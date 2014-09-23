@@ -20,6 +20,14 @@
 namespace Euclid {
 namespace PhzDataModel {
 
+/**
+ * @struct Euclid::PhzDataModel::ModelParameter
+ * @brief Define the axis (and their order) of the Phz grids.
+ *
+ * @details
+ * The order of the axis is of grate importance as this will determine the model walk-through and therefore which intermediary result can be re-used.
+ *
+ */
 struct ModelParameter {
   enum {
     Z = 0,
@@ -29,16 +37,54 @@ struct ModelParameter {
   };
 };
 
+/**
+ * @def Euclid::PhzDataModel::ModelAxesTuple
+ * @brief Alias on the Axes tuple specifying the actual type of axis.
+ *
+ */
 typedef std::tuple<Euclid::GridContainer::GridAxis<double>, Euclid::GridContainer::GridAxis<double>,
     Euclid::GridContainer::GridAxis<Euclid::XYDataset::QualifiedName>, Euclid::GridContainer::GridAxis<Euclid::XYDataset::QualifiedName>> ModelAxesTuple;
 
+/**
+ * @brief Define the Phz model parameter space.
+ *
+ * @param zs
+ * A vector containing the red-shifts values for the model.
+ *
+ * @param ebvs
+ * A vector containing the color excess ( E(B-V) ) values for the model.
+ *
+ * @param reddening_curves
+ * A vector containing the reddening curves for the model.
+ *
+ * @param seds
+ * A vector containing the original spectral energy density (SED) for the model.
+ *
+ * @return The ModelAxesTuple encoding the model parameter space.
+ */
 ModelAxesTuple createAxesTuple(std::vector<double> zs, std::vector<double> ebvs,
                                std::vector<Euclid::XYDataset::QualifiedName> reddening_curves,
                                std::vector<Euclid::XYDataset::QualifiedName> seds) ;
-
+/**
+ * @def Euclid::PhzDataModel::PhzGrid
+ * @brief Alias on the Phz grid.
+ *
+ * @details
+ * This grid has the the Phz model parameter space dimension build-in (Definition of the axes), however it is not fully specialized keeping the versatility on its GridCellManager.
+ *
+ */
 template<typename GridCellManager>
 using PhzGrid = typename Euclid::GridContainer::GridContainer<GridCellManager, double, double, Euclid::XYDataset::QualifiedName, Euclid::XYDataset::QualifiedName>;
 
+/**
+ * @brief Retrieves a PhzGrid from a binary stream.
+ *
+ * @param in
+ * The istream containing the serialized PhzGrid.
+ *
+ * @return
+ * The re-constructed PhzGrid.
+ */
 template<typename GridCellManager>
 PhzGrid<GridCellManager> phzGridBinaryImport(std::istream& in) {
   return Euclid::GridContainer::gridBinaryImport<GridCellManager, double, double, Euclid::XYDataset::QualifiedName, Euclid::XYDataset::QualifiedName>(in);
