@@ -16,11 +16,25 @@
 namespace boost {
 namespace serialization {
 
+/**
+ * @brief Serialize/deserialize function.
+ *
+ * @details
+ * Everything is done in the constructor. Nothing here.
+ *
+ */
 template<typename Archive>
 void serialize(Archive&, Euclid::XYDataset::QualifiedName&, const unsigned int) {
   // Nothing here. Everything is done in the constructor
 }
 
+/**
+ * @brief Save the data to be used by the constructor.
+ *
+ * @details
+ * Stores the Groups vector then the (unqualified)name.
+ *
+ */
 template<typename Archive>
 void save_construct_data(Archive& ar, const Euclid::XYDataset::QualifiedName* t, const unsigned int) {
   std::vector<std::string> groups = t->groups();
@@ -29,6 +43,13 @@ void save_construct_data(Archive& ar, const Euclid::XYDataset::QualifiedName* t,
   ar << name;
 }
 
+/**
+ * @brief Get constructor data and instantiate the object.
+ *
+ * @details
+ * Reads the Groups vector then the (unqualified)name.
+ *
+ */
 template<typename Archive>
 void load_construct_data(Archive& ar, Euclid::XYDataset::QualifiedName* t, const unsigned int) {
   std::vector<std::string> groups;

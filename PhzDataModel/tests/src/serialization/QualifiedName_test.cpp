@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_SUITE (QualifiedNameSerialization_test)
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
-BOOST_FIXTURE_TEST_CASE(factory_test, PhzQualifiedName_Fixture) {
+BOOST_FIXTURE_TEST_CASE(serialization_test, PhzQualifiedName_Fixture) {
   BOOST_TEST_MESSAGE(" ");
   BOOST_TEST_MESSAGE("--> Testing the serialization of the QualifiedName");
   BOOST_TEST_MESSAGE(" ");
