@@ -1,4 +1,4 @@
-/** 
+/**
  * @file PhzDataModel/serialization/QualifiedName.h
  * @date May 20, 2014
  * @author Nikolaos Apostolakos
@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/serialization/string.hpp>
 #include "XYDataset/QualifiedName.h"
 
 namespace boost {
