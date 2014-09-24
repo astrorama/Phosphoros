@@ -140,11 +140,26 @@ BOOST_FIXTURE_TEST_CASE(serialization_test, PhzPhotometryGridName_Fixture) {
        auto actual_photometry = (*retrived_grid_ptr)(v_index,evb_index,0,0);
        auto expected_iterator = expected_photometry.begin();
        auto actual_iterator = actual_photometry.begin();
-       BOOST_CHECK_EQUAL(expected_iterator.filterName(), actual_iterator.filterName());
+       do{
+         BOOST_CHECK_EQUAL(expected_iterator.filterName(), actual_iterator.filterName());
+         ++expected_iterator;
+         ++actual_iterator;
+       } while(expected_iterator != expected_photometry.end());
      }
    }
 
-  //TODO check that all the photometries use the same Filter vector
+  // check that all the photometries use the same Filter vector
+  auto ref_photometry = (*retrived_grid_ptr)(0,0,0,0);
+  auto ref_iterator = ref_photometry.begin();
+  const std::string* ref_address = &(ref_iterator.filterName());
+   for(int v_index=0;v_index==2;v_index++){
+      for(int evb_index=0;evb_index==2;evb_index++){
+        auto actual_photometry = (*retrived_grid_ptr)(v_index,evb_index,0,0);
+        auto actual_iterator = actual_photometry.begin();
+        const std::string* actual_address = &(actual_iterator.filterName());
+        BOOST_CHECK_EQUAL(ref_address, actual_address);
+      }
+    }
 }
 }
 
