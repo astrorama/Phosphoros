@@ -40,7 +40,7 @@ BOOST_FIXTURE_TEST_CASE(factory_test, PhzQualifiedName_Fixture) {
   Euclid::XYDataset::QualifiedName *original_ptr=&qualified_name;
   oa << original_ptr;
 
- /* boost::archive::text_iarchive ia(stream);
+  boost::archive::text_iarchive ia(stream);
 
   Euclid::XYDataset::QualifiedName *out_qualified_name;
   ia >> out_qualified_name;
@@ -52,7 +52,7 @@ BOOST_FIXTURE_TEST_CASE(factory_test, PhzQualifiedName_Fixture) {
   for(auto expected :qualified_name.groups()){
     BOOST_CHECK_EQUAL(expected,*actual);
     ++actual;
-    }*/
+    }
   }
 }
 

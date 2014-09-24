@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <boost/serialization/string.hpp>
+#include <boost/serialization/vector.hpp>
 #include "XYDataset/QualifiedName.h"
 
 namespace boost {
