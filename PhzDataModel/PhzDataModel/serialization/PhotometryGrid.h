@@ -1,4 +1,4 @@
-/** 
+/**
  * @file PhotometryGrid.h
  * @date August 21, 2014
  * @author Nikolaos Apostolakos
@@ -15,7 +15,14 @@
 
 namespace boost {
 namespace serialization {
-
+/**
+ * @brief Serialization of the PhotometryGrid
+ *
+ * @details
+ * Note the following points: Only non-epty grids can be serialized and all the photometries must have the same filters.
+ * One store the list of filter names only once. Then we store the flux and error values for each photometry.
+ *
+ */
 template<typename Archive>
 void save(Archive& ar, const Euclid::PhzDataModel::PhotometryGrid& grid, const unsigned int) {
   size_t size = grid.size();
@@ -48,6 +55,14 @@ void save(Archive& ar, const Euclid::PhzDataModel::PhotometryGrid& grid, const u
   }
 }
 
+/**
+ * @brief Deserialization of the PhotometryGrid
+ *
+ * @details
+ * One get the filter list then the photometries are reconstructed using a single instance of the filter names.
+ * Eventually the Grid cell are populated with the reconstructed photometries.
+ *
+ */
 template<typename Archive>
 void load(Archive& ar, Euclid::PhzDataModel::PhotometryGrid& grid, const unsigned int) {
   std::vector<std::string> filter_names;
@@ -65,8 +80,10 @@ void load(Archive& ar, Euclid::PhzDataModel::PhotometryGrid& grid, const unsigne
   }
 }
 
-/// This method is specialized for the PhotometryGrid to avoid storing multiple
-/// times the filter names of the photometries.
+/**
+ * @brief split the Boost serialization between the Save and Load functions.
+ *
+ */
 template<typename Archive>
 void serialize(Archive& ar, Euclid::PhzDataModel::PhotometryGrid& t, const unsigned int version) {
   split_free(ar, t, version);
