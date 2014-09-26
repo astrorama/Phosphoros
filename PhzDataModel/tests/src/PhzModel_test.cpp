@@ -74,6 +74,6 @@ BOOST_FIXTURE_TEST_CASE(createAxesTuple_test, PhzModel_Fixture) {
     BOOST_CHECK(ref_reddening == *axe_iterator_qualified_name);
     ++axe_iterator_qualified_name;
   }
+}
 
-}
-}
+BOOST_AUTO_TEST_SUITE_END ()

@@ -39,5 +39,5 @@ BOOST_FIXTURE_TEST_CASE(factory_test, PhotometryGrid_Fixture) {
   BOOST_CHECK_EQUAL(25,ptr->capacity());
   }
 
-}
+BOOST_AUTO_TEST_SUITE_END ()
 
