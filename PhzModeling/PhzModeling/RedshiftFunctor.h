@@ -40,6 +40,16 @@ public:
 		*/
 	RedshiftFunctor& operator=(RedshiftFunctor&&) = default;
 
+  /**
+      * @brief Copy Constructor
+    */
+  RedshiftFunctor(RedshiftFunctor&) = default;
+
+  /**
+    * @brief Copy operator
+    */
+  RedshiftFunctor& operator=(RedshiftFunctor&) = default;
+
 	/**
 		* @brief Destructor
 		*/

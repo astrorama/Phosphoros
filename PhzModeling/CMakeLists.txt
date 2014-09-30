@@ -20,3 +20,5 @@ elements_add_unit_test(RedshiftFunctor_test tests/src/RedshiftFunctor_test.cpp
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
 elements_add_unit_test(ExtinctionFunctor_test tests/src/ExtinctionFunctor_test.cpp
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
+elements_add_unit_test(ModelDatasetGenerator_test tests/src/ModelDatasetGenerator_test.cpp
+                       LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)

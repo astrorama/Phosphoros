@@ -41,6 +41,17 @@ public:
   ExtinctionFunctor& operator=(ExtinctionFunctor&&) = default;
 
   /**
+  * @brief Copy Constructor
+  */
+  ExtinctionFunctor(ExtinctionFunctor&) = default;
+
+  /**
+  * @brief Copy operator
+  */
+  ExtinctionFunctor& operator=(ExtinctionFunctor&) = default;
+
+
+  /**
   * @brief Destructor
   */
   virtual ~ExtinctionFunctor() = default;
