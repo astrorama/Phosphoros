@@ -234,7 +234,6 @@ BOOST_FIXTURE_TEST_CASE(dereferencing_test, ModelDatasetGenerator_Fixture) {
           BOOST_CHECK_EQUAL(3,dataset_0.size());
           auto expected_iterator = sed.begin();
           for(auto& pair:dataset_0){
-            std::cout<<"expected<"<<expected_iterator->first<<';'<<expected_iterator->second<<"> actual<"<<pair.first<<";"<<pair.second<<">\n";
             BOOST_CHECK(Elements::isEqual(expected_iterator->first,pair.first));
             BOOST_CHECK(Elements::isEqual(expected_iterator->second,pair.second));
             ++expected_iterator;
@@ -246,51 +245,51 @@ BOOST_FIXTURE_TEST_CASE(dereferencing_test, ModelDatasetGenerator_Fixture) {
     }
   }
 
-  }
-/*
-  model_generator = {parameter_space,m_sed_map,m_reddening_curve_map,0,m_no_reddening_function,m_redshift_function};
-
   // check the loop with only the (dummy) redshift function
-   for(auto sed:seds){
-     for (auto internal_index=0;internal_index<33;++internal_index){
-       for (auto redshift:zs){
-         auto& dataset_0 =*model_generator;
-         BOOST_CHECK_EQUAL(3,dataset_0.size());
-         auto expected_iterator = sed.begin();
-         for(auto pair:dataset_0){
-           BOOST_CHECK(Elements::isEqual(pair.first,expected_iterator->first*(1+redshift)));
-           BOOST_CHECK(Elements::isEqual(pair.second,expected_iterator->second));
-           ++expected_iterator;
-         }
-       }
-       ++model_generator;
-     }
-   }
+  Euclid::PhzModeling::ModelDatasetGenerator redshift_model_generator = {parameter_space,m_sed_map,m_reddening_curve_map,0,m_no_reddening_function,m_redshift_function};
+  for (auto& sed:seds){
+      for (auto& reddening:extinction_functions){
+        for (auto& ebv:ebvs){
+          for (auto& redshift:zs){
 
+            auto& dataset_0 =*redshift_model_generator;
 
-  std::vector<DummyExtinctionFunction> extinction_functions {red1,red2,red3};
-  model_generator = {parameter_space,m_sed_map,m_reddening_curve_map,0,m_reddening_function,m_no_redshift_function};
+            BOOST_CHECK_EQUAL(3,dataset_0.size());
+            auto expected_iterator = sed.begin();
+            for(auto& pair:dataset_0){
+              BOOST_CHECK(Elements::isEqual((1+redshift)*(expected_iterator->first),pair.first));
+              BOOST_CHECK(Elements::isEqual(expected_iterator->second,pair.second));
+              ++expected_iterator;
+            }
 
-  // check the loop with only the (dummy) reddening function
-
-  for(auto sed:seds){
-    for (auto reddening:extinction_functions){
-      for (auto ebv:ebvs){
-        for (auto redshift:zs){
-          auto& dataset_0 =*model_generator;
-          BOOST_CHECK_EQUAL(3,dataset_0.size());
-          auto expected_iterator = sed.begin();
-          for(auto pair:dataset_0){
-            BOOST_CHECK(Elements::isEqual(pair.first,expected_iterator->first));
-            BOOST_CHECK(Elements::isEqual(pair.second,expected_iterator->second*(1+ebv*reddening(pair.first))));
-            ++expected_iterator;
+            ++redshift_model_generator;
           }
         }
       }
     }
-    ++model_generator;
-  }
-*/
 
+  // check the loop with only the (dummy) reddening function
+  Euclid::PhzModeling::ModelDatasetGenerator reddening_model_generator =  {parameter_space,m_sed_map,m_reddening_curve_map,0,m_reddening_function,m_no_redshift_function};
+  for (auto& sed:seds){
+       for (auto& reddening:extinction_functions){
+         for (auto& ebv:ebvs){
+           for (auto& redshift:zs){
+
+             auto& dataset_0 =*reddening_model_generator;
+
+             BOOST_CHECK_EQUAL(3,dataset_0.size());
+             auto expected_iterator = sed.begin();
+             for(auto& pair:dataset_0){
+               BOOST_CHECK(Elements::isEqual(expected_iterator->first,pair.first));
+               BOOST_CHECK(Elements::isEqual((1+ebv*reddening(pair.first))*(expected_iterator->second),pair.second));
+               ++expected_iterator;
+             }
+             ++reddening_model_generator;
+           }
+         }
+       }
+     }
+
+}
 
 BOOST_AUTO_TEST_SUITE_END ()

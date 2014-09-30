@@ -118,14 +118,13 @@ namespace PhzModeling {
       double ebv = std::get<Euclid::PhzDataModel::ModelParameter::EBV>(m_parameter_space)[new_ebv_index];
 
       const auto sed_name =std::get<Euclid::PhzDataModel::ModelParameter::SED>(m_parameter_space)[new_sed_index];
-      m_current_reddened_sed.reset(new Euclid::XYDataset::XYDataset(std::move(m_reddening_function(m_sed_map.at(sed_name),*m_reddening_curve_map.at(reddening_curve_name), ebv))));
+      m_current_reddened_sed.reset(new Euclid::XYDataset::XYDataset(m_reddening_function(m_sed_map.at(sed_name),*m_reddening_curve_map.at(reddening_curve_name), ebv)));
     }
     if (new_sed_index != m_current_sed_index || new_reddening_curve_index != m_current_reddening_curve_index
         || new_ebv_index != m_current_ebv_index || new_z_index != m_current_z_index || !m_current_redshifted_sed) {
       double z = std::get<Euclid::PhzDataModel::ModelParameter::Z>(m_parameter_space)[new_z_index];
-      const auto redshift_functor = PhzModeling::RedshiftFunctor();
 
-      m_current_redshifted_sed.reset( new Euclid::XYDataset::XYDataset(std::move(redshift_functor(*m_current_reddened_sed,z))));
+      m_current_redshifted_sed.reset( new Euclid::XYDataset::XYDataset(m_redshift_function(*m_current_reddened_sed,z)));
     }
     m_current_sed_index = new_sed_index;
     m_current_reddening_curve_index = new_reddening_curve_index;
