@@ -22,3 +22,5 @@ elements_add_unit_test(ExtinctionFunctor_test tests/src/ExtinctionFunctor_test.c
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
 elements_add_unit_test(ModelDatasetGenerator_test tests/src/ModelDatasetGenerator_test.cpp
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
+elements_add_unit_test(ModelDatasetGrid_test tests/src/ModelDatasetGrid_test.cpp
+                       LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)

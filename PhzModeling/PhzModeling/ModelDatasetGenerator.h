@@ -19,7 +19,7 @@ namespace PhzModeling {
 
 /**
  * @class Euclid::PhzModeling::ModelDatasetGenerator
- * @brief Provides the Model for the current index of the Model parameter space iterator
+ * @brief Provides the SED Model for the current index of the Model parameter space iterator
  */
 class ModelDatasetGenerator {
 

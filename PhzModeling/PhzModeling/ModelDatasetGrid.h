@@ -44,10 +44,37 @@ struct GridCellManagerTraits<Euclid::PhzModeling::ModelDatasetCellManager> {
 
 namespace Euclid {
 namespace PhzModeling {
-
+/**
+ * @class Euclid::PhzModeling::ModelDatasetGrid
+ * @brief Specialization of the Euclid::PhzDataModel::PhzGrid used to store and walk through the parameter space.
+ * The grid do not actually store the SED models but compute them dynamically (through the ModelDatsetGenerator).
+ */
 class ModelDatasetGrid: public Euclid::PhzDataModel::PhzGrid<ModelDatasetCellManager> {
 
 public:
+  /**
+   * @brief Constructor
+   * @details
+   * Constructor.
+   *
+   * @param parameter_space
+   * A ModelAxesTuple defining the axes of the the Grid.
+   *
+   * @param sed_map
+   * A map storing the SED template and giving access to them through the QualifiedName.
+   * As the XYDataset cannot be copied one must move this argument in.
+   *
+   * @param reddening_curve_map
+   * A map storing the extinction curve as a Function and giving access to them through the QualifiedName.
+   * As the unique_ptr cannot be copied one must move this argument in.
+   *
+   * @param reddening_function
+   * A function used to apply the extinction to a SED
+   *
+   * @param redshift_function
+   * A function used to apply the redshit to a SED
+   *
+   */
   ModelDatasetGrid(const Euclid::PhzDataModel::ModelAxesTuple& parameter_space,
                    std::map<Euclid::XYDataset::QualifiedName,Euclid::XYDataset::XYDataset> sed_map,
                    std::map<Euclid::XYDataset::QualifiedName,std::unique_ptr<Euclid::MathUtils::Function> > reddening_curve_map,
