@@ -24,3 +24,5 @@ elements_add_unit_test(ModelDatasetGenerator_test tests/src/ModelDatasetGenerato
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
 elements_add_unit_test(ModelDatasetGrid_test tests/src/ModelDatasetGrid_test.cpp
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
+elements_add_unit_test(ApplyFilterFunctor_test tests/src/ApplyFilterFunctor_test.cpp
+                       LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
