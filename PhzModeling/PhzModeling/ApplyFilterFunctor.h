@@ -58,9 +58,12 @@ public:
     /**
         * @brief Function Call Operator
         * @details
-        * Apply the filter to the Photometry Model
+        * Apply the filter to the Photometry Model.
+        * Points out of the range are discarded
+        * (we keep the first point before and after the range
+        * for interpolation purpose)
         *
-       * @param model
+        * @param model
         * A XYDataset representing the Photometry Model to be filtered.
         *
         * @param filter_range

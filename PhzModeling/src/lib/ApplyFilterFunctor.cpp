@@ -15,22 +15,39 @@ Euclid::XYDataset::XYDataset ApplyFilterFunctor::operator()(
   const Euclid::MathUtils::Function& filter
 ) const {
     std::vector<std::pair<double, double>> filtered_values {};
-    for (auto& model_pair : model) {
+    bool has_entered_range=false;
+    bool is_first=true;
 
-      if (filter_range.first>model_pair.first
-          || filter_range.second<model_pair.first ){
-        filtered_values.push_back(std::make_pair(
-            model_pair.first,
-            0.
-            ));
+    for (auto model_iterator=model.begin();model_iterator!= model.end();++model_iterator) {
+      // before entering the range
+      if (filter_range.first>model_iterator->first){
+        is_first=false;
+        continue;
       }
-      else {
-        filtered_values.push_back(std::make_pair(
-            model_pair.first,
-            model_pair.second*filter(model_pair.first)
-            ));
+
+      // first entrance get the previous point
+      if (!has_entered_range){
+        has_entered_range=true;
+        if (!is_first){
+          --model_iterator;
+          filtered_values.push_back(std::make_pair(model_iterator->first,0.));
+          ++model_iterator;
+        }
       }
+
+      //after the range get the last point and break
+      if (filter_range.second<model_iterator->first){
+        filtered_values.push_back(std::make_pair(model_iterator->first,0.));
+        break;
+      }
+
+      // inside the range
+      filtered_values.push_back(std::make_pair(
+          model_iterator->first,
+          model_iterator->second*filter(model_iterator->first)
+          ));
     }
+
     return  Euclid::XYDataset::XYDataset {std::move(filtered_values)};
 }
 
