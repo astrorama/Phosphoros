@@ -10,8 +10,11 @@
 Euclid::PhzModeling::ModelDatasetGrid::ModelDatasetGrid(const Euclid::PhzDataModel::ModelAxesTuple& parameter_space,
    std::map<Euclid::XYDataset::QualifiedName,Euclid::XYDataset::XYDataset> sed_map,
    std::map<Euclid::XYDataset::QualifiedName,std::unique_ptr<Euclid::MathUtils::Function> > reddening_curve_map,
-   std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,const Euclid::MathUtils::Function&, double)> reddening_function,
-   std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&, double)> redshift_function): Euclid::PhzDataModel::PhzGrid<ModelDatasetCellManager>(parameter_space){
+   std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,
+       const Euclid::MathUtils::Function&,
+       double)> reddening_function,
+   std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,
+       double)> redshift_function): Euclid::PhzDataModel::PhzGrid<ModelDatasetCellManager>(parameter_space){
 
   m_sed_map=std::move(sed_map);
   m_reddening_curve_map=std::move(reddening_curve_map);
@@ -25,12 +28,28 @@ Euclid::PhzModeling::ModelDatasetGrid::ModelDatasetGrid(const Euclid::PhzDataMod
 }
 
 
-Euclid::PhzDataModel::PhzGrid<Euclid::PhzModeling::ModelDatasetCellManager>::iterator Euclid::PhzModeling::ModelDatasetGrid::begin(){
+Euclid::PhzDataModel::PhzGrid<Euclid::PhzModeling::ModelDatasetCellManager>::iterator
+ Euclid::PhzModeling::ModelDatasetGrid::begin(){
 
-  return Euclid::PhzDataModel::PhzGrid<ModelDatasetCellManager>::iterator(*this, Euclid::PhzModeling::ModelDatasetGenerator(getAxesTuple(), m_sed_map, m_reddening_curve_map, 0, m_reddening_function,m_redshift_function));
+  return Euclid::PhzDataModel::PhzGrid<ModelDatasetCellManager>::iterator(
+      *this,
+      Euclid::PhzModeling::ModelDatasetGenerator(getAxesTuple(),
+      m_sed_map,
+      m_reddening_curve_map,
+      0,
+      m_reddening_function,
+      m_redshift_function));
 }
 
 
-Euclid::PhzDataModel::PhzGrid<Euclid::PhzModeling::ModelDatasetCellManager>::iterator Euclid::PhzModeling::ModelDatasetGrid::end(){
-  return Euclid::PhzDataModel::PhzGrid<ModelDatasetCellManager>::iterator(*this, Euclid::PhzModeling::ModelDatasetGenerator(getAxesTuple(), m_sed_map, m_reddening_curve_map, m_size, m_reddening_function,m_redshift_function));
+Euclid::PhzDataModel::PhzGrid<Euclid::PhzModeling::ModelDatasetCellManager>::iterator
+ Euclid::PhzModeling::ModelDatasetGrid::end(){
+  return Euclid::PhzDataModel::PhzGrid<ModelDatasetCellManager>::iterator(
+      *this,
+      Euclid::PhzModeling::ModelDatasetGenerator(getAxesTuple(),
+      m_sed_map,
+      m_reddening_curve_map,
+      m_size,
+      m_reddening_function,
+      m_redshift_function));
 }

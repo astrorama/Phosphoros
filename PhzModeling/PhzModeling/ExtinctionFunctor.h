@@ -19,7 +19,8 @@ namespace PhzModeling {
  * @brief
  * This functor is in charge of applying extinction on the SED
  * @details
- * This functor is applying extinction on a SED using a provided Extinction Law and the E(B-V) value.
+ * This functor is applying extinction on a SED using a provided
+ * Extinction Law and the E(B-V) value.
  *
  */
 class ExtinctionFunctor {
@@ -65,7 +66,8 @@ public:
   * A XYDataset representing the SED to be reddened.
   *
   * @param reddening_curve
-  * The extinction law implementing the function \lambda->k(\lambda) such that k(B)-k(V)=1.
+  * The extinction law implementing the function \lambda->k(\lambda)
+  * such that k(B)-k(V)=1.
   *
   * @param ebv
   * The color excess E(B-V)
@@ -73,7 +75,8 @@ public:
   * @return
   * A XYDataset representing the reddened SED.
   */
-  Euclid::XYDataset::XYDataset operator()(const Euclid::XYDataset::XYDataset& sed,const Euclid::MathUtils::Function& reddening_curve, double ebv) const;
+  Euclid::XYDataset::XYDataset operator()(const Euclid::XYDataset::XYDataset& sed,
+      const Euclid::MathUtils::Function& reddening_curve, double ebv) const;
 };
 
 } // end of namespace PhzModeling

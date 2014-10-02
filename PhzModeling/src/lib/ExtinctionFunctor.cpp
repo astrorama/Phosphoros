@@ -7,7 +7,9 @@
 #include "PhzModeling/ExtinctionFunctor.h"
 
 
-Euclid::XYDataset::XYDataset Euclid::PhzModeling::ExtinctionFunctor::operator()(const Euclid::XYDataset::XYDataset& sed,const Euclid::MathUtils::Function& reddening_curve, double ebv) const {
+Euclid::XYDataset::XYDataset
+ Euclid::PhzModeling::ExtinctionFunctor::operator()(const Euclid::XYDataset::XYDataset& sed,
+ const Euclid::MathUtils::Function& reddening_curve, double ebv) const {
   std::vector<std::pair<double, double>> reddened_values {};
   for (auto& sed_pair : sed) {
     double exponent = -0.4 * reddening_curve(sed_pair.first) * ebv;

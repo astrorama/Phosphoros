@@ -18,8 +18,10 @@ namespace PhzModeling {
  * @brief
  * This functor is in charge of redshifting the SED
  * @details
- * This functor is redshifting a SED to a given value z of the redshift. The shift is applied to all the pair of the SED.
- * For a given z, the wavelength component of the SED is multiplied by the factor(1+z)
+ * This functor is redshifting a SED to a given value z of the redshift.
+ * The shift is applied to all the pair of the SED.
+ * For a given z, the wavelength component of the SED is multiplied by
+ * the factor(1+z)
  * while the corresponding flux is multiplied by 1/(1+z)²
  */
 class RedshiftFunctor {
@@ -69,7 +71,8 @@ public:
 		* @return
 		* A XYDataset representing the redshifted SED.
 		*/
-	Euclid::XYDataset::XYDataset operator()(const Euclid::XYDataset::XYDataset& sed, double z) const;
+	Euclid::XYDataset::XYDataset operator()(const Euclid::XYDataset::XYDataset& sed,
+	    double z) const;
 };
 
 } // end of namespace PhzModeling

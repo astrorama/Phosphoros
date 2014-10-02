@@ -116,24 +116,65 @@ struct ModelDatasetGenerator_Fixture {
 
 
   std::vector<double> zs{0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9};
-  std::vector<double> ebvs{0.0,0.001,0.002,0.003,0.004,0.005,0.006,0.007,0.008,0.009,0.01};
-  std::vector<Euclid::XYDataset::QualifiedName> reddeing_curves{{"reddeningCurves/Curve1"},{"reddeningCurves/Curve2"},{"reddeningCurves/Curve3"}};
-  std::vector<Euclid::XYDataset::QualifiedName> seds{{"sed/Curve_1"},{"sed/Curve_2"},{"sed/Curve_3"}};
+  std::vector<double> ebvs{0.0,0.001,0.002,0.003,0.004,
+                           0.005,0.006,0.007,0.008,0.009,0.01};
+  std::vector<Euclid::XYDataset::QualifiedName> reddeing_curves{
+    {"reddeningCurves/Curve1"},
+    {"reddeningCurves/Curve2"},
+    {"reddeningCurves/Curve3"}
+  };
+  std::vector<Euclid::XYDataset::QualifiedName> seds{
+    {"sed/Curve_1"},
+    {"sed/Curve_2"},
+    {"sed/Curve_3"}
+  };
 
-  Euclid::PhzDataModel::ModelAxesTuple parameter_space= Euclid::PhzDataModel::createAxesTuple(zs,ebvs,reddeing_curves,seds);
+  Euclid::PhzDataModel::ModelAxesTuple parameter_space
+    = Euclid::PhzDataModel::createAxesTuple(zs,ebvs,reddeing_curves,seds);
 
   std::map<Euclid::XYDataset::QualifiedName,Euclid::XYDataset::XYDataset> m_sed_map;
-  std::map<Euclid::XYDataset::QualifiedName,std::unique_ptr<Euclid::MathUtils::Function> > m_reddening_curve_map;
+  std::map<Euclid::XYDataset::QualifiedName,
+           std::unique_ptr<Euclid::MathUtils::Function> > m_reddening_curve_map;
 
-  std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset& ,const Euclid::MathUtils::Function&, double)> m_reddening_function =  std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset& ,const Euclid::MathUtils::Function&, double)>(DummyReddening{});
-  std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset& , double)> m_redshift_function=std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset& , double)>(DummyRedshift{});
+  std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,
+      const Euclid::MathUtils::Function&,
+      double)> m_reddening_function
+      =  std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,
+          const Euclid::MathUtils::Function&, double)>(DummyReddening{});
+  std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,
+      double)> m_redshift_function
+      = std::function<Euclid::XYDataset::XYDataset(
+          const Euclid::XYDataset::XYDataset& ,
+          double)>(DummyRedshift{});
 
-  std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset& ,const Euclid::MathUtils::Function&, double)> m_no_reddening_function =  std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset& ,const Euclid::MathUtils::Function&, double)>(NoReddening{});
-  std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset& , double)> m_no_redshift_function=std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset& , double)>(NoRedshift{});
+  std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&
+      ,const Euclid::MathUtils::Function&,
+      double)> m_no_reddening_function
+      =  std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,
+          const Euclid::MathUtils::Function&,
+          double)>(NoReddening{});
+  std::function<Euclid::XYDataset::XYDataset(
+      const Euclid::XYDataset::XYDataset&,
+      double)> m_no_redshift_function
+      = std::function<Euclid::XYDataset::XYDataset(
+          const Euclid::XYDataset::XYDataset&,
+          double)>(NoRedshift{});
 
-  std::vector<std::pair<double, double>> sed1 {std::make_pair(10000.,0.004),std::make_pair(12000.,0.002),std::make_pair(14000.,0.001)};
-  std::vector<std::pair<double, double>> sed2 {std::make_pair(10000.,0.005),std::make_pair(12000.,0.003),std::make_pair(14000.,0.002)};
-  std::vector<std::pair<double, double>> sed3 {std::make_pair(10000.,0.006),std::make_pair(12000.,0.004),std::make_pair(14000.,0.003)};
+  std::vector<std::pair<double, double>> sed1 {
+    std::make_pair(10000.,0.004),
+    std::make_pair(12000.,0.002),
+    std::make_pair(14000.,0.001)
+  };
+  std::vector<std::pair<double, double>> sed2 {
+    std::make_pair(10000.,0.005),
+    std::make_pair(12000.,0.003),
+    std::make_pair(14000.,0.002)
+  };
+  std::vector<std::pair<double, double>> sed3 {
+    std::make_pair(10000.,0.006),
+    std::make_pair(12000.,0.004),
+    std::make_pair(14000.,0.003)
+  };
 
   DummyExtinctionFunction red1={1.};
   DummyExtinctionFunction red2={2.};
@@ -144,9 +185,18 @@ struct ModelDatasetGenerator_Fixture {
     m_sed_map.emplace(Euclid::XYDataset::QualifiedName("sed/Curve_2"),sed2);
     m_sed_map.emplace(Euclid::XYDataset::QualifiedName("sed/Curve_3"),sed3);
 
-    m_reddening_curve_map.emplace(Euclid::XYDataset::QualifiedName("reddeningCurves/Curve1"),std::unique_ptr<Euclid::MathUtils::Function>(new DummyExtinctionFunction(1.)));
-    m_reddening_curve_map.emplace(Euclid::XYDataset::QualifiedName("reddeningCurves/Curve2"),std::unique_ptr<Euclid::MathUtils::Function>(new DummyExtinctionFunction(2.)));
-    m_reddening_curve_map.emplace(Euclid::XYDataset::QualifiedName("reddeningCurves/Curve3"),std::unique_ptr<Euclid::MathUtils::Function>(new DummyExtinctionFunction(4.)));
+    m_reddening_curve_map.emplace(
+        Euclid::XYDataset::QualifiedName("reddeningCurves/Curve1"),
+        std::unique_ptr<Euclid::MathUtils::Function>(new DummyExtinctionFunction(1.))
+    );
+    m_reddening_curve_map.emplace(
+        Euclid::XYDataset::QualifiedName("reddeningCurves/Curve2"),
+        std::unique_ptr<Euclid::MathUtils::Function>(new DummyExtinctionFunction(2.))
+    );
+    m_reddening_curve_map.emplace(
+        Euclid::XYDataset::QualifiedName("reddeningCurves/Curve3"),
+        std::unique_ptr<Euclid::MathUtils::Function>(new DummyExtinctionFunction(4.))
+    );
   }
 };
 
@@ -160,7 +210,14 @@ BOOST_FIXTURE_TEST_CASE(constructor_test, ModelDatasetGenerator_Fixture) {
   BOOST_TEST_MESSAGE("--> Testing constructor");
   BOOST_TEST_MESSAGE(" ");
 
-  Euclid::PhzModeling::ModelDatasetGenerator model_generator {parameter_space,m_sed_map,m_reddening_curve_map,0,m_reddening_function,m_redshift_function};
+  Euclid::PhzModeling::ModelDatasetGenerator model_generator {
+    parameter_space,
+    m_sed_map,
+    m_reddening_curve_map,
+    0,
+    m_reddening_function,
+    m_redshift_function
+  };
 
   BOOST_CHECK(model_generator==0);
   BOOST_CHECK(model_generator!=1);
@@ -175,7 +232,14 @@ BOOST_FIXTURE_TEST_CASE(operator_int_test, ModelDatasetGenerator_Fixture) {
   BOOST_TEST_MESSAGE("--> Testing operators taking integer parameter");
   BOOST_TEST_MESSAGE(" ");
 
-  Euclid::PhzModeling::ModelDatasetGenerator model_generator {parameter_space,m_sed_map,m_reddening_curve_map,0,m_reddening_function,m_redshift_function};
+  Euclid::PhzModeling::ModelDatasetGenerator model_generator {
+    parameter_space,
+    m_sed_map,
+    m_reddening_curve_map,
+    0,
+    m_reddening_function,
+    m_redshift_function
+  };
 
   BOOST_CHECK(model_generator==0);
   ++model_generator;
@@ -195,7 +259,14 @@ BOOST_FIXTURE_TEST_CASE(operator_generator_test, ModelDatasetGenerator_Fixture) 
   BOOST_TEST_MESSAGE("--> Testing operators taking ModelDatasetGenerator parameter");
   BOOST_TEST_MESSAGE(" ");
 
-  Euclid::PhzModeling::ModelDatasetGenerator model_generator {parameter_space,m_sed_map,m_reddening_curve_map,0,m_reddening_function,m_redshift_function};
+  Euclid::PhzModeling::ModelDatasetGenerator model_generator {
+    parameter_space,
+    m_sed_map,
+    m_reddening_curve_map,
+    0,
+    m_reddening_function,
+    m_redshift_function
+  };
   Euclid::PhzModeling::ModelDatasetGenerator other_model_generator{model_generator};
 
   BOOST_CHECK(model_generator==other_model_generator);
@@ -223,7 +294,14 @@ BOOST_FIXTURE_TEST_CASE(dereferencing_test, ModelDatasetGenerator_Fixture) {
   std::vector<DummyExtinctionFunction> extinction_functions {red1,red2,red3};
 
   // check the loop with functions not modifying the seds
-  Euclid::PhzModeling::ModelDatasetGenerator model_generator {parameter_space,m_sed_map,m_reddening_curve_map,0,m_no_reddening_function,m_no_redshift_function};
+  Euclid::PhzModeling::ModelDatasetGenerator model_generator {
+    parameter_space,
+    m_sed_map,
+    m_reddening_curve_map,
+    0,
+    m_no_reddening_function,
+    m_no_redshift_function
+  };
   for (auto& sed:seds){
     for (auto& reddening:extinction_functions){
       for (auto& ebv:ebvs){
@@ -246,7 +324,14 @@ BOOST_FIXTURE_TEST_CASE(dereferencing_test, ModelDatasetGenerator_Fixture) {
   }
 
   // check the loop with only the (dummy) redshift function
-  Euclid::PhzModeling::ModelDatasetGenerator redshift_model_generator = {parameter_space,m_sed_map,m_reddening_curve_map,0,m_no_reddening_function,m_redshift_function};
+  Euclid::PhzModeling::ModelDatasetGenerator redshift_model_generator = {
+      parameter_space,
+      m_sed_map,
+      m_reddening_curve_map,
+      0,
+      m_no_reddening_function,
+      m_redshift_function
+  };
   for (auto& sed:seds){
       for (auto& reddening:extinction_functions){
         for (auto& ebv:ebvs){
@@ -269,7 +354,14 @@ BOOST_FIXTURE_TEST_CASE(dereferencing_test, ModelDatasetGenerator_Fixture) {
     }
 
   // check the loop with only the (dummy) reddening function
-  Euclid::PhzModeling::ModelDatasetGenerator reddening_model_generator =  {parameter_space,m_sed_map,m_reddening_curve_map,0,m_reddening_function,m_no_redshift_function};
+  Euclid::PhzModeling::ModelDatasetGenerator reddening_model_generator = {
+      parameter_space,
+      m_sed_map,
+      m_reddening_curve_map,
+      0,
+      m_reddening_function,
+      m_no_redshift_function
+  };
   for (auto& sed:seds){
        for (auto& reddening:extinction_functions){
          for (auto& ebv:ebvs){
@@ -281,7 +373,10 @@ BOOST_FIXTURE_TEST_CASE(dereferencing_test, ModelDatasetGenerator_Fixture) {
              auto expected_iterator = sed.begin();
              for(auto& pair:dataset_0){
                BOOST_CHECK(Elements::isEqual(expected_iterator->first,pair.first));
-               BOOST_CHECK(Elements::isEqual((1+ebv*reddening(pair.first))*(expected_iterator->second),pair.second));
+               BOOST_CHECK(
+                   Elements::isEqual((1+ebv*reddening(pair.first))*(expected_iterator->second),
+                   pair.second)
+               );
                ++expected_iterator;
              }
              ++reddening_model_generator;
