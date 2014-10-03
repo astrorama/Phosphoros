@@ -26,3 +26,5 @@ elements_add_unit_test(ModelDatasetGrid_test tests/src/ModelDatasetGrid_test.cpp
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
 elements_add_unit_test(ApplyFilterFunctor_test tests/src/ApplyFilterFunctor_test.cpp
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
+elements_add_unit_test(CalculateFluxFunctor_test tests/src/CalculateFluxFunctor_test.cpp
+                       LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)

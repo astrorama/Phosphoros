@@ -1,6 +1,6 @@
 /**
- * @file tests/src/RedshiftFunctor_test.cpp
- * @date Sep 16, 2014
+ * @file tests/src/ApplyFilterFunctor_test.cpp
+ * @date Oct 2, 2014
  * @author Florian Dubath
  */
 
