@@ -126,6 +126,14 @@ BOOST_FIXTURE_TEST_CASE(border_test, ApplyFilterFunctor_Fixture) {
 
   auto output_model=functor(input_model,std::make_pair(8000.,18000.),filter);
   BOOST_CHECK_EQUAL(input_model.size(), output_model.size());
+
+  auto output_iterator = output_model.begin();
+  for (auto& input_pair : input_model) {
+    BOOST_CHECK(Elements::isEqual(input_pair.first,output_iterator->first));
+    BOOST_CHECK(Elements::isEqual(input_pair.second*filter(input_pair.first),output_iterator->second));
+
+       output_iterator++;
+     }
 }
 
 BOOST_AUTO_TEST_SUITE_END ()
