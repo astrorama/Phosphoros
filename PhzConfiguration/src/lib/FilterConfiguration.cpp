@@ -21,7 +21,8 @@ FilterConfiguration::FilterConfiguration(const std::map<std::string, po::variabl
 }
 
 
-void FilterConfiguration::addProgramOptions(po::options_description& options) {
+po::options_description FilterConfiguration::getProgramOptions() {
+  po::options_description options {"Photometric filter options"};
   options.add_options()
     ("filter-root-path", po::value<std::string>(),
         "The directory containing the Filter datasets, organized in folders")
@@ -29,6 +30,7 @@ void FilterConfiguration::addProgramOptions(po::options_description& options) {
         "Use all the Filters in the given group and subgroups")
     ("filter-list", po::value<std::vector<std::string>>(),
         "Use all the given Filters");
+  return options;
 }
 
 std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> FilterConfiguration::filterDatasetProvider() {

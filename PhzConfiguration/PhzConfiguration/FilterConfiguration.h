@@ -22,7 +22,7 @@ public:
   
   FilterConfiguration(const std::map<std::string, po::variable_value>& options);
   
-  static void addProgramOptions(po::options_description& options);
+  static po::options_description getProgramOptions();
   
   std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> filterDatasetProvider();
   
