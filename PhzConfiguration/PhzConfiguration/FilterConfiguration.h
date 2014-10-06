@@ -26,6 +26,8 @@ public:
   
   std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> filterDatasetProvider();
   
+  std::vector<Euclid::XYDataset::QualifiedName> filterList();
+  
 private:
   
   std::map<std::string, po::variable_value> m_options;
