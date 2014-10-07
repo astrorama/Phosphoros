@@ -91,7 +91,7 @@ BOOST_FIXTURE_TEST_CASE(values_test, ApplyFilterFunctor_Fixture) {
   // first values is out of the range must be 0 regardless of the filter value  (which is 1)
   BOOST_CHECK(Elements::isEqual(input_iterator->first,output_iterator->first));
   BOOST_CHECK(Elements::isEqual(0.,output_iterator->second));
-  std::cout<<output_iterator->second<<';'<<input_iterator->first;
+  //std::cout<<output_iterator->second<<';'<<input_iterator->first;
 
   ++output_iterator;
   ++input_iterator;
@@ -99,20 +99,20 @@ BOOST_FIXTURE_TEST_CASE(values_test, ApplyFilterFunctor_Fixture) {
   BOOST_CHECK(Elements::isEqual(input_iterator->first,output_iterator->first));
   BOOST_CHECK(Elements::isEqual(input_iterator->second/4.,output_iterator->second));
 
-  std::cout<<output_iterator->second<<';'<<input_iterator->first;
+  //std::cout<<output_iterator->second<<';'<<input_iterator->first;
   ++output_iterator;
   ++input_iterator;
   // third value must be multiplied by 3/4
   BOOST_CHECK(Elements::isEqual(input_iterator->first,output_iterator->first));
   BOOST_CHECK(Elements::isEqual(input_iterator->second*3./4.,output_iterator->second));
 
-  std::cout<<output_iterator->second<<';'<<input_iterator->first;
+  //std::cout<<output_iterator->second<<';'<<input_iterator->first;
   ++output_iterator;
   ++input_iterator;
   // last values is out of the range must be 0 regardless of the filter value (which is 1)
   BOOST_CHECK(Elements::isEqual(input_iterator->first,output_iterator->first));
   BOOST_CHECK(Elements::isEqual(0.,output_iterator->second));
-  std::cout<<output_iterator->second<<';'<<input_iterator->first;
+  //std::cout<<output_iterator->second<<';'<<input_iterator->first;
 }
 
 
