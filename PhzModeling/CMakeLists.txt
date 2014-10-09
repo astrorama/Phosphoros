@@ -10,8 +10,8 @@ find_package(Boost REQUIRED COMPONENTS serialization)
 
 #===== Libraries ===============================================================
 elements_add_library(PhzModeling src/lib/*.cpp
-                  LINK_LIBRARIES ${CMAKE_DL_LIBS} Boost XYDataset MathUtils PhzDataModel
-                  INCLUDE_DIRS Boost XYDataset PhzDataModel GridContainer
+                  LINK_LIBRARIES ${CMAKE_DL_LIBS} Boost SourceCatalog XYDataset MathUtils PhzDataModel
+                  INCLUDE_DIRS Boost SourceCatalog XYDataset PhzDataModel GridContainer
                   PUBLIC_HEADERS PhzModeling )
 
 #===== Boost tests =============================================================
@@ -27,4 +27,6 @@ elements_add_unit_test(ModelDatasetGrid_test tests/src/ModelDatasetGrid_test.cpp
 elements_add_unit_test(ApplyFilterFunctor_test tests/src/ApplyFilterFunctor_test.cpp
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
 elements_add_unit_test(CalculateFluxFunctor_test tests/src/CalculateFluxFunctor_test.cpp
+                       LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
+elements_add_unit_test(ModelFluxAlgorithm_test tests/src/ModelFluxAlgorithm_test.cpp
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)

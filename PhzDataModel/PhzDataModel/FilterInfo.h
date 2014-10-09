@@ -59,12 +59,12 @@ public:
   /**
    * @brief Copy Constructor
    */
-  FilterInfo(FilterInfo&)=default;
+  FilterInfo(const FilterInfo&);
 
   /**
    * @brief Copy Operator
    */
-  FilterInfo& operator=(FilterInfo&) = default;
+  FilterInfo& operator=(const FilterInfo&) = default;
 
   /**
    * @brief destructor

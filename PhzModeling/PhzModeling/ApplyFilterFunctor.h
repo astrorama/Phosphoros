@@ -43,12 +43,12 @@ public:
   /**
       * @brief Copy Constructor
     */
-  ApplyFilterFunctor(ApplyFilterFunctor&) = default;
+  ApplyFilterFunctor(const ApplyFilterFunctor&) = default;
 
   /**
     * @brief Copy operator
     */
-  ApplyFilterFunctor& operator=(ApplyFilterFunctor&) = default;
+  ApplyFilterFunctor& operator=(const ApplyFilterFunctor&) = default;
 
     /**
         * @brief Destructor

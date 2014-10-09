@@ -44,12 +44,12 @@ public:
   /**
   * @brief Copy Constructor
   */
-  ExtinctionFunctor(ExtinctionFunctor&) = default;
+  ExtinctionFunctor(const ExtinctionFunctor&) = default;
 
   /**
   * @brief Copy operator
   */
-  ExtinctionFunctor& operator=(ExtinctionFunctor&) = default;
+  ExtinctionFunctor& operator=(const ExtinctionFunctor&) = default;
 
 
   /**

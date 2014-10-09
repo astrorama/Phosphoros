@@ -44,12 +44,12 @@ public:
   /**
       * @brief Copy Constructor
     */
-  CalculateFluxFunctor(CalculateFluxFunctor&) = default;
+  CalculateFluxFunctor(const CalculateFluxFunctor&) = default;
 
   /**
     * @brief Copy operator
     */
-  CalculateFluxFunctor& operator=(CalculateFluxFunctor&) = default;
+  CalculateFluxFunctor& operator=(const CalculateFluxFunctor&) = default;
 
     /**
         * @brief Destructor

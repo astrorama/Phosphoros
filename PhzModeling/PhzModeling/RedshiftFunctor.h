@@ -45,12 +45,12 @@ public:
   /**
       * @brief Copy Constructor
     */
-  RedshiftFunctor(RedshiftFunctor&) = default;
+  RedshiftFunctor(const RedshiftFunctor&) = default;
 
   /**
     * @brief Copy operator
     */
-  RedshiftFunctor& operator=(RedshiftFunctor&) = default;
+  RedshiftFunctor& operator=(const RedshiftFunctor&) = default;
 
 	/**
 		* @brief Destructor
