@@ -30,3 +30,7 @@ elements_add_unit_test(CalculateFluxFunctor_test tests/src/CalculateFluxFunctor_
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
 elements_add_unit_test(ModelFluxAlgorithm_test tests/src/ModelFluxAlgorithm_test.cpp
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
+elements_add_unit_test(BuildFilterInfoFunctor_test tests/src/BuildFilterInfoFunctor_test.cpp
+                       LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
+elements_add_unit_test(PhotometryAlgorithm_test tests/src/PhotometryAlgorithm_test.cpp
+                       LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)

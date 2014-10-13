@@ -51,6 +51,17 @@ public:
 
   }
 
+  /**
+   * @brief Move constructor
+   */
+  ModelFluxAlgorithm(ModelFluxAlgorithm&&)=default;
+
+  /**
+     * @brief Move operator
+     */
+  ModelFluxAlgorithm& operator=(ModelFluxAlgorithm&&)=default;
+
+
 /**
  * @brief destructor
  */

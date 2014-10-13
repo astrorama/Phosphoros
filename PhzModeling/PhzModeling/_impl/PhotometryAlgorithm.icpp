@@ -1,0 +1,64 @@
+/**
+ * @file PhzModeling/_impl/PhotometryAlgorithm.icpp
+ * @date Oct 13, 2014
+ * @author Florian Dubath
+ */
+
+#ifdef PHOTOMETRYALGO_IMPL
+
+
+  PhotometryAlgorithm::PhotometryAlgorithm(ModelFluxAlgo model_flux_algorithm,
+      std::map<Euclid::XYDataset::QualifiedName,Euclid::XYDataset::XYDataset> filter_map,
+      std::vector<Euclid::XYDataset::QualifiedName> filter_name_list):m_model_flux_agorithm(std::move(model_flux_algorithm)),
+    m_filter_map(std::move(filter_map)),m_filter_name_list(std::move(filter_name_list)){
+
+    // initialization
+    m_filter_info_vector=manageFilter();
+    m_filter_name_shared_vector=createSharedPointers();
+  }
+
+
+  template<typename ModelIterator,typename PhotometryIterator>
+  void PhotometryAlgorithm::operator()(ModelIterator model_begin,ModelIterator model_end,PhotometryIterator photometry_begin) const{
+
+    // as there is no default constructor for the FluxErrorPair we have to build manually the vector.
+    std::vector<Euclid::SourceCatalog::FluxErrorPair> fluxes{};
+    for(int cmpt=0;cmpt!=m_filter_name_list.size();++cmpt){
+      fluxes.push_back(Euclid::SourceCatalog::FluxErrorPair(0.,0.));
+    }
+
+    while (model_begin!=model_end){
+
+
+      m_model_flux_agorithm(*model_begin,m_filter_info_vector.begin(),m_filter_info_vector.end(),fluxes.begin());
+
+      *photometry_begin=Euclid::SourceCatalog::Photometry(m_filter_name_shared_vector,fluxes);
+
+      ++model_begin;
+      ++photometry_begin;
+    }
+  }
+
+
+
+  std::vector<Euclid::PhzDataModel::FilterInfo> PhotometryAlgorithm::manageFilter(){
+    auto vector = std::vector<Euclid::PhzDataModel::FilterInfo>();
+    for(auto name:m_filter_name_list){
+      vector.push_back(filter_info_functor(m_filter_map[name]));
+    }
+    return std::move(vector);
+  }
+
+  std::shared_ptr<std::vector<std::string>> PhotometryAlgorithm::createSharedPointers(){
+    auto ptr = std::shared_ptr<std::vector<std::string>>(new std::vector<std::string>());
+
+    for(auto name:m_filter_name_list){
+      ptr->push_back(name.qualifiedName());
+    }
+
+    return ptr;
+  }
+
+
+
+#endif    /* PHZMODELING_MODELFLUXALGORITHM_H */
