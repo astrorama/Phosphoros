@@ -5,6 +5,7 @@
  */
 
 #include "PhzModeling/ExtinctionFunctor.h"
+#include "XYDataset/XYDataset.h"
 
 
 Euclid::XYDataset::XYDataset

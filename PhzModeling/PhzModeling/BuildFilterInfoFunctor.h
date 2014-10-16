@@ -5,15 +5,24 @@
  */
 
 #ifndef PHZMODELING_BULDFILTERINFOFUNCTOR_H
-#define    PHZMODELING_BULDFILTERINFOFUNCTOR_H
+#define PHZMODELING_BULDFILTERINFOFUNCTOR_H
 
-
-#include "XYDataset/XYDataset.h"
-#include "MathUtils/function/Piecewise.h"
-#include "ElementsKernel/PhysConstants.h"
-#include "PhzDataModel/FilterInfo.h"
+#include <utility>
+#include <memory>
 
 namespace Euclid {
+namespace MathUtils {
+  class Function;
+}
+
+namespace XYDataset {
+  class XYDataset;
+}
+
+namespace PhzDataModel{
+  class FilterInfo;
+}
+
 namespace PhzModeling {
 /**
  * @class Euclid::PhzModeling::BuildFilterInfoFunctor

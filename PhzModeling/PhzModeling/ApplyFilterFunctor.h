@@ -5,13 +5,19 @@
  */
 
 #ifndef PHZMODELING_APPLYFILTERFUNCTOR_H
-#define    PHZMODELING_APPLYFILTERFUNCTOR_H
+#define PHZMODELING_APPLYFILTERFUNCTOR_H
 
-
-#include "XYDataset/XYDataset.h"
-#include "MathUtils/function/Function.h"
+#include <utility>
 
 namespace Euclid {
+namespace MathUtils {
+  class Function;
+}
+
+namespace XYDataset {
+  class XYDataset;
+}
+
 namespace PhzModeling {
 
 /**

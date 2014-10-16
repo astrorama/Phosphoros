@@ -6,6 +6,7 @@
  */
 
 #include "PhzModeling/ModelDatasetGenerator.h"
+#include "XYDataset/XYDataset.h"
 
 namespace Euclid {
 namespace PhzModeling {

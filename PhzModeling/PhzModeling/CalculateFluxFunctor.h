@@ -8,10 +8,15 @@
 #define PHZMODELING_CALCULATEFLUXFUNCTOR_H
 
 
-#include "XYDataset/XYDataset.h"
-#include "MathUtils/function/Function.h"
-
 namespace Euclid {
+namespace MathUtils {
+  class Function;
+}
+
+namespace XYDataset {
+  class XYDataset;
+}
+
 namespace PhzModeling {
 
 /**

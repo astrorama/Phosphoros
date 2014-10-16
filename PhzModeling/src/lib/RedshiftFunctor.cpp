@@ -5,6 +5,7 @@
  */
 
 #include "PhzModeling/RedshiftFunctor.h"
+#include "XYDataset/XYDataset.h"
 
 namespace Euclid {
 namespace PhzModeling {

@@ -13,6 +13,7 @@
 #include "PhzModeling/BuildFilterInfoFunctor.h"
 #include "XYDataset/XYDataset.h"
 #include "ElementsKernel/PhysConstants.h"
+#include "PhzDataModel/FilterInfo.h"
 
 struct BuildFilterInfoFunctor_Fixture {
 

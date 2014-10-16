@@ -9,12 +9,16 @@
 #define PHZMODELING_MODELDATASETGENERATOR_H_
 
 
-#include "XYDataset/XYDataset.h"
+#include <map>
 #include "PhzDataModel/PhzModel.h"
-#include "PhzModeling/ExtinctionFunctor.h"
-#include "PhzModeling/RedshiftFunctor.h"
+#include "MathUtils/function/Function.h"
 
 namespace Euclid {
+namespace XYDataset{
+  class XYDataset;
+  class QualifiedName;
+}
+
 namespace PhzModeling {
 
 /**

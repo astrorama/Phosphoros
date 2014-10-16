@@ -7,7 +7,6 @@
 #include "PhzModeling/BuildFilterInfoFunctor.h"
 #include "MathUtils/interpolation/interpolation.h"
 #include "MathUtils/function/function_tools.h"
-#include "MathUtils/function/Piecewise.h"
 #include "ElementsKernel/PhysConstants.h"
 #include "PhzDataModel/FilterInfo.h"
 

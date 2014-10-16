@@ -9,10 +9,13 @@
 
 #include <memory>
 #include <cmath>
-#include "XYDataset/XYDataset.h"
 #include "MathUtils/function/Function.h"
 
 namespace Euclid {
+
+namespace XYDataset {
+  class XYDataset;
+}
 namespace PhzModeling {
 /**
  * @class Euclid::PhzModeling::ExtinctionFunctor

@@ -5,6 +5,8 @@
  */
 
 #include "PhzModeling/ApplyFilterFunctor.h"
+#include "MathUtils/function/Function.h"
+#include "XYDataset/XYDataset.h"
 
 namespace Euclid {
 namespace PhzModeling {

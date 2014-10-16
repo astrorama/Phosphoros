@@ -12,6 +12,7 @@
 #include "ElementsKernel/Exception.h"
 #include "PhzModeling/ApplyFilterFunctor.h"
 #include "XYDataset/XYDataset.h"
+#include "MathUtils/function/Function.h"
 
 struct ApplyFilterFunctor_Fixture {
 

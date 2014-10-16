@@ -15,6 +15,7 @@
 #include "SourceCatalog/SourceAttributes/Photometry.h"
 #include "PhzDataModel/FilterInfo.h"
 #include "PhzModeling/BuildFilterInfoFunctor.h"
+#include "PhzModeling/ModelFluxAlgorithm.h"
 
 namespace Euclid {
 namespace PhzModeling {
@@ -26,6 +27,8 @@ public:
   PhotometryAlgorithm(ModelFluxAlgo model_flux_algorithm,
       std::map<Euclid::XYDataset::QualifiedName,Euclid::XYDataset::XYDataset> filter_map,
       std::vector<Euclid::XYDataset::QualifiedName> filter_name_list);
+
+
 
   virtual ~PhotometryAlgorithm()=default;
 
@@ -45,11 +48,15 @@ private:
 
   std::shared_ptr<std::vector<std::string>> createSharedPointers();
 
+};
+
 #define PHOTOMETRYALGO_IMPL
-#include "SourceCatalog/_impl/Source.icpp"
+#include "PhzModeling/_impl/PhotometryAlgorithm.icpp"
 #undef PHOTOMETRYALGO_IMPL
 
-};
+
+
+
 } // end of namespace PhzModeling
 } // end of namespace Euclid
 

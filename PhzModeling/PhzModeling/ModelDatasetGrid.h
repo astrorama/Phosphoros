@@ -13,6 +13,7 @@
 
 namespace Euclid {
 namespace PhzModeling {
+class ModelDatasetGenerator;
 
 struct ModelDatasetCellManager {
   size_t m_size;

@@ -7,10 +7,11 @@
 #ifndef PHZMODELING_REDSHIFTFUNCTOR_H
 #define	PHZMODELING_REDSHIFTFUNCTOR_H
 
-
-#include "XYDataset/XYDataset.h"
-
 namespace Euclid {
+namespace XYDataset {
+  class XYDataset;
+}
+
 namespace PhzModeling {
 
 /**
