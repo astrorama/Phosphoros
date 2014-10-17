@@ -134,9 +134,9 @@ BOOST_FIXTURE_TEST_CASE(Exception_test, PhotometryAlgorithm_Fixture) {
   local_filter_name_list.push_back(Euclid::XYDataset::QualifiedName{"filterSet1/filter-1"});
 
 
- // BOOST_CHECK_THROW(
- //     Euclid::PhzModeling::PhotometryAlgorithm<Euclid::PhzModeling::ModelFluxAlgorithm> algo(std::move(flux_model_algo),std::move(filter_map),std::move(local_filter_name_list)),
- //     Elements::Exception);
+  BOOST_CHECK_THROW(
+      Euclid::PhzModeling::PhotometryAlgorithm<Euclid::PhzModeling::ModelFluxAlgorithm> algo(std::move(flux_model_algo),std::move(filter_map),std::move(local_filter_name_list))
+     ,Elements::Exception);
 }
 
 BOOST_FIXTURE_TEST_CASE(execution_test, PhotometryAlgorithm_Fixture) {

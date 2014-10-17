@@ -29,7 +29,6 @@ template<typename ModelFluxAlgo>
 
     while (model_begin!=model_end){
 
-
       m_model_flux_agorithm(*model_begin,m_filter_info_vector.begin(),m_filter_info_vector.end(),fluxes.begin());
 
       *photometry_begin=Euclid::SourceCatalog::Photometry(m_filter_name_shared_vector,fluxes);
