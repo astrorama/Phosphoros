@@ -12,4 +12,7 @@ elements_add_library(PhzConfiguration src/lib/*.cpp
 
 elements_add_unit_test(FilterConfiguration_test tests/src/FilterConfiguration_test.cpp
                        LINK_LIBRARIES XYDataset PhzConfiguration TYPE Boost)
+
+elements_add_unit_test(SedConfiguration_test tests/src/FilterConfiguration_test.cpp
+                       LINK_LIBRARIES XYDataset PhzConfiguration TYPE Boost)
  

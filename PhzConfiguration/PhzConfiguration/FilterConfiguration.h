@@ -22,30 +22,73 @@ namespace PhzConfiguration {
  * This class defines the filter parameter options
  * @details
  * The parameters available are:
- * filter-root-path : string, root path to the filters
+ * filter-root-path : string root path to the filters
  * The three following parameters can be used multiple times
- * filter-group     : string, a filter group(only one) e.g. filter/MER
- * filter-name      : string: a filter name (only one) e.g. MER/vis
- * filter-exclude   : string: a filter name to be excluded (only one)
- * @throw ElementException
- * Missing or unknown filter dataset provider options : <filter-root-path>
+ * filter-group     : string a filter group(only one) e.g. filter/MER
+ * filter-name      : string a filter name (only one) e.g. MER/vis
+ * filter-exclude   : string a filter name to be excluded (only one)
+ * @throw
+ * ElementException: Missing or unknown filter dataset provider options
+ * ElementException: Empty filter list
  */
 
 class FilterConfiguration {
   
 public:
   
+  /**
+   * @brief
+   * Get program options of the FilterConfiguration class
+   * @return
+   * A boost boost::program_options::options_description type
+   */
   static po::options_description getProgramOptions();
 
+  /**
+   * @brief Constructor
+   * The filter configuration class which defines parameters allowed for
+   * the filter parameter options
+   *
+   * @details
+   * The filter options are:
+   * filter-root-path : string, the root path of the filters
+   * filter-group     : vector of strings, goup name   e.g. filter/MER
+   * filter-name      : vector of strings, filter name e.g. filter/MER/vis
+   * filter-exclude   : vector of strings, filter name to be excluded
+   * @param options
+   * A map(std::string, boost::program_options::variable_value) containing
+   * the options and their value.
+   *
+   */
   FilterConfiguration(const std::map<std::string, po::variable_value>& options)
                      : m_options{options} {};
-  
+
+  /**
+   * @brief
+   * This function provides a XYdatasetProvider object
+   * @details
+   * @throw ElementException
+   * Missing  <filter-root-path> or unknown filter dataset provider options
+   * @return
+   * A unique pointer of XYDatasetProvider type
+   */
   std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> getFilterDatasetProvider();
   
+  /**
+   * @brief
+   * This function provides a filter list
+   * @details
+   * @throw ElementException
+   * Missing  <filter-root-path> or unknown filter dataset provider options
+   * @throw ElementException
+   *  Empty filter list
+   * @return
+   * A vector of QualifiedName type
+   */
   std::vector<Euclid::XYDataset::QualifiedName> getFilterList();
   
 private:
-  
+  /// Map containing all the filter options and their value
   std::map<std::string, po::variable_value> m_options;
   
 };
