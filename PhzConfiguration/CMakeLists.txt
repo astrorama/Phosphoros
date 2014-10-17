@@ -9,4 +9,7 @@ elements_add_library(PhzConfiguration src/lib/*.cpp
                      LINK_LIBRARIES Boost XYDataset
                      INCLUDE_DIRS Boost XYDataset
                      PUBLIC_HEADERS PhzConfiguration)
+
+elements_add_unit_test(FilterConfiguration_test tests/src/FilterConfiguration_test.cpp
+                       LINK_LIBRARIES XYDataset PhzConfiguration TYPE Boost)
  

@@ -14,13 +14,6 @@
 namespace Euclid {
 namespace PhzConfiguration {
 
-FilterConfiguration::FilterConfiguration(const std::map<std::string, po::variable_value>& options) : m_options{options} {
-  if (m_options["filter-root-path"].empty()) {
-    throw Elements::Exception("Missing filter-root-path parameter");
-  }
-}
-
-
 po::options_description FilterConfiguration::getProgramOptions() {
   po::options_description options {"Photometric filter options"};
   options.add_options()
@@ -28,12 +21,14 @@ po::options_description FilterConfiguration::getProgramOptions() {
         "The directory containing the Filter datasets, organized in folders")
     ("filter-group", po::value<std::vector<std::string>>(),
         "Use all the Filters in the given group and subgroups")
-    ("filter-list", po::value<std::vector<std::string>>(),
-        "Use all the given Filters");
+    ("filter-exclude", po::value<std::vector<std::string>>(),
+        "Exclude a filter name")
+    ("filter-name", po::value<std::vector<std::string>>(),
+        "A single filter name");
   return options;
 }
 
-std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> FilterConfiguration::filterDatasetProvider() {
+std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> FilterConfiguration::getFilterDatasetProvider() {
   if (!m_options["filter-root-path"].empty()) {
     std::string path = m_options["filter-root-path"].as<std::string>();
     std::unique_ptr<Euclid::XYDataset::FileParser> file_parser {new Euclid::XYDataset::AsciiParser{}};
@@ -41,14 +36,14 @@ std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> FilterConfiguration::filte
       new Euclid::XYDataset::FileSystemProvider{path, std::move(file_parser)}
     };
   }
-  throw Elements::Exception {"Missing or unknown Filter dataset provider options"};
+  throw Elements::Exception {"Missing or unknown filter dataset provider options : <filter-root-path>"};
 }
 
-std::vector<Euclid::XYDataset::QualifiedName> FilterConfiguration::filterList() {
+std::vector<Euclid::XYDataset::QualifiedName> FilterConfiguration::getFilterList() {
   // We use a set to avoid duplicate entries
   std::set<Euclid::XYDataset::QualifiedName> selected {};
   if (!m_options["filter-group"].empty()) {
-    auto provider = filterDatasetProvider();
+    auto provider = getFilterDatasetProvider();
     auto group_list = m_options["filter-group"].as<std::vector<std::string>>();
     for (auto& group : group_list) {
       for (auto& name : provider->listContents(group)) {
@@ -56,14 +51,22 @@ std::vector<Euclid::XYDataset::QualifiedName> FilterConfiguration::filterList() 
       }
     }
   }
-  if (!m_options["filter-list"].empty()) {
-    auto name_list = m_options["filter-list"].as<std::vector<std::string>>();
+  // Add filter-name if any
+  if (!m_options["filter-name"].empty()) {
+    auto name_list    = m_options["filter-name"].as<std::vector<std::string>>();
     for (auto& name : name_list) {
       selected.insert(Euclid::XYDataset::QualifiedName{name});
     }
   }
+  // Remove filter-exclude if any
+  if (!m_options["filter-exclude"].empty()) {
+    auto name_list = m_options["filter-exclude"].as<std::vector<std::string>>();
+    for (auto& name : name_list) {
+      selected.erase(Euclid::XYDataset::QualifiedName{name});
+    }
+  }
   if (selected.empty()) {
-    throw Elements::Exception() << "Empty Filter list";
+    throw Elements::Exception() << "Empty filter list";
   }
   return std::vector<Euclid::XYDataset::QualifiedName> {selected.begin(), selected.end()};
 }

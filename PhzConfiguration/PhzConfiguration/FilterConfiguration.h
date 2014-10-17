@@ -16,17 +16,33 @@ namespace po = boost::program_options;
 namespace Euclid {
 namespace PhzConfiguration {
 
+/**
+ * @class Euclid::PhzConfiguration::FilterConfiguration
+ * @brief
+ * This class defines the filter parameter options
+ * @details
+ * The parameters available are:
+ * filter-root-path : string, root path to the filters
+ * The three following parameters can be used multiple times
+ * filter-group     : string, a filter group(only one) e.g. filter/MER
+ * filter-name      : string: a filter name (only one) e.g. MER/vis
+ * filter-exclude   : string: a filter name to be excluded (only one)
+ * @throw ElementException
+ * Missing or unknown filter dataset provider options : <filter-root-path>
+ */
+
 class FilterConfiguration {
   
 public:
   
-  FilterConfiguration(const std::map<std::string, po::variable_value>& options);
-  
   static po::options_description getProgramOptions();
+
+  FilterConfiguration(const std::map<std::string, po::variable_value>& options)
+                     : m_options{options} {};
   
-  std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> filterDatasetProvider();
+  std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> getFilterDatasetProvider();
   
-  std::vector<Euclid::XYDataset::QualifiedName> filterList();
+  std::vector<Euclid::XYDataset::QualifiedName> getFilterList();
   
 private:
   
