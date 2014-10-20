@@ -34,3 +34,5 @@ elements_add_unit_test(BuildFilterInfoFunctor_test tests/src/BuildFilterInfoFunc
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
 elements_add_unit_test(PhotometryAlgorithm_test tests/src/PhotometryAlgorithm_test.cpp
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
+elements_add_unit_test(PhotometryGridCreator_test tests/src/PhotometryGridCreator_test.cpp
+                       LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
