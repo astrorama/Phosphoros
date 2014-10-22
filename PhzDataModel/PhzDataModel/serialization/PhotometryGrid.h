@@ -19,7 +19,7 @@ namespace serialization {
  * @brief Serialization of the PhotometryGrid
  *
  * @details
- * Note the following points: Only non-epty grids can be serialized and all the photometries must have the same filters.
+ * Note the following points: Only non-empty grids can be serialized and all the photometries must have the same filters.
  * One store the list of filter names only once. Then we store the flux and error values for each photometry.
  *
  */

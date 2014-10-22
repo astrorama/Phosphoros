@@ -23,8 +23,6 @@ FilterInfo::FilterInfo(
   m_normalization=normalization;
 }
 
-
-
 const std::pair<double,double>& FilterInfo::getRange(){
   return m_range;
 }

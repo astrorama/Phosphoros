@@ -46,6 +46,7 @@ public:
       const Euclid::MathUtils::Function& filter,
       double normalization
       );
+
   /**
    * @brief Move Constructor
    */
