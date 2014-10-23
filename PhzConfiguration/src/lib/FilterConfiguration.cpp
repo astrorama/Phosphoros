@@ -22,7 +22,7 @@ po::options_description FilterConfiguration::getProgramOptions() {
     ("filter-group", po::value<std::vector<std::string>>(),
         "Use all the Filters in the given group and subgroups")
     ("filter-exclude", po::value<std::vector<std::string>>(),
-        "Exclude a filter name")
+        "Exclude a single filter name")
     ("filter-name", po::value<std::vector<std::string>>(),
         "A single filter name");
   return options;
