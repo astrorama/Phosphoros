@@ -11,6 +11,8 @@
 #include "XYDataset/FileSystemProvider.h"
 #include "PhzConfiguration/SedConfiguration.h"
 
+namespace po = boost::program_options;
+
 namespace Euclid {
 namespace PhzConfiguration {
 

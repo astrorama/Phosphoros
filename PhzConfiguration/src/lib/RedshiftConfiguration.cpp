@@ -14,26 +14,15 @@
 #include "XYDataset/AsciiParser.h"
 #include "XYDataset/FileSystemProvider.h"
 #include "PhzConfiguration/RedshiftConfiguration.h"
+#include "CheckString.h"
 
 using boost::regex;
 using boost::regex_match;
 
+namespace po = boost::program_options;
+
 namespace Euclid {
 namespace PhzConfiguration {
-
-// This function applies a provided regex (regex_string) to a string_to_parse()
-// in order to detect any not  wanted character otherwise throws an exception
-void check_string(const std::string& regex_string,
-                  const std::string& option,
-                  const std::string& string_to_parse)
-{
-  boost::regex expression(regex_string);
-  if (!boost::regex_match(string_to_parse, expression)) {
-    throw Elements::Exception() <<"Invalid character(s) found for the option: "
-                                << option << " = " << string_to_parse;
-  }
-}
-
 
 po::options_description RedshiftConfiguration::getProgramOptions() {
   po::options_description options {"Photometric redshift option"};
@@ -58,7 +47,7 @@ std::vector<double> RedshiftConfiguration::getZList() {
   if (!m_options["z-range"].empty()) {
     auto ranges_list = m_options["z-range"].as<std::vector<std::string>>();
     for (auto& range_string : ranges_list) {
-      check_string(z_range_regex, {"z-range"}, range_string);
+      checkString(z_range_regex, {"z-range"}, range_string);
       std::stringstream range_stream {range_string};
       double min {};
       double max {};
@@ -83,7 +72,7 @@ std::vector<double> RedshiftConfiguration::getZList() {
   if (!m_options["z-value"].empty()) {
     auto values_list = m_options["z-value"].as<std::vector<std::string>>();
     for (auto& values_string : values_list) {
-      check_string(z_value_regex, {"z-value"}, values_string);
+      checkString(z_value_regex, {"z-value"}, values_string);
       std::stringstream values_stream {values_string};
       while (values_stream.good()) {
         double value {};

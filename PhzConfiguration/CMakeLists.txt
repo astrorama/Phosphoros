@@ -18,4 +18,7 @@ elements_add_unit_test(SedConfiguration_test tests/src/FilterConfiguration_test.
                        
 elements_add_unit_test(RedshiftConfiguration_test tests/src/RedshiftConfiguration_test.cpp
                        LINK_LIBRARIES XYDataset PhzConfiguration TYPE Boost)
+                       
+elements_add_unit_test(ReddeningConfiguration_test tests/src/ReddeningConfiguration_test.cpp
+                       LINK_LIBRARIES XYDataset PhzConfiguration TYPE Boost)
  

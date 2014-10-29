@@ -10,7 +10,6 @@
 #include <map>
 #include <string>
 #include <boost/program_options.hpp>
-namespace po = boost::program_options;
 #include "XYDataset/XYDatasetProvider.h"
 
 namespace Euclid {
@@ -42,7 +41,7 @@ public:
    * @return
    * A boost boost::program_options::options_description type
    */
-  static po::options_description getProgramOptions();
+  static boost::program_options::options_description getProgramOptions();
 
   /**
    * @brief Constructor
@@ -60,7 +59,7 @@ public:
    * the options and their value.
    *
    */
-  FilterConfiguration(const std::map<std::string, po::variable_value>& options)
+  FilterConfiguration(const std::map<std::string, boost::program_options::variable_value>& options)
                      : m_options{options} {};
 
   /**
@@ -89,7 +88,7 @@ public:
   
 private:
   /// Map containing all the filter options and their value
-  std::map<std::string, po::variable_value> m_options;
+  std::map<std::string, boost::program_options::variable_value> m_options;
   
 };
 

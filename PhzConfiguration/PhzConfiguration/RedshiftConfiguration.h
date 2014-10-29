@@ -12,7 +12,6 @@
 #include <map>
 #include <string>
 #include <boost/program_options.hpp>
-namespace po = boost::program_options;
 #include "XYDataset/XYDatasetProvider.h"
 
 namespace Euclid {
@@ -28,17 +27,17 @@ namespace PhzConfiguration {
  *          - min as minimum redshift value
  *          - max as maximum redshift value and max > min
  *          - step, step to be used for the interval
- * The space character is the separator.
- * You can add several z-range parameters but they should not overlap. The
- * the following example is forbidden:
+ *  Note that the space character is the separator.
+ *  You can add several z-range parameters but they should not overlap. The
+ *  following example is not allowed:
  *  z-range = 0. 2. 0.5
  *  z-range = 1.5 3. 1.
- *  1.5 is less than 2 of the first range and this is not allowed!
+ *  as 1.5 is less than 2 of the first range.
  * A regex is applied for z-range: (((\\d+(\\.\\d*)?)|(\\.\\d+))($|\\s+)){3}
  *
  * z-value : double, redshift value e.g. 4.
  * You can add as many z-value parameters as you want but each z-value
- * parameter contains only one value.
+ * parameter must contain only one value.
  * A regex is applied for z-value : ((\\d+(\\.\\d*)?)|(\\.\\d+))($|\\s+)
  * @throw
  * ElementException: Invalid range(s) for the z-range option!
@@ -56,7 +55,7 @@ public:
    * @return
    * A boost boost::program_options::options_description object
    */
-  static po::options_description getProgramOptions();
+  static boost::program_options::options_description getProgramOptions();
 
   /**
    * @brief Constructor
@@ -71,7 +70,7 @@ public:
    * A map containing the options and their value.
    *
    */
-  RedshiftConfiguration(const std::map<std::string, po::variable_value>& options)
+  RedshiftConfiguration(const std::map<std::string, boost::program_options::variable_value>& options)
                      : m_options{options} {};
 
 
@@ -81,7 +80,6 @@ public:
    * @details
    * @throw ElementException
    * Missing  <filter-root-path> or unknown filter dataset provider options
-   * @throw ElementException
    * ElementException: Invalid range(s) for the z-range option!
    * ElementException: Invalid character(s) for the z-range option
    * ElementException: Invalid character(s) for the z-value option
@@ -93,7 +91,7 @@ public:
 
 private:
   /// Map containing all the filter options and their value
-  std::map<std::string, po::variable_value> m_options;
+  std::map<std::string, boost::program_options::variable_value> m_options;
 
 };
 

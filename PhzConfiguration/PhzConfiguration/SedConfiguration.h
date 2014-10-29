@@ -12,7 +12,6 @@
 #include <map>
 #include <string>
 #include <boost/program_options.hpp>
-namespace po = boost::program_options;
 #include "XYDataset/XYDatasetProvider.h"
 
 namespace Euclid {
@@ -44,7 +43,7 @@ public:
    * @return
    * A boost boost::program_options::options_description type
    */
-  static po::options_description getProgramOptions();
+  static boost::program_options::options_description getProgramOptions();
 
   /**
    * @brief Constructor
@@ -62,7 +61,7 @@ public:
    * the options and their value.
    *
    */
-  SedConfiguration(const std::map<std::string, po::variable_value>& options)
+  SedConfiguration(const std::map<std::string, boost::program_options::variable_value>& options)
                      : m_options{options} {};
 
   /**
@@ -72,7 +71,7 @@ public:
    * @throw ElementException
    * Missing  <sed-root-path> or unknown sed dataset provider options
    * @return
-   * A unique pointer of XYDatasetProvider type
+   * A unique boost::program_optionsinter of XYDatasetProvider type
    */
   std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> getSedDatasetProvider();
 
@@ -91,7 +90,7 @@ public:
 
 private:
   /// Map containing all the sed options and their value
-  std::map<std::string, po::variable_value> m_options;
+  std::map<std::string, boost::program_options::variable_value> m_options;
 
 };
 
