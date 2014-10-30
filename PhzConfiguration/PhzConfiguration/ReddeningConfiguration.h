@@ -92,7 +92,7 @@ public:
    * @return
    * A unique pointer of XYDatasetProvider type
    */
-  std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> getReddeningDatasetProvider();
+  std::unique_ptr<XYDataset::XYDatasetProvider> getReddeningDatasetProvider();
   
   /**
    * @brief
@@ -105,7 +105,7 @@ public:
    * @return
    * A vector of QualifiedName types
    */
-  std::vector<Euclid::XYDataset::QualifiedName> getReddeningCurveList();
+  std::vector<XYDataset::QualifiedName> getReddeningCurveList();
 
   /**
    * @brief

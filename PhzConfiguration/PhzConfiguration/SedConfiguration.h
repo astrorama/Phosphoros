@@ -57,8 +57,7 @@ public:
    * sed-name      : vector of strings, sed name e.g. sed/MER/vis
    * sed-exclude   : vector of strings, sed name to be excluded
    * @param options
-   * A map(std::string, boost::program_options::variable_value) containing
-   * the options and their value.
+   * A map containing the options and their value.
    *
    */
   SedConfiguration(const std::map<std::string, boost::program_options::variable_value>& options)
@@ -73,7 +72,7 @@ public:
    * @return
    * A unique boost::program_optionsinter of XYDatasetProvider type
    */
-  std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> getSedDatasetProvider();
+  std::unique_ptr<XYDataset::XYDatasetProvider> getSedDatasetProvider();
 
   /**
    * @brief
@@ -86,7 +85,7 @@ public:
    * @return
    * A vector of QualifiedName type
    */
-  std::vector<Euclid::XYDataset::QualifiedName> getSedList();
+  std::vector<XYDataset::QualifiedName> getSedList();
 
 private:
   /// Map containing all the sed options and their value

@@ -22,3 +22,5 @@ elements_add_unit_test(RedshiftConfiguration_test tests/src/RedshiftConfiguratio
 elements_add_unit_test(ReddeningConfiguration_test tests/src/ReddeningConfiguration_test.cpp
                        LINK_LIBRARIES XYDataset PhzConfiguration TYPE Boost)
  
+elements_add_unit_test(ParameterSpaceConfiguration_test tests/src/ParameterSpaceConfiguration_test.cpp
+                       LINK_LIBRARIES XYDataset PhzConfiguration TYPE Boost)

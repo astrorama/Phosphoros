@@ -55,8 +55,7 @@ public:
    * filter-name      : vector of strings, filter name e.g. filter/MER/vis
    * filter-exclude   : vector of strings, filter name to be excluded
    * @param options
-   * A map(std::string, boost::program_options::variable_value) containing
-   * the options and their value.
+   * A map containing the options and their value.
    *
    */
   FilterConfiguration(const std::map<std::string, boost::program_options::variable_value>& options)
@@ -71,7 +70,7 @@ public:
    * @return
    * A unique pointer of XYDatasetProvider type
    */
-  std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> getFilterDatasetProvider();
+  std::unique_ptr<XYDataset::XYDatasetProvider> getFilterDatasetProvider();
   
   /**
    * @brief
@@ -84,7 +83,7 @@ public:
    * @return
    * A vector of QualifiedName type
    */
-  std::vector<Euclid::XYDataset::QualifiedName> getFilterList();
+  std::vector<XYDataset::QualifiedName> getFilterList();
   
 private:
   /// Map containing all the filter options and their value
