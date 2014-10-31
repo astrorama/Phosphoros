@@ -5,16 +5,22 @@
  */
 
 #include <string>
+#include <iostream>
 #include <vector>
 #include "ElementsKernel/Exception.h"
+#include "ElementsKernel/Logging.h"
+
 #include "XYDataset/AsciiParser.h"
 #include "XYDataset/FileSystemProvider.h"
 #include "PhzConfiguration/FilterConfiguration.h"
+#include "CheckString.h"
 
 namespace po = boost::program_options;
 
 namespace Euclid {
 namespace PhzConfiguration {
+
+static Elements::Logging logger = Elements::Logging::getLogger("PhzConfiguration");
 
 po::options_description FilterConfiguration::getProgramOptions() {
   po::options_description options {"Photometric filter options"};
@@ -26,7 +32,7 @@ po::options_description FilterConfiguration::getProgramOptions() {
     ("filter-exclude", po::value<std::vector<std::string>>(),
         "Exclude a single filter name")
     ("filter-name", po::value<std::vector<std::string>>(),
-        "A single filter name");
+        "Add a single filter name");
   return options;
 }
 
@@ -48,7 +54,11 @@ std::vector<XYDataset::QualifiedName> FilterConfiguration::getFilterList() {
     auto provider = getFilterDatasetProvider();
     auto group_list = m_options["filter-group"].as<std::vector<std::string>>();
     for (auto& group : group_list) {
-      for (auto& name : provider->listContents(group)) {
+      auto names_in_group = provider->listContents(group);
+      if (names_in_group.empty()) {
+        logger.warn() << "Filter group \"" << group << "\" is empty!";
+      }
+      for (auto& name : names_in_group) {
         selected.insert(name);
       }
     }
@@ -64,7 +74,14 @@ std::vector<XYDataset::QualifiedName> FilterConfiguration::getFilterList() {
   if (!m_options["filter-exclude"].empty()) {
     auto name_list = m_options["filter-exclude"].as<std::vector<std::string>>();
     for (auto& name : name_list) {
-      selected.erase(XYDataset::QualifiedName{name});
+      // Check the name exists before excluding
+      auto foundInList = selected.find(name);
+      if (foundInList != selected.end()) {
+         selected.erase(XYDataset::QualifiedName{name});
+      }
+      else {
+         logger.warn() << "filter-exclude: \"" << name << "\" not found in the list!";
+      }
     }
   }
   if (selected.empty()) {

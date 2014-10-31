@@ -6,7 +6,6 @@
 
 #include <string>
 #include <vector>
-#include <boost/regex.hpp>
 
 #include "ElementsKernel/Exception.h"
 #include "XYDataset/AsciiParser.h"
@@ -24,7 +23,7 @@ namespace PhzConfiguration {
 
 
 po::options_description ReddeningConfiguration::getProgramOptions() {
-  po::options_description options {"Photometric filter options"};
+  po::options_description options {"Photometric reddening options"};
   options.add_options()
     ("reddening-curve-root-path", po::value<std::string>(),
         "The directory containing the reddening curves")
@@ -96,7 +95,7 @@ std::vector<double> ReddeningConfiguration::getEbvList() {
   if (!m_options["ebv-range"].empty()) {
     auto ranges_list = m_options["ebv-range"].as<std::vector<std::string>>();
     for (auto& range_string : ranges_list) {
-      checkString(ebv_range_regex, {"ebv-range"}, range_string);
+      checkRangeString({"ebv-range"}, range_string);
       std::stringstream range_stream {range_string};
       double min {};
       double max {};
@@ -121,7 +120,7 @@ std::vector<double> ReddeningConfiguration::getEbvList() {
   if (!m_options["ebv-value"].empty()) {
     auto values_list = m_options["ebv-value"].as<std::vector<std::string>>();
     for (auto& values_string : values_list) {
-      checkString(ebv_value_regex, {"ebv-value"}, values_string);
+      checkValueString({"ebv-value"}, values_string);
       std::stringstream values_stream {values_string};
       while (values_stream.good()) {
         double value {};

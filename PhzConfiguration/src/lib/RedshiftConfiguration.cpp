@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <boost/regex.hpp>
 
 #include "ElementsKernel/Exception.h"
 #include "XYDataset/AsciiParser.h"
@@ -37,17 +36,12 @@ po::options_description RedshiftConfiguration::getProgramOptions() {
 
 std::vector<double> RedshiftConfiguration::getZList() {
 
-  // Regex for the z-range option
-  const std::string z_range_regex{"(((\\d+(\\.\\d*)?)|(\\.\\d+))($|\\s+)){3}"};
-  // regex for the z-value option
-  const std::string z_value_regex{"((\\d+(\\.\\d*)?)|(\\.\\d+))($|\\s+)"};
-
   // A set is used to avoid duplicates and to order the different entries
   std::set<double> selected {};
   if (!m_options["z-range"].empty()) {
     auto ranges_list = m_options["z-range"].as<std::vector<std::string>>();
     for (auto& range_string : ranges_list) {
-      checkString(z_range_regex, {"z-range"}, range_string);
+      checkRangeString({"z-range"}, range_string);
       std::stringstream range_stream {range_string};
       double min {};
       double max {};
@@ -72,7 +66,7 @@ std::vector<double> RedshiftConfiguration::getZList() {
   if (!m_options["z-value"].empty()) {
     auto values_list = m_options["z-value"].as<std::vector<std::string>>();
     for (auto& values_string : values_list) {
-      checkString(z_value_regex, {"z-value"}, values_string);
+      checkValueString({"z-value"}, values_string);
       std::stringstream values_stream {values_string};
       while (values_stream.good()) {
         double value {};
