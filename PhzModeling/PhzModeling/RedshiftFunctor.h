@@ -28,35 +28,6 @@ namespace PhzModeling {
 class RedshiftFunctor {
 
 public:
-	/**
-	    * @brief Default Constructor
-	    */
-	RedshiftFunctor() = default;
-
-	/**
-	    * @brief Move Constructor
-		*/
-	RedshiftFunctor(RedshiftFunctor&&) = default;
-
-	/**
-		* @brief Move operator
-		*/
-	RedshiftFunctor& operator=(RedshiftFunctor&&) = default;
-
-  /**
-      * @brief Copy Constructor
-    */
-  RedshiftFunctor(const RedshiftFunctor&) = default;
-
-  /**
-    * @brief Copy operator
-    */
-  RedshiftFunctor& operator=(const RedshiftFunctor&) = default;
-
-	/**
-		* @brief Destructor
-		*/
-	virtual ~RedshiftFunctor() = default;
 
 	/**
 		* @brief Function Call Operator

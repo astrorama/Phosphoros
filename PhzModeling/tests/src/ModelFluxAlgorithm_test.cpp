@@ -22,7 +22,7 @@ struct ModelFluxAlgorithm_Fixture {
 
     virtual ~DummyFilterFunction() = default;
 
-    double operator()(const double x) const {
+    double operator()(const double) const {
       return 1.;
     }
 
@@ -43,7 +43,7 @@ struct ModelFluxAlgorithm_Fixture {
     Euclid::XYDataset::XYDataset operator()(
           const Euclid::XYDataset::XYDataset& model,
           const std::pair<double,double>& filter_range,
-          const Euclid::MathUtils::Function& filter
+          const Euclid::MathUtils::Function&
         ) const{
           std::vector<std::pair<double, double>> filtered_values {};
            for (auto& sed_pair : model) {
@@ -65,7 +65,7 @@ struct ModelFluxAlgorithm_Fixture {
     DummyFluxCalculator& operator=(DummyFluxCalculator&&) = default;
     DummyFluxCalculator& operator=(const DummyFluxCalculator&) = default;
      virtual ~DummyFluxCalculator() = default;
-     double operator()(const Euclid::XYDataset::XYDataset& filterd_model,double normalization){
+     double operator()(const Euclid::XYDataset::XYDataset& filterd_model,double){
             return  filterd_model.size();
      }
    };

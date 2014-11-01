@@ -22,13 +22,20 @@ namespace XYDataset{
 namespace PhzModeling {
 
 /**
- * @class Euclid::PhzModeling::ModelDatasetGenerator
+ * @class ModelDatasetGenerator
  * @brief Provides the SED Model for the current index of the Model
  * parameter space iterator
  */
 class ModelDatasetGenerator {
 
 public:
+  
+  typedef std::function<XYDataset::XYDataset(const XYDataset::XYDataset&,
+                            const MathUtils::Function&, double )> ReddeningFunction;
+  
+  typedef std::function<XYDataset::XYDataset(const XYDataset::XYDataset& ,
+                            double)> RedshiftFunction;
+  
   /**
   * @brief Constructor
   * @details
@@ -55,17 +62,14 @@ public:
   * A function used to apply the redshit to a SED
   *
   */
-  ModelDatasetGenerator(const Euclid::PhzDataModel::ModelAxesTuple& parameter_space,
-                        const std::map<Euclid::XYDataset::QualifiedName,
-                                       Euclid::XYDataset::XYDataset>& sed_map,
-                        const std::map<Euclid::XYDataset::QualifiedName,
-                          std::unique_ptr<Euclid::MathUtils::Function> >& reddening_curve_map,
+  ModelDatasetGenerator(const PhzDataModel::ModelAxesTuple& parameter_space,
+                        const std::map<XYDataset::QualifiedName,
+                                       XYDataset::XYDataset>& sed_map,
+                        const std::map<XYDataset::QualifiedName,
+                          std::unique_ptr<MathUtils::Function> >& reddening_curve_map,
                         size_t current_index,
-                        const std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,
-                            const Euclid::MathUtils::Function&,
-                            double )>& reddening_function,
-                        const std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset& ,
-                            double)>& redshift_function);
+                        const ReddeningFunction& reddening_function,
+                        const RedshiftFunction& redshift_function);
 
   /**
     * @brief Copy constructor.
@@ -206,13 +210,13 @@ public:
     * @return
     * A XYDataset representing the Model for the current index
     */
-  Euclid::XYDataset::XYDataset& operator*();
+  XYDataset::XYDataset& operator*();
 
 private:
 
   // An object to convert the parameter space coordinates to a long index and vice versa
-  decltype(Euclid::GridContainer::makeGridIndexHelper(std::declval<Euclid::PhzDataModel::ModelAxesTuple>())) m_index_helper;
-  const Euclid::PhzDataModel::ModelAxesTuple& m_parameter_space;
+  decltype(GridContainer::makeGridIndexHelper(std::declval<PhzDataModel::ModelAxesTuple>())) m_index_helper;
+  const PhzDataModel::ModelAxesTuple& m_parameter_space;
 
   // The current long 1D index
   size_t m_current_index;
@@ -225,20 +229,18 @@ private:
   size_t m_current_z_index {0};
 
   // The latest calculated reddened and redshifted SEDs
-  std::unique_ptr<Euclid::XYDataset::XYDataset> m_current_reddened_sed;
-  std::unique_ptr<Euclid::XYDataset::XYDataset> m_current_redshifted_sed;
+  std::unique_ptr<XYDataset::XYDataset> m_current_reddened_sed;
+  std::unique_ptr<XYDataset::XYDataset> m_current_redshifted_sed;
 
   // map with the SED datasets the generator uses
-  const std::map<Euclid::XYDataset::QualifiedName,Euclid::XYDataset::XYDataset>& m_sed_map;
+  const std::map<XYDataset::QualifiedName,XYDataset::XYDataset>& m_sed_map;
 
   // vector with the reddening curves the generator uses
-  const std::map<Euclid::XYDataset::QualifiedName,
-    std::unique_ptr<Euclid::MathUtils::Function> >& m_reddening_curve_map;
+  const std::map<XYDataset::QualifiedName,
+    std::unique_ptr<MathUtils::Function> >& m_reddening_curve_map;
 
-  const std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,
-      const Euclid::MathUtils::Function&, double)>& m_reddening_function;
-  const std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,
-      double)>& m_redshift_function;
+  ReddeningFunction m_reddening_function;
+  RedshiftFunction m_redshift_function;
 
 
 }; // End of ModelDatasetGenerator class

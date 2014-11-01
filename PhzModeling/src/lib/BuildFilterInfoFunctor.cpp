@@ -17,7 +17,30 @@ namespace PhzModeling {
 
 
 std::pair<double,double> BuildFilterInfoFunctor::getRange(const Euclid::XYDataset::XYDataset& filter_dataset) const{
-return std::make_pair(filter_dataset.begin()->first,(--filter_dataset.end())->first);
+  size_t min = 0;
+  size_t current = 0;
+  size_t max = 0;
+  bool first_non_zero_found = false;
+  for (auto& data_pair : filter_dataset) {
+    if (!first_non_zero_found) {
+      if (data_pair.second == 0) {
+        ++min;
+      } else {
+        first_non_zero_found = true;
+      }
+    }
+    if (data_pair.second != 0) {
+      max = current;
+    }
+    ++current;
+  }
+  if (min > 0) {
+    --min;
+  }
+  if (max < filter_dataset.size()-1) {
+    ++max;
+  }
+  return std::make_pair((filter_dataset.begin()+min)->first, (filter_dataset.begin()+max)->first);
 }
 
 

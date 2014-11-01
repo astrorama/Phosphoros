@@ -54,8 +54,6 @@ public:
      *
      */
   PhotometryGridCreator(
-      PhzDataModel::ModelAxesTuple parameter_space,
-      std::vector<Euclid::XYDataset::QualifiedName> filter_name_list,
       std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> sed_provider,
       std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> reddening_curve_provider,
       std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> filter_provider);
@@ -65,29 +63,20 @@ public:
   virtual ~PhotometryGridCreator()=default;
 
   /**
-   * @brief Function Call Operator
+   * @brief Creates a photometry grid
    * @details
-   * Build the photometry grid.
+   * Build a photometry grid.
    *
    */
-  PhzDataModel::PhotometryGrid operator()();
+  PhzDataModel::PhotometryGrid createGrid(const PhzDataModel::ModelAxesTuple& parameter_space,
+              const std::vector<Euclid::XYDataset::QualifiedName>& filter_name_list);
 
 private:
-  PhzDataModel::ModelAxesTuple m_parameter_space;
-  std::vector<Euclid::XYDataset::QualifiedName> m_filter_name_list;
+  
   std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> m_sed_provider;
   std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> m_reddening_curve_provider;
   std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> m_filter_provider;
-
-  std::map<Euclid::XYDataset::QualifiedName,Euclid::XYDataset::XYDataset> m_filter_map{};
-  std::map<Euclid::XYDataset::QualifiedName,Euclid::XYDataset::XYDataset> m_sed_map{};
-  std::map<Euclid::XYDataset::QualifiedName,std::unique_ptr<Euclid::MathUtils::Function> > m_reddening_curve_map{};
-
-  void buildFilterMap();
-
-  void buildSedMap();
-
-  void buildReddeningCurveMap();
+  
 };
 
 }

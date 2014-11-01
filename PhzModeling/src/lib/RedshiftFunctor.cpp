@@ -15,7 +15,7 @@ Euclid::XYDataset::XYDataset RedshiftFunctor::operator()(
     double z) const {
 	    std::vector<std::pair<double, double>> redshifted_values {};
 	    for (auto& sed_pair : sed) {
-	      redshifted_values.push_back(
+	      redshifted_values.emplace_back(
 	          std::make_pair(sed_pair.first*(1+z),
 	          sed_pair.second/((1+z)*(1+z))));
 	    }

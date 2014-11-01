@@ -18,10 +18,8 @@ namespace XYDataset {
 
 namespace PhzModeling {
 
-class FilterInfo;
-
 /**
-* @class Euclid::PhzModeling::ModelFluxAlgorithm
+* @class PhzModeling::ModelFluxAlgorithm
  * @brief
  * Compute the Fluxes of a model relative to a set of filters.
  * @details
@@ -34,6 +32,14 @@ class ModelFluxAlgorithm{
 
 
 public:
+  
+  typedef std::function<XYDataset::XYDataset (const XYDataset::XYDataset&,
+                                              const std::pair<double,double>&,
+                                              const MathUtils::Function& )
+                       > ApplyFilterFunction;
+  
+  typedef std::function<double (const XYDataset::XYDataset&, double)> CalculateFluxFunction;
+  
   /**
    * @brief constructor
    *
@@ -48,29 +54,11 @@ public:
    * and returning as a double the total flux of the model.
    *
    */
-  ModelFluxAlgorithm(
-    const std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,
-        const std::pair<double,double>&, const Euclid::MathUtils::Function&)>& apply_filter_function,
-    const std::function<double (const Euclid::XYDataset::XYDataset& ,double )>& calculate_flux_function)
-  :m_apply_filter_function(apply_filter_function),m_calculate_flux_function(calculate_flux_function){
-
+  ModelFluxAlgorithm(ApplyFilterFunction apply_filter_function,
+                     CalculateFluxFunction calculate_flux_function)
+        : m_apply_filter_function{std::move(apply_filter_function)},
+          m_calculate_flux_function{std::move(calculate_flux_function)} {
   }
-
-  /**
-   * @brief Move constructor
-   */
-  ModelFluxAlgorithm(ModelFluxAlgorithm&&)=default;
-
-  /**
-     * @brief Move operator
-     */
-  ModelFluxAlgorithm& operator=(ModelFluxAlgorithm&&)=default;
-
-
-/**
- * @brief destructor
- */
-  virtual ~ModelFluxAlgorithm()=default;
 
   /**
    * @brief  Function Call Operator
@@ -92,12 +80,12 @@ public:
    *
    */
   template<typename FilterIterator,typename FluxIterator>
-  void operator()(const Euclid::XYDataset::XYDataset& model,
+  void operator()(const XYDataset::XYDataset& model,
                   FilterIterator filter_iterator_begin,
                   FilterIterator filter_iterator_end,
                   FluxIterator flux_iterator) const{
     while (filter_iterator_begin!=filter_iterator_end){
-         auto filter_info= *filter_iterator_begin;
+         auto& filter_info= *filter_iterator_begin;
          auto filtered_model= m_apply_filter_function(model,filter_info.getRange(),filter_info.getFilter());
 
          flux_iterator->flux= m_calculate_flux_function(filtered_model,filter_info.getNormalization());
@@ -109,9 +97,8 @@ public:
   }
 
 private:
-  const std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,
-      const std::pair<double,double>&,const Euclid::MathUtils::Function&)>& m_apply_filter_function;
-  const std::function<double(const Euclid::XYDataset::XYDataset& ,double )>& m_calculate_flux_function;
+  ApplyFilterFunction m_apply_filter_function;
+  CalculateFluxFunction m_calculate_flux_function;
 };
 
 

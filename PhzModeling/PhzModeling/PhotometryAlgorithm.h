@@ -19,7 +19,7 @@ namespace Euclid {
 namespace PhzModeling {
 
 /**
- * @class Euclid::PhzModeling::PhotometryAlgorithm
+ * @class PhotometryAlgorithm
  * @brief
  * Calculates the Photometry of Models, for a set of filters.
  * @details
@@ -28,7 +28,9 @@ namespace PhzModeling {
  */
 template<typename ModelFluxAlgo>
 class PhotometryAlgorithm{
+  
 public:
+  
   /**
    * @brief constructor
    *
@@ -46,8 +48,8 @@ public:
    * used to build the photometry.
    */
   PhotometryAlgorithm(ModelFluxAlgo model_flux_algorithm,
-      std::map<Euclid::XYDataset::QualifiedName,Euclid::XYDataset::XYDataset> filter_map,
-      std::vector<Euclid::XYDataset::QualifiedName> filter_name_list);
+      const std::map<XYDataset::QualifiedName,XYDataset::XYDataset>& filter_map,
+      const std::vector<XYDataset::QualifiedName>& filter_name_list);
 
   /**
    * #brief destructor.
@@ -73,27 +75,23 @@ public:
 
 private:
   ModelFluxAlgo m_model_flux_agorithm;
-  std::map<Euclid::XYDataset::QualifiedName,Euclid::XYDataset::XYDataset> m_filter_map;
-  std::vector<Euclid::XYDataset::QualifiedName> m_filter_name_list;
-  std::vector<Euclid::PhzDataModel::FilterInfo> m_filter_info_vector;
+  std::vector<PhzDataModel::FilterInfo> m_filter_info_vector;
   std::shared_ptr<std::vector<std::string>> m_filter_name_shared_vector;
 
-  BuildFilterInfoFunctor filter_info_functor{};
-
-  std::vector<Euclid::PhzDataModel::FilterInfo> manageFilter();
-
-  std::shared_ptr<std::vector<std::string>> createSharedPointers();
-
 };
+
+template<typename ModelFluxAlgo>
+PhotometryAlgorithm<ModelFluxAlgo> createPhotometryAlgorithm(ModelFluxAlgo model_flux_algorithm,
+      const std::map<XYDataset::QualifiedName,XYDataset::XYDataset>& filter_map,
+      const std::vector<XYDataset::QualifiedName>& filter_name_list) {
+  return PhotometryAlgorithm<ModelFluxAlgo>(model_flux_algorithm, filter_map, filter_name_list);
+}
+
+} // end of namespace PhzModeling
+} // end of namespace Euclid
 
 #define PHOTOMETRYALGO_IMPL
 #include "PhzModeling/_impl/PhotometryAlgorithm.icpp"
 #undef PHOTOMETRYALGO_IMPL
-
-
-
-
-} // end of namespace PhzModeling
-} // end of namespace Euclid
 
 #endif    /* PHZMODELING_MODELFLUXALGORITHM_H */

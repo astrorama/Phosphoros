@@ -13,7 +13,6 @@
 
 namespace Euclid {
 namespace PhzModeling {
-class ModelDatasetGenerator;
 
 struct ModelDatasetCellManager {
   size_t m_size;
@@ -26,18 +25,18 @@ namespace Euclid {
 namespace GridContainer {
 
 template<>
-struct GridCellManagerTraits<Euclid::PhzModeling::ModelDatasetCellManager> {
-  typedef Euclid::XYDataset::XYDataset data_type;
-  typedef Euclid::PhzModeling::ModelDatasetGenerator iterator;
-  static std::unique_ptr<Euclid::PhzModeling::ModelDatasetCellManager> factory(size_t size) {
-    return std::unique_ptr<Euclid::PhzModeling::ModelDatasetCellManager>{
-      new Euclid::PhzModeling::ModelDatasetCellManager {size}
+struct GridCellManagerTraits<PhzModeling::ModelDatasetCellManager> {
+  typedef XYDataset::XYDataset data_type;
+  typedef PhzModeling::ModelDatasetGenerator iterator;
+  static std::unique_ptr<PhzModeling::ModelDatasetCellManager> factory(size_t size) {
+    return std::unique_ptr<PhzModeling::ModelDatasetCellManager>{
+      new PhzModeling::ModelDatasetCellManager {size}
     };
   }
-  static size_t begin(const Euclid::PhzModeling::ModelDatasetCellManager&) {
+  static size_t begin(const PhzModeling::ModelDatasetCellManager&) {
     return 0;
   }
-  static size_t end(const Euclid::PhzModeling::ModelDatasetCellManager& manager) {
+  static size_t end(const PhzModeling::ModelDatasetCellManager& manager) {
     return manager.m_size;
   }
 };
@@ -48,15 +47,20 @@ struct GridCellManagerTraits<Euclid::PhzModeling::ModelDatasetCellManager> {
 namespace Euclid {
 namespace PhzModeling {
 /**
- * @class Euclid::PhzModeling::ModelDatasetGrid
- * @brief Specialization of the Euclid::PhzDataModel::PhzGrid used to store
+ * @class PhzModeling::ModelDatasetGrid
+ * @brief Specialization of the PhzDataModel::PhzGrid used to store
  * and walk through the parameter space.
  * The grid do not actually store the SED models but compute them dynamically
  * (through the ModelDatsetGenerator).
  */
-class ModelDatasetGrid: public Euclid::PhzDataModel::PhzGrid<ModelDatasetCellManager> {
+class ModelDatasetGrid: public PhzDataModel::PhzGrid<ModelDatasetCellManager> {
 
 public:
+  
+  typedef ModelDatasetGenerator::ReddeningFunction ReddeningFunction;
+  
+  typedef ModelDatasetGenerator::RedshiftFunction RedshiftFunction;
+  
   /**
    * @brief Constructor
    * @details
@@ -82,36 +86,30 @@ public:
    * A function used to apply the redshit to a SED
    *
    */
-  ModelDatasetGrid(const Euclid::PhzDataModel::ModelAxesTuple& parameter_space,
-                   std::map<Euclid::XYDataset::QualifiedName,Euclid::XYDataset::XYDataset> sed_map,
-                   std::map<Euclid::XYDataset::QualifiedName,
-                     std::unique_ptr<Euclid::MathUtils::Function> > reddening_curve_map,
-                   std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,
-                       const Euclid::MathUtils::Function&,
-                       double)> reddening_function,
-                   std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,
-                       double)> redshift_function);
+  ModelDatasetGrid(const PhzDataModel::ModelAxesTuple& parameter_space,
+                   std::map<XYDataset::QualifiedName,XYDataset::XYDataset> sed_map,
+                   std::map<XYDataset::QualifiedName,
+                     std::unique_ptr<MathUtils::Function> > reddening_curve_map,
+                   ReddeningFunction reddening_function,
+                   RedshiftFunction redshift_function);
 
   /**
   * @brief begin function for the iteration.
   */
-  Euclid::PhzDataModel::PhzGrid<ModelDatasetCellManager>::iterator begin();
+  PhzDataModel::PhzGrid<ModelDatasetCellManager>::iterator begin();
 
   /**
   * @brief end function for the iteration.
   */
-  Euclid::PhzDataModel::PhzGrid<ModelDatasetCellManager>::iterator end();
+  PhzDataModel::PhzGrid<ModelDatasetCellManager>::iterator end();
 
 private:
   size_t m_size;
 
-  std::map<Euclid::XYDataset::QualifiedName,Euclid::XYDataset::XYDataset> m_sed_map;
-  std::map<Euclid::XYDataset::QualifiedName,std::unique_ptr<Euclid::MathUtils::Function> > m_reddening_curve_map;
-  std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,
-      const Euclid::MathUtils::Function&,
-      double)> m_reddening_function;
-  std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,
-double)> m_redshift_function;
+  std::map<XYDataset::QualifiedName,XYDataset::XYDataset> m_sed_map;
+  std::map<XYDataset::QualifiedName,std::unique_ptr<MathUtils::Function> > m_reddening_curve_map;
+  ReddeningFunction m_reddening_function;
+  RedshiftFunction m_redshift_function;
 };
 
 }

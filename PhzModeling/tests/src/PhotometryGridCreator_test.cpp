@@ -38,7 +38,7 @@ struct PhotometryGridCreator_Fixture {
       return std::unique_ptr<Euclid::XYDataset::XYDataset>{new Euclid::XYDataset::XYDataset(std::move(copied_values))};
     }
 
-    std::vector<Euclid::XYDataset::QualifiedName> listContents(const std::string& group){
+    std::vector<Euclid::XYDataset::QualifiedName> listContents(const std::string&){
       std::vector<Euclid::XYDataset::QualifiedName> content{};
       for (auto& pair : m_storage) {
         content.push_back(pair.first);
@@ -139,9 +139,7 @@ BOOST_FIXTURE_TEST_CASE(Constructor_test, PhotometryGridCreator_Fixture) {
   auto axes= Euclid::PhzDataModel::createAxesTuple(zs,ebvs,reddeing_curves,seds);
   std::vector<Euclid::XYDataset::QualifiedName> filter_name_list{Euclid::XYDataset::QualifiedName{"filter/filter_1"},Euclid::XYDataset::QualifiedName{"filter/filter_2"}};
 
-  Euclid::PhzModeling::PhotometryGridCreator gridCreator{
-    axes,
-    filter_name_list,
+  Euclid::PhzModeling::PhotometryGridCreator gridCreator {
     std::move(sed_provider),
     std::move(reddening_provider),
     std::move(filter_provider)
@@ -163,13 +161,11 @@ BOOST_FIXTURE_TEST_CASE(throw_SED_test, PhotometryGridCreator_Fixture) {
   std::vector<Euclid::XYDataset::QualifiedName> filter_name_list{Euclid::XYDataset::QualifiedName{"filter/filter_1"},Euclid::XYDataset::QualifiedName{"filter/filter_2"}};
 
   // throw because the SED is not into the provider
-  BOOST_CHECK_THROW(new Euclid::PhzModeling::PhotometryGridCreator(
-    axes,
-    filter_name_list,
+  BOOST_CHECK_THROW(Euclid::PhzModeling::PhotometryGridCreator(
     std::move(sed_provider),
     std::move(reddening_provider),
     std::move(filter_provider)
-  ),Elements::Exception);
+  ).createGrid(axes, filter_name_list), Elements::Exception);
 }
 
 BOOST_FIXTURE_TEST_CASE(throw_curve_test, PhotometryGridCreator_Fixture) {
@@ -187,13 +183,11 @@ BOOST_FIXTURE_TEST_CASE(throw_curve_test, PhotometryGridCreator_Fixture) {
   std::vector<Euclid::XYDataset::QualifiedName> filter_name_list{Euclid::XYDataset::QualifiedName{"filter/filter_1"},Euclid::XYDataset::QualifiedName{"filter/filter_2"}};
 
   // throw because the reddening curve is not into the provider
-  BOOST_CHECK_THROW(new Euclid::PhzModeling::PhotometryGridCreator(
-    axes,
-    filter_name_list,
+  BOOST_CHECK_THROW(Euclid::PhzModeling::PhotometryGridCreator(
     std::move(sed_provider),
     std::move(reddening_provider),
     std::move(filter_provider)
-  ),Elements::Exception);
+  ).createGrid(axes, filter_name_list), Elements::Exception);
 }
 
 BOOST_FIXTURE_TEST_CASE(throw_filter_test, PhotometryGridCreator_Fixture) {
@@ -211,13 +205,11 @@ BOOST_FIXTURE_TEST_CASE(throw_filter_test, PhotometryGridCreator_Fixture) {
   std::vector<Euclid::XYDataset::QualifiedName> filter_name_list{Euclid::XYDataset::QualifiedName{"filter/filter_5"},Euclid::XYDataset::QualifiedName{"filter/filter_2"}};
 
   // throw because the filter is not into the provider
-  BOOST_CHECK_THROW(new Euclid::PhzModeling::PhotometryGridCreator(
-    axes,
-    filter_name_list,
+  BOOST_CHECK_THROW(Euclid::PhzModeling::PhotometryGridCreator(
     std::move(sed_provider),
     std::move(reddening_provider),
     std::move(filter_provider)
-  ),Elements::Exception);
+  ).createGrid(axes, filter_name_list), Elements::Exception);
 }
 
 
@@ -234,14 +226,12 @@ BOOST_FIXTURE_TEST_CASE(execution_test, PhotometryGridCreator_Fixture) {
   std::vector<Euclid::XYDataset::QualifiedName> filter_name_list{Euclid::XYDataset::QualifiedName{"filter/filter_1"},Euclid::XYDataset::QualifiedName{"filter/filter_2"}};
 
   Euclid::PhzModeling::PhotometryGridCreator gridCreator{
-    axes,
-    filter_name_list,
     std::move(sed_provider),
     std::move(reddening_provider),
     std::move(filter_provider)
   };
   double sum_filter_1=0.;
-  auto photometry_grid = gridCreator();
+  auto photometry_grid = gridCreator.createGrid(axes, filter_name_list);
   for (auto photometry:photometry_grid){
     auto filter_value = photometry.find("filter/filter_1");
     BOOST_CHECK(filter_value->flux>=0.0);

@@ -29,36 +29,6 @@ namespace PhzModeling {
 class ExtinctionFunctor {
 
 public:
-  /**
-  * @brief Default Constructor
-  */
-  ExtinctionFunctor()= default;
-
-  /**
-  * @brief Move Constructor
-  */
-  ExtinctionFunctor(ExtinctionFunctor&&) = default;
-
-  /**
-  * @brief Move operator
-  */
-  ExtinctionFunctor& operator=(ExtinctionFunctor&&) = default;
-
-  /**
-  * @brief Copy Constructor
-  */
-  ExtinctionFunctor(const ExtinctionFunctor&) = default;
-
-  /**
-  * @brief Copy operator
-  */
-  ExtinctionFunctor& operator=(const ExtinctionFunctor&) = default;
-
-
-  /**
-  * @brief Destructor
-  */
-  virtual ~ExtinctionFunctor() = default;
 
   /**
   * @brief Function Call Operator

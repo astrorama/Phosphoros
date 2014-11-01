@@ -6,68 +6,69 @@
 
 #ifdef PHOTOMETRYALGO_IMPL
 
+namespace Euclid {
+namespace PhzModeling {
+
+std::vector<PhzDataModel::FilterInfo> manageFilter(
+          const std::vector<XYDataset::QualifiedName>& filter_name_list,
+          const std::map<XYDataset::QualifiedName, XYDataset::XYDataset>& filter_map) {
+
+  auto vector = std::vector<PhzDataModel::FilterInfo>();
+
+  for (auto& name : filter_name_list) {
+    try{
+      const XYDataset::XYDataset& reference_filter=filter_map.at(name);
+      vector.push_back(BuildFilterInfoFunctor{}(reference_filter));
+    } catch(std::out_of_range err){
+      throw Elements::Exception()
+      << "The The provided filter map do not contains a filter named :"<<name.qualifiedName();
+    }
+  }
+
+  return std::move(vector);
+}
+
+std::shared_ptr<std::vector<std::string>> createSharedPointers(
+              const std::vector<XYDataset::QualifiedName>& filter_name_list){
+  auto ptr = std::make_shared<std::vector<std::string>>();
+
+  for (auto& name : filter_name_list) {
+    ptr->push_back(name.qualifiedName());
+  }
+
+  return ptr;
+}
+
 template<typename ModelFluxAlgo>
-  PhotometryAlgorithm<ModelFluxAlgo>::PhotometryAlgorithm(ModelFluxAlgo model_flux_algorithm,
-      std::map<Euclid::XYDataset::QualifiedName,Euclid::XYDataset::XYDataset> filter_map,
-      std::vector<Euclid::XYDataset::QualifiedName> filter_name_list)
-:m_model_flux_agorithm{std::move(model_flux_algorithm)},
- m_filter_map{std::move(filter_map)},
- m_filter_name_list{std::move(filter_name_list)} {
-   m_filter_info_vector=manageFilter();
-   m_filter_name_shared_vector=createSharedPointers();
- }
+PhotometryAlgorithm<ModelFluxAlgo>::PhotometryAlgorithm(ModelFluxAlgo model_flux_algorithm,
+          const std::map<XYDataset::QualifiedName,XYDataset::XYDataset>& filter_map,
+          const std::vector<XYDataset::QualifiedName>& filter_name_list)
+    : m_model_flux_agorithm{std::move(model_flux_algorithm)},
+      m_filter_info_vector {manageFilter(filter_name_list, filter_map)},
+      m_filter_name_shared_vector {createSharedPointers(filter_name_list)} {
+}
 
- template<typename ModelFluxAlgo>
-  template<typename ModelIterator,typename PhotometryIterator>
-  void PhotometryAlgorithm<ModelFluxAlgo>::operator()(ModelIterator model_begin,ModelIterator model_end,PhotometryIterator photometry_begin) const{
+template<typename ModelFluxAlgo>
+template<typename ModelIterator,typename PhotometryIterator>
+void PhotometryAlgorithm<ModelFluxAlgo>::operator()(ModelIterator model_begin,ModelIterator model_end,PhotometryIterator photometry_begin) const{
 
-    // as there is no default constructor for the FluxErrorPair we have to build manually the vector.
-    std::vector<Euclid::SourceCatalog::FluxErrorPair> fluxes{};
-    for(int cmpt=0;cmpt!=m_filter_name_list.size();++cmpt){
-      fluxes.push_back(Euclid::SourceCatalog::FluxErrorPair(0.,0.));
-    }
+  while (model_begin!=model_end){
 
-    while (model_begin!=model_end){
+  std::vector<SourceCatalog::FluxErrorPair> fluxes {m_filter_name_shared_vector->size(), {0., 0.}};
 
-      m_model_flux_agorithm(*model_begin,m_filter_info_vector.begin(),m_filter_info_vector.end(),fluxes.begin());
+    m_model_flux_agorithm(*model_begin,m_filter_info_vector.begin(),m_filter_info_vector.end(),fluxes.begin());
 
-      *photometry_begin=Euclid::SourceCatalog::Photometry(m_filter_name_shared_vector,fluxes);
+    *photometry_begin=SourceCatalog::Photometry(m_filter_name_shared_vector, std::move(fluxes));
 
-      ++model_begin;
-      ++photometry_begin;
-    }
+    ++model_begin;
+    ++photometry_begin;
   }
+}
 
 
 
-  template<typename ModelFluxAlgo>
-  std::vector<Euclid::PhzDataModel::FilterInfo> PhotometryAlgorithm<ModelFluxAlgo>::manageFilter(){
-    auto vector = std::vector<Euclid::PhzDataModel::FilterInfo>();
-
-    for(auto name:m_filter_name_list){
-      try{
-        Euclid::XYDataset::XYDataset& reference_filter=m_filter_map.at(name);
-        vector.push_back(filter_info_functor(reference_filter));
-      } catch(std::out_of_range err){
-        throw Elements::Exception()
-        << "The The provided filter map do not contains a filter named :"<<name.qualifiedName();
-      }
-    }
-
-    return std::move(vector);
-  }
-
-  template<typename ModelFluxAlgo>
-  std::shared_ptr<std::vector<std::string>> PhotometryAlgorithm<ModelFluxAlgo>::createSharedPointers(){
-    auto ptr = std::shared_ptr<std::vector<std::string>>(new std::vector<std::string>());
-
-    for(auto name:m_filter_name_list){
-      ptr->push_back(name.qualifiedName());
-    }
-
-    return ptr;
-  }
-
+} // end of namespace PhzModeling
+} // end of namespace Euclid
 
 
 #endif    /* PHZMODELING_MODELFLUXALGORITHM_H */

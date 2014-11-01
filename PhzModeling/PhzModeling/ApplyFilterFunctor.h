@@ -31,35 +31,6 @@ namespace PhzModeling {
 class ApplyFilterFunctor {
 
 public:
-    /**
-        * @brief Default Constructor
-        */
-  ApplyFilterFunctor() = default;
-
-    /**
-        * @brief Move Constructor
-        */
-  ApplyFilterFunctor(ApplyFilterFunctor&&) = default;
-
-    /**
-        * @brief Move operator
-        */
-  ApplyFilterFunctor& operator=(ApplyFilterFunctor&&) = default;
-
-  /**
-      * @brief Copy Constructor
-    */
-  ApplyFilterFunctor(const ApplyFilterFunctor&) = default;
-
-  /**
-    * @brief Copy operator
-    */
-  ApplyFilterFunctor& operator=(const ApplyFilterFunctor&) = default;
-
-    /**
-        * @brief Destructor
-        */
-    virtual ~ApplyFilterFunctor() = default;
 
     /**
         * @brief Function Call Operator

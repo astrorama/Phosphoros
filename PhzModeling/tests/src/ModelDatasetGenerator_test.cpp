@@ -42,7 +42,7 @@ struct ModelDatasetGenerator_Fixture {
     NoRedshift& operator=(NoRedshift&&) = default;
     NoRedshift& operator=(const NoRedshift&) = default;
       virtual ~NoRedshift() = default;
-      Euclid::XYDataset::XYDataset operator()(const Euclid::XYDataset::XYDataset& sed, double z) const{
+      Euclid::XYDataset::XYDataset operator()(const Euclid::XYDataset::XYDataset& sed, double) const{
         std::vector<std::pair<double, double>> redshifted_values {};
              for (auto& sed_pair : sed) {
               redshifted_values.push_back(std::make_pair(sed_pair.first,sed_pair.second));
@@ -77,7 +77,7 @@ struct ModelDatasetGenerator_Fixture {
     NoReddening& operator=(NoReddening&&) = default;
     NoReddening& operator=(NoReddening&) = default;
        virtual ~NoReddening() = default;
-       Euclid::XYDataset::XYDataset operator()(const Euclid::XYDataset::XYDataset& sed,const Euclid::MathUtils::Function& reddening_curve, double ebv) const{
+       Euclid::XYDataset::XYDataset operator()(const Euclid::XYDataset::XYDataset& sed,const Euclid::MathUtils::Function&, double) const{
          std::vector<std::pair<double, double>> redshifted_values {};
                      for (auto& sed_pair : sed) {
                       redshifted_values.push_back(std::make_pair(sed_pair.first,sed_pair.second));
