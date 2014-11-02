@@ -4,6 +4,8 @@
  * @author Florian Dubath
  */
 
+#include <future>
+#include <thread>
 #include "MathUtils/interpolation/interpolation.h"
 
 #include "PhzDataModel/PhzModel.h"
@@ -87,8 +89,34 @@ std::map<XYDataset::QualifiedName, std::unique_ptr<Euclid::MathUtils::Function>>
 
     auto photometry_algo = createPhotometryAlgorithm(std::move(flux_model_algo),std::move(filter_map), filter_name_list);
 
-    // Do the computation
-    photometry_algo(model_grid.begin(),model_grid.end(),photometry_grid.begin());
+    // Get the number of threads we can run in parallel
+    int thread_no = std::thread::hardware_concurrency();
+    // Here we keep the futures for the threads we start so we can wait for them
+    std::vector<std::future<void>> futures;
+    // We keep a counter of how many threads we have started to not start more
+    // than our threads
+    int counter = 0;
+    for (auto& sed : std::get<PhzDataModel::ModelParameter::SED>(parameter_space)) {
+      // If we have started already too many threads we wait for them to finish
+      if (counter == thread_no) {
+        for (auto& f : futures) {
+          f.get();
+        }
+        futures.clear();
+        counter = 0;
+      }
+      // We start a new thread to handle this SED
+      auto model_iter = model_grid.begin();
+      model_iter.fixAxisByValue<PhzDataModel::ModelParameter::SED>(sed);
+      auto photometry_iter = photometry_grid.begin();
+      photometry_iter.fixAxisByValue<PhzDataModel::ModelParameter::SED>(sed);
+      
+      futures.push_back(std::async(std::launch::async, photometry_algo, model_iter, model_grid.end(), photometry_iter));
+      ++counter;
+    }
+    for (auto& f : futures) {
+      f.get();
+    }
 
     return std::move(photometry_grid);
   }
