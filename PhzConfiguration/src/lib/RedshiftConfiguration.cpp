@@ -53,8 +53,9 @@ std::vector<double> RedshiftConfiguration::getZList() {
                                     << "option from here : " << dummy;
       }
       // Check the range is allowed before inserting
-      if (!selected.empty() && ( (max < min) || (*--selected.end() > min)) ) {
-       throw Elements::Exception{"Invalid range(s) for z-range option"};
+      if ( (max < min) || (!selected.empty() && (*--selected.end() > min))) {
+        throw Elements::Exception()<< "Invalid range(s) for z-range option : \""
+                                  <<range_stream.str()<<"\"";
       }
       // Insert value in the set
       for (double value=min; value<=max; value+=step) {

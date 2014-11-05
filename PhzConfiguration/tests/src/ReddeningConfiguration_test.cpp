@@ -450,6 +450,28 @@ BOOST_FIXTURE_TEST_CASE(wrong_characters_ebvrange_test, ReddeningConfiguration_F
 }
 
 //-----------------------------------------------------------------------------
+// Test the bad characters in the ebv-range option
+//-----------------------------------------------------------------------------
+
+BOOST_FIXTURE_TEST_CASE(min_max_ebvrange_test, ReddeningConfiguration_Fixture) {
+
+  BOOST_TEST_MESSAGE(" ");
+  BOOST_TEST_MESSAGE("--> Testing the ebv-range with min > max");
+  BOOST_TEST_MESSAGE(" ");
+
+  std::vector<std::string> ebv_ranges_vector;
+
+  ebv_ranges_vector.push_back("4. 0. 0.1");
+
+  options_map["ebv-range"].value() = boost::any(ebv_ranges_vector);
+
+  cf::ReddeningConfiguration rconf(options_map);
+
+  BOOST_CHECK_THROW(rconf.getEbvList(), Elements::Exception);
+
+}
+
+//-----------------------------------------------------------------------------
 // Test the bad characters in the ebv-value option
 //-----------------------------------------------------------------------------
 

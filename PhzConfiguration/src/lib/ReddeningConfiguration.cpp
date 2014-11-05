@@ -6,8 +6,11 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "ElementsKernel/Exception.h"
+#include "ElementsKernel/Logging.h"
+
 #include "XYDataset/AsciiParser.h"
 #include "XYDataset/FileSystemProvider.h"
 #include "PhzConfiguration/ReddeningConfiguration.h"
@@ -21,6 +24,7 @@ namespace po = boost::program_options;
 namespace Euclid {
 namespace PhzConfiguration {
 
+static Elements::Logging logger = Elements::Logging::getLogger("PhzConfiguration");
 
 po::options_description ReddeningConfiguration::getProgramOptions() {
   po::options_description options {"Photometric reddening options"};
@@ -58,7 +62,11 @@ std::vector<Euclid::XYDataset::QualifiedName> ReddeningConfiguration::getReddeni
     auto provider = getReddeningDatasetProvider();
     auto group_list = m_options["reddening-curve-group"].as<std::vector<std::string>>();
     for (auto& group : group_list) {
-      for (auto& name : provider->listContents(group)) {
+      auto names_in_group = provider->listContents(group);
+      if (names_in_group.empty()) {
+        logger.warn() << "Reddening group : \"" << group << "\" is empty!";
+      }
+      for (auto& name : names_in_group) {
         selected.insert(name);
       }
     }
@@ -85,11 +93,6 @@ std::vector<Euclid::XYDataset::QualifiedName> ReddeningConfiguration::getReddeni
 
 std::vector<double> ReddeningConfiguration::getEbvList() {
 
-  // Regex for the ebv-range option
-  const std::string ebv_range_regex{"(((\\d+(\\.\\d*)?)|(\\.\\d+))($|\\s+)){3}"};
-  // regex for the ebv-value option
-  const std::string ebv_value_regex{"((\\d+(\\.\\d*)?)|(\\.\\d+))($|\\s+)"};
-
   // A set is used to avoid duplicates and to order the different entries
   std::set<double> selected {};
   if (!m_options["ebv-range"].empty()) {
@@ -107,8 +110,9 @@ std::vector<double> ReddeningConfiguration::getEbvList() {
                                     << "option from here : " << dummy;
       }
       // Check the range is allowed before inserting
-      if (!selected.empty() && ( (max < min) || (*--selected.end() > min)) ) {
-       throw Elements::Exception{"Invalid range(s) for ebv-range option"};
+      if ( (max < min) || (!selected.empty() && (*--selected.end() > min))) {
+        throw Elements::Exception()<< "Invalid range(s) for ebv-range option : \""
+                                  <<range_stream.str()<<"\"";
       }
       // Insert value in the set
       for (double value=min; value<=max; value+=step) {
