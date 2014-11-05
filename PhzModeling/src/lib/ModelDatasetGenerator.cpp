@@ -12,17 +12,14 @@ namespace Euclid {
 namespace PhzModeling {
 
   ModelDatasetGenerator::ModelDatasetGenerator(
-      const Euclid::PhzDataModel::ModelAxesTuple& parameter_space,
-      const std::map<Euclid::XYDataset::QualifiedName,Euclid::XYDataset::XYDataset>& sed_map,
-      const std::map<Euclid::XYDataset::QualifiedName,
-        std::unique_ptr<Euclid::MathUtils::Function> >& reddening_curve_map,
+      const PhzDataModel::ModelAxesTuple& parameter_space,
+      const std::map<XYDataset::QualifiedName,XYDataset::XYDataset>& sed_map,
+      const std::map<XYDataset::QualifiedName,
+        std::unique_ptr<MathUtils::Function> >& reddening_curve_map,
       size_t current_index,
-      const std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,
-          const Euclid::MathUtils::Function& ,
-          double)>& reddening_function,
-      const std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset& ,
-          double)>& redshift_function)
-      : m_index_helper{Euclid::GridContainer::makeGridIndexHelper(parameter_space)},
+      const ReddeningFunction& reddening_function,
+      const RedshiftFunction& redshift_function)
+      : m_index_helper{GridContainer::makeGridIndexHelper(parameter_space)},
         m_parameter_space(parameter_space),
         m_current_index{current_index},
         m_size{m_index_helper.m_axes_index_factors.back()},
@@ -33,7 +30,7 @@ namespace PhzModeling {
         { }
 
   ModelDatasetGenerator::ModelDatasetGenerator(const ModelDatasetGenerator& other)
-      : m_index_helper{Euclid::GridContainer::makeGridIndexHelper(other.m_parameter_space)},
+      : m_index_helper{GridContainer::makeGridIndexHelper(other.m_parameter_space)},
         m_parameter_space(other.m_parameter_space),
         m_current_index{other.m_current_index},
         m_size{other.m_size},
@@ -109,38 +106,38 @@ namespace PhzModeling {
     return m_current_index < other.m_current_index;
   }
 
-  Euclid::XYDataset::XYDataset& ModelDatasetGenerator::operator*() {
+  XYDataset::XYDataset& ModelDatasetGenerator::operator*() {
     // We calculate the parameter indices for the current index
     size_t new_sed_index = m_index_helper.axisIndex(
-        Euclid::PhzDataModel::ModelParameter::SED, m_current_index);
+        PhzDataModel::ModelParameter::SED, m_current_index);
 
     size_t new_reddening_curve_index = m_index_helper.axisIndex(
-        Euclid::PhzDataModel::ModelParameter::REDDENING_CURVE, m_current_index);
+        PhzDataModel::ModelParameter::REDDENING_CURVE, m_current_index);
 
     size_t new_ebv_index = m_index_helper.axisIndex(
-        Euclid::PhzDataModel::ModelParameter::EBV, m_current_index);
+        PhzDataModel::ModelParameter::EBV, m_current_index);
 
     size_t new_z_index = m_index_helper.axisIndex(
-        Euclid::PhzDataModel::ModelParameter::Z, m_current_index);
+        PhzDataModel::ModelParameter::Z, m_current_index);
 
     // We check if we need to recalculate the reddened SED
     if (new_sed_index != m_current_sed_index
         || new_reddening_curve_index != m_current_reddening_curve_index
         || new_ebv_index != m_current_ebv_index || !m_current_reddened_sed) {
 
-      const auto reddening_curve_name=std::get<Euclid::PhzDataModel::ModelParameter::REDDENING_CURVE>(m_parameter_space)[new_reddening_curve_index];
+      auto& reddening_curve_name = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(m_parameter_space)[new_reddening_curve_index];
 
-      double ebv = std::get<Euclid::PhzDataModel::ModelParameter::EBV>(m_parameter_space)[new_ebv_index];
+      double ebv = std::get<PhzDataModel::ModelParameter::EBV>(m_parameter_space)[new_ebv_index];
 
-      const auto sed_name =std::get<Euclid::PhzDataModel::ModelParameter::SED>(m_parameter_space)[new_sed_index];
-      m_current_reddened_sed.reset(new Euclid::XYDataset::XYDataset(m_reddening_function(m_sed_map.at(sed_name),
-          *m_reddening_curve_map.at(reddening_curve_name), ebv)));
+      auto& sed_name =std::get<PhzDataModel::ModelParameter::SED>(m_parameter_space)[new_sed_index];
+      m_current_reddened_sed.reset(new XYDataset::XYDataset(m_reddening_function(m_sed_map.at(sed_name),
+          *(m_reddening_curve_map.at(reddening_curve_name)), ebv)));
     }
     if (new_sed_index != m_current_sed_index || new_reddening_curve_index != m_current_reddening_curve_index
         || new_ebv_index != m_current_ebv_index || new_z_index != m_current_z_index || !m_current_redshifted_sed) {
-      double z = std::get<Euclid::PhzDataModel::ModelParameter::Z>(m_parameter_space)[new_z_index];
+      double z = std::get<PhzDataModel::ModelParameter::Z>(m_parameter_space)[new_z_index];
 
-      m_current_redshifted_sed.reset( new Euclid::XYDataset::XYDataset(m_redshift_function(*m_current_reddened_sed,z)));
+      m_current_redshifted_sed.reset( new XYDataset::XYDataset(m_redshift_function(*m_current_reddened_sed,z)));
     }
     m_current_sed_index = new_sed_index;
     m_current_reddening_curve_index = new_reddening_curve_index;

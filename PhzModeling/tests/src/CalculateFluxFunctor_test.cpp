@@ -15,7 +15,7 @@
 
 struct CalculateFluxtFunctor_Fixture {
 
-   Euclid::PhzModeling::CalculateFluxFunctor functor;
+   Euclid::PhzModeling::CalculateFluxFunctor functor {Euclid::MathUtils::InterpolationType::LINEAR};
 
    CalculateFluxtFunctor_Fixture(){
     }

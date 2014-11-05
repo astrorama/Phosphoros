@@ -11,11 +11,16 @@
 namespace Euclid {
 namespace PhzModeling {
 
+CalculateFluxFunctor::CalculateFluxFunctor(MathUtils::InterpolationType interp_type)
+      : m_interp_type{interp_type} {
+}
+
+
 double CalculateFluxFunctor::operator()(
   const Euclid::XYDataset::XYDataset& model,
   double normalization
 ) const {
-  auto interpolated_model = Euclid::MathUtils::interpolate(model, Euclid::MathUtils::InterpolationType::LINEAR);
+  auto interpolated_model = Euclid::MathUtils::interpolate(model, m_interp_type);
   return Euclid::MathUtils::integrate(*interpolated_model, model.begin()->first, (--model.end())->first)/normalization;
 }
 

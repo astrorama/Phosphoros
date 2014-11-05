@@ -7,11 +7,10 @@
 #ifndef PHZMODELING_CALCULATEFLUXFUNCTOR_H
 #define PHZMODELING_CALCULATEFLUXFUNCTOR_H
 
+#include "MathUtils/interpolation/interpolation.h"
+
 
 namespace Euclid {
-namespace MathUtils {
-  class Function;
-}
 
 namespace XYDataset {
   class XYDataset;
@@ -31,35 +30,8 @@ namespace PhzModeling {
 class CalculateFluxFunctor {
 
 public:
-    /**
-        * @brief Default Constructor
-        */
-  CalculateFluxFunctor() = default;
-
-    /**
-        * @brief Move Constructor
-        */
-  CalculateFluxFunctor(CalculateFluxFunctor&&) = default;
-
-    /**
-        * @brief Move operator
-        */
-  CalculateFluxFunctor& operator=(CalculateFluxFunctor&&) = default;
-
-  /**
-      * @brief Copy Constructor
-    */
-  CalculateFluxFunctor(const CalculateFluxFunctor&) = default;
-
-  /**
-    * @brief Copy operator
-    */
-  CalculateFluxFunctor& operator=(const CalculateFluxFunctor&) = default;
-
-    /**
-        * @brief Destructor
-        */
-    virtual ~CalculateFluxFunctor() = default;
+  
+  CalculateFluxFunctor(MathUtils::InterpolationType interp_type);
 
     /**
         * @brief Function Call Operator
@@ -80,6 +52,10 @@ public:
         const Euclid::XYDataset::XYDataset& model,
         double normalization
         ) const;
+    
+private:
+  
+  MathUtils::InterpolationType m_interp_type;
 
 };
 

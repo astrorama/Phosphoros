@@ -4,7 +4,7 @@
  * @author Florian Dubath
  */
 
-
+#include <future>
 #include "MathUtils/interpolation/interpolation.h"
 
 #include "PhzDataModel/PhzModel.h"
@@ -24,82 +24,87 @@
 namespace Euclid {
 namespace PhzModeling {
 
+template<typename NameIter>
+std::map<XYDataset::QualifiedName, XYDataset::XYDataset> buildMap(
+          XYDataset::XYDatasetProvider& provider, NameIter begin, NameIter end) {
+  std::map<XYDataset::QualifiedName, XYDataset::XYDataset> result {};
+  while (begin != end) {
+    auto dataset_ptr = provider.getDataset(*begin);
+    if (!dataset_ptr) {
+      throw Elements::Exception() << "Failed to find dataset: " << begin->qualifiedName();
+    }
+    result.insert(std::make_pair(*begin, std::move(*dataset_ptr)));
+    ++begin;
+  }
+  return result;
+}
+
+std::map<XYDataset::QualifiedName, std::unique_ptr<Euclid::MathUtils::Function>>
+    convertToFunction(const std::map<XYDataset::QualifiedName, XYDataset::XYDataset>& dataset_map) {
+  std::map<XYDataset::QualifiedName, std::unique_ptr<Euclid::MathUtils::Function>> result {};
+  for (auto& pair : dataset_map) {
+    auto function_ptr = MathUtils::interpolate(pair.second, MathUtils::InterpolationType::LINEAR);
+    result.emplace(pair.first, std::move(function_ptr));
+  }
+  return result;
+}
 
   PhotometryGridCreator::PhotometryGridCreator(
-      PhzDataModel::ModelAxesTuple parameter_space,
-      std::vector<Euclid::XYDataset::QualifiedName> filter_name_list,
-      std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> sed_provider,
-      std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> reddening_curve_provider,
-      std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> filter_provider):
-      m_parameter_space{std::move(parameter_space)},
-      m_filter_name_list{std::move(filter_name_list)},
-      m_sed_provider{std::move(sed_provider)},
-      m_reddening_curve_provider{std::move(reddening_curve_provider)},
-      m_filter_provider(std::move(filter_provider))
-  {
-    buildFilterMap();
-    buildSedMap();
-    buildReddeningCurveMap();
+                std::unique_ptr<XYDataset::XYDatasetProvider> sed_provider,
+                std::unique_ptr<XYDataset::XYDatasetProvider> reddening_curve_provider,
+                std::unique_ptr<XYDataset::XYDatasetProvider> filter_provider)
+        : m_sed_provider{std::move(sed_provider)},
+          m_reddening_curve_provider{std::move(reddening_curve_provider)},
+          m_filter_provider(std::move(filter_provider)) {
   }
 
-  PhzDataModel::PhotometryGrid PhotometryGridCreator::operator()(){
-    // Define the functions based on the Functors
-    auto reddening_function= std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset& ,const Euclid::MathUtils::Function&, double)>(ExtinctionFunctor{});
-    auto redshift_function= std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset& , double)>(RedshiftFunctor{});
-    auto apply_filter_function=std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,const std::pair<double,double>& , const Euclid::MathUtils::Function&)>(ApplyFilterFunctor{});
-    auto flux_function=std::function<double(const Euclid::XYDataset::XYDataset& ,double)>(CalculateFluxFunctor{});
-    PhzModeling::ModelFluxAlgorithm flux_model_algo {apply_filter_function,flux_function};
+  PhzDataModel::PhotometryGrid PhotometryGridCreator::createGrid(
+              const PhzDataModel::ModelAxesTuple& parameter_space,
+              const std::vector<Euclid::XYDataset::QualifiedName>& filter_name_list) {
+    
+    // Create the maps
+    auto filter_map = buildMap(*m_filter_provider, filter_name_list.begin(), filter_name_list.end());
+    auto sed_name_list = std::get<PhzDataModel::ModelParameter::SED>(parameter_space);
+    auto sed_map = buildMap(*m_sed_provider, sed_name_list.begin(), sed_name_list.end());
+    auto reddening_curve_list = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(parameter_space);
+    auto reddening_curve_map = convertToFunction(buildMap(*m_reddening_curve_provider,
+                                              reddening_curve_list.begin(), reddening_curve_list.end()));
+    
+    // Define the functions and the algorithms based on the Functors
+    ModelDatasetGrid::ReddeningFunction reddening_function {ExtinctionFunctor{}};
+    ModelDatasetGrid::RedshiftFunction redshift_function {RedshiftFunctor{}};
+    ModelFluxAlgorithm::ApplyFilterFunction apply_filter_function {ApplyFilterFunctor{}};
+    ModelFluxAlgorithm::CalculateFluxFunction flux_function {CalculateFluxFunctor{MathUtils::InterpolationType::LINEAR}};
+    ModelFluxAlgorithm flux_model_algo {std::move(apply_filter_function), std::move(flux_function)};
+    
     // Create the model grid
-    auto model_grid= PhzModeling::ModelDatasetGrid(m_parameter_space,std::move(m_sed_map),std::move(m_reddening_curve_map),reddening_function,redshift_function);
+    auto model_grid= ModelDatasetGrid(parameter_space, std::move(sed_map),std::move(reddening_curve_map),
+                                      reddening_function, redshift_function);
 
     // Create the photometry Grid
-    auto photometry_grid = PhzDataModel::PhotometryGrid(m_parameter_space);
+    auto photometry_grid = PhzDataModel::PhotometryGrid(parameter_space);
 
     // Define the algo
 
-    Euclid::PhzModeling::PhotometryAlgorithm<Euclid::PhzModeling::ModelFluxAlgorithm> photometry_algo(std::move(flux_model_algo),std::move(m_filter_map),std::move(m_filter_name_list));
+    auto photometry_algo = createPhotometryAlgorithm(std::move(flux_model_algo),std::move(filter_map), filter_name_list);
 
-    // Do the computation
-    photometry_algo(model_grid.begin(),model_grid.end(),photometry_grid.begin());
+    // Here we keep the futures for the threads we start so we can wait for them
+    std::vector<std::future<void>> futures;
+    for (auto& sed : std::get<PhzDataModel::ModelParameter::SED>(parameter_space)) {
+      // We start a new thread to handle this SED
+      auto model_iter = model_grid.begin();
+      model_iter.fixAxisByValue<PhzDataModel::ModelParameter::SED>(sed);
+      auto photometry_iter = photometry_grid.begin();
+      photometry_iter.fixAxisByValue<PhzDataModel::ModelParameter::SED>(sed);
+      
+      futures.push_back(std::async(std::launch::async, photometry_algo, model_iter, model_grid.end(), photometry_iter));
+    }
+    // Wait for all threads to finish
+    for (auto& f : futures) {
+      f.get();
+    }
 
     return std::move(photometry_grid);
-  }
-
-
-  void PhotometryGridCreator::buildFilterMap(){
-    for (auto filter_name:m_filter_name_list){
-
-      auto filter_ptr = m_filter_provider->getDataset(filter_name);
-      if(!filter_ptr){
-        throw  Elements::Exception() << "PhotometryGridCreator:: The filter provider do not contains a filter named :"<<filter_name.qualifiedName();
-      }
-
-      m_filter_map.insert(std::make_pair(filter_name,std::move(*filter_ptr)));
-    }
-  }
-
-  void PhotometryGridCreator::buildSedMap(){
-   for(auto sed_name:std::get<Euclid::PhzDataModel::ModelParameter::SED>(m_parameter_space)){
-     auto sed_ptr = m_sed_provider->getDataset(sed_name);
-     if (!sed_ptr){
-       throw  Elements::Exception() << "PhotometryGridCreator:: The SED provider do not contains a SED named :"<<sed_name.qualifiedName();
-     }
-
-     m_sed_map.insert(std::make_pair(sed_name,std::move(*m_sed_provider->getDataset(sed_name))));
-   }
-  }
-
-  void PhotometryGridCreator::buildReddeningCurveMap(){
-   for(auto reddening_curve_name:std::get<Euclid::PhzDataModel::ModelParameter::REDDENING_CURVE>(m_parameter_space)){
-
-     auto curve_dataset_ptr = m_reddening_curve_provider->getDataset(reddening_curve_name);
-     if (!curve_dataset_ptr){
-           throw  Elements::Exception() << "PhotometryGridCreator:: The Reddening curve provider do not contains a curve named :"<<reddening_curve_name.qualifiedName();
-         }
-     auto function_ptr = Euclid::MathUtils::interpolate(*curve_dataset_ptr, Euclid::MathUtils::InterpolationType::LINEAR);
-
-     m_reddening_curve_map.insert(std::make_pair(reddening_curve_name,std::move(function_ptr)));
-   }
   }
 
 

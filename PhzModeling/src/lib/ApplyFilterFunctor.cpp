@@ -32,22 +32,22 @@ Euclid::XYDataset::XYDataset ApplyFilterFunctor::operator()(
         has_entered_range=true;
         if (!is_first){
           --model_iterator;
-          filtered_values.push_back(std::make_pair(model_iterator->first,0.));
+          filtered_values.emplace_back(model_iterator->first, 0.);
           ++model_iterator;
         }
       }
 
       //after the range get the last point and break
       if (filter_range.second<model_iterator->first){
-        filtered_values.push_back(std::make_pair(model_iterator->first,0.));
+        filtered_values.emplace_back(model_iterator->first, 0.);
         break;
       }
 
       // inside the range
-      filtered_values.push_back(std::make_pair(
+      filtered_values.emplace_back(
           model_iterator->first,
           model_iterator->second*filter(model_iterator->first)
-          ));
+          );
     }
 
     return  Euclid::XYDataset::XYDataset {std::move(filtered_values)};
