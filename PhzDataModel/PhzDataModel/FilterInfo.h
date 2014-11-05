@@ -79,7 +79,7 @@ public:
    * A pair<double,double> containing the filter range
    *
    */
-  const std::pair<double,double>& getRange();
+  const std::pair<double,double>& getRange() const;
 
   /**
    * @brief Filter getter
@@ -88,7 +88,7 @@ public:
    * A MathUtils::Function& which is the filter function
    *
    */
-  const Euclid::MathUtils::Function& getFilter();
+  const Euclid::MathUtils::Function& getFilter() const;
 
   /**
    * @brief Normalization getter
@@ -97,7 +97,7 @@ public:
    * A double which is the filter normalization
    *
    */
-  double getNormalization();
+  double getNormalization() const;
 
 private:
   std::pair<double,double> m_range;
