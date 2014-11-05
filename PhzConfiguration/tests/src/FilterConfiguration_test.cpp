@@ -36,7 +36,7 @@ void removeDir(const std::string& base_dir) {
 }
 
 struct FilterConfiguration_Fixture {
- //commit test zzzz
+
   std::string group { "filter/MER" };
   // Do not forget the "/" at the end of the base directory
   Elements::TempDir temp_dir;
