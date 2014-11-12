@@ -26,30 +26,11 @@ public:
   
   typedef std::function<void(const PhzDataModel::PhotometryGrid&)> OutputFunction;
   
-  static boost::program_options::options_description getProgramOptions() {
-    boost::program_options::options_description options {"Create Photometry Grid options"};
-    
-    options.add_options()
-    ("binary-photometry-grid", boost::program_options::value<std::string>(),
-        "The file to export in binary format the photometry grid");
-    
-    options.add(ParameterSpaceConfiguration::getProgramOptions());
-    options.add(FilterConfiguration::getProgramOptions());
-    
-    return options;
-  }
+  static boost::program_options::options_description getProgramOptions();
   
-  CreatePhotometryGridConfiguration(const std::map<std::string, boost::program_options::variable_value>& options)
-          : ParameterSpaceConfiguration(options), FilterConfiguration(options) {
-    m_options = options;
-  }
+  CreatePhotometryGridConfiguration(const std::map<std::string, boost::program_options::variable_value>& options);
   
-  OutputFunction getOutputFunction() {
-    return [this](const PhzDataModel::PhotometryGrid& grid) {
-      std::ofstream out {m_options["binary-photometry-grid"].as<std::string>()};
-      GridContainer::gridBinaryExport(out, grid);
-    };
-  }
+  OutputFunction getOutputFunction();
   
 private:
   

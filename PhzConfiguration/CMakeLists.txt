@@ -2,12 +2,13 @@ elements_subdir(PhzConfiguration 0.1)
 
 elements_depends_on_subdirs(ElementsKernel)
 elements_depends_on_subdirs(XYDataset)
+elements_depends_on_subdirs(PhzDataModel)
 
 find_package(Boost REQUIRED COMPONENTS program_options serialization)
 
 elements_add_library(PhzConfiguration src/lib/*.cpp
                      LINK_LIBRARIES Boost XYDataset
-                     INCLUDE_DIRS Boost XYDataset
+                     INCLUDE_DIRS Boost XYDataset PhzDataModel
                      PUBLIC_HEADERS PhzConfiguration)
 
 elements_add_unit_test(FilterConfiguration_test tests/src/FilterConfiguration_test.cpp
@@ -24,3 +25,6 @@ elements_add_unit_test(ReddeningConfiguration_test tests/src/ReddeningConfigurat
  
 elements_add_unit_test(ParameterSpaceConfiguration_test tests/src/ParameterSpaceConfiguration_test.cpp
                        LINK_LIBRARIES XYDataset PhzConfiguration TYPE Boost)
+                       
+elements_add_unit_test(CreatePhotometryGridConfiguration_test tests/src/CreatePhotometryGridConfiguration_test.cpp
+                       LINK_LIBRARIES XYDataset PhzDataModel PhzConfiguration TYPE Boost)                       
