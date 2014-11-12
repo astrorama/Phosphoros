@@ -60,7 +60,7 @@ public:
    * The option is:
    *  binary-photometry-grid : string, output filename for storing the grid data
    * @param options
-   * A map containing the options and their value.
+   * A map containing the options and their values.
    *
    */
   CreatePhotometryGridConfiguration(const std::map<std::string, boost::program_options::variable_value>& options);

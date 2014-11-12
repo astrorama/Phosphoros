@@ -10,7 +10,9 @@
 
 #include <map>
 #include <string>
+
 #include <boost/program_options.hpp>
+
 #include "XYDataset/XYDatasetProvider.h"
 #include "PhzConfiguration/SedConfiguration.h"
 #include "PhzConfiguration/RedshiftConfiguration.h"
@@ -26,8 +28,8 @@ namespace PhzConfiguration {
  * RedshiftConfiguration and ReddeningConfiguration classes
  * @details
  * The parameters available are the ones define by the SedConfiguration,
- * RedshiftConfiguration and ReddeningConfiguration classes, so see these classes
- * for more details. the options available are:
+ * RedshiftConfiguration and ReddeningConfiguration classes, so have a look at
+ *  these classes for more details. the options available are:
  * sed-root-path
  * sed-group
  * sed-exclude
@@ -41,7 +43,6 @@ namespace PhzConfiguration {
  * ebv-range
  * ebv-value
  */
-
 class ParameterSpaceConfiguration : public SedConfiguration,
                                     public RedshiftConfiguration,
                                     public ReddeningConfiguration {
@@ -52,7 +53,7 @@ public:
    * @brief
    * Get program options of the ParameterSpaceConfiguration class
    * @return
-   * A boost boost::program_options::options_description type
+   * A boost::program_options::options_description boost type
    */
   static boost::program_options::options_description getProgramOptions()
   {
@@ -68,7 +69,7 @@ public:
   /**
    * @brief Constructor
    * @param options
-   * A map containing the options and their value.
+   * A map containing the options and their values.
    *
    */
   ParameterSpaceConfiguration(const std::map<std::string, boost::program_options::variable_value>& options)

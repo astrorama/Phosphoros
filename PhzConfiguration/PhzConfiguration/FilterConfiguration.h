@@ -55,7 +55,7 @@ public:
    * filter-name      : vector of strings, filter name e.g. filter/MER/vis
    * filter-exclude   : vector of strings, filter name to be excluded
    * @param options
-   * A map containing the options and their value.
+   * A map containing the options and their values.
    *
    */
   FilterConfiguration(const std::map<std::string, boost::program_options::variable_value>& options)
