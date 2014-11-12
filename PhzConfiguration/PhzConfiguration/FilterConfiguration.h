@@ -9,6 +9,7 @@
 
 #include <map>
 #include <string>
+
 #include <boost/program_options.hpp>
 #include "XYDataset/XYDatasetProvider.h"
 
@@ -30,7 +31,6 @@ namespace PhzConfiguration {
  * ElementException: Missing or unknown filter dataset provider options
  * ElementException: Empty filter list
  */
-
 class FilterConfiguration {
   
 public:
