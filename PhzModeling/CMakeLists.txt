@@ -11,7 +11,7 @@ find_package(Boost REQUIRED COMPONENTS serialization)
 #===== Libraries ===============================================================
 elements_add_library(PhzModeling src/lib/*.cpp
                   LINK_LIBRARIES ${CMAKE_DL_LIBS} Boost SourceCatalog XYDataset MathUtils PhzDataModel
-                  INCLUDE_DIRS Boost SourceCatalog XYDataset PhzDataModel GridContainer
+                  INCLUDE_DIRS Boost SourceCatalog XYDataset MathUtils PhzDataModel GridContainer
                   PUBLIC_HEADERS PhzModeling )
 
 #===== Boost tests =============================================================

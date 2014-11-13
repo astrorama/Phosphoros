@@ -31,25 +31,15 @@ public:
      * @brief constructor
      *
      * @details
-     * Instanciate and initialize a PhotometryGridCreator. If the parameter space requires
-     * a SED or a reddening curve that the corresponding provider are unable to returns
-     * an exception will be throw an Euclid Exception. An exception is also throw if the
-     * filter provider cannot provide the requested filters.
+     * Instanciate and initialize a PhotometryGridCreator.
      *
-     * #param parameter_space
-     * A ModelAxesTuple defining the SEDs, the redshifts, the reddening curves and the EVB values
-     * for which the photometry will be computed.
-     *
-     * #param filter_name_list
-     * A vector<QualifiedName> containing the list (and order) of filter for building the photometry.
-     *
-     * #param sed_provider
+     * @param sed_provider
      * A unique_ptr<XYDatasetProvider> allowing to access to the SEDs
      *
-     * #param reddening_curve_provider
+     * @param reddening_curve_provider
      * A unique_ptr<XYDatasetProvider> allowing to access to the Reddening curves
      *
-     * #param filter_provider
+     * @param filter_provider
      * A unique_ptr<XYDatasetProvider> allowing to access to the Filters
      *
      */
@@ -65,18 +55,29 @@ public:
   /**
    * @brief Creates a photometry grid
    * @details
-   * Build a photometry grid.
+   * Build a photometry grid. If the parameter space requires
+   * a SED or a reddening curve that the corresponding provider are unable to returns
+   * an exception will be throw an Euclid Exception. An exception is also throw if the
+   * filter provider cannot provide the requested filters.
+   *
+   * @param parameter_space
+   * A ModelAxesTuple defining the SEDs, the redshifts, the reddening curves and the EVB values
+   * for which the photometry will be computed.
+   *
+   * @param filter_name_list
+   * A vector<QualifiedName> containing the list (and order) of filter for building the photometry.
+   *
    *
    */
   PhzDataModel::PhotometryGrid createGrid(const PhzDataModel::ModelAxesTuple& parameter_space,
               const std::vector<Euclid::XYDataset::QualifiedName>& filter_name_list);
 
 private:
-  
+
   std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> m_sed_provider;
   std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> m_reddening_curve_provider;
   std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> m_filter_provider;
-  
+
 };
 
 }
