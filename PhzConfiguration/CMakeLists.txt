@@ -4,11 +4,9 @@ elements_depends_on_subdirs(ElementsKernel)
 elements_depends_on_subdirs(XYDataset)
 elements_depends_on_subdirs(PhzDataModel)
 
-find_package(Boost REQUIRED COMPONENTS program_options serialization)
-
 elements_add_library(PhzConfiguration src/lib/*.cpp
-                     LINK_LIBRARIES Boost XYDataset
-                     INCLUDE_DIRS Boost XYDataset PhzDataModel
+                     LINK_LIBRARIES  XYDataset PhzDataModel
+                     INCLUDE_DIRS XYDataset PhzDataModel
                      PUBLIC_HEADERS PhzConfiguration)
 
 elements_add_unit_test(FilterConfiguration_test tests/src/FilterConfiguration_test.cpp
