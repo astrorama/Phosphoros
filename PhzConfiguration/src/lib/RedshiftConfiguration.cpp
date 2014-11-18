@@ -27,7 +27,7 @@ po::options_description RedshiftConfiguration::getProgramOptions() {
   po::options_description options {"Photometric redshift option"};
   options.add_options()
    ("z-range", po::value<std::vector<std::string>>(),
-        "Redshift range: min, max, step")
+        "Redshift range: minimum maximum step")
     ("z-value", po::value<std::vector<std::string>>(),
         "A single z value");
   return options;
