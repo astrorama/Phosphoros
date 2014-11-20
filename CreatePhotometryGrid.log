@@ -1,0 +1,27 @@
+2014-11-20T15:58:22CET ElementsProgram  INFO : ##########################################################
+2014-11-20T15:58:22CET ElementsProgram  INFO : ##########################################################
+2014-11-20T15:58:22CET ElementsProgram  INFO : #
+2014-11-20T15:58:22CET ElementsProgram  INFO : #  C++ program:  CreatePhotometryGrid starts 
+2014-11-20T15:58:22CET ElementsProgram  INFO : #
+2014-11-20T15:58:22CET ElementsProgram  INFO : ##########################################################
+2014-11-20T15:58:22CET ElementsProgram  INFO : #
+2014-11-20T15:58:22CET ElementsProgram  INFO : # List of all program options
+2014-11-20T15:58:22CET ElementsProgram  INFO : # ---------------------------
+2014-11-20T15:58:22CET ElementsProgram  INFO : #
+2014-11-20T15:58:22CET ElementsProgram  INFO : binary-photometry-grid = /tmp/CreatePhotometryGrid/photometry_grid.dat
+2014-11-20T15:58:22CET ElementsProgram  INFO : config-file = "/home/nikoapos/ISDC/Projects/Phosphoros/PhzExecutables/conf/PhzExecutables/CreatePhotometryGrid.conf"
+2014-11-20T15:58:22CET ElementsProgram  INFO : ebv-range = { 0 1 1 }
+2014-11-20T15:58:22CET ElementsProgram  INFO : filter-group = { MER }
+2014-11-20T15:58:22CET ElementsProgram  INFO : filter-root-path = /tmp/CreatePhotometryGrid/Filter
+2014-11-20T15:58:22CET ElementsProgram  INFO : log-file = "CreatePhotometryGrid.log"
+2014-11-20T15:58:22CET ElementsProgram  INFO : log-level = 400
+2014-11-20T15:58:22CET ElementsProgram  INFO : reddening-curve-name = { calzetti }
+2014-11-20T15:58:22CET ElementsProgram  INFO : reddening-curve-root-path = /tmp/CreatePhotometryGrid/ExtLaw
+2014-11-20T15:58:22CET ElementsProgram  INFO : sed-group = { Cosmos }
+2014-11-20T15:58:22CET ElementsProgram  INFO : sed-root-path = /tmp/CreatePhotometryGrid/Sed
+2014-11-20T15:58:22CET ElementsProgram  INFO : z-range = { 0 6 1 }
+2014-11-20T15:58:22CET ElementsProgram  INFO : #
+2014-11-20T15:58:22CET CreatePhotometryGrid  INFO : Parsing user arguments
+2014-11-20T15:58:22CET ElementsProgram FATAL : # 
+2014-11-20T15:58:22CET ElementsProgram FATAL : # Elements Exception :  IO error, can not write any file there : %s /tmp/CreatePhotometryGrid/photometry_grid.datfrom option : binary-photometry-grid 
+2014-11-20T15:58:22CET ElementsProgram FATAL : # 
