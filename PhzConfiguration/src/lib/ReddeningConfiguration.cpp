@@ -38,9 +38,9 @@ po::options_description ReddeningConfiguration::getProgramOptions() {
     ("reddening-curve-name", po::value<std::vector<std::string>>(),
         "A single reddening curve name")
     ("ebv-range", po::value<std::vector<std::string>>(),
-        "E(B_V) range: min, max, step")
+        "E(B-V) range: minimum maximum step")
     ("ebv-value", po::value<std::vector<std::string>>(),
-        "A single E(B_V) value");
+        "A single E(B-V) value");
   return options;
 }
 
