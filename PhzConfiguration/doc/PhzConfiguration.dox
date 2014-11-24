@@ -1,0 +1,345 @@
+namespace Euclid {
+namespace PhzConfiguration {
+
+/** \page phzConfiguration PhzConfiguration module
+
+\tableofcontents
+
+The PhzConfiguration module provides classes for manipulating easily the parameter
+options needed for the Phosphoros package. This module consists of six classes
+described below.
+
+This page contains multiple code examples. To improve the readability the 
+following code lines are assumed for each example. 
+
+\code{.cpp}
+  using namespace Euclid::PhzConfiguration;
+  using namespace std;
+\endcode
+
+Note that these lines are used to make the example code more readable and they
+will introduce all the symbols of the PhzConfiguration and std namespaces in the
+global namespace, so they must be sparingly used.
+
+At the bottom of this page there is the entire code of the examples we present
+here.
+
+Note: 
+     To make an easy understanding, all examples are based on the following main 
+     executable code named Test_program: 
+     
+\code {.cpp}
+/*
+ * Test_program.cpp
+ */
+// Necessary include files
+#include <boost/program_options.hpp>
+#include <iostream>
+
+// Define and needed namespace for an easy reading
+namespace po = boost::program_options;
+using namespace Euclid::PhzConfiguration;
+
+// Main program body
+int main(int argc, char* argv[]) {
+ // Code of the classes will be written here 
+}
+\endcode
+
+In all examples presented here we will not repeat this code. \n
+For the need of the examples we assume to have a  \b $HOME/Euclid_data/PhotZAuxData/
+repository with a \b Filter/MER group containing the following filters:
+\code {.cpp}
+Gext_ACSf435w.txt   Iext_ACSf775w.txt   Rext_ACSf606w.txt   Ynir_WFC3f105w.txt
+Hnir_WFC3f160w.txt  Jnir_WFC3f125w.txt  VIS_ACSf814w.txt    Zext_ACSf850lp.txt
+\endcode
+We also assume that we have a reddening curve into \b $HOME/euclid_data/extinction_laws
+repository with a \b reddening/CAL group containing the curve file : calzetti_1.dat
+
+\section phzConfiguration_FilterConfiguration The FilterConfiguration Class
+
+This class defines the filter parameter options as follows:
+
+ - "filter-root-path" : The directory containing the filter datasets, organized in folders
+ - "filter-group"     : Use all the Filters in the given group and subgroups
+ - "filter-exclude"   : Exclude a single filter name
+ - "filter-name"      : Add a single filter name
+
+\subsection FilterConfiguration_getProgramOptions The getProgramOptions Function
+
+This function gets the parameter options available for the FilterConfiguration
+class. Use it as follows:
+  
+\code {.cpp}
+
+  // Get the options
+  auto options = FilterConfiguration::getProgramOptions();
+
+  // This can be used to print them on the screen
+  std::cout <<options << '\n';
+\endcode
+
+The output of this code will be:
+
+\code{.cpp}
+Photometric filter options:
+  --filter-root-path arg The directory containing the Filter datasets, 
+                         organized in folders
+  --filter-group arg     Use all the Filters in the given group and subgroups
+  --filter-exclude arg   Exclude a single filter name
+  --filter-name arg      Add a single filter name
+\endcode
+
+\subsection FilterConfiguration_getFilterList The getFilterList Function
+
+The getFilterList function provides a filter list. 
+First, we need to create a FilterConfiguration object. To do so, we need to
+pass to the constructor a boost variable's map. We create this map as follows:
+
+\code{.cpp}
+  // This can be used to parse the command line parameters to the map
+  po::variables_map variables_map {};
+  po::store(po::parse_command_line(argc, argv, options), variables_map);
+  po::notify(variables_map);
+\endcode
+
+where:
+
+\b argc    : is the number of arguments passed to the program (argc as argument count) \n
+\b argv    : is a one-dimensional array of strings, each string is one of the arguments
+          that was passed to the program (argv as argument vector) \n
+\b options : is the object returned by the getProgramOptions function \n
+\n
+
+Now we are able to create our FilterConfiguration object and use the 
+\b getFilterList function as follows:
+
+\code{.cpp}
+  // This is how we define the object with the variable map
+  FilterConfiguration fconf {variables_map};
+  
+  // Call the getFilterList function and display the filter list
+  std::cout << " The user filters are: " <<std::endl;
+  for (auto& filter : fconf.getFilterList()) {
+    std::cout << filter.qualifiedName() << std::endl;
+  }
+\endcode
+
+Let's imagine you call the Test_program program with the following arguments:
+
+\code{.cpp}
+ > Test_program --filter-root-path="$HOME/Euclid_data/PhotZAuxData/" --filter-group="Filter/MER"
+\endcode
+
+So in our example, the getFilterList call will return all filter qualified names
+present in the filter/MER group as follows:
+
+\code{.cpp}
+Filter/MER/VIS_ACSf814w
+Filter/MER/Jnir_WFC3f125w
+Filter/MER/Gext_ACSf435w
+Filter/MER/Rext_ACSf606w
+Filter/MER/Iext_ACSf775w
+Filter/MER/Ynir_WFC3f105w
+Filter/MER/Hnir_WFC3f160w
+Filter/MER/Zext_ACSf850lp
+\endcode
+
+
+
+\subsection FilterConfiguration_getFilterDatasetProvider The getFilterDatasetProvider Function
+
+This function provides a XYdatasetProvider object. In this example we use the
+\b listContents function of the XYdatasetProvider for displaying the contents 
+of this object:
+
+\code{.cpp}
+  // Call of the getFilterDatasetProvider function
+  auto fdp = fconf.getFilterDatasetProvider();
+  auto vector_fdp = fdp->listContents("Filter/MER");
+  for (auto& element : vector_fdp) {
+    std::cout << "Qualified name: "<< element.qualifiedName() << std::endl;
+  }
+\endcode
+
+The output of the getFilterDatasetProvider function call is:
+
+\code{.cpp}
+Qualified name: Filter/MER/VIS_ACSf814w
+Qualified name: Filter/MER/Jnir_WFC3f125w
+Qualified name: Filter/MER/Gext_ACSf435w
+Qualified name: Filter/MER/Rext_ACSf606w
+Qualified name: Filter/MER/Iext_ACSf775w
+Qualified name: Filter/MER/Ynir_WFC3f105w
+Qualified name: Filter/MER/Hnir_WFC3f160w
+Qualified name: Filter/MER/Zext_ACSf850lp
+\endcode
+
+In this case, the qualify name is the filename without extension.
+
+\section SedConfiguration_SedConfiguration The SedConfiguration Class
+
+This class defines the sed parameter options as follows:
+
+\code{.cpp}
+Photometric sed options:
+  --sed-root-path arg   The directory containing the sed datasets, organized in
+                        folders
+  --sed-group arg       Use all the seds in the given group and subgroups
+  --sed-exclude arg     Exclude a sed name
+  --sed-name arg        A single sed name
+\endcode
+
+The Sedconfiguration class has similar functions as the FilterConfiguration class.
+So we do not describe here these functions, see the FilterConfiguration class.
+
+\section phzConfiguration_RedshiftConfiguration The RedshiftConfiguration Class
+
+This class defines the redshift parameter options as follows:
+
+\code{.cpp}
+Photometric redshift option:
+  --z-range arg         Redshift range: minimum maximum step
+  --z-value arg         A single z value
+\endcode
+
+\subsection RedshiftConfiguration_getProgramOptions The getProgramOptions Function
+
+See the \b getProgramOptions function of the FilterConfiguration class
+
+\subsection RedshiftConfiguration_getZList The getZList Function
+
+This function provides a redshift list as follows:
+
+\code{.cpp}
+  RedshiftConfiguration redconf {variables_map};
+  auto z_list = redconf.getZList();
+  for (auto& z : z_list) {
+      std::cout << z << " ";
+  }
+\endcode
+
+If you call the Tes_program with the following z-range:
+
+\code{.cpp}
+ > Test_program --z-range=" --z-range="0. 2. 0.5"
+\endcode
+
+The ouput is :
+
+\code{.cpp}
+0 0.5 1 1.5 2
+\endcode
+
+\section ReddeningConfiguration_ReddeningConfiguration The ReddeningConfiguration Class
+
+This class defines the Reddening parameter options as follows:
+
+\code{.cpp}
+Photometric reddening options:
+  --reddening-curve-root-path arg The directory containing the reddening curves
+  --reddening-curve-group arg     Use all the reddening curves in the given 
+                                  group and subgroups
+  --reddening-curve-exclude arg   a single name of the reddening curve to be 
+                                  excluded
+  --reddening-curve-name arg      A single reddening curve name
+  --ebv-range arg                 E(B-V) range: minimum maximum step
+  --ebv-value arg                 A single E(B-V) value
+\endcode
+
+\subsection ReddeningConfiguration_getEbvList The getEbvList Function
+
+This function provides an E(B-V) list as a vector. The use of this function
+could be done as follows:
+
+\code{.cpp}
+  ReddeningConfiguration reddconf {variables_map};
+  auto ebv_list = reddconf.getEbvList();
+  for (auto& ebv : ebv_list) {
+      std::cout << ebv << " ";
+  }
+\endcode
+
+If you call the Test_program program with the following arguments:
+
+\code{.cpp}
+ > Test_program --ebv-range="0. 1. 0.1"
+\endcode
+
+The output is:
+
+\code{.cpp}
+0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1 
+\endcode
+
+\subsection ReddeningConfiguration_getReddeningCurveList The getReddeningCurveList Function
+This function gets a list of the reddening curves. The following examples shows
+how to use it:
+\code
+  auto curve_list = reddconf.getReddeningCurveList();
+  for (auto& curve : curve_list) {
+      std::cout << curve.qualifiedName()<< " ";
+  }
+\endcode
+
+If we call the Test_program with the following paramters:
+
+\code
+Test_program --reddening-curve-root-path="$HOME/euclid_data/extinction_laws/" --reddening-curve-group="reddening/CAL"
+\endcode
+
+This example will produce the following ouput:
+\code
+reddening/CAL/calzetti_1
+\endcode
+ 
+\subsection ReddeningConfiguration_getReddeningDatasetProvider The getReddeningDatasetProvider Function
+
+This function provides a XYdatasetProvider object. In the example we use the
+\b listContents function of the XYdatasetProvider for displaying the contents 
+of this object as follows:
+
+\code{.cpp}
+  // Call of the getReddeningDatasetProvider function
+  auto dataset_provider = reddconf.getReddeningDatasetProvider();
+  // Call listContents giving the group name
+  auto vector_rdp = dataset_provider->listContents("reddening/CAL");
+  for (auto& element : vector_rdp) {
+    std::cout << "Qualified name: "<< element.qualifiedName() << std::endl;
+  }
+\endcode
+
+If we call the Test_program with the following paramters:
+
+\code
+Test_program --reddening-curve-root-path="$HOME/euclid_data/extinction_laws/" --reddening-curve-group="reddening/CAL"
+\endcode
+
+This example will produce the following ouput:
+\code
+reddening/CAL/calzetti_1
+\endcode
+
+\section fullcode Full example code
+
+\code{.cpp}
+/*
+ * Test_command_line_options.cpp
+ */
+
+#include <boost/program_options.hpp>
+#include "PhzConfiguration/FilterConfiguration.h"
+#include <iostream>
+
+namespace po = boost::program_options;
+using namespace Euclid::PhzConfiguration;
+
+int main(int argc, char* argv[]) {
+}
+
+\endcode
+
+*/
+
+}
+} // end of namespace Euclid
