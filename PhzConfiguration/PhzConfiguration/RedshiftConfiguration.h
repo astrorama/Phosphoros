@@ -23,26 +23,26 @@ namespace PhzConfiguration {
  * This class defines the redshift parameter options
  * @details
  * The parameters available are:
- * z-range : double type, min max step e.g. "0. 2. 0.5"
+ * - \b z-range : double type, min max step e.g. "0. 2. 0.5"
  *          - min as minimum redshift value
  *          - max as maximum redshift value and max > min
  *          - step, step to be used for the interval
  *  Note that the space character is the separator.
  *  You can add several z-range parameters but they should not overlap. The
  *  following example is not allowed:
- *  z-range = 0. 2. 0.5
- *  z-range = 1.5 3. 1.
- *  as 1.5 is less than 2 of the first range.
- * A regex is applied for z-range: (((\\d+(\\.\\d*)?)|(\\.\\d+))($|\\s+)){3}
+ *  - z-range = 0. 2. 0.5
+ *  - z-range = 1.5 3. 1.
+ *  as 1.5 is less than 2 of the first range. \n
+ * A regex is applied for z-range: `(((\\d+(\\.\\d*)?)|(\\.\\d+))($|\\s+)){3}`
  *
- * z-value : double, redshift value e.g. 4.
+ * - \b z-value : double, redshift value e.g. 4. \n
  * You can add as many z-value parameters as you want but each z-value
- * parameter must contain only one value.
- * A regex is applied for z-value : ((\\d+(\\.\\d*)?)|(\\.\\d+))($|\\s+)
- * @throw
- * ElementException: Invalid range(s) for the z-range option!
- * ElementException: Invalid character(s) for the z-range option
- * ElementException: Invalid character(s) for the z-value option
+ * parameter must contain only one value.\n
+ * A regex is applied for z-value : `((\\d+(\\.\\d*)?)|(\\.\\d+))($|\\s+)`
+ * @throw Element::Exception
+ * - Invalid range(s) for the z-range option!
+ * - Invalid character(s) for the z-range option
+ * - Invalid character(s) for the z-value option
  */
 
 class RedshiftConfiguration {
@@ -64,10 +64,10 @@ public:
    *
    * @details
    * The redshift options are:
-   * z-range     : string, minimum z, maximum z, z step e.g. 0 2 0.1
-   * z-value     : string, a single value e.g. 1.5
+   * - \b z-range     : string, minimum z, maximum z, z step e.g. 0 2 0.1
+   * - \b z-value     : string, a single value e.g. 1.5
    * @param options
-   * A map containing the options and their value.
+   * A map containing the options and their values.
    *
    */
   RedshiftConfiguration(const std::map<std::string, boost::program_options::variable_value>& options)
@@ -78,19 +78,19 @@ public:
    * @brief
    * This function provides a redshift list
    * @details
-   * @throw ElementException
-   * Missing  <filter-root-path> or unknown filter dataset provider options
-   * ElementException: Invalid range(s) for the z-range option!
-   * ElementException: Invalid character(s) for the z-range option
-   * ElementException: Invalid character(s) for the z-value option
-   *  Empty filter list
+   * @throw Element::Exception
+   * - Missing  <filter-root-path> or unknown filter dataset provider options
+   * - Invalid range(s) for the z-range option!
+   * - Invalid character(s) for the z-range option
+   * - Invalid character(s) for the z-value option
+   * - Empty filter list
    * @return
    * A vector of QualifiedName type
    */
    std::vector<double> getZList();
 
 private:
-  /// Map containing all the filter options and their value
+  /// Map containing all the filter options and their values
   std::map<std::string, boost::program_options::variable_value> m_options;
 
 };

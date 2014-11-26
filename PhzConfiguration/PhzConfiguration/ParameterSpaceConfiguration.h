@@ -27,21 +27,21 @@ namespace PhzConfiguration {
  * This class combines the parameter options of the SedConfiguration,
  * RedshiftConfiguration and ReddeningConfiguration classes
  * @details
- * The parameters available are the ones define by the SedConfiguration,
+ * The parameters available are the ones defined by the SedConfiguration,
  * RedshiftConfiguration and ReddeningConfiguration classes, so have a look at
- *  these classes for more details. the options available are:
- * sed-root-path
- * sed-group
- * sed-exclude
- * sed-name
- * z-range
- * z-value
- * reddening-curve-root-path
- * reddening-curve-group
- * reddening-curve-exclude
- * reddening-curve-name
- * ebv-range
- * ebv-value
+ *  these classes for more details. The options available are:
+ * - sed-root-path
+ * - sed-group
+ * - sed-exclude
+ * - sed-name
+ * - z-range
+ * - z-value
+ * - reddening-curve-root-path
+ * - reddening-curve-group
+ * - reddening-curve-exclude
+ * - reddening-curve-name
+ * - ebv-range
+ * - ebv-value
  */
 class ParameterSpaceConfiguration : public SedConfiguration,
                                     public RedshiftConfiguration,

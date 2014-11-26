@@ -23,14 +23,14 @@ namespace PhzConfiguration {
  * This class defines the sed parameter options
  * @details
  * The parameters available are:
- * sed-root-path : string root path to the seds
+ * - \b sed-root-path : string root path to the seds
  * The three following parameters can be used multiple times
- * sed-group     : string a sed group(only one) e.g. sed/MER
- * sed-name      : string a sed name (only one) e.g. MER/vis
- * sed-exclude   : string a sed name to be excluded (only one)
- * @throw
- * ElementException: Missing or unknown sed dataset provider options
- * ElementException: Empty sed list
+ * - \b sed-group     : string a sed group(only one) e.g. sed/MER
+ * - \b sed-name      : string a sed name (only one) e.g. MER/vis
+ * - \b sed-exclude   : string a sed name to be excluded (only one)
+ * @throw Element::Exception
+ * - Missing or unknown sed dataset provider options
+ * - Empty sed list
  */
 
 class SedConfiguration {
@@ -52,12 +52,12 @@ public:
    *
    * @details
    * The sed options are:
-   * sed-root-path : string, the root path of the seds
-   * sed-group     : vector of strings, goup name   e.g. sed/MER
-   * sed-name      : vector of strings, sed name e.g. sed/MER/vis
-   * sed-exclude   : vector of strings, sed name to be excluded
+   * - sed-root-path : string, the root path of the seds
+   * - sed-group     : vector of strings, goup name   e.g. sed/MER
+   * - sed-name      : vector of strings, sed name e.g. sed/MER/vis
+   * - sed-exclude   : vector of strings, sed name to be excluded
    * @param options
-   * A map containing the options and their value.
+   * A map containing the options and their values
    *
    */
   SedConfiguration(const std::map<std::string, boost::program_options::variable_value>& options)
@@ -67,8 +67,8 @@ public:
    * @brief
    * This function provides a XYdatasetProvider object
    * @details
-   * @throw ElementException
-   * Missing  <sed-root-path> or unknown sed dataset provider options
+   * @throw Element::Exception
+   * - Missing  <sed-root-path> or unknown sed dataset provider options
    * @return
    * A unique boost::program_optionsinter of XYDatasetProvider type
    */
@@ -78,17 +78,16 @@ public:
    * @brief
    * This function provides a sed list
    * @details
-   * @throw ElementException
-   * Missing  <sed-root-path> or unknown sed dataset provider options
-   * @throw ElementException
-   *  Empty sed list
+   * @throw Element::Exception
+   * - Missing  <sed-root-path> or unknown sed dataset provider options
+   * - Empty sed list
    * @return
    * A vector of QualifiedName type
    */
   std::vector<XYDataset::QualifiedName> getSedList();
 
 private:
-  /// Map containing all the sed options and their value
+  /// Map containing all the sed options and their values
   std::map<std::string, boost::program_options::variable_value> m_options;
 
 };

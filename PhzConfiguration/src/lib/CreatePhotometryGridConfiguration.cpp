@@ -50,7 +50,7 @@ po::options_description CreatePhotometryGridConfiguration::getProgramOptions() {
 
   options.add_options()
   ("binary-photometry-grid", boost::program_options::value<std::string>(),
-      "The file to export in binary format the photometry grid");
+      "The filename of the file to export in binary format the photometry grid");
 
   options.add(ParameterSpaceConfiguration::getProgramOptions());
   options.add(FilterConfiguration::getProgramOptions());

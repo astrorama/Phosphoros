@@ -86,7 +86,7 @@ public:
   std::vector<XYDataset::QualifiedName> getFilterList();
   
 private:
-  /// Map containing all the filter options and their value
+  /// Map containing all the filter options and their values
   std::map<std::string, boost::program_options::variable_value> m_options;
   
 };

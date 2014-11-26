@@ -21,8 +21,8 @@ Note that these lines are used to make the example code more readable and they
 will introduce all the symbols of the PhzConfiguration and std namespaces in the
 global namespace, so they must be sparingly used.
 
-At the bottom of this page there is the entire code of the examples we present
-here.
+At the bottom of this page there are several program codes of the examples we 
+present here.
 
 Note: 
      To make an easy understanding, all examples are based on the following main 
@@ -46,24 +46,35 @@ int main(int argc, char* argv[]) {
 }
 \endcode
 
-In all examples presented here we will not repeat this code. \n
-For the need of the examples we assume to have a  \b $HOME/Euclid_data/PhotZAuxData/
-repository with a \b Filter/MER group containing the following filters:
+In all examples presented in this document we will not repeat this code. \n
+For the need of the examples we assume to have : \n 
+- \b $HOME/Euclid_data/PhotZAuxData/ --> a repository for auxiliary data \n
+- \b Filter/MER --> a directory which is a \b group containing the filters files
+
+Below are the filters we supposed to have under the \b 
+$HOME/Euclid_data/PhotZAuxData/Filter/MER group:
+
 \code {.cpp}
 Gext_ACSf435w.txt   Iext_ACSf775w.txt   Rext_ACSf606w.txt   Ynir_WFC3f105w.txt
 Hnir_WFC3f160w.txt  Jnir_WFC3f125w.txt  VIS_ACSf814w.txt    Zext_ACSf850lp.txt
 \endcode
-We also assume that we have a reddening curve into \b $HOME/euclid_data/extinction_laws
-repository with a \b reddening/CAL group containing the curve file : calzetti_1.dat
+
+We also assume that we have the following:
+
+- \b $HOME/euclid_data/extinction_laws --> the repository of the reddening curves
+- \b reddening/CAL --> a group containing the \b calzetti_1.dat reddening curve file
 
 \section phzConfiguration_FilterConfiguration The FilterConfiguration Class
 
 This class defines the filter parameter options as follows:
-
- - "filter-root-path" : The directory containing the filter datasets, organized in folders
- - "filter-group"     : Use all the Filters in the given group and subgroups
- - "filter-exclude"   : Exclude a single filter name
- - "filter-name"      : Add a single filter name
+\code{.cpp}
+Photometric filter options:
+  --filter-root-path arg The directory containing the Filter datasets, 
+                         organized in folders
+  --filter-group arg     Use all the Filters in the given group and subgroups
+  --filter-exclude arg   Exclude a single filter name
+  --filter-name arg      Add a single filter name
+\endcode
 
 \subsection FilterConfiguration_getProgramOptions The getProgramOptions Function
 
@@ -320,25 +331,686 @@ This example will produce the following ouput:
 reddening/CAL/calzetti_1
 \endcode
 
-\section fullcode Full example code
+\section ParameterSpaceConfiguration_ParameterSpaceConfiguration The ParameterSpaceConfiguration Class
+
+This class combines the parameter options of the SedConfiguration, 
+RedshiftConfiguration and the ReddeningConfiguration classes. It means all the 
+options available are the following:
+\code{.cpp}
+Photometric combined options:
+
+Photometric sed options:
+  --sed-root-path arg              The directory containing the sed datasets, 
+                                   organized in folders
+  --sed-group arg                  Use all the seds in the given group and 
+                                   subgroups
+  --sed-exclude arg                Exclude a sed name
+  --sed-name arg                   A single sed name
+
+Photometric redshift option:
+  --z-range arg                    Redshift range: minimum maximum step
+  --z-value arg                    A single z value
+
+Photometric reddening options:
+  --reddening-curve-root-path arg  The directory containing the reddening 
+                                   curves
+  --reddening-curve-group arg      Use all the reddening curves in the given 
+                                   group and subgroups
+  --reddening-curve-exclude arg    a single name of the reddening curve to be 
+                                   excluded
+  --reddening-curve-name arg       A single reddening curve name
+  --ebv-range arg                  E(B-V) range: minimum maximum step
+  --ebv-value arg                  A single E(B-V) value
+\endcode
+
+\subsection ParameterSpaceConfiguration_getProgramOptions The getProgramOptions Function
+
+This function is similar to the getProgramOptions functions already shown. To
+use it proceed as follows:
+
+\code{.cpp}
+  auto option_desc = Euclid::PhzConfiguration::ParameterSpaceConfiguration::getProgramOptions();
+  for(auto option : option_desc.options()) {
+    std::cout<<"ParameterSpaceConfiguration option name : " << option->long_name() <<std::endl;
+  }
+\endcode 
+
+This code will produce the following outputs adn shows you the available option 
+for this class:
+
+\code{.cpp}
+ParameterSpaceConfiguration option name : sed-root-path
+ParameterSpaceConfiguration option name : sed-group
+ParameterSpaceConfiguration option name : sed-exclude
+ParameterSpaceConfiguration option name : sed-name
+ParameterSpaceConfiguration option name : z-range
+ParameterSpaceConfiguration option name : z-value
+ParameterSpaceConfiguration option name : reddening-curve-root-path
+ParameterSpaceConfiguration option name : reddening-curve-group
+ParameterSpaceConfiguration option name : reddening-curve-exclude
+ParameterSpaceConfiguration option name : reddening-curve-name
+ParameterSpaceConfiguration option name : ebv-range
+ParameterSpaceConfiguration option name : ebv-value
+\endcode
+
+\section CreatePhotometryGridConfiguration_CreatePhotometryGridConfiguration The CreatePhotometryGridConfiguration Class
+
+This class defines the Photometry Grid parameter option, \b binary-photometry-grid
+and inherits from the one of ParameterSpaceConfiguration and FilterConfiguration
+options. It also provides a function for writing a grid in a binary file.
+The options available for this class are:
+
+\code{.cpp}
+Create Photometry Grid options:
+  --binary-photometry-grid arg      The filename of the file to export in 
+                                    binary format the photometry grid
+
+Photometric combined options:
+
+Photometric sed options:
+  --sed-root-path arg               The directory containing the sed datasets, 
+                                    organized in folders
+  --sed-group arg                   Use all the seds in the given group and 
+                                    subgroups
+  --sed-exclude arg                 Exclude a sed name
+  --sed-name arg                    A single sed name
+
+Photometric redshift option:
+  --z-range arg                     Redshift range: minimum maximum step
+  --z-value arg                     A single z value
+
+Photometric reddening options:
+  --reddening-curve-root-path arg   The directory containing the reddening 
+                                    curves
+  --reddening-curve-group arg       Use all the reddening curves in the given 
+                                    group and subgroups
+  --reddening-curve-exclude arg     a single name of the reddening curve to be 
+                                    excluded
+  --reddening-curve-name arg        A single reddening curve name
+  --ebv-range arg                   E(B-V) range: minimum maximum step
+  --ebv-value arg                   A single E(B-V) value
+
+Photometric filter options:
+  --filter-root-path arg            The directory containing the Filter 
+                                    datasets, organized in folders
+  --filter-group arg                Use all the Filters in the given group and 
+                                    subgroups
+  --filter-exclude arg              Exclude a single filter name
+  --filter-name arg                 Add a single filter name
+
+\endcode
+
+Of course, most of these options comes from the inheritance. Note the new option: 
+\b binary-photometry-grid.
+
+\subsection CreatePhotometryGridConfiguration_getProgramOptions The getProgramOptions Function
+
+This function is similar to the getProgramOptions functions already shown. 
+To use it proceed as follows:
+
+\code{.cpp}
+  auto cpgc_option_desc = Euclid::PhzConfiguration::CreatePhotometryGridConfiguration::getProgramOptions();
+  for(auto option : cpgc_option_desc.options()) {
+    std::cout<<"CreatePhotometryGridConfiguration option name : " << option->long_name() <<std::endl;
+  }
+\endcode
+
+This code displays all available options for this class:
+
+\code{.cpp}
+CreatePhotometryGridConfiguration option name : binary-photometry-grid
+CreatePhotometryGridConfiguration option name : sed-root-path
+CreatePhotometryGridConfiguration option name : sed-group
+CreatePhotometryGridConfiguration option name : sed-exclude
+CreatePhotometryGridConfiguration option name : sed-name
+CreatePhotometryGridConfiguration option name : z-range
+CreatePhotometryGridConfiguration option name : z-value
+CreatePhotometryGridConfiguration option name : reddening-curve-root-path
+CreatePhotometryGridConfiguration option name : reddening-curve-group
+CreatePhotometryGridConfiguration option name : reddening-curve-exclude
+CreatePhotometryGridConfiguration option name : reddening-curve-name
+CreatePhotometryGridConfiguration option name : ebv-range
+CreatePhotometryGridConfiguration option name : ebv-value
+CreatePhotometryGridConfiguration option name : filter-root-path
+CreatePhotometryGridConfiguration option name : filter-group
+CreatePhotometryGridConfiguration option name : filter-exclude
+CreatePhotometryGridConfiguration option name : filter-name
+\endcode
+
+\subsection CreatePhotometryGridConfiguration_getOutputFunction The getOutputFunction Function
+
+This function provides a function of PhzDataModel::PhotometryGrid object and 
+stores this object in a binary file with the filename and path provided by the
+ \b binary-photometry-grid option.
+In the example below we create a photometry object and we store it using the 
+\b getOutputFunction function.
+\code
+  // All the necessary stuff for creating the grid object
+  std::vector<double> zs{0.0,0.1};
+  std::vector<double> ebvs{0.0,0.001};
+  std::vector<Euclid::XYDataset::QualifiedName> reddeing_curves{{"reddeningCurves/Curve1"}};
+  std::vector<Euclid::XYDataset::QualifiedName> seds{{"sed/Curve1"}};
+
+  std::shared_ptr<std::vector<std::string>> filter_1 = std::shared_ptr<std::vector<std::string>>(new std::vector<std::string>{"filtre1","filter2"});
+  std::shared_ptr<std::vector<std::string>> filter_2 = std::shared_ptr<std::vector<std::string>>(new std::vector<std::string>{"filtre1","filter2","filter3"});
+  std::shared_ptr<std::vector<std::string>> filter_3 = std::shared_ptr<std::vector<std::string>>(new std::vector<std::string>{"filtre1","filter3"});
+
+  std::vector<Euclid::SourceCatalog::FluxErrorPair> values_1{{1.1,2.1},{3.1,4.1}};
+  std::vector<Euclid::SourceCatalog::FluxErrorPair> values_2{{1.2,2.2},{3.2,4.2}};
+  std::vector<Euclid::SourceCatalog::FluxErrorPair> values_3{{1.3,2.3},{3.3,4.3}};
+  std::vector<Euclid::SourceCatalog::FluxErrorPair> values_4{{1.4,2.4},{3.4,4.4}};
+
+  Euclid::SourceCatalog::Photometry photometry_1{filter_1,values_1};
+  Euclid::SourceCatalog::Photometry photometry_2{filter_1,values_2};
+  Euclid::SourceCatalog::Photometry photometry_3{filter_1,values_3};
+  Euclid::SourceCatalog::Photometry photometry_4{filter_1,values_4};
+
+  // Output file name
+  std::string path_filename ="/tmp/test_writing_binary_file.dat";
+
+  // Create the option map
+  std::map<std::string, po::variable_value> options_map;
+  options_map["binary-photometry-grid"].value() = boost::any(path_filename);
+
+  // Create the CreatePhotometryGridConfiguration object
+  Euclid::PhzConfiguration::CreatePhotometryGridConfiguration cpgc(options_map);
+
+  // Get the output function
+  auto output_func = cpgc.getOutputFunction();
+
+  // Create the photomotry grid
+  auto axes=Euclid::PhzDataModel::createAxesTuple(zs,ebvs,reddeing_curves,seds);
+  Euclid::PhzDataModel::PhotometryGrid original_grid{axes};
+  original_grid(0,0,0,0)=photometry_1;
+  original_grid(1,0,0,0)=photometry_2;
+  original_grid(0,1,0,0)=photometry_3;
+  original_grid(1,1,0,0)=photometry_4;
+
+  // Store the grid in a binary file
+  output_func(original_grid);
+  
+\endcode
+
+\section fullcode Full Example Code
+
+\subsection fullcode_FilterConfiguration Code for the FilterConfiguration Class
+
+The \b Test_filter_class program just describes the FilterConfiguration class. 
+it supposed that you call it as follows:
+
+\code{.cpp}
+> Test_filter_class  --filter-root-path="$HOME/Euclid_data/PhotZAuxData/" --filter-group="Filter/MER"
+\endcode
+
+The example code:
 
 \code{.cpp}
 /*
- * Test_command_line_options.cpp
+ * Test_filter_class.cpp
+ *
+ *  Created on: Nov 25, 2014
+ *      Author: Nicolas Morisset
  */
 
+#include <iostream>
 #include <boost/program_options.hpp>
 #include "PhzConfiguration/FilterConfiguration.h"
-#include <iostream>
 
 namespace po = boost::program_options;
 using namespace Euclid::PhzConfiguration;
 
 int main(int argc, char* argv[]) {
+
+  // Get the options
+  auto filter_options          = FilterConfiguration::getProgramOptions();
+
+  // Print the options
+  std::cout << " " << std::endl;
+  std::cout << " ---> Filter Options " << std::endl;
+  std::cout << " " << std::endl;
+  std::cout << filter_options << std::endl;
+
+  // This can be used to parse the command line parameters to the map
+  po::variables_map filter_map {};
+  po::store(po::parse_command_line(argc, argv, filter_options), filter_map);
+  po::notify(filter_map);
+
+  // This is how we use the map with the user options
+  FilterConfiguration fconf {filter_map};
+  std::cout << " ---> Result of the FilterConfiguration::getFilterList function "<<std::endl;
+  std::cout << " " << std::endl;
+  for (auto& filter : fconf.getFilterList()) {
+    std::cout << "      Qualified Name : "<< filter.qualifiedName() << std::endl;
+  }
+  std::cout << " " << std::endl;
+  std::cout << " ---> Result of the FilterConfiguration::getFilterDatasetProvider function "<<std::endl;
+  std::cout << " " << std::endl;
+
+  // Call of the getFilterDatasetProvider function
+  auto fdp = fconf.getFilterDatasetProvider();
+  auto vector_fdp = fdp->listContents("Filter/MER");
+  for (auto& element : vector_fdp) {
+    std::cout << "      Qualified name: "<< element.qualifiedName() << std::endl;
+  }
+}
+
+
+\endcode
+
+The outputs of this code:
+
+\code{.cpp}
+ ---> Filter Options 
+ 
+Photometric filter options:
+  --filter-root-path arg The directory containing the Filter datasets, 
+                         organized in folders
+  --filter-group arg     Use all the Filters in the given group and subgroups
+  --filter-exclude arg   Exclude a single filter name
+  --filter-name arg      Add a single filter name
+
+ ---> Result of the FilterConfiguration::getFilterList function 
+ 
+      Qualified Name : Filter/MER/VIS_ACSf814w
+      Qualified Name : Filter/MER/Jnir_WFC3f125w
+      Qualified Name : Filter/MER/Gext_ACSf435w
+      Qualified Name : Filter/MER/Rext_ACSf606w
+      Qualified Name : Filter/MER/Iext_ACSf775w
+      Qualified Name : Filter/MER/Ynir_WFC3f105w
+      Qualified Name : Filter/MER/Hnir_WFC3f160w
+      Qualified Name : Filter/MER/Zext_ACSf850lp
+ 
+ ---> Result of the FilterConfiguration::getFilterDatasetProvider function 
+ 
+      Qualified name: Filter/MER/VIS_ACSf814w
+      Qualified name: Filter/MER/Jnir_WFC3f125w
+      Qualified name: Filter/MER/Gext_ACSf435w
+      Qualified name: Filter/MER/Rext_ACSf606w
+      Qualified name: Filter/MER/Iext_ACSf775w
+      Qualified name: Filter/MER/Ynir_WFC3f105w
+      Qualified name: Filter/MER/Hnir_WFC3f160w
+      Qualified name: Filter/MER/Zext_ACSf850lp
+      
+\endcode
+
+\subsection fullcode_RedshiftConfiguration Code for the RedshiftConfiguration Class
+
+The \b Test_redshift_class program just describes the RedshiftConfiguration class. 
+it supposed that you call it as follows:
+
+\code{.cpp}
+> Test_redshift_class --z-range="0 2. 0.5" --z-value="2.2"
+\endcode
+
+The example code:
+
+\code{.cpp}
+/*
+ * Test_redshift_class.cpp
+ */
+
+#include <iostream>
+#include <boost/program_options.hpp>
+#include "PhzConfiguration/RedshiftConfiguration.h"
+
+namespace po = boost::program_options;
+using namespace Euclid::PhzConfiguration;
+
+int main(int argc, char* argv[]) {
+
+  // Get the options
+  auto options = RedshiftConfiguration::getProgramOptions();
+
+  // Print the options
+  std::cout << " " << std::endl;
+  std::cout << options << std::endl;
+
+  // This can be used to parse the command line parameters to the map
+  po::variables_map variable_map {};
+  po::store(po::parse_command_line(argc, argv, options), variable_map);
+  po::notify(variable_map);
+
+  // This is how we use the map with the user options
+  std::cout << " ---> Result of the RedshiftConfiguration::getZList function " << std::endl;
+  std::cout << " " << std::endl;
+
+  // Call of the getZList function
+  RedshiftConfiguration redshiftConf {variable_map};
+  auto z_list = redshiftConf.getZList();
+  for (auto& z : z_list) {
+      std::cout << "     z : " << z << " ";
+  }
+  std::cout << " " << std::endl;
 }
 
 \endcode
 
+The outputs of this code:
+
+\code{.cpp}
+ Photometric redshift option:
+  --z-range arg         Redshift range: minimum maximum step
+  --z-value arg         A single z value
+
+ ---> Result of the RedshiftConfiguration::getZList function 
+ 
+     z : 0      z : 0.5      z : 1      z : 1.5      z : 2      z : 2.2  
+\endcode
+
+
+\subsection fullcode_ReddeningConfiguration Code for the ReddeningConfiguration Class
+
+The \b Test_reddening_class program just describes the ReddeningConfiguration class. 
+it supposed that you call it as follows:
+
+\code{.cpp}
+Test_reddening_class --ebv-range="0. 1. 0.1" --reddening-curve-root-path="$HOME/euclid_data/extinction_laws/" --reddening-curve-group="reddening/CAL"
+\endcode
+
+The example code:
+
+\code{.cpp}
+/*
+ * Test_reddening_class.cpp
+ *
+ */
+
+#include <iostream>
+#include <boost/program_options.hpp>
+#include "PhzConfiguration/ReddeningConfiguration.h"
+
+namespace po = boost::program_options;
+using namespace Euclid::PhzConfiguration;
+
+int main(int argc, char* argv[]) {
+
+  // Get the options
+  auto options = ReddeningConfiguration::getProgramOptions();
+
+  // Print the options
+  std::cout << " " << std::endl;
+  std::cout << options << std::endl;
+
+  // This can be used to parse the command line parameters to the map
+  po::variables_map variable_map {};
+  po::store(po::parse_command_line(argc, argv, options), variable_map);
+  po::notify(variable_map);
+
+  std::cout << " ---> Result of the ReddeningConfiguration::getEbvList function " << std::endl;
+
+  // Call of the getEbvList function
+  ReddeningConfiguration reddeningConf {variable_map};
+  auto ebv_list = reddeningConf.getEbvList();
+  for (auto& ebv : ebv_list) {
+      std::cout <<"      "<< ebv << " ";
+  }
+  std::cout << "\n";
+
+  std::cout << " ---> Result of the ReddeningConfiguration::getReddeningCurveList function " << std::endl;
+
+  // Call the getReddeningCurveList function
+  auto curve_list = reddeningConf.getReddeningCurveList();
+  for (auto& curve : curve_list) {
+      std::cout << "      Qualified name : "<< curve.qualifiedName() << " ";
+  }
+
+  std::cout << " " << std::endl;
+  std::cout << " ---> Result of the ReddeningConfiguration::getReddeningDatasetProvider function " << std::endl;
+
+  // Call of the getReddeningDatasetProvider function
+  auto dataset_provider = reddeningConf.getReddeningDatasetProvider();
+  auto vector_rdp = dataset_provider->listContents("reddening/CAL");
+  for (auto& element : vector_rdp) {
+    std::cout << "      Qualified name : "<< element.qualifiedName() << std::endl;
+  }
+  std::cout << " " << std::endl;
+}
+
+\endcode
+
+The outputs of this code:
+
+\code{.cpp}
+  
+Photometric reddening options:
+  --reddening-curve-root-path arg The directory containing the reddening curves
+  --reddening-curve-group arg     Use all the reddening curves in the given 
+                                  group and subgroups
+  --reddening-curve-exclude arg   a single name of the reddening curve to be 
+                                  excluded
+  --reddening-curve-name arg      A single reddening curve name
+  --ebv-range arg                 E(B-V) range: minimum maximum step
+  --ebv-value arg                 A single E(B-V) value
+
+ ---> Result of the ReddeningConfiguration::getEbvList function 
+      0       0.1       0.2       0.3       0.4       0.5       0.6       0.7       0.8       0.9       1 
+ ---> Result of the ReddeningConfiguration::getReddeningCurveList function 
+      Qualified name : reddening/CAL/calzetti_1  
+ ---> Result of the ReddeningConfiguration::getReddeningDatasetProvider function 
+      Qualified name : reddening/CAL/calzetti_1
+ 
+\endcode
+
+\subsection fullcode_CreatePhotometryGridConfiguration Code for the CreatePhotometryGridConfiguration Class
+
+The \b Test_photometrygrid_class program just describes the CreatePhotometryGridConfiguration class. 
+it supposed that you call it as follows:
+
+\code{.cpp}
+Test_photometrygrid_class --binary-photometry-grid="/tmp/test_writing_binary_file.dat"
+\endcode
+
+The example code:
+
+\code{.cpp}
+/*
+ * Test_photometrygrid_class.cpp
+ *
+ */
+
+#include <iostream>
+#include <boost/program_options.hpp>
+#include "PhzConfiguration/CreatePhotometryGridConfiguration.h"
+
+namespace po = boost::program_options;
+using namespace Euclid::PhzConfiguration;
+
+int main(int argc, char* argv[]) {
+
+  // Get the options
+  auto options = CreatePhotometryGridConfiguration::getProgramOptions();
+
+  // Print the options
+  std::cout << " " << std::endl;
+  std::cout << options << std::endl;
+
+  // This can be used to parse the command line parameters to the map
+  po::variables_map variable_map {};
+  po::store(po::parse_command_line(argc, argv, options), variable_map);
+  po::notify(variable_map);
+
+  // Set up the grid object
+  std::vector<double> zs{0.0,0.1};
+  std::vector<double> ebvs{0.0,0.001};
+  std::vector<Euclid::XYDataset::QualifiedName> reddeing_curves{{"reddeningCurves/Curve1"}};
+  std::vector<Euclid::XYDataset::QualifiedName> seds{{"sed/Curve1"}};
+
+  std::shared_ptr<std::vector<std::string>> filter_1 = std::shared_ptr<std::vector<std::string>>(new std::vector<std::string>{"filtre1","filter2"});
+  std::shared_ptr<std::vector<std::string>> filter_2 = std::shared_ptr<std::vector<std::string>>(new std::vector<std::string>{"filtre1","filter2","filter3"});
+  std::shared_ptr<std::vector<std::string>> filter_3 = std::shared_ptr<std::vector<std::string>>(new std::vector<std::string>{"filtre1","filter3"});
+  std::vector<Euclid::SourceCatalog::FluxErrorPair> values_1{{1.1,2.1},{3.1,4.1}};
+  std::vector<Euclid::SourceCatalog::FluxErrorPair> values_2{{1.2,2.2},{3.2,4.2}};
+  std::vector<Euclid::SourceCatalog::FluxErrorPair> values_3{{1.3,2.3},{3.3,4.3}};
+  std::vector<Euclid::SourceCatalog::FluxErrorPair> values_4{{1.4,2.4},{3.4,4.4}};
+
+  Euclid::SourceCatalog::Photometry photometry_1{filter_1,values_1};
+  Euclid::SourceCatalog::Photometry photometry_2{filter_1,values_2};
+  Euclid::SourceCatalog::Photometry photometry_3{filter_1,values_3};
+  Euclid::SourceCatalog::Photometry photometry_4{filter_1,values_4};
+
+  // Create the photomotry grid
+  auto axes=Euclid::PhzDataModel::createAxesTuple(zs,ebvs,reddeing_curves,seds);
+  Euclid::PhzDataModel::PhotometryGrid original_grid{axes};
+  original_grid(0,0,0,0)=photometry_1;
+  original_grid(1,0,0,0)=photometry_2;
+  original_grid(0,1,0,0)=photometry_3;
+  original_grid(1,1,0,0)=photometry_4;
+
+  // Create the CreatePhotometryGridConfiguration object
+  CreatePhotometryGridConfiguration cpgc(variable_map);
+
+  // Get the output function
+  auto output_func = cpgc.getOutputFunction();
+
+  // Store the grid in a binary file
+  output_func(original_grid);
+}
+
+
+\endcode
+
+The outputs of this code shows only the options but you should have a binary 
+file created under : /tmp/test_writing_binary_file.dat 
+
+\code{.cpp}
+Create Photometry Grid options:
+  --binary-photometry-grid arg      The filename of the file to export in 
+                                    binary format the photometry grid
+
+Photometric combined options:
+
+Photometric sed options:
+  --sed-root-path arg               The directory containing the sed datasets, 
+                                    organized in folders
+  --sed-group arg                   Use all the seds in the given group and 
+                                    subgroups
+  --sed-exclude arg                 Exclude a sed name
+  --sed-name arg                    A single sed name
+
+Photometric redshift option:
+  --z-range arg                     Redshift range: minimum maximum step
+  --z-value arg                     A single z value
+
+Photometric reddening options:
+  --reddening-curve-root-path arg   The directory containing the reddening 
+                                    curves
+  --reddening-curve-group arg       Use all the reddening curves in the given 
+                                    group and subgroups
+  --reddening-curve-exclude arg     a single name of the reddening curve to be 
+                                    excluded
+  --reddening-curve-name arg        A single reddening curve name
+  --ebv-range arg                   E(B-V) range: minimum maximum step
+  --ebv-value arg                   A single E(B-V) value
+
+Photometric filter options:
+  --filter-root-path arg            The directory containing the Filter 
+                                    datasets, organized in folders
+  --filter-group arg                Use all the Filters in the given group and 
+                                    subgroups
+  --filter-exclude arg              Exclude a single filter name
+  --filter-name arg                 Add a single filter name
+  
+\endcode
+
+
+\subsection fullcode_main_program Main Program Based on Element Framework
+
+Here we show an example of the \b Demo executable based on the Element framework 
+and uses as an example the FilterConfiguration class.
+
+\code{.cpp}
+/** 
+ * @file Demo.cpp
+ */
+
+#include <string>
+#include <map>
+
+#include <boost/program_options.hpp>
+
+#include "ElementsKernel/Program.h"
+#include "ElementsKernel/Exception.h"
+#include "ElementsKernel/Version.h"
+#include "ElementsKernel/Logging.h"
+#include "ElementsKernel/Exit.h"
+#include "PhzConfiguration/FilterConfiguration.h"
+
+namespace po = boost::program_options;
+
+using namespace std;
+using namespace Euclid;
+
+class Demo : public Elements::Program {
+
+  public:
+
+    // Get the program options
+    po::options_description defineSpecificProgramOptions() override {
+      return PhzConfiguration::FilterConfiguration::getProgramOptions();
+    }
+
+    // Main
+    Elements::ExitCode mainMethod(map<string, po::variable_value>& args) override {
+    
+    // Set the logger
+    Elements::Logging logger = Elements::Logging::getLogger("Demo");
+
+    // Intantiate the filter class
+    PhzConfiguration::FilterConfiguration filter_conf {args};
+
+    // Get the filter list
+    auto filter_list = filter_conf.getFilterList();
+    
+    // Log the filter found
+    for (auto& f : filter_list) {
+      logger.info() << "Using filter " << f.qualifiedName();
+    }
+
+    return Elements::ExitCode::OK;
+  }
+  
+  string getVersion() {
+    return "0.1";
+  }
+  
+};
+
+MAIN_FOR(Demo)
+\endcode
+
+If you call the \b Demo executable as follows:
+\code{.cpp}
+> Demo --filter-root-path="$HOME/Euclid_data/PhotZAuxData/" --filter-group="Filter/MER"
+\endcode
+the result should look like as follows:
+
+\code{.cpp}
+2014-11-26T14:26:19CET ElementsProgram  INFO : ##########################################################
+2014-11-26T14:26:19CET ElementsProgram  INFO : ##########################################################
+2014-11-26T14:26:19CET ElementsProgram  INFO : #
+2014-11-26T14:26:19CET ElementsProgram  INFO : #  C++ program:  Demo starts 
+2014-11-26T14:26:19CET ElementsProgram  INFO : #
+2014-11-26T14:26:19CET ElementsProgram  INFO : ##########################################################
+2014-11-26T14:26:19CET ElementsProgram  INFO : #
+2014-11-26T14:26:19CET ElementsProgram  INFO : # List of all program options
+2014-11-26T14:26:19CET ElementsProgram  INFO : # ---------------------------
+2014-11-26T14:26:19CET ElementsProgram  INFO : #
+2014-11-26T14:26:19CET ElementsProgram  INFO : config-file = "$HOME/kepler/Sandbox/SandboxExecutables/conf/SandboxExecutables/Demo.conf"
+2014-11-26T14:26:19CET ElementsProgram  INFO : filter-group = { Filter/MER }
+2014-11-26T14:26:19CET ElementsProgram  INFO : filter-root-path = $HOME/Euclid_data/PhotZAuxData/
+2014-11-26T14:26:19CET ElementsProgram  INFO : log-file = "Demo.log"
+2014-11-26T14:26:19CET ElementsProgram  INFO : log-level = 400
+2014-11-26T14:26:19CET ElementsProgram  INFO : #
+2014-11-26T14:26:19CET Demo  INFO : Using filter Filter/MER/VIS_ACSf814w
+2014-11-26T14:26:19CET Demo  INFO : Using filter Filter/MER/Jnir_WFC3f125w
+2014-11-26T14:26:19CET Demo  INFO : Using filter Filter/MER/Gext_ACSf435w
+2014-11-26T14:26:19CET Demo  INFO : Using filter Filter/MER/Rext_ACSf606w
+2014-11-26T14:26:19CET Demo  INFO : Using filter Filter/MER/Iext_ACSf775w
+2014-11-26T14:26:19CET Demo  INFO : Using filter Filter/MER/Ynir_WFC3f105w
+2014-11-26T14:26:19CET Demo  INFO : Using filter Filter/MER/Hnir_WFC3f160w
+2014-11-26T14:26:19CET Demo  INFO : Using filter Filter/MER/Zext_ACSf850lp
+
+\endcode
 */
 
 }

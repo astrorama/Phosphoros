@@ -6,15 +6,12 @@
  */
 
 #include <string>
-#include <iostream>
 #include <vector>
 #include <algorithm>
 
-#include "PhzConfiguration/ParameterSpaceConfiguration.h"
-
 #include <boost/test/unit_test.hpp>
-//#include <boost/filesystem.hpp>
 
+#include "PhzConfiguration/ParameterSpaceConfiguration.h"
 
 BOOST_AUTO_TEST_SUITE (ParameterSpaceConfiguration_test)
 
@@ -23,7 +20,6 @@ BOOST_AUTO_TEST_SUITE (ParameterSpaceConfiguration_test)
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(getProgramOptions_test) {
-
 
   auto option_desc = Euclid::PhzConfiguration::ParameterSpaceConfiguration::getProgramOptions();
 

@@ -23,17 +23,17 @@ namespace PhzConfiguration {
 /**
  * @class Euclid::PhzConfiguration::CreatePhotometryGridConfiguration
  * @brief
- * This class defines the Photometry Grid parameter option, binary-photometry-grid
- * and inherits from the one of ParameterSpaceConfiguration and FilterConfiguration
+ * This class defines the Photometry Grid parameter option, \b binary-photometry-grid
+ * and inherits from the options of the ParameterSpaceConfiguration and FilterConfiguration
  * options. It also provides a function for writing a grid in a binary file.
  * @details
  * The parameter available is :
- *  binary-photometry-grid : string, output filename for storing the grid data
+ * - \b binary-photometry-grid : string, output filename for storing the grid data
  * Before writing data to the disk, the constructor checks that it is
  * possible to write on the disk at the location specified by the
  * binary-photometry-grid option and throws an exception if any.
- * @throw
- * ElementException:  IO error, can not write any file there
+ * @throw Element::Exception
+ * - IO error, can not write any file there
  */
 
 class CreatePhotometryGridConfiguration : public ParameterSpaceConfiguration,
@@ -58,7 +58,7 @@ public:
    *
    * @details
    * The option is:
-   *  binary-photometry-grid : string, output filename for storing the grid data
+   *  - \b binary-photometry-grid : string, output filename for storing the grid data
    * @param options
    * A map containing the options and their values.
    *
@@ -67,15 +67,15 @@ public:
   
   /**
    * @brief
-   * This function provides a function of PhzDataModel::PhotometryGrid
-   * object and stores this object in a binary file with the filename provided
-   * by the binary-photometry-grid option.
+   * This function provides a function with PhzDataModel::PhotometryGrid
+   * object as argument and this function stores this object in a binary file
+   *  with the filename provided by the binary-photometry-grid option.
    * @details
    * Before writing the object to the disk, the constructor checks that it is
-   * possible to write data on the disk at the location specified by the
+   * possible to write data at the location specified by the \b
    * binary-photometry-grid option and throws an exception if any.
-   * @throw ElementException
-   * ElementException:  IO error, can not write any file there
+   * @throw Element::Exception
+   * - IO error, can not write any file there
    * @return
    * A void function.
    */
