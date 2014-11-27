@@ -915,12 +915,13 @@ Photometric filter options:
 
 \subsection fullcode_main_program Main Program Based on Element Framework
 
-Here we show an example of the \b Demo executable based on the Element framework 
-and uses as an example the FilterConfiguration class.
+Here we show an example of the \b Demo executable based on the Element framework. 
+We only use one class, the FilterConfiguration class but it is easy to add more
+if you wish modifying the \b defineSpecificProgramOptions function.
 
 \code{.cpp}
-/** 
- * @file Demo.cpp
+/* 
+ * Demo.cpp
  */
 
 #include <string>
@@ -978,11 +979,21 @@ class Demo : public Elements::Program {
 MAIN_FOR(Demo)
 \endcode
 
-If you call the \b Demo executable as follows:
+If you can call the \b Demo executable either passing the options in the 
+command line as follows :
 \code{.cpp}
 > Demo --filter-root-path="$HOME/Euclid_data/PhotZAuxData/" --filter-group="Filter/MER"
 \endcode
-the result should look like as follows:
+
+or just typing : \b Demo and using a configuration file(e.g. Demo.conf). The 
+configuration file for our example should look like this:
+
+\code{.cpp}
+filter-root-path = $HOME/Euclid_data/PhotZAuxData/
+filter-group = Filter/MER
+\endcode 
+
+Whatever the way you call the executable the outputs should look like as follows:
 
 \code{.cpp}
 2014-11-26T14:26:19CET ElementsProgram  INFO : ##########################################################
