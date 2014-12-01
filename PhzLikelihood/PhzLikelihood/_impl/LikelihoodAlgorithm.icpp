@@ -1,0 +1,40 @@
+/** 
+ * @file LikelihoodAlgorithm.icpp
+ * @date December 1, 2014
+ * @author Nikolaos Apostolakos
+ */
+
+#include "ElementsKernel/Exception.h"
+#include "PhzLikelihood/LikelihoodAlgorithm.h"
+
+namespace Euclid {
+namespace PhzLikelihood {
+
+template<typename ModelIter, typename LikelihoodIter>
+void LikelihoodAlgorithm::operator()(const SourceCatalog::Photometry& source_photometry,
+                                     ModelIter model, ModelIter model_end,
+                                     LikelihoodIter likelihood) const {
+  // Create a new source photometry, with the correct filter order
+  std::shared_ptr<std::vector<std::string>> ordered_filter_list_ptr {new std::vector<std::string>};
+  for (auto model_iter=model->begin(); model_iter!=model->end(); ++model_iter) {
+    ordered_filter_list_ptr->push_back(model_iter.filterName());
+  }
+  std::vector<SourceCatalog::FluxErrorPair> ordered_flux_list;
+  for (auto& filter : *ordered_filter_list_ptr) {
+    auto flux_ptr = source_photometry.find(filter);
+    if (flux_ptr == nullptr) {
+      throw Elements::Exception() << "Source does not contain photometry for " << filter;
+    }
+    ordered_flux_list.push_back(*flux_ptr);
+  }
+  SourceCatalog::Photometry ordered_source_phot {ordered_filter_list_ptr, std::move(ordered_flux_list)};
+  
+  // Calculate the likelihood for each model and populate the output
+  for (; model != model_end; ++model, ++ likelihood) {
+    double scale = m_scale_factor_calc(ordered_source_phot.begin(), ordered_source_phot.end(), model->begin());
+    *likelihood = m_likelihood_calc(ordered_source_phot.begin(), ordered_source_phot.end(), model->begin(), scale);
+  }
+}
+
+} // end of namespace PhzLikelihood
+} // end of namespace Euclid
