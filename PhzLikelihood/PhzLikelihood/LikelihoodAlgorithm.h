@@ -20,13 +20,13 @@ public:
   typedef std::function<double(SourceCatalog::Photometry::const_iterator source_begin,
                                SourceCatalog::Photometry::const_iterator source_end,
                                SourceCatalog::Photometry::const_iterator model_begin)
-  > ScaleFactorCalc;
+                       > ScaleFactorCalc;
   
   typedef std::function<double(SourceCatalog::Photometry::const_iterator source_begin,
                                SourceCatalog::Photometry::const_iterator source_end,
                                SourceCatalog::Photometry::const_iterator model_begin,
                                double scale_factor)
-  > LikelihoodCalc;
+                       > LikelihoodCalc;
   
   LikelihoodAlgorithm(ScaleFactorCalc scale_factor_calc, LikelihoodCalc likelihood_calc);
   

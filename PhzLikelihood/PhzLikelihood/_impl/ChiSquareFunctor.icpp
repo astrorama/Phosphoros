@@ -1,0 +1,25 @@
+/** 
+ * @file ChiSquareFunctor.icpp
+ * @date December 2, 2014
+ * @author Nikolaos Apostolakos
+ */
+
+#include <cmath>
+
+namespace Euclid {
+namespace PhzLikelihood {
+
+template<typename SourceIter, typename ModelIter>
+double ChiSquareFunctor::operator ()(SourceIter source, SourceIter source_end,
+                                     ModelIter model, double scale) const {
+    double chi_square {0};
+    for (; source!=source_end; ++source, ++model) {
+      double difference = scale * (*model).flux - (*source).flux;
+      chi_square += difference * difference / ((*source).error * (*source).error);
+    }
+    return exp(-1 * chi_square / 2);
+}
+
+} // end of namespace PhzLikelihood
+} // end of namespace Euclid
+

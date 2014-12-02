@@ -30,7 +30,7 @@ void LikelihoodAlgorithm::operator()(const SourceCatalog::Photometry& source_pho
   SourceCatalog::Photometry ordered_source_phot {ordered_filter_list_ptr, std::move(ordered_flux_list)};
   
   // Calculate the likelihood for each model and populate the output
-  for (; model != model_end; ++model, ++ likelihood) {
+  for (; model != model_end; ++model, ++likelihood) {
     double scale = m_scale_factor_calc(ordered_source_phot.begin(), ordered_source_phot.end(), model->begin());
     *likelihood = m_likelihood_calc(ordered_source_phot.begin(), ordered_source_phot.end(), model->begin(), scale);
   }

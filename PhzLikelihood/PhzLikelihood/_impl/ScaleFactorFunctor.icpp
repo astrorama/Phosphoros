@@ -1,0 +1,30 @@
+/** 
+ * @file ScaleFactorFunctor.icpp
+ * @date December 2, 2014
+ * @author Nikolaos Apostolakos
+ */
+
+#ifndef SCALEFACTORFUNCTOR_ICPP
+#define	SCALEFACTORFUNCTOR_ICPP
+
+namespace Euclid {
+namespace PhzLikelihood {
+
+template<typename SourceIter, typename ModelIter>
+double ScaleFactorFunctor::operator ()(SourceIter source, SourceIter source_end,
+                                       ModelIter model) const {
+    double numerator {0};
+    double denominator {0};
+    for (; source!=source_end; ++source, ++model) {
+      double error_square = (*source).error * (*source).error;
+      numerator += ((*model).flux * (*source).flux) / error_square;
+      denominator += ((*model).flux * (*model).flux) / error_square;
+    }
+    return numerator / denominator;
+}
+
+} // end of namespace PhzLikelihood
+} // end of namespace Euclid
+
+#endif	/* SCALEFACTORFUNCTOR_ICPP */
+
