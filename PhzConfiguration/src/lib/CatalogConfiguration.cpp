@@ -92,24 +92,32 @@ Table::Table readAsciiTable(std::string file) {
   return Table::AsciiReader().read(in);
 }
 
-SourceCatalog::Catalog CatalogConfiguration::getCatalog() {
-  std::string catalog_file = m_options["input-catalog-file"].as<std::string>();
-  
-  // Get the format of the file
-  FormatType format;
-  if (m_options["input-catalog-format"].empty()) {
-    format = autoDetectFormatType(catalog_file);
-  } else if (m_options["input-catalog-format"].as<std::string>().compare("FITS") == 0) {
-    format = FormatType::FITS;
-  } else {
-    format = FormatType::ASCII;
+const Table::Table& CatalogConfiguration::getAsTable() {
+  if (m_table_ptr == nullptr) {
+    std::string catalog_file = m_options["input-catalog-file"].as<std::string>();
+
+    // Get the format of the file
+    FormatType format;
+    if (m_options["input-catalog-format"].empty()) {
+      format = autoDetectFormatType(catalog_file);
+    } else if (m_options["input-catalog-format"].as<std::string>().compare("FITS") == 0) {
+      format = FormatType::FITS;
+    } else {
+      format = FormatType::ASCII;
+    }
+
+    // Read the catalog from the file as a Table object
+    logger.info() << "Reading table from file " << catalog_file;
+    Table::Table table = (format == FormatType::FITS)
+                         ? readFitsTable(catalog_file)
+                         : readAsciiTable(catalog_file);
+    m_table_ptr.reset(new Table::Table{std::move(table)});
   }
-  
-  // Read the catalog from the file as a Table object
-  logger.info() << "Reading table from file " << catalog_file;
-  Table::Table table = (format == FormatType::FITS)
-                       ? readFitsTable(catalog_file)
-                       : readAsciiTable(catalog_file);
+  return *m_table_ptr;
+}
+
+SourceCatalog::Catalog CatalogConfiguration::getCatalog() {
+  auto& table = getAsTable();
   
   // Get the name of the ID column
   std::string id_column_name = "ID";

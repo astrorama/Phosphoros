@@ -13,6 +13,7 @@
 #include <boost/program_options.hpp>
 #include "SourceCatalog/AttributeFromRow.h"
 #include "SourceCatalog/Catalog.h"
+#include "Table/Table.h"
 
 namespace Euclid {
 namespace PhzConfiguration {
@@ -31,10 +32,13 @@ protected:
   
   virtual void addAttributeHandler(std::shared_ptr<SourceCatalog::AttributeFromRow> handler) final;
   
+  virtual const Table::Table& getAsTable() final;
+  
 private:
   
   std::map<std::string, boost::program_options::variable_value> m_options;
   std::vector<std::shared_ptr<SourceCatalog::AttributeFromRow>> m_attribute_handlers;
+  std::unique_ptr<Table::Table> m_table_ptr;
   
 };
 
