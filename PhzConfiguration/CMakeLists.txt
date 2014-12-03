@@ -3,9 +3,10 @@ elements_subdir(PhzConfiguration 0.1)
 elements_depends_on_subdirs(ElementsKernel)
 elements_depends_on_subdirs(XYDataset)
 elements_depends_on_subdirs(PhzDataModel)
+elements_depends_on_subdirs(PhzOutput)
 
 elements_add_library(PhzConfiguration src/lib/*.cpp
-                     LINK_LIBRARIES  XYDataset PhzDataModel
+                     LINK_LIBRARIES  XYDataset PhzDataModel PhzOutput
                      INCLUDE_DIRS XYDataset PhzDataModel
                      PUBLIC_HEADERS PhzConfiguration)
 
