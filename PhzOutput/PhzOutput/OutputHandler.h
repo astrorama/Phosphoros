@@ -21,7 +21,7 @@ public:
   virtual ~OutputHandler() {}
   
   virtual void handleSourceOutput(const SourceCatalog::Source& source,
-                                  PhzDataModel::PhotometryGrid::iterator best_model,
+                                  PhzDataModel::PhotometryGrid::const_iterator best_model,
                                   const GridContainer::GridContainer<std::vector<double>, double>& pdf) = 0;
   
 };

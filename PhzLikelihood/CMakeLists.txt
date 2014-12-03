@@ -1,10 +1,10 @@
 elements_subdir(PhzLikelihood)
 
-elements_depends_on_subdirs(PhzDataModel)
+elements_depends_on_subdirs(PhzDataModel PhzOutput)
 
 #===== Libraries ===============================================================
 elements_add_library(PhzLikelihood src/lib/*.cpp
-                  LINK_LIBRARIES PhzDataModel
+                  LINK_LIBRARIES PhzDataModel PhzOutput
                   PUBLIC_HEADERS PhzLikelihood )
 
 #===== Boost tests =============================================================

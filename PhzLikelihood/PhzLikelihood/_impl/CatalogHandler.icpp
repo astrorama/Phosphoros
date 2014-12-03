@@ -1,0 +1,45 @@
+/** 
+ * @file CatalogHandler.icpp
+ * @date December 3, 2014
+ * @author Nikolaos Apostolakos
+ */
+
+#include <iomanip>
+#include "SourceCatalog/SourceAttributes/Photometry.h"
+
+namespace Euclid {
+namespace PhzLikelihood {
+
+template<typename SourceIter>
+void CatalogHandler::handleSources(SourceIter source_begin, SourceIter source_end,
+                                   std::unique_ptr<PhzOutput::OutputHandler> out_handler_ptr) const {
+  Elements::Logging logger = Elements::Logging::getLogger("CatalogHandler");
+  
+  // Setup few counters used to log the process
+  int counter {0};
+  double total = (source_end - source_begin);
+  int done {0};
+  logger.info() << "Start processing " << (source_end - source_begin) << " sources";
+  
+  for (SourceIter source=source_begin; source != source_end; ++source) {
+    // Log the progress
+    if (++counter == 100) {
+      logger.info() << "Processing source with ID: " << source->getId()
+                    << " (progress: " << (int)(done/total) << "%)";
+      counter = 0;
+    }
+    
+    // Get the PHZ results
+    auto source_phot_ptr = (*source).template getAttribute<SourceCatalog::Photometry>();
+    auto best_model_iter = m_source_phz_func(*source_phot_ptr);
+    
+    // Pass them to the handler. For the moment we pass a dummy PDF
+    GridContainer::GridContainer<std::vector<double>, double> pdf {GridContainer::GridAxis<double>{"Z", {}}};
+    out_handler_ptr->handleSourceOutput(*source, best_model_iter, pdf);
+    // Increase the progress (by 100 because it is a percentage)
+    done += 100;
+  }
+}
+
+} // end of namespace PhzLikelihood
+} // end of namespace Euclid
