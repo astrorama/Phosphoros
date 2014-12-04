@@ -5,6 +5,9 @@
  */
 
 #include <future>
+#include <atomic>
+#include <thread>
+#include <atomic>
 #include "ElementsKernel/Logging.h"
 #include "MathUtils/interpolation/interpolation.h"
 
@@ -60,6 +63,30 @@ PhotometryGridCreator::PhotometryGridCreator(
         m_reddening_curve_provider{std::move(reddening_curve_provider)},
         m_filter_provider(std::move(filter_provider)) {
 }
+        
+class ParallelJob {
+  
+public:
+
+  ParallelJob(PhotometryAlgorithm<ModelFluxAlgorithm>& m_photometry_algo,
+              ModelDatasetGrid::iterator model_begin, ModelDatasetGrid::iterator model_end, 
+              PhzDataModel::PhotometryGrid::iterator photometry_begin, std::atomic<size_t>& m_progress)
+        : m_photometry_algo(m_photometry_algo), m_model_begin(model_begin), m_model_end(model_end),
+          m_photometry_begin(photometry_begin), m_progress(m_progress) { }
+        
+  void operator()() {
+    m_photometry_algo(m_model_begin, m_model_end, m_photometry_begin, m_progress);
+  }
+
+private:
+  
+  PhotometryAlgorithm<ModelFluxAlgorithm>& m_photometry_algo;
+  ModelDatasetGrid::iterator m_model_begin;
+  ModelDatasetGrid::iterator m_model_end;
+  PhzDataModel::PhotometryGrid::iterator m_photometry_begin;
+  std::atomic<size_t>& m_progress;
+  
+};
 
 PhzDataModel::PhotometryGrid PhotometryGridCreator::createGrid(
             const PhzDataModel::ModelAxesTuple& parameter_space,
@@ -93,7 +120,9 @@ PhzDataModel::PhotometryGrid PhotometryGridCreator::createGrid(
 
   // Here we keep the futures for the threads we start so we can wait for them
   std::vector<std::future<void>> futures;
-  logger.info() << "Creating photometries for " << model_grid.size() << " models";
+  std::atomic<size_t> progress {0};
+  size_t total_models = model_grid.size();
+  logger.info() << "Creating photometries for " << total_models << " models";
   for (auto& sed : std::get<PhzDataModel::ModelParameter::SED>(parameter_space)) {
     // We start a new thread to handle this SED
     auto model_iter = model_grid.begin();
@@ -101,7 +130,12 @@ PhzDataModel::PhotometryGrid PhotometryGridCreator::createGrid(
     auto photometry_iter = photometry_grid.begin();
     photometry_iter.fixAxisByValue<PhzDataModel::ModelParameter::SED>(sed);
 
-    futures.push_back(std::async(std::launch::async, photometry_algo, model_iter, model_grid.end(), photometry_iter));
+    futures.push_back(std::async(std::launch::async, ParallelJob{photometry_algo, model_iter, model_grid.end(), photometry_iter, progress}));
+  }
+  while (progress < total_models) {
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+      int percentage_done = 100. * progress / total_models;
+      logger.info() << "Progress: " << percentage_done << " %";
   }
   // Wait for all threads to finish
   for (auto& f : futures) {

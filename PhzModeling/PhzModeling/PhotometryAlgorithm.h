@@ -59,6 +59,29 @@ public:
   /**
    * @brief Function Call Operator
    * @details
+   * Iterate over the model and for each of them compute the photometry. Version
+   * which can be monitored, to be used for parallel programming.
+   *
+   * @param model_begin
+   * An iterator over a XYDataset container giving access to the models.
+   *
+   * @param model_end
+   * end iterator for the model container
+   *
+   * @param photometry_begin
+   * An iterator over a Photometry container into which the computed photometry will be stored.
+   * 
+   * @param monitor
+   * A reference to an object to be notified with the progress of the job. Its
+   * prefix ++ operator will be called every time a model is handled.
+   */
+  template<typename ModelIterator,typename PhotometryIterator, typename Monitor>
+  void operator()(ModelIterator model_begin, ModelIterator model_end,
+                  PhotometryIterator photometry_begin, Monitor& monitor) const;
+  
+  /**
+   * @brief Function Call Operator
+   * @details
    * Iterate over the model and for each of them compute the photometry
    *
    * @param model_begin
@@ -71,7 +94,8 @@ public:
    * An iterator over a Photometry container into which the computed photometry will be stored.
    */
   template<typename ModelIterator,typename PhotometryIterator>
-  void operator()(ModelIterator model_begin,ModelIterator model_end,PhotometryIterator photometry_begin) const;
+  void operator()(ModelIterator model_begin, ModelIterator model_end,
+                  PhotometryIterator photometry_begin) const;
 
 private:
   ModelFluxAlgo m_model_flux_agorithm;

@@ -49,8 +49,10 @@ PhotometryAlgorithm<ModelFluxAlgo>::PhotometryAlgorithm(ModelFluxAlgo model_flux
 }
 
 template<typename ModelFluxAlgo>
-template<typename ModelIterator,typename PhotometryIterator>
-void PhotometryAlgorithm<ModelFluxAlgo>::operator()(ModelIterator model_begin,ModelIterator model_end,PhotometryIterator photometry_begin) const{
+template<typename ModelIterator,typename PhotometryIterator, typename Monitor>
+void PhotometryAlgorithm<ModelFluxAlgo>::operator()(
+                            ModelIterator model_begin,ModelIterator model_end,
+                            PhotometryIterator photometry_begin, Monitor& monitor) const{
 
   while (model_begin!=model_end){
 
@@ -62,7 +64,17 @@ void PhotometryAlgorithm<ModelFluxAlgo>::operator()(ModelIterator model_begin,Mo
 
     ++model_begin;
     ++photometry_begin;
+    ++monitor;
   }
+}
+
+template<typename ModelFluxAlgo>
+template<typename ModelIterator,typename PhotometryIterator>
+void PhotometryAlgorithm<ModelFluxAlgo>::operator()(
+                            ModelIterator model_begin,ModelIterator model_end,
+                            PhotometryIterator photometry_begin) const {
+  int monitor {0};
+  this->operator()(model_begin, model_end, photometry_begin, monitor);
 }
 
 

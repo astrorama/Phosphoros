@@ -40,9 +40,11 @@ public:
     
     auto grid = creator.createGrid(param_space, conf.getFilterList());
     
+    logger.info() << "Creating the output";
     auto output = conf.getOutputFunction();
     output(grid);
     
+    logger.info() << "Done!";
     return Elements::ExitCode::OK;
   }
   
