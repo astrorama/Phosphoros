@@ -5,6 +5,7 @@
  */
 
 #include <future>
+#include "ElementsKernel/Logging.h"
 #include "MathUtils/interpolation/interpolation.h"
 
 #include "PhzDataModel/PhzModel.h"
@@ -23,6 +24,8 @@
 
 namespace Euclid {
 namespace PhzModeling {
+
+static Elements::Logging logger = Elements::Logging::getLogger("PhotometryGridCreator");
 
 template<typename NameIter>
 std::map<XYDataset::QualifiedName, XYDataset::XYDataset> buildMap(
@@ -90,6 +93,7 @@ PhzDataModel::PhotometryGrid PhotometryGridCreator::createGrid(
 
   // Here we keep the futures for the threads we start so we can wait for them
   std::vector<std::future<void>> futures;
+  logger.info() << "Creating photometries for " << model_grid.size() << " models";
   for (auto& sed : std::get<PhzDataModel::ModelParameter::SED>(parameter_space)) {
     // We start a new thread to handle this SED
     auto model_iter = model_grid.begin();

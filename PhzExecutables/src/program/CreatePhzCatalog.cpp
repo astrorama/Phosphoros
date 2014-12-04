@@ -75,9 +75,7 @@ class CreatePhzCatalog : public Elements::Program {
   Elements::ExitCode mainMethod(map<string, po::variable_value>& args) override {
     PhzConfiguration::CreatePhzCatalogConfiguration conf {args};
     
-    ifstream in {"/tmp/CreatePhotometryGrid/photometry_grid.dat"};
-    auto model_phot_grid = PhzDataModel::phzGridBinaryImport<vector<SourceCatalog::Photometry>>(in);
-    in.close();
+    auto model_phot_grid = conf.getPhotometryGrid();
     
     PhzLikelihood::CatalogHandler handler {conf.getPhotometricCorrectionMap(), move(model_phot_grid)};
     

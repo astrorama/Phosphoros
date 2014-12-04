@@ -12,11 +12,13 @@
 #include <boost/program_options.hpp>
 #include "PhzOutput/OutputHandler.h"
 #include "PhzConfiguration/PhotometricCorrectionConfiguration.h"
+#include "PhzConfiguration/PhotometryGridConfiguration.h"
 
 namespace Euclid {
 namespace PhzConfiguration {
 
-class CreatePhzCatalogConfiguration : public PhotometricCorrectionConfiguration {
+class CreatePhzCatalogConfiguration : public PhotometricCorrectionConfiguration,
+                                      public PhotometryGridConfiguration {
   
 public:
   

@@ -20,12 +20,13 @@ po::options_description CreatePhzCatalogConfiguration::getProgramOptions() {
       "The filename of the file to export the PHZ catalog file");
 
   options.add(PhotometricCorrectionConfiguration::getProgramOptions());
+  options.add(PhotometryGridConfiguration::getProgramOptions());
 
   return options;
 }
 
 CreatePhzCatalogConfiguration::CreatePhzCatalogConfiguration(const std::map<std::string, po::variable_value>& options)
-          : CatalogConfiguration(options), PhotometricCorrectionConfiguration(options) {
+          : CatalogConfiguration(options), PhotometricCorrectionConfiguration(options), PhotometryGridConfiguration(options) {
   m_options = options;
 }
 
