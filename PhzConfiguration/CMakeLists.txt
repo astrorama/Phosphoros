@@ -27,3 +27,6 @@ elements_add_unit_test(ParameterSpaceConfiguration_test tests/src/ParameterSpace
                        
 elements_add_unit_test(CreatePhotometryGridConfiguration_test tests/src/CreatePhotometryGridConfiguration_test.cpp
                        LINK_LIBRARIES XYDataset PhzDataModel PhzConfiguration TYPE Boost)                       
+
+elements_add_unit_test(PhotometryGridConfiguration_test tests/src/PhotometryGridConfiguration_test.cpp
+                       LINK_LIBRARIES XYDataset PhzDataModel PhzConfiguration TYPE Boost)                       
