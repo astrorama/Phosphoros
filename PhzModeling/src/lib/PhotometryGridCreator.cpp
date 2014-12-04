@@ -49,63 +49,63 @@ std::map<XYDataset::QualifiedName, std::unique_ptr<Euclid::MathUtils::Function>>
   return result;
 }
 
-  PhotometryGridCreator::PhotometryGridCreator(
-                std::unique_ptr<XYDataset::XYDatasetProvider> sed_provider,
-                std::unique_ptr<XYDataset::XYDatasetProvider> reddening_curve_provider,
-                std::unique_ptr<XYDataset::XYDatasetProvider> filter_provider)
-        : m_sed_provider{std::move(sed_provider)},
-          m_reddening_curve_provider{std::move(reddening_curve_provider)},
-          m_filter_provider(std::move(filter_provider)) {
+PhotometryGridCreator::PhotometryGridCreator(
+              std::unique_ptr<XYDataset::XYDatasetProvider> sed_provider,
+              std::unique_ptr<XYDataset::XYDatasetProvider> reddening_curve_provider,
+              std::unique_ptr<XYDataset::XYDatasetProvider> filter_provider)
+      : m_sed_provider{std::move(sed_provider)},
+        m_reddening_curve_provider{std::move(reddening_curve_provider)},
+        m_filter_provider(std::move(filter_provider)) {
+}
+
+PhzDataModel::PhotometryGrid PhotometryGridCreator::createGrid(
+            const PhzDataModel::ModelAxesTuple& parameter_space,
+            const std::vector<Euclid::XYDataset::QualifiedName>& filter_name_list) {
+
+  // Create the maps
+  auto filter_map = buildMap(*m_filter_provider, filter_name_list.begin(), filter_name_list.end());
+  auto sed_name_list = std::get<PhzDataModel::ModelParameter::SED>(parameter_space);
+  auto sed_map = buildMap(*m_sed_provider, sed_name_list.begin(), sed_name_list.end());
+  auto reddening_curve_list = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(parameter_space);
+  auto reddening_curve_map = convertToFunction(buildMap(*m_reddening_curve_provider,
+                                            reddening_curve_list.begin(), reddening_curve_list.end()));
+
+  // Define the functions and the algorithms based on the Functors
+  ModelDatasetGrid::ReddeningFunction reddening_function {ExtinctionFunctor{}};
+  ModelDatasetGrid::RedshiftFunction redshift_function {RedshiftFunctor{}};
+  ModelFluxAlgorithm::ApplyFilterFunction apply_filter_function {ApplyFilterFunctor{}};
+  ModelFluxAlgorithm::CalculateFluxFunction flux_function {CalculateFluxFunctor{MathUtils::InterpolationType::LINEAR}};
+  ModelFluxAlgorithm flux_model_algo {std::move(apply_filter_function), std::move(flux_function)};
+
+  // Create the model grid
+  auto model_grid= ModelDatasetGrid(parameter_space, std::move(sed_map),std::move(reddening_curve_map),
+                                    reddening_function, redshift_function);
+
+  // Create the photometry Grid
+  auto photometry_grid = PhzDataModel::PhotometryGrid(parameter_space);
+
+  // Define the algo
+
+  auto photometry_algo = createPhotometryAlgorithm(std::move(flux_model_algo),std::move(filter_map), filter_name_list);
+
+  // Here we keep the futures for the threads we start so we can wait for them
+  std::vector<std::future<void>> futures;
+  for (auto& sed : std::get<PhzDataModel::ModelParameter::SED>(parameter_space)) {
+    // We start a new thread to handle this SED
+    auto model_iter = model_grid.begin();
+    model_iter.fixAxisByValue<PhzDataModel::ModelParameter::SED>(sed);
+    auto photometry_iter = photometry_grid.begin();
+    photometry_iter.fixAxisByValue<PhzDataModel::ModelParameter::SED>(sed);
+
+    futures.push_back(std::async(std::launch::async, photometry_algo, model_iter, model_grid.end(), photometry_iter));
+  }
+  // Wait for all threads to finish
+  for (auto& f : futures) {
+    f.get();
   }
 
-  PhzDataModel::PhotometryGrid PhotometryGridCreator::createGrid(
-              const PhzDataModel::ModelAxesTuple& parameter_space,
-              const std::vector<Euclid::XYDataset::QualifiedName>& filter_name_list) {
-    
-    // Create the maps
-    auto filter_map = buildMap(*m_filter_provider, filter_name_list.begin(), filter_name_list.end());
-    auto sed_name_list = std::get<PhzDataModel::ModelParameter::SED>(parameter_space);
-    auto sed_map = buildMap(*m_sed_provider, sed_name_list.begin(), sed_name_list.end());
-    auto reddening_curve_list = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(parameter_space);
-    auto reddening_curve_map = convertToFunction(buildMap(*m_reddening_curve_provider,
-                                              reddening_curve_list.begin(), reddening_curve_list.end()));
-    
-    // Define the functions and the algorithms based on the Functors
-    ModelDatasetGrid::ReddeningFunction reddening_function {ExtinctionFunctor{}};
-    ModelDatasetGrid::RedshiftFunction redshift_function {RedshiftFunctor{}};
-    ModelFluxAlgorithm::ApplyFilterFunction apply_filter_function {ApplyFilterFunctor{}};
-    ModelFluxAlgorithm::CalculateFluxFunction flux_function {CalculateFluxFunctor{MathUtils::InterpolationType::LINEAR}};
-    ModelFluxAlgorithm flux_model_algo {std::move(apply_filter_function), std::move(flux_function)};
-    
-    // Create the model grid
-    auto model_grid= ModelDatasetGrid(parameter_space, std::move(sed_map),std::move(reddening_curve_map),
-                                      reddening_function, redshift_function);
-
-    // Create the photometry Grid
-    auto photometry_grid = PhzDataModel::PhotometryGrid(parameter_space);
-
-    // Define the algo
-
-    auto photometry_algo = createPhotometryAlgorithm(std::move(flux_model_algo),std::move(filter_map), filter_name_list);
-
-    // Here we keep the futures for the threads we start so we can wait for them
-    std::vector<std::future<void>> futures;
-    for (auto& sed : std::get<PhzDataModel::ModelParameter::SED>(parameter_space)) {
-      // We start a new thread to handle this SED
-      auto model_iter = model_grid.begin();
-      model_iter.fixAxisByValue<PhzDataModel::ModelParameter::SED>(sed);
-      auto photometry_iter = photometry_grid.begin();
-      photometry_iter.fixAxisByValue<PhzDataModel::ModelParameter::SED>(sed);
-      
-      futures.push_back(std::async(std::launch::async, photometry_algo, model_iter, model_grid.end(), photometry_iter));
-    }
-    // Wait for all threads to finish
-    for (auto& f : futures) {
-      f.get();
-    }
-
-    return std::move(photometry_grid);
-  }
+  return std::move(photometry_grid);
+}
 
 
 }
