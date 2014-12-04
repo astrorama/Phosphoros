@@ -96,7 +96,7 @@ class CreatePhzCatalog : public Elements::Program {
     auto out_ptr = conf.getOutputHandler();
     
     while (progress < total_sources) {
-      this_thread::sleep_for(chrono::seconds(1));
+      this_thread::sleep_for(chrono::seconds(5));
       int percentage_done = 100. * progress / total_sources;
       logger.info() << "Progress: " << percentage_done << " %";
     }

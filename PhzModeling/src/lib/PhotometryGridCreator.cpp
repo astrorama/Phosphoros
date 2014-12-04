@@ -133,7 +133,7 @@ PhzDataModel::PhotometryGrid PhotometryGridCreator::createGrid(
     futures.push_back(std::async(std::launch::async, ParallelJob{photometry_algo, model_iter, model_grid.end(), photometry_iter, progress}));
   }
   while (progress < total_models) {
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::seconds(5));
       int percentage_done = 100. * progress / total_models;
       logger.info() << "Progress: " << percentage_done << " %";
   }
