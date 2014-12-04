@@ -1,4 +1,4 @@
-/** 
+/**
  * @file PhzDataModel/PhzModel.h
  * @date May 20, 2014
  * @author Nikolaos Apostolakos
@@ -42,8 +42,8 @@ struct ModelParameter {
  * @brief Alias on the Axes tuple specifying the actual type of axis.
  *
  */
-typedef std::tuple<Euclid::GridContainer::GridAxis<double>, Euclid::GridContainer::GridAxis<double>,
-    Euclid::GridContainer::GridAxis<Euclid::XYDataset::QualifiedName>, Euclid::GridContainer::GridAxis<Euclid::XYDataset::QualifiedName>> ModelAxesTuple;
+typedef std::tuple<GridContainer::GridAxis<double>, GridContainer::GridAxis<double>,
+    GridContainer::GridAxis<XYDataset::QualifiedName>, GridContainer::GridAxis<XYDataset::QualifiedName>> ModelAxesTuple;
 
 /**
  * @brief Define the Phz model parameter space.
@@ -63,8 +63,8 @@ typedef std::tuple<Euclid::GridContainer::GridAxis<double>, Euclid::GridContaine
  * @return The ModelAxesTuple encoding the model parameter space.
  */
 ModelAxesTuple createAxesTuple(std::vector<double> zs, std::vector<double> ebvs,
-                               std::vector<Euclid::XYDataset::QualifiedName> reddening_curves,
-                               std::vector<Euclid::XYDataset::QualifiedName> seds) ;
+                               std::vector<XYDataset::QualifiedName> reddening_curves,
+                               std::vector<XYDataset::QualifiedName> seds) ;
 /**
  * @def Euclid::PhzDataModel::PhzGrid
  * @brief Alias on the Phz grid.
@@ -74,7 +74,7 @@ ModelAxesTuple createAxesTuple(std::vector<double> zs, std::vector<double> ebvs,
  *
  */
 template<typename GridCellManager>
-using PhzGrid = typename Euclid::GridContainer::GridContainer<GridCellManager, double, double, Euclid::XYDataset::QualifiedName, Euclid::XYDataset::QualifiedName>;
+using PhzGrid = typename GridContainer::GridContainer<GridCellManager, double, double, XYDataset::QualifiedName, XYDataset::QualifiedName>;
 
 /**
  * @brief Retrieves a PhzGrid from a binary stream.
@@ -87,7 +87,7 @@ using PhzGrid = typename Euclid::GridContainer::GridContainer<GridCellManager, d
  */
 template<typename GridCellManager>
 PhzGrid<GridCellManager> phzGridBinaryImport(std::istream& in) {
-  return Euclid::GridContainer::gridBinaryImport<GridCellManager, double, double, Euclid::XYDataset::QualifiedName, Euclid::XYDataset::QualifiedName>(in);
+  return GridContainer::gridBinaryImport<GridCellManager, double, double, XYDataset::QualifiedName, XYDataset::QualifiedName>(in);
 }
 
 }

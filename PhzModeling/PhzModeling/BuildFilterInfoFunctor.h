@@ -75,24 +75,24 @@ public:
    * @return
    * The FilterInfo build from the input filter sampling.
    */
-  Euclid::PhzDataModel::FilterInfo operator()(const Euclid::XYDataset::XYDataset& filter_dataset) const;
+  PhzDataModel::FilterInfo operator()(const XYDataset::XYDataset& filter_dataset) const;
 
 
 private:
   /*
    * return the first and the last of the X axis values
    */
-  std::pair<double,double> getRange(const Euclid::XYDataset::XYDataset& filter_dataset) const;
+  std::pair<double,double> getRange(const XYDataset::XYDataset& filter_dataset) const;
   /*
    * create a function as a linear interpolation of the provided filter sampling
    */
-  std::unique_ptr<Euclid::MathUtils::Function> computeFunction(const Euclid::XYDataset::XYDataset& filter_dataset) const;
+  std::unique_ptr<MathUtils::Function> computeFunction(const XYDataset::XYDataset& filter_dataset) const;
 
   /*
    * take the sampling, multiply it by 1/lambda², then take a linear interpolation
    * and return c * the integral.
    */
-  double computeNormalization(const Euclid::XYDataset::XYDataset& filter_dataset, std::pair<double,double> range) const;
+  double computeNormalization(const XYDataset::XYDataset& filter_dataset, std::pair<double,double> range) const;
 
 };
 

@@ -8,21 +8,20 @@
 #define	PHZDATAMODEL_PHOTOMETRYGRID_H
 
 #include <memory>
+#include <vector>
 #include "SourceCatalog/SourceAttributes/Photometry.h"
 #include "PhzDataModel/PhzModel.h"
 
 namespace Euclid {
 namespace PhzDataModel {
 
-typedef std::vector<Euclid::SourceCatalog::Photometry> PhotometryCellManager;
+typedef std::vector<SourceCatalog::Photometry> PhotometryCellManager;
 
 typedef PhzGrid<PhotometryCellManager> PhotometryGrid;
 
 } // end of namespace PhzDataModel
-} // end of namespace Euclid
 
 
-namespace Euclid {
 namespace GridContainer {
 
 /**
@@ -34,10 +33,10 @@ namespace GridContainer {
  * factory method because the Photometry does not have default constructor *
  */
 template<>
-struct GridCellManagerTraits<Euclid::PhzDataModel::PhotometryCellManager> {
-  typedef Euclid::SourceCatalog::Photometry data_type;
+struct GridCellManagerTraits<PhzDataModel::PhotometryCellManager> {
+  typedef SourceCatalog::Photometry data_type;
 
-  typedef typename Euclid::PhzDataModel::PhotometryCellManager::iterator iterator;
+  typedef typename PhzDataModel::PhotometryCellManager::iterator iterator;
 
   /**
    * @brief Factory to build PhotometryCellManager which has no default constructor
@@ -49,22 +48,22 @@ struct GridCellManagerTraits<Euclid::PhzDataModel::PhotometryCellManager> {
    * A unique_ptr on the new PhotometryCellManager.
    *
    */
-  static std::unique_ptr<Euclid::PhzDataModel::PhotometryCellManager> factory(size_t size);
+  static std::unique_ptr<PhzDataModel::PhotometryCellManager> factory(size_t size);
 
   /**
    * @brief return the size of the PhotometryCellManager
    */
-  static size_t size(const Euclid::PhzDataModel::PhotometryCellManager& vector);
+  static size_t size(const PhzDataModel::PhotometryCellManager& vector);
 
   /**
    * @brief static iterator on the PhotometryCellManager
    */
-  static iterator begin(Euclid::PhzDataModel::PhotometryCellManager& vector);
+  static iterator begin(PhzDataModel::PhotometryCellManager& vector);
 
   /**
    * @brief static iterator on the PhotometryCellManager
    */
-  static iterator end(Euclid::PhzDataModel::PhotometryCellManager& vector);
+  static iterator end(PhzDataModel::PhotometryCellManager& vector);
 
   static const bool enable_boost_serialize = true;
 }; // end of GridCellManagerTraits
