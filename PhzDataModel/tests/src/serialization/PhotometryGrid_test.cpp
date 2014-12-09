@@ -91,7 +91,7 @@ BOOST_FIXTURE_TEST_CASE(serializationException_test, PhzPhotometryGridName_Fixtu
   grid_ptr=&original_grid_2;
   // Get the exception for not identical filter list (not the same name)
   BOOST_CHECK_THROW((oa3 << grid_ptr),Elements::Exception);
-  }
+}
 
 BOOST_FIXTURE_TEST_CASE(serialization_test, PhzPhotometryGridName_Fixture) {
   BOOST_TEST_MESSAGE(" ");
@@ -152,14 +152,15 @@ BOOST_FIXTURE_TEST_CASE(serialization_test, PhzPhotometryGridName_Fixture) {
   auto ref_photometry = (*retrived_grid_ptr)(0,0,0,0);
   auto ref_iterator = ref_photometry.begin();
   const std::string* ref_address = &(ref_iterator.filterName());
-   for(int v_index=0;v_index==2;v_index++){
-      for(int evb_index=0;evb_index==2;evb_index++){
-        auto actual_photometry = (*retrived_grid_ptr)(v_index,evb_index,0,0);
-        auto actual_iterator = actual_photometry.begin();
-        const std::string* actual_address = &(actual_iterator.filterName());
-        BOOST_CHECK_EQUAL(ref_address, actual_address);
-      }
+  for(int v_index=0;v_index==2;v_index++){
+    for(int evb_index=0;evb_index==2;evb_index++){
+      auto actual_photometry = (*retrived_grid_ptr)(v_index,evb_index,0,0);
+      auto actual_iterator = actual_photometry.begin();
+      const std::string* actual_address = &(actual_iterator.filterName());
+      BOOST_CHECK_EQUAL(ref_address, actual_address);
     }
+  }
 }
-}
+
+BOOST_AUTO_TEST_SUITE_END ()
 

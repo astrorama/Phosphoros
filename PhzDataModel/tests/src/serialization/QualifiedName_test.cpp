@@ -52,7 +52,8 @@ BOOST_FIXTURE_TEST_CASE(serialization_test, PhzQualifiedName_Fixture) {
   for(auto expected :qualified_name.groups()){
     BOOST_CHECK_EQUAL(expected,*actual);
     ++actual;
-    }
   }
 }
 
+
+BOOST_AUTO_TEST_SUITE_END ()
