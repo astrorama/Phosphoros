@@ -70,7 +70,7 @@ void load(Archive& ar, Euclid::PhzDataModel::PhotometryGrid& grid, const unsigne
   auto filter_names_ptr = std::make_shared<std::vector<std::string>>(std::move(filter_names));
   for (auto& cell : grid) {
     std::vector<Euclid::SourceCatalog::FluxErrorPair> phot_values;
-    for (int i=0; i< filter_names_ptr->size(); ++i) {
+    for (size_t i=0; i< filter_names_ptr->size(); ++i) {
       double flux;
       double error;
       ar >> flux >> error;
