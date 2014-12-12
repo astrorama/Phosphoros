@@ -19,11 +19,6 @@
 struct ModelDatasetGenerator_Fixture {
   class DummyRedshift{
   public:
-    DummyRedshift() = default;
-    DummyRedshift(DummyRedshift&&) = default;
-    DummyRedshift(const DummyRedshift&) = default;
-    DummyRedshift& operator=(DummyRedshift&&) = default;
-    DummyRedshift& operator=(const DummyRedshift&) = default;
     virtual ~DummyRedshift() = default;
     Euclid::XYDataset::XYDataset operator()(const Euclid::XYDataset::XYDataset& sed, double z) const{
       std::vector<std::pair<double, double>> redshifted_values {};
@@ -36,11 +31,6 @@ struct ModelDatasetGenerator_Fixture {
 
   class NoRedshift{
     public:
-    NoRedshift() = default;
-    NoRedshift(NoRedshift&&) = default;
-    NoRedshift(const NoRedshift&) = default;
-    NoRedshift& operator=(NoRedshift&&) = default;
-    NoRedshift& operator=(const NoRedshift&) = default;
       virtual ~NoRedshift() = default;
       Euclid::XYDataset::XYDataset operator()(const Euclid::XYDataset::XYDataset& sed, double) const{
         std::vector<std::pair<double, double>> redshifted_values {};
@@ -53,11 +43,6 @@ struct ModelDatasetGenerator_Fixture {
 
   class DummyReddening{
    public:
-    DummyReddening() = default;
-    DummyReddening(DummyReddening&&) = default;
-    DummyReddening(const DummyReddening&) = default;
-    DummyReddening& operator=(DummyReddening&&) = default;
-    DummyReddening& operator=(const DummyReddening&) = default;
      virtual ~DummyReddening() = default;
      Euclid::XYDataset::XYDataset operator()(const Euclid::XYDataset::XYDataset& sed,const Euclid::MathUtils::Function& reddening_curve, double ebv) const{
        std::vector<std::pair<double, double>> redshifted_values {};
@@ -71,11 +56,6 @@ struct ModelDatasetGenerator_Fixture {
 
   class NoReddening{
      public:
-    NoReddening() = default;
-    NoReddening(NoReddening&&) = default;
-    NoReddening(NoReddening&) = default;
-    NoReddening& operator=(NoReddening&&) = default;
-    NoReddening& operator=(NoReddening&) = default;
        virtual ~NoReddening() = default;
        Euclid::XYDataset::XYDataset operator()(const Euclid::XYDataset::XYDataset& sed,const Euclid::MathUtils::Function&, double) const{
          std::vector<std::pair<double, double>> redshifted_values {};

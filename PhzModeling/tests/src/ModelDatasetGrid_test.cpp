@@ -19,11 +19,7 @@
 struct ModelDatasetGrid_Fixture {
   class DummyRedshift{
   public:
-    DummyRedshift() = default;
-    DummyRedshift(DummyRedshift&&) = default;
-    DummyRedshift(const DummyRedshift&) = default;
-    DummyRedshift& operator=(DummyRedshift&&) = default;
-    DummyRedshift& operator=(const DummyRedshift&) = default;
+
     virtual ~DummyRedshift() = default;
     Euclid::XYDataset::XYDataset operator()(const Euclid::XYDataset::XYDataset& sed, double z) const{
       std::vector<std::pair<double, double>> redshifted_values {};
@@ -38,11 +34,7 @@ struct ModelDatasetGrid_Fixture {
 
   class DummyReddening{
    public:
-    DummyReddening() = default;
-    DummyReddening(DummyReddening&&) = default;
-    DummyReddening(const DummyReddening&) = default;
-    DummyReddening& operator=(DummyReddening&&) = default;
-    DummyReddening& operator=(const DummyReddening&) = default;
+
      virtual ~DummyReddening() = default;
      Euclid::XYDataset::XYDataset operator()(const Euclid::XYDataset::XYDataset& sed,const Euclid::MathUtils::Function& reddening_curve, double ebv) const{
        std::vector<std::pair<double, double>> redshifted_values {};

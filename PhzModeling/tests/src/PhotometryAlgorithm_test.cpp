@@ -38,11 +38,7 @@ struct PhotometryAlgorithm_Fixture {
 
   class DummyApplyFilter{
   public:
-    DummyApplyFilter() = default;
-    DummyApplyFilter(DummyApplyFilter&&) = default;
-    DummyApplyFilter(const DummyApplyFilter&) = default;
-    DummyApplyFilter& operator=(DummyApplyFilter&&) = default;
-    DummyApplyFilter& operator=(const DummyApplyFilter&) = default;
+
     virtual ~DummyApplyFilter() = default;
     Euclid::XYDataset::XYDataset operator()(
           const Euclid::XYDataset::XYDataset& model,
@@ -62,11 +58,7 @@ struct PhotometryAlgorithm_Fixture {
 
   class DummyFluxCalculator{
    public:
-    DummyFluxCalculator() = default;
-    DummyFluxCalculator(DummyFluxCalculator&&) = default;
-    DummyFluxCalculator(const DummyFluxCalculator&) = default;
-    DummyFluxCalculator& operator=(DummyFluxCalculator&&) = default;
-    DummyFluxCalculator& operator=(const DummyFluxCalculator&) = default;
+
      virtual ~DummyFluxCalculator() = default;
      double operator()(const Euclid::XYDataset::XYDataset& filterd_model,double){
 
