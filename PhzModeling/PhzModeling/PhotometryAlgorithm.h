@@ -28,9 +28,9 @@ namespace PhzModeling {
  */
 template<typename ModelFluxAlgo>
 class PhotometryAlgorithm{
-  
+
 public:
-  
+
   /**
    * @brief constructor
    *
@@ -40,10 +40,10 @@ public:
    * to compute the photometry. If the XYDataset representing the requested
    * filter is not available in the filter map the initialization throw an Euclid Exception.
    *
-   * #param filter_map
+   * @param filter_map
    * A map<QualifiedName,XYDataset> which contains the filters sampling.
    *
-   * #param filter_name_list
+   * @param filter_name_list
    * A vector<QualifiedName> storing the list ( and the order) of filters to be
    * used to build the photometry.
    */
@@ -52,7 +52,7 @@ public:
       const std::vector<XYDataset::QualifiedName>& filter_name_list);
 
   /**
-   * #brief destructor.
+   * @brief destructor.
    */
   virtual ~PhotometryAlgorithm()=default;
 
@@ -70,7 +70,7 @@ public:
    *
    * @param photometry_begin
    * An iterator over a Photometry container into which the computed photometry will be stored.
-   * 
+   *
    * @param monitor
    * A reference to an object to be notified with the progress of the job. Its
    * prefix ++ operator will be called every time a model is handled.
@@ -78,7 +78,7 @@ public:
   template<typename ModelIterator,typename PhotometryIterator, typename Monitor>
   void operator()(ModelIterator model_begin, ModelIterator model_end,
                   PhotometryIterator photometry_begin, Monitor& monitor) const;
-  
+
   /**
    * @brief Function Call Operator
    * @details

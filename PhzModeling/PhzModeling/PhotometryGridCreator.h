@@ -48,7 +48,7 @@ public:
       std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> reddening_curve_provider,
       std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> filter_provider);
   /**
-   * #brief destructor.
+   * @brief destructor.
    */
   virtual ~PhotometryGridCreator()=default;
 
