@@ -25,8 +25,18 @@ namespace po = boost::program_options;
 
 static Elements::Logging logger = Elements::Logging::getLogger("CreatePhzCatalog");
 
-typedef tuple<const SourceCatalog::Source&, PhzDataModel::PhotometryGrid::const_iterator,
-              GridContainer::GridContainer<std::vector<double>, double>> result_type;
+struct ResultType {
+  ResultType(const SourceCatalog::Source& source,
+             const PhzDataModel::PhotometryGrid::const_iterator best_match,
+             GridContainer::GridContainer<std::vector<double>, double> pdf)
+        : source(source), best_match(best_match), pdf(std::move(pdf)) { }
+
+  ResultType(const ResultType& other) : source(other.source), best_match(other.best_match), pdf{GridContainer::GridAxis<double>{"Z", {}}} {};
+  ResultType(ResultType&&) = default;
+  const SourceCatalog::Source& source;
+  const PhzDataModel::PhotometryGrid::const_iterator best_match;
+  GridContainer::GridContainer<std::vector<double>, double> pdf;
+};
 
 class ParallelJob {
   
@@ -36,8 +46,8 @@ public:
               vector<SourceCatalog::Source>::const_iterator end, atomic<size_t>& progress)
         : handler(handler), begin(begin), end(end), m_progress(progress) { }
 
-  vector<result_type> operator()() {
-    vector<result_type> result;
+  vector<ResultType> operator()() {
+    vector<ResultType> result;
     handler.handleSources(begin, end, unique_ptr<PhzOutput::OutputHandler>{new Output{result, m_progress}});
     return result;
   }
@@ -46,16 +56,16 @@ private:
   
   class Output : public PhzOutput::OutputHandler {
   public :
-    Output(vector<result_type>& result_vector, atomic<size_t>& progress) : m_result_vector(result_vector), m_progress(progress) {}
+    Output(vector<ResultType>& result_vector, atomic<size_t>& progress) : m_result_vector(result_vector), m_progress(progress) {}
     void handleSourceOutput(const SourceCatalog::Source& source,
                             PhzDataModel::PhotometryGrid::const_iterator best_model,
                             const GridContainer::GridContainer<std::vector<double>, double>&) override {
       GridContainer::GridContainer<std::vector<double>, double> pdf {GridContainer::GridAxis<double>{"Z", {}}};
-      m_result_vector.push_back(result_type{source, best_model, move(pdf)});
+      m_result_vector.push_back(ResultType{source, best_model, move(pdf)});
       ++m_progress;
     }
   private:
-    vector<result_type>& m_result_vector;  
+    vector<ResultType>& m_result_vector;  
     atomic<size_t>& m_progress;
   };
   
@@ -81,12 +91,13 @@ class CreatePhzCatalog : public Elements::Program {
     
     auto catalog = conf.getCatalog();
     
-    std::vector<std::future<vector<result_type>>> futures;
+    std::vector<std::future<vector<ResultType>>> futures;
     
     atomic<size_t> progress {0};
     size_t total_sources = catalog.size();
     logger.info() << "Processing " << total_sources << " sources";
     uint threads = std::thread::hardware_concurrency();
+    logger.info() << "Using " << threads << " threads";
     uint step = (catalog.end()-catalog.begin()) / threads;
     for (uint i=0; i< threads; ++i) {
       auto begin = catalog.begin() + i*step;
@@ -102,7 +113,7 @@ class CreatePhzCatalog : public Elements::Program {
     }
     for (auto& f : futures) {
       for (auto& result : f.get()) {
-        out_ptr->handleSourceOutput(get<0>(result), get<1>(result), get<2>(result));
+        out_ptr->handleSourceOutput(result.source, result.best_match, result.pdf);
       }
     }
     
