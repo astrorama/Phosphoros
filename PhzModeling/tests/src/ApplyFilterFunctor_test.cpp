@@ -39,7 +39,6 @@ struct ApplyFilterFunctor_Fixture {
   };
 
 
-
    Euclid::XYDataset::XYDataset input_model;
    Euclid::PhzModeling::ApplyFilterFunctor functor;
    std::pair<double,double> range= std::make_pair(11000.,15000.);
