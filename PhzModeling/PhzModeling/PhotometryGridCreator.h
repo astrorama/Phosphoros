@@ -28,25 +28,30 @@ namespace PhzModeling {
 class PhotometryGridCreator{
 public:
   /**
-     * @brief constructor
-     *
-     * @details
-     * Instanciate and initialize a PhotometryGridCreator.
-     *
-     * @param sed_provider
-     * A unique_ptr<XYDatasetProvider> allowing to access to the SEDs
-     *
-     * @param reddening_curve_provider
-     * A unique_ptr<XYDatasetProvider> allowing to access to the Reddening curves
-     *
-     * @param filter_provider
-     * A unique_ptr<XYDatasetProvider> allowing to access to the Filters
-     *
-     */
+   * @brief constructor
+   *
+   * @details
+   * Instanciate and initialize a PhotometryGridCreator.
+   *
+   * @param sed_provider
+   * A unique_ptr<XYDatasetProvider> allowing to access to the SEDs
+   *
+   * @param reddening_curve_provider
+   * A unique_ptr<XYDatasetProvider> allowing to access to the Reddening curves
+   *
+   * @param filter_provider
+   * A unique_ptr<XYDatasetProvider> allowing to access to the Filters
+   *
+   * @param progress_msg_timer
+   * An integer indicating every how many seconds the progress message will appear.
+   * A value of 0 (default) will disable the messages completely.
+   *
+   */
   PhotometryGridCreator(
       std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> sed_provider,
       std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> reddening_curve_provider,
-      std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> filter_provider);
+      std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> filter_provider,
+      int progress_msg_timer = 0);
   /**
    * @brief destructor.
    */
@@ -67,7 +72,6 @@ public:
    * @param filter_name_list
    * A vector<QualifiedName> containing the list (and order) of filter for building the photometry.
    *
-   *
    */
   PhzDataModel::PhotometryGrid createGrid(const PhzDataModel::ModelAxesTuple& parameter_space,
               const std::vector<Euclid::XYDataset::QualifiedName>& filter_name_list);
@@ -77,6 +81,7 @@ private:
   std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> m_sed_provider;
   std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> m_reddening_curve_provider;
   std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> m_filter_provider;
+  int m_progress_msg_timer;
 
 };
 

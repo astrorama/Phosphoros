@@ -32,7 +32,7 @@ public:
     
     PhzModeling::PhotometryGridCreator creator {conf.getSedDatasetProvider(),
                                                 conf.getReddeningDatasetProvider(),
-                                                conf.getFilterDatasetProvider()};
+                                                conf.getFilterDatasetProvider(), 5};
     
     auto param_space = PhzDataModel::createAxesTuple(conf.getZList(), conf.getEbvList(),
                                                      conf.getReddeningCurveList(),

@@ -58,10 +58,12 @@ std::map<XYDataset::QualifiedName, std::unique_ptr<Euclid::MathUtils::Function>>
 PhotometryGridCreator::PhotometryGridCreator(
               std::unique_ptr<XYDataset::XYDatasetProvider> sed_provider,
               std::unique_ptr<XYDataset::XYDatasetProvider> reddening_curve_provider,
-              std::unique_ptr<XYDataset::XYDatasetProvider> filter_provider)
+              std::unique_ptr<XYDataset::XYDatasetProvider> filter_provider,
+              int progress_msg_timer)
       : m_sed_provider{std::move(sed_provider)},
         m_reddening_curve_provider{std::move(reddening_curve_provider)},
-        m_filter_provider(std::move(filter_provider)) {
+        m_filter_provider(std::move(filter_provider)),
+        m_progress_msg_timer{progress_msg_timer} {
 }
         
 class ParallelJob {
@@ -132,10 +134,12 @@ PhzDataModel::PhotometryGrid PhotometryGridCreator::createGrid(
 
     futures.push_back(std::async(std::launch::async, ParallelJob{photometry_algo, model_iter, model_grid.end(), photometry_iter, progress}));
   }
-  while (progress < total_models) {
-    std::this_thread::sleep_for(std::chrono::seconds(5));
-      int percentage_done = 100. * progress / total_models;
-      logger.info() << "Progress: " << percentage_done << " %";
+  if (m_progress_msg_timer > 0) {
+    while (progress < total_models) {
+      std::this_thread::sleep_for(std::chrono::seconds(m_progress_msg_timer));
+        int percentage_done = 100. * progress / total_models;
+        logger.info() << "Progress: " << percentage_done << " %";
+    }
   }
   // Wait for all threads to finish
   for (auto& f : futures) {
