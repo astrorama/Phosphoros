@@ -32,39 +32,14 @@ namespace PhzModeling {
  * This functor takes the sampling of the filter. It extracts the range of the filter,
  * compute the filter normalization (integration of c*filter(lambda)/lambda² )
  * and build an interpolated Function representing the filter.
+ *
+ * Note that the range starts at the last value of Lambda for which the
+ * filter has a zero value and ends to the last value of lambda for which
+ * the filter value is again 0
  */
 class BuildFilterInfoFunctor {
 
 public:
-  /**
-   * @brief Default Constructor
-   */
-  BuildFilterInfoFunctor() = default;
-
-  /**
-   * @brief Move Constructor
-   */
-  BuildFilterInfoFunctor(BuildFilterInfoFunctor&&) = default;
-
-  /**
-   * @brief Move operator
-   */
-  BuildFilterInfoFunctor& operator=(BuildFilterInfoFunctor&&) = default;
-
-  /**
-   * @brief Copy Constructor
-   */
-  BuildFilterInfoFunctor(const BuildFilterInfoFunctor&) = default;
-
-  /**
-    * @brief Copy operator
-    */
-  BuildFilterInfoFunctor& operator=(const BuildFilterInfoFunctor&) = default;
-
-  /**
-   * @brief Destructor
-   */
-  virtual ~BuildFilterInfoFunctor() = default;
 
   /**
    * @brief Work out the filter info from the filter data set
@@ -80,7 +55,10 @@ public:
 
 private:
   /*
-   * return the first and the last of the X axis values
+   * return the first and the last of the X axis values. If the Y value starts
+   * and/or ends with 0s, the range starts at the last value of Lambda for which
+   * the filter has a zero value and ends to the last value of lambda for which
+   * the filter value is again 0
    */
   std::pair<double,double> getRange(const XYDataset::XYDataset& filter_dataset) const;
   /*
