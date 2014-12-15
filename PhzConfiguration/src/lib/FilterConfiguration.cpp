@@ -49,7 +49,7 @@ std::unique_ptr<XYDataset::XYDatasetProvider> FilterConfiguration::getFilterData
 
 std::vector<XYDataset::QualifiedName> FilterConfiguration::getFilterList() {
   // We use a set to avoid duplicate entries
-  std::set<XYDataset::QualifiedName, XYDataset::QualifiedName::AlphabeticalComparator> selected {};
+  std::set<XYDataset::QualifiedName, XYDataset::QualifiedName::LexicographicalComparator> selected {};
   if (!m_options["filter-group"].empty()) {
     auto provider = getFilterDatasetProvider();
     auto group_list = m_options["filter-group"].as<std::vector<std::string>>();

@@ -43,7 +43,7 @@ std::unique_ptr<Euclid::XYDataset::XYDatasetProvider> SedConfiguration::getSedDa
 
 std::vector<Euclid::XYDataset::QualifiedName> SedConfiguration::getSedList() {
   // We use a set to avoid duplicate entries
-  std::set<Euclid::XYDataset::QualifiedName, XYDataset::QualifiedName::AlphabeticalComparator> selected {};
+  std::set<Euclid::XYDataset::QualifiedName, XYDataset::QualifiedName::LexicographicalComparator> selected {};
   if (!m_options["sed-group"].empty()) {
     auto provider = getSedDatasetProvider();
     auto group_list = m_options["sed-group"].as<std::vector<std::string>>();
