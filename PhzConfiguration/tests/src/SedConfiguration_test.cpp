@@ -131,8 +131,8 @@ BOOST_FIXTURE_TEST_CASE(getSedDatasetProvider_function_test, SedConfiguration_Fi
   auto fdp     = sconf.getSedDatasetProvider();
   auto vec_fdp = fdp->listContents(group);
 
-  BOOST_CHECK_EQUAL(vec_fdp[0].datasetName(), "file2");
-  BOOST_CHECK_EQUAL(vec_fdp[1].datasetName(), "Dataset_name_for_file1");
+  BOOST_CHECK_EQUAL(vec_fdp[0].datasetName(), "Dataset_name_for_file1");
+  BOOST_CHECK_EQUAL(vec_fdp[1].datasetName(), "file2");
 
 }
 
@@ -165,8 +165,8 @@ BOOST_FIXTURE_TEST_CASE(getSedList_function_test, SedConfiguration_Fixture) {
   cf::SedConfiguration sconf(options_map);
   auto list = sconf.getSedList();
 
-  BOOST_CHECK_EQUAL(list[0].datasetName(), "file2");
-  BOOST_CHECK_EQUAL(list[1].datasetName(), "Dataset_name_for_file1");
+  BOOST_CHECK_EQUAL(list[0].datasetName(), "Dataset_name_for_file1");
+  BOOST_CHECK_EQUAL(list[1].datasetName(), "file2");
 
 }
 
@@ -211,7 +211,7 @@ BOOST_FIXTURE_TEST_CASE(getSedList_add_function_test, SedConfiguration_Fixture) 
   auto list = sconf.getSedList();
 
   BOOST_CHECK_EQUAL(list.size(), 3);
-  BOOST_CHECK_EQUAL(list[2].qualifiedName(), "sed/COSMOS/Dataset_name_for_file3");
+  BOOST_CHECK_EQUAL(list[0].qualifiedName(), "sed/COSMOS/Dataset_name_for_file3");
 
 }
 
@@ -236,7 +236,7 @@ BOOST_FIXTURE_TEST_CASE(getSedList_add_twice_function_test, SedConfiguration_Fix
   auto list2 = sconf2.getSedList();
 
   BOOST_CHECK_EQUAL(list.size(), list2.size());
-  BOOST_CHECK_EQUAL(list[1].qualifiedName(), "sed/MER/Dataset_name_for_file1");
+  BOOST_CHECK_EQUAL(list[0].qualifiedName(), "sed/MER/Dataset_name_for_file1");
 
 }
 
