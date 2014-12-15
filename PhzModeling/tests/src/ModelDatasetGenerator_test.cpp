@@ -282,24 +282,19 @@ BOOST_FIXTURE_TEST_CASE(dereferencing_test, ModelDatasetGenerator_Fixture) {
     m_no_reddening_function,
     m_no_redshift_function
   };
-  for (auto& sed:seds){
-    for (auto& reddening:extinction_functions){
-      for (auto& ebv:ebvs){
-        for (auto& redshift:zs){
+  for (auto& sed : seds) {
+    for (size_t i=0; i<extinction_functions.size()*ebvs.size()*zs.size(); ++i) {
+      auto& dataset_0 =*model_generator;
 
-          auto& dataset_0 =*model_generator;
-
-          BOOST_CHECK_EQUAL(3,dataset_0.size());
-          auto expected_iterator = sed.begin();
-          for(auto& pair:dataset_0){
-            BOOST_CHECK(Elements::isEqual(expected_iterator->first,pair.first));
-            BOOST_CHECK(Elements::isEqual(expected_iterator->second,pair.second));
-            ++expected_iterator;
-          }
-
-          ++model_generator;
-        }
+      BOOST_CHECK_EQUAL(3,dataset_0.size());
+      auto expected_iterator = sed.begin();
+      for(auto& pair:dataset_0){
+        BOOST_CHECK(Elements::isEqual(expected_iterator->first,pair.first));
+        BOOST_CHECK(Elements::isEqual(expected_iterator->second,pair.second));
+        ++expected_iterator;
       }
+
+      ++model_generator;
     }
   }
 
@@ -312,26 +307,24 @@ BOOST_FIXTURE_TEST_CASE(dereferencing_test, ModelDatasetGenerator_Fixture) {
       m_no_reddening_function,
       m_redshift_function
   };
-  for (auto& sed:seds){
-      for (auto& reddening:extinction_functions){
-        for (auto& ebv:ebvs){
-          for (auto& redshift:zs){
+  for (auto& sed : seds) {
+    for (size_t i=0; i<extinction_functions.size()*ebvs.size(); ++i) {
+      for (auto& redshift : zs) {
 
-            auto& dataset_0 =*redshift_model_generator;
+        auto& dataset_0 =*redshift_model_generator;
 
-            BOOST_CHECK_EQUAL(3,dataset_0.size());
-            auto expected_iterator = sed.begin();
-            for(auto& pair:dataset_0){
-              BOOST_CHECK(Elements::isEqual((1+redshift)*(expected_iterator->first),pair.first));
-              BOOST_CHECK(Elements::isEqual(expected_iterator->second,pair.second));
-              ++expected_iterator;
-            }
-
-            ++redshift_model_generator;
-          }
+        BOOST_CHECK_EQUAL(3,dataset_0.size());
+        auto expected_iterator = sed.begin();
+        for(auto& pair:dataset_0){
+          BOOST_CHECK(Elements::isEqual((1+redshift)*(expected_iterator->first),pair.first));
+          BOOST_CHECK(Elements::isEqual(expected_iterator->second,pair.second));
+          ++expected_iterator;
         }
+
+        ++redshift_model_generator;
       }
     }
+  }
 
   // check the loop with only the (dummy) reddening function
   Euclid::PhzModeling::ModelDatasetGenerator reddening_model_generator = {
@@ -342,28 +335,28 @@ BOOST_FIXTURE_TEST_CASE(dereferencing_test, ModelDatasetGenerator_Fixture) {
       m_reddening_function,
       m_no_redshift_function
   };
-  for (auto& sed:seds){
-       for (auto& reddening:extinction_functions){
-         for (auto& ebv:ebvs){
-           for (auto& redshift:zs){
+  for (auto& sed : seds) {
+    for (auto& reddening : extinction_functions) {
+      for (auto& ebv : ebvs) {
+        for (size_t i=0; i< zs.size(); ++i) {
 
-             auto& dataset_0 =*reddening_model_generator;
+          auto& dataset_0 = *reddening_model_generator;
 
-             BOOST_CHECK_EQUAL(3,dataset_0.size());
-             auto expected_iterator = sed.begin();
-             for(auto& pair:dataset_0){
-               BOOST_CHECK(Elements::isEqual(expected_iterator->first,pair.first));
-               BOOST_CHECK(
-                   Elements::isEqual((1+ebv*reddening(pair.first))*(expected_iterator->second),
-                   pair.second)
-               );
-               ++expected_iterator;
-             }
-             ++reddening_model_generator;
-           }
-         }
-       }
-     }
+          BOOST_CHECK_EQUAL(3, dataset_0.size());
+          auto expected_iterator = sed.begin();
+          for (auto& pair : dataset_0) {
+            BOOST_CHECK(Elements::isEqual(expected_iterator->first, pair.first));
+            BOOST_CHECK(
+                        Elements::isEqual((1 + ebv * reddening(pair.first))*(expected_iterator->second),
+                                          pair.second)
+                        );
+            ++expected_iterator;
+          }
+          ++reddening_model_generator;
+        }
+      }
+    }
+  }
 
 }
 
