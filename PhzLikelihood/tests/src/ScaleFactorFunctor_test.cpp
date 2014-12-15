@@ -8,6 +8,7 @@
 #include <set>
 #include <boost/test/unit_test.hpp>
 #include <vector>
+#include <cmath>
 
 #include "ElementsKernel/Real.h"
 #include "SourceCatalog/SourceAttributes/Photometry.h"
@@ -130,8 +131,8 @@ BOOST_FIXTURE_TEST_CASE(nPoints_test, ScaleFactorFunctor_Fixture) {
   vector<SourceCatalog::FluxErrorPair> model_List;
   for (int i = 0; i < 20; ++i) {
     source_List.push_back(
-        { abs(sin(0.22 + i * 10.25)), 0.1 * abs(sin(0.11 + i * 11.27)) });
-    model_List.push_back( { abs(sin(0.25 + i * 10.23)), 0.0 });
+        { std::abs(std::sin(0.22 + i * 10.25)), 0.1 * std::abs(std::sin(0.11 + i * 11.27)) });
+    model_List.push_back( { std::abs(std::sin(0.25 + i * 10.23)), 0.0 });
   }
 
   double num = 0;
