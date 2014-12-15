@@ -1,4 +1,4 @@
-/** 
+/**
  * @file ScaleFactorFunctor.icpp
  * @date December 2, 2014
  * @author Nikolaos Apostolakos
@@ -10,6 +10,23 @@
 namespace Euclid {
 namespace PhzLikelihood {
 
+/**
+  * @brief Function Call Operator
+  * @details
+  * Compute the Scale Factor of a source
+  *
+  * @param source_begin
+  * An iterator over the Filters of the source exposing an object having "flux" and "error" fields.
+
+  * @param source_end
+  * End iterator for the Filters of the source.
+  *
+  * @param model_begin
+  * An iterator over the Filters of the model exposing an object containing the model "flux".
+  *
+  * @return
+  * The computed Scale Factor as a double.
+  */
 template<typename SourceIter, typename ModelIter>
 double ScaleFactorFunctor::operator ()(SourceIter source, SourceIter source_end,
                                        ModelIter model) const {
