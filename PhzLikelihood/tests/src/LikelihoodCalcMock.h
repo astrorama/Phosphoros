@@ -14,6 +14,13 @@
 
 namespace Euclid {
 
+// This is a mock object that performs the more strict bitwise equality checks.
+// It shouldn't contain any logic for real number equality arithmetics. The
+// pragma allows the mock to do exactly that without the unnecessary compilation
+// warnings.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+
 class LikelihoodCalcMock {
   
 public:
@@ -149,6 +156,9 @@ private:
   std::shared_ptr<std::queue<std::tuple<phot_iter, phot_iter, phot_iter, double, double>>> m_functor_call_queue;
   
 }; // end of class LikelihoodCalcMock
+
+// Recover the warning messages for floating point comparison
+#pragma GCC diagnostic pop
 
 } // end of namespace Euclid
 

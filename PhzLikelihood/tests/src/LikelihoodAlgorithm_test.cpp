@@ -64,7 +64,14 @@ BOOST_AUTO_TEST_CASE(SameFilterOrder) {
   
   // Then
   for (int i=0; i<model_no; ++i) {
+// We have instruct the mock class to return the exact double representation. We
+// want to do a very strict bitwise comparison and not a more relaxed real value
+// representation comparison, to guarantee that the algorithm does not do any
+// math on the result. The following pragma supress the related warnings.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
     BOOST_CHECK(likelihood_list[i] == i);
+#pragma GCC diagnostic pop
   }
   
 }
@@ -129,7 +136,14 @@ BOOST_AUTO_TEST_CASE(DifferentFilterOrder) {
   
   // Then
   for (int i=0; i<model_no; ++i) {
+// We have instruct the mock class to return the exact double representation. We
+// want to do a very strict bitwise comparison and not a more relaxed real value
+// representation comparison, to guarantee that the algorithm does not do any
+// math on the result. The following pragma supress the related warnings.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wfloat-equal"
     BOOST_CHECK(likelihood_list[i] == i);
+#pragma GCC diagnostic pop
   }
   
 }
