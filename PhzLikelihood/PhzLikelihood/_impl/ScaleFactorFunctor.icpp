@@ -13,7 +13,7 @@ namespace PhzLikelihood {
 /**
   * @brief Function Call Operator
   * @details
-  * Compute the Scale Factor of a source
+  * Compute the Scale Factor of the source with respect to the model.
   *
   * @param source_begin
   * An iterator over the Filters of the source exposing an object having "flux" and "error" fields.

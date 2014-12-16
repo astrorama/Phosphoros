@@ -13,3 +13,5 @@ elements_add_unit_test(LikelihoodAlgorithm_test tests/src/LikelihoodAlgorithm_te
                        LINK_LIBRARIES PhzLikelihood TYPE Boost)
 elements_add_unit_test(ScaleFactorFunctor_test tests/src/ScaleFactorFunctor_test.cpp
                        LINK_LIBRARIES PhzLikelihood TYPE Boost)
+elements_add_unit_test(ChiSquareFunctor_test tests/src/ChiSquareFunctor_test.cpp
+                       LINK_LIBRARIES PhzLikelihood TYPE Boost)
