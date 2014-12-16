@@ -17,7 +17,7 @@ namespace Euclid {
 namespace PhzConfiguration {
 
 /**
- * @class Euclid::PhzConfiguration::FilterConfiguration
+ * @class FilterConfiguration
  * @brief
  * This class defines the filter parameter options
  * @details

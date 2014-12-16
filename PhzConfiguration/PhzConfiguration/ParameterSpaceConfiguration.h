@@ -22,7 +22,7 @@ namespace Euclid {
 namespace PhzConfiguration {
 
 /**
- * @class Euclid::PhzConfiguration::ParameterSpaceConfiguration
+ * @class ParameterSpaceConfiguration
  * @brief
  * This class combines the parameter options of the SedConfiguration,
  * RedshiftConfiguration and ReddeningConfiguration classes

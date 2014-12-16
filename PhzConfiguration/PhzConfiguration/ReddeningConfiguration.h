@@ -16,7 +16,7 @@ namespace Euclid {
 namespace PhzConfiguration {
 
 /**
- * @class Euclid::PhzConfiguration::ReddeningConfiguration
+ * @class ReddeningConfiguration
  * @brief
  * This class defines the Reddening parameter options
  * @details

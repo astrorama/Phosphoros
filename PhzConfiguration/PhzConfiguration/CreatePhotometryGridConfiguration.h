@@ -21,7 +21,7 @@ namespace Euclid {
 namespace PhzConfiguration {
 
 /**
- * @class Euclid::PhzConfiguration::CreatePhotometryGridConfiguration
+ * @class CreatePhotometryGridConfiguration
  * @brief
  * This class defines the Photometry Grid parameter option, \b binary-photometry-grid
  * and inherits from the options of the ParameterSpaceConfiguration and FilterConfiguration

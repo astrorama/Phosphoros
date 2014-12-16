@@ -18,7 +18,7 @@ namespace Euclid {
 namespace PhzConfiguration {
 
 /**
- * @class Euclid::PhzConfiguration::RedshiftConfiguration
+ * @class RedshiftConfiguration
  * @brief
  * This class defines the redshift parameter options
  * @details

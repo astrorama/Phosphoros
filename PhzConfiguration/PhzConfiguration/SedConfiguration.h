@@ -18,7 +18,7 @@ namespace Euclid {
 namespace PhzConfiguration {
 
 /**
- * @class Euclid::PhzConfiguration::SedConfiguration
+ * @class SedConfiguration
  * @brief
  * This class defines the sed parameter options
  * @details
