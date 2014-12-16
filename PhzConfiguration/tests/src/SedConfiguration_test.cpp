@@ -129,12 +129,15 @@ BOOST_FIXTURE_TEST_CASE(getSedDatasetProvider_function_test, SedConfiguration_Fi
 
   cf::SedConfiguration sconf(options_map);
   auto fdp     = sconf.getSedDatasetProvider();
-  auto vec_fdp = fdp->listContents(group);
-
-  for (auto& t : vec_fdp)
-    std::cout << t.qualifiedName() << std::endl;
-  BOOST_CHECK_EQUAL(vec_fdp[0].datasetName(), "Dataset_name_for_file1");
-  BOOST_CHECK_EQUAL(vec_fdp[1].datasetName(), "file2");
+  BOOST_CHECK(fdp != nullptr);
+  auto dataset = fdp->getDataset({"sed/MER/file2"});
+  BOOST_CHECK_EQUAL(2, dataset->size());
+  auto iter = dataset->begin();
+  BOOST_CHECK_EQUAL(111.1, iter->first);
+  BOOST_CHECK_EQUAL(111.1, iter->second);
+  ++iter;
+  BOOST_CHECK_EQUAL(222.2, iter->first);
+  BOOST_CHECK_EQUAL(222.2, iter->second);
 
 }
 

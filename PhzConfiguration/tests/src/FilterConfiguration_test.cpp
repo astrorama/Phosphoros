@@ -81,7 +81,6 @@ struct FilterConfiguration_Fixture {
     options_map["filter-root-path"].value() = boost::any(base_directory);
     options_map["filter-group"].value() = boost::any(group_vector);
 
-    std::cout <<"zzz "<<temp_dir.path().native()<<std::endl;
   }
   ~FilterConfiguration_Fixture() {
     //removeDir(base_directory);
@@ -130,10 +129,15 @@ BOOST_FIXTURE_TEST_CASE(getFilterDatasetProvider_function_test, FilterConfigurat
 
   cf::FilterConfiguration fconf(options_map);
   auto fdp     = fconf.getFilterDatasetProvider();
-  auto vec_fdp = fdp->listContents(group);
-
-  BOOST_CHECK_EQUAL(vec_fdp[0].datasetName(), "file2");
-  BOOST_CHECK_EQUAL(vec_fdp[1].datasetName(), "Dataset_name_for_file1");
+  BOOST_CHECK(fdp != nullptr);
+  auto dataset = fdp->getDataset({"filter/MER/file2"});
+  BOOST_CHECK_EQUAL(2, dataset->size());
+  auto iter = dataset->begin();
+  BOOST_CHECK_EQUAL(111.1, iter->first);
+  BOOST_CHECK_EQUAL(111.1, iter->second);
+  ++iter;
+  BOOST_CHECK_EQUAL(222.2, iter->first);
+  BOOST_CHECK_EQUAL(222.2, iter->second);
 
 }
 
@@ -210,8 +214,7 @@ BOOST_FIXTURE_TEST_CASE(getFilterList_add_function_test, FilterConfiguration_Fix
 
   cf::FilterConfiguration fconf(options_map);
   auto list = fconf.getFilterList();
- for(auto i : list)
-	 std::cout<<"list: "<<i.qualifiedName()<<std::endl;
+
   BOOST_CHECK_EQUAL(list.size(), 3);
   BOOST_CHECK_EQUAL(list[0].qualifiedName(), "filter/COSMOS/Dataset_name_for_file3");
 

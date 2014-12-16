@@ -14,5 +14,6 @@ elements_add_executable(CreatePhotometryGrid src/program/CreatePhotometryGrid.cp
 
 elements_add_executable(CreatePhzCatalog src/program/CreatePhzCatalog.cpp
                         LINK_LIBRARIES ElementsKernel Boost PhzConfiguration PhzDataModel PhzModeling PhzLikelihood PhzOutput)
+                        
 
 elements_install_conf_files()

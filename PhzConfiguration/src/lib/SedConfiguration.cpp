@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 #include "ElementsKernel/Exception.h"
 #include "XYDataset/AsciiParser.h"
 #include "XYDataset/FileSystemProvider.h"
