@@ -4,24 +4,22 @@
  * @author Nikolaos Apostolakos
  */
 
-#include <algorithm>
 #include <tuple>
 #include "ElementsKernel/Exception.h"
 #include "GridContainer/_impl/TemplateLoopCounter.h"
 #include "PhzDataModel/LikelihoodGrid.h"
-#include "PhzLikelihood/LikelihoodAlgorithm.h"
-#include "PhzLikelihood/ScaleFactorFunctor.h"
-#include "PhzLikelihood/ChiSquareFunctor.h"
 #include "PhzLikelihood/SourcePhzFunctor.h"
 
 namespace Euclid {
 namespace PhzLikelihood {
 
 SourcePhzFunctor::SourcePhzFunctor(PhzDataModel::PhotometricCorrectionMap phot_corr_map,
-                                   PhzDataModel::PhotometryGrid phot_grid)
+                                   PhzDataModel::PhotometryGrid phot_grid,
+                                   LikelihoodFunction likelihood_func,
+                                   BestFitSearchFunction best_fit_search_func)
         : m_phot_corr_map{std::move(phot_corr_map)}, m_phot_grid{std::move(phot_grid)},
-          m_likelihood_func{LikelihoodAlgorithm{ScaleFactorFunctor{}, ChiSquareFunctor{}}},
-          m_best_fit_search_func{std::max_element<PhzDataModel::LikelihoodGrid::iterator>} {
+          m_likelihood_func{std::move(likelihood_func)},
+          m_best_fit_search_func{std::move(best_fit_search_func)} {
 }
 
 SourceCatalog::Photometry applyPhotCorr(const PhzDataModel::PhotometricCorrectionMap& pc_map,

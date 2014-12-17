@@ -7,11 +7,15 @@
 #ifndef PHZLIKELIHOOD_SOURCEPHZFUNCTOR_H
 #define	PHZLIKELIHOOD_SOURCEPHZFUNCTOR_H
 
+#include <algorithm>
 #include <functional>
 #include "SourceCatalog/SourceAttributes/Photometry.h"
 #include "PhzDataModel/LikelihoodGrid.h"
 #include "PhzDataModel/PhotometryGrid.h"
 #include "PhzDataModel/PhotometricCorrectionMap.h"
+#include "PhzLikelihood/LikelihoodAlgorithm.h"
+#include "PhzLikelihood/ScaleFactorFunctor.h"
+#include "PhzLikelihood/ChiSquareFunctor.h"
 
 namespace Euclid {
 namespace PhzLikelihood {
@@ -32,7 +36,9 @@ public:
                        > BestFitSearchFunction;
   
   SourcePhzFunctor(PhzDataModel::PhotometricCorrectionMap phot_corr_map,
-                   PhzDataModel::PhotometryGrid phot_grid);
+                   PhzDataModel::PhotometryGrid phot_grid,
+                   LikelihoodFunction likelihood_func = LikelihoodAlgorithm{ScaleFactorFunctor{}, ChiSquareFunctor{}},
+                   BestFitSearchFunction best_fit_search_func = std::max_element<PhzDataModel::LikelihoodGrid::iterator>);
   
   PhzDataModel::PhotometryGrid::const_iterator operator()(
                             const SourceCatalog::Photometry& source_phot) const;
