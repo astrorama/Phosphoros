@@ -77,7 +77,7 @@ BOOST_FIXTURE_TEST_CASE(twoPoints_test, ScaleFactorFunctor_Fixture) {
   model_List.push_back( { 7.0, 0.0 });
 
   PhzLikelihood::ScaleFactorFunctor functor { };
-  // for equal error value we have (fm1*fs1+fm2*fs2)/(fm1²+fm2²)
+  // for equal error value we have (fm1*fs1+fm2*fs2)/(fm1^2+fm2^2)
   for (int i = 1; i < 12; ++i) {
     source_List[0].flux = i;
     for (int j = 1; j < 12; ++j) {

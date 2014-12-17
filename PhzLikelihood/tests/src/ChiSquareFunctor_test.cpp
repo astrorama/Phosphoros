@@ -73,7 +73,7 @@ BOOST_FIXTURE_TEST_CASE(multiplePoint_test, ChiSquareFunctor_Fixture) {
   vector<SourceCatalog::FluxErrorPair> model_List;
   source_List.push_back( { 5.0, 1.0 });
   model_List.push_back( { 3.0, 0.0 });
-  // chi² for this item = (2*3-5)²/1²=1
+  // chi^2 for this item = (2*3-5)^2/1^2=1
   double scale = 2.0;
 
   PhzLikelihood::ChiSquareFunctor functor { };
@@ -85,7 +85,7 @@ BOOST_FIXTURE_TEST_CASE(multiplePoint_test, ChiSquareFunctor_Fixture) {
 
   source_List.push_back( { 7.0, 1.0 });
   model_List.push_back( { 3.0, 0.0 });
-  // chi² for this item = (2*3-7)²/1²=1
+  // chi^2 for this item = (2*3-7)^2/1^2=1
 
   double value=functor(source_List.begin(), source_List.end(),
         model_List.begin(), scale);
@@ -97,7 +97,7 @@ BOOST_FIXTURE_TEST_CASE(multiplePoint_test, ChiSquareFunctor_Fixture) {
   model_List.push_back( { 2.0, 0.0 });
   value=functor(source_List.begin(), source_List.end(),
          model_List.begin(), scale);
-  // chi² for this item = (2*2-1)²/2²=9/4
+  // chi^2 for this item = (2*2-1)^2/2^2=9/4
   BOOST_CHECK(Elements::isEqual(value, prev_Value*exp(- 9.0/8.0)));
   prev_Value=value;
 
@@ -105,7 +105,7 @@ BOOST_FIXTURE_TEST_CASE(multiplePoint_test, ChiSquareFunctor_Fixture) {
   model_List.push_back( { 11.0, 0.0 });
   value=functor(source_List.begin(), source_List.end(),
          model_List.begin(), scale);
-  // chi² for this item = (2*11-5)²/7²=289/49
+  // chi^2 for this item = (2*11-5)^2/7^2=289/49
   BOOST_CHECK(Elements::isEqual(value, prev_Value*exp(- 289.0/98.0)));
   prev_Value=value;
 

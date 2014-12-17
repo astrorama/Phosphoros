@@ -13,9 +13,9 @@ namespace PhzLikelihood {
  * @class Euclid::PhzLikelihood::ScaleFactorFunctor
  * @brief
  * This functor is in charge of computing the Scale Factor of the source. This factor
- * enters the computation of the Chi².
+ * enters the computation of the Chi^2.
  * @details
- * The scale Factor is computed (analytically) as the value minimizing the Chi².
+ * The scale Factor is computed (analytically) as the value minimizing the Chi^2.
  * For a single Filter the Scale Factor is the ratio between the source flux and the model flux.
  * When multiple filter are available the Scale Factor is computed as the ratio between the
  * weighted sum of the source flux and the weighted sum of the model flux.

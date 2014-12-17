@@ -12,7 +12,7 @@ namespace PhzLikelihood {
 /**
    * @brief Function Call Operator
    * @details
-   * Compute the Likelihood for a source with respect to the model using the Chi² pathway.
+   * Compute the Likelihood for a source with respect to the model using the Chi^2 pathway.
    *
    * @param source_begin
    * An iterator over the Filters of the source exposing an object having "flux" and "error" fields.
@@ -26,7 +26,7 @@ namespace PhzLikelihood {
    * @param scale
    * The scale factor, a double.
    * In order to get a meaningful value for the Likelihood, the scale factor
-   * must be chosen as the value minimizing the Chi² (an analytical formula is available).
+   * must be chosen as the value minimizing the Chi^2 (an analytical formula is available).
    *
    * @return
    * The computed Likelihood as a double.
