@@ -30,8 +30,8 @@ namespace PhzLikelihood {
 template<typename SourceIter, typename ModelIter>
 double ScaleFactorFunctor::operator ()(SourceIter source, SourceIter source_end,
                                        ModelIter model) const {
-    double numerator {0};
-    double denominator {0};
+    double numerator {0.0};
+    double denominator {0.0};
     for (; source!=source_end; ++source, ++model) {
       double error_square = (*source).error * (*source).error;
       numerator += ((*model).flux * (*source).flux) / error_square;
