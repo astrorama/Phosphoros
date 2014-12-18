@@ -2,6 +2,9 @@ elements_subdir(PhzLikelihood)
 
 elements_depends_on_subdirs(PhzDataModel PhzOutput)
 
+find_package(gmock)
+find_package(gtest)
+
 #===== Libraries ===============================================================
 elements_add_library(PhzLikelihood src/lib/*.cpp
                   LINK_LIBRARIES PhzDataModel PhzOutput
@@ -10,7 +13,8 @@ elements_add_library(PhzLikelihood src/lib/*.cpp
 #===== Boost tests =============================================================
 
 elements_add_unit_test(LikelihoodAlgorithm_test tests/src/LikelihoodAlgorithm_test.cpp
-                       LINK_LIBRARIES PhzLikelihood TYPE Boost)
+                       LINK_LIBRARIES gmock gtest PhzLikelihood TYPE Boost
+                       INCLUDE_DIRS gmock gtest)
 elements_add_unit_test(ScaleFactorFunctor_test tests/src/ScaleFactorFunctor_test.cpp
                        LINK_LIBRARIES PhzLikelihood TYPE Boost)
 elements_add_unit_test(ChiSquareFunctor_test tests/src/ChiSquareFunctor_test.cpp
