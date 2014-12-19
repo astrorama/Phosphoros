@@ -35,10 +35,6 @@ public:
       phot_iter source = std::get<0>(args);
       phot_iter source_end = std::get<1>(args);
       phot_iter model = std::get<2>(args);
-// This is a mock object that performs the more strict bitwise equality checks.
-// It shouldn't contain any logic for real number equality arithmetics. The
-// pragma allows the mock to do exactly that without the unnecessary compilation
-// warnings.
       for(; exp_source!=exp_source_end && source!=source_end; ++exp_source, ++ source, ++exp_model, ++model) {
         if ((*exp_source).flux != (*source).flux || (*exp_source).error != (*source).error) {
           BOOST_ERROR("Expected source photometry (" << (*exp_source).flux << "," <<
