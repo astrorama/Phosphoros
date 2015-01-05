@@ -11,7 +11,6 @@
 #include <boost/test/test_tools.hpp>
 #include "EnableGMock.h"
 #include "SourceCatalog/SourceAttributes/Photometry.h"
-#include "FluxErrorPair_boost.h"
 
 using namespace testing;
 
