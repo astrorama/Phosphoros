@@ -48,7 +48,8 @@ public:
 
   vector<ResultType> operator()() {
     vector<ResultType> result;
-    handler.handleSources(begin, end, unique_ptr<PhzOutput::OutputHandler>{new Output{result, m_progress}});
+    Output output {result, m_progress};
+    handler.handleSources(begin, end, output);
     return result;
   }
   

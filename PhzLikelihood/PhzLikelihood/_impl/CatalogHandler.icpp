@@ -12,7 +12,7 @@ namespace PhzLikelihood {
 
 template<typename SourceIter>
 void CatalogHandler::handleSources(SourceIter source_begin, SourceIter source_end,
-                                   std::unique_ptr<PhzOutput::OutputHandler> out_handler_ptr) const {
+                                   PhzOutput::OutputHandler& out_handler) const {
   
   for (SourceIter source=source_begin; source != source_end; ++source) {
     // Get the PHZ results
@@ -21,7 +21,7 @@ void CatalogHandler::handleSources(SourceIter source_begin, SourceIter source_en
     
     // Pass them to the handler. For the moment we pass a dummy PDF
     GridContainer::GridContainer<std::vector<double>, double> pdf {GridContainer::GridAxis<double>{"Z", {}}};
-    out_handler_ptr->handleSourceOutput(*source, best_model_iter, pdf);
+    out_handler.handleSourceOutput(*source, best_model_iter, pdf);
   }
 }
 
