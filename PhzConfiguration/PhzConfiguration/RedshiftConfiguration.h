@@ -20,7 +20,7 @@ namespace PhzConfiguration {
 /**
  * @class RedshiftConfiguration
  * @brief
- * This class defines the redshift parameter options
+ * This class defines the Redshift parameter options
  * @details
  * The parameters available are:
  * - \b z-range : double type, min max step e.g. "0. 2. 0.5"
@@ -58,9 +58,9 @@ public:
   static boost::program_options::options_description getProgramOptions();
 
   /**
-   * @brief Constructor
-   * The redshift configuration class which defines parameters allowed for
-   * the redshift parameter options(z-range and z-value)
+   * @brief
+   * The redshift configuration class defines parameters allowed for
+   * the redshift parameter options
    *
    * @details
    * The redshift options are:

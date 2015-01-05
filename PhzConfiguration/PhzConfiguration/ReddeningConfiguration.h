@@ -26,10 +26,10 @@ namespace PhzConfiguration {
  * - \b reddening-group   : string, a reddening group(only one) e.g. reddening/CAL \n
  * - \b reddening-name    : string, a reddening name (only one) e.g. CAL/calzetti \n
  * - \b reddening-exclude : string, a reddening name to be excluded (only one) \n
- * - \b ebv-range : double type, min max step e.g. "0. 2. 0.5" \n
- *            - min as minimum E(B-V) value
- *            - max as maximum E(B-V) value where max > min
- *            - step, step to be used for the interval \n
+ * - \b ebv-range         : double, min max step e.g. "0. 2. 0.5" \n
+ *                         - min as minimum E(B-V) value
+ *                         - max as maximum E(B-V) value where max > min
+ *                         - step, step to be used for the interval \n
  * Note that the space character is the separator.
  * You can add several z-range parameters but they should not overlap. The
  * the following example is forbidden: \n
@@ -62,8 +62,8 @@ public:
   static boost::program_options::options_description getProgramOptions();
 
   /**
-   * @brief Constructor
-   * The reddening configuration class which defines parameters allowed for
+   * @brief
+   * The reddening configuration class defines parameters allowed for
    * the reddening parameter options
    *
    * @details

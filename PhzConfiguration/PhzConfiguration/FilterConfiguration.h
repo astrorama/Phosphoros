@@ -19,7 +19,7 @@ namespace PhzConfiguration {
 /**
  * @class FilterConfiguration
  * @brief
- * This class defines the filter parameter options
+ * This class defines the Filter parameter options
  * @details
  * The parameters available are:
  * filter-root-path : string root path to the filters

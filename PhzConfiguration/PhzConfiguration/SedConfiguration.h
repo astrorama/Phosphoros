@@ -20,7 +20,7 @@ namespace PhzConfiguration {
 /**
  * @class SedConfiguration
  * @brief
- * This class defines the sed parameter options
+ * This class defines the Sed parameter options
  * @details
  * The parameters available are:
  * - \b sed-root-path : string root path to the seds
@@ -46,8 +46,8 @@ public:
   static boost::program_options::options_description getProgramOptions();
 
   /**
-   * @brief Constructor
-   * The sed configuration class which defines parameters allowed for
+   * @brief
+   * The sed configuration class defines parameters allowed for
    * the sed parameter options
    *
    * @details

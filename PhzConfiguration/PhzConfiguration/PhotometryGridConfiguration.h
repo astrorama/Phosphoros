@@ -46,7 +46,7 @@ public:
 
   /**
    * @brief
-   * It defines parameters allowed for this class
+   * This class defines the photometry grid parameter options
    * @details
    * The options are:
    * photometry-grid-file : string, filename and path of the photometry grid file
