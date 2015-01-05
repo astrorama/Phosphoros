@@ -14,11 +14,6 @@ inline wrap_stringstream& operator<<(wrap_stringstream& wrapped, const Euclid::S
   return wrapped << '(' << item.flux << ',' << item.error << ')';
 }
 
-/// Enables boost to compare objects of type FluxErrorPair
-inline bool operator!=(const Euclid::SourceCatalog::FluxErrorPair& left, const Euclid::SourceCatalog::FluxErrorPair& right) {
-  return left.flux != right.flux || left.error != right.error;
-}
-
 }
 
 #endif	/* FLUXERRORPAIR_BOOST_H */
