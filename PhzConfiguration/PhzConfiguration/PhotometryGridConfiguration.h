@@ -19,16 +19,34 @@
 namespace Euclid {
 namespace PhzConfiguration {
 
+/**
+ * @class PhotometryGridConfiguration
+ * @brief
+ * This class defines the Photometry Grid parameter option
+ * @details
+ * The parameter available is :
+ * - \b photometry-grid-file, string, The path and filename of the grid file"
+ * The getPhotometryGrid function loads a photometry grid in memory referred by the
+ * photometry-grid-file parameter.
+ * @throw Element::Exception
+ * - Empty parameter option
+ */
+
 class PhotometryGridConfiguration {
 
 public:
 
+  /**
+   * @brief
+   * Get program options of the ReddeningConfiguration class
+   * @return
+   * A boost boost::program_options::options_description type
+   */
    static boost::program_options::options_description getProgramOptions();
 
   /**
-   * @brief Constructor
-   * Construtor which defines parameters allowed for this class
-   *
+   * @brief
+   * It defines parameters allowed for this class
    * @details
    * The options are:
    * photometry-grid-file : string, filename and path of the photometry grid file
@@ -41,12 +59,14 @@ public:
 
 
   /**
-   * @brief
+   * @brief getPhotometryGrid
+   * This function loads in memory a photometry grid referred by \b photometry-grid-file
+   * options as a PhzDataModel::PhotometryGrid object.
    * @details
    * @throw ElementException
-   * @throw ElementException
+   * Empty parameter option
    * @return
-   * A vector of QualifiedName type
+   * A PhzDataModel::PhotometryGrid object (the photometry grid)
    */
    PhzDataModel::PhotometryGrid getPhotometryGrid();
 
