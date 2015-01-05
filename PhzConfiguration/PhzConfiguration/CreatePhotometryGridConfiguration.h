@@ -23,12 +23,14 @@ namespace PhzConfiguration {
 /**
  * @class CreatePhotometryGridConfiguration
  * @brief
+ * This class defines the photometry grid parameter option used by the CreatePhotometryGrid
+ * executable
+ * @details
  * This class defines the Photometry Grid parameter option, \b binary-photometry-grid
  * and inherits from the options of the ParameterSpaceConfiguration and FilterConfiguration
  * options. It also provides a function for writing a grid in a binary file.
- * @details
  * The parameter available is :
- * - \b binary-photometry-grid : string, output filename for storing the grid data
+ * - \b binary-photometry-grid : string, output filename and path for storing the photometry grid data
  * Before writing data to the disk, the constructor checks that it is
  * possible to write on the disk at the location specified by the
  * binary-photometry-grid option and throws an exception if any.
@@ -52,23 +54,25 @@ public:
   static boost::program_options::options_description getProgramOptions();
   
   /**
-   * @brief Constructor
-   * The CreatePhotometryGridConfiguration class which defines parameters allowed for
-   * the CreatePhotometryGridConfiguration parameter options
-   *
+   * @brief
+   * It defines parameter options allowed for this class.
    * @details
    * The option is:
    *  - \b binary-photometry-grid : string, output filename for storing the grid data
+   *  The constructor also makes sure we are able to write a file to the location
+   *  defined by \b binary-photometry-grid
    * @param options
    * A map containing the options and their values.
+   * @throw Element::Exception
+   * - IO error, can not write any file there(to the location defined by \b binary-photometry-grid)
    *
    */
   CreatePhotometryGridConfiguration(const std::map<std::string, boost::program_options::variable_value>& options);
   
   /**
    * @brief
-   * This function provides a function with PhzDataModel::PhotometryGrid
-   * object as argument and this function stores this object in a binary file
+   * This function provides a function with a PhzDataModel::PhotometryGrid
+   * object as argument and it stores this object in a binary file
    *  with the filename provided by the binary-photometry-grid option.
    * @details
    * Before writing the object to the disk, the constructor checks that it is
