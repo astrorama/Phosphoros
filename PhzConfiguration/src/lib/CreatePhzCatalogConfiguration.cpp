@@ -13,20 +13,22 @@ namespace Euclid {
 namespace PhzConfiguration {
 
 po::options_description CreatePhzCatalogConfiguration::getProgramOptions() {
-  boost::program_options::options_description options {"Create PHZ Catalog options"};
+  po::options_description options {"Create PHZ Catalog options"};
 
   options.add_options()
   ("output-catalog-file", po::value<std::string>(),
       "The filename of the file to export the PHZ catalog file");
 
   options.add(PhotometricCorrectionConfiguration::getProgramOptions());
+  options.add(PhotometryCatalogConfiguration::getProgramOptions());
   options.add(PhotometryGridConfiguration::getProgramOptions());
 
   return options;
 }
 
 CreatePhzCatalogConfiguration::CreatePhzCatalogConfiguration(const std::map<std::string, po::variable_value>& options)
-          : CatalogConfiguration(options), PhotometricCorrectionConfiguration(options), PhotometryGridConfiguration(options) {
+          : CatalogConfiguration(options), PhotometricCorrectionConfiguration(options),
+            PhotometryCatalogConfiguration(options), PhotometryGridConfiguration(options) {
   m_options = options;
 }
 

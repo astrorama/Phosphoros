@@ -12,6 +12,7 @@
 #include <boost/program_options.hpp>
 #include "PhzOutput/OutputHandler.h"
 #include "PhzConfiguration/PhotometricCorrectionConfiguration.h"
+#include "PhzConfiguration/PhotometryCatalogConfiguration.h"
 #include "PhzConfiguration/PhotometryGridConfiguration.h"
 
 namespace Euclid {
@@ -30,6 +31,7 @@ namespace PhzConfiguration {
  * and it adds the required configuration for the output of the executable.
  */
 class CreatePhzCatalogConfiguration : public PhotometricCorrectionConfiguration,
+                                      public PhotometryCatalogConfiguration,
                                       public PhotometryGridConfiguration {
   
 public:
@@ -39,9 +41,10 @@ public:
    * Returns the program options for the CreatePhzCatalog executable
    * 
    * @details
-   * The returned options are the ones defined by the PhotometricCorrectionConfiguration
-   * and the PhotometryGridConfiguration, plus the parameter \a output-catalog-file,
-   * which is the filename of the file to export the PHZ catalog.
+   * The returned options are the ones defined by the PhotometricCorrectionConfiguration,
+   * the PhotometryCatalogConfiguration  and the PhotometryGridConfiguration,
+   * plus the parameter \a output-catalog-file, which is the filename of the file
+   * to export the PHZ catalog.
    * 
    * @return A boost::program_options::options_description object describing
    * the program options

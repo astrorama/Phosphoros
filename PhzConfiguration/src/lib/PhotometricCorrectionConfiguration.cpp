@@ -17,12 +17,11 @@ namespace Euclid {
 namespace PhzConfiguration {
 
 po::options_description PhotometricCorrectionConfiguration::getProgramOptions() {
-  return PhotometryCatalogConfiguration::getProgramOptions();
+  return po::options_description {};
 }
 
 PhotometricCorrectionConfiguration::PhotometricCorrectionConfiguration(
-                      const std::map<std::string, po::variable_value>& options)
-        : CatalogConfiguration(options), PhotometryCatalogConfiguration(options) {
+                      const std::map<std::string, po::variable_value>& options) {
   m_options = options;
 }
 
