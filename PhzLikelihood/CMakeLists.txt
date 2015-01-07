@@ -19,3 +19,8 @@ elements_add_unit_test(ScaleFactorFunctor_test tests/src/ScaleFactorFunctor_test
                        LINK_LIBRARIES PhzLikelihood TYPE Boost)
 elements_add_unit_test(ChiSquareFunctor_test tests/src/ChiSquareFunctor_test.cpp
                        LINK_LIBRARIES PhzLikelihood TYPE Boost)
+elements_add_unit_test(SourcePhzFunctor_test tests/src/SourcePhzFunctor_test.cpp
+                       LINK_LIBRARIES gmock gtest PhzLikelihood TYPE Boost
+                       INCLUDE_DIRS gmock gtest)
+
+
