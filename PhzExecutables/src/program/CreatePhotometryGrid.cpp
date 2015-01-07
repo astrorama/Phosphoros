@@ -6,6 +6,7 @@
 
 #include <map>
 #include <string>
+#include <chrono>
 #include <boost/program_options.hpp>
 #include "ElementsKernel/Program.h"
 #include "ElementsKernel/Logging.h"
@@ -17,6 +18,28 @@ using namespace Euclid;
 namespace po = boost::program_options;
 
 static Elements::Logging logger = Elements::Logging::getLogger("CreatePhotometryGrid");
+
+class ProgressReporter {
+  
+public:
+  
+  void operator()(size_t step, size_t total) {
+    int percentage_done = 100. * step / total;
+    auto now_time = std::chrono::system_clock::now();
+    auto time_diff = now_time - m_last_time;
+    if (percentage_done > m_last_progress || std::chrono::duration_cast<std::chrono::seconds>(time_diff).count() >= 5) {
+      m_last_progress = percentage_done;
+      m_last_time = now_time;
+      logger.info() << "Progress: " << percentage_done << " % (" << step << "/" << total << ")";
+    }
+  }
+  
+private:
+  
+  int m_last_progress = -1;
+  std::chrono::time_point<std::chrono::system_clock> m_last_time = std::chrono::system_clock::now();
+  
+};
 
 class CreatePhotometryGrid : public Elements::Program {
 
@@ -32,13 +55,17 @@ public:
     
     PhzModeling::PhotometryGridCreator creator {conf.getSedDatasetProvider(),
                                                 conf.getReddeningDatasetProvider(),
-                                                conf.getFilterDatasetProvider(), 5};
+                                                conf.getFilterDatasetProvider()};
     
     auto param_space = PhzDataModel::createAxesTuple(conf.getZList(), conf.getEbvList(),
                                                      conf.getReddeningCurveList(),
                                                      conf.getSedList());
     
-    auto grid = creator.createGrid(param_space, conf.getFilterList());
+    PhzModeling::PhotometryGridCreator::ProgressListener listener = [](size_t step, size_t total) {
+      int percentage_done = 100. * step / total;
+      logger.info() << "Progress: " << percentage_done << " %";
+    };
+    auto grid = creator.createGrid(param_space, conf.getFilterList(), ProgressReporter{});
     
     logger.info() << "Creating the output";
     auto output = conf.getOutputFunction();

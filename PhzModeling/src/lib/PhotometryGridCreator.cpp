@@ -8,6 +8,7 @@
 #include <atomic>
 #include <thread>
 #include <atomic>
+#include <chrono>
 #include "ElementsKernel/Logging.h"
 #include "MathUtils/interpolation/interpolation.h"
 
@@ -58,12 +59,10 @@ std::map<XYDataset::QualifiedName, std::unique_ptr<Euclid::MathUtils::Function>>
 PhotometryGridCreator::PhotometryGridCreator(
               std::unique_ptr<XYDataset::XYDatasetProvider> sed_provider,
               std::unique_ptr<XYDataset::XYDatasetProvider> reddening_curve_provider,
-              std::unique_ptr<XYDataset::XYDatasetProvider> filter_provider,
-              int progress_msg_timer)
+              std::unique_ptr<XYDataset::XYDatasetProvider> filter_provider)
       : m_sed_provider{std::move(sed_provider)},
         m_reddening_curve_provider{std::move(reddening_curve_provider)},
-        m_filter_provider(std::move(filter_provider)),
-        m_progress_msg_timer{progress_msg_timer} {
+        m_filter_provider(std::move(filter_provider)) {
 }
         
 class ParallelJob {
@@ -92,7 +91,8 @@ private:
 
 PhzDataModel::PhotometryGrid PhotometryGridCreator::createGrid(
             const PhzDataModel::ModelAxesTuple& parameter_space,
-            const std::vector<Euclid::XYDataset::QualifiedName>& filter_name_list) {
+            const std::vector<Euclid::XYDataset::QualifiedName>& filter_name_list,
+            ProgressListener progress_listener) {
 
   // Create the maps
   auto filter_map = buildMap(*m_filter_provider, filter_name_list.begin(), filter_name_list.end());
@@ -134,12 +134,14 @@ PhzDataModel::PhotometryGrid PhotometryGridCreator::createGrid(
 
     futures.push_back(std::async(std::launch::async, ParallelJob{photometry_algo, model_iter, model_grid.end(), photometry_iter, progress}));
   }
-  if (m_progress_msg_timer > 0) {
+  // If we have a progress listener we create a thread to update it every .1 sec
+  if (progress_listener) {
+    progress_listener(0, total_models);
     while (progress < total_models) {
-      std::this_thread::sleep_for(std::chrono::seconds(m_progress_msg_timer));
-        int percentage_done = 100. * progress / total_models;
-        logger.info() << "Progress: " << percentage_done << " %";
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      progress_listener(progress, total_models);
     }
+    progress_listener(total_models, total_models);
   }
   // Wait for all threads to finish
   for (auto& f : futures) {
