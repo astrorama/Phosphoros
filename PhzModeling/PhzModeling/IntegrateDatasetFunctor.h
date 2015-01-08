@@ -44,7 +44,7 @@ public:
    * @param range The range to integrate
    * @return The integral value
    */
-  double operator()(const XYDataset::XYDataset& dataset, std::pair<double, double> range) const;
+  double operator()(const XYDataset::XYDataset& dataset, const std::pair<double, double>& range) const;
   
 private:
   
