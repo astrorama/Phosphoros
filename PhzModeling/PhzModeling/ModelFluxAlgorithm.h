@@ -35,11 +35,13 @@ class ModelFluxAlgorithm {
 
 public:
   
+  /// Signature of the functions which is used for applying the filter
   typedef std::function<XYDataset::XYDataset (const XYDataset::XYDataset& dataset,
                                               const std::pair<double,double>& range,
                                               const MathUtils::Function& filter)
                        > ApplyFilterFunction;
   
+  /// Signature of the function which is used for integrating the model dataset
   typedef std::function<double (const XYDataset::XYDataset& dataset,
                                 std::pair<double, double> range)
                        > IntegrateDatasetFunction;
@@ -59,10 +61,7 @@ public:
    *
    */
   ModelFluxAlgorithm(ApplyFilterFunction apply_filter_function,
-                     IntegrateDatasetFunction integrate_dataset_function=IntegrateDatasetFunctor{MathUtils::InterpolationType::LINEAR})
-        : m_apply_filter_function{std::move(apply_filter_function)},
-          m_integrate_dataset_function{std::move(integrate_dataset_function)} {
-  }
+      IntegrateDatasetFunction integrate_dataset_function=IntegrateDatasetFunctor{MathUtils::InterpolationType::LINEAR});
 
   /**
    * @brief  Function Call Operator
@@ -87,18 +86,7 @@ public:
   void operator()(const XYDataset::XYDataset& model,
                   FilterIterator filter_iterator_begin,
                   FilterIterator filter_iterator_end,
-                  FluxIterator flux_iterator) const{
-    while (filter_iterator_begin!=filter_iterator_end){
-         auto& filter_info= *filter_iterator_begin;
-         auto filtered_model= m_apply_filter_function(model,filter_info.getRange(),filter_info.getFilter());
-
-         flux_iterator->flux= m_integrate_dataset_function(filtered_model, filter_info.getRange()) / filter_info.getNormalization();
-         flux_iterator->error= 0.;
-
-         ++filter_iterator_begin;
-         ++flux_iterator;
-       }
-  }
+                  FluxIterator flux_iterator) const;
 
 private:
   ApplyFilterFunction m_apply_filter_function;
@@ -108,5 +96,7 @@ private:
 
 } // end of namespace PhzModeling
 } // end of namespace Euclid
+
+#include "PhzModeling/_impl/ModelFluxAlgorithm.icpp"
 
 #endif    /* PHZMODELING_MODELFLUXALGORITHM_H */
