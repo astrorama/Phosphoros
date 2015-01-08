@@ -18,7 +18,6 @@
 #include "PhzModeling/ExtinctionFunctor.h"
 #include "PhzModeling/RedshiftFunctor.h"
 #include "PhzModeling/ApplyFilterFunctor.h"
-#include "PhzModeling/CalculateFluxFunctor.h"
 #include "PhzModeling/ModelDatasetGrid.h"
 #include "PhzModeling/ModelFluxAlgorithm.h"
 #include "PhzModeling/PhotometryAlgorithm.h"
@@ -106,8 +105,7 @@ PhzDataModel::PhotometryGrid PhotometryGridCreator::createGrid(
   ModelDatasetGrid::ReddeningFunction reddening_function {ExtinctionFunctor{}};
   ModelDatasetGrid::RedshiftFunction redshift_function {RedshiftFunctor{}};
   ModelFluxAlgorithm::ApplyFilterFunction apply_filter_function {ApplyFilterFunctor{}};
-  ModelFluxAlgorithm::CalculateFluxFunction flux_function {CalculateFluxFunctor{MathUtils::InterpolationType::LINEAR}};
-  ModelFluxAlgorithm flux_model_algo {std::move(apply_filter_function), std::move(flux_function)};
+  ModelFluxAlgorithm flux_model_algo {std::move(apply_filter_function)};
 
   // Create the model grid
   auto model_grid= ModelDatasetGrid(parameter_space, std::move(sed_map),std::move(reddening_curve_map),

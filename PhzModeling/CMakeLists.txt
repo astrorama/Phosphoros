@@ -26,8 +26,6 @@ elements_add_unit_test(ModelDatasetGrid_test tests/src/ModelDatasetGrid_test.cpp
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
 elements_add_unit_test(ApplyFilterFunctor_test tests/src/ApplyFilterFunctor_test.cpp
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
-elements_add_unit_test(CalculateFluxFunctor_test tests/src/CalculateFluxFunctor_test.cpp
-                       LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
 elements_add_unit_test(ModelFluxAlgorithm_test tests/src/ModelFluxAlgorithm_test.cpp
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
 elements_add_unit_test(BuildFilterInfoFunctor_test tests/src/BuildFilterInfoFunctor_test.cpp
@@ -36,3 +34,5 @@ elements_add_unit_test(PhotometryAlgorithm_test tests/src/PhotometryAlgorithm_te
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
 elements_add_unit_test(PhotometryGridCreator_test tests/src/PhotometryGridCreator_test.cpp
                        LINK_LIBRARIES XYDataset PhzModeling TYPE Boost)
+elements_add_unit_test(IntegrateDatasetFunctor_test tests/src/IntegrateDatasetFunctor_test.cpp
+                       LINK_LIBRARIES PhzModeling TYPE Boost)

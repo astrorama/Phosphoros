@@ -7,6 +7,8 @@
 #ifndef PHZMODELING_MODELFLUXALGORITHM_H
 #define PHZMODELING_MODELFLUXALGORITHM_H
 
+#include "PhzModeling/IntegrateDatasetFunctor.h"
+
 namespace Euclid {
 namespace MathUtils {
   class Function;
@@ -28,17 +30,19 @@ namespace PhzModeling {
  * then calculate the total flux.
  *
  */
-class ModelFluxAlgorithm{
+class ModelFluxAlgorithm {
 
 
 public:
   
-  typedef std::function<XYDataset::XYDataset (const XYDataset::XYDataset&,
-                                              const std::pair<double,double>&,
-                                              const MathUtils::Function& )
+  typedef std::function<XYDataset::XYDataset (const XYDataset::XYDataset& dataset,
+                                              const std::pair<double,double>& range,
+                                              const MathUtils::Function& filter)
                        > ApplyFilterFunction;
   
-  typedef std::function<double (const XYDataset::XYDataset&, double)> CalculateFluxFunction;
+  typedef std::function<double (const XYDataset::XYDataset& dataset,
+                                std::pair<double, double> range)
+                       > IntegrateDatasetFunction;
   
   /**
    * @brief constructor
@@ -48,16 +52,16 @@ public:
    * a pair of double (the filter range) and a MathUtils::Function (the filter)
    * and returning in a XYDataset the filtered model.
    *
-   * @param calculate_flux_function
-   * A std::function taking as input a XYDataset (the filtered model)
-   * and a double (the filter normalization)
-   * and returning as a double the total flux of the model.
+   * @param integrate_dataset_function
+   * An std::function for performing integration of XYDatasets, which will be
+   * used for calculating the integral of the filtered dataset. It defaults on
+   * linear interpolation integration.
    *
    */
   ModelFluxAlgorithm(ApplyFilterFunction apply_filter_function,
-                     CalculateFluxFunction calculate_flux_function)
+                     IntegrateDatasetFunction integrate_dataset_function=IntegrateDatasetFunctor{MathUtils::InterpolationType::LINEAR})
         : m_apply_filter_function{std::move(apply_filter_function)},
-          m_calculate_flux_function{std::move(calculate_flux_function)} {
+          m_integrate_dataset_function{std::move(integrate_dataset_function)} {
   }
 
   /**
@@ -88,7 +92,7 @@ public:
          auto& filter_info= *filter_iterator_begin;
          auto filtered_model= m_apply_filter_function(model,filter_info.getRange(),filter_info.getFilter());
 
-         flux_iterator->flux= m_calculate_flux_function(filtered_model,filter_info.getNormalization());
+         flux_iterator->flux= m_integrate_dataset_function(filtered_model, filter_info.getRange()) / filter_info.getNormalization();
          flux_iterator->error= 0.;
 
          ++filter_iterator_begin;
@@ -98,7 +102,7 @@ public:
 
 private:
   ApplyFilterFunction m_apply_filter_function;
-  CalculateFluxFunction m_calculate_flux_function;
+  IntegrateDatasetFunction m_integrate_dataset_function;
 };
 
 

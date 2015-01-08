@@ -56,23 +56,21 @@ struct PhotometryAlgorithm_Fixture {
     }
   };
 
-  class DummyFluxCalculator{
+  class DummyIntegralCalculator {
    public:
 
-     virtual ~DummyFluxCalculator() = default;
-     double operator()(const Euclid::XYDataset::XYDataset& filterd_model,double){
-
+     virtual ~DummyIntegralCalculator() = default;
+     double operator()(const Euclid::XYDataset::XYDataset& filterd_model,std::pair<double,double>){
             return  filterd_model.size();
      }
    };
 
-
   std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,const std::pair<double,double>& , const Euclid::MathUtils::Function&)> m_apply_filter_function
       =std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,const std::pair<double,double>& , const Euclid::MathUtils::Function&)>(DummyApplyFilter{});
 
-  std::function<double(const Euclid::XYDataset::XYDataset& ,double)> m_flux_function
-     =std::function<double(const Euclid::XYDataset::XYDataset& ,double)>(DummyFluxCalculator{});
-
+  std::function<double(const Euclid::XYDataset::XYDataset& ,std::pair<double,double>)> m_integral_function
+     =std::function<double(const Euclid::XYDataset::XYDataset& ,std::pair<double,double>)>(DummyIntegralCalculator{});
+  
 
 
   std::map<Euclid::XYDataset::QualifiedName,Euclid::XYDataset::XYDataset> filter_map;
@@ -91,11 +89,11 @@ struct PhotometryAlgorithm_Fixture {
 
    std::vector<std::pair<double, double>> makeFilter(double first, double vlue){
        return std::vector<std::pair<double, double>>{
-         std::make_pair(first,vlue),
-         std::make_pair(12000.,vlue),
-         std::make_pair(17000.,vlue),
-         std::make_pair(18000.,vlue),
-         std::make_pair(20000.,vlue)
+         std::make_pair(first,vlue*(first*first)/2.99792458e+18),
+         std::make_pair(12000.,vlue*(12000*12000)/2.99792458e+18),
+         std::make_pair(17000.,vlue*(17000*17000)/2.99792458e+18),
+         std::make_pair(18000.,vlue*(18000*18000)/2.99792458e+18),
+         std::make_pair(20000.,vlue*(20000*20000)/2.99792458e+18)
        };
    }
 
@@ -110,7 +108,7 @@ BOOST_FIXTURE_TEST_CASE(Constructor_test, PhotometryAlgorithm_Fixture) {
   BOOST_TEST_MESSAGE("--> Testing the constructor");
   BOOST_TEST_MESSAGE(" ");
 
-  Euclid::PhzModeling::ModelFluxAlgorithm flux_model_algo{m_apply_filter_function,m_flux_function};
+  Euclid::PhzModeling::ModelFluxAlgorithm flux_model_algo{m_apply_filter_function,m_integral_function};
   Euclid::PhzModeling::PhotometryAlgorithm<Euclid::PhzModeling::ModelFluxAlgorithm> algo(std::move(flux_model_algo),std::move(filter_map),std::move(filter_name_list));
 }
 
@@ -119,7 +117,7 @@ BOOST_FIXTURE_TEST_CASE(Exception_test, PhotometryAlgorithm_Fixture) {
   BOOST_TEST_MESSAGE("--> Testing the exception");
   BOOST_TEST_MESSAGE(" ");
 
-  Euclid::PhzModeling::ModelFluxAlgorithm flux_model_algo{m_apply_filter_function,m_flux_function};
+  Euclid::PhzModeling::ModelFluxAlgorithm flux_model_algo{m_apply_filter_function,m_integral_function};
 
   std::vector<Euclid::XYDataset::QualifiedName> local_filter_name_list;
   local_filter_name_list.push_back(Euclid::XYDataset::QualifiedName{"filterSet1/filter2"});
@@ -136,7 +134,7 @@ BOOST_FIXTURE_TEST_CASE(execution_test, PhotometryAlgorithm_Fixture) {
   BOOST_TEST_MESSAGE("--> Testing the execution");
   BOOST_TEST_MESSAGE(" ");
 
-  Euclid::PhzModeling::ModelFluxAlgorithm flux_model_algo{m_apply_filter_function,m_flux_function};
+  Euclid::PhzModeling::ModelFluxAlgorithm flux_model_algo{m_apply_filter_function,m_integral_function};
   Euclid::PhzModeling::PhotometryAlgorithm<Euclid::PhzModeling::ModelFluxAlgorithm> algo(std::move(flux_model_algo),std::move(filter_map),std::move(filter_name_list));
 
   auto model_1 = Euclid::XYDataset::XYDataset{std::vector<std::pair<double, double>>{
@@ -180,8 +178,8 @@ BOOST_FIXTURE_TEST_CASE(execution_test, PhotometryAlgorithm_Fixture) {
    auto filter5 =photometry.find("filterSet1/filter5");
    BOOST_CHECK(filter5);
 
-   BOOST_CHECK_EQUAL(model_vector_iterator->size(),filter2->flux);
-   BOOST_CHECK_EQUAL(model_vector_iterator->size()-1,filter5->flux);
+   BOOST_CHECK_CLOSE(model_vector_iterator->size()/2200.,filter2->flux, 1E-10);
+   BOOST_CHECK_CLOSE((model_vector_iterator->size()-1)/4500.,filter5->flux, 1E-10);
    ++model_vector_iterator;
   }
 

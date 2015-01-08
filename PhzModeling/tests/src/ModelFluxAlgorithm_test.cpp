@@ -53,11 +53,11 @@ struct ModelFluxAlgorithm_Fixture {
     }
   };
 
-  class DummyFluxCalculator{
+  class DummyIntegralCalculator {
    public:
 
-     virtual ~DummyFluxCalculator() = default;
-     double operator()(const Euclid::XYDataset::XYDataset& filterd_model,double){
+     virtual ~DummyIntegralCalculator() = default;
+     double operator()(const Euclid::XYDataset::XYDataset& filterd_model,std::pair<double,double>){
             return  filterd_model.size();
      }
    };
@@ -66,8 +66,8 @@ struct ModelFluxAlgorithm_Fixture {
   std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,const std::pair<double,double>& , const Euclid::MathUtils::Function&)> m_apply_filter_function
       =std::function<Euclid::XYDataset::XYDataset(const Euclid::XYDataset::XYDataset&,const std::pair<double,double>& , const Euclid::MathUtils::Function&)>(DummyApplyFilter{});
 
-  std::function<double(const Euclid::XYDataset::XYDataset& ,double)> m_flux_function
-     =std::function<double(const Euclid::XYDataset::XYDataset& ,double)>(DummyFluxCalculator{});
+  std::function<double(const Euclid::XYDataset::XYDataset& ,std::pair<double,double>)> m_integral_function
+     =std::function<double(const Euclid::XYDataset::XYDataset& ,std::pair<double,double>)>(DummyIntegralCalculator{});
   ModelFluxAlgorithm_Fixture(){
   }
 };
@@ -108,7 +108,7 @@ BOOST_FIXTURE_TEST_CASE(execution_test, ModelFluxAlgorithm_Fixture) {
     Euclid::PhzDataModel::FilterInfo{std::make_pair(15000.,20000.),DummyFilterFunction(),1.}
   };
 
-  Euclid::PhzModeling::ModelFluxAlgorithm algo{m_apply_filter_function,m_flux_function};
+  Euclid::PhzModeling::ModelFluxAlgorithm algo{m_apply_filter_function, m_integral_function};
 
   algo(flat_model,filter_infos.begin(),filter_infos.end(),result_vector.begin());
 
