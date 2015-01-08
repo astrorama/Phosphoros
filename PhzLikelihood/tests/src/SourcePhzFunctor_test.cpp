@@ -100,7 +100,9 @@ BOOST_AUTO_TEST_SUITE (SourcePhzFunctor_test)
 //-----------------------------------------------------------------------------
 BOOST_FIXTURE_TEST_CASE(SourcePhzFunctor_test, SourcePhzFunctor_Fixture) {
   LikelihoodFunctionMock likelihood_function;
-  likelihood_function.expectFunctorCall(photometry_corrected);
+
+
+  likelihood_function.expectFunctorCall(photometry_corrected,ref_photo_grid.cbegin(),ref_photo_grid.cend());
   BestFitFunctionMock best_fit_function;
   best_fit_function.expectFunctorCall();
 

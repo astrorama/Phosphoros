@@ -24,7 +24,6 @@ class LikelihoodFunctionMock {
 
 public:
 
-
   virtual ~LikelihoodFunctionMock() = default;
 
   typedef PhzDataModel::PhotometryGrid::const_iterator phot_iter;
@@ -35,20 +34,37 @@ public:
           PhzDataModel::LikelihoodGrid::iterator likelihood_begin)
   );
 
-  void expectFunctorCall(const SourceCatalog::Photometry& source_photometry) {
-    EXPECT_CALL(*this, FunctorCall(_, _, _,_)).With(
-        Args<0>(Truly([this, source_photometry](std::tuple<const SourceCatalog::Photometry&> args) {
+  void expectFunctorCall(const SourceCatalog::Photometry& source_photometry, phot_iter model_begin, phot_iter model_end) {
+    EXPECT_CALL(*this, FunctorCall(_, _, _,_)).With(AllOf(
+            Args<0>(Truly([this, source_photometry](std::tuple<const SourceCatalog::Photometry&> args) {
 
-           auto& recieved_photometry = std::get<0>(args);
-           BOOST_CHECK_EQUAL(source_photometry.size(),recieved_photometry.size());
-           auto expected_iter= source_photometry.begin();
-           for(auto& recieved:recieved_photometry){
-             BOOST_CHECK(Elements::isEqual((*expected_iter).flux,recieved.flux));
-             ++expected_iter;
-           }
-           return true;
-        }))
-    ).WillOnce(Return());
+                      auto& recieved_photometry = std::get<0>(args);
+                      BOOST_CHECK_EQUAL(source_photometry.size(),recieved_photometry.size());
+                      auto expected_iter= source_photometry.begin();
+                      for(auto& recieved:recieved_photometry) {
+                        BOOST_CHECK(Elements::isEqual((*expected_iter).flux,recieved.flux));
+                        ++expected_iter;
+                      }
+                      return true;
+                    })),
+            Args<1,2>(Truly([&model_begin,&model_end](std::tuple<phot_iter,phot_iter> args) {
+                      auto& provided_iter = std::get<0>(args);
+                      do
+                      {
+                        auto provided_photo_iter=(*provided_iter).begin();
+                        for(auto& ref_photo_iter :(*model_begin)){
+                          BOOST_CHECK(Elements::isEqual((*provided_photo_iter).flux,ref_photo_iter.flux));
+                          ++provided_photo_iter;
+                        }
+
+                        ++model_begin;
+                        ++provided_iter;
+                      }
+                      while (model_begin !=model_end);
+                      return true;
+                    } ))
+
+        )).WillOnce(Return());
   }
 };
 
