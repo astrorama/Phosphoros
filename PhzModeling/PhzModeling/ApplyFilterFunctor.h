@@ -36,9 +36,9 @@ public:
    * @brief Function Call Operator
    * @details
    * Apply the filter to the Model dataset.
-   * Points out of the range are discarded
-   * (we keep the first point before and after the range
-   * for interpolation purpose)
+   * Points out of the range are discarded. If the given model dataset starts
+   * or ends outside the given range, the returned dataset starts or ends
+   * with datapoints with the range wavelengths, with zero values.
    *
    * @param model
    * An XYDataset representing the Model to be filtered.

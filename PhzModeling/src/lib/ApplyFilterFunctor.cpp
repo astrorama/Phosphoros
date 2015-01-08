@@ -15,40 +15,35 @@ XYDataset::XYDataset ApplyFilterFunctor::operator()(
                               const XYDataset::XYDataset& model,
                               const std::pair<double,double>& filter_range,
                               const MathUtils::Function& filter) const {
+  // The data points of the filtered model
   std::vector<std::pair<double, double>> filtered_values {};
-  bool has_entered_range=false;
-  bool is_first=true;
-
-  for (auto model_iterator=model.begin();model_iterator!= model.end();++model_iterator) {
-    // before entering the range
-    if (filter_range.first>model_iterator->first){
-      is_first=false;
+  
+  // Add the minimum of the range as a zero point, if the first model point is
+  // outside of the range
+  if (model.front().first <= filter_range.first) {
+    filtered_values.emplace_back(filter_range.first, 0.);
+  }
+  
+  // Go through the dataset points and add the ones that are inside the range
+  // multiplied by the filter
+  for (auto& model_point : model) {
+    // Skip values before the min of the range
+    if (model_point.first <= filter_range.first) {
       continue;
     }
-
-    // first entrance get the previous point
-    if (!has_entered_range){
-      has_entered_range=true;
-      if (!is_first){
-        --model_iterator;
-        filtered_values.emplace_back(model_iterator->first, 0.);
-        ++model_iterator;
-      }
-    }
-
-    //after the range get the last point and break
-    if (filter_range.second<model_iterator->first){
-      filtered_values.emplace_back(model_iterator->first, 0.);
+    // Skip values after the max of the range
+    if (model_point.first >= filter_range.second) {
       break;
     }
-
-    // inside the range
-    filtered_values.emplace_back(
-        model_iterator->first,
-        model_iterator->second*filter(model_iterator->first)
-        );
+    filtered_values.emplace_back(model_point.first, model_point.second * filter(model_point.first));
   }
-
+  
+  // Add the maximum of the range as a zero point, if the last model point is
+  // outside of the range
+  if (model.back().first >= filter_range.second) {
+    filtered_values.emplace_back(filter_range.second, 0.);
+  }
+  
   return  XYDataset::XYDataset {std::move(filtered_values)};
 }
 

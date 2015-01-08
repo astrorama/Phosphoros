@@ -85,34 +85,30 @@ BOOST_FIXTURE_TEST_CASE(values_test, ApplyFilterFunctor_Fixture) {
   auto output_model=functor(input_model,range,filter);
   auto output_iterator=output_model.begin();
   auto input_iterator=input_model.begin();
-  // first record is not in the output skip it in the input
+  // first two records are not in the output skip it in the input
+  ++input_iterator;
   ++input_iterator;
 
-  // first values is out of the range must be 0 regardless of the filter value  (which is 1)
-  BOOST_CHECK(Elements::isEqual(input_iterator->first,output_iterator->first));
+  // first values is the range must be 0 regardless of the filter value  (which is 1)
+  BOOST_CHECK(Elements::isEqual(range.first, output_iterator->first));
   BOOST_CHECK(Elements::isEqual(0.,output_iterator->second));
-  //std::cout<<output_iterator->second<<';'<<input_iterator->first;
-
   ++output_iterator;
-  ++input_iterator;
+
   // second value must be multiplied by 1/4
   BOOST_CHECK(Elements::isEqual(input_iterator->first,output_iterator->first));
   BOOST_CHECK(Elements::isEqual(input_iterator->second/4.,output_iterator->second));
-
-  //std::cout<<output_iterator->second<<';'<<input_iterator->first;
   ++output_iterator;
   ++input_iterator;
+  
   // third value must be multiplied by 3/4
   BOOST_CHECK(Elements::isEqual(input_iterator->first,output_iterator->first));
   BOOST_CHECK(Elements::isEqual(input_iterator->second*3./4.,output_iterator->second));
-
-  //std::cout<<output_iterator->second<<';'<<input_iterator->first;
   ++output_iterator;
   ++input_iterator;
-  // last values is out of the range must be 0 regardless of the filter value (which is 1)
-  BOOST_CHECK(Elements::isEqual(input_iterator->first,output_iterator->first));
+  
+  // last values is the range must be 0 regardless of the filter value (which is 1)
+  BOOST_CHECK(Elements::isEqual(range.second, output_iterator->first));
   BOOST_CHECK(Elements::isEqual(0.,output_iterator->second));
-  //std::cout<<output_iterator->second<<';'<<input_iterator->first;
 }
 
 
