@@ -44,19 +44,27 @@ std::pair<double,double> getRange(const XYDataset::XYDataset& filter_dataset) {
  * take the sampling, multiply it by 1/lambda², then take a linear interpolation
  * and return c * the integral.
  */
-double computeNormalization(const XYDataset::XYDataset& filter_dataset, std::pair<double,double> range)  {
-  std::vector<std::pair<double, double>> normalized_values {};
-  for (auto& sed_pair : filter_dataset) {
-    normalized_values.push_back(std::make_pair(sed_pair.first,sed_pair.second/(sed_pair.first*sed_pair.first)));
+double computeNormalization(const XYDataset::XYDataset& filter_dataset, 
+                            const std::pair<double,double>& range)  {
+  std::vector<double> x {};
+  std::vector<double> y {};
+  for (auto& filter_pair : filter_dataset) {
+    if (filter_pair.first >= range.first) {
+      x.emplace_back(filter_pair.first);
+      y.emplace_back(filter_pair.second/(filter_pair.first*filter_pair.first));
+    }
+    if (filter_pair.first > range.second) {
+      break;
+    }
   }
-  auto filter_over_lambda_squar=MathUtils::interpolate(normalized_values,MathUtils::InterpolationType::LINEAR);
-  auto integral_value = MathUtils::integrate(*filter_over_lambda_squar,range.first,range.second);
-  return integral_value * Elements::Units::c_light/ Elements::Units::angstrom;
+  auto filter_over_lambda_squar = MathUtils::interpolate(x, y, MathUtils::InterpolationType::LINEAR);
+  auto integral_value = MathUtils::integrate(*filter_over_lambda_squar, range.first, range.second);
+  return integral_value * Elements::Units::c_light / Elements::Units::angstrom;
 }
 
 // create a function as a linear interpolation of the provided filter sampling
 std::unique_ptr<MathUtils::Function> computeFunction(const XYDataset::XYDataset& filter_dataset) {
-  return MathUtils::interpolate(filter_dataset,MathUtils::InterpolationType::LINEAR);
+  return MathUtils::interpolate(filter_dataset, MathUtils::InterpolationType::LINEAR);
 }
 
 PhzDataModel::FilterInfo BuildFilterInfoFunctor::operator()(const XYDataset::XYDataset& filter_dataset) const {
