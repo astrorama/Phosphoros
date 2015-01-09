@@ -9,7 +9,7 @@
 namespace Euclid {
 namespace PhzModeling {
 
-std::vector<PhzDataModel::FilterInfo> manageFilter(
+std::vector<PhzDataModel::FilterInfo> manageFilters (
           const std::vector<XYDataset::QualifiedName>& filter_name_list,
           const std::map<XYDataset::QualifiedName, XYDataset::XYDataset>& filter_map) {
 
@@ -28,7 +28,7 @@ std::vector<PhzDataModel::FilterInfo> manageFilter(
   return std::move(vector);
 }
 
-std::shared_ptr<std::vector<std::string>> createSharedPointers(
+std::shared_ptr<std::vector<std::string>> createSharedPointer (
               const std::vector<XYDataset::QualifiedName>& filter_name_list){
   auto ptr = std::make_shared<std::vector<std::string>>();
 
@@ -44,8 +44,8 @@ PhotometryAlgorithm<ModelFluxAlgo>::PhotometryAlgorithm(ModelFluxAlgo model_flux
           const std::map<XYDataset::QualifiedName,XYDataset::XYDataset>& filter_map,
           const std::vector<XYDataset::QualifiedName>& filter_name_list)
     : m_model_flux_agorithm{std::move(model_flux_algorithm)},
-      m_filter_info_vector {manageFilter(filter_name_list, filter_map)},
-      m_filter_name_shared_vector {createSharedPointers(filter_name_list)} {
+      m_filter_info_vector {manageFilters(filter_name_list, filter_map)},
+      m_filter_name_shared_vector {createSharedPointer(filter_name_list)} {
 }
 
 template<typename ModelFluxAlgo>
