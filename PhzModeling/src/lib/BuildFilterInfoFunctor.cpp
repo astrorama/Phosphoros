@@ -21,31 +21,23 @@ namespace PhzModeling {
  * the filter value is again 0
  */
 std::pair<double,double> getRange(const XYDataset::XYDataset& filter_dataset) {
-  size_t min = 0;
-  size_t current = 0;
-  size_t max = 0;
-  bool first_non_zero_found = false;
-  for (auto& data_pair : filter_dataset) {
-    if (!first_non_zero_found) {
-      if (data_pair.second == 0) {
-        ++min;
-      } else {
-        first_non_zero_found = true;
-      }
+  // Find the last zero before the first non-zero point
+  auto min = filter_dataset.begin();
+  for (auto current=filter_dataset.begin(); current!=filter_dataset.end(); ++current) {
+    if (current->second != 0) {
+      min = (current==filter_dataset.begin()) ? current : current - 1;
+      break;
     }
-    if (data_pair.second != 0) {
-      max = current;
+  }
+  // Find the first zero after the last non-zero point
+  auto max = filter_dataset.begin();
+  for (auto current=filter_dataset.end()-1; current!=filter_dataset.begin()-1; --current) {
+    if (current->second != 0) {
+      max = (current==filter_dataset.end()-1) ? current : current + 1;
+      break;
     }
-    ++current;
   }
-  if (min > 0) {
-    --min;
-  }
-  if (max < filter_dataset.size()-1) {
-    ++max;
-  }
-  return std::make_pair((filter_dataset.begin()+min)->first, (filter_dataset.begin()+max)->first);
-}
+  return std::make_pair(min->first, max->first);
 
 /*
  * take the sampling, multiply it by 1/lambda², then take a linear interpolation
