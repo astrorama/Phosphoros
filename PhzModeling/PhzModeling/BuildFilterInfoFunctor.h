@@ -52,26 +52,6 @@ public:
    */
   PhzDataModel::FilterInfo operator()(const XYDataset::XYDataset& filter_dataset) const;
 
-
-private:
-  /*
-   * return the first and the last of the X axis values. If the Y value starts
-   * and/or ends with 0s, the range starts at the last value of Lambda for which
-   * the filter has a zero value and ends to the last value of lambda for which
-   * the filter value is again 0
-   */
-  std::pair<double,double> getRange(const XYDataset::XYDataset& filter_dataset) const;
-  /*
-   * create a function as a linear interpolation of the provided filter sampling
-   */
-  std::unique_ptr<MathUtils::Function> computeFunction(const XYDataset::XYDataset& filter_dataset) const;
-
-  /*
-   * take the sampling, multiply it by 1/lambda², then take a linear interpolation
-   * and return c * the integral.
-   */
-  double computeNormalization(const XYDataset::XYDataset& filter_dataset, std::pair<double,double> range) const;
-
 };
 
 } // end of namespace PhzModeling
