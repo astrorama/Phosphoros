@@ -38,6 +38,7 @@ std::pair<double,double> getRange(const XYDataset::XYDataset& filter_dataset) {
     }
   }
   return std::make_pair(min->first, max->first);
+}
 
 /*
  * take the sampling, multiply it by 1/lambda², then take a linear interpolation
