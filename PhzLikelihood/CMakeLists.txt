@@ -22,5 +22,8 @@ elements_add_unit_test(ChiSquareFunctor_test tests/src/ChiSquareFunctor_test.cpp
 elements_add_unit_test(SourcePhzFunctor_test tests/src/SourcePhzFunctor_test.cpp
                        LINK_LIBRARIES gmock gtest PhzLikelihood TYPE Boost
                        INCLUDE_DIRS gmock gtest)
+elements_add_unit_test(SumMarginalizationFunctor_test tests/src/SumMarginalizationFunctor_test.cpp
+                       LINK_LIBRARIES gmock gtest PhzLikelihood TYPE Boost
+                       INCLUDE_DIRS gmock gtest)
 
 
