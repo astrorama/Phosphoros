@@ -26,6 +26,28 @@ namespace po = boost::program_options;
 
 static Elements::Logging logger = Elements::Logging::getLogger("CreatePhzCatalog");
 
+class ProgressReporter {
+  
+public:
+  
+  void operator()(size_t step, size_t total) {
+    int percentage_done = 100. * step / total;
+    auto now_time = std::chrono::system_clock::now();
+    auto time_diff = now_time - m_last_time;
+    if (percentage_done > m_last_progress || std::chrono::duration_cast<std::chrono::seconds>(time_diff).count() >= 5) {
+      m_last_progress = percentage_done;
+      m_last_time = now_time;
+      logger.info() << "Progress: " << percentage_done << " % (" << step << "/" << total << ")";
+    }
+  }
+  
+private:
+  
+  int m_last_progress = -1;
+  std::chrono::time_point<std::chrono::system_clock> m_last_time = std::chrono::system_clock::now();
+  
+};
+
 struct ResultType {
   ResultType(const SourceCatalog::Source& source,
              const PhzDataModel::PhotometryGrid::const_iterator best_match,
@@ -110,11 +132,15 @@ class CreatePhzCatalog : public Elements::Program {
     }
     auto out_ptr = conf.getOutputHandler();
     
+    ProgressReporter progress_reporter {};
+    progress_reporter(0, total_sources);
     while (progress < total_sources) {
-      this_thread::sleep_for(chrono::seconds(5));
-      int percentage_done = 100. * progress / total_sources;
-      logger.info() << "Progress: " << percentage_done << " %";
+      this_thread::sleep_for(chrono::milliseconds(100));
+      progress_reporter(progress, total_sources);
     }
+    progress_reporter(total_sources, total_sources);
+    
+    logger.info() << "Handling output...";
     for (auto& f : futures) {
       for (auto& result : f.get()) {
         out_ptr->handleSourceOutput(result.source, result.best_match, result.pdf);

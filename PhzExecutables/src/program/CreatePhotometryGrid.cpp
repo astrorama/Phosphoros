@@ -61,10 +61,6 @@ public:
                                                      conf.getReddeningCurveList(),
                                                      conf.getSedList());
     
-    PhzModeling::PhotometryGridCreator::ProgressListener listener = [](size_t step, size_t total) {
-      int percentage_done = 100. * step / total;
-      logger.info() << "Progress: " << percentage_done << " %";
-    };
     auto grid = creator.createGrid(param_space, conf.getFilterList(), ProgressReporter{});
     
     logger.info() << "Creating the output";
