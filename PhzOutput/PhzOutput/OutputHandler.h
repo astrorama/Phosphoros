@@ -10,6 +10,7 @@
 #include "GridContainer/GridContainer.h"
 #include "SourceCatalog/Source.h"
 #include "PhzDataModel/PhotometryGrid.h"
+#include "PhzDataModel/Pdf1D.h"
 
 namespace Euclid {
 namespace PhzOutput {
@@ -22,7 +23,7 @@ public:
   
   virtual void handleSourceOutput(const SourceCatalog::Source& source,
                                   PhzDataModel::PhotometryGrid::const_iterator best_model,
-                                  const GridContainer::GridContainer<std::vector<double>, double>& pdf) = 0;
+                                  const PhzDataModel::Pdf1D& pdf) = 0;
   
 };
 

@@ -16,10 +16,12 @@ namespace PhzLikelihood {
 SourcePhzFunctor::SourcePhzFunctor(PhzDataModel::PhotometricCorrectionMap phot_corr_map,
                                    PhzDataModel::PhotometryGrid phot_grid,
                                    LikelihoodFunction likelihood_func,
-                                   BestFitSearchFunction best_fit_search_func)
+                                   BestFitSearchFunction best_fit_search_func,
+                                   MarginalizationFunction marginalization_func)
         : m_phot_corr_map{std::move(phot_corr_map)}, m_phot_grid{std::move(phot_grid)},
           m_likelihood_func{std::move(likelihood_func)},
-          m_best_fit_search_func{std::move(best_fit_search_func)} {
+          m_best_fit_search_func{std::move(best_fit_search_func)},
+          m_marginalization_func{std::move(marginalization_func)} {
 }
 
 SourceCatalog::Photometry applyPhotCorr(const PhzDataModel::PhotometricCorrectionMap& pc_map,
@@ -60,8 +62,7 @@ void fixSameAxis(IterFrom& from, IterTo& to) {
   helper.fixSameAxis(from, to, GridContainer::TemplateLoopCounter<std::tuple_size<PhzDataModel::ModelAxesTuple>::value - 1>{});
 }
 
-PhzDataModel::PhotometryGrid::const_iterator SourcePhzFunctor::operator()(
-                          const SourceCatalog::Photometry& source_phot) const {
+auto SourcePhzFunctor::operator()(const SourceCatalog::Photometry& source_phot) const -> result_type {
   // Apply the photometric correction to the given source photometry
   auto cor_source_phot = applyPhotCorr(m_phot_corr_map, source_phot);
   // Create a new likelihood grid, with all cells set to 0
@@ -71,9 +72,12 @@ PhzDataModel::PhotometryGrid::const_iterator SourcePhzFunctor::operator()(
   // Select the best fitted model
   auto best_fit = m_best_fit_search_func(likelihood_grid.begin(), likelihood_grid.end());
   // Create an iterator of PhotometryGrid instead of the LikelihoodGrid that we have
-  auto result = m_phot_grid.begin();
-  fixSameAxis(best_fit, result);
-  return result;
+  auto best_fit_result = m_phot_grid.begin();
+  fixSameAxis(best_fit, best_fit_result);
+  // Calculate the 1D PDF
+  auto pdf_1D = m_marginalization_func(likelihood_grid);
+  // Return the result
+  return result_type{best_fit_result, std::move(pdf_1D)};
 }
 
 } // end of namespace PhzLikelihood

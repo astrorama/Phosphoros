@@ -18,6 +18,7 @@
 
 #include <fstream>
 #include "PhzDataModel/PhzModel.h"
+#include "PhzDataModel/Pdf1D.h"
 
 using namespace std;
 using namespace Euclid;
@@ -28,14 +29,11 @@ static Elements::Logging logger = Elements::Logging::getLogger("CreatePhzCatalog
 struct ResultType {
   ResultType(const SourceCatalog::Source& source,
              const PhzDataModel::PhotometryGrid::const_iterator best_match,
-             GridContainer::GridContainer<std::vector<double>, double> pdf)
+             PhzDataModel::Pdf1D pdf)
         : source(source), best_match(best_match), pdf(std::move(pdf)) { }
-
-  ResultType(const ResultType& other) : source(other.source), best_match(other.best_match), pdf{GridContainer::GridAxis<double>{"Z", {}}} {};
-  ResultType(ResultType&&) = default;
   const SourceCatalog::Source& source;
   const PhzDataModel::PhotometryGrid::const_iterator best_match;
-  GridContainer::GridContainer<std::vector<double>, double> pdf;
+  PhzDataModel::Pdf1D pdf;
 };
 
 class ParallelJob {
@@ -60,9 +58,14 @@ private:
     Output(vector<ResultType>& result_vector, atomic<size_t>& progress) : m_result_vector(result_vector), m_progress(progress) {}
     void handleSourceOutput(const SourceCatalog::Source& source,
                             PhzDataModel::PhotometryGrid::const_iterator best_model,
-                            const GridContainer::GridContainer<std::vector<double>, double>&) override {
-      GridContainer::GridContainer<std::vector<double>, double> pdf {GridContainer::GridAxis<double>{"Z", {}}};
-      m_result_vector.push_back(ResultType{source, best_model, move(pdf)});
+                            const PhzDataModel::Pdf1D& pdf) override {
+      // We need to make a copy of the pdf because the results will be handled
+      // by a different thread when the refered object will be already deleted
+      PhzDataModel::Pdf1D pdf_copy {pdf.getAxis<0>()};
+      for (size_t i=0; i<pdf.size(); ++i) {
+        pdf_copy(i) = pdf(i);
+      }
+      m_result_vector.push_back(ResultType{source, best_model, std::move(pdf_copy)});
       ++m_progress;
     }
   private:

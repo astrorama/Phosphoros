@@ -17,11 +17,9 @@ void CatalogHandler::handleSources(SourceIter source_begin, SourceIter source_en
   for (SourceIter source=source_begin; source != source_end; ++source) {
     // Get the PHZ results
     auto source_phot_ptr = (*source).template getAttribute<SourceCatalog::Photometry>();
-    auto best_model_iter = m_source_phz_func(*source_phot_ptr);
-    
-    // Pass them to the handler. For the moment we pass a dummy PDF
-    GridContainer::GridContainer<std::vector<double>, double> pdf {GridContainer::GridAxis<double>{"Z", {}}};
-    out_handler.handleSourceOutput(*source, best_model_iter, pdf);
+    auto phz_results = m_source_phz_func(*source_phot_ptr);
+    // Pass them to the handler
+    out_handler.handleSourceOutput(*source, std::get<0>(phz_results), std::get<1>(phz_results));
   }
 }
 
