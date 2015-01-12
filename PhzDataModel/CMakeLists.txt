@@ -27,4 +27,8 @@ elements_add_unit_test(PhotometryGridSerialization_test tests/src/serialization/
 elements_add_unit_test(FilterInfo_test tests/src/FilterInfo_test.cpp
                        LINK_LIBRARIES PhzDataModel TYPE Boost)
 
+elements_add_unit_test(PhotometricCorrectionMap_test tests/src/PhotometricCorrectionMap_test.cpp
+                       LINK_LIBRARIES PhzDataModel TYPE Boost)
+
+
 
