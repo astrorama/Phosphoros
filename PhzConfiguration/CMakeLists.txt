@@ -15,18 +15,24 @@ elements_add_unit_test(FilterConfiguration_test tests/src/FilterConfiguration_te
 
 elements_add_unit_test(SedConfiguration_test tests/src/SedConfiguration_test.cpp
                        LINK_LIBRARIES XYDataset PhzConfiguration TYPE Boost)
-                       
+
 elements_add_unit_test(RedshiftConfiguration_test tests/src/RedshiftConfiguration_test.cpp
                        LINK_LIBRARIES XYDataset PhzConfiguration TYPE Boost)
-                       
+
 elements_add_unit_test(ReddeningConfiguration_test tests/src/ReddeningConfiguration_test.cpp
                        LINK_LIBRARIES XYDataset PhzConfiguration TYPE Boost)
- 
+
 elements_add_unit_test(ParameterSpaceConfiguration_test tests/src/ParameterSpaceConfiguration_test.cpp
                        LINK_LIBRARIES XYDataset PhzConfiguration TYPE Boost)
-                       
+
 elements_add_unit_test(CreatePhotometryGridConfiguration_test tests/src/CreatePhotometryGridConfiguration_test.cpp
-                       LINK_LIBRARIES XYDataset PhzDataModel PhzConfiguration TYPE Boost)                       
+                       LINK_LIBRARIES XYDataset PhzDataModel PhzConfiguration TYPE Boost)
 
 elements_add_unit_test(PhotometryGridConfiguration_test tests/src/PhotometryGridConfiguration_test.cpp
-                       LINK_LIBRARIES XYDataset PhzDataModel PhzConfiguration TYPE Boost)                       
+                       LINK_LIBRARIES XYDataset PhzDataModel PhzConfiguration TYPE Boost)
+
+elements_add_unit_test(CatalogConfiguration_test tests/src/CatalogConfiguration_test.cpp
+                       LINK_LIBRARIES XYDataset PhzDataModel PhzConfiguration TYPE Boost)
+
+elements_add_unit_test(SpectroscopicRedshiftCatalogConfiguration_test tests/src/SpectroscopicRedshiftCatalogConfiguration_test.cpp
+                       LINK_LIBRARIES XYDataset PhzDataModel PhzConfiguration TYPE Boost)
