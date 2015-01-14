@@ -1,0 +1,44 @@
+/**
+ * @file PhzPhotometricCorrection/src/lib/CalculateScaleFactorMap.cpp
+ * @date Jan 14, 2015
+ * @author Florian Dubath
+ */
+
+
+#ifndef CALCULATESCALEFACTORMAP_ICPP
+#define CALCULATESCALEFACTORMAP_ICPP
+
+
+namespace Euclid {
+namespace PhzPhotometricCorrection {
+
+
+template<typename SourceIter>
+ScaleFactorMap CalculateScaleFactorMap::operator()(SourceIter& sourcesBegin,SourceIter& sourcesEnd,BestFitModelMap& modelMap) const{
+
+    auto result_map= ScaleFactorMap();
+
+    PhzLikelihood::ScaleFactorFunctor scale_factor_functor();
+
+    while (sourcesBegin!=sourcesEnd){
+      auto source_id = sourcesBegin->getId();
+      auto source_photometry = sourcesBegin->getAttribute<SourceCatalog::Photometry>();
+      auto model_iterator = modelMap.at(source_id)->begin();
+
+      double alpha = scale_factor_functor(
+          source_photometry->begin(),
+          source_photometry->end(),
+          std::move(model_iterator));
+
+      result_map.emplace(std::make_pair(source_id, alpha));
+      ++sourcesBegin;
+    }
+
+    return std::move(result_map);
+  }
+
+
+} // end of namespace PhzPhotometricCorrection
+} // end of namespace Euclid
+
+#endif // CALCULATESCALEFACTORMAP_ICPP
