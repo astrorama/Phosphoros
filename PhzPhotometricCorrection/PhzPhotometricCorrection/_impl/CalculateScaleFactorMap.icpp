@@ -9,29 +9,36 @@
 #define CALCULATESCALEFACTORMAP_ICPP
 
 
+#include "PhzLikelihood/ScaleFactorFunctor.h"
+#include "SourceCatalog/SourceAttributes/Photometry.h"
+
 namespace Euclid {
 namespace PhzPhotometricCorrection {
 
 
-template<typename SourceIter>
-ScaleFactorMap CalculateScaleFactorMap::operator()(SourceIter& sourcesBegin,SourceIter& sourcesEnd,BestFitModelMap& modelMap) const{
 
+CalculateScaleFactorMap::CalculateScaleFactorMap(CalculateScaleFactorMap::ScaleFactorCalc scaleFactorFunction = CalculateScaleFactorMap::ScaleFactorCalc(PhzLikelihood::ScaleFactorFunctor()))
+: m_scale_factor_function(std::move(scaleFactorFunction)){}
+
+template<typename SourceIter, typename ModelPhotPtr>
+ScaleFactorMap CalculateScaleFactorMap::operator()(
+    SourceIter source_begin,
+    SourceIter source_end,
+    const std::map<int64_t, ModelPhotPtr>& model_phot_map) const{
     auto result_map= ScaleFactorMap();
 
-    PhzLikelihood::ScaleFactorFunctor scale_factor_functor();
+    while (source_begin!=source_end){
+      auto source_id = source_begin->getId();
+      auto source_photometry = source_begin->template getAttribute<SourceCatalog::Photometry>();
+      auto model_iterator = model_phot_map.at(source_id)->begin();
 
-    while (sourcesBegin!=sourcesEnd){
-      auto source_id = sourcesBegin->getId();
-      auto source_photometry = sourcesBegin->getAttribute<SourceCatalog::Photometry>();
-      auto model_iterator = modelMap.at(source_id)->begin();
-
-      double alpha = scale_factor_functor(
+      double alpha = m_scale_factor_function(
           source_photometry->begin(),
           source_photometry->end(),
           std::move(model_iterator));
 
       result_map.emplace(std::make_pair(source_id, alpha));
-      ++sourcesBegin;
+      ++source_begin;
     }
 
     return std::move(result_map);

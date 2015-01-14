@@ -8,13 +8,14 @@
 #define PHZPHOTOMETRICCORRECTION_CALCULATESCALEFACTORMAP_H
 
 #include "SourceCatalog/Catalog.h"
-#include "PhzLikelihood/ScaleFactorFunctor.h"
 #include "PhzPhotometricCorrection/BestFitModelMap.h"
 
 namespace Euclid {
 namespace PhzPhotometricCorrection {
 
-typedef std::map<long, double> ScaleFactorMap;
+typedef std::map<int64_t, double> ScaleFactorMap;
+
+
 
 /**
  * @class CalculateScaleFactorMap
@@ -26,7 +27,28 @@ class CalculateScaleFactorMap{
 public:
 
   /**
+   * Definition of the function for calculating the factor with which a model
+   * photometry must be scaled to best fit the source. It is a function which
+   * gets the iterators over the source and the model photometries and it returns
+   * the scale factor as a double. It makes the assumption that the iterators
+   * will iterate over the photometries of the same filters and in the same
+   * order.
+   */
+  typedef std::function<double(SourceCatalog::Photometry::const_iterator source_begin,
+                               SourceCatalog::Photometry::const_iterator source_end,
+                               SourceCatalog::Photometry::const_iterator model_begin)
+                       > ScaleFactorCalc;
+
+
+  CalculateScaleFactorMap(ScaleFactorCalc scaleFactorFunction);
+
+  /**
     * @brief Compute the Scale Factor Map
+    *
+    * @tparam SourceIter The type of the iterator over the source objects
+    *
+    * @tparam ModelPhotPtr A type which can be dereferenced to a Photometry object
+    *    representing the model photometry
     *
     * @param sourcesBegin
     * A begin iterator over the sources.
@@ -40,9 +62,13 @@ public:
     * @return A map pairing the source Id with the computed scale factor for
     * its best fitted model.
     */
-  template<typename SourceIter>
-  ScaleFactorMap operator()(SourceIter& sourcesBegin,SourceIter& sourcesEnd,BestFitModelMap& modelMap) const;
-
+  template<typename SourceIter,typename ModelPhotPtr>
+  ScaleFactorMap operator()(
+      SourceIter source_begin,
+      SourceIter source_end,
+      const std::map<int64_t, ModelPhotPtr>& model_phot_map) const;
+private:
+  ScaleFactorCalc m_scale_factor_function;
 };
 
 

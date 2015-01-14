@@ -16,3 +16,5 @@ find_package(Boost REQUIRED COMPONENTS serialization)
 #                  PUBLIC_HEADERS PhzPhotometricCorrection )
 
 #===== Boost tests =============================================================
+elements_add_unit_test(CalculateScaleFactorMap_test tests/src/CalculateScaleFactorMap_test.cpp
+                       LINK_LIBRARIES PhzDataModel PhzLikelihood TYPE Boost)
