@@ -8,7 +8,6 @@
 #define PHZPHOTOMETRICCORRECTION_CALCULATESCALEFACTORMAP_H
 
 #include "SourceCatalog/Catalog.h"
-#include "PhzPhotometricCorrection/BestFitModelMap.h"
 
 namespace Euclid {
 namespace PhzPhotometricCorrection {

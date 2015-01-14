@@ -9,6 +9,10 @@ elements_depends_on_subdirs(PhzLikelihood)
 
 find_package(Boost REQUIRED COMPONENTS serialization)
 
+
+find_package(gmock)
+find_package(gtest)
+
 #===== Libraries ===============================================================
 #elements_add_library(PhzPhotometricCorrection src/lib/*.cpp
 #                  LINK_LIBRARIES ${CMAKE_DL_LIBS} Boost SourceCatalog XYDataset MathUtils PhzDataModel PhzLikelihood
@@ -17,4 +21,6 @@ find_package(Boost REQUIRED COMPONENTS serialization)
 
 #===== Boost tests =============================================================
 elements_add_unit_test(CalculateScaleFactorMap_test tests/src/CalculateScaleFactorMap_test.cpp
-                       LINK_LIBRARIES PhzDataModel PhzLikelihood TYPE Boost)
+                       LINK_LIBRARIES gmock gtest PhzDataModel PhzLikelihood TYPE Boost
+                       INCLUDE_DIRS gmock gtest)
+
