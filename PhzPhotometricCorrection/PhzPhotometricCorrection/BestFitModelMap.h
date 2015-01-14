@@ -8,7 +8,7 @@
 #define PHZPHOTOMETRICCORRECTION_BESTFITMODELMAP_H
 
 #include <map>
-#include "SourceCatalog/SourceAttributes/Photometry.h"
+#include "PhzDataModel/PhotometryGrid.h"
 
 namespace Euclid {
 namespace PhzPhotometricCorrection {
@@ -21,7 +21,7 @@ namespace PhzPhotometricCorrection {
  * @details
  * This map has as key the source ID and contains a pointer on the best fit model.
  */
-typedef std::map<long, std::unique_ptr<SourceCatalog::Photometry>> BestFitModelMap;
+typedef std::map<int64_t, PhzDataModel::PhotometryGrid::const_iterator> BestFitModelMap;
 
 } // end of namespace PhzPhotometricCorrection
 } // end of namespace Euclid
