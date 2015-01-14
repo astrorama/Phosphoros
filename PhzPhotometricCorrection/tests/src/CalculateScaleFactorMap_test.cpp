@@ -7,17 +7,20 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <functional>
 #include <boost/test/unit_test.hpp>
 
 #include "ElementsKernel/Real.h"
 #include "ElementsKernel/Exception.h"
 #include "SourceCatalog/Catalog.h"
 #include "PhzPhotometricCorrection/CalculateScaleFactorMap.h"
+#include "ScaleFactorCalcMockForMap.h"
 
 
 namespace Euclid {
 namespace PhzPhotometricCorrection {
 
+using namespace std::placeholders;
 
 struct CalculateScaleFactorMap_Fixture {
 
@@ -54,7 +57,7 @@ struct CalculateScaleFactorMap_Fixture {
               new SourceCatalog::Photometry(filters,std::move(value_photometry_2))
       ));
       auto source_2 = SourceCatalog::Source(source_2_id,std::move(attribute_2));
-      m_catalog.push_back(std::move(source_1));
+      m_catalog.push_back(std::move(source_2));
 
     auto model_photo_Value_1 = std::vector<SourceCatalog::FluxErrorPair>{{10.1,0.1},{10.2,0.2},{10.3,0.3}};
     auto model_ptr_1 = std::unique_ptr<SourceCatalog::Photometry>(new SourceCatalog::Photometry(filters,std::move(model_photo_Value_1)));
@@ -74,11 +77,41 @@ struct CalculateScaleFactorMap_Fixture {
 BOOST_AUTO_TEST_SUITE (CalculateScaleFactorMap_test)
 BOOST_FIXTURE_TEST_CASE(Functional_call_test, CalculateScaleFactorMap_Fixture) {
 
-  auto functor = CalculateScaleFactorMap();
+  ScaleFactorCalcMockForMap functorMock;
+
+  {
+      InSequence s;
+      EXPECT_CALL(functorMock, FCall(_,_,_)).With(AllOf(
+          Args<0>(Truly([](std::tuple<SourceCatalog::Photometry::const_iterator> args) {
+                    BOOST_CHECK(Elements::isEqual((*std::get<0>(args)).flux,1.1));
+                    // std::cout<<(*std::get<0>(args)).flux;
+                    return true;
+                  })),
+          Args<2>(Truly([](std::tuple<SourceCatalog::Photometry::const_iterator> args) {
+                                      BOOST_CHECK(Elements::isEqual((*std::get<0>(args)).flux,10.1));
+                                      // std::cout<<(*std::get<0>(args)).flux;
+                                      return true;
+                                    }))
+       )).WillOnce(Return(1));
+
+      EXPECT_CALL(functorMock, FCall(_,_,_)).With(AllOf(
+          Args<0>(Truly([](std::tuple<SourceCatalog::Photometry::const_iterator> args) {
+                    BOOST_CHECK(Elements::isEqual((*std::get<0>(args)).flux,2.1));
+                   // std::cout<<(*std::get<0>(args)).flux;
+                    return true;
+                  })),
+          Args<2>(Truly([](std::tuple<SourceCatalog::Photometry::const_iterator> args) {
+                                      BOOST_CHECK(Elements::isEqual((*std::get<0>(args)).flux,20.1));
+                                    //  std::cout<<(*std::get<0>(args)).flux;
+                                      return true;
+                                    }))
+       )).WillOnce(Return(2));
+  }
+
+  CalculateScaleFactorMap::ScaleFactorCalc function =  std::bind(&ScaleFactorCalcMockForMap::FCall, &functorMock,_1,_2,_3);
+
+  auto functor = CalculateScaleFactorMap(function);
   auto scale = functor(m_catalog.begin(),m_catalog.end(),model_map);
-
-
-
 }
 
 

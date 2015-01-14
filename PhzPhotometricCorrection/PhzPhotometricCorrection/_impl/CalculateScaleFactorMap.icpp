@@ -17,7 +17,9 @@ namespace PhzPhotometricCorrection {
 
 
 
-CalculateScaleFactorMap::CalculateScaleFactorMap(CalculateScaleFactorMap::ScaleFactorCalc scaleFactorFunction = CalculateScaleFactorMap::ScaleFactorCalc(PhzLikelihood::ScaleFactorFunctor()))
+CalculateScaleFactorMap::CalculateScaleFactorMap(
+    CalculateScaleFactorMap::ScaleFactorCalc scaleFactorFunction
+    = CalculateScaleFactorMap::ScaleFactorCalc(PhzLikelihood::ScaleFactorFunctor()))
 : m_scale_factor_function(std::move(scaleFactorFunction)){}
 
 template<typename SourceIter, typename ModelPhotPtr>
