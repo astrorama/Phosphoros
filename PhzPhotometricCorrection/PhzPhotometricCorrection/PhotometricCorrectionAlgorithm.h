@@ -39,7 +39,17 @@ public:
    *    each source (source ID is the key of the map)
    * @param model_map The objects pointing to the model photometries for each
    *    source (souce ID is the key of the map) 
+   * 
    * @return The calcualted photometric correction
+   * 
+   * @throws ElementsException
+   *    if there are no sources in the input
+   * @throws ElementsException 
+   *    if any of the sources does not contain the photometry attribute
+   * @throws ElementsException
+   *    if the scale factor map does not contain factors for all the sources
+   * @throws ElementsException
+   *    if the model photometry map does not contain photometries for all the sources
    */
   template <typename SourceIter, typename ModelPhotPtr>
   PhzDataModel::PhotometricCorrectionMap operator()(
