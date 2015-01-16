@@ -1,4 +1,4 @@
-/** 
+/**
  * @file SourcePhzFunctor.cpp
  * @date December 2, 2014
  * @author Nikolaos Apostolakos
@@ -14,11 +14,11 @@ namespace Euclid {
 namespace PhzLikelihood {
 
 SourcePhzFunctor::SourcePhzFunctor(PhzDataModel::PhotometricCorrectionMap phot_corr_map,
-                                   PhzDataModel::PhotometryGrid phot_grid,
+                                   const PhzDataModel::PhotometryGrid& phot_grid,
                                    LikelihoodFunction likelihood_func,
                                    BestFitSearchFunction best_fit_search_func,
                                    MarginalizationFunction marginalization_func)
-        : m_phot_corr_map{std::move(phot_corr_map)}, m_phot_grid{std::move(phot_grid)},
+        : m_phot_corr_map{std::move(phot_corr_map)}, m_phot_grid(phot_grid),
           m_likelihood_func{std::move(likelihood_func)},
           m_best_fit_search_func{std::move(best_fit_search_func)},
           m_marginalization_func{std::move(marginalization_func)} {
@@ -42,7 +42,7 @@ SourceCatalog::Photometry applyPhotCorr(const PhzDataModel::PhotometricCorrectio
 
 template<typename IterFrom, typename IterTo>
 class GridIterHelper {
-  
+
 public:
 
   template<int I>
@@ -53,7 +53,7 @@ public:
 
   void fixSameAxis(IterFrom&, IterTo&, const GridContainer::TemplateLoopCounter<-1>&) {
   }
-//  
+//
 };
 
 template<typename IterFrom, typename IterTo>

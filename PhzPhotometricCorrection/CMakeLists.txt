@@ -20,4 +20,7 @@ elements_add_unit_test(PhotometricCorrectionAlgorithm_test tests/src/Photometric
 elements_add_unit_test(CalculateScaleFactorMap_test tests/src/CalculateScaleFactorMap_test.cpp
                        LINK_LIBRARIES gmock gtest PhzPhotometricCorrection TYPE Boost
                        INCLUDE_DIRS gmock gtest)
+elements_add_unit_test(FindBestFitModels_test tests/src/FindBestFitModels_test.cpp
+                       LINK_LIBRARIES gmock gtest PhzPhotometricCorrection TYPE Boost
+                       INCLUDE_DIRS gmock gtest)
 

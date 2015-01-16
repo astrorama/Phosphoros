@@ -1,0 +1,57 @@
+/**
+ * @file PhzPhotometricCorrection/FindBestFitModels.h
+ * @date Jan 16, 2015
+ * @author Florian Dubath
+ */
+
+#include <map>
+#include "SourceCatalog/Catalog.h"
+#include "PhzLikelihood/SourcePhzFunctor.h"
+
+namespace Euclid {
+namespace PhzPhotometricCorrection {
+
+using namespace std;
+
+template<typename sourceCalculatorFunctor>
+map<int64_t, PhzDataModel::PhotometryGrid::const_iterator> FindBestFitModels<sourceCalculatorFunctor>::operator()(
+    const SourceCatalog::Catalog& calibration_catalog,
+    const PhzDataModel::PhotometryGrid& model_photometric_grid,
+    const PhzDataModel::PhotometricCorrectionMap& photometric_correction) {
+  auto best_fit_map =
+      map<int64_t, PhzDataModel::PhotometryGrid::const_iterator>();
+
+  for (auto& source : calibration_catalog) {
+    int64_t source_id = source.getId();
+    shared_ptr < SourceCatalog::SpectroscopicRedshift > redshift_ptr =
+        source.getAttribute<SourceCatalog::SpectroscopicRedshift>();
+    double expected_redshift = redshift_ptr->getValue();
+
+    shared_ptr < SourceCatalog::Photometry > photometry_ptr =
+        source.getAttribute<SourceCatalog::Photometry>();
+
+    auto& z_axis = model_photometric_grid.getAxis<
+        PhzDataModel::ModelParameter::Z>();
+    double closest_z = -1.;
+    double zs_diff = 10000.;
+    for (auto& z_value : z_axis) {
+      double curr_diff = abs(z_value - expected_redshift);
+      if (curr_diff < zs_diff) {
+        zs_diff = curr_diff;
+        closest_z = z_value;
+      }
+    }
+
+    auto& sliced_grid = model_photometric_grid.fixAxisByValue< PhzDataModel::ModelParameter::Z > (closest_z);
+
+    auto source_phz_calculator =sourceCalculatorFunctor(
+        photometric_correction, sliced_grid);
+    best_fit_map.emplace(source_id,  std::get<0>(source_phz_calculator(*photometry_ptr)));
+  }
+
+  return best_fit_map;
+}
+
+} // end of namespace PhzPhotometricCorrection
+} // end of namespace Euclid
+

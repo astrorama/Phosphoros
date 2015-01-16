@@ -1,4 +1,4 @@
-/** 
+/**
  * @file ScaleFactorCalcMock.h
  * @date December 1, 2014
  * @author Nikolaos Apostolakos
@@ -17,17 +17,17 @@ using namespace testing;
 namespace Euclid {
 
 class ScaleFactorCalcMock {
-  
+
 private:
-  
+
 public:
-  
+
   virtual ~ScaleFactorCalcMock() = default;
-  
+
   typedef SourceCatalog::Photometry::const_iterator phot_iter;
-  
+
   MOCK_METHOD3(FunctorCall, double(phot_iter source_begin, phot_iter source_end, phot_iter model_begin));
-  
+
   void expectFunctorCall(const SourceCatalog::Photometry& source, const SourceCatalog::Photometry& model, double result) {
     EXPECT_CALL(*this, FunctorCall(_, _, _)).With(AllOf(
         Args<0,1>(Truly([source](std::tuple<phot_iter,phot_iter> args) {
