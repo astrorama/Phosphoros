@@ -82,7 +82,7 @@ public:
 
   /**
    * Constructs a new SourcePhzFunctor instance. It gets as parameters a map
-   * containing the photometric corrections, the grid with the model photometries,
+   * containing the photometric corrections, a const reference to the grid with the model photometries,
    * the algorithm to use for calculating the likelihood grid, the algorithm
    * for finding the best fitted model and the algorithm for performing the PDF
    * marginalization. Note that the algorithms can be ommitted
@@ -93,7 +93,7 @@ public:
    * @param phot_corr_map
    *    The map with the photometric corrections
    * @param phot_grid
-   *    The grid with the model photometries
+   *    The const reference to the grid with the model photometries
    * @param likelihood_func
    *    The STL-like algorithm for calculating the likelihood grid
    * @param best_fit_search_func
