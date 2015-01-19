@@ -9,6 +9,7 @@
 #include <set>
 #include <functional>
 #include <boost/test/unit_test.hpp>
+#include <boost/test/test_tools.hpp>
 
 #include "ElementsKernel/Real.h"
 #include "ElementsKernel/Exception.h"
@@ -32,18 +33,18 @@ struct FindBestFitModels_Fixture {
    vector<XYDataset::QualifiedName> seds { { "sed/Curve1" } };
 
    shared_ptr<vector<string>> filters = shared_ptr<vector<string>>(
-       new vector<string> { "filter_1", "filter_2", "filter_3" });
+       new vector<string> { "Filter1", "Filter2" });
 
    SourceCatalog::Photometry photometry_1 { filters,
-     vector<SourceCatalog::FluxErrorPair> { { 1.1, 0. }, { 1.2, 0. }, {1.3, 0. } } };
+     vector<SourceCatalog::FluxErrorPair> { { 1.1, 0. }, { 1.2, 0. } } };
    SourceCatalog::Photometry photometry_2 { filters,
-     vector<SourceCatalog::FluxErrorPair> { { 2.1, 0. }, { 2.2, 0. }, {2.3, 0. } } };
+     vector<SourceCatalog::FluxErrorPair> { { 2.1, 0. }, { 2.2, 0. } } };
    SourceCatalog::Photometry photometry_3 { filters,
-     vector<SourceCatalog::FluxErrorPair> { { 3.1, 0. }, { 3.2, 0. }, {3.3, 0. } } };
+     vector<SourceCatalog::FluxErrorPair> { { 3.1, 0. }, { 3.2, 0. } } };
    SourceCatalog::Photometry photometry_4 { filters,
-     vector<SourceCatalog::FluxErrorPair> { { 4.1, 0. }, { 4.2, 0. }, {4.3, 0. } } };
+     vector<SourceCatalog::FluxErrorPair> { { 4.1, 0. }, { 4.2, 0. } } };
    SourceCatalog::Photometry photometry_source { filters,
-     vector<SourceCatalog::FluxErrorPair> { { 0.1, 0. }, { 0.2, 0. }, {0.3, 0. } } };
+     vector<SourceCatalog::FluxErrorPair> { { 0.1, 0. }, { 0.2, 0. } } };
 
    PhzDataModel::ModelAxesTuple axes = PhzDataModel::createAxesTuple(zs, ebvs,
        reddeing_curves, seds);
@@ -51,27 +52,64 @@ struct FindBestFitModels_Fixture {
    PhzDataModel::PhotometryGrid ref_photo_grid { axes };
 
    PhzDataModel::PhotometricCorrectionMap correctionMap { {
-       XYDataset::QualifiedName { "filter_1" }, 1.0 }, {
-       XYDataset::QualifiedName { "filter_2" }, 2.0 }, {
-       XYDataset::QualifiedName { "filter_3" }, 3.0 } };
+       XYDataset::QualifiedName { "Filter1" }, 1.0 }, {
+       XYDataset::QualifiedName { "Filter2" }, 2.0 }, };
 
    SourceCatalog::Photometry photometry_corrected { filters, ComputeCorrection(
-       vector<SourceCatalog::FluxErrorPair> { { 0.1, 0. }, { 0.2, 0. }, {0.3, 0. } } , correctionMap) };
+       vector<SourceCatalog::FluxErrorPair> { { 0.1, 0. }, { 0.2, 0. } } , correctionMap) };
+
+   vector<shared_ptr<SourceCatalog::Attribute>> source_attr_1 =
+       vector<shared_ptr<SourceCatalog::Attribute>>{shared_ptr<SourceCatalog::Attribute>{new SourceCatalog::Photometry{make_shared<vector<string>>(
+       initializer_list<string>{"Filter1", "Filter2"}),
+       vector<SourceCatalog::FluxErrorPair>{   {1.1, 0.1},  {1.2, 0.2}}}},
+       shared_ptr<SourceCatalog::Attribute>{new SourceCatalog::SpectroscopicRedshift(0.0,0.001)}};
+
+   vector<shared_ptr<SourceCatalog::Attribute>> source_attr_2 =
+           vector<shared_ptr<SourceCatalog::Attribute>>{shared_ptr<SourceCatalog::Attribute>{new SourceCatalog::Photometry{make_shared<vector<string>>(
+           initializer_list<string>{"Filter1", "Filter2"}),
+           vector<SourceCatalog::FluxErrorPair>{   {2.1, 0.1}, {2.2, 0.2}}}},
+        shared_ptr<SourceCatalog::Attribute>{new SourceCatalog::SpectroscopicRedshift(0.05,0.001)}};
+
+   vector<shared_ptr<SourceCatalog::Attribute>> source_attr_3 =
+           vector<shared_ptr<SourceCatalog::Attribute>>{shared_ptr<SourceCatalog::Attribute>{new SourceCatalog::Photometry{make_shared<vector<string>>(
+           initializer_list<string>{"Filter1", "Filter2"}),
+           vector<SourceCatalog::FluxErrorPair>{   {3.1, 0.1}, {3.2, 0.2}}}},
+        shared_ptr<SourceCatalog::Attribute>{new SourceCatalog::SpectroscopicRedshift(0.1,0.001)}};
+
+   vector<shared_ptr<SourceCatalog::Attribute>> source_attr_4 =
+           vector<shared_ptr<SourceCatalog::Attribute>>{shared_ptr<SourceCatalog::Attribute>{new SourceCatalog::Photometry{make_shared<vector<string>>(
+           initializer_list<string>{"Filter1", "Filter2"}),
+           vector<SourceCatalog::FluxErrorPair>{   {4.1, 0.1}, {4.2, 0.2}}}},
+        shared_ptr<SourceCatalog::Attribute>{new SourceCatalog::SpectroscopicRedshift(0.15,0.001)}};
+
+   vector<shared_ptr<SourceCatalog::Attribute>> source_attr_5 =
+          vector<shared_ptr<SourceCatalog::Attribute>>{shared_ptr<SourceCatalog::Attribute>{new SourceCatalog::Photometry{make_shared<vector<string>>(
+          initializer_list<string>{"Filter1", "Filter2"}),
+          vector<SourceCatalog::FluxErrorPair>{   {4.1, 0.1},  {4.2, 0.2}}}}};
+
+   vector<shared_ptr<SourceCatalog::Attribute>> source_attr_6 =
+           vector<shared_ptr<SourceCatalog::Attribute>>{
+        shared_ptr<SourceCatalog::Attribute>{new SourceCatalog::SpectroscopicRedshift(0.15,0.001)}};
 
    vector<SourceCatalog::Source> sources {
-     {1, {shared_ptr<SourceCatalog::Attribute>{new SourceCatalog::Photometry{make_shared<vector<string>>(
-         initializer_list<string>{"Filter1", "Filter2"}),
-         vector<SourceCatalog::FluxErrorPair>{   {1.1, 0.1},  {1.2, 0.2}}}}}},
-     {2, {shared_ptr<SourceCatalog::Attribute>{new SourceCatalog::Photometry{make_shared<vector<string>>(
-         initializer_list<string>{"Filter1", "Filter2"}),
-         vector<SourceCatalog::FluxErrorPair>{   {2.1, 0.1}, {2.2, 0.2}}}}}},
-     {3, {shared_ptr<SourceCatalog::Attribute>{new SourceCatalog::Photometry{make_shared<vector<string>>(
-         initializer_list<string>{"Filter1", "Filter2"}),
-         vector<SourceCatalog::FluxErrorPair>{   {4.1, 0.1}, {4.2, 0.2}}}}}},
-     {4, {shared_ptr<SourceCatalog::Attribute>{new SourceCatalog::Photometry{make_shared<vector<string>>(
-         initializer_list<string>{"Filter1", "Filter2"}),
-         vector<SourceCatalog::FluxErrorPair>{   {3.1, 0.1}, {3.2, 0.2}}}}}}
+     {1, source_attr_1},
+     {2, source_attr_2},
+     {3, source_attr_3},
+     {4, source_attr_4}
    };
+
+   vector<SourceCatalog::Source> sources_missing_spectro {
+        {1, source_attr_1},
+        {2, source_attr_2},
+        {3, source_attr_3},
+        {4, source_attr_5}
+      };
+   vector<SourceCatalog::Source> sources_missing_photo {
+          {1, source_attr_1},
+          {2, source_attr_2},
+          {3, source_attr_3},
+          {4, source_attr_6}
+        };
 
 
 
@@ -113,12 +151,29 @@ struct FindBestFitModels_Fixture {
 
 BOOST_AUTO_TEST_SUITE (FindBestFitModels_test)
 BOOST_FIXTURE_TEST_CASE(Functional_call_test, FindBestFitModels_Fixture) {
-  auto test_object = FindBestFitModels<PhzLikelihood::SourcePhzFunctor>();
+
 
   const auto& grid_ref=photo_grid;
   const auto& sources_ref=sources;
   const auto& map_ref=correctionMap;
-  test_object(sources_ref,grid_ref,map_ref);
+//  auto test_object = FindBestFitModels<PhzLikelihood::SourcePhzFunctor>();
+//  auto result_map = test_object(sources_ref,grid_ref,map_ref);
+
+
+  auto test_object_2 = FindBestFitModels<SourcePhzCalculatorMock>();
+  auto result_map_2 = test_object_2(sources_ref,grid_ref,map_ref);
+}
+
+BOOST_FIXTURE_TEST_CASE(Functional_call_throw_test, FindBestFitModels_Fixture) {
+  auto test_object = FindBestFitModels<SourcePhzCalculatorMock>();
+
+  const auto& grid_ref=photo_grid;
+  const auto& sources_ref=sources_missing_spectro;
+  const auto& map_ref=correctionMap;
+  BOOST_CHECK_THROW(test_object(sources_ref,grid_ref,map_ref),Elements::Exception)
+
+  const auto& sources_ref_2=sources_missing_photo;
+  BOOST_CHECK_THROW(test_object(sources_ref_2,grid_ref,map_ref),Elements::Exception)
 }
 
 

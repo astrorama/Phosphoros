@@ -23,14 +23,34 @@ public:
   virtual ~SourcePhzCalculatorMock() = default;
 
   SourcePhzCalculatorMock(PhzDataModel::PhotometricCorrectionMap phot_corr_map,
-      PhzDataModel::PhotometryGrid phot_grid): m_phot_corr_map{std::move(phot_corr_map)}, m_phot_grid{std::move(phot_grid)}{
+     const PhzDataModel::PhotometryGrid& phot_grid):
+       m_phot_corr_map{std::move(phot_corr_map)},
+       m_phot_grid(phot_grid){
+        expectFunctorCall();
+
+
+      }
+
+  MOCK_METHOD1(FunctorCall,
+      PhzLikelihood::SourcePhzFunctor::result_type*(const SourceCatalog::Photometry& source_phot));
+
+  PhzLikelihood::SourcePhzFunctor::result_type operator()(const SourceCatalog::Photometry& source_phot){
+    std::unique_ptr< PhzLikelihood::SourcePhzFunctor::result_type> res(FunctorCall(source_phot));
+    return std::move(*res);
   }
 
-  MOCK_METHOD1(FunctorCall, PhzDataModel::PhotometryGrid::const_iterator(const SourceCatalog::Photometry& source_phot));
+  void expectFunctorCall() {
+      EXPECT_CALL(*this, FunctorCall(_)).WillOnce(Return(
+          new PhzLikelihood::SourcePhzFunctor::result_type{
+        m_phot_grid.begin(),
+            PhzDataModel::Pdf1D{GridContainer::GridAxis<double>{"Axis",{}}}}));
+  };
+
+
 
 private:
   PhzDataModel::PhotometricCorrectionMap m_phot_corr_map;
-  PhzDataModel::PhotometryGrid m_phot_grid;
+  const PhzDataModel::PhotometryGrid& m_phot_grid;
 };
 
 

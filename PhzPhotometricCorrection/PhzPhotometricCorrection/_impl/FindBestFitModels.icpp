@@ -7,6 +7,7 @@
 #include <map>
 #include "SourceCatalog/Catalog.h"
 #include "PhzLikelihood/SourcePhzFunctor.h"
+#include "ElementsKernel/Exception.h"
 
 namespace Euclid {
 namespace PhzPhotometricCorrection {
@@ -18,34 +19,47 @@ map<int64_t, PhzDataModel::PhotometryGrid::const_iterator> FindBestFitModels<sou
     const SourceCatalog::Catalog& calibration_catalog,
     const PhzDataModel::PhotometryGrid& model_photometric_grid,
     const PhzDataModel::PhotometricCorrectionMap& photometric_correction) {
-  auto best_fit_map =
-      map<int64_t, PhzDataModel::PhotometryGrid::const_iterator>();
+
+
+  auto best_fit_map = map<int64_t, PhzDataModel::PhotometryGrid::const_iterator>();
 
   for (auto& source : calibration_catalog) {
+
     int64_t source_id = source.getId();
+
     shared_ptr < SourceCatalog::SpectroscopicRedshift > redshift_ptr =
         source.getAttribute<SourceCatalog::SpectroscopicRedshift>();
+
+    if (redshift_ptr==nullptr){
+          throw Elements::Exception()<<"Source with Id "<< source_id
+             << " has no spectroscopic redshift attribute";
+    }
+
     double expected_redshift = redshift_ptr->getValue();
 
     shared_ptr < SourceCatalog::Photometry > photometry_ptr =
         source.getAttribute<SourceCatalog::Photometry>();
+    if (photometry_ptr==nullptr){
+          throw Elements::Exception()<<"Source with Id "<< source_id
+              << " has no photometry attribute";
+    }
 
-    auto& z_axis = model_photometric_grid.getAxis<
-        PhzDataModel::ModelParameter::Z>();
+    auto& z_axis = model_photometric_grid.getAxis<PhzDataModel::ModelParameter::Z>();
+
     double closest_z = -1.;
     double zs_diff = 10000.;
     for (auto& z_value : z_axis) {
       double curr_diff = abs(z_value - expected_redshift);
       if (curr_diff < zs_diff) {
-        zs_diff = curr_diff;
         closest_z = z_value;
+        zs_diff = curr_diff;
       }
     }
 
     auto& sliced_grid = model_photometric_grid.fixAxisByValue< PhzDataModel::ModelParameter::Z > (closest_z);
 
-    auto source_phz_calculator =sourceCalculatorFunctor(
-        photometric_correction, sliced_grid);
+    sourceCalculatorFunctor source_phz_calculator(photometric_correction, sliced_grid);
+
     best_fit_map.emplace(source_id,  std::get<0>(source_phz_calculator(*photometry_ptr)));
   }
 
