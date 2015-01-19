@@ -51,7 +51,7 @@ public:
    * @details
    * These options are the ones required by the PhotometryCatalogConfiguration,
    * SpectroscopicRedshiftCatalogConfiguration and PhotometryGridConfiguration
-   * classes, with the folowing extra options:
+   * classes, with the folowing extra option:
    * - output-phot-corr-file : The file to export the calculated photometric correction
    * 
    * @return A boost::program_options::options_description object describing
@@ -68,6 +68,8 @@ public:
    * 
    * @param options
    *    A map with the options and their values
+   * @throws ElementsException
+   *    of the output-phot-corr-file is missing
    * @throws ElementsException
    *    if the output-phot-corr-file cannot be created
    */

@@ -47,6 +47,9 @@ CalculatePhotometricCorrectionConfiguration::CalculatePhotometricCorrectionConfi
   m_options = options;
 
   //Extract file option
+  if (m_options["output-phot-corr-file"].empty()) {
+    throw Elements::Exception() << "Missing parameter output-phot-corr-file";
+  }
   std::string filename = m_options["output-phot-corr-file"].as<std::string>();
 
   // The purpose here is to make sure we are able to
