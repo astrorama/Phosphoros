@@ -91,25 +91,25 @@ struct FindBestFitModels_Fixture {
            vector<shared_ptr<SourceCatalog::Attribute>>{
         shared_ptr<SourceCatalog::Attribute>{new SourceCatalog::SpectroscopicRedshift(0.15,0.001)}};
 
-   vector<SourceCatalog::Source> sources {
+   SourceCatalog::Catalog sources {{
      {1, source_attr_1},
      {2, source_attr_2},
      {3, source_attr_3},
      {4, source_attr_4}
-   };
+   }};
 
-   vector<SourceCatalog::Source> sources_missing_spectro {
+   SourceCatalog::Catalog sources_missing_spectro {{
         {1, source_attr_1},
         {2, source_attr_2},
         {3, source_attr_3},
         {4, source_attr_5}
-      };
-   vector<SourceCatalog::Source> sources_missing_photo {
+      }};
+   SourceCatalog::Catalog sources_missing_photo {{
           {1, source_attr_1},
           {2, source_attr_2},
           {3, source_attr_3},
           {4, source_attr_6}
-        };
+        }};
 
 
 
@@ -139,41 +139,27 @@ struct FindBestFitModels_Fixture {
      ref_photo_grid(0, 1, 0, 0) = photometry_3;
      ref_photo_grid(1, 1, 0, 0) = photometry_4;
    }
-
-
 };
-
-/*
-
- * */
 
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE (FindBestFitModels_test)
 BOOST_FIXTURE_TEST_CASE(Functional_call_test, FindBestFitModels_Fixture) {
+  auto test_object = FindBestFitModels<PhzLikelihood::SourcePhzFunctor>();
+  auto result_map = test_object(sources,photo_grid,correctionMap);
+}
 
-
-  const auto& grid_ref=photo_grid;
-  const auto& sources_ref=sources;
-  const auto& map_ref=correctionMap;
-//  auto test_object = FindBestFitModels<PhzLikelihood::SourcePhzFunctor>();
-//  auto result_map = test_object(sources_ref,grid_ref,map_ref);
-
-
-  auto test_object_2 = FindBestFitModels<SourcePhzCalculatorMock>();
-  auto result_map_2 = test_object_2(sources_ref,grid_ref,map_ref);
+BOOST_FIXTURE_TEST_CASE(Functional_call_mock_test, FindBestFitModels_Fixture) {
+  auto test_object = FindBestFitModels<SourcePhzCalculatorMock>();
+  auto result_map = test_object(sources,photo_grid,correctionMap);
 }
 
 BOOST_FIXTURE_TEST_CASE(Functional_call_throw_test, FindBestFitModels_Fixture) {
   auto test_object = FindBestFitModels<SourcePhzCalculatorMock>();
 
-  const auto& grid_ref=photo_grid;
-  const auto& sources_ref=sources_missing_spectro;
-  const auto& map_ref=correctionMap;
-  BOOST_CHECK_THROW(test_object(sources_ref,grid_ref,map_ref),Elements::Exception)
+  BOOST_CHECK_THROW(test_object(sources_missing_spectro,photo_grid,correctionMap),Elements::Exception)
 
-  const auto& sources_ref_2=sources_missing_photo;
-  BOOST_CHECK_THROW(test_object(sources_ref_2,grid_ref,map_ref),Elements::Exception)
+  BOOST_CHECK_THROW(test_object(sources_missing_photo,photo_grid,correctionMap),Elements::Exception)
 }
 
 

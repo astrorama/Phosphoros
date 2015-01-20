@@ -47,7 +47,7 @@ public:
 
   template<int I>
   void fixSameAxis(IterFrom& from, IterTo& to, const GridContainer::TemplateLoopCounter<I>&) {
-    to.template fixAxisByIndex<I>(from.template axisIndex<I>());
+    to.template fixAxisByValue<I>(from.template axisValue<I>());
     fixSameAxis(from, to, GridContainer::TemplateLoopCounter<I-1>{});
   }
 
@@ -73,6 +73,7 @@ auto SourcePhzFunctor::operator()(const SourceCatalog::Photometry& source_phot) 
   auto best_fit = m_best_fit_search_func(likelihood_grid.begin(), likelihood_grid.end());
   // Create an iterator of PhotometryGrid instead of the LikelihoodGrid that we have
   auto best_fit_result = m_phot_grid.begin();
+
   fixSameAxis(best_fit, best_fit_result);
   // Calculate the 1D PDF
   auto pdf_1D = m_marginalization_func(likelihood_grid);
