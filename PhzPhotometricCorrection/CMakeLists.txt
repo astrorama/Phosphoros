@@ -23,4 +23,9 @@ elements_add_unit_test(CalculateScaleFactorMap_test tests/src/CalculateScaleFact
 elements_add_unit_test(FindBestFitModels_test tests/src/FindBestFitModels_test.cpp
                        LINK_LIBRARIES gmock gtest PhzPhotometricCorrection TYPE Boost
                        INCLUDE_DIRS gmock gtest)
+elements_add_unit_test(DefaultStopCriteria_test tests/src/DefaultStopCriteria_test.cpp
+                       LINK_LIBRARIES PhzPhotometricCorrection TYPE Boost)
+elements_add_unit_test(PhotometricCorrectionCalculator_test tests/src/PhotometricCorrectionCalculator_test.cpp
+                       LINK_LIBRARIES gmock gtest PhzPhotometricCorrection TYPE Boost
+                       INCLUDE_DIRS gmock gtest)
 
