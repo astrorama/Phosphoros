@@ -11,6 +11,7 @@
 #include "ElementsKernel/Real.h"
 #include "ElementsKernel/Exception.h"
 #include "PhzDataModel/PhotometricCorrectionMap.h"
+#include "Table/AsciiReader.h"
 namespace Euclid {
 
 
@@ -79,7 +80,14 @@ BOOST_FIXTURE_TEST_CASE(Writer_test, PhotometricCorrectionMap_Fixture) {
   std::stringstream stream {};
   PhzDataModel::writePhotometricCorrectionMap(stream,ref_map);
 
-  BOOST_CHECK_EQUAL(stream.str(),string_representation);
+  auto table = Table::AsciiReader().read(stream);
+
+  BOOST_CHECK_EQUAL(ref_map.size(), table.size());
+
+  for (auto&row : table){
+    auto filter_name =  boost::get<std::string>(row["Filter"]);
+    BOOST_CHECK_EQUAL(ref_map.at(XYDataset::QualifiedName(filter_name)), boost::get<double>(row["Correction"]));
+  }
 }
 
 
