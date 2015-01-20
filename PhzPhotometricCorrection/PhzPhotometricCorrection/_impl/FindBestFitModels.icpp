@@ -60,7 +60,7 @@ map<int64_t, PhzDataModel::PhotometryGrid::const_iterator> FindBestFitModels<sou
 
     sourceCalculatorFunctor source_phz_calculator(photometric_correction, sliced_grid);
 
-    best_fit_map.emplace(source_id,  std::get<0>(source_phz_calculator(*photometry_ptr)));
+    best_fit_map.emplace(source_id,  get<0>(source_phz_calculator(*photometry_ptr)));
   }
 
   return best_fit_map;

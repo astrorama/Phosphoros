@@ -9,7 +9,6 @@
 #define CALCULATESCALEFACTORMAP_ICPP
 
 
-#include "PhzLikelihood/ScaleFactorFunctor.h"
 #include "SourceCatalog/SourceAttributes/Photometry.h"
 
 namespace Euclid {
@@ -18,8 +17,7 @@ namespace PhzPhotometricCorrection {
 
 
 CalculateScaleFactorMap::CalculateScaleFactorMap(
-    CalculateScaleFactorMap::ScaleFactorCalc scaleFactorFunction
-    = CalculateScaleFactorMap::ScaleFactorCalc(PhzLikelihood::ScaleFactorFunctor()))
+    CalculateScaleFactorMap::ScaleFactorCalc scaleFactorFunction)
 : m_scale_factor_function(std::move(scaleFactorFunction)){}
 
 template<typename SourceIter, typename ModelPhotPtr>

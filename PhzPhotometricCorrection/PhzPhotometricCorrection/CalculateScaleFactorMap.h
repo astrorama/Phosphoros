@@ -8,6 +8,7 @@
 #define PHZPHOTOMETRICCORRECTION_CALCULATESCALEFACTORMAP_H
 
 #include "SourceCatalog/Catalog.h"
+#include "PhzLikelihood/ScaleFactorFunctor.h"
 
 namespace Euclid {
 namespace PhzPhotometricCorrection {
@@ -39,7 +40,8 @@ public:
                        > ScaleFactorCalc;
 
 
-  CalculateScaleFactorMap(ScaleFactorCalc scaleFactorFunction);
+  CalculateScaleFactorMap(ScaleFactorCalc scaleFactorFunction
+      = CalculateScaleFactorMap::ScaleFactorCalc(PhzLikelihood::ScaleFactorFunctor()));
 
   /**
     * @brief Compute the Scale Factor Map
