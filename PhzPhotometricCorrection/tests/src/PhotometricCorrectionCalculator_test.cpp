@@ -65,11 +65,25 @@ public:
                   Catalog::const_iterator source_begin,
                   Catalog::const_iterator source_end,
                   const map<int64_t, PhzDataModel::PhotometryGrid::const_iterator>& model_phot_map));
-  void expectFunctorCall(Catalog::const_iterator source_begin,
-                         Catalog::const_iterator source_end,
-                         const map<int64_t, PhzDataModel::PhotometryGrid::const_iterator>& model_phot_map,
+  void expectFunctorCall(Catalog::const_iterator expected_source_begin,
+                         Catalog::const_iterator expected_source_end,
+                         const map<int64_t, PhzDataModel::PhotometryGrid::const_iterator>& expected_model_phot_map,
                          const map<int64_t, double> result) {
-    EXPECT_CALL(*this, FunctorCall(_, _, _)).WillOnce(Return(result));
+    EXPECT_CALL(*this, FunctorCall(_, _,
+        Truly([&expected_model_phot_map](const map<int64_t, PhzDataModel::PhotometryGrid::const_iterator>& model_phot_map) {
+          BOOST_CHECK_EQUAL(model_phot_map.size(), expected_model_phot_map.size());
+          for (auto iter=model_phot_map.begin(), exp_iter=expected_model_phot_map.begin(); iter!=model_phot_map.end(); ++iter, ++exp_iter) {
+            BOOST_CHECK_EQUAL(iter->first, exp_iter->first);
+          }
+          return true;
+        }))).With(Args<0, 1>(
+        Truly([expected_source_begin, expected_source_end](tuple<Catalog::const_iterator, Catalog::const_iterator> args) {
+          BOOST_CHECK_EQUAL(get<1>(args)-get<0>(args), expected_source_end-expected_source_begin);
+          for (auto iter=get<0>(args), exp_iter=expected_source_begin; iter!=get<1>(args); ++iter, ++exp_iter) {
+            BOOST_CHECK_EQUAL(iter->getId(), exp_iter->getId());
+          }
+          return true;
+        }))).WillOnce(Return(result));
   }
 };
 
@@ -81,12 +95,33 @@ public:
                   Catalog::const_iterator source_end,
                   const map<int64_t, double>& scale_factor_map,
                   const map<int64_t, PhzDataModel::PhotometryGrid::const_iterator>& model_phot_map));
-  void expectFunctorCall(Catalog::const_iterator source_begin,
-                         Catalog::const_iterator source_end,
-                         const map<int64_t, double>& scale_factor_map,
-                         const map<int64_t, PhzDataModel::PhotometryGrid::const_iterator>& model_phot_map,
+  void expectFunctorCall(Catalog::const_iterator expected_source_begin,
+                         Catalog::const_iterator expected_source_end,
+                         const map<int64_t, double>& expected_scale_factor_map,
+                         const map<int64_t, PhzDataModel::PhotometryGrid::const_iterator>& expected_model_phot_map,
                          const PhzDataModel::PhotometricCorrectionMap& result) {
-    EXPECT_CALL(*this, FunctorCall(_, _, _, _)).WillOnce(Return(result));
+    EXPECT_CALL(*this, FunctorCall(_, _,
+        Truly([&expected_scale_factor_map](const map<int64_t, double>& scale_factor_map) {
+          BOOST_CHECK_EQUAL(scale_factor_map.size(), expected_scale_factor_map.size());
+          for (auto iter=scale_factor_map.begin(), exp_iter=expected_scale_factor_map.begin(); iter!=scale_factor_map.end(); ++iter, ++exp_iter) {
+            BOOST_CHECK_EQUAL(iter->first, exp_iter->first);
+          }
+          return true;
+        }),
+        Truly([&expected_model_phot_map](const map<int64_t, PhzDataModel::PhotometryGrid::const_iterator>& model_phot_map) {
+          BOOST_CHECK_EQUAL(model_phot_map.size(), expected_model_phot_map.size());
+          for (auto iter=model_phot_map.begin(), exp_iter=expected_model_phot_map.begin(); iter!=model_phot_map.end(); ++iter, ++exp_iter) {
+            BOOST_CHECK_EQUAL(iter->first, exp_iter->first);
+          }
+          return true;
+        }))).With(Args<0, 1>(
+        Truly([expected_source_begin, expected_source_end](tuple<Catalog::const_iterator, Catalog::const_iterator> args) {
+          BOOST_CHECK_EQUAL(get<1>(args)-get<0>(args), expected_source_end-expected_source_begin);
+          for (auto iter=get<0>(args), exp_iter=expected_source_begin; iter!=get<1>(args); ++iter, ++exp_iter) {
+            BOOST_CHECK_EQUAL(iter->getId(), exp_iter->getId());
+          }
+          return true;
+        }))).WillOnce(Return(result));
   }
 };
 
