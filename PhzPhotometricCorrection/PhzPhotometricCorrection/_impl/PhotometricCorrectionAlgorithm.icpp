@@ -57,7 +57,7 @@ static std::map<int64_t, PhzDataModel::PhotometricCorrectionMap> createSourcePho
   return result;
 }
 
-static PhzDataModel::PhotometricCorrectionMap findMeanPhotometricCorrections(
+static PhzDataModel::PhotometricCorrectionMap findMedianPhotometricCorrections(
             const std::map<int64_t, PhzDataModel::PhotometricCorrectionMap>& source_phot_corr_map) {
   
   // Order the photometries for each filter, by storring them in multisets
@@ -94,7 +94,7 @@ PhzDataModel::PhotometricCorrectionMap PhotometricCorrectionAlgorithm::operator 
   auto source_phot_corr_map = createSourcePhotCorrMap(source_begin, source_end,
                                                       scale_factor_map, model_phot_map);
   
-  return findMeanPhotometricCorrections(source_phot_corr_map);
+  return findMedianPhotometricCorrections(source_phot_corr_map);
 }
 
 } // end of namespace PhzPhotometricCorrection
