@@ -31,8 +31,10 @@ PhzDataModel::PhotometricCorrectionMap createInitialPhotCorr(const SourceCatalog
 PhzDataModel::PhotometricCorrectionMap PhotometricCorrectionCalculator::operator ()(
                               const SourceCatalog::Catalog& catalog,
                               const PhzDataModel::PhotometryGrid& model_phot_grid,
+                              ProgressListener progress_listener,
                               StopCriteriaFunction stop_criteria_func) {
   PhzDataModel::PhotometricCorrectionMap phot_corr = createInitialPhotCorr(catalog);
+  size_t counter {0};
   while(!stop_criteria_func(phot_corr)) {
     auto best_fit_model_map = m_find_best_fit_models(
                                             catalog, model_phot_grid, phot_corr);
@@ -42,6 +44,9 @@ PhzDataModel::PhotometricCorrectionMap PhotometricCorrectionCalculator::operator
     phot_corr = m_calculate_photometric_correction(
                                             catalog.begin(), catalog.end(),
                                             scale_factor_map, best_fit_model_map);
+    if (progress_listener) {
+      progress_listener(++counter, phot_corr);
+    }
   }
   return phot_corr;
 }

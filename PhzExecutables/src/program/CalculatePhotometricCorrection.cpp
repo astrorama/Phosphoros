@@ -45,7 +45,13 @@ public:
     PhotometricCorrectionCalculator calculator {find_best_fit_models,
                                 calculate_scale_factor_map, phot_corr_algorighm};
                                 
-    auto phot_corr_map = calculator(catalog, model_phot_grid);
+    auto progress_logger = [](size_t iter_no, const PhzDataModel::PhotometricCorrectionMap& phot_corr) {
+      logger.info() << "Iteration no: " << iter_no;
+      for (auto& pair : phot_corr) {
+        logger.info() << pair.first.qualifiedName() << " : " << pair.second;
+      }
+    };
+    auto phot_corr_map = calculator(catalog, model_phot_grid, progress_logger);
     
     output_func(phot_corr_map);
     

@@ -24,6 +24,8 @@ class PhotometricCorrectionCalculator {
 
 public:
   
+  typedef std::function<void(size_t iter_no, const PhzDataModel::PhotometricCorrectionMap& phot_corr)> ProgressListener;
+  
   typedef std::function<std::map<int64_t, PhzDataModel::PhotometryGrid::const_iterator>(
                   const SourceCatalog::Catalog& calibration_catalog,
                   const PhzDataModel::PhotometryGrid& model_photometric_grid,
@@ -52,6 +54,7 @@ public:
   PhzDataModel::PhotometricCorrectionMap operator()(
           const SourceCatalog::Catalog& catalog,
           const PhzDataModel::PhotometryGrid& model_phot_grid,
+          ProgressListener progress_listener=ProgressListener{},
           StopCriteriaFunction stop_criteria_func=DefaultStopCriteria{DEFAULT_ITER_NO, DEFAULT_TOLERANCE});
   
 private:
