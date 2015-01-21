@@ -44,7 +44,7 @@ public:
    *    the filters of the model photometries
    */
   CatalogHandler(PhzDataModel::PhotometricCorrectionMap phot_corr_map,
-                 PhzDataModel::PhotometryGrid phot_grid);
+                 const PhzDataModel::PhotometryGrid& phot_grid);
   
   /**
    * Iterates through a set of sources and calculates the PHZ parameters for

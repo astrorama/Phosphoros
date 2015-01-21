@@ -113,7 +113,7 @@ class CreatePhzCatalog : public Elements::Program {
     
     auto model_phot_grid = conf.getPhotometryGrid();
     
-    PhzLikelihood::CatalogHandler handler {conf.getPhotometricCorrectionMap(), move(model_phot_grid)};
+    PhzLikelihood::CatalogHandler handler {conf.getPhotometricCorrectionMap(), model_phot_grid};
     
     auto catalog = conf.getCatalog();
     

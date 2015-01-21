@@ -13,8 +13,8 @@ namespace PhzLikelihood {
 static Elements::Logging logger = Elements::Logging::getLogger("CatalogHandler");
 
 CatalogHandler::CatalogHandler(PhzDataModel::PhotometricCorrectionMap phot_corr_map,
-                               PhzDataModel::PhotometryGrid phot_grid)
-            : m_source_phz_func{std::move(phot_corr_map), std::move(phot_grid)} {
+                               const PhzDataModel::PhotometryGrid& phot_grid)
+            : m_source_phz_func{std::move(phot_corr_map), phot_grid} {
 }
 
 } // end of namespace PhzLikelihood
