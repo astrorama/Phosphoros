@@ -25,7 +25,7 @@ CreatePhotometryGridConfiguration::CreatePhotometryGridConfiguration(const std::
 
   m_options = options;
 
-  //Extract file option
+  // Extract file option
   std::string filename = m_options["binary-photometry-grid"].as<std::string>();
 
   // The purpose here is to make sure we are able to

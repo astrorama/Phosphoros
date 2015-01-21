@@ -39,7 +39,8 @@ public:
   static boost::program_options::options_description getProgramOptions();
   
   /// Creates a new instance of PhotometricCorrectionConfiguration
-  PhotometricCorrectionConfiguration(const std::map<std::string, boost::program_options::variable_value>& options);
+  PhotometricCorrectionConfiguration(const std::map<std::string, boost::program_options::variable_value>& options)
+                                    : m_options{options} {};
   
   /// Returns a map with the photometric corrections for the filters
   PhzDataModel::PhotometricCorrectionMap getPhotometricCorrectionMap();
