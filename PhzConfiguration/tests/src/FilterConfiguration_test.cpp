@@ -83,7 +83,7 @@ struct FilterConfiguration_Fixture {
 
   }
   ~FilterConfiguration_Fixture() {
-    //removeDir(base_directory);
+    removeDir(base_directory);
   }
 
 
