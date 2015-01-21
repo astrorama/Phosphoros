@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(FunctorCallSuccess) {
       bind(&CalculateScaleFactorsMapMock::FunctorCall, &calculate_scale_factors_map_mock, _1, _2, _3),
       bind(&CalculatePhotometricCorrectionMock::FunctorCall, &calculate_photometric_correction_mock, _1, _2, _3, _4)
   };
-  auto result_phot_corr_map = calculator(catalog, model_phot_grid, {},
+  auto result_phot_corr_map = calculator(catalog, model_phot_grid,
                   bind(&StopCriteriaMock::FunctorCall, &stop_criteria_mock, _1));
   
   // Then

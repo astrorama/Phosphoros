@@ -37,6 +37,7 @@ public:
     auto catalog = conf.getCatalog();
     auto model_phot_grid = conf.getPhotometryGrid();
     auto output_func = conf.getOutputFunction();
+    auto stop_criteria = conf.getStopCriteria();
     
     FindBestFitModels<PhzLikelihood::SourcePhzFunctor> find_best_fit_models {};
     CalculateScaleFactorMap calculate_scale_factor_map {};
@@ -51,7 +52,7 @@ public:
         logger.info() << pair.first.qualifiedName() << " : " << pair.second;
       }
     };
-    auto phot_corr_map = calculator(catalog, model_phot_grid, progress_logger);
+    auto phot_corr_map = calculator(catalog, model_phot_grid, stop_criteria, progress_logger);
     
     output_func(phot_corr_map);
     

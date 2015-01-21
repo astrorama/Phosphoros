@@ -18,9 +18,6 @@ namespace Euclid {
 namespace PhzPhotometricCorrection {
 
 class PhotometricCorrectionCalculator {
-  
-  static constexpr int DEFAULT_ITER_NO = 5;
-  static constexpr double DEFAULT_TOLERANCE = 1E-10;
 
 public:
   
@@ -54,8 +51,8 @@ public:
   PhzDataModel::PhotometricCorrectionMap operator()(
           const SourceCatalog::Catalog& catalog,
           const PhzDataModel::PhotometryGrid& model_phot_grid,
-          ProgressListener progress_listener=ProgressListener{},
-          StopCriteriaFunction stop_criteria_func=DefaultStopCriteria{DEFAULT_ITER_NO, DEFAULT_TOLERANCE});
+          StopCriteriaFunction stop_criteria_func,
+          ProgressListener progress_listener=ProgressListener{});
   
 private:
   

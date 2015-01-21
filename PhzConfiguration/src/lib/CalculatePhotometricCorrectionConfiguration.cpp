@@ -7,6 +7,7 @@
 #include <fstream>
 #include "ElementsKernel/Exception.h"
 #include "ElementsKernel/Logging.h"
+#include "PhzPhotometricCorrection/DefaultStopCriteria.h"
 #include "PhzConfiguration/CalculatePhotometricCorrectionConfiguration.h"
 
 namespace po = boost::program_options;
@@ -22,7 +23,11 @@ po::options_description CalculatePhotometricCorrectionConfiguration::getProgramO
 
   options.add_options()
   ("output-phot-corr-file", boost::program_options::value<std::string>(),
-      "The filename of the file to export the calculated photometric correction");
+      "The filename of the file to export the calculated photometric correction")
+  ("phot-corr-iter-no", boost::program_options::value<int>()->default_value(5),
+      "The maximum number of iterations to perform (negative=unlimited)")
+  ("phot-corr-tolerance", boost::program_options::value<double>()->default_value(1E-3),
+      "The tolerance which if achieved between two iteration steps the iteration stops");
 
   // We get all the catalog options. We are careful not to add an option twice.
   po::options_description catalog_options = PhotometryCatalogConfiguration::getProgramOptions();
@@ -75,6 +80,12 @@ auto CalculatePhotometricCorrectionConfiguration::getOutputFunction() -> OutputF
   };
 }
 
+PhzPhotometricCorrection::PhotometricCorrectionCalculator::StopCriteriaFunction
+                      CalculatePhotometricCorrectionConfiguration::getStopCriteria() {
+  int iter_no = m_options["phot-corr-iter-no"].as<int>();
+  double tolerance = m_options["phot-corr-tolerance"].as<double>();
+  return PhzPhotometricCorrection::DefaultStopCriteria(iter_no, tolerance);
+}
 
 } // end of namespace PhzConfiguration
 } // end of namespace Euclid

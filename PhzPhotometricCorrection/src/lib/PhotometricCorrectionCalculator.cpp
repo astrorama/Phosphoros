@@ -31,8 +31,8 @@ PhzDataModel::PhotometricCorrectionMap createInitialPhotCorr(const SourceCatalog
 PhzDataModel::PhotometricCorrectionMap PhotometricCorrectionCalculator::operator ()(
                               const SourceCatalog::Catalog& catalog,
                               const PhzDataModel::PhotometryGrid& model_phot_grid,
-                              ProgressListener progress_listener,
-                              StopCriteriaFunction stop_criteria_func) {
+                              StopCriteriaFunction stop_criteria_func,
+                              ProgressListener progress_listener) {
   PhzDataModel::PhotometricCorrectionMap phot_corr = createInitialPhotCorr(catalog);
   size_t counter {0};
   while(!stop_criteria_func(phot_corr)) {

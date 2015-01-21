@@ -70,6 +70,12 @@ BOOST_AUTO_TEST_CASE(getProgramOptions) {
   if (!options.find_nothrow("output-phot-corr-file", false)) {
     BOOST_ERROR("Missing option output-phot-corr-file");
   }
+  if (!options.find_nothrow("phot-corr-iter-no", false)) {
+    BOOST_ERROR("Missing option phot-corr-iter-no");
+  }
+  if (!options.find_nothrow("phot-corr-tolerance", false)) {
+    BOOST_ERROR("Missing option phot-corr-tolerance");
+  }
   for (auto option : phot_cat_options) {
     if (!options.find_nothrow(option->long_name(), false)) {
       BOOST_ERROR("Missing option " + option->long_name());

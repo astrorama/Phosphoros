@@ -11,6 +11,7 @@
 #include <string>
 #include <boost/program_options.hpp>
 #include "PhzDataModel/PhotometricCorrectionMap.h"
+#include "PhzPhotometricCorrection/PhotometricCorrectionCalculator.h"
 #include "PhzConfiguration/PhotometryCatalogConfiguration.h"
 #include "PhzConfiguration/SpectroscopicRedshiftCatalogConfiguration.h"
 #include "PhzConfiguration/PhotometryGridConfiguration.h"
@@ -51,8 +52,13 @@ public:
    * @details
    * These options are the ones required by the PhotometryCatalogConfiguration,
    * SpectroscopicRedshiftCatalogConfiguration and PhotometryGridConfiguration
-   * classes, with the folowing extra option:
+   * classes, with the folowing extra options:
    * - output-phot-corr-file : The file to export the calculated photometric correction
+   * - phot-corr-iter-no     : The maximum number of iterations to perform
+   *                           with negative values mean unlimited (defaults to 5)
+   * - phot-corr-tolerance   : The tolerance which if achieved between two iteration
+   *                           steps the iteration stops. It must be a non negative
+   *                           number (defaults to 1E-3)
    * 
    * @return A boost::program_options::options_description object describing
    * the program options
@@ -82,6 +88,9 @@ public:
    * @return The output function
    */
   OutputFunction getOutputFunction();
+  
+  /// Returns the stop criteria for the loop
+  PhzPhotometricCorrection::PhotometricCorrectionCalculator::StopCriteriaFunction getStopCriteria();
   
 private:
   
