@@ -40,6 +40,20 @@ void writePhotometricCorrectionMap(std::ostream& out, const PhotometricCorrectio
  * with 2 columns (Filter <string>,Correction<double>).
  * The Filter column contains the full (also with groups)
  * filter name.
+ * 
+ * Example file:
+ * \code
+ * #             Filter Correction
+ * #             string     double
+ *
+ *  MER/Ynir_WFC3f105w   0.929515
+ *   MER/Iext_ACSf775w    1.08226
+ *  MER/Hnir_WFC3f160w   0.600265
+ *   MER/Rext_ACSf606w    1.57643
+ *  MER/Jnir_WFC3f125w   0.654886
+ *  MER/Zext_ACSf850lp    1.02498
+ *    MER/VIS_ACSf814w    1.13837
+ * \endcode
  *
  * @param in
  * A istream encoding the table representing the correction map .
