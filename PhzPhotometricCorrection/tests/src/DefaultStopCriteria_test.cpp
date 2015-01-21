@@ -36,14 +36,9 @@ BOOST_AUTO_TEST_CASE(maxIterationsStop) {
   
   // When
   int counter = 0;
-  bool stop = false;
-  while (!stop) {
+  while (!checker({{XYDataset::QualifiedName("Filter1"), counter},
+                   {XYDataset::QualifiedName("Filter2"), counter}})) {
     ++counter;
-    PhzDataModel::PhotometricCorrectionMap map {
-      {XYDataset::QualifiedName("Filter1"), counter},
-      {XYDataset::QualifiedName("Filter2"), counter}
-    };
-    stop = checker(map);
   }
   
   // Then

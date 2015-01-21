@@ -21,7 +21,7 @@ DefaultStopCriteria::DefaultStopCriteria(int max_iter, double tolerance)
 bool DefaultStopCriteria::operator ()(const PhzDataModel::PhotometricCorrectionMap& phot_corr) {
   ++m_current_iter;
   // If we already have reached the maximum iterations we stop
-  if (m_current_iter == m_max_iter) {
+  if (m_current_iter > m_max_iter) {
     return true;
   }
   bool result = true;
