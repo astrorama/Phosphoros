@@ -1,4 +1,4 @@
-/** 
+/**
  * @file PhotometricCorrectionAlgorithm.icpp
  * @date January 14, 2015
  * @author Nikolaos Apostolakos
@@ -11,6 +11,7 @@
 #include <set>
 #include "ElementsKernel/Exception.h"
 #include "SourceCatalog/SourceAttributes/Photometry.h"
+#include "PhzPhotometricCorrection/FindMedianPhotometricCorrectionsFunctor.h"
 
 namespace Euclid {
 namespace PhzPhotometricCorrection {
@@ -20,32 +21,32 @@ static std::map<int64_t, PhzDataModel::PhotometricCorrectionMap> createSourcePho
                                   SourceIter source, SourceIter source_end,
                                   const std::map<int64_t,double>& scale_factor_map,
                                   const std::map<int64_t, ModelPhotPtr>& model_phot_map) {
-  
+
   // Iterate through the sources and calcualte their optimal photometric corerctions
   std::map<int64_t, PhzDataModel::PhotometricCorrectionMap> result {};
   for (; source != source_end; ++source) {
-    
+
     // Get the source photometry
     auto source_phot_ptr = source->template getAttribute<SourceCatalog::Photometry>();
     if (source_phot_ptr == nullptr) {
       throw Elements::Exception() << "Source with ID " << source->getId()
           << " does not contain photometric information";
     }
-    
+
     // Get the scale factor
     auto scale = scale_factor_map.find(source->getId());
     if (scale == scale_factor_map.end()) {
       throw Elements::Exception() << "Scale factor for source " << source->getId()
           << " is not available";
     }
-    
+
     // Get the model photometry
     auto model_phot = model_phot_map.find(source->getId());
     if (model_phot == model_phot_map.end()) {
       throw Elements::Exception() << "Model photometry for source " << source->getId()
           << " is not available";
     }
-    
+
     PhzDataModel::PhotometricCorrectionMap source_phot_corr {};
     auto source_iter = source_phot_ptr->begin();
     auto model_iter = model_phot->second->begin();
@@ -57,44 +58,25 @@ static std::map<int64_t, PhzDataModel::PhotometricCorrectionMap> createSourcePho
   return result;
 }
 
-static PhzDataModel::PhotometricCorrectionMap findMedianPhotometricCorrections(
-            const std::map<int64_t, PhzDataModel::PhotometricCorrectionMap>& source_phot_corr_map) {
-  
-  // Order the photometries for each filter, by storring them in multisets
-  std::map<XYDataset::QualifiedName, std::multiset<double>> ordered_source_phot_corr;
-  for (auto& source_phot_corr_pair : source_phot_corr_map) {
-    for (auto& phot_corr_pair : source_phot_corr_pair.second) {
-      ordered_source_phot_corr[phot_corr_pair.first].insert(phot_corr_pair.second);
-    }
-  }
-  
-  // Calculate the median for each filter
-  PhzDataModel::PhotometricCorrectionMap result {};
-  for (auto& pair : ordered_source_phot_corr) {
-    size_t size = pair.second.size();
-    double median = (size % 2 == 0)
-                    ? (*std::next(pair.second.begin(), size/2 - 1) + *std::next(pair.second.begin(), size/2)) / 2
-                    : *std::next(pair.second.begin(), size/2);
-    result[pair.first] = median;
-  }
-  return result;
-}
+
 
 template <typename SourceIter, typename ModelPhotPtr>
 PhzDataModel::PhotometricCorrectionMap PhotometricCorrectionAlgorithm::operator ()(
                                   SourceIter source_begin, SourceIter source_end,
                                   const std::map<int64_t,double>& scale_factor_map,
-                                  const std::map<int64_t, ModelPhotPtr>& model_phot_map) {
-  
+                                  const std::map<int64_t, ModelPhotPtr>& model_phot_map,
+                                  PCFunction<SourceIter> sss) {
+
+  SourceIter alternate_begin(source_begin);
   // Check that we have some sources
   if (source_begin == source_end) {
     throw Elements::Exception() << "No sources given as input";
   }
-  
+
   auto source_phot_corr_map = createSourcePhotCorrMap(source_begin, source_end,
                                                       scale_factor_map, model_phot_map);
-  
-  return findMedianPhotometricCorrections(source_phot_corr_map);
+
+  return sss(source_phot_corr_map, alternate_begin, source_end);
 }
 
 } // end of namespace PhzPhotometricCorrection
