@@ -23,13 +23,17 @@ namespace PhzConfiguration {
  * correction
  * 
  * @details
- * At the moment this class is very minimal, because the photometric correction
- * implementation is not yet defined. It provides a photometric
- * correction map with all the corrections set to 1, for all the filters defined
- * as photometry filters of the input catalog with the filter-name-mapping.
+ * The parameter option available is :
+ * photometric-correction-file : string,  filename and path of the correction file
+ * The photometric correction implementation is not yet defined. It provides a photometric
+ * correction map with all the corrections set to 1 for all the filters defined as photometry
+ * filters of the input catalog with the filter-name-mapping parameter. Otherwise if the
+ * photometric-correction-file is defined the correction data will be read from this correction file
  * 
  * When the Photometric Correction is defined, this class will be modified
  * accordingly.
+ * @throw
+ * ElementException: Photometric Correction file does not exist
  */
 class PhotometricCorrectionConfiguration {
   
