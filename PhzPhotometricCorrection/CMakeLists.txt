@@ -29,3 +29,5 @@ elements_add_unit_test(PhotometricCorrectionCalculator_test tests/src/Photometri
                        LINK_LIBRARIES gmock gtest PhzPhotometricCorrection TYPE Boost
                        INCLUDE_DIRS gmock gtest)
 
+elements_add_unit_test(FindMedianPhotometricCorrectionsFunctor_test tests/src/FindMedianPhotometricCorrectionsFunctor_test.cpp
+                       LINK_LIBRARIES PhzPhotometricCorrection TYPE Boost)
