@@ -64,7 +64,7 @@ public:
                     SourceIter source_begin, SourceIter source_end,
                     const std::map<int64_t, double>& scale_factor_map,
                     const std::map<int64_t, ModelPhotPtr>& model_phot_map,
-                    PCFunction<SourceIter> sss=FindMedianPhotometricCorrectionsFunctor{});
+                    PCFunction<SourceIter> photometric_corrections_selector=FindMedianPhotometricCorrectionsFunctor{});
 
 };
 
