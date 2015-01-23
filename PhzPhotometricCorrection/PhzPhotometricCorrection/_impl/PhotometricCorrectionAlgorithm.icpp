@@ -48,10 +48,9 @@ static std::map<int64_t, PhzDataModel::PhotometricCorrectionMap> createSourcePho
     }
 
     PhzDataModel::PhotometricCorrectionMap source_phot_corr {};
-    auto source_iter = source_phot_ptr->begin();
-    auto model_iter = model_phot->second->begin();
-    for (;source_iter != source_phot_ptr->end(); ++source_iter, ++model_iter) {
-      source_phot_corr[source_iter.filterName()] = scale->second * (*model_iter).flux / (*source_iter).flux;
+    for (auto source_iter=source_phot_ptr->begin(); source_iter!=source_phot_ptr->end(); ++source_iter) {
+      auto model_ptr = model_phot->second->find(source_iter.filterName());
+      source_phot_corr[source_iter.filterName()] = scale->second * model_ptr->flux / (*source_iter).flux;
     }
     result[source->getId()] = std::move(source_phot_corr);
   }
