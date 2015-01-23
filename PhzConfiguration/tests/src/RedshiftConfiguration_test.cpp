@@ -10,17 +10,14 @@
 #include <iostream>
 #include <vector>
 
+#include <boost/test/unit_test.hpp>
+
 #include "ElementsKernel/Temporary.h"
 #include "ElementsKernel/Exception.h"
 #include "PhzConfiguration/RedshiftConfiguration.h"
 
-#include <boost/test/unit_test.hpp>
-#include <boost/filesystem.hpp>
-
-
 namespace po = boost::program_options;
 namespace cf = Euclid::PhzConfiguration;
-
 
 struct RedshiftConfiguration_Fixture {
 

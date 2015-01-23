@@ -15,23 +15,11 @@
 #include "PhzConfiguration/PhotometricCorrectionConfiguration.h"
 
 #include <boost/test/unit_test.hpp>
-#include <boost/filesystem.hpp>
+#include "CreateDirectory.h"
 
 
 namespace po = boost::program_options;
 namespace cf = Euclid::PhzConfiguration;
-
-// Create a directory on disk
-void makeDirectory(const std::string& name) {
-  boost::filesystem::path d {name};
-  boost::filesystem::create_directories(d);
-}
-
-// Remove a directory on disk
-void removeDir(const std::string& base_dir) {
-  boost::filesystem::path bd {base_dir};
-  boost::filesystem::remove_all(bd);
-}
 
 struct PhotometricCorrectionConfiguration_Fixture {
 
@@ -66,7 +54,6 @@ struct PhotometricCorrectionConfiguration_Fixture {
 
   }
   ~PhotometricCorrectionConfiguration_Fixture() {
-	    //removeDir(base_directory);
   }
 
 

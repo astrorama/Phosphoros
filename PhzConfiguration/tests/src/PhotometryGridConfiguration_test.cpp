@@ -18,7 +18,6 @@
 
 #include "PhzConfiguration/PhotometryGridConfiguration.h"
 
-
 struct PhotometryGridConfiguration_Fixture {
 
 

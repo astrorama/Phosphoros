@@ -10,30 +10,19 @@
 #include <iostream>
 #include <vector>
 
+#include <boost/test/unit_test.hpp>
+
 #include "ElementsKernel/Temporary.h"
 #include "ElementsKernel/Exception.h"
 #include "XYDataset/AsciiParser.h"
 #include "XYDataset/FileSystemProvider.h"
 #include "PhzConfiguration/FilterConfiguration.h"
+#include "CreateDirectory.h"
 
-#include <boost/test/unit_test.hpp>
-#include <boost/filesystem.hpp>
 
 
 namespace po = boost::program_options;
 namespace cf = Euclid::PhzConfiguration;
-
-// Create a directory on disk
-void makeDirectory(const std::string& name) {
-  boost::filesystem::path d {name};
-  boost::filesystem::create_directories(d);
-}
-
-// Remove a directory on disk
-void removeDir(const std::string& base_dir) {
-  boost::filesystem::path bd {base_dir};
-  boost::filesystem::remove_all(bd);
-}
 
 struct FilterConfiguration_Fixture {
 
@@ -83,7 +72,6 @@ struct FilterConfiguration_Fixture {
 
   }
   ~FilterConfiguration_Fixture() {
-    removeDir(base_directory);
   }
 
 

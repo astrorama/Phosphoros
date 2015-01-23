@@ -10,31 +10,19 @@
 #include <iostream>
 #include <vector>
 
+#include <boost/test/unit_test.hpp>
+
 #include "ElementsKernel/Temporary.h"
 #include "ElementsKernel/Exception.h"
 #include "XYDataset/AsciiParser.h"
 #include "XYDataset/FileSystemProvider.h"
 #include "PhzConfiguration/CatalogConfiguration.h"
-
-#include <boost/test/unit_test.hpp>
-#include <boost/filesystem.hpp>
+#include "CreateDirectory.h"
 
 namespace po = boost::program_options;
 namespace cf = Euclid::PhzConfiguration;
 
 struct CatalogConfiguration_fixture {
-
-  // Create a directory on disk
-  void makeDirectory(const std::string& name) {
-    boost::filesystem::path d { name };
-    boost::filesystem::create_directories(d);
-  }
-
-  // Remove a directory on disk
-  void removeDir(const std::string& base_dir) {
-    boost::filesystem::path bd { base_dir };
-    boost::filesystem::remove_all(bd);
-  }
 
   void makeFile(const std::string& file_name, const std::string& content) {
     std::ofstream test_file;
@@ -115,7 +103,6 @@ struct CatalogConfiguration_fixture {
   }
 
   ~CatalogConfiguration_fixture() {
-    removeDir(base_directory);
   }
 
 };
