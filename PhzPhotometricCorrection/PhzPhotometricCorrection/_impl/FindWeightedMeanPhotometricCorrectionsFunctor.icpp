@@ -1,0 +1,43 @@
+/** 
+ * @file FindWeightedMeanPhotometricCorrectionsFunctor.h
+ * @date January 23, 2015
+ * @author Nikolaos Apostolakos
+ */
+
+#include <set>
+
+namespace Euclid {
+namespace PhzPhotometricCorrection {
+
+template <typename SourceIter>
+  PhzDataModel::PhotometricCorrectionMap FindWeightedMeanPhotometricCorrectionsFunctor::operator()(
+            const std::map<int64_t, PhzDataModel::PhotometricCorrectionMap>& source_phot_corr_map,
+            SourceIter source_begin, SourceIter source_end) {
+  
+  std::map<int64_t, PhzDataModel::PhotometricCorrectionMap> source_weights_map {};
+  for (auto source = source_begin; source != source_end; ++source) {
+    auto source_phot_ptr = source->template getAttribute<SourceCatalog::Photometry>();
+    PhzDataModel::PhotometricCorrectionMap source_weights {};
+    for (auto iter=source_phot_ptr->begin(); iter!=source_phot_ptr->end(); ++iter) {
+      source_weights[iter.filterName()] = (*iter).flux / (*iter).error;
+    }
+    source_weights_map[source->getId()] = std::move(source_weights);
+  }
+  
+  PhzDataModel::PhotometricCorrectionMap result {};
+  PhzDataModel::PhotometricCorrectionMap total_weights {};
+  for (auto& source_phot_corr_pair : source_phot_corr_map) {
+    for (auto& phot_corr_pair : source_phot_corr_pair.second) {
+      double weight = source_weights_map.at(source_phot_corr_pair.first).at(phot_corr_pair.first);
+      result[phot_corr_pair.first] += phot_corr_pair.second * weight;
+      total_weights[phot_corr_pair.first] += weight;
+    }
+  }
+  for (auto& pair : result) {
+    pair.second /= total_weights[pair.first];
+  }
+  return result;
+}
+
+} // end of namespace PhzPhotometricCorrection
+} // end of namespace Euclid

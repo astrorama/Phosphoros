@@ -10,8 +10,10 @@
 #include <map>
 #include <string>
 #include <boost/program_options.hpp>
+#include "SourceCatalog/Catalog.h"
 #include "PhzDataModel/PhotometricCorrectionMap.h"
 #include "PhzPhotometricCorrection/PhotometricCorrectionCalculator.h"
+#include "PhzPhotometricCorrection/PhotometricCorrectionAlgorithm.h"
 #include "PhzConfiguration/PhotometryCatalogConfiguration.h"
 #include "PhzConfiguration/SpectroscopicRedshiftCatalogConfiguration.h"
 #include "PhzConfiguration/PhotometryGridConfiguration.h"
@@ -53,12 +55,15 @@ public:
    * These options are the ones required by the PhotometryCatalogConfiguration,
    * SpectroscopicRedshiftCatalogConfiguration and PhotometryGridConfiguration
    * classes, with the folowing extra options:
-   * - output-phot-corr-file : The file to export the calculated photometric correction
-   * - phot-corr-iter-no     : The maximum number of iterations to perform
-   *                           with negative values mean unlimited (defaults to 5)
-   * - phot-corr-tolerance   : The tolerance which if achieved between two iteration
-   *                           steps the iteration stops. It must be a non negative
-   *                           number (defaults to 1E-3)
+   * - output-phot-corr-file      : The file to export the calculated photometric correction
+   * - phot-corr-iter-no          : The maximum number of iterations to perform
+   *                                with negative values mean unlimited (defaults to 5)
+   * - phot-corr-tolerance        : The tolerance which if achieved between two iteration
+   *                                steps the iteration stops. It must be a non negative
+   *                                number (defaults to 1E-3)
+   * - phot-corr-selection-method : The method to select the photometric correction of each
+   *                                filter from the optimal corrections of each source.
+   *                                One of MEDIAN (default), WEIGHTED_MEDIAN, MEAN, WEIGHTED_MEAN
    * 
    * @return A boost::program_options::options_description object describing
    * the program options
@@ -91,6 +96,12 @@ public:
   
   /// Returns the stop criteria for the loop
   PhzPhotometricCorrection::PhotometricCorrectionCalculator::StopCriteriaFunction getStopCriteria();
+  
+  /// Returns the method to use for selecting the photometric correction from the
+  /// optimal corrections of each source
+  PhzPhotometricCorrection::PhotometricCorrectionAlgorithm::PhotometricCorrectionSelector<
+              SourceCatalog::Catalog::const_iterator> getPhotometricCorrectionSelector();
+  
   
 private:
   

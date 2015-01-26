@@ -42,6 +42,7 @@ public:
     FindBestFitModels<PhzLikelihood::SourcePhzFunctor> find_best_fit_models {};
     CalculateScaleFactorMap calculate_scale_factor_map {};
     PhotometricCorrectionAlgorithm phot_corr_algorighm {};
+    auto selector = conf.getPhotometricCorrectionSelector();
 
     PhotometricCorrectionCalculator calculator {find_best_fit_models,
                                 calculate_scale_factor_map, phot_corr_algorighm};
@@ -52,7 +53,7 @@ public:
         logger.info() << pair.first.qualifiedName() << " : " << pair.second;
       }
     };
-    auto phot_corr_map = calculator(catalog, model_phot_grid, stop_criteria, progress_logger);
+    auto phot_corr_map = calculator(catalog, model_phot_grid, stop_criteria, selector, progress_logger);
 
     output_func(phot_corr_map);
 

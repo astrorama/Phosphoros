@@ -32,6 +32,7 @@ PhzDataModel::PhotometricCorrectionMap PhotometricCorrectionCalculator::operator
                               const SourceCatalog::Catalog& catalog,
                               const PhzDataModel::PhotometryGrid& model_phot_grid,
                               StopCriteriaFunction stop_criteria_func,
+                              SelectorFunction selector,
                               ProgressListener progress_listener) {
   PhzDataModel::PhotometricCorrectionMap phot_corr = createInitialPhotCorr(catalog);
   size_t counter {0};
@@ -43,7 +44,8 @@ PhzDataModel::PhotometricCorrectionMap PhotometricCorrectionCalculator::operator
                                             best_fit_model_map);
     phot_corr = m_calculate_photometric_correction(
                                             catalog.begin(), catalog.end(),
-                                            scale_factor_map, best_fit_model_map);
+                                            scale_factor_map, best_fit_model_map,
+                                            selector);
     if (progress_listener) {
       progress_listener(++counter, phot_corr);
     }

@@ -9,6 +9,10 @@
 #include "ElementsKernel/Logging.h"
 #include "PhzPhotometricCorrection/DefaultStopCriteria.h"
 #include "PhzConfiguration/CalculatePhotometricCorrectionConfiguration.h"
+#include "PhzPhotometricCorrection/FindMeanPhotometricCorrectionsFunctor.h"
+#include "PhzPhotometricCorrection/FindMedianPhotometricCorrectionsFunctor.h"
+#include "PhzPhotometricCorrection/FindWeightedMeanPhotometricCorrectionsFunctor.h"
+#include "PhzPhotometricCorrection/FindWeightedMedianPhotometricCorrectionsFunctor.h"
 
 namespace po = boost::program_options;
 
@@ -27,7 +31,9 @@ po::options_description CalculatePhotometricCorrectionConfiguration::getProgramO
   ("phot-corr-iter-no", boost::program_options::value<int>()->default_value(5),
       "The maximum number of iterations to perform (negative=unlimited)")
   ("phot-corr-tolerance", boost::program_options::value<double>()->default_value(1E-3),
-      "The tolerance which if achieved between two iteration steps the iteration stops");
+      "The tolerance which if achieved between two iteration steps the iteration stops")
+  ("phot-corr-selection-method", boost::program_options::value<std::string>(),
+      "The method used for selecting the photometric correction (MEDIAN, WEIGHTED_MEDIAN, MEAN, WEIGHTED_MEAN)");
 
   // We get all the catalog options. We are careful not to add an option twice.
   po::options_description catalog_options = PhotometryCatalogConfiguration::getProgramOptions();
@@ -85,6 +91,27 @@ PhzPhotometricCorrection::PhotometricCorrectionCalculator::StopCriteriaFunction
   int iter_no = m_options["phot-corr-iter-no"].as<int>();
   double tolerance = m_options["phot-corr-tolerance"].as<double>();
   return PhzPhotometricCorrection::DefaultStopCriteria(iter_no, tolerance);
+}
+
+PhzPhotometricCorrection::PhotometricCorrectionAlgorithm::PhotometricCorrectionSelector<SourceCatalog::Catalog::const_iterator> 
+    CalculatePhotometricCorrectionConfiguration::getPhotometricCorrectionSelector() {
+  if (!m_options["phot-corr-selection-method"].empty()) {
+    std::string selection_method = m_options["phot-corr-selection-method"].as<std::string>();
+    if (selection_method == "MEDIAN") {
+      return PhzPhotometricCorrection::FindMedianPhotometricCorrectionsFunctor {};
+    } else if (selection_method == "WEIGHTED_MEDIAN") {
+      return PhzPhotometricCorrection::FindWeightedMedianPhotometricCorrectionsFunctor {};
+    } else if (selection_method == "MEAN") {
+      return PhzPhotometricCorrection::FindMeanPhotometricCorrectionsFunctor {};
+    } else if (selection_method == "WEIGHTED_MEAN") {
+      return PhzPhotometricCorrection::FindWeightedMeanPhotometricCorrectionsFunctor {};
+    } else {
+      logger.error() << "Unknown photometric correction selection method " << selection_method;
+      throw Elements::Exception() << "Unknown photometric correction selection method " << selection_method;
+    }
+  }
+  logger.warn() << "No photometric correction selection was given. Using default (MEDIAN)";
+  return PhzPhotometricCorrection::FindMedianPhotometricCorrectionsFunctor {};
 }
 
 } // end of namespace PhzConfiguration

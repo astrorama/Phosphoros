@@ -13,6 +13,7 @@
 #include "PhzDataModel/PhotometricCorrectionMap.h"
 #include "PhzDataModel/PhotometryGrid.h"
 #include "PhzPhotometricCorrection/DefaultStopCriteria.h"
+#include "PhotometricCorrectionAlgorithm.h"
 
 namespace Euclid {
 namespace PhzPhotometricCorrection {
@@ -35,11 +36,14 @@ public:
                   const std::map<int64_t, PhzDataModel::PhotometryGrid::const_iterator>& model_phot_map
             )> CalculateScaleFactorsMapFunction;
   
+  typedef PhzPhotometricCorrection::PhotometricCorrectionAlgorithm::PhotometricCorrectionSelector<SourceCatalog::Catalog::const_iterator> SelectorFunction;
+  
   typedef std::function<PhzDataModel::PhotometricCorrectionMap(
                   SourceCatalog::Catalog::const_iterator source_begin,
                   SourceCatalog::Catalog::const_iterator source_end,
                   const std::map<int64_t, double>& scale_factor_map,
-                  const std::map<int64_t, PhzDataModel::PhotometryGrid::const_iterator>& model_phot_map
+                  const std::map<int64_t, PhzDataModel::PhotometryGrid::const_iterator>& model_phot_map,
+                  SelectorFunction selector
             )> CalculatePhotometricCorrectionFunction;
   
   typedef std::function<bool(const PhzDataModel::PhotometricCorrectionMap& phot_corr)> StopCriteriaFunction;
@@ -52,6 +56,7 @@ public:
           const SourceCatalog::Catalog& catalog,
           const PhzDataModel::PhotometryGrid& model_phot_grid,
           StopCriteriaFunction stop_criteria_func,
+          SelectorFunction selector,
           ProgressListener progress_listener=ProgressListener{});
   
 private:

@@ -26,10 +26,9 @@ class PhotometricCorrectionAlgorithm {
 public:
 
   template <typename SourceIter>
-  using PCFunction = std::function<PhzDataModel::PhotometricCorrectionMap(
+  using PhotometricCorrectionSelector = std::function<PhzDataModel::PhotometricCorrectionMap(
       const std::map<int64_t, PhzDataModel::PhotometricCorrectionMap>& source_phot_corr_map,
-      SourceIter source_begin,
-      SourceIter source_end)>;
+      SourceIter source_begin, SourceIter source_end)>;
 
   /**
    * @brief Calculates the photometric corrections so the input sources
@@ -64,8 +63,8 @@ public:
                     SourceIter source_begin, SourceIter source_end,
                     const std::map<int64_t, double>& scale_factor_map,
                     const std::map<int64_t, ModelPhotPtr>& model_phot_map,
-                    PCFunction<SourceIter> photometric_corrections_selector=FindMedianPhotometricCorrectionsFunctor{});
-
+                    PhotometricCorrectionSelector<SourceIter> selector=FindMedianPhotometricCorrectionsFunctor{});
+                    
 };
 
 } // end of namespace PhzPhotometricCorrection

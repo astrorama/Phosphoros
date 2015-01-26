@@ -1,0 +1,54 @@
+/** 
+ * @file FindWeightedMedianPhotometricCorrectionsFunctor.icpp
+ * @date January 23, 2015
+ * @author Nikolaos Apostolakos
+ */
+
+#include <set>
+
+namespace Euclid {
+namespace PhzPhotometricCorrection {
+
+template <typename SourceIter>
+  PhzDataModel::PhotometricCorrectionMap FindWeightedMedianPhotometricCorrectionsFunctor::operator()(
+            const std::map<int64_t, PhzDataModel::PhotometricCorrectionMap>& source_phot_corr_map,
+            SourceIter source_begin, SourceIter source_end) {
+  
+  std::map<int64_t, PhzDataModel::PhotometricCorrectionMap> source_weights_map {};
+  for (auto source = source_begin; source != source_end; ++source) {
+    auto source_phot_ptr = source->template getAttribute<SourceCatalog::Photometry>();
+    PhzDataModel::PhotometricCorrectionMap source_weights {};
+    for (auto iter=source_phot_ptr->begin(); iter!=source_phot_ptr->end(); ++iter) {
+      source_weights[iter.filterName()] = (*iter).flux / (*iter).error;
+    }
+    source_weights_map[source->getId()] = std::move(source_weights);
+  }
+  
+  struct Compare {
+    bool operator()(const std::pair<double, double>& a, const std::pair<double, double>& b) {return a.first < b.first;}
+  };
+  std::map<XYDataset::QualifiedName, std::multiset<std::pair<double,double>, Compare>> ordered_source_phot_corr;
+  std::map<XYDataset::QualifiedName, double> total_weights {};
+  for (auto source_phot_corr_iter=source_phot_corr_map.begin(), source_weight_iter=source_weights_map.cbegin();
+          source_phot_corr_iter!=source_phot_corr_map.end(); ++source_phot_corr_iter, ++ source_weight_iter) {
+    for (auto phot_corr_iter=source_phot_corr_iter->second.begin(), weight_iter=source_weight_iter->second.begin();
+          phot_corr_iter!=source_phot_corr_iter->second.end(); ++phot_corr_iter, ++ weight_iter) {
+      ordered_source_phot_corr[phot_corr_iter->first].insert({phot_corr_iter->second, weight_iter->second});
+      total_weights[phot_corr_iter->first] += weight_iter->second;
+    }
+  }
+  
+  PhzDataModel::PhotometricCorrectionMap result {};
+  for (auto& pair : ordered_source_phot_corr) {
+    double total_weight = total_weights[pair.first];
+    auto iter = pair.second.begin();
+    for (double current_weight=0; current_weight < total_weight/2.; current_weight += iter->second) {
+      ++iter;
+    }
+    result[pair.first] = iter->first;
+  }
+  return result;
+}
+
+} // end of namespace PhzPhotometricCorrection
+} // end of namespace Euclid

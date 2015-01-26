@@ -1,0 +1,30 @@
+/** 
+ * @file FindMeanPhotometricCorrectionsFunctor.icpp
+ * @date January 23, 2015
+ * @author Nikolaos Apostolakos
+ */
+
+#include <set>
+
+namespace Euclid {
+namespace PhzPhotometricCorrection {
+
+template <typename SourceIter>
+  PhzDataModel::PhotometricCorrectionMap FindMeanPhotometricCorrectionsFunctor::operator()(
+            const std::map<int64_t, PhzDataModel::PhotometricCorrectionMap>& source_phot_corr_map,
+            SourceIter source_begin, SourceIter source_end) {
+  
+  PhzDataModel::PhotometricCorrectionMap result {};
+  for (auto& source_phot_corr_pair : source_phot_corr_map) {
+    for (auto& phot_corr_pair : source_phot_corr_pair.second) {
+      result[phot_corr_pair.first] += phot_corr_pair.second;
+    }
+  }
+  for (auto& pair : result) {
+    pair.second /= source_phot_corr_map.size();
+  }
+  return result;
+}
+
+} // end of namespace PhzPhotometricCorrection
+} // end of namespace Euclid

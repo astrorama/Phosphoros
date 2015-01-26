@@ -64,7 +64,7 @@ PhzDataModel::PhotometricCorrectionMap PhotometricCorrectionAlgorithm::operator 
                                   SourceIter source_begin, SourceIter source_end,
                                   const std::map<int64_t,double>& scale_factor_map,
                                   const std::map<int64_t, ModelPhotPtr>& model_phot_map,
-                                  PCFunction<SourceIter> photometric_corrections_selector) {
+                                  PhotometricCorrectionSelector<SourceIter> selector) {
 
   // Check that we have some sources
   if (source_begin == source_end) {
@@ -74,7 +74,7 @@ PhzDataModel::PhotometricCorrectionMap PhotometricCorrectionAlgorithm::operator 
   auto source_phot_corr_map = createSourcePhotCorrMap(source_begin, source_end,
                                                       scale_factor_map, model_phot_map);
 
-  return photometric_corrections_selector(source_phot_corr_map, source_begin, source_end);
+  return selector(source_phot_corr_map, source_begin, source_end);
 }
 
 } // end of namespace PhzPhotometricCorrection

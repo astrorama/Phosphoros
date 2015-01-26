@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE(FunctorCallSuccess) {
       bind(&CalculatePhotometricCorrectionMock::FunctorCall, &calculate_photometric_correction_mock, _1, _2, _3, _4)
   };
   auto result_phot_corr_map = calculator(catalog, model_phot_grid,
-                  bind(&StopCriteriaMock::FunctorCall, &stop_criteria_mock, _1));
+                  bind(&StopCriteriaMock::FunctorCall, &stop_criteria_mock, _1), {});
   
   // Then
   BOOST_CHECK_EQUAL(result_phot_corr_map.size(), 2);
