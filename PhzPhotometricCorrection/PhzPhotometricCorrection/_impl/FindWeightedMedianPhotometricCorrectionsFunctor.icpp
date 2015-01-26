@@ -1,4 +1,4 @@
-/** 
+/**
  * @file FindWeightedMedianPhotometricCorrectionsFunctor.icpp
  * @date January 23, 2015
  * @author Nikolaos Apostolakos
@@ -13,7 +13,7 @@ template <typename SourceIter>
   PhzDataModel::PhotometricCorrectionMap FindWeightedMedianPhotometricCorrectionsFunctor::operator()(
             const std::map<int64_t, PhzDataModel::PhotometricCorrectionMap>& source_phot_corr_map,
             SourceIter source_begin, SourceIter source_end) {
-  
+
   std::map<int64_t, PhzDataModel::PhotometricCorrectionMap> source_weights_map {};
   for (auto source = source_begin; source != source_end; ++source) {
     auto source_phot_ptr = source->template getAttribute<SourceCatalog::Photometry>();
@@ -23,7 +23,7 @@ template <typename SourceIter>
     }
     source_weights_map[source->getId()] = std::move(source_weights);
   }
-  
+
   struct Compare {
     bool operator()(const std::pair<double, double>& a, const std::pair<double, double>& b) {return a.first < b.first;}
   };
@@ -37,12 +37,12 @@ template <typename SourceIter>
       total_weights[phot_corr_iter->first] += weight_iter->second;
     }
   }
-  
+
   PhzDataModel::PhotometricCorrectionMap result {};
   for (auto& pair : ordered_source_phot_corr) {
     double total_weight = total_weights[pair.first];
     auto iter = pair.second.begin();
-    for (double current_weight=0; current_weight < total_weight/2.; current_weight += iter->second) {
+    for (double current_weight=0; current_weight + iter->second < total_weight/2.; current_weight += iter->second) {
       ++iter;
     }
     result[pair.first] = iter->first;

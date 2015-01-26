@@ -31,3 +31,9 @@ elements_add_unit_test(PhotometricCorrectionCalculator_test tests/src/Photometri
 
 elements_add_unit_test(FindMedianPhotometricCorrectionsFunctor_test tests/src/FindMedianPhotometricCorrectionsFunctor_test.cpp
                        LINK_LIBRARIES PhzPhotometricCorrection TYPE Boost)
+elements_add_unit_test(FindWeightedMedianPhotometricCorrectionsFunctor_test tests/src/FindWeightedMedianPhotometricCorrectionsFunctor_test.cpp
+                       LINK_LIBRARIES PhzPhotometricCorrection TYPE Boost)
+elements_add_unit_test(FindMeanPhotometricCorrectionsFunctor_test tests/src/FindMeanPhotometricCorrectionsFunctor_test.cpp
+                       LINK_LIBRARIES PhzPhotometricCorrection TYPE Boost)
+elements_add_unit_test(FindWeightedMeanPhotometricCorrectionsFunctor_test tests/src/FindWeightedMeanPhotometricCorrectionsFunctor_test.cpp
+                       LINK_LIBRARIES PhzPhotometricCorrection TYPE Boost)
