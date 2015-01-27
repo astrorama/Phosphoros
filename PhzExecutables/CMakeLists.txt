@@ -18,6 +18,9 @@ elements_add_executable(CreatePhzCatalog src/program/CreatePhzCatalog.cpp
 
 elements_add_executable(CalculatePhotometricCorrection src/program/CalculatePhotometricCorrection.cpp
                         LINK_LIBRARIES ElementsKernel Boost PhzConfiguration PhzPhotometricCorrection)
+
+elements_add_executable(LsPhotometryGrid src/program/LsPhotometryGrid.cpp
+                        LINK_LIBRARIES ElementsKernel Boost PhzConfiguration)
                         
 
 elements_install_conf_files()
