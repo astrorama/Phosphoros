@@ -16,14 +16,14 @@ namespace po = boost::program_options;
 static Elements::Logging logger = Elements::Logging::getLogger("LsPhotometryGrid");
 
 void printGeneric(const PhzDataModel::PhotometryGrid& grid) {
-  std::cout << "\nSED axis size: " << grid.getAxis<PhzDataModel::ModelParameter::SED>().size() << '\n';
-  std::cout << "Reddening curve axis size: " << grid.getAxis<PhzDataModel::ModelParameter::REDDENING_CURVE>().size() << '\n';
-  std::cout << "E(B-V) axis size: " << grid.getAxis<PhzDataModel::ModelParameter::EBV>().size() << '\n';
-  std::cout << "Z axis size: " << grid.getAxis<PhzDataModel::ModelParameter::Z>().size() << '\n';
-  std::cout << "Total grid size : " << grid.size() << "\n\n";
+  cout << "\nSED axis size: " << grid.getAxis<PhzDataModel::ModelParameter::SED>().size() << '\n';
+  cout << "Reddening curve axis size: " << grid.getAxis<PhzDataModel::ModelParameter::REDDENING_CURVE>().size() << '\n';
+  cout << "E(B-V) axis size: " << grid.getAxis<PhzDataModel::ModelParameter::EBV>().size() << '\n';
+  cout << "Z axis size: " << grid.getAxis<PhzDataModel::ModelParameter::Z>().size() << '\n';
+  cout << "Total grid size : " << grid.size() << "\n\n";
 }
 
-std::ostream& operator<<(std::ostream& stream, const XYDataset::QualifiedName& name) {
+ostream& operator<<(ostream& stream, const XYDataset::QualifiedName& name) {
   stream << name.qualifiedName();
   return stream;
 }
@@ -31,36 +31,36 @@ std::ostream& operator<<(std::ostream& stream, const XYDataset::QualifiedName& n
 template <int I>
 void printAxis(const PhzDataModel::PhotometryGrid& grid) {
   auto& axis = grid.getAxis<I>();
-  std::cout << "\nAxis " << axis.name() << " (" << axis.size() << ")\n";
-  std::cout << "Index\tValue\n";
+  cout << "\nAxis " << axis.name() << " (" << axis.size() << ")\n";
+  cout << "Index\tValue\n";
   int i {0};
   for (auto& value : axis) {
-    std::cout << i++ << '\t' << value << '\n';
+    cout << i++ << '\t' << value << '\n';
   }
-  std::cout << '\n';
+  cout << '\n';
 }
 
 void printPhotometry(const PhzDataModel::PhotometryGrid& grid,
-                     const std::tuple<size_t,size_t,size_t,size_t>& coords) {
+                     const tuple<size_t,size_t,size_t,size_t>& coords) {
   size_t c1 = get<0>(coords);
   size_t c2 = get<1>(coords);
   size_t c3 = get<2>(coords);
   size_t c4 = get<3>(coords);
   // Note that the photometry grid indices have the opposit order
   auto& phot = grid.at(c4,c3,c2,c1);
-  std::cout << "\nCell (" << c1 << "," << c2 << "," << c3 << "," << c4 << ") axis information:\n";
-  std::cout << "SED      " << grid.getAxis<PhzDataModel::ModelParameter::SED>()[c1] << '\n';
-  std::cout << "REDCURVE " << grid.getAxis<PhzDataModel::ModelParameter::REDDENING_CURVE>()[c2] << '\n';
-  std::cout << "EBV      " << grid.getAxis<PhzDataModel::ModelParameter::EBV>()[c3] << '\n';
-  std::cout << "Z        " << grid.getAxis<PhzDataModel::ModelParameter::Z>()[c4] << '\n';
-  std::cout << "\nCell (" << c1 << "," << c2 << "," << c3 << "," << c4 << ") Photometry:\n";
+  cout << "\nCell (" << c1 << "," << c2 << "," << c3 << "," << c4 << ") axis information:\n";
+  cout << "SED      " << grid.getAxis<PhzDataModel::ModelParameter::SED>()[c1] << '\n';
+  cout << "REDCURVE " << grid.getAxis<PhzDataModel::ModelParameter::REDDENING_CURVE>()[c2] << '\n';
+  cout << "EBV      " << grid.getAxis<PhzDataModel::ModelParameter::EBV>()[c3] << '\n';
+  cout << "Z        " << grid.getAxis<PhzDataModel::ModelParameter::Z>()[c4] << '\n';
+  cout << "\nCell (" << c1 << "," << c2 << "," << c3 << "," << c4 << ") Photometry:\n";
   for (auto iter=phot.begin(); iter!=phot.end(); ++iter) {
-    std::cout << iter.filterName() << "\t" << (*iter).flux << '\n';
+    cout << iter.filterName() << "\t" << (*iter).flux << '\n';
   }
-  std::cout << '\n';
+  cout << '\n';
 }
 
-class LsGrid : public Elements::Program {
+class LsPhotometryGrid : public Elements::Program {
   
   po::options_description defineSpecificProgramOptions() override {
     return PhzConfiguration::LsPhotometryGridConfiguration::getProgramOptions();
@@ -105,4 +105,4 @@ class LsGrid : public Elements::Program {
   
 };
 
-MAIN_FOR(LsGrid)
+MAIN_FOR(LsPhotometryGrid)

@@ -7,6 +7,8 @@ elements_depends_on_subdirs(PhzDataModel)
 elements_depends_on_subdirs(PhzLikelihood)
 elements_depends_on_subdirs(PhzOutput)
 elements_depends_on_subdirs(PhzPhotometricCorrection)
+elements_depends_on_subdirs(XYDataset)
+elements_depends_on_subdirs(MathUtils)
 
 find_package(Boost REQUIRED COMPONENTS program_options)
 
@@ -21,6 +23,11 @@ elements_add_executable(CalculatePhotometricCorrection src/program/CalculatePhot
 
 elements_add_executable(LsPhotometryGrid src/program/LsPhotometryGrid.cpp
                         LINK_LIBRARIES ElementsKernel Boost PhzConfiguration)
-                        
 
+elements_add_executable(LsData src/program/LsData.cpp
+                        LINK_LIBRARIES ElementsKernel Boost XYDataset)
+
+elements_add_executable(PrintModelDataset src/program/PrintModelDataset.cpp
+                        LINK_LIBRARIES ElementsKernel Boost PhzConfiguration MathUtils PhzModeling)
+                        
 elements_install_conf_files()
