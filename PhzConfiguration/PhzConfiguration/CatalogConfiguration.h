@@ -86,7 +86,24 @@ public:
    * @throws ElementsException
    *    if both source-id-column-name and source-id-column-index are given
    */
-  CatalogConfiguration(const std::map<std::string, boost::program_options::variable_value>& options);
+   CatalogConfiguration(const std::map<std::string, boost::program_options::variable_value>& options);
+
+   /**
+    * @brief move assignment operator.
+    */
+   CatalogConfiguration& operator=(CatalogConfiguration&&)=default;
+
+   /**
+    * @brief move constructor.
+    */
+   CatalogConfiguration(CatalogConfiguration&&)=default;
+
+   /**
+   * @brief destructor.
+   */
+   virtual ~CatalogConfiguration()=default;
+
+
 
   /// Returns an instance of SourceCatalog::Catalog representing the catalog
   /// described by the options passed to the constructor.

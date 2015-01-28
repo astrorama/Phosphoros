@@ -1,4 +1,4 @@
-/** 
+/**
  * @file CalculatePhotometricCorrectionConfiguration.h
  * @date January 19, 2015
  * @author Nikolaos Apostolakos
@@ -23,10 +23,10 @@ namespace PhzConfiguration {
 
 /**
  * @class CalculatePhotometricCorrectionConfiguration
- * 
- * @brief 
+ *
+ * @brief
  * Configuration class to be used by the CalculatePhotometricCorrection executable
- * 
+ *
  * @details
  * This class defines as input a catalog which contains photometric and
  * spectroscopic information (by inheriting the PhotometryCatalogConfiguration
@@ -39,18 +39,18 @@ namespace PhzConfiguration {
 class CalculatePhotometricCorrectionConfiguration : virtual public PhotometryCatalogConfiguration,
                                                     virtual public SpectroscopicRedshiftCatalogConfiguration,
                                                     public PhotometryGridConfiguration {
-  
+
 public:
-  
+
   /// The type of the function which handles the output of the photometric
   /// correction map
   typedef std::function<void(const PhzDataModel::PhotometricCorrectionMap&)> OutputFunction;
-  
+
   /**
    * @brief
    * Returns the program options required by the CalculatePhotometricCorrection
    * executable
-   * 
+   *
    * @details
    * These options are the ones required by the PhotometryCatalogConfiguration,
    * SpectroscopicRedshiftCatalogConfiguration and PhotometryGridConfiguration
@@ -64,19 +64,19 @@ public:
    * - phot-corr-selection-method : The method to select the photometric correction of each
    *                                filter from the optimal corrections of each source.
    *                                One of MEDIAN (default), WEIGHTED_MEDIAN, MEAN, WEIGHTED_MEAN
-   * 
+   *
    * @return A boost::program_options::options_description object describing
    * the program options
    */
   static boost::program_options::options_description getProgramOptions();
-  
+
   /**
    * @brief
    * Constructs a new CalculatePhotometricCorrectionConfiguration instance
    * @details
    * The option output-phot-corr-file is obligatory and it must be a path where
    * the executable can create the photometric correction file.
-   * 
+   *
    * @param options
    *    A map with the options and their values
    * @throws ElementsException
@@ -85,7 +85,12 @@ public:
    *    if the output-phot-corr-file cannot be created
    */
   CalculatePhotometricCorrectionConfiguration(const std::map<std::string, boost::program_options::variable_value>& options);
-  
+
+   /**
+   * @brief destructor.
+   */
+  virtual ~CalculatePhotometricCorrectionConfiguration()=default;
+
   /**
    * @brief
    * Returns a function which can be used for storing the output photometric
@@ -93,20 +98,20 @@ public:
    * @return The output function
    */
   OutputFunction getOutputFunction();
-  
+
   /// Returns the stop criteria for the loop
   PhzPhotometricCorrection::PhotometricCorrectionCalculator::StopCriteriaFunction getStopCriteria();
-  
+
   /// Returns the method to use for selecting the photometric correction from the
   /// optimal corrections of each source
   PhzPhotometricCorrection::PhotometricCorrectionAlgorithm::PhotometricCorrectionSelector<
               SourceCatalog::Catalog::const_iterator> getPhotometricCorrectionSelector();
-  
-  
+
+
 private:
-  
+
   std::map<std::string, boost::program_options::variable_value> m_options;
-  
+
 };
 
 } // end of namespace PhzConfiguration

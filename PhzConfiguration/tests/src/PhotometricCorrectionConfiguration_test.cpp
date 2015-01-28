@@ -109,8 +109,11 @@ BOOST_FIXTURE_TEST_CASE(getPhotometricCorrectionMap_test, PhotometricCorrectionC
   auto correction_data_map = pcc.getPhotometricCorrectionMap();
 
   BOOST_CHECK_EQUAL(correction_data_map.size(), 3);
-  auto itmap = correction_data_map.begin();
-  BOOST_CHECK_EQUAL(itmap->first.datasetName(), std::string{"filter_name1"});
+  auto itmap = correction_data_map.find({"mer/filter_name1"});
+  if (itmap==correction_data_map.end()){
+    BOOST_FAIL("The filter was not found.");
+  }
+
   BOOST_CHECK_EQUAL(itmap->second, 1.1);
 }
 
@@ -128,8 +131,10 @@ BOOST_FIXTURE_TEST_CASE(getPhotometricCorrectionMap_filter_name_mapping_test, Ph
   auto correction_data_map = pcc.getPhotometricCorrectionMap();
 
   BOOST_CHECK_EQUAL(correction_data_map.size(), 2);
-  auto itmap = correction_data_map.begin();
-  BOOST_CHECK_EQUAL(itmap->first.datasetName(), std::string{"filter2"});
+  auto itmap = correction_data_map.find({"mer/filter2"});
+  if (itmap==correction_data_map.end()){
+     BOOST_FAIL("The filter was not found.");
+   }
   BOOST_CHECK_EQUAL(itmap->second, 1.);
 
 }
