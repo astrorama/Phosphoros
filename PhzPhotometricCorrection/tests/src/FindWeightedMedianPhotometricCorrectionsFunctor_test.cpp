@@ -90,8 +90,6 @@ BOOST_FIXTURE_TEST_CASE(NoInputSources_test, FindWeightedMedianPhotometricCorrec
   PhzPhotometricCorrection::FindWeightedMedianPhotometricCorrectionsFunctor functor{};
   auto result = functor(source_phot_corr_map,sources.begin(),sources.end());
 
-std::cout<<result.at({"Filter_1"})<<"\n";
-
   // with equal weight we should recover the median (5).
   BOOST_CHECK(Elements::isEqual(5., result.at({"Filter_1"})));
 
