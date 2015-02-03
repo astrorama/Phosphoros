@@ -5,8 +5,7 @@
  */
 
 #include <iostream>
-#include "ElementsKernel/Logging.h"
-#include "ElementsKernel/Program.h"
+#include "ElementsKernel/ProgramHeaders.h"
 #include "MathUtils/interpolation/interpolation.h"
 #include "PhzConfiguration/ParameterSpaceConfiguration.h"
 #include "PhzModeling/ModelDatasetGrid.h"
@@ -82,10 +81,6 @@ class PrintModelDataset : public Elements::Program {
     cout << '\n';
     
     return Elements::ExitCode::OK;
-  }
-  
-  string getVersion() override {
-    return "0.1";
   }
   
 };

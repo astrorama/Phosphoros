@@ -8,8 +8,7 @@
 #include <string>
 #include <chrono>
 #include <boost/program_options.hpp>
-#include "ElementsKernel/Program.h"
-#include "ElementsKernel/Logging.h"
+#include "ElementsKernel/ProgramHeaders.h"
 #include "PhzConfiguration/CreatePhotometryGridConfiguration.h"
 #include "PhzModeling/PhotometryGridCreator.h"
 
@@ -69,10 +68,6 @@ public:
     
     logger.info() << "Done!";
     return Elements::ExitCode::OK;
-  }
-  
-  string getVersion() override {
-    return "0.1";
   }
   
 };

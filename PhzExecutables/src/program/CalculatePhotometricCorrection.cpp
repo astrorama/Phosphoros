@@ -7,8 +7,7 @@
 #include <map>
 #include <string>
 #include <boost/program_options.hpp>
-#include "ElementsKernel/Program.h"
-#include "ElementsKernel/Logging.h"
+#include "ElementsKernel/ProgramHeaders.h"
 #include "PhzLikelihood/SourcePhzFunctor.h"
 #include "PhzConfiguration/CalculatePhotometricCorrectionConfiguration.h"
 #include "PhzPhotometricCorrection/PhotometricCorrectionCalculator.h"
@@ -59,10 +58,6 @@ public:
 
     logger.info() << "Done!";
     return Elements::ExitCode::OK;
-  }
-
-  string getVersion() override {
-    return "0.1";
   }
 
 };

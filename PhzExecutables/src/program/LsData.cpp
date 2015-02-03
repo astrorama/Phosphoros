@@ -7,8 +7,7 @@
 #include <iostream>
 #include <set>
 #include <boost/program_options/options_description.hpp>
-#include "ElementsKernel/Logging.h"
-#include "ElementsKernel/Program.h"
+#include "ElementsKernel/ProgramHeaders.h"
 #include "XYDataset/AsciiParser.h"
 #include "XYDataset/FileSystemProvider.h"
 
@@ -62,10 +61,6 @@ class LsData : public Elements::Program {
     }
     
     return Elements::ExitCode::OK;
-  }
-  
-  string getVersion() override {
-    return "0.1";
   }
   
 };

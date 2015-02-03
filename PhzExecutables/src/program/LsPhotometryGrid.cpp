@@ -5,8 +5,7 @@
  */
 
 #include <iostream>
-#include "ElementsKernel/Logging.h"
-#include "ElementsKernel/Program.h"
+#include "ElementsKernel/ProgramHeaders.h"
 #include "PhzConfiguration/LsPhotometryGridConfiguration.h"
 
 using namespace std;
@@ -97,10 +96,6 @@ class LsPhotometryGrid : public Elements::Program {
     }
     
     return Elements::ExitCode::OK;
-  }
-  
-  string getVersion() override {
-    return "0.1";
   }
   
 };

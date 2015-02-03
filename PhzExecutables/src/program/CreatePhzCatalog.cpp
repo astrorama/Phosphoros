@@ -11,8 +11,7 @@
 #include <memory>
 #include <atomic>
 #include <chrono>
-#include "ElementsKernel/Logging.h"
-#include "ElementsKernel/Program.h"
+#include "ElementsKernel/ProgramHeaders.h"
 #include "PhzLikelihood/CatalogHandler.h"
 #include "PhzConfiguration/CreatePhzCatalogConfiguration.h"
 
@@ -149,10 +148,6 @@ class CreatePhzCatalog : public Elements::Program {
     
     logger.info("Done!");
     return Elements::ExitCode::OK;
-  }
-  
-  string getVersion() override {
-    return "0.1";
   }
   
 };
