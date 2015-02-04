@@ -60,7 +60,12 @@ map<int64_t, PhzDataModel::PhotometryGrid::const_iterator> FindBestFitModels<sou
 
     sourceCalculatorFunctor source_phz_calculator(photometric_correction, sliced_grid);
 
-    best_fit_map.emplace(source_id,  get<0>(source_phz_calculator(*photometry_ptr)));
+    // We must return an iterator to the input grid, not to the slice, so we
+    // create a new iterator and we fix its axes
+    auto slice_iter = get<0>(source_phz_calculator(*photometry_ptr));
+    auto grid_iter = model_photometric_grid.begin();
+    grid_iter.fixAllAxes(slice_iter);
+    best_fit_map.emplace(source_id, grid_iter);
   }
 
   return best_fit_map;

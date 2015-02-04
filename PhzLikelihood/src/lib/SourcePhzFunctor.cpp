@@ -6,7 +6,6 @@
 
 #include <tuple>
 #include "ElementsKernel/Exception.h"
-#include "GridContainer/_impl/TemplateLoopCounter.h"
 #include "PhzDataModel/LikelihoodGrid.h"
 #include "PhzLikelihood/SourcePhzFunctor.h"
 
@@ -40,28 +39,6 @@ SourceCatalog::Photometry applyPhotCorr(const PhzDataModel::PhotometricCorrectio
   return SourceCatalog::Photometry{filter_names_ptr, std::move(fluxes)};
 }
 
-template<typename IterFrom, typename IterTo>
-class GridIterHelper {
-
-public:
-
-  template<int I>
-  void fixSameAxis(IterFrom& from, IterTo& to, const GridContainer::TemplateLoopCounter<I>&) {
-    to.template fixAxisByValue<I>(from.template axisValue<I>());
-    fixSameAxis(from, to, GridContainer::TemplateLoopCounter<I-1>{});
-  }
-
-  void fixSameAxis(IterFrom&, IterTo&, const GridContainer::TemplateLoopCounter<-1>&) {
-  }
-//
-};
-
-template<typename IterFrom, typename IterTo>
-void fixSameAxis(IterFrom& from, IterTo& to) {
-  GridIterHelper< IterFrom, IterTo> helper {};
-  helper.fixSameAxis(from, to, GridContainer::TemplateLoopCounter<std::tuple_size<PhzDataModel::ModelAxesTuple>::value - 1>{});
-}
-
 auto SourcePhzFunctor::operator()(const SourceCatalog::Photometry& source_phot) const -> result_type {
   // Apply the photometric correction to the given source photometry
   auto cor_source_phot = applyPhotCorr(m_phot_corr_map, source_phot);
@@ -73,8 +50,8 @@ auto SourcePhzFunctor::operator()(const SourceCatalog::Photometry& source_phot) 
   auto best_fit = m_best_fit_search_func(likelihood_grid.begin(), likelihood_grid.end());
   // Create an iterator of PhotometryGrid instead of the LikelihoodGrid that we have
   auto best_fit_result = m_phot_grid.begin();
+  best_fit_result.fixAllAxes(best_fit);
 
-  fixSameAxis(best_fit, best_fit_result);
   // Calculate the 1D PDF
   auto pdf_1D = m_marginalization_func(likelihood_grid);
   // Return the result
