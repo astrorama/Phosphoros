@@ -44,7 +44,8 @@ public:
    * The returned options are the ones defined by the PhotometricCorrectionConfiguration,
    * the PhotometryCatalogConfiguration  and the PhotometryGridConfiguration,
    * plus the parameter \a output-catalog-file, which is the filename of the file
-   * to export the PHZ catalog.
+   * to export the PHZ catalog and the \a output-pdf-file parameter which is the filename
+   * of the FITS file for the PDFs storage.
    *
    * @return A boost::program_options::options_description object describing
    * the program options
