@@ -10,7 +10,7 @@
 
 
 #include <boost/filesystem.hpp>
-#include <CCFits/CCFits>
+#include <CCfits/CCfits>
 #include "Table/Row.h"
 #include "PhzOutput/OutputHandler.h"
 
