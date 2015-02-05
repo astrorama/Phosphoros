@@ -25,5 +25,8 @@ elements_add_unit_test(SourcePhzFunctor_test tests/src/SourcePhzFunctor_test.cpp
 elements_add_unit_test(SumMarginalizationFunctor_test tests/src/SumMarginalizationFunctor_test.cpp
                        LINK_LIBRARIES gmock gtest PhzLikelihood TYPE Boost
                        INCLUDE_DIRS gmock gtest)
+elements_add_unit_test(MaxMarginalizationFunctor_test tests/src/MaxMarginalizationFunctor_test.cpp
+                       LINK_LIBRARIES gmock gtest PhzLikelihood TYPE Boost
+                       INCLUDE_DIRS gmock gtest)
 
 

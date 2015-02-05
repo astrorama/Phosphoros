@@ -1,16 +1,16 @@
 /** 
- * @file SumMarginalizationFunctor_test.cpp
- * @date January 12, 2015
+ * @file MaxMarginalizationFunctor_test.cpp
+ * @date February 5, 2015
  * @author Nikolaos Apostolakos
  */
 
 #include <boost/test/unit_test.hpp>
 #include <boost/test/test_tools.hpp>
-#include "PhzLikelihood/SumMarginalizationFunctor.h"
+#include "PhzLikelihood/MaxMarginalizationFunctor.h"
 
 using namespace Euclid;
 
-struct SumMarginalizationFunctor_Fixture {
+struct MaxMarginalizationFunctor_Fixture {
   
   double tolerance = 1e-10;
   
@@ -25,22 +25,25 @@ struct SumMarginalizationFunctor_Fixture {
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE (SumMarginalizationFunctor_test)
+BOOST_AUTO_TEST_SUITE (MaxMarginalizationFunctor_test)
 
 //-----------------------------------------------------------------------------
 // Checks the returned 1D PDF of the Z axis
 //-----------------------------------------------------------------------------
-BOOST_FIXTURE_TEST_CASE(ZAxisMarginalization, SumMarginalizationFunctor_Fixture) {
+BOOST_FIXTURE_TEST_CASE(ZAxisMarginalization, MaxMarginalizationFunctor_Fixture) {
   
   // Given
-  for (double z : z_values) {
-    for (auto iter = pdf_grid.begin().fixAxisByValue<PhzDataModel::ModelParameter::Z>(z); iter != pdf_grid.end(); ++iter) {
-      (*iter) = z;
-    }
-  }
+  pdf_grid(1,1,0,1) = .1;
+  pdf_grid(1,2,0,1) = .05;
+  pdf_grid(2,1,0,1) = .15;
+  pdf_grid(2,2,0,1) = .2;
+  pdf_grid(3,1,0,1) = .4;
+  pdf_grid(3,2,0,1) = .35;
+  pdf_grid(4,1,0,1) = .44;
+  pdf_grid(4,2,0,1) = .5;
   
   // When
-  auto pdf = PhzLikelihood::SumMarginalizationFunctor<PhzDataModel::ModelParameter::Z>()(pdf_grid);
+  auto pdf = PhzLikelihood::MaxMarginalizationFunctor<PhzDataModel::ModelParameter::Z>()(pdf_grid);
   auto& axis = pdf.getAxis<0>();
   
   // Then
@@ -50,6 +53,7 @@ BOOST_FIXTURE_TEST_CASE(ZAxisMarginalization, SumMarginalizationFunctor_Fixture)
   // Check that the calculated node values are correct
   std::vector<double> expected_pdf {0., 0.8, 1.6, 3.2, 4.};
   BOOST_CHECK_EQUAL(pdf.size(), expected_pdf.size());
+  
   for (size_t i=0; i<pdf.size(); ++i) {
     BOOST_CHECK_CLOSE(pdf(i), expected_pdf[i], tolerance);
   }
@@ -59,17 +63,20 @@ BOOST_FIXTURE_TEST_CASE(ZAxisMarginalization, SumMarginalizationFunctor_Fixture)
 //-----------------------------------------------------------------------------
 // Checks the returned 1D PDF of the E(B-V) axis
 //-----------------------------------------------------------------------------
-BOOST_FIXTURE_TEST_CASE(EbvAxisMarginalization, SumMarginalizationFunctor_Fixture) {
+BOOST_FIXTURE_TEST_CASE(EbvAxisMarginalization, MaxMarginalizationFunctor_Fixture) {
   
   // Given
-  for (double ebv : ebv_values) {
-    for (auto iter = pdf_grid.begin().fixAxisByValue<PhzDataModel::ModelParameter::EBV>(ebv); iter != pdf_grid.end(); ++iter) {
-      (*iter) = ebv;
-    }
-  }
+  pdf_grid(1,1,0,1) = .01;
+  pdf_grid(2,1,0,1) = .005;
+  pdf_grid(1,2,0,1) = .015;
+  pdf_grid(2,2,0,1) = .03;
+  pdf_grid(1,3,0,1) = .04;
+  pdf_grid(2,3,0,1) = .035;
+  pdf_grid(1,4,0,1) = .044;
+  pdf_grid(2,4,0,1) = .05;
   
   // When
-  auto pdf = PhzLikelihood::SumMarginalizationFunctor<PhzDataModel::ModelParameter::EBV>()(pdf_grid);
+  auto pdf = PhzLikelihood::MaxMarginalizationFunctor<PhzDataModel::ModelParameter::EBV>()(pdf_grid);
   auto& axis = pdf.getAxis<0>();
   
   

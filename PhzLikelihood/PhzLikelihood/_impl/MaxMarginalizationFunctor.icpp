@@ -1,0 +1,41 @@
+/** 
+ * @file MaxMarginalizationFunctor.icpp
+ * @date February 5, 2015
+ * @author Nikolaos Apostolakos
+ */
+
+#include <algorithm>
+#include "MathUtils/interpolation/interpolation.h"
+#include "MathUtils/function/function_tools.h"
+
+namespace Euclid {
+namespace PhzLikelihood {
+
+template <int FinalAxis>
+auto MaxMarginalizationFunctor<FinalAxis>::operator()(const PhzDataModel::PdfGrid& pdf_grid) const -> result_type {
+  // First calculate the result as maximum of the rest axes
+  result_type result {pdf_grid.getAxis<FinalAxis>()};
+  for (auto iter = result.begin(); iter != result.end(); ++iter) {
+    *iter = *std::max_element(
+          pdf_grid.begin().fixAxisByValue<FinalAxis>(iter.template axisValue<0>()),
+          pdf_grid.end());
+  }
+
+  // Then normalize the result so it has total integral 1
+  std::vector<double> x {};
+  std::vector<double> y {};
+  for (auto iter = result.begin(); iter != result.end(); ++iter) {
+    x.emplace_back(iter.template axisValue<0>());
+    y.emplace_back(*iter);
+  }
+  auto as_function = MathUtils::interpolate(x, y, MathUtils::InterpolationType::LINEAR);
+  double integral = MathUtils::integrate(*as_function, x.front(), x.back());
+  for (auto& pdf_value : result) {
+    pdf_value /= integral;
+  }
+
+  return result;
+}
+
+} // end of namespace PhzLikelihood
+} // end of namespace Euclid
