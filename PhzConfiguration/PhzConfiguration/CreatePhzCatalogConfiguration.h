@@ -11,6 +11,7 @@
 #include <string>
 #include <boost/program_options.hpp>
 #include "PhzOutput/OutputHandler.h"
+#include "PhzLikelihood/CatalogHandler.h"
 #include "PhzConfiguration/PhotometricCorrectionConfiguration.h"
 #include "PhzConfiguration/PhotometryCatalogConfiguration.h"
 #include "PhzConfiguration/PhotometryGridConfiguration.h"
@@ -43,9 +44,11 @@ public:
    * @details
    * The returned options are the ones defined by the PhotometricCorrectionConfiguration,
    * the PhotometryCatalogConfiguration  and the PhotometryGridConfiguration,
-   * plus the parameter \a output-catalog-file, which is the filename of the file
-   * to export the PHZ catalog and the \a output-pdf-file parameter which is the filename
-   * of the FITS file for the PDFs storage.
+   * plus the parameters:
+   * 
+   * - output-catalog-file  : the filename of the file to export the PHZ catalog
+   * - output-pdf-file      : the filename of the FITS file for the PDFs storage
+   * - marginalization-type : the type of marginalization algorithm (SUM, MAX)
    *
    * @return A boost::program_options::options_description object describing
    * the program options
@@ -79,6 +82,8 @@ public:
    * The handler to use for storing the output
    */
   std::unique_ptr<PhzOutput::OutputHandler> getOutputHandler();
+  
+  PhzLikelihood::CatalogHandler::MarginalizationFunction getMarginalizationFunc();
 
 private:
 

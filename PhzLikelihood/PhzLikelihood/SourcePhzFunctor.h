@@ -103,9 +103,9 @@ public:
    */
   SourcePhzFunctor(PhzDataModel::PhotometricCorrectionMap phot_corr_map,
                    const PhzDataModel::PhotometryGrid& phot_grid,
+                   MarginalizationFunction marginalization_func = SumMarginalizationFunctor<PhzDataModel::ModelParameter::Z>{},
                    LikelihoodFunction likelihood_func = LikelihoodAlgorithm{ScaleFactorFunctor{}, ChiSquareFunctor{}},
-                   BestFitSearchFunction best_fit_search_func = std::max_element<PhzDataModel::LikelihoodGrid::iterator>,
-                   MarginalizationFunction marginalization_func = SumMarginalizationFunctor<PhzDataModel::ModelParameter::Z>{});
+                   BestFitSearchFunction best_fit_search_func = std::max_element<PhzDataModel::LikelihoodGrid::iterator>);
 
   /**
    * Calculates the PHZ results for the given source photometry. The given
@@ -134,9 +134,9 @@ private:
 
   PhzDataModel::PhotometricCorrectionMap m_phot_corr_map;
   const PhzDataModel::PhotometryGrid& m_phot_grid;
+  MarginalizationFunction m_marginalization_func;
   LikelihoodFunction m_likelihood_func;
   BestFitSearchFunction m_best_fit_search_func;
-  MarginalizationFunction m_marginalization_func;
 
 };
 

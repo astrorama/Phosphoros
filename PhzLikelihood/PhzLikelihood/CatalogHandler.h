@@ -30,6 +30,8 @@ class CatalogHandler {
   
 public:
   
+  typedef SourcePhzFunctor::MarginalizationFunction MarginalizationFunction;
+  
   /**
    * Constructs a new CatalogHandler instance. If the given photometric
    * correction map does not contain corrections for all the filters of the
@@ -44,7 +46,8 @@ public:
    *    the filters of the model photometries
    */
   CatalogHandler(PhzDataModel::PhotometricCorrectionMap phot_corr_map,
-                 const PhzDataModel::PhotometryGrid& phot_grid);
+                 const PhzDataModel::PhotometryGrid& phot_grid,
+                 MarginalizationFunction marginalization_func);
   
   /**
    * Iterates through a set of sources and calculates the PHZ parameters for

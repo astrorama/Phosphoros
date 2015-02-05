@@ -4,8 +4,11 @@
  * @author Nikolaos Apostolakos
  */
 
+#include "ElementsKernel/Exception.h"
 #include "PhzOutput/BestModelCatalog.h"
 #include "PhzOutput/PdfOutput.h"
+#include "PhzLikelihood/SumMarginalizationFunctor.h"
+#include "PhzLikelihood/MaxMarginalizationFunctor.h"
 #include "PhzConfiguration/CreatePhzCatalogConfiguration.h"
 
 namespace po = boost::program_options;
@@ -20,7 +23,9 @@ po::options_description CreatePhzCatalogConfiguration::getProgramOptions() {
   ("output-catalog-file", po::value<std::string>(),
       "The filename of the file to export the PHZ catalog file")
   ("output-pdf-file", po::value<std::string>(),
-        "The filename of the PDF data");
+        "The filename of the PDF data")
+  ("marginalization-type", po::value<std::string>(),
+        "The type of marginalization algorithm (one of SUM, MAX)");
 
   options.add(PhotometricCorrectionConfiguration::getProgramOptions());
   options.add(PhotometryCatalogConfiguration::getProgramOptions());
@@ -63,6 +68,20 @@ std::unique_ptr<PhzOutput::OutputHandler> CreatePhzCatalogConfiguration::getOutp
     result->addHandler(std::unique_ptr<PhzOutput::OutputHandler>{new PhzOutput::PdfOutput{out_file}});
   }
   return std::unique_ptr<PhzOutput::OutputHandler>{result.release()};
+}
+
+PhzLikelihood::SourcePhzFunctor::MarginalizationFunction CreatePhzCatalogConfiguration::getMarginalizationFunc() {
+  if (m_options["marginalization-type"].empty()) {
+    throw Elements::Exception() << "Missing mandatory parameter marginalization-type";
+  }
+  if (m_options["marginalization-type"].as<std::string>() == "SUM") {
+    return PhzLikelihood::SumMarginalizationFunctor<PhzDataModel::ModelParameter::Z>{};
+  }
+  if (m_options["marginalization-type"].as<std::string>() == "MAX") {
+    return PhzLikelihood::MaxMarginalizationFunctor<PhzDataModel::ModelParameter::Z>{};
+  }
+  throw Elements::Exception() << "Unknown marginalization type \"" 
+                    << m_options["marginalization-type"].as<std::string>() << "\"";
 }
 
 } // end of namespace PhzConfiguration

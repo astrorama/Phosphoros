@@ -14,13 +14,13 @@ namespace PhzLikelihood {
 
 SourcePhzFunctor::SourcePhzFunctor(PhzDataModel::PhotometricCorrectionMap phot_corr_map,
                                    const PhzDataModel::PhotometryGrid& phot_grid,
+                                   MarginalizationFunction marginalization_func,
                                    LikelihoodFunction likelihood_func,
-                                   BestFitSearchFunction best_fit_search_func,
-                                   MarginalizationFunction marginalization_func)
+                                   BestFitSearchFunction best_fit_search_func)
         : m_phot_corr_map{std::move(phot_corr_map)}, m_phot_grid(phot_grid),
+          m_marginalization_func{std::move(marginalization_func)},
           m_likelihood_func{std::move(likelihood_func)},
-          m_best_fit_search_func{std::move(best_fit_search_func)},
-          m_marginalization_func{std::move(marginalization_func)} {
+          m_best_fit_search_func{std::move(best_fit_search_func)} {
 }
 
 SourceCatalog::Photometry applyPhotCorr(const PhzDataModel::PhotometricCorrectionMap& pc_map,
