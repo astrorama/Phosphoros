@@ -20,6 +20,8 @@ namespace PhzOutput {
 void PdfOutput::handleSourceOutput(const SourceCatalog::Source& source,
                                          PhzDataModel::PhotometryGrid::const_iterator best_model,
                                    const PhzDataModel::Pdf1D& pdf) {
+  // Count the number of sources saved
+  ++m_counter;
 
   // Create the columnInfo object
   std::shared_ptr<Euclid::Table::ColumnInfo> column_info {new Euclid::Table::ColumnInfo {{
@@ -36,15 +38,17 @@ void PdfOutput::handleSourceOutput(const SourceCatalog::Source& source,
   Table::Table pdf_table{row_list};
 
   // Store pdf data into fits dile
-//  CCfits::FITS fits_file {m_out_file.string(), CCfits::RWmode::Write};
   Table::FitsWriter fits_writer {Table::FitsWriter::Format::BINARY};
 
-	if (source.getId()%1000 == 0) {
+  // Close and reopen the FITS object for efficiency reason
+	if (m_counter % 5000 == 0) {
+	  std::cout<<"m_counter = "<<m_counter<<"\n"<<std::endl;
 		m_fits_file->destroy();
 		m_fits_file.reset( new CCfits::FITS {m_out_file.string(), CCfits::RWmode::Write});
+		m_counter = 0;
 	}
-  fits_writer.write(*m_fits_file, std::to_string(source.getId()), pdf_table);
 
+  fits_writer.write(*m_fits_file, std::to_string(source.getId()), pdf_table);
 }
 
 } // end of namespace PhzOutput

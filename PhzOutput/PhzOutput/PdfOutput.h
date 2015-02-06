@@ -23,7 +23,9 @@ class PdfOutput : public OutputHandler {
 
 public:
 
-	PdfOutput(fs::path out_file) : m_out_file{out_file}, m_fits_file{new CCfits::FITS{"!"+out_file.string(), CCfits::RWmode::Write}} {}
+	PdfOutput(fs::path out_file) :m_out_file{out_file},
+	                              m_fits_file{new CCfits::FITS{"!"+out_file.string(), CCfits::RWmode::Write}},
+	                              m_counter(0) {}
 
   virtual ~PdfOutput() = default;
 
@@ -33,8 +35,10 @@ public:
 
 private:
 
-  fs::path m_out_file;
-  std::unique_ptr<CCfits::FITS> m_fits_file;
+  fs::path                      m_out_file;  // Filename of the output fits file
+  std::unique_ptr<CCfits::FITS> m_fits_file; // Unique pointer to the FITS file object
+  int64_t                       m_counter;   // Counting the number of sources
+
 };
 
 } // end of namespace PhzOutput
