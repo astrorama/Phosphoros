@@ -37,12 +37,11 @@ void PdfOutput::handleSourceOutput(const SourceCatalog::Source& source,
 
   Table::Table pdf_table{row_list};
 
-  // Store pdf data into fits dile
+  // Store pdf data into fits file
   Table::FitsWriter fits_writer {Table::FitsWriter::Format::BINARY};
 
   // Close and reopen the FITS object for efficiency reason
 	if (m_counter % 5000 == 0) {
-	  std::cout<<"m_counter = "<<m_counter<<"\n"<<std::endl;
 		m_fits_file->destroy();
 		m_fits_file.reset( new CCfits::FITS {m_out_file.string(), CCfits::RWmode::Write});
 		m_counter = 0;
