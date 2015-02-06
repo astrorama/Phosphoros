@@ -34,7 +34,8 @@ public:
    * @brief Calculates the photometric corrections so the input sources
    * will best match the given models, scaled by the given factors. All
    * the sources of the catalog and the mapped models are assumed to contain
-   * photometries for the same filters.
+   * photometries for the same filters. The returned photometric correction is
+   * normalized so the median filter has multiplier 1.
    *
    * @tparam SourceIter The type of the iterator over the source objects
    * @tparam ModelPhotPtr A type which can be dereferenced to a Photometry object

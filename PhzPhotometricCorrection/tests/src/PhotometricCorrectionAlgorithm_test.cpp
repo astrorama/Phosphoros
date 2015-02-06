@@ -145,8 +145,8 @@ BOOST_FIXTURE_TEST_CASE(EvenNumberOfSources_test, PhotometricCorrectionAlgorithm
   BOOST_CHECK_EQUAL(phot_corr.size(), 2);
   BOOST_CHECK(pc1 != phot_corr.end());
   BOOST_CHECK(pc2 != phot_corr.end());
-  BOOST_CHECK_SMALL(pc1->second - 0.3, tolerance);
-  BOOST_CHECK_SMALL(pc2->second - 0.3, tolerance);
+  BOOST_CHECK_SMALL(pc1->second - 1, tolerance);
+  BOOST_CHECK_SMALL(pc2->second - 1, tolerance);
 }
 
 //-----------------------------------------------------------------------------
@@ -176,8 +176,8 @@ BOOST_FIXTURE_TEST_CASE(OddNumberOfSources_test, PhotometricCorrectionAlgorithm_
   BOOST_CHECK_EQUAL(phot_corr.size(), 2);
   BOOST_CHECK(pc1 != phot_corr.end());
   BOOST_CHECK(pc2 != phot_corr.end());
-  BOOST_CHECK_SMALL(pc1->second - 0.28, tolerance);
-  BOOST_CHECK_SMALL(pc2->second - 0.28, tolerance);
+  BOOST_CHECK_SMALL(pc1->second - 1, tolerance);
+  BOOST_CHECK_SMALL(pc2->second - 1, tolerance);
 }
 
 //-----------------------------------------------------------------------------

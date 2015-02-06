@@ -57,7 +57,21 @@ static std::map<int64_t, PhzDataModel::PhotometricCorrectionMap> createSourcePho
   return result;
 }
 
-
+PhzDataModel::PhotometricCorrectionMap normalizePhotCorr(const PhzDataModel::PhotometricCorrectionMap& phot_corr) {
+  std::multiset<double> values {};
+  for (auto& pair : phot_corr) {
+    values.insert(pair.second);
+  }
+  size_t size = values.size();
+  double factor = (size % 2 == 0)
+                  ? (*std::next(values.begin(), size/2 - 1) + *std::next(values.begin(), size/2)) / 2.
+                  : *std::next(values.begin(), size/2);
+  auto result = phot_corr;
+  for (auto& pair : result) {
+    pair.second = pair.second / factor;
+  }
+  return result;
+}
 
 template <typename SourceIter, typename ModelPhotPtr>
 PhzDataModel::PhotometricCorrectionMap PhotometricCorrectionAlgorithm::operator ()(
@@ -74,7 +88,9 @@ PhzDataModel::PhotometricCorrectionMap PhotometricCorrectionAlgorithm::operator 
   auto source_phot_corr_map = createSourcePhotCorrMap(source_begin, source_end,
                                                       scale_factor_map, model_phot_map);
 
-  return selector(source_phot_corr_map, source_begin, source_end);
+  auto phot_corr = selector(source_phot_corr_map, source_begin, source_end);
+  
+  return normalizePhotCorr(phot_corr);
 }
 
 } // end of namespace PhzPhotometricCorrection
