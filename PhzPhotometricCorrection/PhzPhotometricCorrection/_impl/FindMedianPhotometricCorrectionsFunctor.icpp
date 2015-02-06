@@ -20,9 +20,7 @@ namespace PhzPhotometricCorrection {
 template <typename SourceIter>
   PhzDataModel::PhotometricCorrectionMap FindMedianPhotometricCorrectionsFunctor::operator()(
       const std::map<int64_t, PhzDataModel::PhotometricCorrectionMap>& source_phot_corr_map,
-      SourceIter source_begin,
-      SourceIter source_end
-  ){
+      SourceIter, SourceIter){
   // Order the photometries for each filter, by storring them in multisets
     std::map<XYDataset::QualifiedName, std::multiset<double>> ordered_source_phot_corr;
     for (auto& source_phot_corr_pair : source_phot_corr_map) {

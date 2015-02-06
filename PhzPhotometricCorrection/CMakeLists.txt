@@ -8,6 +8,13 @@ elements_depends_on_subdirs(PhzLikelihood)
 find_package(gmock)
 find_package(gtest)
 
+if(ELEMENTS_HIDE_WARNINGS)
+  if(UNIX)
+    set_property(SOURCE tests/src/PhotometricCorrectionCalculator_test.cpp
+                 PROPERTY COMPILE_FLAGS -Wno-float-equal)
+  endif()
+endif()
+
 #===== Libraries ===============================================================
 elements_add_library(PhzPhotometricCorrection src/lib/*.cpp
                   LINK_LIBRARIES PhzDataModel SourceCatalog PhzLikelihood

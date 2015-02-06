@@ -5,6 +5,13 @@ elements_depends_on_subdirs(PhzDataModel PhzOutput)
 find_package(gmock)
 find_package(gtest)
 
+if(ELEMENTS_HIDE_WARNINGS)
+  if(UNIX)
+    set_property(SOURCE tests/src/LikelihoodAlgorithm_test.cpp
+                 PROPERTY COMPILE_FLAGS -Wno-float-equal)
+  endif()
+endif()
+
 #===== Libraries ===============================================================
 elements_add_library(PhzLikelihood src/lib/*.cpp
                   LINK_LIBRARIES PhzDataModel PhzOutput

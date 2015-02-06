@@ -18,7 +18,7 @@ namespace PhzOutput {
 
 
 void PdfOutput::handleSourceOutput(const SourceCatalog::Source& source,
-                                         PhzDataModel::PhotometryGrid::const_iterator best_model,
+                                   PhzDataModel::PhotometryGrid::const_iterator,
                                    const PhzDataModel::Pdf1D& pdf) {
   // Count the number of sources saved
   ++m_counter;
