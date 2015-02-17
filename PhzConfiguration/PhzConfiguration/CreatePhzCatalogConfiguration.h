@@ -64,6 +64,7 @@ public:
    */
   CreatePhzCatalogConfiguration(const std::map<std::string,
                               boost::program_options::variable_value>& options);
+  
    /**
    * @brief destructor.
    */

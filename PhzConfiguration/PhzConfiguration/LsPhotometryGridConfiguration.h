@@ -22,6 +22,11 @@ public:
   
   LsPhotometryGridConfiguration(const std::map<std::string, boost::program_options::variable_value>& options);
   
+   /**
+   * @brief destructor.
+   */
+   virtual ~LsPhotometryGridConfiguration()=default;
+  
   bool showGeneric();
   
   bool showSedAxis();

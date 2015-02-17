@@ -72,6 +72,11 @@ public:
    */
   RedshiftConfiguration(const std::map<std::string, boost::program_options::variable_value>& options)
                      : m_options{options} {};
+  
+   /**
+   * @brief destructor.
+   */
+   virtual ~RedshiftConfiguration()=default;
 
 
   /**

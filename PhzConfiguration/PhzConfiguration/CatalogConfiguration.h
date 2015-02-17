@@ -89,16 +89,6 @@ public:
    CatalogConfiguration(const std::map<std::string, boost::program_options::variable_value>& options);
 
    /**
-    * @brief move assignment operator.
-    */
-   CatalogConfiguration& operator=(CatalogConfiguration&&)=default;
-
-   /**
-    * @brief move constructor.
-    */
-   CatalogConfiguration(CatalogConfiguration&&)=default;
-
-   /**
    * @brief destructor.
    */
    virtual ~CatalogConfiguration()=default;
@@ -139,7 +129,7 @@ private:
 
   std::map<std::string, boost::program_options::variable_value> m_options;
   std::vector<std::shared_ptr<SourceCatalog::AttributeFromRow>> m_attribute_handlers;
-  std::unique_ptr<Table::Table> m_table_ptr;
+  std::shared_ptr<Table::Table> m_table_ptr;
 
 };
 

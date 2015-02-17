@@ -69,16 +69,6 @@ public:
   SpectroscopicRedshiftCatalogConfiguration(const std::map<std::string,
                               boost::program_options::variable_value>& options);
 
-   /**
-    * @brief move assignment operator.
-    */
-   SpectroscopicRedshiftCatalogConfiguration& operator=(SpectroscopicRedshiftCatalogConfiguration&&)=default;
-
-   /**
-   * @brief move constructor.
-   */
-   SpectroscopicRedshiftCatalogConfiguration(SpectroscopicRedshiftCatalogConfiguration&&)=default;
-
   /**
   * @brief destructor.
   */

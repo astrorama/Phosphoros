@@ -74,6 +74,11 @@ public:
    */
   ParameterSpaceConfiguration(const std::map<std::string, boost::program_options::variable_value>& options)
             : SedConfiguration(options), RedshiftConfiguration(options), ReddeningConfiguration(options) {};
+  
+   /**
+   * @brief destructor.
+   */
+   virtual ~ParameterSpaceConfiguration()=default;
 
 
 };

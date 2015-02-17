@@ -12,19 +12,6 @@ elements_depends_on_subdirs(MathUtils)
 
 find_package(Boost REQUIRED COMPONENTS program_options)
 
-if(ELEMENTS_HIDE_WARNINGS)
-  if(UNIX)
-    set_property(SOURCE src/lib/SpectroscopicRedshiftCatalogConfiguration.cpp
-                 PROPERTY COMPILE_FLAGS -Wno-virtual-move-assign)
-    set_property(SOURCE src/lib/CalculatePhotometricCorrectionConfiguration.cpp
-                 PROPERTY COMPILE_FLAGS -Wno-virtual-move-assign)
-    set_property(SOURCE tests/src/CalculatePhotometricCorrectionConfiguration_test.cpp
-                 PROPERTY COMPILE_FLAGS -Wno-virtual-move-assign)
-    set_property(SOURCE src/program/CalculatePhotometricCorrection.cpp
-                 PROPERTY COMPILE_FLAGS -Wno-virtual-move-assign)
-  endif()
-endif()
-
 elements_add_executable(CreatePhotometryGrid src/program/CreatePhotometryGrid.cpp
                         LINK_LIBRARIES ElementsKernel Boost PhzConfiguration PhzDataModel PhzModeling)
 

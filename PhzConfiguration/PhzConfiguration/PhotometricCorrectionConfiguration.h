@@ -46,6 +46,11 @@ public:
   PhotometricCorrectionConfiguration(const std::map<std::string, boost::program_options::variable_value>& options)
                                     : m_options{options} {};
   
+   /**
+   * @brief destructor.
+   */
+   virtual ~PhotometricCorrectionConfiguration()=default;
+  
   /// Returns a map with the photometric corrections for the filters
   PhzDataModel::PhotometricCorrectionMap getPhotometricCorrectionMap();
   
