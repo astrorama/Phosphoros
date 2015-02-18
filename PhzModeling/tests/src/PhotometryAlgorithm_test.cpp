@@ -89,11 +89,11 @@ struct PhotometryAlgorithm_Fixture {
 
    std::vector<std::pair<double, double>> makeFilter(double first, double vlue){
        return std::vector<std::pair<double, double>>{
-         std::make_pair(first,vlue*(first*first)/2.99792458e+18),
-         std::make_pair(12000.,vlue*(12000*12000)/2.99792458e+18),
-         std::make_pair(17000.,vlue*(17000*17000)/2.99792458e+18),
-         std::make_pair(18000.,vlue*(18000*18000)/2.99792458e+18),
-         std::make_pair(20000.,vlue*(20000*20000)/2.99792458e+18)
+         std::make_pair(first,vlue*(first*first)/2.99792458e+6),
+         std::make_pair(12000.,vlue*(12000*12000)/2.99792458e+6),
+         std::make_pair(17000.,vlue*(17000*17000)/2.99792458e+6),
+         std::make_pair(18000.,vlue*(18000*18000)/2.99792458e+6),
+         std::make_pair(20000.,vlue*(20000*20000)/2.99792458e+6)
        };
    }
 
@@ -178,8 +178,8 @@ BOOST_FIXTURE_TEST_CASE(execution_test, PhotometryAlgorithm_Fixture) {
    auto filter5 =photometry.find("filterSet1/filter5");
    BOOST_CHECK(filter5);
 
-   BOOST_CHECK_CLOSE(model_vector_iterator->size()/2200.,filter2->flux, 1E-10);
-   BOOST_CHECK_CLOSE((model_vector_iterator->size()-1)/4500.,filter5->flux, 1E-10);
+   BOOST_CHECK_CLOSE(model_vector_iterator->size()/2200.,filter2->flux*1E12, 1E-10);
+   BOOST_CHECK_CLOSE((model_vector_iterator->size()-1)/4500.,filter5->flux*1E12, 1E-10);
    ++model_vector_iterator;
   }
 

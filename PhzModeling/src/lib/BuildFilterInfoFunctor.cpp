@@ -14,6 +14,9 @@
 namespace Euclid {
 namespace PhzModeling {
 
+/// The value bellow which the filter transmission is assumed to be zero
+static const double FILTER_ZERO_LIMIT = 1E-5;
+
 /*
  * return the first and the last of the X axis values. If the Y value starts
  * and/or ends with 0s, the range starts at the last value of Lambda for which
@@ -24,7 +27,7 @@ std::pair<double,double> getRange(const XYDataset::XYDataset& filter_dataset) {
   // Find the last zero before the first non-zero point
   auto min = filter_dataset.begin();
   for (auto current=filter_dataset.begin(); current!=filter_dataset.end(); ++current) {
-    if (current->second != 0) {
+    if (current->second > FILTER_ZERO_LIMIT) {
       min = (current==filter_dataset.begin()) ? current : current - 1;
       break;
     }
@@ -32,7 +35,7 @@ std::pair<double,double> getRange(const XYDataset::XYDataset& filter_dataset) {
   // Find the first zero after the last non-zero point
   auto max = filter_dataset.begin();
   for (auto current=filter_dataset.end()-1; current!=filter_dataset.begin()-1; --current) {
-    if (current->second != 0) {
+    if (current->second > FILTER_ZERO_LIMIT) {
       max = (current==filter_dataset.end()-1) ? current : current + 1;
       break;
     }
