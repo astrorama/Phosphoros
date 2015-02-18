@@ -24,17 +24,8 @@ elements_add_library(PhzPhotometricCorrection src/lib/*.cpp
 
 elements_add_unit_test(PhotometricCorrectionAlgorithm_test tests/src/PhotometricCorrectionAlgorithm_test.cpp
                        LINK_LIBRARIES PhzPhotometricCorrection TYPE Boost)
-elements_add_unit_test(CalculateScaleFactorMap_test tests/src/CalculateScaleFactorMap_test.cpp
-                       LINK_LIBRARIES gmock gtest PhzPhotometricCorrection TYPE Boost
-                       INCLUDE_DIRS gmock gtest)
-elements_add_unit_test(FindBestFitModels_test tests/src/FindBestFitModels_test.cpp
-                       LINK_LIBRARIES gmock gtest PhzPhotometricCorrection TYPE Boost
-                       INCLUDE_DIRS gmock gtest)
 elements_add_unit_test(DefaultStopCriteria_test tests/src/DefaultStopCriteria_test.cpp
                        LINK_LIBRARIES PhzPhotometricCorrection TYPE Boost)
-elements_add_unit_test(PhotometricCorrectionCalculator_test tests/src/PhotometricCorrectionCalculator_test.cpp
-                       LINK_LIBRARIES gmock gtest PhzPhotometricCorrection TYPE Boost
-                       INCLUDE_DIRS gmock gtest)
 
 elements_add_unit_test(FindMedianPhotometricCorrectionsFunctor_test tests/src/FindMedianPhotometricCorrectionsFunctor_test.cpp
                        LINK_LIBRARIES PhzPhotometricCorrection TYPE Boost)
@@ -44,3 +35,16 @@ elements_add_unit_test(FindMeanPhotometricCorrectionsFunctor_test tests/src/Find
                        LINK_LIBRARIES PhzPhotometricCorrection TYPE Boost)
 elements_add_unit_test(FindWeightedMeanPhotometricCorrectionsFunctor_test tests/src/FindWeightedMeanPhotometricCorrectionsFunctor_test.cpp
                        LINK_LIBRARIES PhzPhotometricCorrection TYPE Boost)
+
+#===== Tests using GMock =======================================================
+if(GMOCK_FOUND AND GTEST_FOUND)
+  elements_add_unit_test(CalculateScaleFactorMap_test tests/src/CalculateScaleFactorMap_test.cpp
+                         LINK_LIBRARIES gmock gtest PhzPhotometricCorrection TYPE Boost
+                         INCLUDE_DIRS gmock gtest)
+  elements_add_unit_test(FindBestFitModels_test tests/src/FindBestFitModels_test.cpp
+                         LINK_LIBRARIES gmock gtest PhzPhotometricCorrection TYPE Boost
+                         INCLUDE_DIRS gmock gtest)
+  elements_add_unit_test(PhotometricCorrectionCalculator_test tests/src/PhotometricCorrectionCalculator_test.cpp
+                         LINK_LIBRARIES gmock gtest PhzPhotometricCorrection TYPE Boost
+                         INCLUDE_DIRS gmock gtest)
+endif(GMOCK_FOUND AND GTEST_FOUND)
