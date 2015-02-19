@@ -30,7 +30,7 @@ namespace PhzConfiguration {
  * and inherits from the options of the ParameterSpaceConfiguration and FilterConfiguration
  * options. It also provides a function for writing a grid in a binary file.
  * The parameter available is :
- * - \b binary-photometry-grid : string, output filename and path for storing the photometry grid data
+ * - \b output-photometry-grid : string, output filename and path for storing the photometry grid data
  * Before writing data to the disk, the constructor checks that it is
  * possible to write on the disk at the location specified by the
  * binary-photometry-grid option and throws an exception if any.

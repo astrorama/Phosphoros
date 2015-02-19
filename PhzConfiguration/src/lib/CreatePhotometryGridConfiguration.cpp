@@ -26,7 +26,7 @@ CreatePhotometryGridConfiguration::CreatePhotometryGridConfiguration(const std::
   m_options = options;
 
   // Extract file option
-  std::string filename = m_options["binary-photometry-grid"].as<std::string>();
+  std::string filename = m_options["output-photometry-grid"].as<std::string>();
 
   // The purpose here is to make sure we are able to
   // write the binary file on the disk
@@ -49,7 +49,7 @@ po::options_description CreatePhotometryGridConfiguration::getProgramOptions() {
   boost::program_options::options_description options {"Create Photometry Grid options"};
 
   options.add_options()
-  ("binary-photometry-grid", boost::program_options::value<std::string>(),
+  ("output-photometry-grid", boost::program_options::value<std::string>(),
       "The filename of the file to export in binary format the photometry grid");
 
   options.add(ParameterSpaceConfiguration::getProgramOptions());
@@ -61,7 +61,7 @@ po::options_description CreatePhotometryGridConfiguration::getProgramOptions() {
 
  CreatePhotometryGridConfiguration::OutputFunction CreatePhotometryGridConfiguration::getOutputFunction() {
   return [this](const PhzDataModel::PhotometryGrid& grid) {
-    std::ofstream out {m_options["binary-photometry-grid"].as<std::string>()};
+    std::ofstream out {m_options["output-photometry-grid"].as<std::string>()};
     GridContainer::gridBinaryExport(out, grid);
   };
 }
