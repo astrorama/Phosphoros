@@ -17,7 +17,7 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 
 
 
-elements_add_library(PhUI ${PhUI_SRCS} ${PhUI_HEADERS_MOC} ${PhUI_FORMS_HEADERS} ${PhUI_RESOURCES_RCC}
+elements_add_library(QtUI ${PhUI_SRCS} ${PhUI_HEADERS_MOC} ${PhUI_FORMS_HEADERS} ${PhUI_RESOURCES_RCC}
                      LINK_LIBRARIES ElementsKernel ${QT_LIBRARIES}
                      INCLUDE_DIRS ElementsKernel
                      PUBLIC_HEADERS QtUI)
