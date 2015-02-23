@@ -71,7 +71,7 @@ BOOST_FIXTURE_TEST_CASE(getProgramOptions_function_test, CreatePhotometryGridCon
   auto option_desc = cf::CreatePhotometryGridConfiguration::getProgramOptions();
   const boost::program_options::option_description* desc{};
 
-  desc = option_desc.find_nothrow("binary-photometry-grid", false);
+  desc = option_desc.find_nothrow("output-photometry-grid", false);
   BOOST_CHECK(desc != nullptr);
 
 }
@@ -88,7 +88,7 @@ BOOST_FIXTURE_TEST_CASE(constructor_test, CreatePhotometryGridConfiguration_Fixt
 
   // Location not allowed
   path_filename ="/etc/zzz_test_writing_binary_file.dat";
-  options_map["binary-photometry-grid"].value() = boost::any(path_filename);
+  options_map["output-photometry-grid"].value() = boost::any(path_filename);
 
   BOOST_CHECK_THROW(cf::CreatePhotometryGridConfiguration cpgc(options_map), Elements::Exception);
 
@@ -106,7 +106,7 @@ BOOST_FIXTURE_TEST_CASE(getOutputFunction_test, CreatePhotometryGridConfiguratio
 
   // Create a binary file
   path_filename ="/tmp/test_writing_binary_file.dat";
-  options_map["binary-photometry-grid"].value() = boost::any(path_filename);
+  options_map["output-photometry-grid"].value() = boost::any(path_filename);
 
   cf::CreatePhotometryGridConfiguration cpgc(options_map);
   auto output_func = cpgc.getOutputFunction();
