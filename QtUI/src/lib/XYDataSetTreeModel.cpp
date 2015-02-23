@@ -4,7 +4,7 @@
 #include <QDir>
 #include <set>
 #include "QtUI/FileUtils.h"
-#include "QtUI/XYDataSetModel.h"
+#include "QtUI/XYDataSetTreeModel.h"
 #include "XYDataset/QualifiedName.h"
 
 #include "XYDataset/FileSystemProvider.h"
@@ -15,17 +15,17 @@
 using namespace std;
 using namespace Euclid;
 
-XYDataSetModel::XYDataSetModel(QObject *parent) :
+XYDataSetTreeModel::XYDataSetTreeModel(QObject *parent) :
     QStandardItemModel(parent) {
 }
 
-std::string XYDataSetModel::getRelPath(std::string path) const {
+std::string XYDataSetTreeModel::getRelPath(std::string path) const {
   return Euclid::PhosphorosUiDm::FileUtils::removeStart(
       Euclid::PhosphorosUiDm::FileUtils::removeStart(path, m_root_dir),
       QString(QDir::separator()).toStdString());
 }
 
-std::string XYDataSetModel::getFullPath(std::string path) const {
+std::string XYDataSetTreeModel::getFullPath(std::string path) const {
   if (Euclid::PhosphorosUiDm::FileUtils::starts_with(path, m_root_dir)) {
     return path;
   }
@@ -33,7 +33,7 @@ std::string XYDataSetModel::getFullPath(std::string path) const {
   return m_root_dir + QString(QDir::separator()).toStdString() + path;
 }
 
-void XYDataSetModel::loadDirectory(std::string rootPath,
+void XYDataSetTreeModel::loadDirectory(std::string rootPath,
     bool singleLeafSelection, std::string rootDisplayName) {
   this->setColumnCount(1);
   QStandardItem* root_item = new QStandardItem(
@@ -95,7 +95,7 @@ void XYDataSetModel::loadDirectory(std::string rootPath,
   }
 }
 
-void XYDataSetModel::setEnabled(bool enable) {
+void XYDataSetTreeModel::setEnabled(bool enable) {
   for (auto it : m_map_dir) {
     it.second->setEnabled(enable);
     for (int i = 0; i < it.second->rowCount(); ++i) {
@@ -106,7 +106,7 @@ void XYDataSetModel::setEnabled(bool enable) {
   setEditionStatus(enable);
 }
 
-void XYDataSetModel::checkDir(bool checked, std::string dir,
+void XYDataSetTreeModel::checkDir(bool checked, std::string dir,
     std::list<std::string> exclusions) {
 
   if (dir.compare(".") == 0
@@ -141,15 +141,15 @@ void XYDataSetModel::checkDir(bool checked, std::string dir,
   }
 }
 
-void XYDataSetModel::setEditionStatus(bool inEdition) {
+void XYDataSetTreeModel::setEditionStatus(bool inEdition) {
   m_in_edition = inEdition;
 }
 
-void XYDataSetModel::selectRoot() {
+void XYDataSetTreeModel::selectRoot() {
   this->item(0)->setCheckState(Qt::CheckState::Checked);
 }
 
-void XYDataSetModel::onItemChangedSingleLeaf(QStandardItem* item) {
+void XYDataSetTreeModel::onItemChangedSingleLeaf(QStandardItem* item) {
   if (m_in_edition && !m_bypass_item_changed) {
     m_bypass_item_changed = true;
     if (item->checkState() == Qt::CheckState::Checked) {
@@ -160,7 +160,7 @@ void XYDataSetModel::onItemChangedSingleLeaf(QStandardItem* item) {
   }
 }
 
-void XYDataSetModel::onItemChangedUniqueSelection(QStandardItem* item) {
+void XYDataSetTreeModel::onItemChangedUniqueSelection(QStandardItem* item) {
   if (m_in_edition && !m_bypass_item_changed) {
     m_bypass_item_changed = true;
     if (item->checkState() == Qt::CheckState::Checked) {
@@ -173,7 +173,7 @@ void XYDataSetModel::onItemChangedUniqueSelection(QStandardItem* item) {
   }
 }
 
-void XYDataSetModel::onItemChanged(QStandardItem* item) {
+void XYDataSetTreeModel::onItemChanged(QStandardItem* item) {
   if (m_in_edition && !m_bypass_item_changed) {
     m_bypass_item_changed = true;
 
@@ -200,7 +200,7 @@ void XYDataSetModel::onItemChanged(QStandardItem* item) {
   }
 }
 
-void XYDataSetModel::setState(std::string root,
+void XYDataSetTreeModel::setState(std::string root,
     const std::list<std::string>& exclusions) {
   m_bypass_item_changed = true;
 
@@ -243,7 +243,7 @@ void XYDataSetModel::setState(std::string root,
   m_bypass_item_changed = false;
 }
 
-std::pair<bool, std::string> XYDataSetModel::getRootSelection(
+std::pair<bool, std::string> XYDataSetTreeModel::getRootSelection(
     std::string from) const {
 
   auto root_item = item(0);
@@ -278,7 +278,7 @@ std::pair<bool, std::string> XYDataSetModel::getRootSelection(
   return std::make_pair(false, "");
 }
 
-std::string XYDataSetModel::getGroup() const {
+std::string XYDataSetTreeModel::getGroup() const {
   auto res = getRootSelection();
   if (!res.first) {
     return "";
@@ -296,7 +296,7 @@ std::string XYDataSetModel::getGroup() const {
   }
 }
 
-std::list<std::string> XYDataSetModel::XYDataSetModel::getExclusions(
+std::list<std::string> XYDataSetTreeModel::XYDataSetTreeModel::getExclusions(
     std::string root) const {
   std::list < std::string > list;
 

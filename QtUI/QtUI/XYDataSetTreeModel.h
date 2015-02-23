@@ -8,14 +8,14 @@
  * below a provided path and provide a set of possible behavior on user interaction.
  * Each item (or only file item) present a check box allowing the user to select it.
  */
-class XYDataSetModel : public QStandardItemModel
+class XYDataSetTreeModel : public QStandardItemModel
 {
     Q_OBJECT
 public:
-    explicit XYDataSetModel(QObject *parent = 0);
+    explicit XYDataSetTreeModel(QObject *parent = 0);
 
     /**
-     * @brief Initialise the XYDataSetModel by setting its internal data
+     * @brief Initialise the XYDataSetTreeModel by setting its internal data
      * @param rootPath
      * The path of the top folder to be displayed by the model
      * @param singleLeafSelection

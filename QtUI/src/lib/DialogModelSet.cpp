@@ -3,7 +3,7 @@
 #include "QtUI/FileUtils.h"
 #include "QtUI/DialogModelSet.h"
 #include "ui_DialogModelSet.h"
-#include "QtUI/XYDataSetModel.h"
+#include "QtUI/XYDataSetTreeModel.h"
 
 DialogModelSet::DialogModelSet(QWidget *parent) :
     QDialog(parent),
@@ -22,7 +22,7 @@ DialogModelSet::DialogModelSet(QWidget *parent) :
 
 
 
-    XYDataSetModel* treeModel_z = new XYDataSetModel();
+    XYDataSetTreeModel* treeModel_z = new XYDataSetTreeModel();
     treeModel_z->loadDirectory(Euclid::PhosphorosUiDm::FileUtils::getSedRootPath(true),false,"SEDs");
     ui->treeView_Sed->setModel(treeModel_z);
     ui->treeView_Sed->expandAll();
@@ -30,7 +30,7 @@ DialogModelSet::DialogModelSet(QWidget *parent) :
     connect(treeModel_z, SIGNAL(itemChanged(QStandardItem*)), treeModel_z,
                  SLOT(onItemChanged(QStandardItem*)));
 
-    XYDataSetModel* treeModel_red = new XYDataSetModel();
+    XYDataSetTreeModel* treeModel_red = new XYDataSetTreeModel();
     treeModel_red->loadDirectory(Euclid::PhosphorosUiDm::FileUtils::getRedCurveRootPath(true),false,"Reddening Curves");
     ui->treeView_Reddening->setModel(treeModel_red);
     ui->treeView_Reddening->expandAll();
@@ -81,8 +81,8 @@ void DialogModelSet::turnControlsInEdition(){
     ui->btn_cancel->setEnabled(true);
     ui->btn_save->setEnabled(true);
 
-    static_cast<XYDataSetModel*>(ui->treeView_Sed->model())->setEnabled(true);
-    static_cast<XYDataSetModel*>(ui->treeView_Reddening->model())->setEnabled(true);
+    static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setEnabled(true);
+    static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setEnabled(true);
 
 
     ui->txt_ebvMin->setEnabled(true);
@@ -114,8 +114,8 @@ void DialogModelSet::turnControlsInView(){
     ui->btn_cancel->setEnabled(false);
     ui->btn_save->setEnabled(false);
 
-    static_cast<XYDataSetModel*>(ui->treeView_Sed->model())->setEnabled(false);
-    static_cast<XYDataSetModel*>(ui->treeView_Reddening->model())->setEnabled(false);
+    static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setEnabled(false);
+    static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setEnabled(false);
 
     ui->txt_ebvMin->setEnabled(false);
     ui->txt_ebvMax->setEnabled(false);
@@ -172,10 +172,10 @@ void DialogModelSet::on_btn_cancel_clicked()
     }else{
         auto selected_rule = ui->tableView_ParameterRule->getSelectedRule();
         // SED
-        static_cast<XYDataSetModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedRootObject(),selected_rule.getExcludedSeds());
+        static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedRootObject(),selected_rule.getExcludedSeds());
 
         // Reddening Curve
-        static_cast<XYDataSetModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getReddeningRootObject(),selected_rule.getExcludedReddenings());
+        static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getReddeningRootObject(),selected_rule.getExcludedReddenings());
 
         // E(B-V)-range
         ui->txt_ebvMin->setText(QString::number(selected_rule.getEbvRange().getMin()));
@@ -196,8 +196,8 @@ void DialogModelSet::on_btn_cancel_clicked()
 
 void DialogModelSet::on_btn_save_clicked()
 {
-    auto sed_res = static_cast<XYDataSetModel*>(ui->treeView_Sed->model())->getRootSelection();
-    auto red_res =  static_cast<XYDataSetModel*>(ui->treeView_Reddening->model())->getRootSelection();
+    auto sed_res = static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->getRootSelection();
+    auto red_res =  static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->getRootSelection();
 
     if(!sed_res.first|| !red_res.first){
         QMessageBox::warning( this, "Missing Data...",
@@ -208,12 +208,12 @@ void DialogModelSet::on_btn_save_clicked()
 
     // SED
     std::string sed_root = sed_res.second;
-    std::list<std::string> sed_excl = static_cast<XYDataSetModel*>(ui->treeView_Sed->model())->getExclusions(sed_root);
+    std::list<std::string> sed_excl = static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->getExclusions(sed_root);
     ui->tableView_ParameterRule->setSedsToSelectedRule(std::move(sed_root),std::move(sed_excl));
 
     // Reddeing Curves
     std::string red_root =red_res.second;
-    std::list<std::string> red_excl = static_cast<XYDataSetModel*>(ui->treeView_Reddening->model())->getExclusions(red_root);
+    std::list<std::string> red_excl = static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->getExclusions(red_root);
     ui->tableView_ParameterRule->setRedCurvesToSelectedRule(std::move(red_root),std::move(red_excl));
 
     // E(B-V)-range
@@ -235,10 +235,10 @@ void DialogModelSet::on_btn_save_clicked()
     auto selected_rule = ui->tableView_ParameterRule->getSelectedRule();
 
     // SED
-    static_cast<XYDataSetModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedRootObject(),selected_rule.getExcludedSeds());
+    static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedRootObject(),selected_rule.getExcludedSeds());
 
     // Reddening Curve
-    static_cast<XYDataSetModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getReddeningRootObject(),selected_rule.getExcludedReddenings());
+    static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getReddeningRootObject(),selected_rule.getExcludedReddenings());
 
 }
 
@@ -249,10 +249,10 @@ void DialogModelSet::on_btn_save_clicked()
          auto selected_rule = model->getRule(new_index.row());
 
          // SED
-         static_cast<XYDataSetModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedRootObject(),selected_rule.getExcludedSeds());
+         static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedRootObject(),selected_rule.getExcludedSeds());
 
          // Reddening Curve
-         static_cast<XYDataSetModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getReddeningRootObject(),selected_rule.getExcludedReddenings());
+         static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getReddeningRootObject(),selected_rule.getExcludedReddenings());
 
          // E(B-V)-range
          ui->txt_ebvMin->setText(QString::number(selected_rule.getEbvRange().getMin()));
@@ -265,8 +265,8 @@ void DialogModelSet::on_btn_save_clicked()
      }
      else{
 
-         static_cast<XYDataSetModel*>(ui->treeView_Sed->model())->setState("",{});
-         static_cast<XYDataSetModel*>(ui->treeView_Reddening->model())->setState("",{});
+         static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setState("",{});
+         static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setState("",{});
 
          // E(B-V)-range
          ui->txt_ebvMin->setText("");

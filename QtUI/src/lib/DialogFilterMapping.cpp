@@ -3,7 +3,7 @@
 
 #include "QtUI/DialogFilterMapping.h"
 #include "ui_DialogFilterMapping.h"
-#include "QtUI/XYDataSetModel.h"
+#include "QtUI/XYDataSetTreeModel.h"
 #include "QtUI/FileUtils.h"
 
 DialogFilterMapping::DialogFilterMapping(QWidget *parent) :
@@ -41,7 +41,7 @@ void DialogFilterMapping::setFilter(const Euclid::PhosphorosUiDm::FilterMapping&
 
     std::string path_filter = Euclid::PhosphorosUiDm::FileUtils::getFilterRootPath(true);
 
-    XYDataSetModel* treeModel_filter = new XYDataSetModel();
+    XYDataSetTreeModel* treeModel_filter = new XYDataSetTreeModel();
     treeModel_filter->loadDirectory(path_filter,true,"Filters");
     treeModel_filter->setEnabled(true);
     ui->treeView_filter->setModel(treeModel_filter);
@@ -56,7 +56,7 @@ void DialogFilterMapping::setFilter(const Euclid::PhosphorosUiDm::FilterMapping&
 
 void DialogFilterMapping::on_btn_save_clicked()
 {
-    auto filter_res = static_cast<XYDataSetModel*>(ui->treeView_filter->model())->getRootSelection();
+    auto filter_res = static_cast<XYDataSetTreeModel*>(ui->treeView_filter->model())->getRootSelection();
 
     if (!filter_res.first
             || ui->txt_name->text().trimmed().length()==0
