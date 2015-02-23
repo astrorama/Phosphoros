@@ -7,4 +7,4 @@ find_package(ElementsProject)
 #---------------------------------------------------------------
 
 # Declare project name and version
-elements_project(PhosphorosUI 1.0 USE Phosphoros 0.1)
+elements_project(PhosphorosUI 0.1 USE Phosphoros 0.1)
