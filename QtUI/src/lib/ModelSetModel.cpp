@@ -34,15 +34,15 @@ const QString ModelSetModel::getValue(int row,int column) const{
     return this->item(row,column)->text();
 }
 
-const std::map<int,PhosphorosUiDm::ParameterRule> ModelSetModel::getParameterRules(int row) const{
+const std::map<int,Euclid::PhosphorosUiDm::ParameterRule> ModelSetModel::getParameterRules(int row) const{
     int key = getRef(row).toInt();
     return m_set_list.at(key).getParameterRules();
 }
 
 
-void ModelSetModel::setParameterRules(int row, const std::map<int,PhosphorosUiDm::ParameterRule>& value){
+void ModelSetModel::setParameterRules(int row, const std::map<int,Euclid::PhosphorosUiDm::ParameterRule>& value){
      int key = getRef(row).toInt();
-     m_set_list[key].setParameterRules(std::move(std::map<int,PhosphorosUiDm::ParameterRule>(value))); // copy to anew object
+     m_set_list[key].setParameterRules(std::move(std::map<int,Euclid::PhosphorosUiDm::ParameterRule>(value))); // copy to anew object
 }
 
 void ModelSetModel::setValue(int row,int column, const QString& value){
@@ -51,7 +51,7 @@ void ModelSetModel::setValue(int row,int column, const QString& value){
 
 void ModelSetModel::loadSets(const std::string& path){
     m_root_path=path;
-     m_set_list=PhosphorosUiDm::ModelSet::loadModelSetsFromFolder(path);
+     m_set_list=Euclid::PhosphorosUiDm::ModelSet::loadModelSetsFromFolder(path);
 
      this->setColumnCount(3);
      this->setRowCount(m_set_list.size());
@@ -91,7 +91,7 @@ int ModelSetModel::newSet(int duplicate_from_row ){
 
 
 
-    PhosphorosUiDm::ModelSet set(m_root_path);
+    Euclid::PhosphorosUiDm::ModelSet set(m_root_path);
 
 
     if (duplicate_from_row>=0){

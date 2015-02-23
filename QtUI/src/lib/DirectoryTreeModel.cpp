@@ -11,11 +11,11 @@ DirectoryTreeModel::DirectoryTreeModel(QObject *parent) :
 }
 
 std::string DirectoryTreeModel::getRelPath(std::string path) const{
-    return FileUtils::removeStart(FileUtils::removeStart(path,m_root_dir),QString(QDir::separator()).toStdString());
+    return Euclid::PhosphorosUiDm::FileUtils::removeStart(Euclid::PhosphorosUiDm::FileUtils::removeStart(path,m_root_dir),QString(QDir::separator()).toStdString());
 }
 
 std::string DirectoryTreeModel::getFullPath(std::string path) const{
-    if (FileUtils::starts_with(path,m_root_dir)){
+    if (Euclid::PhosphorosUiDm::FileUtils::starts_with(path,m_root_dir)){
        return path;
     }
 

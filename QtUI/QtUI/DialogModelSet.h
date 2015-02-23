@@ -28,7 +28,7 @@ public:
      * @param init_parameter_rules
      * the map of ParameterRules to be displayed/modified
      */
-    void loadData(const std::map<int,PhosphorosUiDm::ParameterRule>& init_parameter_rules);
+    void loadData(const std::map<int,Euclid::PhosphorosUiDm::ParameterRule>& init_parameter_rules);
 
     /**
      * @brief When called, set the popup in read-only.
@@ -45,7 +45,7 @@ signals:
       * @brief SIGNAL popupClosing: rised when the the popup close.
       * The argument is the modifed map of ParameterRules.
       */
-     void popupClosing(std::map<int,PhosphorosUiDm::ParameterRule>);
+     void popupClosing(std::map<int,Euclid::PhosphorosUiDm::ParameterRule>);
 
 private slots:
      /**
@@ -92,9 +92,9 @@ private slots:
 
 private:
     Ui::DialogModelSet *ui;
-    bool m_insert;
-    bool m_view_popup;
-    bool m_singe_line;
+    bool m_insert=false;
+    bool m_view_popup=false;
+    bool m_singe_line=false;
 
     void turnControlsInEdition();
     void turnControlsInView();

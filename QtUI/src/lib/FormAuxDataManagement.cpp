@@ -7,6 +7,9 @@
 #include "QtUI/DialogCreatesSubGroup.h"
 #include "QtUI/FileUtils.h"
 
+
+using namespace Euclid;
+
 FormAuxDataManagement::FormAuxDataManagement(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::FormAuxDataManagement)
@@ -23,7 +26,7 @@ FormAuxDataManagement::~FormAuxDataManagement()
 void FormAuxDataManagement::loadManagementPage(int index){
 
     DirectoryTreeModel* treeModel_filter = new DirectoryTreeModel();
-    treeModel_filter->loadDirectory(FileUtils::getFilterRootPath(true),false, "Filters");
+    treeModel_filter->loadDirectory(PhosphorosUiDm::FileUtils::getFilterRootPath(true),false, "Filters");
     treeModel_filter->selectRoot();
     treeModel_filter->setEnabled(true);
 
@@ -34,7 +37,7 @@ void FormAuxDataManagement::loadManagementPage(int index){
                  SLOT(onItemChangedUniqueSelection(QStandardItem*)));
 
     DirectoryTreeModel* treeModel_Sed = new DirectoryTreeModel();
-    treeModel_Sed->loadDirectory(FileUtils::getSedRootPath(true),false, "SEDs");
+    treeModel_Sed->loadDirectory(PhosphorosUiDm::FileUtils::getSedRootPath(true),false, "SEDs");
     treeModel_Sed->selectRoot();
     treeModel_Sed->setEnabled(true);
     ui->treeView_ManageSed->setModel(treeModel_Sed);
@@ -44,7 +47,7 @@ void FormAuxDataManagement::loadManagementPage(int index){
                  SLOT(onItemChangedUniqueSelection(QStandardItem*)));
 
     DirectoryTreeModel* treeModel_Red = new DirectoryTreeModel();
-    treeModel_Red->loadDirectory(FileUtils::getRedCurveRootPath(true),false, "Reddening Curves");
+    treeModel_Red->loadDirectory(PhosphorosUiDm::FileUtils::getRedCurveRootPath(true),false, "Reddening Curves");
     treeModel_Red->selectRoot();
     treeModel_Red->setEnabled(true);
     ui->treeView_ManageRed->setModel(treeModel_Red);
@@ -72,7 +75,7 @@ void FormAuxDataManagement::on_btn_RedImport_clicked()
     DialogImportAuxData* popup= new DialogImportAuxData();
     popup->setData(title,group,model->getRelPath(group));
     if (popup->exec()){
-        loadManagementPage();
+        loadManagementPage(2);
     }
 }
 
@@ -83,7 +86,7 @@ void FormAuxDataManagement::on_btn_RedSubGroup_clicked()
   std::string group =  model->getGroup();
   popup->setParentFolder(group,model->getRelPath(group));
   if ( popup->exec()){
-      loadManagementPage();
+      loadManagementPage(2);
   }
 }
 
@@ -94,8 +97,8 @@ void FormAuxDataManagement::on_btn_RedDelete_clicked()
     if (QMessageBox::question( this, "Confirm deletion...",
                                   QString::fromStdString("Do you really want to delete the reddening curve(s) '"+model->getRelPath(selection)+"'?"),
                                   QMessageBox::Yes|QMessageBox::Cancel )==QMessageBox::Yes){
-        FileUtils::removeDir(QString::fromStdString(selection));
-        loadManagementPage();
+        Euclid::PhosphorosUiDm::FileUtils::removeDir(QString::fromStdString(selection));
+        loadManagementPage(2);
     }
 }
 
@@ -108,7 +111,7 @@ void FormAuxDataManagement::on_btn_SedImport_clicked()
     DialogImportAuxData* popup= new DialogImportAuxData();
     popup->setData(title,group,model->getRelPath(group));
     if (popup->exec()){
-        loadManagementPage();
+        loadManagementPage(1);
     }
 }
 
@@ -119,7 +122,7 @@ void FormAuxDataManagement::on_btn_SedSubGroup_clicked()
     std::string group =  model->getGroup();
     popup->setParentFolder(group,model->getRelPath(group));
     if ( popup->exec()){
-        loadManagementPage();
+        loadManagementPage(1);
     }
 }
 
@@ -130,8 +133,8 @@ void FormAuxDataManagement::on_btn_SedDelete_clicked()
    if (QMessageBox::question( this, "Confirm deletion...",
                                  QString::fromStdString("Do you really want to delete the SED(s) '"+model->getRelPath(selection)+"'?"),
                                  QMessageBox::Yes|QMessageBox::Cancel )==QMessageBox::Yes){
-       FileUtils::removeDir(QString::fromStdString(selection));
-       loadManagementPage();
+       Euclid::PhosphorosUiDm::FileUtils::removeDir(QString::fromStdString(selection));
+       loadManagementPage(1);
    }
 }
 
@@ -165,7 +168,7 @@ void FormAuxDataManagement::on_btn_FilterDelete_clicked()
    if (QMessageBox::question( this, "Confirm deletion...",
                                  QString::fromStdString("Do you really want to delete the Filter Transmission Curve(s) '"+model->getRelPath(selection)+"'?"),
                                  QMessageBox::Yes|QMessageBox::Cancel )==QMessageBox::Yes){
-       FileUtils::removeDir(QString::fromStdString(selection));
+       Euclid::PhosphorosUiDm::FileUtils::removeDir(QString::fromStdString(selection));
        loadManagementPage();
    }
 }

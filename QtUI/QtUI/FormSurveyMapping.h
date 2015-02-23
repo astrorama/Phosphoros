@@ -32,7 +32,7 @@ private slots:
 
     void filterSelectionChanged(QModelIndex, QModelIndex);
 
-    void filterEditionPopupClosing(PhosphorosUiDm::FilterMapping);
+    void filterEditionPopupClosing(Euclid::PhosphorosUiDm::FilterMapping);
 
     void on_btn_MapToHome_clicked();
 

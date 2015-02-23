@@ -6,6 +6,7 @@
 
 #include "QtUI/SurveyFilterMapping.h"
 
+namespace Euclid {
 namespace PhosphorosUiDm {
     SurveyFilterMapping::SurveyFilterMapping(){}
 
@@ -135,6 +136,5 @@ namespace PhosphorosUiDm {
          file.close();
      }
 
-
-
+}
 }

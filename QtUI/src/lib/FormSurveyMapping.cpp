@@ -22,7 +22,7 @@ FormSurveyMapping::~FormSurveyMapping()
 
 void FormSurveyMapping::loadMappingPage(){
     SurveyModel* model = new SurveyModel();
-    model->loadSurvey(FileUtils::getMappingRootPath(true));
+    model->loadSurvey(Euclid::PhosphorosUiDm::FileUtils::getMappingRootPath(true));
     ui->table_Map->setModel(model);
     ui->table_Map->setColumnHidden(3, true);
     ui->table_Map->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -174,7 +174,7 @@ void FormSurveyMapping::on_btn_MapCancel_clicked()
         if(index==0)
         ui->cb_SourceId->setItemText(0,QString::fromStdString(cb_text));
 
-        FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
+        FilterModel* filter_model = new FilterModel(Euclid::PhosphorosUiDm::FileUtils::getFilterRootPath(false));
 
         filter_model->setFilters(model->getFilters(row));
         ui->table_Filter->setModel(filter_model);
@@ -212,7 +212,7 @@ void FormSurveyMapping::on_btn_MapSave_clicked()
 
 void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QModelIndex){
 
-     FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
+     FilterModel* filter_model = new FilterModel(Euclid::PhosphorosUiDm::FileUtils::getFilterRootPath(false));
      if (new_index.isValid()){
          SurveyModel* model=static_cast<SurveyModel*>(ui->table_Map->model());
 
@@ -259,7 +259,7 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
 void FormSurveyMapping::on_btn_ImportColumn_clicked()
 {
     QFileDialog dialog(this);
-    dialog.selectFile(QString::fromStdString(FileUtils::getRootPath()));
+    dialog.selectFile(QString::fromStdString(Euclid::PhosphorosUiDm::FileUtils::getRootPath()));
     dialog.setFileMode(QFileDialog::ExistingFile);
     if (dialog.exec()){
         QStringList fileNames=dialog.selectedFiles();
@@ -277,12 +277,12 @@ void FormSurveyMapping::on_btn_AddFilter_clicked()
 {
      m_filterInsert=true;
     DialogFilterMapping* popUp= new DialogFilterMapping();
-    popUp->setFilter(PhosphorosUiDm::FilterMapping(),m_column_from_file);
+    popUp->setFilter(Euclid::PhosphorosUiDm::FilterMapping(),m_column_from_file);
 
     connect(
       popUp,
-      SIGNAL(popupClosing(PhosphorosUiDm::FilterMapping)),
-      SLOT(filterEditionPopupClosing(PhosphorosUiDm::FilterMapping))
+      SIGNAL(popupClosing(Euclid::PhosphorosUiDm::FilterMapping)),
+      SLOT(filterEditionPopupClosing(Euclid::PhosphorosUiDm::FilterMapping))
      );
 
     popUp->exec();
@@ -296,15 +296,15 @@ void FormSurveyMapping::on_btn_BtnEditFilter_clicked()
     popUp->setFilter(  static_cast<FilterModel*>(ui->table_Filter->model())->getFilter(ui->table_Filter->selectionModel()->currentIndex().row())
                        ,m_column_from_file);
     connect(
-      popUp,
-      SIGNAL(popupClosing(PhosphorosUiDm::FilterMapping)),
-      SLOT(filterEditionPopupClosing(PhosphorosUiDm::FilterMapping))
-     );
+         popUp,
+         SIGNAL(popupClosing(Euclid::PhosphorosUiDm::FilterMapping)),
+         SLOT(filterEditionPopupClosing(Euclid::PhosphorosUiDm::FilterMapping))
+        );
 
     popUp->exec();
 }
 
-void FormSurveyMapping::filterEditionPopupClosing(PhosphorosUiDm::FilterMapping filter){
+void FormSurveyMapping::filterEditionPopupClosing(Euclid::PhosphorosUiDm::FilterMapping filter){
     FilterModel* filter_model=static_cast<FilterModel*>(ui->table_Filter->model());
 
     if (m_filterInsert){

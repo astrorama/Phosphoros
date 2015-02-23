@@ -5,6 +5,10 @@
 /**
  * @brief The FileUtils class
  */
+
+namespace Euclid {
+namespace PhosphorosUiDm {
+
 class FileUtils
 {
 public:
@@ -129,4 +133,6 @@ public:
 
 };
 
+}
+}
 #endif // FILEUTILS_H

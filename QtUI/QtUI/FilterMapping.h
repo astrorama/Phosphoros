@@ -2,7 +2,7 @@
 #define FILTERMAPPING_H
 #include <string>
 
-
+namespace Euclid {
 namespace PhosphorosUiDm {
 /**
  * @class FilterMapping
@@ -73,5 +73,6 @@ private:
     std::string m_filter_trnsmission_file;
 };
 
+}
 }
 #endif // FILTERMAPPING_H

@@ -40,8 +40,8 @@ private slots:
 
 private:
     Ui::FormAnalysis *ui;
-    std::map<std::string,bool> getSelectedFilters();
-    std::map<int,PhosphorosUiDm::SurveyFilterMapping>  m_analysis_survey_list;
+    std::map<std::string,bool> getSelectedFilters(bool return_path=false);
+    std::map<int,Euclid::PhosphorosUiDm::SurveyFilterMapping>  m_analysis_survey_list;
 };
 
 #endif // FORMANALYSIS_H

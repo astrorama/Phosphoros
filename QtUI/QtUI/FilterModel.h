@@ -25,7 +25,7 @@ public:
      * @brief Initialise the FilterModel by setting its internal data
      * @param initFilterList list of FilterMapping which provide data to fill the model
      */
-    void setFilters(const std::list<PhosphorosUiDm::FilterMapping>& initFilterList);
+    void setFilters(const std::list<Euclid::PhosphorosUiDm::FilterMapping>& initFilterList);
 
     /**
      * @brief Replace the representation of the FilterMapping at the row 'row' by
@@ -33,25 +33,25 @@ public:
      * @param filter
      * @param row
      */
-    void setFilter(const PhosphorosUiDm::FilterMapping& filter, int row);
+    void setFilter(const Euclid::PhosphorosUiDm::FilterMapping& filter, int row);
 
     /**
      * @brief Build a list of FilterMapping out of its internal state
      * @return the list of FilterMapping handled by the model
      */
-    std::list<PhosphorosUiDm::FilterMapping> getFilters() const;
+    std::list<Euclid::PhosphorosUiDm::FilterMapping> getFilters() const;
 
     /** @brief  Build a FilterMapping out of data at the row 'row'
       * @param row
       * @return the FilterMapping represented by the row 'row'
       */
-    PhosphorosUiDm::FilterMapping getFilter(int row) const;
+    Euclid::PhosphorosUiDm::FilterMapping getFilter(int row) const;
 
     /**
      * @brief Add a new item to the model representing the provider 'filter'
      * @param filter
      */
-    void addFilter(const PhosphorosUiDm::FilterMapping& filter);
+    void addFilter(const Euclid::PhosphorosUiDm::FilterMapping& filter);
 
     /**
      * @brief Delete the filter at the row 'row'

@@ -4,6 +4,8 @@
 #include <string>
 #include <list>
 #include "Range.h"
+
+namespace Euclid {
 namespace PhosphorosUiDm {
 
 /**
@@ -113,5 +115,5 @@ private:
 };
 
 }
-
+}
 #endif // PARAMETERRULE_H

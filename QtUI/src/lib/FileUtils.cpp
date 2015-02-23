@@ -5,6 +5,9 @@
 #include <QSettings>
 #include "QtUI/FileUtils.h"
 
+namespace Euclid {
+namespace PhosphorosUiDm {
+
 FileUtils::FileUtils()
 {
 }
@@ -175,4 +178,7 @@ std::string FileUtils::getPhotCorrectionsRootPath(bool check)  {
         }
     }
     return info.absoluteFilePath().toStdString();
+}
+
+}
 }

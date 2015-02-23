@@ -5,6 +5,10 @@
 #include "QtUI/ParameterRule.h"
 #include "QtUI/FileUtils.h"
 
+#include "XYDataset/FileSystemProvider.h"
+#include "XYDataset/AsciiParser.h"
+
+namespace Euclid {
 namespace PhosphorosUiDm {
 
 
@@ -14,92 +18,34 @@ ParameterRule::ParameterRule()
 
 std::string ParameterRule::getSedRootObject(std::string rootPath) const{
 
-    std::string res = FileUtils::removeStart(m_sed_root_object,rootPath);
-
-    if (res.length()==0){
-        res="<Root>";
-    }
-    return res;
+   return FileUtils::removeStart(m_sed_root_object,rootPath);
 }
 
 std::string ParameterRule::getReddeningRootObject(std::string rootPath) const{
 
-    std::string res = FileUtils::removeStart(m_reddening_root_object,rootPath);
+    return FileUtils::removeStart(m_reddening_root_object,rootPath);
 
-    if (res.length()==0){
-        res="<Root>";
-    }
-    return res;
 }
 
 long long ParameterRule::getModelNumber() const{
 
 
-    long sed_factor = 0;
+    long sed_factor = 1;
+    std::unique_ptr < XYDataset::FileParser > file_parser {new XYDataset::AsciiParser { } };
+    XYDataset::FileSystemProvider provider { Euclid::PhosphorosUiDm::FileUtils::getSedRootPath(false), std::move(file_parser) };
+     auto unordered = provider.listContents(m_sed_root_object);
+     if (sed_factor<unordered.size()){
+       sed_factor=unordered.size();
+     }
+     sed_factor-=getExcludedSeds().size();
 
-    std::list<std::string> next_scan_folder{{getSedRootObject()}};
-
-    while (next_scan_folder.size()>0){
-        auto curr_dir = next_scan_folder.front();
-
-        QFileInfo info(QString::fromStdString(curr_dir));
-        if (info.isFile()){
-             ++sed_factor;
-            break;
-        }
-
-        QDir curr_qdir(QString::fromStdString(curr_dir));
-
-        QStringList fileNames = curr_qdir.entryList(QDir::Files | QDir::Dirs |  QDir::NoDotAndDotDot );
-        foreach (const QString &fileName, fileNames) {
-            QFileInfo curr_file(curr_qdir.absoluteFilePath(QString::fromStdString(curr_dir))+QDir::separator()+ fileName) ;
-            std::string full_name= curr_file.absoluteFilePath().toStdString();
-
-            if ( curr_file.isDir()==1 ){
-                next_scan_folder.push_back(full_name);
-            }
-            else {
-                ++sed_factor;
-            }
-        }
-
-        next_scan_folder.remove(curr_dir);
+    long red_factor = 1;
+    std::unique_ptr < XYDataset::FileParser >  red_file_parser {new XYDataset::AsciiParser { } };
+    XYDataset::FileSystemProvider red_provider { Euclid::PhosphorosUiDm::FileUtils::getRedCurveRootPath(false), std::move(red_file_parser) };
+    unordered = red_provider.listContents(m_reddening_root_object);
+    if (red_factor<unordered.size()){
+      red_factor=unordered.size();
     }
-
-    sed_factor-=getExcludedSeds().size();
-
-    long red_factor = 0;
-
-    next_scan_folder={{getReddeningRootObject()}};
-
-    while (next_scan_folder.size()>0){
-        auto curr_dir = next_scan_folder.front();
-
-        QFileInfo info(QString::fromStdString(curr_dir));
-        if (info.isFile()){
-             ++red_factor;
-            break;
-        }
-
-        QDir curr_qdir(QString::fromStdString(curr_dir));
-
-        QStringList fileNames = curr_qdir.entryList(QDir::Files | QDir::Dirs |  QDir::NoDotAndDotDot );
-        foreach (const QString &fileName, fileNames) {
-            QFileInfo curr_file(curr_qdir.absoluteFilePath(QString::fromStdString(curr_dir))+QDir::separator()+ fileName) ;
-            std::string full_name= curr_file.absoluteFilePath().toStdString();
-
-            if ( curr_file.isDir()==1 ){
-                next_scan_folder.push_back(full_name);
-            }
-            else {
-                ++red_factor;
-            }
-        }
-
-        next_scan_folder.remove(curr_dir);
-    }
-
-
     red_factor-=getExcludedReddenings().size();
 
     long long z_factor = 1;
@@ -152,5 +98,6 @@ void ParameterRule::setZRange(Range z_range){
     m_redshift_range=std::move(z_range);
 }
 
+}
 }
 

@@ -1,6 +1,6 @@
 #include "QtUI/FilterMapping.h"
 
-
+namespace Euclid {
 namespace PhosphorosUiDm {
 
 FilterMapping::FilterMapping(){}
@@ -37,4 +37,5 @@ void FilterMapping::setFilterFile(std::string filter_trnsmission_file){
     m_filter_trnsmission_file=filter_trnsmission_file;
 }
 
+}
 }

@@ -3,6 +3,7 @@
 
 #include <string>
 
+namespace Euclid {
 namespace PhosphorosUiDm {
 /**
  * @class Range
@@ -76,6 +77,7 @@ private:
     double m_step;
 };
 
+}
 }
 
 #endif // RANGE_H

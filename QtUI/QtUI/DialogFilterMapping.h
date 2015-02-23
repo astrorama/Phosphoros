@@ -27,14 +27,14 @@ public:
      * @param columns
      * A (possibly empty) list of columns to be used to prepopulate the column drop downs.
      */
-    void setFilter(const PhosphorosUiDm::FilterMapping& filter, const std::list<std::string>& columns);
+    void setFilter(const Euclid::PhosphorosUiDm::FilterMapping& filter, const std::list<std::string>& columns);
 
 signals:
     /**
      * @brief SIGNAL popupClosing: rised when the FilterMapping is saved and the popup close.
      * The argument is the modifed FilterMapping.
      */
-    void popupClosing(PhosphorosUiDm::FilterMapping);
+    void popupClosing(Euclid::PhosphorosUiDm::FilterMapping);
 
 
 private slots:

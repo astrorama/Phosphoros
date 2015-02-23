@@ -84,14 +84,14 @@ public:
      * @param row
      * @return the map of ParameterRules
      */
-    const std::map<int,PhosphorosUiDm::ParameterRule> getParameterRules(int row) const;
+    const std::map<int,Euclid::PhosphorosUiDm::ParameterRule> getParameterRules(int row) const;
 
     /**
      * @brief Set the map of ParameterRules to the ModelSet represented by the row 'row'.
      * @param row
      * @param value
      */
-    void setParameterRules(int row, const std::map<int,PhosphorosUiDm::ParameterRule>& value);
+    void setParameterRules(int row, const std::map<int,Euclid::PhosphorosUiDm::ParameterRule>& value);
 
     /**
      * @brief get the RootPath
@@ -104,7 +104,7 @@ private:
     const QString getNumber(int row) const;
     const QString getRef(int row) const;
     void setValue(int row, int column,const QString& value);
-    std::map<int,PhosphorosUiDm::ModelSet> m_set_list;
+    std::map<int,Euclid::PhosphorosUiDm::ModelSet> m_set_list;
     std::string m_root_path;
 
 

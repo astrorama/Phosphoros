@@ -3,6 +3,8 @@
 #include <list>
 #include <map>
 #include "FilterMapping.h"
+
+namespace Euclid {
 namespace PhosphorosUiDm {
 
 /**
@@ -124,6 +126,7 @@ private:
 
 };
 
+}
 }
 
 #endif // SURVEYFILTERMAPPING_H

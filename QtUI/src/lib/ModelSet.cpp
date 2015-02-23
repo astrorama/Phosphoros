@@ -6,7 +6,7 @@
 #include "QtUI/FileUtils.h"
 
 #include "QtUI/ModelSet.h"
-
+namespace Euclid {
 namespace PhosphorosUiDm {
 
 ModelSet::ModelSet(){}
@@ -196,5 +196,6 @@ void ModelSet::setParameterRules( std::map<int,ParameterRule> parameter_rules){
     m_parameter_rules=std::move(parameter_rules);
 }
 
+}
 }
 

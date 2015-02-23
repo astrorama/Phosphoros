@@ -4,6 +4,7 @@
 #include <iomanip>
 #include "QtUI/Range.h"
 
+namespace Euclid {
 namespace PhosphorosUiDm {
 
 
@@ -52,5 +53,6 @@ void Range::setStep(double step){
     m_step=step;
 }
 
+}
 }
 

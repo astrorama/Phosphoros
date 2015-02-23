@@ -4,6 +4,8 @@
 #include <string>
 #include <map>
 #include "ParameterRule.h"
+
+namespace Euclid {
 namespace PhosphorosUiDm {
 /**
  * @brief The ModelSet class
@@ -93,5 +95,5 @@ private:
 };
 
 }
-
+}
 #endif // MODELSET_H

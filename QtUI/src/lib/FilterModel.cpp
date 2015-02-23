@@ -5,7 +5,7 @@ FilterModel::FilterModel(std::string basePath):m_base_path(basePath)
 {
 }
 
-void FilterModel::setFilters(const std::list<PhosphorosUiDm::FilterMapping>& initFilterList){
+void FilterModel::setFilters(const std::list<Euclid::PhosphorosUiDm::FilterMapping>& initFilterList){
 
     this->setColumnCount(5);
     this->setRowCount(initFilterList.size());
@@ -19,8 +19,8 @@ void FilterModel::setFilters(const std::list<PhosphorosUiDm::FilterMapping>& ini
         this->setItem(i,1,new QStandardItem(QString::fromStdString(filter.getFluxColumn())));
         this->setItem(i,2,new QStandardItem(QString::fromStdString(filter.getErrorColumn())));
         std::string shortName = filter.getFilterFile();
-        if (FileUtils::starts_with(shortName,m_base_path)){
-            shortName=FileUtils::removeStart(shortName,m_base_path);
+        if (Euclid::PhosphorosUiDm::FileUtils::starts_with(shortName,m_base_path)){
+            shortName=Euclid::PhosphorosUiDm::FileUtils::removeStart(shortName,m_base_path);
         }
         this->setItem(i,3,new QStandardItem(QString::fromStdString(shortName)));
         this->setItem(i,4,new QStandardItem(QString::fromStdString(filter.getFilterFile())));
@@ -28,20 +28,20 @@ void FilterModel::setFilters(const std::list<PhosphorosUiDm::FilterMapping>& ini
     }
 }
 
-void FilterModel::setFilter(const PhosphorosUiDm::FilterMapping& filter, int row){
+void FilterModel::setFilter(const Euclid::PhosphorosUiDm::FilterMapping& filter, int row){
     item(row,0)->setText(QString::fromStdString(filter.getName()));
     item(row,1)->setText(QString::fromStdString(filter.getFluxColumn()));
     item(row,2)->setText(QString::fromStdString(filter.getErrorColumn()));
     std::string shortName = filter.getFilterFile();
-    if (FileUtils::starts_with(shortName,m_base_path)){
-        shortName=FileUtils::removeStart(shortName,m_base_path);
+    if (Euclid::PhosphorosUiDm::FileUtils::starts_with(shortName,m_base_path)){
+        shortName=Euclid::PhosphorosUiDm::FileUtils::removeStart(shortName,m_base_path);
     }
     item(row,3)->setText(QString::fromStdString(shortName));
     item(row,4)->setText(QString::fromStdString(filter.getFilterFile()));
 }
 
-std::list<PhosphorosUiDm::FilterMapping> FilterModel::getFilters() const{
-    std::list<PhosphorosUiDm::FilterMapping> list;
+std::list<Euclid::PhosphorosUiDm::FilterMapping> FilterModel::getFilters() const{
+    std::list<Euclid::PhosphorosUiDm::FilterMapping> list;
     for (int i=0; i<this->rowCount();++i){
         list.push_back(getFilter(i));
     }
@@ -49,8 +49,8 @@ std::list<PhosphorosUiDm::FilterMapping> FilterModel::getFilters() const{
     return list;
 }
 
-PhosphorosUiDm::FilterMapping FilterModel::getFilter(int row) const{
-    PhosphorosUiDm::FilterMapping filter;
+Euclid::PhosphorosUiDm::FilterMapping FilterModel::getFilter(int row) const{
+    Euclid::PhosphorosUiDm::FilterMapping filter;
     filter.setName(item(row,0)->text().toStdString());
     filter.setFluxColumn(item(row,1)->text().toStdString());
     filter.setErrorColumn(item(row,2)->text().toStdString());
@@ -59,14 +59,14 @@ PhosphorosUiDm::FilterMapping FilterModel::getFilter(int row) const{
 
 }
 
-void FilterModel::addFilter(const PhosphorosUiDm::FilterMapping& filter){
+void FilterModel::addFilter(const Euclid::PhosphorosUiDm::FilterMapping& filter){
     QList<QStandardItem*> items;
     items.push_back(new QStandardItem(QString::fromStdString(filter.getName())));
     items.push_back(new QStandardItem(QString::fromStdString(filter.getFluxColumn())));
     items.push_back(new QStandardItem(QString::fromStdString(filter.getErrorColumn())));
     std::string shortName = filter.getFilterFile();
-    if (FileUtils::starts_with(shortName,m_base_path)){
-        shortName=FileUtils::removeStart(shortName,m_base_path);
+    if (Euclid::PhosphorosUiDm::FileUtils::starts_with(shortName,m_base_path)){
+        shortName=Euclid::PhosphorosUiDm::FileUtils::removeStart(shortName,m_base_path);
     }
     items.push_back(new QStandardItem(QString::fromStdString(shortName)));
     items.push_back(new QStandardItem(QString::fromStdString(filter.getFilterFile())));

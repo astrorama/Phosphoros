@@ -41,7 +41,8 @@ SOURCES += src/program/Main.cpp\
     src/lib/FormAuxDataManagement.cpp \
     src/lib/FormSurveyMapping.cpp \
     src/lib/FormModelSet.cpp \
-    src/lib/FormAnalysis.cpp 
+    src/lib/FormAnalysis.cpp \ 
+    src/lib/PhotometricCorrectionHandler.cpp
 
 HEADERS  += QtUI/MainWindow.h \
     QtUI/ModelSetTable.h \
@@ -67,7 +68,8 @@ HEADERS  += QtUI/MainWindow.h \
     QtUI/FormAuxDataManagement.h \
     QtUI/FormSurveyMapping.h \
     QtUI/FormModelSet.h \
-    QtUI/FormAnalysis.h
+    QtUI/FormAnalysis.h \
+    QtUI/PhotometricCorrectionHandler.h
 
 FORMS    += auxdir/QtUI/MainWindow.ui \
     auxdir/QtUI/DialogModelSet.ui \

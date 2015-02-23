@@ -17,7 +17,7 @@ DialogPhotCorrectionEdition::~DialogPhotCorrectionEdition()
 
 
 void DialogPhotCorrectionEdition::setCorrectionsFile(std::string filePath){
-    m_file_path=FileUtils::getPhotCorrectionsRootPath(false) + QString(QDir::separator()).toStdString() + filePath;
+    m_file_path=Euclid::PhosphorosUiDm::FileUtils::getPhotCorrectionsRootPath(false) + QString(QDir::separator()).toStdString() + filePath;
     ui->txt_FileName->setText(QString::fromStdString(filePath));
 
     //TODO Open file and load grid

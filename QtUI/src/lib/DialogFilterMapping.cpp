@@ -1,12 +1,10 @@
 
 #include <QMessageBox>
 
-
-#include <QDir>
-#include <QSettings>
 #include "QtUI/DialogFilterMapping.h"
 #include "ui_DialogFilterMapping.h"
-#include "QtUI/DirectoryTreeModel.h"
+#include "QtUI/XYDataSetModel.h"
+#include "QtUI/FileUtils.h"
 
 DialogFilterMapping::DialogFilterMapping(QWidget *parent) :
     QDialog(parent),
@@ -21,7 +19,7 @@ DialogFilterMapping::~DialogFilterMapping()
 }
 
 
-void DialogFilterMapping::setFilter(const PhosphorosUiDm::FilterMapping& filter, const std::list<std::string>& columns){
+void DialogFilterMapping::setFilter(const Euclid::PhosphorosUiDm::FilterMapping& filter, const std::list<std::string>& columns){
     ui->cb_error->clear();
     ui->cb_error->addItem("");
     ui->cb_flux->clear();
@@ -40,15 +38,11 @@ void DialogFilterMapping::setFilter(const PhosphorosUiDm::FilterMapping& filter,
 
 
 
-    QSettings settings("SDC-CH", "PhosphorosUI");
-    QString path_filter =settings.value(QString::fromStdString("Gerneral/root-path")).toString()+QDir::separator()+ "Filter";
-    QFileInfo info_filter(path_filter);
-    if (!info_filter.exists()){
-        QDir().mkpath(path_filter);
-    }
 
-    DirectoryTreeModel* treeModel_filter = new DirectoryTreeModel();
-    treeModel_filter->loadDirectory(path_filter.toStdString(),true,"Filters");
+    std::string path_filter = Euclid::PhosphorosUiDm::FileUtils::getFilterRootPath(true);
+
+    XYDataSetModel* treeModel_filter = new XYDataSetModel();
+    treeModel_filter->loadDirectory(path_filter,true,"Filters");
     treeModel_filter->setEnabled(true);
     ui->treeView_filter->setModel(treeModel_filter);
     ui->treeView_filter->expandAll();
@@ -62,7 +56,7 @@ void DialogFilterMapping::setFilter(const PhosphorosUiDm::FilterMapping& filter,
 
 void DialogFilterMapping::on_btn_save_clicked()
 {
-    auto filter_res = static_cast<DirectoryTreeModel*>(ui->treeView_filter->model())->getRootSelection();
+    auto filter_res = static_cast<XYDataSetModel*>(ui->treeView_filter->model())->getRootSelection();
 
     if (!filter_res.first
             || ui->txt_name->text().trimmed().length()==0
@@ -76,7 +70,7 @@ void DialogFilterMapping::on_btn_save_clicked()
         return;
     }
 
-   PhosphorosUiDm::FilterMapping filter;
+   Euclid::PhosphorosUiDm::FilterMapping filter;
    filter.setName(ui->txt_name->text().trimmed().toStdString());
    filter.setFluxColumn(ui->cb_flux->currentText().trimmed().toStdString());
    filter.setErrorColumn(ui->cb_error->currentText().trimmed().toStdString());

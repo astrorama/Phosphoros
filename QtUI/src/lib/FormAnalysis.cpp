@@ -5,6 +5,8 @@
 #include "QtUI/DialogPhotometricCorrectionComputation.h"
 #include "QtUI/FileUtils.h"
 #include "QtUI/ModelSet.h"
+#include "QtUI/PhotometricCorrectionHandler.h"
+#include "QtUI/SurveyFilterMapping.h"
 
 FormAnalysis::FormAnalysis(QWidget *parent) :
     QWidget(parent),
@@ -19,14 +21,14 @@ FormAnalysis::~FormAnalysis()
 }
 
 void FormAnalysis::loadAnalysisPage(){
-   m_analysis_survey_list = PhosphorosUiDm::SurveyFilterMapping::loadSurveysFromFolder(FileUtils::getMappingRootPath(false));
+   m_analysis_survey_list =  Euclid::PhosphorosUiDm::SurveyFilterMapping::loadSurveysFromFolder(Euclid::PhosphorosUiDm::FileUtils::getMappingRootPath(false));
 
    ui->cb_AnalysisSurvey->clear();
    for(auto& survey:m_analysis_survey_list){
        ui->cb_AnalysisSurvey->addItem(QString::fromStdString(survey.second.getName()));
    }
 
-    auto models = PhosphorosUiDm::ModelSet::loadModelSetsFromFolder(FileUtils::getModelRootPath(false));
+    auto models = Euclid::PhosphorosUiDm::ModelSet::loadModelSetsFromFolder(Euclid::PhosphorosUiDm::FileUtils::getModelRootPath(false));
     ui->cb_AnalysisModel->clear();
     for(auto& model:models){
         ui->cb_AnalysisModel->addItem(QString::fromStdString(model.second.getName()));
@@ -37,13 +39,14 @@ void FormAnalysis::loadAnalysisPage(){
 }
 
 
-std::map<std::string,bool> FormAnalysis::getSelectedFilters(){
+std::map<std::string,bool> FormAnalysis::getSelectedFilters(bool return_path){
     std::map<std::string,bool> res;
-    auto model = static_cast<QStandardItemModel*>(ui->listView_filter->model());
+    auto model = static_cast<QStandardItemModel*>(ui->tableView_filter->model());
     for (int i=0; i<model->rowCount();++i ){
         auto item = model->item(i);
         bool checked = item->checkState()==Qt::CheckState::Checked;
-        res[item->text().toStdString()]=checked;
+
+        res[model->item(i,return_path)->text().toStdString()]=checked;
     }
 
     return res;
@@ -72,7 +75,7 @@ void FormAnalysis::on_cb_AnalysisCorrection_currentIndexChanged(const QString &s
 void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(const QString &selectedName)
 {
 
-    PhosphorosUiDm::SurveyFilterMapping selected_survey;
+    Euclid::PhosphorosUiDm::SurveyFilterMapping selected_survey;
 
     for(auto&survey:m_analysis_survey_list){
         if (survey.second.getName().compare(selectedName.toStdString())==0){
@@ -88,11 +91,14 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(const QString &selec
         QStandardItem* item = new QStandardItem(QString::fromStdString(filter.getName()));
         item->setCheckable(true);
         item->setCheckState(Qt::CheckState::Checked);
-        QList<QStandardItem*> items{{item}};
+        QStandardItem* file_item = new QStandardItem(QString::fromStdString(filter.getFilterFile()));
+
+        QList<QStandardItem*> items{{item,file_item}};
         grid_model->appendRow(items);
     }
 
-    ui->listView_filter->setModel(grid_model);
+    ui->tableView_filter->setModel(grid_model);
+   // ui->tableView_filter->setColumnHidden(1, true);
     connect( grid_model, SIGNAL(itemChanged(QStandardItem*)),
                  SLOT(onFilterSelectionItemChanged(QStandardItem*)));
 }
@@ -102,6 +108,14 @@ void FormAnalysis::onFilterSelectionItemChanged(QStandardItem* affectedItem){
     // TODO change the GRID and the corrections fie
     affectedItem->checkState();
     affectedItem->text();
+
+    auto filter_map = getSelectedFilters(true);
+    auto file_list = Euclid::PhosphorosUiDm::PhotometricCorrectionHandler::getCompatibleCorrectionFiles(filter_map);
+    ui->cb_AnalysisCorrection->clear();
+
+    for (auto file : file_list){
+        ui->cb_AnalysisCorrection->addItem(QString::fromStdString(file));
+    }
 }
 
 void FormAnalysis::on_btn_computeCorrections_clicked()
@@ -113,3 +127,5 @@ void FormAnalysis::on_btn_computeCorrections_clicked()
                    getSelectedFilters());
     popup->exec();
 }
+
+
