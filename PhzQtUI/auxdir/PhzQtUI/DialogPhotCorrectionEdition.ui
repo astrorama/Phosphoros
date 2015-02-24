@@ -115,7 +115,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="btn_Save">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -132,8 +132,20 @@
       <bool>false</bool>
      </property>
      <property name="toolTip">
-      <string>Edits corrections into the grid</string>
+      <string>Edit corrections directly into the grid (double-click for starting edition)</string>
      </property>
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <attribute name="horizontalHeaderStretchLastSection">
+      <bool>true</bool>
+     </attribute>
+     <attribute name="verticalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
+     <attribute name="verticalHeaderHighlightSections">
+      <bool>false</bool>
+     </attribute>
     </widget>
    </item>
    <item>

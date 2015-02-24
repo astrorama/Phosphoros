@@ -3,6 +3,7 @@ elements_subdir(PhzQtUI)
 
 elements_depends_on_subdirs(XYDataset)
 elements_depends_on_subdirs(PhzDataModel)
+elements_depends_on_subdirs(PhzUITools)
 
 find_package(Qt4 REQUIRED QtCore QtGui QtXml)
 
@@ -22,11 +23,11 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 
 
 elements_add_library(PhzQtUI ${PhUI_SRCS} ${PhUI_HEADERS_MOC} ${PhUI_FORMS_HEADERS} ${PhUI_RESOURCES_RCC}
-                     LINK_LIBRARIES ElementsKernel ${QT_LIBRARIES} XYDataset PhzDataModel
-                     INCLUDE_DIRS ElementsKernel XYDataset PhzDataModel
+                     LINK_LIBRARIES ElementsKernel ${QT_LIBRARIES} XYDataset PhzDataModel PhzUITools
+                     INCLUDE_DIRS ElementsKernel XYDataset PhzDataModel PhzUITools
                      PUBLIC_HEADERS PhzQtUI)
 
 elements_add_executable(PhosphorosUI src/program/Main.cpp
-                        LINK_LIBRARIES PhzQtUI XYDataset PhzDataModel)
+                        LINK_LIBRARIES PhzQtUI XYDataset PhzDataModel PhzUITools)
 
 

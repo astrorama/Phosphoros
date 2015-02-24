@@ -4,16 +4,52 @@
 #include <string>
 #include <list>
 #include <map>
+#include "PhzDataModel/PhotometricCorrectionMap.h"
 
 namespace Euclid {
 namespace PhosphorosUiDm {
 
+/**
+ * @brief The PhotometricCorrectionHandler class
+ */
 class PhotometricCorrectionHandler
 {
 public:
-    PhotometricCorrectionHandler();
 
+  /**
+   *  @brief Scan the Photometric Corrections files and returns the list of those
+   * having the right filters.
+   *
+   * @param selected_filters
+   * A map containing the filter of the Survey and a flag indicating if they are
+   * selected. Only the selected filters will be taken into account.
+   *
+   * @return the list of file name corresponding to Corrections files with the
+   *  same filters as those seleted.
+   */
    static std::list<std::string> getCompatibleCorrectionFiles(std::map<std::string,bool> selected_filters);
+
+  /**
+   * @brief read the PhotometricCorrections out of the file which name is provided.
+   *
+   * @param file
+   * the name of the file (relative to the PhotometricCorrections folder)
+   *
+   * @return the Photometric Corrections as a map where the keys are the filters
+   * and the values the correction.
+   */
+   static PhzDataModel::PhotometricCorrectionMap getCorrections(std::string file);
+
+  /**
+   * @brief write the PhotometricCorrections onto the file which name is provided.
+   *
+   * @param map
+   * the PhotometricCorrectionMap
+   *
+   * @param file
+   * the name of the file (relative to the PhotometricCorrections folder)
+   */
+   static void writeCorrections(PhzDataModel::PhotometricCorrectionMap map, std::string file);
 };
 
 }

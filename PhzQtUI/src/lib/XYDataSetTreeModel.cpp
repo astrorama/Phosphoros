@@ -322,3 +322,33 @@ std::list<std::string> XYDataSetTreeModel::XYDataSetTreeModel::getExclusions(
 
   return list;
 }
+
+
+
+std::list<std::string> XYDataSetTreeModel::getSelectedLeaf( std::string root) const{
+  std::list < std::string > list;
+
+  auto root_item = item(0);
+    if (root.compare(".") != 0 && root.compare(item(0)->text().toStdString()) != 0
+        && root.compare(m_root_dir) != 0) {
+      root = getFullPath(root);
+      if (m_map_dir.count(root)) {
+        root_item = m_map_dir.at(root);
+      } else {
+        return list;
+      }
+    }
+
+    for (int i = 0; i < root_item->rowCount(); ++i) {
+      auto child = root_item->child(i);
+      if (child->hasChildren()) {
+        list.merge(getExclusions(child->text().toStdString()));
+      } else if (child->checkState() == Qt::CheckState::Checked) {
+        list.push_back(child->text().toStdString());
+      }
+    }
+
+    return list;
+}
+
+

@@ -57,9 +57,16 @@ public:
     /**
      * @brief get all the leaves which are not checked under a given 'root'
      * @param root
-     * @return
+     * @return the list of unchecked leaf
      */
     std::list<std::string> getExclusions(std::string root) const;
+
+    /**
+     * @brief get all the leaves which are checked under a given 'root'
+     * @param root
+     * @return the list of checked list
+     */
+    std::list<std::string> getSelectedLeaf( std::string root) const;
 
     /**
      * @brief get the current element if it represent a folder or the parent element if the current is a file.
@@ -80,6 +87,7 @@ public:
      * @return the absolute path
      */
     std::string getFullPath(std::string path) const;
+
 
 public slots:
       /**

@@ -7,6 +7,7 @@
 #include "PhzQtUI/ModelSet.h"
 #include "PhzQtUI/PhotometricCorrectionHandler.h"
 #include "PhzQtUI/SurveyFilterMapping.h"
+#include "PhzQtUI/PhzGridInfoHandler.h"
 
 FormAnalysis::FormAnalysis(QWidget *parent) :
     QWidget(parent),
@@ -28,9 +29,9 @@ void FormAnalysis::loadAnalysisPage(){
        ui->cb_AnalysisSurvey->addItem(QString::fromStdString(survey.second.getName()));
    }
 
-    auto models = Euclid::PhosphorosUiDm::ModelSet::loadModelSetsFromFolder(Euclid::PhosphorosUiDm::FileUtils::getModelRootPath(false));
+    m_analysis_model_list = Euclid::PhosphorosUiDm::ModelSet::loadModelSetsFromFolder(Euclid::PhosphorosUiDm::FileUtils::getModelRootPath(false));
     ui->cb_AnalysisModel->clear();
-    for(auto& model:models){
+    for(auto& model:m_analysis_model_list){
         ui->cb_AnalysisModel->addItem(QString::fromStdString(model.second.getName()));
     }
 
@@ -103,9 +104,23 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(const QString &selec
                  SLOT(onFilterSelectionItemChanged(QStandardItem*)));
 }
 
+void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(const QString &selectedName)
+{
+     Euclid::PhosphorosUiDm::ModelSet selected_model;
+
+     for(auto&model:m_analysis_model_list){
+         if (model.second.getName().compare(selectedName.toStdString())==0){
+           selected_model=model.second;
+             break;
+         }
+     }
+
+     auto axis = Euclid::PhosphorosUiDm::PhzGridInfoHandler::getAxesTuple(selected_model);
+}
+
 
 void FormAnalysis::onFilterSelectionItemChanged(QStandardItem* affectedItem){
-    // TODO change the GRID and the corrections fie
+    // TODO change the GRID and the corrections file
     affectedItem->checkState();
     affectedItem->text();
 
@@ -118,14 +133,16 @@ void FormAnalysis::onFilterSelectionItemChanged(QStandardItem* affectedItem){
     }
 }
 
+
 void FormAnalysis::on_btn_computeCorrections_clicked()
 {
     DialogPhotometricCorrectionComputation* popup = new DialogPhotometricCorrectionComputation();
     popup->setData(ui->cb_AnalysisSurvey->currentText().toStdString(),
                    ui->cb_AnalysisModel->currentText().toStdString(),
-                   ui->txt_CompatibleGrid->text().toStdString(),
+                   ui->cb_CompatibleGrid->currentText().toStdString(),
                    getSelectedFilters());
     popup->exec();
 }
+
 
 

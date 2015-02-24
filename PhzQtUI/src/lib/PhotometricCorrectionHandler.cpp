@@ -15,9 +15,6 @@
 namespace Euclid {
 namespace PhosphorosUiDm {
 
-
-PhotometricCorrectionHandler::PhotometricCorrectionHandler(){}
-
 std::list<std::string> PhotometricCorrectionHandler::getCompatibleCorrectionFiles(std::map<std::string,bool> selected_filters){
       std::string folder = FileUtils::getPhotCorrectionsRootPath(true);
       std::list<std::string> requiered_filters;
@@ -55,6 +52,22 @@ std::list<std::string> PhotometricCorrectionHandler::getCompatibleCorrectionFile
       return file_list;
 }
 
+PhzDataModel::PhotometricCorrectionMap PhotometricCorrectionHandler::getCorrections(std::string file){
+  std::string folder = FileUtils::getPhotCorrectionsRootPath(true);
+  QFileInfo file_info(QString::fromStdString(folder)+ QDir::separator()+QString::fromStdString(file) );
+  std::ifstream in {file_info.absoluteFilePath().toStdString() };
+  return PhzDataModel::readPhotometricCorrectionMap(in);
+}
+
+
+
+void PhotometricCorrectionHandler::writeCorrections(PhzDataModel::PhotometricCorrectionMap map, std::string file){
+  std::string folder = FileUtils::getPhotCorrectionsRootPath(true);
+   QFileInfo file_info(QString::fromStdString(folder)+ QDir::separator()+QString::fromStdString(file) );
+   std::ofstream out {file_info.absoluteFilePath().toStdString() };
+   PhzDataModel::writePhotometricCorrectionMap(out,map);
+   out.close();
+}
 
 }
 }

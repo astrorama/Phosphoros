@@ -212,26 +212,26 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="txt_CompatibleGrid">
-         <property name="enabled">
-          <bool>false</bool>
+        <widget class="QComboBox" name="cb_CompatibleGrid">
+         <property name="editable">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
       </layout>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_27">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_18">
