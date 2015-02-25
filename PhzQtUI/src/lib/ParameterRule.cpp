@@ -50,12 +50,12 @@ long long ParameterRule::getModelNumber() const{
 
     long long z_factor = 1;
     if (m_redshift_range.getStep()>0 && m_redshift_range.getMax()>m_redshift_range.getMin()){
-        z_factor=(m_redshift_range.getMax()-m_redshift_range.getMin())/m_redshift_range.getStep();
+        z_factor=(m_redshift_range.getMax()-m_redshift_range.getMin())/m_redshift_range.getStep()+1;
     }
 
     long long ebv_factor = 1;
     if (m_ebv_range.getStep()>0 && m_ebv_range.getMax()>m_ebv_range.getMin()){
-        ebv_factor=(m_ebv_range.getMax()-m_ebv_range.getMin())/m_ebv_range.getStep();
+        ebv_factor=(m_ebv_range.getMax()-m_ebv_range.getMin())/m_ebv_range.getStep()+1;
     }
 
     return sed_factor*red_factor*ebv_factor*z_factor;

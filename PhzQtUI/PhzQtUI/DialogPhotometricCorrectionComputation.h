@@ -2,7 +2,7 @@
 #define DIALOGPHOTOMETRICCORRECTIONCOMPUTATION_H
 
 #include <QDialog>
-#include <map>
+#include <list>
 
 namespace Ui {
 class DialogPhotometricCorrectionComputation;
@@ -15,7 +15,7 @@ class DialogPhotometricCorrectionComputation : public QDialog
 public:
     explicit DialogPhotometricCorrectionComputation(QWidget *parent = 0);
     ~DialogPhotometricCorrectionComputation();
-    void setData(std::string survey, std::string model, std::string grid, std::map<std::string,bool> selectedFilters );
+    void setData(std::string survey, std::string model, std::string grid, std::list<std::string> selectedFilters );
 
 private slots:
     void on_btn_TrainingCatalogFolder_clicked();

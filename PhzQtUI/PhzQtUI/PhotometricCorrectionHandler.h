@@ -27,7 +27,7 @@ public:
    * @return the list of file name corresponding to Corrections files with the
    *  same filters as those seleted.
    */
-   static std::list<std::string> getCompatibleCorrectionFiles(std::map<std::string,bool> selected_filters);
+   static std::list<std::string> getCompatibleCorrectionFiles(std::list<std::string> selected_filters);
 
   /**
    * @brief read the PhotometricCorrections out of the file which name is provided.

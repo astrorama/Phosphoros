@@ -98,6 +98,13 @@ bool FileUtils::starts_with(const std::string  & value, const std::string  & beg
 
 }
 
+std::string FileUtils::addExt(const std::string& name, const std::string& ext){
+  if (FileUtils::ends_with(name,ext)){
+           return name;
+   }
+   return name+ext;
+}
+
 
 std::string FileUtils::removeStart(const std::string& name, const std::string& start){
     if (FileUtils::starts_with(name,start)){
@@ -180,5 +187,16 @@ std::string FileUtils::getPhotCorrectionsRootPath(bool check)  {
     return info.absoluteFilePath().toStdString();
 }
 
+
+std::string FileUtils::getPhotmetricGridRootPath(bool check) {
+  QString path = QString::fromStdString(FileUtils::getRootPath())+QDir::separator()+"PhotometricGrid";
+  QFileInfo info(path);
+  if (check){
+      if (!info.exists()){
+          QDir().mkpath(path);
+      }
+  }
+  return info.absoluteFilePath().toStdString();
+}
 }
 }

@@ -296,7 +296,7 @@ std::string XYDataSetTreeModel::getGroup() const {
   }
 }
 
-std::list<std::string> XYDataSetTreeModel::XYDataSetTreeModel::getExclusions(
+std::list<std::string> XYDataSetTreeModel::getExclusions(
     std::string root) const {
   std::list < std::string > list;
 
@@ -342,7 +342,7 @@ std::list<std::string> XYDataSetTreeModel::getSelectedLeaf( std::string root) co
     for (int i = 0; i < root_item->rowCount(); ++i) {
       auto child = root_item->child(i);
       if (child->hasChildren()) {
-        list.merge(getExclusions(child->text().toStdString()));
+        list.merge(getSelectedLeaf(child->text().toStdString()));
       } else if (child->checkState() == Qt::CheckState::Checked) {
         list.push_back(child->text().toStdString());
       }

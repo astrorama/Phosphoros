@@ -15,37 +15,36 @@
 namespace Euclid {
 namespace PhosphorosUiDm {
 
-std::list<std::string> PhotometricCorrectionHandler::getCompatibleCorrectionFiles(std::map<std::string,bool> selected_filters){
+std::list<std::string> PhotometricCorrectionHandler::getCompatibleCorrectionFiles(std::list<std::string> selected_filters){
       std::string folder = FileUtils::getPhotCorrectionsRootPath(true);
       std::list<std::string> requiered_filters;
 
-      for(auto& filter_pair: selected_filters){
-
-        if (filter_pair.second){
-          requiered_filters.push_back(FileUtils::removeStart(FileUtils::removeStart(filter_pair.first,folder),QString(QDir::separator()).toStdString()));
-        }
+      for(auto& filter: selected_filters){
+          requiered_filters.push_back(FileUtils::removeStart(FileUtils::removeStart(filter,folder),QString(QDir::separator()).toStdString()));
       }
 
       std::list<std::string> file_list;
       QDir dir(QString::fromStdString(folder));
       Q_FOREACH(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::Files)) {
           if (!info.isDir()) {
-            std::ifstream in {info.absoluteFilePath().toStdString() };
-            auto result = PhzDataModel::readPhotometricCorrectionMap(in);
+            try{ // If a file cannot be opened or is ill formated: just skip it!
+              std::ifstream in {info.absoluteFilePath().toStdString() };
+              auto result = PhzDataModel::readPhotometricCorrectionMap(in);
 
-            if (result.size()==requiered_filters.size()){
-              bool match=true;
-                for(auto& name : requiered_filters){
-                  if (result.count(name)==0){
-                    match=false;
+              if (result.size()==requiered_filters.size()){
+                bool match=true;
+                  for(auto& name : requiered_filters){
+                    if (result.count(name)==0){
+                      match=false;
+                    }
                   }
-                }
 
-               if (match){
-                 file_list.push_back(info.fileName().toStdString());
-               }
+                 if (match){
+                   file_list.push_back(info.fileName().toStdString());
+                 }
 
-            }
+              }
+            } catch(...){}
           }
       }
 

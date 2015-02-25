@@ -56,6 +56,15 @@ public:
     static std::string removeExt(const std::string& name, const std::string& ext);
 
     /**
+     * @brief Add at the end of a given string the provided ending if not already present.
+     * @param name
+     * @param ext
+     * @return the 'name' with the 'ext' added if it was not present,
+     * otherwise the unalterated 'name'.
+     */
+    static std::string addExt(const std::string& name, const std::string& ext);
+
+    /**
      * @brief Check if a string starts with a given sub-string,
      * used to detect if a given path is part of a parent path.
      * @param value
@@ -130,6 +139,14 @@ public:
      * @return <rootPath>/PhotometricCorrections
      */
     static std::string getPhotCorrectionsRootPath(bool check);
+
+    /**
+     * @brief get the Photometric Grid RootPath
+     * @param check
+     * if true ensure that the folder exist.
+     * @return <rootPath>/PhotometricGrid
+     */
+    static std::string getPhotmetricGridRootPath(bool check);
 
 };
 
