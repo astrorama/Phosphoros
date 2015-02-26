@@ -54,9 +54,12 @@ private slots:
 
     void on_gb_corrections_clicked();
 
+    void onCorrectionComputed(const std::string &);
+
 private:
     Ui::FormAnalysis *ui;
     std::list<std::string> getSelectedFilters(bool return_path=false);
+    std::list<Euclid::PhosphorosUiDm::FilterMapping> getSelectedFilterMapping();
 
     void enableDisablePage(bool enabled);
     void adjustPhzGridButtons(bool enabled);
@@ -66,6 +69,10 @@ private:
     std::map<std::string, po::variable_value> getGridConfiguration();
 
     void updateGridProgressBar(size_t step, size_t total);
+
+
+    void updateCorrectionSelection();
+    void setComputeCorrectionEnable();
 
     void setRunAnnalysisEnable();
     std::map<int,Euclid::PhosphorosUiDm::SurveyFilterMapping>  m_analysis_survey_list;

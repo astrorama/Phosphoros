@@ -96,6 +96,5 @@ void DialogImportAuxData::on_btn_import_clicked()
         QFileInfo dest_info(dest_folder);
         Euclid::PhosphorosUiDm::FileUtils::copyRecursively(info.absoluteFilePath(),dest_info.absoluteFilePath());
     }
-    //TODO Copy files
     accept();
 }

@@ -97,10 +97,10 @@ void FormAnalysis::updateGridSelection() {
           getSelectedFilters(true));
 
   ui->cb_CompatibleGrid->clear();
-  ui->cb_CompatibleGrid->addItem("<Enter a new name>");
   for (auto& file : possible_files) {
     ui->cb_CompatibleGrid->addItem(QString::fromStdString(file));
   }
+  ui->cb_CompatibleGrid->addItem("<Enter a new name>");
 }
 
 void FormAnalysis::adjustPhzGridButtons(bool enabled){
@@ -113,8 +113,26 @@ void FormAnalysis::updateGridProgressBar(size_t step, size_t total) {
   int value = (step * 100) / total;
   ui->progress_Grid->setValue(value);
   if(value==100){
+    setComputeCorrectionEnable();
     setRunAnnalysisEnable();
   }
+}
+
+void FormAnalysis::updateCorrectionSelection(){
+  auto filter_map = getSelectedFilters(true);
+   auto file_list =
+       Euclid::PhosphorosUiDm::PhotometricCorrectionHandler::getCompatibleCorrectionFiles(
+           filter_map);
+   ui->cb_AnalysisCorrection->clear();
+
+   for (auto file : file_list) {
+     ui->cb_AnalysisCorrection->addItem(QString::fromStdString(file));
+   }
+}
+
+void FormAnalysis::setComputeCorrectionEnable(){
+  bool name_exists = checkGridSelection(true, false);
+    ui->btn_computeCorrections->setEnabled(name_exists && ui->gb_corrections->isChecked () );
 }
 
 void FormAnalysis::setRunAnnalysisEnable() {
@@ -149,10 +167,28 @@ std::list<std::string> FormAnalysis::getSelectedFilters(bool return_path) {
   return res;
 }
 
-//  - Slot on this page
-void FormAnalysis::on_btn_AnalysisToHome_clicked() {
-  navigateToHome();
+
+std::list<Euclid::PhosphorosUiDm::FilterMapping> FormAnalysis::getSelectedFilterMapping(){
+  auto filterNames=getSelectedFilters(false);
+  std::list<Euclid::PhosphorosUiDm::FilterMapping>  list;
+
+
+  for(auto& survey: m_analysis_survey_list){
+    if (survey.second.getName().compare(ui->cb_AnalysisSurvey->currentText().toStdString())==0){
+      for (auto& name : filterNames){
+        for (auto& filter : survey.second.getFilters()){
+          if(filter.getName().compare(name)){
+            list.push_back(filter);
+          }
+        }
+      }
+    }
+  }
+
+  return list;
 }
+
+
 
 bool FormAnalysis::checkGridSelection(bool addFileCheck, bool acceptNewFile) {
   std::string file_name = ui->cb_CompatibleGrid->currentText().toStdString();
@@ -176,6 +212,7 @@ bool FormAnalysis::checkGridSelection(bool addFileCheck, bool acceptNewFile) {
 std::map<std::string, po::variable_value> FormAnalysis::getGridConfiguration(){
   std::string file_name = Euclid::PhosphorosUiDm::FileUtils::addExt(
                ui->cb_CompatibleGrid->currentText().toStdString(), ".dat");
+  ui->cb_CompatibleGrid->setItemText(ui->cb_CompatibleGrid->currentIndex (), QString::fromStdString(file_name));
   Euclid::PhosphorosUiDm::ModelSet selected_model;
 
      for (auto&model : m_analysis_model_list) {
@@ -195,6 +232,9 @@ std::map<std::string, po::variable_value> FormAnalysis::getGridConfiguration(){
 
 //////////////////////////////////////////////////
 // User interaction
+void FormAnalysis::on_btn_AnalysisToHome_clicked() {
+  navigateToHome();
+}
 //  1. Survey and Model
 void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     const QString &selectedName) {
@@ -228,6 +268,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
       SLOT(onFilterSelectionItemChanged(QStandardItem*)));
 
   updateGridSelection();
+  updateCorrectionSelection();
 }
 
 void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(const QString &) {
@@ -235,15 +276,7 @@ void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(const QString &) {
 }
 
 void FormAnalysis::onFilterSelectionItemChanged(QStandardItem*) {
-  auto filter_map = getSelectedFilters(true);
-  auto file_list =
-      Euclid::PhosphorosUiDm::PhotometricCorrectionHandler::getCompatibleCorrectionFiles(
-          filter_map);
-  ui->cb_AnalysisCorrection->clear();
-
-  for (auto file : file_list) {
-    ui->cb_AnalysisCorrection->addItem(QString::fromStdString(file));
-  }
+  updateCorrectionSelection();
 
   updateGridSelection();
 }
@@ -253,6 +286,8 @@ void FormAnalysis::on_cb_CompatibleGrid_textChanged(const QString &) {
   bool name_ok = checkGridSelection(false, true);
   ui->btn_GetConfigGrid->setEnabled(name_ok);
   ui->btn_RunGrid->setEnabled(name_ok);
+
+  setComputeCorrectionEnable();
   setRunAnnalysisEnable();
 }
 
@@ -305,6 +340,7 @@ void FormAnalysis::on_btn_RunGrid_clicked() {
 void FormAnalysis::on_gb_corrections_clicked()
 {
     setRunAnnalysisEnable();
+    setComputeCorrectionEnable();
 }
 
 void FormAnalysis::on_cb_AnalysisCorrection_currentIndexChanged(
@@ -321,13 +357,32 @@ void FormAnalysis::on_btn_editCorrections_clicked() {
 }
 
 void FormAnalysis::on_btn_computeCorrections_clicked() {
+  auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+  std::string id_column;
+
+  for (auto& survey_pair: m_analysis_survey_list){
+    if (survey_pair.second.getName().compare(survey_name)==0){
+      id_column= survey_pair.second.getSourceIdColumn();
+      break;
+    }
+  }
+
   DialogPhotometricCorrectionComputation* popup =
       new DialogPhotometricCorrectionComputation();
-  popup->setData(ui->cb_AnalysisSurvey->currentText().toStdString(),
+  popup->setData(survey_name,id_column,
       ui->cb_AnalysisModel->currentText().toStdString(),
-      ui->cb_CompatibleGrid->currentText().toStdString(), getSelectedFilters());
+      ui->cb_CompatibleGrid->currentText().toStdString(), getSelectedFilterMapping());
+
+  connect( popup, SIGNAL(correctionComputed(const std::string &)),
+      SLOT(onCorrectionComputed(const std::string &)));
   popup->exec();
-  // TODO
+
+}
+
+
+void FormAnalysis::onCorrectionComputed(const std::string & new_file_name){
+  updateCorrectionSelection();
+  ui->cb_AnalysisCorrection->setCurrentIndex(ui->cb_AnalysisCorrection->findText(QString::fromStdString(new_file_name)));
 }
 
 // 4. Run

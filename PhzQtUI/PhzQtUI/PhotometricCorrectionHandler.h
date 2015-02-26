@@ -4,7 +4,11 @@
 #include <string>
 #include <list>
 #include <map>
+#include <boost/program_options.hpp>
 #include "PhzDataModel/PhotometricCorrectionMap.h"
+
+
+namespace po = boost::program_options;
 
 namespace Euclid {
 namespace PhosphorosUiDm {
@@ -50,6 +54,19 @@ public:
    * the name of the file (relative to the PhotometricCorrections folder)
    */
    static void writeCorrections(PhzDataModel::PhotometricCorrectionMap map, std::string file);
+
+   static std::map<std::string, po::variable_value> GetConfigurationMap(
+     std::string output_file_name,
+     int iteration_number,
+     double tolerance,
+     std::string method,
+     std::string photometric_grid_file,
+     std::string training_catalog_file,
+     std::string id_column,
+     std::string z_column,
+     std::vector<std::string> filter_mappings
+   );
+
 };
 
 }

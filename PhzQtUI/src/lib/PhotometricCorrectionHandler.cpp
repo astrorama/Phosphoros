@@ -2,6 +2,7 @@
 #include "PhzQtUI/FileUtils.h"
 
 #include <fstream>
+#include <vector>
 
 #include <QDir>
 #include <QFileInfo>
@@ -58,14 +59,47 @@ PhzDataModel::PhotometricCorrectionMap PhotometricCorrectionHandler::getCorrecti
   return PhzDataModel::readPhotometricCorrectionMap(in);
 }
 
-
-
 void PhotometricCorrectionHandler::writeCorrections(PhzDataModel::PhotometricCorrectionMap map, std::string file){
   std::string folder = FileUtils::getPhotCorrectionsRootPath(true);
    QFileInfo file_info(QString::fromStdString(folder)+ QDir::separator()+QString::fromStdString(file) );
    std::ofstream out {file_info.absoluteFilePath().toStdString() };
    PhzDataModel::writePhotometricCorrectionMap(out,map);
    out.close();
+}
+
+std::map<std::string, po::variable_value> PhotometricCorrectionHandler::GetConfigurationMap(
+    std::string output_file_name,
+    int iteration_number,
+    double tolerance,
+    std::string method,
+    std::string photometric_grid_file,
+    std::string training_catalog_file,
+    std::string id_column,
+    std::string z_column,
+    std::vector<std::string> filter_mappings)
+  {
+    std::map < std::string, po::variable_value > options_map;
+
+    auto path_filename = FileUtils::getPhotCorrectionsRootPath(true)
+        + QString(QDir::separator()).toStdString() + output_file_name;
+    options_map["output-phot-corr-file"].value() = boost::any(path_filename);
+    options_map["phot-corr-iter-no"].value() = boost::any(iteration_number);
+    options_map["phot-corr-tolerance"].value() = boost::any(tolerance);
+    options_map["phot-corr-selection-method"].value() = boost::any(method);
+
+
+    auto path_grid_filename = FileUtils::getPhotmetricGridRootPath(false)
+           + QString(QDir::separator()).toStdString() + photometric_grid_file;
+    options_map["photometry-grid-file"].value() = boost::any(path_grid_filename);
+
+    options_map["input-catalog-file"].value() = boost::any(training_catalog_file);
+    options_map["source-id-column-name"].value() = boost::any(id_column);
+    options_map["spec-z-column-name"].value() = boost::any(z_column);
+
+    options_map["filter-name-mapping"].value() = boost::any(filter_mappings);
+
+    return options_map;
+
 }
 
 }

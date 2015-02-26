@@ -47,6 +47,7 @@ void DialogPhotCorrectionEdition::on_btn_Edit_clicked()
     ui->btn_Edit->setEnabled(false);
     ui->btn_Cancel->setEnabled(true);
     ui->btn_Save->setEnabled(true);
+    ui->buttonBox->setEnabled(false);
     ui->tableView->setEnabled(true);
 }
 
@@ -55,6 +56,7 @@ void DialogPhotCorrectionEdition::on_btn_Cancel_clicked()
     ui->btn_Edit->setEnabled(true);
     ui->btn_Cancel->setEnabled(false);
     ui->btn_Save->setEnabled(false);
+    ui->buttonBox->setEnabled(true);
     ui->tableView->setEnabled(false);
 
     setCorrectionsFile(m_file_path);

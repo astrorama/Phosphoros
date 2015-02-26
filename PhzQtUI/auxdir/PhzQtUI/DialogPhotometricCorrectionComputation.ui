@@ -182,12 +182,16 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QComboBox" name="cb_TrainingCatalog"/>
+      <widget class="QLineEdit" name="txt_catalog">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_TrainingCatalogFolder">
+      <widget class="QPushButton" name="btn_TrainingCatalog">
        <property name="text">
-        <string>Change Folder</string>
+        <string>Browse</string>
        </property>
       </widget>
      </item>
@@ -251,7 +255,11 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="txt_Iteration"/>
+        <widget class="QLineEdit" name="txt_Iteration">
+         <property name="text">
+          <string>100</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
@@ -265,7 +273,11 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="txt_Tolerence"/>
+        <widget class="QLineEdit" name="txt_Tolerence">
+         <property name="text">
+          <string>1E-4</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
@@ -282,7 +294,7 @@
         <widget class="QComboBox" name="cb_SelectionMethod">
          <item>
           <property name="text">
-           <string>WEIGHTED MEDIAN</string>
+           <string>WEIGHTED_MEDIAN</string>
           </property>
          </item>
          <item>
@@ -292,7 +304,7 @@
          </item>
          <item>
           <property name="text">
-           <string>WEIGHTED MEAN</string>
+           <string>WEIGHTED_MEAN</string>
           </property>
          </item>
          <item>
@@ -350,14 +362,7 @@
      <item>
       <widget class="QLineEdit" name="txt_FileName">
        <property name="enabled">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_OutputFileName">
-       <property name="text">
-        <string>Browse</string>
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -395,6 +400,9 @@
       <layout class="QVBoxLayout" name="verticalLayout_7">
        <item>
         <widget class="QPushButton" name="bt_Run">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Run  and  Close</string>
          </property>

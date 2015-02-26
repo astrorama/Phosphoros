@@ -7,6 +7,8 @@
 #include "PhzQtUI/DialogFilterMapping.h"
 #include "PhzQtUI/FileUtils.h"
 
+#include "PhzUITools/CatalogColumnReader.h"
+
 FormSurveyMapping::FormSurveyMapping(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::FormSurveyMapping)
@@ -93,18 +95,13 @@ void FormSurveyMapping::setFilterMappingInView(){
 
 void FormSurveyMapping::loadColumnFromFile(std::string path){
 
-        m_column_from_file.clear();
-        // TODO replace by meaningfull code
-        m_column_from_file.push_back("column 1");
-        m_column_from_file.push_back("column 2");
-        m_column_from_file.push_back("column 3");
-        //
-
-        ui->cb_SourceId->clear();
-        ui->cb_SourceId->addItem("");
-        for(auto item : m_column_from_file){
-            ui->cb_SourceId->addItem(QString::fromStdString(item));
-        }
+  auto column_reader = Euclid::PhzUITools::CatalogColumnReader(path);
+  m_column_from_file=column_reader.getColumnNames();
+  ui->cb_SourceId->clear();
+  ui->cb_SourceId->addItem("");
+  for(auto item : m_column_from_file){
+     ui->cb_SourceId->addItem(QString::fromStdString(item));
+  }
 }
 
 
