@@ -41,6 +41,9 @@ public:
    *    A map with the photometric corrections to be applied for each filter
    * @param phot_grid
    *    A grid with the photometries of the models to perform the fitting with
+   * @param marginalization_func
+   *    The function to use for marginalizing the multi-dimensional likelihood
+   *    grid to a 1D PDF
    * @throws ElementsException
    *    If the phot_corr_map does not contain photometric corrections for all
    *    the filters of the model photometries

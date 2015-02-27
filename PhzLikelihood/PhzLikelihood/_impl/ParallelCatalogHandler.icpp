@@ -1,0 +1,114 @@
+/** 
+ * @file ParallelCatalogHandler.icpp
+ * @date February 27, 2015
+ * @author Nikolaos Apostolakos
+ */
+
+#include <vector>
+#include <atomic>
+#include <future>
+#include <thread>
+#include <chrono>
+#include "ElementsKernel/Logging.h"
+
+namespace Euclid {
+namespace PhzLikelihood {
+
+// This is a helper class which is keeping the results for a single source
+struct ResultType {
+  ResultType(const SourceCatalog::Source& source,
+             const PhzDataModel::PhotometryGrid::const_iterator best_match,
+             PhzDataModel::Pdf1D pdf)
+        : source(source), best_match(best_match), pdf(std::move(pdf)) { }
+  const SourceCatalog::Source& source;
+  const PhzDataModel::PhotometryGrid::const_iterator best_match;
+  PhzDataModel::Pdf1D pdf;
+};
+
+// This is a helper class which handles the execution of a part of the catalog.
+template <typename SourceIter>
+class ParallelJob {
+  
+public:
+  
+  ParallelJob(const CatalogHandler& handler, SourceIter begin,
+              SourceIter end, std::atomic<size_t>& progress)
+        : handler(handler), begin(begin), end(end), m_progress(progress) { }
+
+  std::vector<ResultType> operator()() {
+    std::vector<ResultType> result;
+    Output output {result, m_progress};
+    handler.handleSources(begin, end, output);
+    return result;
+  }
+  
+private:
+  
+  class Output : public PhzOutput::OutputHandler {
+  public :
+    Output(std::vector<ResultType>& result_vector, std::atomic<size_t>& progress) : m_result_vector(result_vector), m_progress(progress) {}
+    void handleSourceOutput(const SourceCatalog::Source& source,
+                            PhzDataModel::PhotometryGrid::const_iterator best_model,
+                            const PhzDataModel::Pdf1D& pdf) override {
+      // We need to make a copy of the pdf because the results will be handled
+      // by a different thread when the refered object will be already deleted
+      PhzDataModel::Pdf1D pdf_copy {pdf.getAxis<0>()};
+      for (size_t i=0; i<pdf.size(); ++i) {
+        pdf_copy(i) = pdf(i);
+      }
+      m_result_vector.push_back(ResultType{source, best_model, std::move(pdf_copy)});
+      ++m_progress;
+    }
+  private:
+    std::vector<ResultType>& m_result_vector;  
+    std::atomic<size_t>& m_progress;
+  };
+  
+  const PhzLikelihood::CatalogHandler& handler;
+  SourceIter begin;
+  SourceIter end;
+  std::atomic<size_t>& m_progress;
+
+};
+
+template<typename SourceIter>
+void ParallelCatalogHandler::handleSources(SourceIter source_begin, SourceIter source_end,
+                                           PhzOutput::OutputHandler& out_handler,
+                                           ProgressListener progress_listener) const {
+  auto logger = Elements::Logging::getLogger("ParallelCatalogHandler");
+  std::vector<std::future<std::vector<ResultType>>> futures;
+    
+  std::atomic<size_t> progress {0};
+  size_t total_sources = source_end - source_begin;
+  logger.info() << "Processing " << total_sources << " sources";
+  uint threads = std::thread::hardware_concurrency();
+  logger.info() << "Using " << threads << " threads";
+  uint step = total_sources / threads;
+  
+  for (uint i=0; i< threads; ++i) {
+    auto begin = source_begin + i*step;
+    auto end = ((i+1) == threads) ? source_end : source_begin + (i+1)*step;
+    logger.info() << "Starting thread " << (i+1) << " for sources ["
+                  << begin->getId() << ',' << (end-1)->getId() << ']';
+    futures.push_back(std::async(std::launch::async, ParallelJob<SourceIter>{m_catalog_handler, begin, end, progress}));
+  }
+  
+  if (progress_listener) {
+    progress_listener(0, total_sources);
+    while (progress < total_sources) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      progress_listener(progress, total_sources);
+    }
+    progress_listener(total_sources, total_sources);
+  }
+  
+  logger.info() << "Thread jobs finished. Handling output...";
+  for (auto& f : futures) {
+    for (auto& result : f.get()) {
+      out_handler.handleSourceOutput(result.source, result.best_match, result.pdf);
+    }
+  }
+}
+
+}
+}
