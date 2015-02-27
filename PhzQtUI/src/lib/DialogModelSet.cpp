@@ -59,11 +59,19 @@ DialogModelSet::~DialogModelSet()
 
 void DialogModelSet::loadData(const std::map<int,Euclid::PhosphorosUiDm::ParameterRule>& init_parameter_rules){
     ui->tableView_ParameterRule->loadParameterRules(init_parameter_rules, Euclid::PhosphorosUiDm::FileUtils::getSedRootPath(false), Euclid::PhosphorosUiDm::FileUtils::getRedCurveRootPath(false));
+
+
     connect(
       ui->tableView_ParameterRule->selectionModel(),
       SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
       SLOT(selectionChanged(QModelIndex, QModelIndex))
      );
+
+    if (ui->tableView_ParameterRule->model()->rowCount()>0){
+      ui->tableView_ParameterRule->selectRow(0);
+    }
+
+
     turnControlsInView();
 }
 
@@ -126,7 +134,6 @@ void DialogModelSet::turnControlsInView(){
     ui->txt_zMax->setEnabled(false);
     ui->txt_zStep->setEnabled(false);
 
-
     ui->tableView_ParameterRule->setEnabled(true);
 }
 
@@ -185,11 +192,6 @@ void DialogModelSet::on_btn_cancel_clicked()
         ui->txt_zMin->setText(QString::number(selected_rule.getZRange().getMin()));
         ui->txt_zMax->setText(QString::number(selected_rule.getZRange().getMax()));
         ui->txt_zStep->setText(QString::number(selected_rule.getZRange().getStep()));
-
-
-
-
-
     }
     turnControlsInView();
 }

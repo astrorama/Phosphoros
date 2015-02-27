@@ -13,12 +13,24 @@
 
 namespace Euclid {
 namespace PhzUITools {
-
-class CatalogColumnReader{
+/**
+ *  @brief The CatalogColumnReader class
+ */
+class CatalogColumnReader {
 
 public:
+  /**
+   * @brief Initialize a CatalogColumnReader with an absolute file name.
+   *
+   * @param file_name the absolute file path of the catalog.
+   */
   CatalogColumnReader(std::string file_name);
 
+  /**
+   * @brief opens and reads the columns name in the file.
+   *
+   * @return the list of the column names.
+   */
   std::list<std::string> getColumnNames();
 
 private:

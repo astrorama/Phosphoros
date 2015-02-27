@@ -55,6 +55,9 @@ public:
    */
    static void writeCorrections(PhzDataModel::PhotometricCorrectionMap map, std::string file);
 
+   /**
+    * Get the photometric corrections computation executable configuration map
+    */
    static std::map<std::string, po::variable_value> GetConfigurationMap(
      std::string output_file_name,
      int iteration_number,

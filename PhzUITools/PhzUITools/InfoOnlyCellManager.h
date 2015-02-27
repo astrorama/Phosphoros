@@ -69,18 +69,3 @@ void serialize(Archive& ar, MyContainer& t, const unsigned int version) {
 
 }
 }
-
-//int main() {
-//  std::ifstream in {"/tmp/CreatePhotometryGrid/photometry_grid.dat"};
-//  auto grid = Euclid::PhzDataModel::phzGridBinaryImport<InfoOnlyCellManager>(in);
-//  std::cout << grid.size() << '\n';
-//  auto& sed_axis = grid.getAxis<Euclid::PhzDataModel::ModelParameter::SED>();
-//  std::cout << sed_axis.name() << '\n';
-//  for (auto& sed : sed_axis) {
-//    std::cout << sed.qualifiedName() << '\n';
-//  }
-//  std::cout << "\nFilters:\n";
-//  for (auto& f : *grid.begin()) {
-//    std::cout << f << "\n";
-//  }
-//}

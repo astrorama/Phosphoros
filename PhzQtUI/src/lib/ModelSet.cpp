@@ -26,9 +26,11 @@ std::map<int,ModelSet> ModelSet::loadModelSetsFromFolder(std::string root_path){
     QStringList fileNames = root_dir.entryList(QDir::Files |  QDir::NoDotAndDotDot );
     int count=0;
     foreach (const QString &fileName, fileNames) {
+      try{
         auto set = PhosphorosUiDm::ModelSet::loadModelSetFromFile(fileName.toStdString(),root_path);
         map[count]=set;
         ++count;
+      } catch(...){} //if a file do not open correctly: just skip it...
     }
 
     return map;

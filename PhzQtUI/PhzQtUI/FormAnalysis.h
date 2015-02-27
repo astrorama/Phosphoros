@@ -56,11 +56,22 @@ private slots:
 
     void onCorrectionComputed(const std::string &);
 
+    void on_btn_BrowseInput_clicked();
+
+    void on_btn_BrowseOutput_clicked();
+
+    void on_btn_GetConfigAnalysis_clicked();
+
+    void on_btn_RunAnalysis_clicked();
+
+    void on_btn_BrowseOutputPdf_clicked();
+
 private:
     Ui::FormAnalysis *ui;
     std::list<std::string> getSelectedFilters(bool return_path=false);
     std::list<Euclid::PhosphorosUiDm::FilterMapping> getSelectedFilterMapping();
 
+    std::string getSelectedSurveySourceColumn();
     void enableDisablePage(bool enabled);
     void adjustPhzGridButtons(bool enabled);
 
@@ -74,7 +85,9 @@ private:
     void updateCorrectionSelection();
     void setComputeCorrectionEnable();
 
-    void setRunAnnalysisEnable();
+    void setRunAnnalysisEnable(bool enabled);
+    std::map < std::string, po::variable_value > getRunOptionMap();
+    void updateAnalysisProgressBar(size_t step, size_t total);
     std::map<int,Euclid::PhosphorosUiDm::SurveyFilterMapping>  m_analysis_survey_list;
     std::map<int,Euclid::PhosphorosUiDm::ModelSet> m_analysis_model_list;
 

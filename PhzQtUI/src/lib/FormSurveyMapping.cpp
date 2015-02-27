@@ -41,6 +41,10 @@ void FormSurveyMapping::loadMappingPage(){
       SLOT(filterMappingSelectionChanged(QModelIndex, QModelIndex))
      );
 
+    ui->table_Map->clearSelection() ;
+    FilterModel* filter_model = new FilterModel(Euclid::PhosphorosUiDm::FileUtils::getFilterRootPath(false));
+    ui->table_Filter->setModel(filter_model);
+
     setFilterMappingInView();
 }
 

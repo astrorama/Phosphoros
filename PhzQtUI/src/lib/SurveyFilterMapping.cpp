@@ -56,9 +56,11 @@ namespace PhosphorosUiDm {
         QStringList fileNames = root_dir.entryList(QDir::Files |  QDir::NoDotAndDotDot );
         int count=0;
         foreach (const QString &fileName, fileNames) {
+          try{
             auto survey = PhosphorosUiDm::SurveyFilterMapping::loadSurveyFromFile(fileName.toStdString(),root_path);
             map[count]=survey;
             ++count;
+          } catch (...){} //if a file do not open correctly: just skip it...
         }
 
         return map;

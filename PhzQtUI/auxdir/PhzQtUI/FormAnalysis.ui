@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1086</width>
-    <height>741</height>
+    <width>1153</width>
+    <height>908</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -432,6 +432,44 @@
     </widget>
    </item>
    <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Type of marginalization :</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QComboBox" name="cb_marginalization">
+       <item>
+        <property name="text">
+         <string>SUM</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>MAX</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_21">
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_19">
@@ -445,7 +483,11 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_23">
          <item>
-          <widget class="QLineEdit" name="txt_inputCatalog"/>
+          <widget class="QLineEdit" name="txt_inputCatalog">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="btn_BrowseInput">
@@ -463,17 +505,39 @@
        <item>
         <widget class="QLabel" name="label_27">
          <property name="text">
-          <string>Output Catalog name :</string>
+          <string>Output Catalog name / Output pdf file name :</string>
          </property>
         </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_24">
          <item>
-          <widget class="QLineEdit" name="txt_OutputCatalog"/>
+          <widget class="QLineEdit" name="txt_OutputCatalog">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="btn_BrowseOutput">
+           <property name="text">
+            <string>Browse</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_26">
+         <item>
+          <widget class="QLineEdit" name="txt_OutputPdf">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_BrowseOutputPdf">
            <property name="text">
             <string>Browse</string>
            </property>

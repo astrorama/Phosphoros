@@ -27,6 +27,8 @@ void FormModelSet::loadSetPage(){
       SLOT(setSelectionChanged(QModelIndex, QModelIndex))
      );
 
+    ui->tableView_Set->clearSelection();
+    ui->tableView_ParameterRule->loadParameterRules(std::map<int,Euclid::PhosphorosUiDm::ParameterRule>{},"","");
     setModelInView();
 }
 

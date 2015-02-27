@@ -138,9 +138,6 @@ void DialogPhotometricCorrectionComputation::on_txt_Tolerence_textChanged(
   setRunEnability();
 }
 
-void DialogPhotometricCorrectionComputation::on_btn_OutputFileName_clicked() {
-  setRunEnability();
-}
 
 void DialogPhotometricCorrectionComputation::on_txt_FileName_textChanged(
     const QString &) {
@@ -148,73 +145,78 @@ void DialogPhotometricCorrectionComputation::on_txt_FileName_textChanged(
 }
 
 void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
-  std::string output_file_name=Euclid::PhosphorosUiDm::FileUtils::addExt(ui->txt_FileName->text().toStdString(),".txt");
-  ui->txt_FileName->setText(QString::fromStdString(output_file_name));
+  try{
+    std::string output_file_name=Euclid::PhosphorosUiDm::FileUtils::addExt(ui->txt_FileName->text().toStdString(),".txt");
+    ui->txt_FileName->setText(QString::fromStdString(output_file_name));
 
-  std::vector<std::string> filter_mapping;
-  for (auto& filter : m_selected_filters){
-    filter_mapping.push_back(filter.getFilterFile()+" "+filter.getFluxColumn()+" "+filter.getErrorColumn());
+    std::vector<std::string> filter_mapping;
+    for (auto& filter : m_selected_filters){
+      filter_mapping.push_back(filter.getFilterFile()+" "+filter.getFluxColumn()+" "+filter.getErrorColumn());
+    }
+
+    int max_iter_number=ui->txt_Iteration->text().toInt();
+
+    auto config_map =Euclid::PhosphorosUiDm::PhotometricCorrectionHandler::GetConfigurationMap(
+        output_file_name,
+        max_iter_number,
+        ui->txt_Tolerence->text().toDouble(),
+        ui->cb_SelectionMethod->currentText().toStdString(),
+        ui->txt_grid->text().toStdString(),
+        ui->txt_catalog->text().toStdString(),
+        m_id_column,
+        ui->cb_SpectroColumn->currentText().toStdString(),
+        filter_mapping
+      );
+
+
+    auto path_filename = Euclid::PhosphorosUiDm::FileUtils::getPhotCorrectionsRootPath(true)
+        + QString(QDir::separator()).toStdString() + output_file_name;
+
+    if (QFileInfo(QString::fromStdString(path_filename)).exists() && QMessageBox::question(this, "Override existing file...",
+              "A File with the very same name as the one you provided already exist. Do you want to replace it?",
+              QMessageBox::Yes|QMessageBox::No)==QMessageBox::No){
+                return;
+    }
+
+    ui->btn_TrainingCatalog->setEnabled(false);
+    ui->cb_SpectroColumn->setEnabled(false);
+    ui->txt_Iteration->setEnabled(false);
+    ui->txt_Tolerence->setEnabled(false);
+    ui->cb_SelectionMethod->setEnabled(false);
+    ui->txt_FileName->setEnabled(false);
+    ui->bt_Run->setEnabled(false);
+    ui->buttonBox->setEnabled(false);
+
+    Euclid::PhzConfiguration::CalculatePhotometricCorrectionConfiguration conf {config_map};
+    auto catalog = conf.getCatalog();
+    auto model_phot_grid = conf.getPhotometryGrid();
+    auto output_func = conf.getOutputFunction();
+    auto stop_criteria = conf.getStopCriteria();
+
+    Euclid::PhzPhotometricCorrection::FindBestFitModels<Euclid::PhzLikelihood::SourcePhzFunctor> find_best_fit_models {};
+    Euclid::PhzPhotometricCorrection::CalculateScaleFactorMap calculate_scale_factor_map {};
+    Euclid::PhzPhotometricCorrection::PhotometricCorrectionAlgorithm phot_corr_algorighm {};
+    auto selector = conf.getPhotometricCorrectionSelector();
+
+    Euclid::PhzPhotometricCorrection::PhotometricCorrectionCalculator calculator {find_best_fit_models,
+                                   calculate_scale_factor_map, phot_corr_algorighm};
+
+
+
+    auto progress_logger = [this,max_iter_number](size_t iter_no, const Euclid::PhzDataModel::PhotometricCorrectionMap& ) {
+      int value = (iter_no*100.)/max_iter_number;
+      ui->progressBar->setValue(value);
+      };
+    auto phot_corr_map = calculator(catalog, model_phot_grid, stop_criteria, selector, progress_logger);
+    output_func(phot_corr_map);
+    correctionComputed(output_file_name);
+    accept();
   }
-
-  int max_iter_number=ui->txt_Iteration->text().toInt();
-
-  auto config_map =Euclid::PhosphorosUiDm::PhotometricCorrectionHandler::GetConfigurationMap(
-      output_file_name,
-      max_iter_number,
-      ui->txt_Tolerence->text().toDouble(),
-      ui->cb_SelectionMethod->currentText().toStdString(),
-      ui->txt_grid->text().toStdString(),
-      ui->txt_catalog->text().toStdString(),
-      m_id_column,
-      ui->cb_SpectroColumn->currentText().toStdString(),
-      filter_mapping
-    );
-
-
-  auto path_filename = Euclid::PhosphorosUiDm::FileUtils::getPhotCorrectionsRootPath(true)
-      + QString(QDir::separator()).toStdString() + output_file_name;
-
-  if (QFileInfo(QString::fromStdString(path_filename)).exists() && QMessageBox::question(this, "Override existing file...",
-            "A File with the very same name as the one you provided already exist. Do you want to replace it?",
-            QMessageBox::Yes|QMessageBox::No)==QMessageBox::No){
-              return;
+  catch (...){
+    QMessageBox::warning(this, "Error in the computation...",
+                  "Sorry, nn error occured during the computation.",
+                  QMessageBox::Close);
   }
-
-  ui->btn_TrainingCatalog->setEnabled(false);
-  ui->cb_SpectroColumn->setEnabled(false);
-  ui->txt_Iteration->setEnabled(false);
-  ui->txt_Tolerence->setEnabled(false);
-  ui->cb_SelectionMethod->setEnabled(false);
-  ui->txt_FileName->setEnabled(false);
-  ui->bt_Run->setEnabled(false);
-  ui->buttonBox->setEnabled(false);
-
-  Euclid::PhzConfiguration::CalculatePhotometricCorrectionConfiguration conf {config_map};
-     auto catalog = conf.getCatalog();
-     auto model_phot_grid = conf.getPhotometryGrid();
-     auto output_func = conf.getOutputFunction();
-     auto stop_criteria = conf.getStopCriteria();
-
-     Euclid::PhzPhotometricCorrection::FindBestFitModels<Euclid::PhzLikelihood::SourcePhzFunctor> find_best_fit_models {};
-     Euclid::PhzPhotometricCorrection::CalculateScaleFactorMap calculate_scale_factor_map {};
-     Euclid::PhzPhotometricCorrection::PhotometricCorrectionAlgorithm phot_corr_algorighm {};
-     auto selector = conf.getPhotometricCorrectionSelector();
-
-     Euclid::PhzPhotometricCorrection::PhotometricCorrectionCalculator calculator {find_best_fit_models,
-                                 calculate_scale_factor_map, phot_corr_algorighm};
-
-
-
-     auto progress_logger = [this,max_iter_number](size_t iter_no, const Euclid::PhzDataModel::PhotometricCorrectionMap& ) {
-         int value = (iter_no*100.)/max_iter_number;
-         ui->progressBar->setValue(value);
-     };
-     auto phot_corr_map = calculator(catalog, model_phot_grid, stop_criteria, selector, progress_logger);
-     output_func(phot_corr_map);
-
-
-     correctionComputed(output_file_name);
-     accept();
 
 
 

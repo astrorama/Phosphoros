@@ -142,10 +142,13 @@
        <item>
         <widget class="QListView" name="listView_Filter">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="toolTip">
           <string/>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
          </property>
         </widget>
        </item>
