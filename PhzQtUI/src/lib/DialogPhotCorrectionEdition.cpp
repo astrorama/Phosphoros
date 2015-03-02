@@ -7,6 +7,11 @@
 #include "PhzQtUI/FileUtils.h"
 #include "PhzQtUI/PhotometricCorrectionHandler.h"
 
+using namespace std;
+
+namespace Euclid {
+namespace PhzQtUI {
+
 DialogPhotCorrectionEdition::DialogPhotCorrectionEdition(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogPhotCorrectionEdition)
@@ -20,10 +25,10 @@ DialogPhotCorrectionEdition::~DialogPhotCorrectionEdition()
 }
 
 
-void DialogPhotCorrectionEdition::setCorrectionsFile(std::string filePath){
+void DialogPhotCorrectionEdition::setCorrectionsFile(string filePath){
     m_file_path=filePath;
     ui->txt_FileName->setText(QString::fromStdString(filePath));
-    m_map = Euclid::PhosphorosUiDm::PhotometricCorrectionHandler::getCorrections(filePath);
+    m_map = PhotometricCorrectionHandler::getCorrections(filePath);
 
     QStandardItemModel* model = new QStandardItemModel();
     model->setColumnCount(m_map.size());
@@ -85,7 +90,7 @@ void DialogPhotCorrectionEdition::on_btn_Save_clicked()
         ++i;
       }
 
-      Euclid::PhosphorosUiDm::PhotometricCorrectionHandler::writeCorrections(m_map,m_file_path);
+      PhotometricCorrectionHandler::writeCorrections(m_map,m_file_path);
         ui->btn_Edit->setEnabled(true);
         ui->btn_Cancel->setEnabled(false);
         ui->btn_Save->setEnabled(false);
@@ -93,7 +98,8 @@ void DialogPhotCorrectionEdition::on_btn_Save_clicked()
     }
 }
 
-
+}
+}
 
 
 

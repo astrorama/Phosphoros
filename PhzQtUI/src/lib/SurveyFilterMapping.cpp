@@ -7,7 +7,7 @@
 #include "PhzQtUI/SurveyFilterMapping.h"
 
 namespace Euclid {
-namespace PhosphorosUiDm {
+namespace PhzQtUI {
     SurveyFilterMapping::SurveyFilterMapping(){}
 
     SurveyFilterMapping::SurveyFilterMapping(std::string root_path):m_root_path(root_path){}
@@ -57,7 +57,7 @@ namespace PhosphorosUiDm {
         int count=0;
         foreach (const QString &fileName, fileNames) {
           try{
-            auto survey = PhosphorosUiDm::SurveyFilterMapping::loadSurveyFromFile(fileName.toStdString(),root_path);
+            auto survey = SurveyFilterMapping::loadSurveyFromFile(fileName.toStdString(),root_path);
             map[count]=survey;
             ++count;
           } catch (...){} //if a file do not open correctly: just skip it...

@@ -5,6 +5,9 @@
 #include <list>
 #include "PhzQtUI/FilterMapping.h"
 
+namespace Euclid {
+namespace PhzQtUI {
+
 namespace Ui {
 class DialogPhotometricCorrectionComputation;
 }
@@ -41,7 +44,7 @@ public:
      */
     void setData(std::string survey, std::string id_column, std::string model,
         std::string grid,
-        std::list<Euclid::PhosphorosUiDm::FilterMapping> selected_filters );
+        std::list<FilterMapping> selected_filters );
 
 signals:
    /**
@@ -91,9 +94,12 @@ private slots:
 
 private:
     Ui::DialogPhotometricCorrectionComputation *ui;
-    std::list<Euclid::PhosphorosUiDm::FilterMapping> m_selected_filters;
+    std::list<FilterMapping> m_selected_filters;
     std::string m_id_column;
     void setRunEnability();
 };
+
+}
+}
 
 #endif // DIALOGPHOTOMETRICCORRECTIONCOMPUTATION_H

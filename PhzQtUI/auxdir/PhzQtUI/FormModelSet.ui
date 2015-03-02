@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FormModelSet</class>
+ <class>Euclid::PhzQtUI::FormModelSet</class>
  <widget class="QWidget" name="FormModelSet">
   <property name="geometry">
    <rect>

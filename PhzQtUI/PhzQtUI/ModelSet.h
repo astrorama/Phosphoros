@@ -6,7 +6,7 @@
 #include "ParameterRule.h"
 
 namespace Euclid {
-namespace PhosphorosUiDm {
+namespace PhzQtUI {
 /**
  * @brief The ModelSet class
  */

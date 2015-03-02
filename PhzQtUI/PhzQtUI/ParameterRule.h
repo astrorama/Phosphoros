@@ -6,7 +6,7 @@
 #include "Range.h"
 
 namespace Euclid {
-namespace PhosphorosUiDm {
+namespace PhzQtUI {
 
 /**
  * @class ParameterRule

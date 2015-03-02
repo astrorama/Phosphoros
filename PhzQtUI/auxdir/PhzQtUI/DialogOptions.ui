@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DialogOptions</class>
+ <class>Euclid::PhzQtUI::DialogOptions</class>
  <widget class="QDialog" name="DialogOptions">
   <property name="geometry">
    <rect>

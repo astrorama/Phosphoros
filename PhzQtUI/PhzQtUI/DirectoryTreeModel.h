@@ -2,6 +2,13 @@
 #define DIRECTORYTREEMODEL_H
 
 #include <QStandardItemModel>
+
+using namespace std;
+
+namespace Euclid {
+namespace PhzQtUI {
+
+
 /**
  * @brief The DirectoryTreeModel class
  * This class provide a Model to be used in TreeView. It display a folder hierarchy
@@ -23,7 +30,7 @@ public:
      * @param rootDisplayName
      * Alias for the root folder to be used as displayed value.
      */
-    void loadDirectory(std::string rootPath, bool singleLeafSelection, std::string rootDisplayName=".");
+    void loadDirectory(string rootPath, bool singleLeafSelection, string rootDisplayName=".");
 
     /**
      * @brief Turn the model Enabled(In edition: the user can check/uncheck elements)/Disabled(read-only)
@@ -38,7 +45,7 @@ public:
      * @param exclusions
      * prevent the listed element to be checked, this allow for selecting a folder but some of its sub-elements.
      */
-    void setState(std::string root, const std::list<std::string>& exclusions);
+    void setState(string root, const list<string>& exclusions);
 
     /**
      * @brief Programatically check the root element of the model.
@@ -52,34 +59,34 @@ public:
      * @param from (by default 'root')
      * @return
      */
-    std::pair<bool,std::string> getRootSelection(std::string from=".") const;
+    pair<bool,string> getRootSelection(string from=".") const;
 
     /**
      * @brief get all the leaves which are not checked under a given 'root'
      * @param root
      * @return
      */
-    std::list<std::string> getExclusions(std::string root) const;
+    list<string> getExclusions(string root) const;
 
     /**
      * @brief get the current element if it represent a folder or the parent element if the current is a file.
      * @return
      */
-    std::string getGroup() const;
+    string getGroup() const;
 
     /**
      * @brief If the 'path' is within the current 'root_dir' return the path relative to the root.
      * @param path
      * @return the relative path
      */
-    std::string getRelPath(std::string path) const;
+    string getRelPath(string path) const;
 
     /**
      * @brief Complete the relative 'path' with the root dir in order to obtain an absolute path
      * @param path
      * @return the absolute path
      */
-    std::string getFullPath(std::string path) const;
+    string getFullPath(string path) const;
 
 public slots:
       /**
@@ -107,13 +114,16 @@ public slots:
 
 private:
       void setEditionStatus(bool inEdition);
-      void checkDir(bool checked,std::string dir, std::list<std::string> exclusions={});
+      void checkDir(bool checked,string dir, list<string> exclusions={});
       bool m_in_edition = false;
       bool m_bypass_item_changed =false;
-      std::map<std::string,QStandardItem*> m_map_dir;
-      std::string m_root_dir;
+      map<string,QStandardItem*> m_map_dir;
+      string m_root_dir;
 
 
 };
+
+}
+}
 
 #endif // DIRECTORYTREEMODEL_H

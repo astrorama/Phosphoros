@@ -4,7 +4,8 @@
 #include <string>
 
 namespace Euclid {
-namespace PhosphorosUiDm {
+namespace PhzQtUI {
+
 /**
  * @class Range
  *

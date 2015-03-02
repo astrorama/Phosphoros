@@ -4,6 +4,9 @@
 #include <QDialog>
 #include "FilterMapping.h"
 
+namespace Euclid {
+namespace PhzQtUI {
+
 namespace Ui {
 class DialogFilterMapping;
 }
@@ -27,14 +30,14 @@ public:
      * @param columns
      * A (possibly empty) list of columns to be used to prepopulate the column drop downs.
      */
-    void setFilter(const Euclid::PhosphorosUiDm::FilterMapping& filter, const std::list<std::string>& columns);
+    void setFilter(const FilterMapping& filter, const std::list<std::string>& columns);
 
 signals:
     /**
      * @brief SIGNAL popupClosing: rised when the FilterMapping is saved and the popup close.
      * The argument is the modifed FilterMapping.
      */
-    void popupClosing(Euclid::PhosphorosUiDm::FilterMapping);
+    void popupClosing(FilterMapping);
 
 
 private slots:
@@ -52,5 +55,8 @@ private slots:
 private:
     Ui::DialogFilterMapping *ui;
 };
+
+}
+}
 
 #endif // DIALOGFILTERMAPPING_H

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
+ <class>Euclid::PhzQtUI::MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
   <property name="geometry">
    <rect>
@@ -185,28 +185,28 @@
       <widget class="QWidget" name="page_2">
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
-         <widget class="FormModelSet" name="widget_ModelSet" native="true"/>
+         <widget class="Euclid::PhzQtUI::FormModelSet" name="widget_ModelSet" native="true"/>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="page_3">
        <layout class="QVBoxLayout" name="verticalLayout_8">
         <item>
-         <widget class="FormSurveyMapping" name="widget_SurveyMapping" native="true"/>
+         <widget class="Euclid::PhzQtUI::FormSurveyMapping" name="widget_SurveyMapping" native="true"/>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="page_6">
        <layout class="QVBoxLayout" name="verticalLayout_28">
         <item>
-         <widget class="FormAuxDataManagement" name="widget_AuxDataManagement" native="true"/>
+         <widget class="Euclid::PhzQtUI::FormAuxDataManagement" name="widget_AuxDataManagement" native="true"/>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="page_5">
        <layout class="QVBoxLayout" name="verticalLayout_26">
         <item>
-         <widget class="FormAnalysis" name="widget_Analysis" native="true"/>
+         <widget class="Euclid::PhzQtUI::FormAnalysis" name="widget_Analysis" native="true"/>
         </item>
        </layout>
       </widget>

@@ -5,29 +5,32 @@
 #include "PhzQtUI/FileUtils.h"
 #include "PhzQtUI/DirectoryTreeModel.h"
 
+namespace Euclid {
+namespace PhzQtUI {
+
 DirectoryTreeModel::DirectoryTreeModel(QObject *parent) :
     QStandardItemModel(parent)
 {
 }
 
-std::string DirectoryTreeModel::getRelPath(std::string path) const{
-    return Euclid::PhosphorosUiDm::FileUtils::removeStart(Euclid::PhosphorosUiDm::FileUtils::removeStart(path,m_root_dir),QString(QDir::separator()).toStdString());
+string DirectoryTreeModel::getRelPath(string path) const{
+    return FileUtils::removeStart(FileUtils::removeStart(path,m_root_dir),QString(QDir::separator()).toStdString());
 }
 
-std::string DirectoryTreeModel::getFullPath(std::string path) const{
-    if (Euclid::PhosphorosUiDm::FileUtils::starts_with(path,m_root_dir)){
+string DirectoryTreeModel::getFullPath(string path) const{
+    if (FileUtils::starts_with(path,m_root_dir)){
        return path;
     }
 
     return m_root_dir + QString(QDir::separator()).toStdString() + path;
 }
 
-void DirectoryTreeModel::loadDirectory(std::string rootPath, bool singleLeafSelection,std::string rootDisplayName){
+void DirectoryTreeModel::loadDirectory(string rootPath, bool singleLeafSelection,string rootDisplayName){
     QDir root_qdir(QString::fromStdString(rootPath));
     m_root_dir=root_qdir.absoluteFilePath(QString::fromStdString(rootPath)).toStdString();
 
-    std::list<std::tuple<std::string,std::string,int,bool>> m_structure;
-    std::list<std::string> next_scan_folder{{m_root_dir}};
+    list<tuple<string,string,int,bool>> m_structure;
+    list<string> next_scan_folder{{m_root_dir}};
 
     while (next_scan_folder.size()>0){
         auto curr_dir = next_scan_folder.front();
@@ -37,8 +40,8 @@ void DirectoryTreeModel::loadDirectory(std::string rootPath, bool singleLeafSele
         QStringList fileNames = curr_qdir.entryList(QDir::Files | QDir::Dirs |  QDir::NoDotAndDotDot );
         foreach (const QString &fileName, fileNames) {
             QFileInfo curr_file(curr_qdir.absoluteFilePath(QString::fromStdString(curr_dir))+QDir::separator()+ fileName) ;
-            std::string full_name= curr_file.absoluteFilePath().toStdString();
-            m_structure.push_back(std::make_tuple(full_name,curr_qdir.absoluteFilePath(QString::fromStdString(curr_dir)).toStdString(),curr_file.isDir(),false));
+            string full_name= curr_file.absoluteFilePath().toStdString();
+            m_structure.push_back(make_tuple(full_name,curr_qdir.absoluteFilePath(QString::fromStdString(curr_dir)).toStdString(),curr_file.isDir(),false));
             if ( curr_file.isDir()==1 ){
                 next_scan_folder.push_back(full_name);
             }
@@ -55,16 +58,16 @@ void DirectoryTreeModel::loadDirectory(std::string rootPath, bool singleLeafSele
 
     m_map_dir[m_root_dir]=root_item;
     for (auto structure_item : m_structure){
-        QStandardItem* item = new QStandardItem(QString::fromStdString(getRelPath(std::get<0>(structure_item))));
-        item->setCheckable(std::get<2>(structure_item)==0 || !singleLeafSelection);
-        if (std::get<2>(structure_item)==1){
+        QStandardItem* item = new QStandardItem(QString::fromStdString(getRelPath(get<0>(structure_item))));
+        item->setCheckable(get<2>(structure_item)==0 || !singleLeafSelection);
+        if (get<2>(structure_item)==1){
            item->setBackground(QBrush(QColor(230, 230, 230)));
         }
 
-        m_map_dir[std::get<1>(structure_item)]->appendRow(item);
+        m_map_dir[get<1>(structure_item)]->appendRow(item);
 
-        if (std::get<2>(structure_item)==1){
-             m_map_dir[std::get<0>(structure_item)]=item;
+        if (get<2>(structure_item)==1){
+             m_map_dir[get<0>(structure_item)]=item;
         }
     }
 }
@@ -80,7 +83,7 @@ void DirectoryTreeModel::setEnabled(bool enable){
     setEditionStatus(enable);
 }
 
-void DirectoryTreeModel::checkDir(bool checked,std::string dir, std::list<std::string> exclusions){
+void DirectoryTreeModel::checkDir(bool checked,string dir, list<string> exclusions){
 
     if (dir.compare(".")==0 || dir.compare(this->item(0)->text().toStdString())==0){
         dir=m_root_dir;
@@ -94,13 +97,13 @@ void DirectoryTreeModel::checkDir(bool checked,std::string dir, std::list<std::s
     }
 
     auto root = m_map_dir.at(dir);
-    if( std::find(exclusions.begin(), exclusions.end(), root->text().toStdString())==exclusions.end()){
+    if( find(exclusions.begin(), exclusions.end(), root->text().toStdString())==exclusions.end()){
         if (root->isCheckable()){
             root->setCheckState(checked_status);
         }
         for (int i = 0 ; i<root->rowCount(); ++i){
             auto child = root->child(i);
-            if( std::find(exclusions.begin(), exclusions.end(), child->text().toStdString())==exclusions.end()){
+            if( find(exclusions.begin(), exclusions.end(), child->text().toStdString())==exclusions.end()){
                  if (child->isCheckable()){
                     child->setCheckState(checked_status);
                  }
@@ -173,7 +176,7 @@ void DirectoryTreeModel::onItemChanged(QStandardItem* item){
     }
 }
 
-void DirectoryTreeModel::setState(std::string root, const std::list<std::string>& exclusions){
+void DirectoryTreeModel::setState(string root, const list<string>& exclusions){
     m_bypass_item_changed=true;
 
 
@@ -189,7 +192,7 @@ void DirectoryTreeModel::setState(std::string root, const std::list<std::string>
         if (m_map_dir.count(root)){
             checkDir(true,root,exclusions);
         } else{
-            std::list<QStandardItem *> item_to_explore{this->item(0)};
+            list<QStandardItem *> item_to_explore{this->item(0)};
 
             while( item_to_explore.size()>0){
                 auto item = item_to_explore.front();
@@ -214,12 +217,12 @@ void DirectoryTreeModel::setState(std::string root, const std::list<std::string>
     m_bypass_item_changed=false;
 }
 
-std::pair<bool,std::string> DirectoryTreeModel::getRootSelection(std::string from) const{
+pair<bool,string> DirectoryTreeModel::getRootSelection(string from) const{
 
     auto root_item = item(0);
     if ( from.compare(".")==0 || from.compare(item(0)->text().toStdString())==0 || from.compare(m_root_dir)==0  ){
         if (root_item->checkState()==Qt::CheckState::Checked){
-            return std::make_pair(true,m_root_dir);
+            return make_pair(true,m_root_dir);
         }
     } else {
         from= getFullPath(from);
@@ -227,13 +230,13 @@ std::pair<bool,std::string> DirectoryTreeModel::getRootSelection(std::string fro
     }
 
      if (root_item->checkState()==Qt::CheckState::Checked){
-         return std::make_pair(true,getFullPath(root_item->text().toStdString()));
+         return make_pair(true,getFullPath(root_item->text().toStdString()));
      }
 
      for (int i = 0 ; i<root_item->rowCount(); ++i){
          auto child = root_item->child(i);
          if (child->checkState()==Qt::CheckState::Checked){
-             return std::make_pair(true,getFullPath(child->text().toStdString()));
+             return make_pair(true,getFullPath(child->text().toStdString()));
          }
 
          if (child->hasChildren()){
@@ -244,10 +247,10 @@ std::pair<bool,std::string> DirectoryTreeModel::getRootSelection(std::string fro
          }
      }
 
-     return std::make_pair(false,"");
+     return make_pair(false,"");
  }
 
-std::string DirectoryTreeModel::getGroup() const{
+string DirectoryTreeModel::getGroup() const{
       auto res = getRootSelection();
       if (!res.first){
           return "";
@@ -257,7 +260,7 @@ std::string DirectoryTreeModel::getGroup() const{
           return res.second;
       }
 
-      int index = res.second.find_last_of("/", std::string::npos);
+      int index = res.second.find_last_of("/", string::npos);
       if (index>=0){
         return res.second.substr(0,index);
       } else {
@@ -265,8 +268,8 @@ std::string DirectoryTreeModel::getGroup() const{
       }
   }
 
-std::list<std::string> DirectoryTreeModel::DirectoryTreeModel::getExclusions(std::string root) const{
-    std::list<std::string> list;
+list<string> DirectoryTreeModel::DirectoryTreeModel::getExclusions(string root) const{
+    list<string> list;
 
     auto root_item =item(0);
     if ( root.compare(".")!=0 && root.compare(item(0)->text().toStdString())!=0 && root.compare(m_root_dir)!=0  ){
@@ -288,4 +291,7 @@ std::list<std::string> DirectoryTreeModel::DirectoryTreeModel::getExclusions(std
    }
 
    return list;
+}
+
+}
 }

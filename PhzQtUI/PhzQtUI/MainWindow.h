@@ -4,6 +4,8 @@
 #include <map>
 #include <QMainWindow>
 
+namespace Euclid {
+namespace PhzQtUI {
 
 namespace Ui {
 class MainWindow;
@@ -41,6 +43,7 @@ private:
 
 };
 
-
+}
+}
 
 #endif // MAINWINDOW_H

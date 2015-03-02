@@ -5,6 +5,11 @@
 #include "ui_DialogModelSet.h"
 #include "PhzQtUI/XYDataSetTreeModel.h"
 
+using namespace std;
+
+namespace Euclid{
+namespace PhzQtUI {
+
 DialogModelSet::DialogModelSet(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogModelSet)
@@ -19,11 +24,8 @@ DialogModelSet::DialogModelSet(QWidget *parent) :
     ui->txt_zMax->setValidator( new QDoubleValidator(0, 100, 2, this) );
     ui->txt_zStep->setValidator( new QDoubleValidator(0, 100, 4, this) );
 
-
-
-
     XYDataSetTreeModel* treeModel_z = new XYDataSetTreeModel();
-    treeModel_z->loadDirectory(Euclid::PhosphorosUiDm::FileUtils::getSedRootPath(true),false,"SEDs");
+    treeModel_z->loadDirectory(FileUtils::getSedRootPath(true),false,"SEDs");
     ui->treeView_Sed->setModel(treeModel_z);
     ui->treeView_Sed->expandAll();
 
@@ -31,14 +33,12 @@ DialogModelSet::DialogModelSet(QWidget *parent) :
                  SLOT(onItemChanged(QStandardItem*)));
 
     XYDataSetTreeModel* treeModel_red = new XYDataSetTreeModel();
-    treeModel_red->loadDirectory(Euclid::PhosphorosUiDm::FileUtils::getRedCurveRootPath(true),false,"Reddening Curves");
+    treeModel_red->loadDirectory(FileUtils::getRedCurveRootPath(true),false,"Reddening Curves");
     ui->treeView_Reddening->setModel(treeModel_red);
     ui->treeView_Reddening->expandAll();
 
     connect( treeModel_red, SIGNAL(itemChanged(QStandardItem*)), treeModel_red,
                  SLOT(onItemChanged(QStandardItem*)));
-
-
 }
 
 DialogModelSet::~DialogModelSet()
@@ -57,8 +57,8 @@ DialogModelSet::~DialogModelSet()
  }
 
 
-void DialogModelSet::loadData(const std::map<int,Euclid::PhosphorosUiDm::ParameterRule>& init_parameter_rules){
-    ui->tableView_ParameterRule->loadParameterRules(init_parameter_rules, Euclid::PhosphorosUiDm::FileUtils::getSedRootPath(false), Euclid::PhosphorosUiDm::FileUtils::getRedCurveRootPath(false));
+void DialogModelSet::loadData(const map<int,ParameterRule>& init_parameter_rules){
+    ui->tableView_ParameterRule->loadParameterRules(init_parameter_rules, FileUtils::getSedRootPath(false), FileUtils::getRedCurveRootPath(false));
 
 
     connect(
@@ -209,23 +209,23 @@ void DialogModelSet::on_btn_save_clicked()
     }
 
     // SED
-    std::string sed_root = sed_res.second;
-    std::list<std::string> sed_excl = static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->getExclusions(sed_root);
+    string sed_root = sed_res.second;
+    list<string> sed_excl = static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->getExclusions(sed_root);
     ui->tableView_ParameterRule->setSedsToSelectedRule(std::move(sed_root),std::move(sed_excl));
 
     // Reddeing Curves
-    std::string red_root =red_res.second;
-    std::list<std::string> red_excl = static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->getExclusions(red_root);
+    string red_root =red_res.second;
+    list<string> red_excl = static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->getExclusions(red_root);
     ui->tableView_ParameterRule->setRedCurvesToSelectedRule(std::move(red_root),std::move(red_excl));
 
     // E(B-V)-range
-    Euclid::PhosphorosUiDm::Range new_ebv;
+    Range new_ebv;
     new_ebv.setMin(ui->txt_ebvMin->text().toDouble());
     new_ebv.setMax(ui->txt_ebvMax->text().toDouble());
     new_ebv.setStep(ui->txt_ebvStep->text().toDouble());
 
     // z-range
-    Euclid::PhosphorosUiDm::Range new_z;
+    Range new_z;
     new_z.setMin(ui->txt_zMin->text().toDouble());
     new_z.setMax(ui->txt_zMax->text().toDouble());
     new_z.setStep(ui->txt_zStep->text().toDouble());
@@ -281,3 +281,6 @@ void DialogModelSet::on_btn_save_clicked()
      }
      turnControlsInView();
  }
+
+}
+}

@@ -5,6 +5,9 @@
 #include <QModelIndex>
 #include "ParameterRule.h"
 
+namespace Euclid {
+namespace PhzQtUI {
+
 namespace Ui {
 class FormModelSet;
 }
@@ -29,7 +32,7 @@ signals:
 private slots:
     void setSelectionChanged(QModelIndex, QModelIndex);
 
-    void setEditionPopupClosing(std::map<int,Euclid::PhosphorosUiDm::ParameterRule>);
+    void setEditionPopupClosing(std::map<int,ParameterRule>);
 
     void on_btn_SetEdit_clicked();
 
@@ -57,5 +60,8 @@ private:
 
     bool m_setInsert;
 };
+
+}
+}
 
 #endif // FORMMODELSET_H

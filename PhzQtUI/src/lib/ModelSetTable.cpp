@@ -5,6 +5,9 @@
 #include <QHeaderView>
 #include "PhzQtUI/ModelSetTable.h"
 
+namespace Euclid {
+namespace PhzQtUI {
+
 
 ModelSetTable::ModelSetTable(QWidget*& parent): QTableView(parent){
 
@@ -62,13 +65,13 @@ bool ModelSetTable::setSelectedName(QString new_name){
 }
 
 
-std::map<int,Euclid::PhosphorosUiDm::ParameterRule> ModelSetTable::getSelectedParameterRules(){
+std::map<int,ParameterRule> ModelSetTable::getSelectedParameterRules(){
     QModelIndexList index = this->selectionModel()->selectedRows();
     return getModel()->getParameterRules(index[0].row());
 }
 
 
-void ModelSetTable::setSelectedRules(const std::map<int,Euclid::PhosphorosUiDm::ParameterRule>& new_value){
+void ModelSetTable::setSelectedRules(const std::map<int,ParameterRule>& new_value){
     QModelIndexList index = this->selectionModel()->selectedIndexes();
     getModel()->setParameterRules(index[0].row(),new_value);
 }
@@ -81,4 +84,5 @@ void ModelSetTable::updateModelNumberForSelected(){
     getModel()->updateModelCount(index[0].row());
 }
 
-
+}
+}

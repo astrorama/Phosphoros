@@ -22,7 +22,7 @@
 namespace po = boost::program_options;
 
 namespace Euclid {
-namespace PhosphorosUiDm {
+namespace PhzQtUI {
 
 PhzDataModel::ModelAxesTuple PhzGridInfoHandler::getAxesTuple(
     const ModelSet& model_set) {
@@ -55,7 +55,7 @@ PhzDataModel::ModelAxesTuple PhzGridInfoHandler::getAxesTuple(
 
     XYDataSetTreeModel treeModel_sed;
     treeModel_sed.loadDirectory(
-        Euclid::PhosphorosUiDm::FileUtils::getSedRootPath(false), false,
+        FileUtils::getSedRootPath(false), false,
         "SEDs");
     treeModel_sed.setState(rule.second.getSedRootObject(),
         rule.second.getExcludedSeds());
@@ -65,7 +65,7 @@ PhzDataModel::ModelAxesTuple PhzGridInfoHandler::getAxesTuple(
 
     XYDataSetTreeModel treeModel_red;
     treeModel_red.loadDirectory(
-        Euclid::PhosphorosUiDm::FileUtils::getRedCurveRootPath(false), false,
+        FileUtils::getRedCurveRootPath(false), false,
         "Reddening Curves");
     treeModel_red.setState(rule.second.getReddeningRootObject(),
         rule.second.getExcludedReddenings());
@@ -84,7 +84,7 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
     const PhzDataModel::ModelAxesTuple& axes,
     const std::list<std::string>& selected_filters) {
   std::string rootPath =
-      Euclid::PhosphorosUiDm::FileUtils::getPhotmetricGridRootPath(true);
+      FileUtils::getPhotmetricGridRootPath(true);
 
   std::list < std::string > list;
 
@@ -94,11 +94,11 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
   foreach (const QString &fileName, fileNames) {
     try { // If a file cannot be opened or is ill formated: just skip it!
       std::ifstream in {root_qdir.absoluteFilePath(fileName).toStdString()};
-      auto grid = Euclid::PhzDataModel::phzGridBinaryImport<InfoOnlyCellManager>(in);
+      auto grid = PhzDataModel::phzGridBinaryImport<InfoOnlyCellManager>(in);
 
       // check the axis
-      auto& sed_axis_file = grid.getAxis<Euclid::PhzDataModel::ModelParameter::SED>();
-      auto& sed_axis_requested = std::get<Euclid::PhzDataModel::ModelParameter::SED>(axes);
+      auto& sed_axis_file = grid.getAxis<PhzDataModel::ModelParameter::SED>();
+      auto& sed_axis_requested = std::get<PhzDataModel::ModelParameter::SED>(axes);
       if (sed_axis_file.size()!=sed_axis_requested.size()) {
         continue;
       }
@@ -112,8 +112,8 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
         continue;
       }
 
-      auto& red_axis_file = grid.getAxis<Euclid::PhzDataModel::ModelParameter::REDDENING_CURVE>();
-      auto& red_axis_requested = std::get<Euclid::PhzDataModel::ModelParameter::REDDENING_CURVE>(axes);
+      auto& red_axis_file = grid.getAxis<PhzDataModel::ModelParameter::REDDENING_CURVE>();
+      auto& red_axis_requested = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(axes);
       if (red_axis_file.size()!=red_axis_requested.size()) {
         continue;
       }
@@ -128,12 +128,12 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
       }
 
       std::vector<double> z_axis_file;
-      for(double value : grid.getAxis<Euclid::PhzDataModel::ModelParameter::Z>()){
+      for(double value : grid.getAxis<PhzDataModel::ModelParameter::Z>()){
         z_axis_file.push_back(value);
       }
 
       std::vector<double> z_axis_requested;
-      for(double value : std::get<Euclid::PhzDataModel::ModelParameter::Z>(axes)){
+      for(double value : std::get<PhzDataModel::ModelParameter::Z>(axes)){
         z_axis_requested.push_back(value);
       }
 
@@ -160,11 +160,11 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
       }
 
       std::vector<double> ebv_axis_file;
-      for(double value : grid.getAxis<Euclid::PhzDataModel::ModelParameter::EBV>()){
+      for(double value : grid.getAxis<PhzDataModel::ModelParameter::EBV>()){
         ebv_axis_file.push_back(value);
       }
       std::vector<double> ebv_axis_requested;
-      for(double value :std::get<Euclid::PhzDataModel::ModelParameter::EBV>(axes)){
+      for(double value :std::get<PhzDataModel::ModelParameter::EBV>(axes)){
         ebv_axis_requested.push_back(value);
       }
       if (ebv_axis_file.size()!=ebv_axis_requested.size()) {
@@ -219,7 +219,7 @@ std::map<std::string, po::variable_value> PhzGridInfoHandler::GetConfigurationMa
 
   std::vector < std::string > sed_add_vector;
 
-  for (auto& sed_item : std::get < Euclid::PhzDataModel::ModelParameter::SED
+  for (auto& sed_item : std::get < PhzDataModel::ModelParameter::SED
       > (axes)) {
     sed_add_vector.push_back(sed_item.qualifiedName());
   }
@@ -228,20 +228,20 @@ std::map<std::string, po::variable_value> PhzGridInfoHandler::GetConfigurationMa
   std::vector < std::string > red_add_vector;
 
   for (auto& red_item : std::get
-      < Euclid::PhzDataModel::ModelParameter::REDDENING_CURVE > (axes)) {
+      < PhzDataModel::ModelParameter::REDDENING_CURVE > (axes)) {
     red_add_vector.push_back(red_item.qualifiedName());
   }
   options_map["reddening-curve-name"].value() = boost::any(red_add_vector);
 
   std::vector < std::string > ebv_value_vector;
-  for (auto& ebv_item : std::get < Euclid::PhzDataModel::ModelParameter::EBV
+  for (auto& ebv_item : std::get < PhzDataModel::ModelParameter::EBV
       > (axes)) {
     ebv_value_vector.push_back(std::to_string(ebv_item));
   }
   options_map["ebv-value"].value() = boost::any(ebv_value_vector);
 
   std::vector < std::string > z_value_vector;
-  for (auto& z_item : std::get < Euclid::PhzDataModel::ModelParameter::Z
+  for (auto& z_item : std::get < PhzDataModel::ModelParameter::Z
       > (axes)) {
     z_value_vector.push_back(std::to_string(z_item));
   }

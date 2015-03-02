@@ -4,6 +4,8 @@
 #include "ui_MainWindow.h"
 #include "PhzQtUI/DialogOptions.h"
 
+namespace Euclid {
+namespace PhzQtUI {
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -87,4 +89,5 @@ void MainWindow::on_btn_HomeToAnalysis_clicked()
   ui->widget_Analysis->loadAnalysisPage();
 }
 
-
+}
+}

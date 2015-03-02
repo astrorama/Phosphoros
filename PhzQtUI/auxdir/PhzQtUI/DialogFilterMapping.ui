@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DialogFilterMapping</class>
+ <class>Euclid::PhzQtUI::DialogFilterMapping</class>
  <widget class="QDialog" name="DialogFilterMapping">
   <property name="geometry">
    <rect>

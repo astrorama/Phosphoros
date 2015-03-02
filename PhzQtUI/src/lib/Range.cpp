@@ -5,7 +5,7 @@
 #include "PhzQtUI/Range.h"
 
 namespace Euclid {
-namespace PhosphorosUiDm {
+namespace PhzQtUI {
 
 
 Range::Range(){

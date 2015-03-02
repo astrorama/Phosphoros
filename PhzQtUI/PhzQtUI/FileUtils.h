@@ -7,7 +7,7 @@
  */
 
 namespace Euclid {
-namespace PhosphorosUiDm {
+namespace PhzQtUI {
 
 class FileUtils
 {

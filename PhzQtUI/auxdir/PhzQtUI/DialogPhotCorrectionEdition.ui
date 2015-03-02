@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DialogPhotCorrectionEdition</class>
+ <class>Euclid::PhzQtUI::DialogPhotCorrectionEdition</class>
  <widget class="QDialog" name="DialogPhotCorrectionEdition">
   <property name="geometry">
    <rect>

@@ -3,6 +3,9 @@
 
 #include <QDialog>
 
+namespace Euclid {
+namespace PhzQtUI {
+
 namespace Ui {
 class DialogCreateSubGroup;
 }
@@ -45,5 +48,8 @@ private:
     Ui::DialogCreateSubGroup *ui;
     std::string m_parent_folder_full;
 };
+
+}
+}
 
 #endif // DIALOGCREATESUBGROUP_H

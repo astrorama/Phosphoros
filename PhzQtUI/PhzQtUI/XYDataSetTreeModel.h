@@ -2,6 +2,10 @@
 #define DIRECTORYTREEMODEL_H
 
 #include <QStandardItemModel>
+
+namespace Euclid {
+namespace PhzQtUI {
+
 /**
  * @brief The DirectoryTreeModel class
  * This class provide a Model to be used in TreeView. It display a folder hierarchy
@@ -124,4 +128,7 @@ private:
 
 };
 
+
+}
+}
 #endif // DIRECTORYTREEMODEL_H

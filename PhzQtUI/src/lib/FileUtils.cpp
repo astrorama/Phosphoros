@@ -6,7 +6,7 @@
 #include "PhzQtUI/FileUtils.h"
 
 namespace Euclid {
-namespace PhosphorosUiDm {
+namespace PhzQtUI {
 
 FileUtils::FileUtils()
 {

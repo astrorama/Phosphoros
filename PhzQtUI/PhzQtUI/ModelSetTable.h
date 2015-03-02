@@ -6,6 +6,9 @@
 #include "ModelSetModel.h"
 #include "ParameterRule.h"
 
+namespace Euclid {
+namespace PhzQtUI {
+
 
 /**
  * @brief The ModelSetTable class
@@ -49,13 +52,13 @@ public:
      * @brief Get the map of ParameterRules of the selected ModelSet.
      * @return the map of ParameterRules
      */
-    std::map<int,Euclid::PhosphorosUiDm::ParameterRule> getSelectedParameterRules();
+    std::map<int,ParameterRule> getSelectedParameterRules();
 
     /**
      * @brief  Set the map of ParameterRules to the selected ModelSet.
      * @param new_value
      */
-    void setSelectedRules(const std::map<int,Euclid::PhosphorosUiDm::ParameterRule>& new_value);
+    void setSelectedRules(const std::map<int,ParameterRule>& new_value);
 
     /**
      * @brief Recompute the number of model inside the selected ModelSet and refresh the view.
@@ -86,9 +89,8 @@ public:
 
 private:
 
-
-
 };
 
-
+}
+}
 #endif // MODELSETTABLE_H

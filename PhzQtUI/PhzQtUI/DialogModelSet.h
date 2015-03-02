@@ -6,6 +6,8 @@
 #include <QItemSelection>
 
 #include "ParameterRule.h"
+namespace Euclid {
+namespace PhzQtUI {
 
 namespace Ui {
 class DialogModelSet;
@@ -28,7 +30,7 @@ public:
      * @param init_parameter_rules
      * the map of ParameterRules to be displayed/modified
      */
-    void loadData(const std::map<int,Euclid::PhosphorosUiDm::ParameterRule>& init_parameter_rules);
+    void loadData(const std::map<int,ParameterRule>& init_parameter_rules);
 
     /**
      * @brief When called, set the popup in read-only.
@@ -45,7 +47,7 @@ signals:
       * @brief SIGNAL popupClosing: rised when the the popup close.
       * The argument is the modifed map of ParameterRules.
       */
-     void popupClosing(std::map<int,Euclid::PhosphorosUiDm::ParameterRule>);
+     void popupClosing(std::map<int,ParameterRule>);
 
 private slots:
      /**
@@ -99,5 +101,8 @@ private:
     void turnControlsInEdition();
     void turnControlsInView();
 };
+
+}
+}
 
 #endif // DIALOGMODELSET_H

@@ -4,6 +4,11 @@
 #include "ui_DialogOptions.h"
 #include <QSettings>
 
+using namespace std;
+
+namespace Euclid {
+namespace PhzQtUI{
+
 DialogOptions::DialogOptions(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogOptions)
@@ -82,4 +87,8 @@ void DialogOptions::on_btn_browseRoot_clicked()
         ui->txt_rootDir->setText(fileNames[0]);
 
     }
+}
+
+
+}
 }

@@ -13,20 +13,21 @@
 #include "ElementsKernel/Logging.h"
 
 using namespace std;
-using namespace Euclid;
+namespace Euclid {
+namespace PhzQtUI {
 
 XYDataSetTreeModel::XYDataSetTreeModel(QObject *parent) :
     QStandardItemModel(parent) {
 }
 
 std::string XYDataSetTreeModel::getRelPath(std::string path) const {
-  return Euclid::PhosphorosUiDm::FileUtils::removeStart(
-      Euclid::PhosphorosUiDm::FileUtils::removeStart(path, m_root_dir),
+  return FileUtils::removeStart(
+      FileUtils::removeStart(path, m_root_dir),
       QString(QDir::separator()).toStdString());
 }
 
 std::string XYDataSetTreeModel::getFullPath(std::string path) const {
-  if (Euclid::PhosphorosUiDm::FileUtils::starts_with(path, m_root_dir)) {
+  if (FileUtils::starts_with(path, m_root_dir)) {
     return path;
   }
 
@@ -59,7 +60,7 @@ void XYDataSetTreeModel::loadDirectory(std::string rootPath,
     for (auto group : name.groups()) {
       std::string current_group = parent_group
           + QString(QDir::separator()).toStdString() + group;
-      current_group = PhosphorosUiDm::FileUtils::removeStart(current_group,
+      current_group = FileUtils::removeStart(current_group,
           QString(QDir::separator()).toStdString());
 
       if (group_set.count(current_group) == 0) {
@@ -351,4 +352,5 @@ std::list<std::string> XYDataSetTreeModel::getSelectedLeaf( std::string root) co
     return list;
 }
 
-
+}
+}

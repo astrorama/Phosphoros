@@ -3,6 +3,11 @@
 
 #include <QDialog>
 
+namespace Euclid {
+namespace PhzQtUI {
+
+
+
 namespace Ui {
 class DialogOptions;
 }
@@ -70,5 +75,8 @@ private slots:
 private:
     Ui::DialogOptions *ui;
 };
+
+}
+}
 
 #endif // DIALOGOPTIONS_H

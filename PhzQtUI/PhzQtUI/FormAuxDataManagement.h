@@ -3,6 +3,9 @@
 
 #include <QWidget>
 
+namespace Euclid {
+namespace PhzQtUI {
+
 namespace Ui {
 class FormAuxDataManagement;
 }
@@ -51,5 +54,8 @@ private slots:
 private:
     Ui::FormAuxDataManagement *ui;
 };
+
+}
+}
 
 #endif // FORMAUXDATAMANAGEMENT_H

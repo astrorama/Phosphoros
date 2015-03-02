@@ -3,6 +3,11 @@
 #include "PhzQtUI/DialogCreatesSubGroup.h"
 #include "ui_DialogCreatesSubGroup.h"
 
+using namespace std;
+
+namespace Euclid {
+namespace PhzQtUI {
+
 DialogCreateSubGroup::DialogCreateSubGroup(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogCreateSubGroup)
@@ -15,7 +20,7 @@ DialogCreateSubGroup::~DialogCreateSubGroup()
     delete ui;
 }
 
-void DialogCreateSubGroup::setParentFolder(std::string folderFull, std::string folderDisplay){
+void DialogCreateSubGroup::setParentFolder(string folderFull, string folderDisplay){
     m_parent_folder_full=folderFull;
     ui->txt_parent->setText(QString::fromStdString(folderDisplay));
 }
@@ -36,4 +41,7 @@ void DialogCreateSubGroup::on_pushButton_clicked()
     else{
         accept();
     }
+}
+
+}
 }

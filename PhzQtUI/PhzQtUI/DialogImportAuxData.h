@@ -4,6 +4,9 @@
 #include <QDialog>
 #include <string>
 
+namespace Euclid {
+namespace PhzQtUI {
+
 namespace Ui {
 class DialogImportAuxData;
 }
@@ -65,5 +68,8 @@ private:
     Ui::DialogImportAuxData *ui;
     std::string m_parent_folder;
 };
+
+}
+}
 
 #endif // DIALOGIMPORTAUXDATA_H

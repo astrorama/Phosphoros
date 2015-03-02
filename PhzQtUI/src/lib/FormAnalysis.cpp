@@ -24,6 +24,10 @@
 #include "PhzLikelihood/ParallelCatalogHandler.h"
 #include "PhzConfiguration/CreatePhzCatalogConfiguration.h"
 
+
+namespace Euclid {
+namespace PhzQtUI {
+
 FormAnalysis::FormAnalysis(QWidget *parent) :
     QWidget(parent), ui(new Ui::FormAnalysis) {
   ui->setupUi(this);
@@ -37,8 +41,8 @@ FormAnalysis::~FormAnalysis() {
 //  Initial data load
 void FormAnalysis::loadAnalysisPage() {
   m_analysis_survey_list =
-      Euclid::PhosphorosUiDm::SurveyFilterMapping::loadSurveysFromFolder(
-          Euclid::PhosphorosUiDm::FileUtils::getMappingRootPath(false));
+      SurveyFilterMapping::loadSurveysFromFolder(
+          FileUtils::getMappingRootPath(false));
 
   ui->cb_AnalysisSurvey->clear();
   for (auto& survey : m_analysis_survey_list) {
@@ -47,8 +51,8 @@ void FormAnalysis::loadAnalysisPage() {
   }
 
   m_analysis_model_list =
-      Euclid::PhosphorosUiDm::ModelSet::loadModelSetsFromFolder(
-          Euclid::PhosphorosUiDm::FileUtils::getModelRootPath(false));
+      ModelSet::loadModelSetsFromFolder(
+          FileUtils::getModelRootPath(false));
   ui->cb_AnalysisModel->clear();
   for (auto& model : m_analysis_model_list) {
     ui->cb_AnalysisModel->addItem(
@@ -88,7 +92,7 @@ void FormAnalysis::enableDisablePage(bool enabled){
 void FormAnalysis::updateGridSelection() {
 
   ui->progress_Grid->setValue(0);
-  Euclid::PhosphorosUiDm::ModelSet selected_model;
+  ModelSet selected_model;
 
   for (auto&model : m_analysis_model_list) {
     if (model.second.getName().compare(
@@ -98,10 +102,10 @@ void FormAnalysis::updateGridSelection() {
     }
   }
 
-  auto axis = Euclid::PhosphorosUiDm::PhzGridInfoHandler::getAxesTuple(
+  auto axis = PhzGridInfoHandler::getAxesTuple(
       selected_model);
   auto possible_files =
-      Euclid::PhosphorosUiDm::PhzGridInfoHandler::getCompatibleGridFile(axis,
+      PhzGridInfoHandler::getCompatibleGridFile(axis,
           getSelectedFilters(true));
 
   ui->cb_CompatibleGrid->clear();
@@ -129,7 +133,7 @@ void FormAnalysis::updateGridProgressBar(size_t step, size_t total) {
 void FormAnalysis::updateCorrectionSelection(){
   auto filter_map = getSelectedFilters(true);
    auto file_list =
-       Euclid::PhosphorosUiDm::PhotometricCorrectionHandler::getCompatibleCorrectionFiles(
+       PhotometricCorrectionHandler::getCompatibleCorrectionFiles(
            filter_map);
    ui->cb_AnalysisCorrection->clear();
 
@@ -153,7 +157,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
 
   QFileInfo info(
       QString::fromStdString(
-          Euclid::PhosphorosUiDm::FileUtils::getPhotCorrectionsRootPath(false))
+          FileUtils::getPhotCorrectionsRootPath(false))
           + QDir::separator() + ui->cb_AnalysisCorrection->currentText());
   bool correction_exists = !ui->gb_corrections->isChecked() || info.exists();
 
@@ -197,9 +201,9 @@ std::list<std::string> FormAnalysis::getSelectedFilters(bool return_path) {
   return res;
 }
 
-std::list<Euclid::PhosphorosUiDm::FilterMapping> FormAnalysis::getSelectedFilterMapping(){
+std::list<FilterMapping> FormAnalysis::getSelectedFilterMapping(){
   auto filterNames=getSelectedFilters(false);
-  std::list<Euclid::PhosphorosUiDm::FilterMapping>  list;
+  std::list<FilterMapping>  list;
 
 
   for(auto& survey: m_analysis_survey_list){
@@ -232,17 +236,17 @@ bool FormAnalysis::checkGridSelection(bool addFileCheck, bool acceptNewFile) {
 
   QFileInfo info(
       QString::fromStdString(
-          Euclid::PhosphorosUiDm::FileUtils::getPhotmetricGridRootPath(false))
+          FileUtils::getPhotmetricGridRootPath(false))
           + QDir::separator() + QString::fromStdString(file_name));
 
   return acceptNewFile || info.exists();
 }
 
 std::map<std::string, po::variable_value> FormAnalysis::getGridConfiguration(){
-  std::string file_name = Euclid::PhosphorosUiDm::FileUtils::addExt(
+  std::string file_name = FileUtils::addExt(
                ui->cb_CompatibleGrid->currentText().toStdString(), ".dat");
   ui->cb_CompatibleGrid->setItemText(ui->cb_CompatibleGrid->currentIndex (), QString::fromStdString(file_name));
-  Euclid::PhosphorosUiDm::ModelSet selected_model;
+  ModelSet selected_model;
 
      for (auto&model : m_analysis_model_list) {
        if (model.second.getName().compare(
@@ -252,10 +256,10 @@ std::map<std::string, po::variable_value> FormAnalysis::getGridConfiguration(){
        }
      }
 
-     auto axes = Euclid::PhosphorosUiDm::PhzGridInfoHandler::getAxesTuple(
+     auto axes = PhzGridInfoHandler::getAxesTuple(
          selected_model);
 
-     return Euclid::PhosphorosUiDm::PhzGridInfoHandler::GetConfigurationMap(
+     return PhzGridInfoHandler::GetConfigurationMap(
              file_name, axes, getSelectedFilters(true));
 }
 
@@ -265,7 +269,7 @@ std::map < std::string, po::variable_value > FormAnalysis::getRunOptionMap(){
       filter_mappings.push_back(filter.getFilterFile()+" "+filter.getFluxColumn()+" "+filter.getErrorColumn());
     }
 
-   auto path_grid_filename = Euclid::PhosphorosUiDm::FileUtils::getPhotmetricGridRootPath(false)
+   auto path_grid_filename = FileUtils::getPhotmetricGridRootPath(false)
                  + QString(QDir::separator()).toStdString() + ui->cb_CompatibleGrid->currentText().toStdString();
 
    std::map < std::string, po::variable_value > options_map;
@@ -278,7 +282,7 @@ std::map < std::string, po::variable_value > FormAnalysis::getRunOptionMap(){
 
 
    if (ui->gb_corrections->isChecked ()){
-     auto path_correction_filename = Euclid::PhosphorosUiDm::FileUtils::getPhotCorrectionsRootPath(true)
+     auto path_correction_filename = FileUtils::getPhotCorrectionsRootPath(true)
                + QString(QDir::separator()).toStdString() + ui->cb_AnalysisCorrection->currentText().toStdString();
      options_map["photometric-correction-file"].value() = boost::any(path_correction_filename);
    }
@@ -299,7 +303,7 @@ void FormAnalysis::on_btn_AnalysisToHome_clicked() {
 void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     const QString &selectedName) {
 
-  Euclid::PhosphorosUiDm::SurveyFilterMapping selected_survey;
+  SurveyFilterMapping selected_survey;
 
   for (auto&survey : m_analysis_survey_list) {
     if (survey.second.getName().compare(selectedName.toStdString()) == 0) {
@@ -363,7 +367,7 @@ void FormAnalysis::on_btn_GetConfigGrid_clicked() {
       if (dialog.exec()){
           QStringList config_fileNames=dialog.selectedFiles();
           auto config_map = getGridConfiguration();
-          Euclid::PhzUITools::ConfigurationWriter::writeConfiguration(config_map,config_fileNames[0].toStdString());
+          PhzUITools::ConfigurationWriter::writeConfiguration(config_map,config_fileNames[0].toStdString());
 
       }
   }
@@ -379,11 +383,11 @@ void FormAnalysis::on_btn_RunGrid_clicked() {
   } else {
    try{
     auto config_map = getGridConfiguration();
-    Euclid::PhzConfiguration::CreatePhotometryGridConfiguration conf { config_map };
-    Euclid::PhzModeling::PhotometryGridCreator creator { conf.getSedDatasetProvider(),
+    PhzConfiguration::CreatePhotometryGridConfiguration conf { config_map };
+    PhzModeling::PhotometryGridCreator creator { conf.getSedDatasetProvider(),
         conf.getReddeningDatasetProvider(), conf.getFilterDatasetProvider() };
 
-    auto param_space = Euclid::PhzDataModel::createAxesTuple(conf.getZList(),
+    auto param_space = PhzDataModel::createAxesTuple(conf.getZList(),
         conf.getEbvList(), conf.getReddeningCurveList(), conf.getSedList());
 
     std::function<void(size_t,size_t)> monitor_function = std::bind(&FormAnalysis::updateGridProgressBar, this, std::placeholders::_1, std::placeholders::_2);
@@ -488,7 +492,7 @@ void FormAnalysis::on_btn_GetConfigAnalysis_clicked()
    if (dialog.exec()){
        QStringList config_fileNames=dialog.selectedFiles();
        auto config_map = getRunOptionMap();
-       Euclid::PhzUITools::ConfigurationWriter::writeConfiguration(config_map,config_fileNames[0].toStdString());
+       PhzUITools::ConfigurationWriter::writeConfiguration(config_map,config_fileNames[0].toStdString());
    }
 }
 
@@ -508,12 +512,12 @@ void FormAnalysis::on_btn_RunAnalysis_clicked()
    }
   enableDisablePage(false);
   auto config_map = getRunOptionMap();
-  Euclid::PhzConfiguration::CreatePhzCatalogConfiguration conf {config_map};
+  PhzConfiguration::CreatePhzCatalogConfiguration conf {config_map};
 
   auto model_phot_grid = conf.getPhotometryGrid();
   auto marginalization_func = conf.getMarginalizationFunc();
 
-  Euclid::PhzLikelihood::ParallelCatalogHandler handler {conf.getPhotometricCorrectionMap(),
+  PhzLikelihood::ParallelCatalogHandler handler {conf.getPhotometricCorrectionMap(),
                                                     model_phot_grid, marginalization_func};
   auto catalog = conf.getCatalog();
   auto out_ptr = conf.getOutputHandler();
@@ -523,4 +527,5 @@ void FormAnalysis::on_btn_RunAnalysis_clicked()
   ui->progress_Analysis->setValue(100);
 }
 
-
+}
+}

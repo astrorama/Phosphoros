@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>FormAuxDataManagement</class>
+ <class>Euclid::PhzQtUI::FormAuxDataManagement</class>
  <widget class="QWidget" name="FormAuxDataManagement">
   <property name="geometry">
    <rect>

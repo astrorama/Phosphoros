@@ -4,6 +4,9 @@
 #include "PhzQtUI/DialogModelSet.h"
 #include "PhzQtUI/FileUtils.h"
 
+namespace Euclid {
+namespace PhzQtUI {
+
 FormModelSet::FormModelSet(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::FormModelSet)
@@ -19,7 +22,7 @@ FormModelSet::~FormModelSet()
 
 void FormModelSet::loadSetPage(){
 
-    ui->tableView_Set->loadFromPath(Euclid::PhosphorosUiDm::FileUtils::getModelRootPath(true));
+    ui->tableView_Set->loadFromPath(FileUtils::getModelRootPath(true));
 
     connect(
       ui->tableView_Set->selectionModel(),
@@ -28,7 +31,7 @@ void FormModelSet::loadSetPage(){
      );
 
     ui->tableView_Set->clearSelection();
-    ui->tableView_ParameterRule->loadParameterRules(std::map<int,Euclid::PhosphorosUiDm::ParameterRule>{},"","");
+    ui->tableView_ParameterRule->loadParameterRules(std::map<int,ParameterRule>{},"","");
     setModelInView();
 }
 
@@ -104,7 +107,7 @@ void FormModelSet::on_btn_SetCancel_clicked()
         m_setInsert=false;
     }else{
         ui->txt_SetName->setText(QString(ui->tableView_Set->getSelectedName()));
-        ui->tableView_ParameterRule->loadParameterRules(ui->tableView_Set->getSelectedParameterRules(),Euclid::PhosphorosUiDm::FileUtils::getSedRootPath(false),Euclid::PhosphorosUiDm::FileUtils::getRedCurveRootPath(false));
+        ui->tableView_ParameterRule->loadParameterRules(ui->tableView_Set->getSelectedParameterRules(),FileUtils::getSedRootPath(false),FileUtils::getRedCurveRootPath(false));
     }
 
     setModelInView();
@@ -134,18 +137,18 @@ void FormModelSet::setSelectionChanged(QModelIndex new_index, QModelIndex)
         ModelSetModel* model=ui->tableView_Set->getModel();
         ui->txt_SetName->setText(model->getName(new_index.row()));
 
-        ui->tableView_ParameterRule->loadParameterRules(model->getParameterRules(new_index.row()),Euclid::PhosphorosUiDm::FileUtils::getSedRootPath(false),Euclid::PhosphorosUiDm::FileUtils::getRedCurveRootPath(false));
+        ui->tableView_ParameterRule->loadParameterRules(model->getParameterRules(new_index.row()),FileUtils::getSedRootPath(false),FileUtils::getRedCurveRootPath(false));
     }
     else{
         ui->txt_SetName->setText("");
-        ui->tableView_ParameterRule->loadParameterRules(std::map<int,Euclid::PhosphorosUiDm::ParameterRule>{},"","");
+        ui->tableView_ParameterRule->loadParameterRules(std::map<int,ParameterRule>{},"","");
     }
     setModelInView();
 }
 
 void FormModelSet::on_btn_SetToRules_clicked()
 {
-    DialogModelSet* popUp= new DialogModelSet();
+    DialogModelSet* popUp= new  DialogModelSet();
     popUp->loadData(ui->tableView_ParameterRule->getModel()->getParameterRules());
 
     // As PHOSPHOROS do not know how to treat sparse grid for now, block to 1 rule!
@@ -153,8 +156,8 @@ void FormModelSet::on_btn_SetToRules_clicked()
 
     connect(
       popUp,
-      SIGNAL(popupClosing(std::map<int,Euclid::PhosphorosUiDm::ParameterRule>)),
-      SLOT(setEditionPopupClosing(std::map<int,Euclid::PhosphorosUiDm::ParameterRule>))
+      SIGNAL(popupClosing(std::map<int,ParameterRule>)),
+      SLOT(setEditionPopupClosing(std::map<int,ParameterRule>))
      );
 
     popUp->exec();
@@ -162,20 +165,23 @@ void FormModelSet::on_btn_SetToRules_clicked()
 
 void FormModelSet::on_btn_viewSet_clicked()
 {
-    DialogModelSet* popUp= new DialogModelSet();
+  DialogModelSet* popUp= new DialogModelSet();
     popUp->loadData(ui->tableView_ParameterRule->getModel()->getParameterRules());
     popUp->setViewMode();
 
     connect(
       popUp,
-      SIGNAL(popupClosing(std::map<int,Euclid::PhosphorosUiDm::ParameterRule>)),
-      SLOT(setEditionPopupClosing(std::map<int,Euclid::PhosphorosUiDm::ParameterRule>))
+      SIGNAL(popupClosing(std::map<int,ParameterRule>)),
+      SLOT(setEditionPopupClosing(std::map<int,ParameterRule>))
      );
 
     popUp->exec();
 }
 
-void FormModelSet::setEditionPopupClosing(std::map<int,Euclid::PhosphorosUiDm::ParameterRule> rules){
+void FormModelSet::setEditionPopupClosing(std::map<int,ParameterRule> rules){
 
-     ui->tableView_ParameterRule->loadParameterRules(rules,Euclid::PhosphorosUiDm::FileUtils::getSedRootPath(false),Euclid::PhosphorosUiDm::FileUtils::getRedCurveRootPath(false));
+     ui->tableView_ParameterRule->loadParameterRules(rules,FileUtils::getSedRootPath(false),FileUtils::getRedCurveRootPath(false));
  }
+
+}
+}

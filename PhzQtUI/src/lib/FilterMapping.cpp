@@ -1,7 +1,7 @@
 #include "PhzQtUI/FilterMapping.h"
 
 namespace Euclid {
-namespace PhosphorosUiDm {
+namespace PhzQtUI {
 
 FilterMapping::FilterMapping(){}
 

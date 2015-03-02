@@ -9,7 +9,7 @@
 #include "XYDataset/AsciiParser.h"
 
 namespace Euclid {
-namespace PhosphorosUiDm {
+namespace PhzQtUI {
 
 
 ParameterRule::ParameterRule()
@@ -32,7 +32,7 @@ long long ParameterRule::getModelNumber() const{
 
     long sed_factor = 1;
     std::unique_ptr < XYDataset::FileParser > file_parser {new XYDataset::AsciiParser { } };
-    XYDataset::FileSystemProvider provider { Euclid::PhosphorosUiDm::FileUtils::getSedRootPath(false), std::move(file_parser) };
+    XYDataset::FileSystemProvider provider { FileUtils::getSedRootPath(false), std::move(file_parser) };
      auto unordered = provider.listContents(m_sed_root_object);
      if (sed_factor<unordered.size()){
        sed_factor=unordered.size();
@@ -41,7 +41,7 @@ long long ParameterRule::getModelNumber() const{
 
     long red_factor = 1;
     std::unique_ptr < XYDataset::FileParser >  red_file_parser {new XYDataset::AsciiParser { } };
-    XYDataset::FileSystemProvider red_provider { Euclid::PhosphorosUiDm::FileUtils::getRedCurveRootPath(false), std::move(red_file_parser) };
+    XYDataset::FileSystemProvider red_provider { FileUtils::getRedCurveRootPath(false), std::move(red_file_parser) };
     unordered = red_provider.listContents(m_reddening_root_object);
     if (red_factor<unordered.size()){
       red_factor=unordered.size();

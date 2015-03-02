@@ -4,6 +4,9 @@
 #include <QStandardItemModel>
 #include "ParameterRule.h"
 
+namespace Euclid {
+namespace PhzQtUI {
+
 /**
  * @brief The ParameterRuleModel class
  * This class provide a Model to be used in TableView.
@@ -19,13 +22,13 @@ public:
      * @param sedRootPath
      * @param redRootPath
      */
-    ParameterRuleModel(std::map<int,Euclid::PhosphorosUiDm::ParameterRule> init_parameter_rules, std::string sedRootPath, std::string redRootPath);
+    ParameterRuleModel(std::map<int,ParameterRule> init_parameter_rules, std::string sedRootPath, std::string redRootPath);
 
     /**
      * @brief Returns the version of the ParameterRules handled by the ParameterRuleModel.
      * @return ParameterRules map
      */
-    const std::map<int,Euclid::PhosphorosUiDm::ParameterRule>& getParameterRules() const;
+    const std::map<int,ParameterRule>& getParameterRules() const;
 
     /**
      * @brief get the value of the item at a given row and column
@@ -41,7 +44,7 @@ public:
      * @param zRange
      * @param row
      */
-    void setRanges(Euclid::PhosphorosUiDm::Range ebvRange,Euclid::PhosphorosUiDm::Range zRange,int row);
+    void setRanges(Range ebvRange,Range zRange,int row);
 
     /**
      * @brief Push the SED root object and SED excluded path to the ParameterRule represented by the row 'row'.
@@ -78,13 +81,16 @@ public:
      * @param row
      * @return the ParameterRule.
      */
-    const Euclid::PhosphorosUiDm::ParameterRule& getRule(int row) const;
+    const ParameterRule& getRule(int row) const;
 
 private:
-    std::list<QString> getItemsRepresentation(const Euclid::PhosphorosUiDm::ParameterRule& rule,int id) const;
-    std::map<int,Euclid::PhosphorosUiDm::ParameterRule> m_parameter_rules;
+    std::list<QString> getItemsRepresentation(const ParameterRule& rule,int id) const;
+    std::map<int,ParameterRule> m_parameter_rules;
     std::string m_sed_root_path;
     std::string m_red_root_path;
 };
+
+}
+}
 
 #endif // PARAMETERRULEMODEL_H

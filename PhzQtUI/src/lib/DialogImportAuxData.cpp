@@ -7,6 +7,12 @@
 #include "ui_DialogImportAuxData.h"
 #include "PhzQtUI/FileUtils.h"
 
+using namespace std;
+
+namespace Euclid {
+namespace PhzQtUI {
+
+
 DialogImportAuxData::DialogImportAuxData(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogImportAuxData)
@@ -19,8 +25,7 @@ DialogImportAuxData::~DialogImportAuxData()
     delete ui;
 }
 
-
-void DialogImportAuxData::setData(std::string title,std::string parentFolderFull,std::string parentFolderDisplay){
+void DialogImportAuxData::setData(string title,string parentFolderFull,string parentFolderDisplay){
     ui->lbl_title->setText(QString::fromStdString(title));
     ui->txt_targetGroup->setText(QString::fromStdString(parentFolderDisplay));
     m_parent_folder=parentFolderFull;
@@ -94,7 +99,10 @@ void DialogImportAuxData::on_btn_import_clicked()
 
         // fill the dest folder
         QFileInfo dest_info(dest_folder);
-        Euclid::PhosphorosUiDm::FileUtils::copyRecursively(info.absoluteFilePath(),dest_info.absoluteFilePath());
+        FileUtils::copyRecursively(info.absoluteFilePath(),dest_info.absoluteFilePath());
     }
     accept();
+}
+
+}
 }

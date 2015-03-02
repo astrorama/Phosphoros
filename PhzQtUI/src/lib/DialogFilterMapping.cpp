@@ -6,6 +6,12 @@
 #include "PhzQtUI/XYDataSetTreeModel.h"
 #include "PhzQtUI/FileUtils.h"
 
+using namespace std;
+
+namespace Euclid {
+namespace PhzQtUI {
+
+
 DialogFilterMapping::DialogFilterMapping(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogFilterMapping)
@@ -19,7 +25,7 @@ DialogFilterMapping::~DialogFilterMapping()
 }
 
 
-void DialogFilterMapping::setFilter(const Euclid::PhosphorosUiDm::FilterMapping& filter, const std::list<std::string>& columns){
+void DialogFilterMapping::setFilter(const FilterMapping& filter, const list<string>& columns){
     ui->cb_error->clear();
     ui->cb_error->addItem("");
     ui->cb_flux->clear();
@@ -39,7 +45,7 @@ void DialogFilterMapping::setFilter(const Euclid::PhosphorosUiDm::FilterMapping&
 
 
 
-    std::string path_filter = Euclid::PhosphorosUiDm::FileUtils::getFilterRootPath(true);
+    string path_filter = FileUtils::getFilterRootPath(true);
 
     XYDataSetTreeModel* treeModel_filter = new XYDataSetTreeModel();
     treeModel_filter->loadDirectory(path_filter,true,"Filters");
@@ -50,7 +56,7 @@ void DialogFilterMapping::setFilter(const Euclid::PhosphorosUiDm::FilterMapping&
     connect( treeModel_filter, SIGNAL(itemChanged(QStandardItem*)), treeModel_filter,
                  SLOT(onItemChangedSingleLeaf(QStandardItem*)));
 
-    treeModel_filter->setState(filter.getFilterFile(),std::list<std::string>());
+    treeModel_filter->setState(filter.getFilterFile(),list<string>());
 }
 
 
@@ -70,7 +76,7 @@ void DialogFilterMapping::on_btn_save_clicked()
         return;
     }
 
-   Euclid::PhosphorosUiDm::FilterMapping filter;
+   FilterMapping filter;
    filter.setName(ui->txt_name->text().trimmed().toStdString());
    filter.setFluxColumn(ui->cb_flux->currentText().trimmed().toStdString());
    filter.setErrorColumn(ui->cb_error->currentText().trimmed().toStdString());
@@ -83,4 +89,7 @@ void DialogFilterMapping::on_btn_save_clicked()
 void DialogFilterMapping::on_btn_cancel_clicked()
 {
     reject();
+}
+
+}
 }

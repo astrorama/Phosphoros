@@ -1,6 +1,10 @@
 #include "PhzQtUI/ParameterRuleModel.h"
 
-ParameterRuleModel::ParameterRuleModel(std::map<int,Euclid::PhosphorosUiDm::ParameterRule> init_parameter_rules, std::string sedRootPath, std::string redRootPath):
+namespace Euclid {
+namespace PhzQtUI {
+
+
+ParameterRuleModel::ParameterRuleModel(std::map<int,ParameterRule> init_parameter_rules, std::string sedRootPath, std::string redRootPath):
     m_parameter_rules(init_parameter_rules) //copy the rules
   ,m_sed_root_path(sedRootPath)
   ,m_red_root_path(redRootPath)
@@ -24,7 +28,7 @@ ParameterRuleModel::ParameterRuleModel(std::map<int,Euclid::PhosphorosUiDm::Para
 }
 
 
-std::list<QString> ParameterRuleModel::getItemsRepresentation(const Euclid::PhosphorosUiDm::ParameterRule& rule, int id) const{
+std::list<QString> ParameterRuleModel::getItemsRepresentation(const ParameterRule& rule, int id) const{
 
     std::string status_sed="All";
     if (rule.getExcludedSeds().size()>0){
@@ -58,7 +62,7 @@ std::list<QString> ParameterRuleModel::getItemsRepresentation(const Euclid::Phos
      return list;
 }
 
-const std::map<int,Euclid::PhosphorosUiDm::ParameterRule>& ParameterRuleModel::getParameterRules() const{
+const std::map<int,ParameterRule>& ParameterRuleModel::getParameterRules() const{
     return m_parameter_rules;
 }
 
@@ -68,7 +72,7 @@ const QString ParameterRuleModel::getValue(int row,int column) const{
 }
 
 
-void ParameterRuleModel::setRanges(Euclid::PhosphorosUiDm::Range ebvRange,Euclid::PhosphorosUiDm::Range zRange,int row){
+void ParameterRuleModel::setRanges(Range ebvRange,Range zRange,int row){
      int ref = getValue(row,7).toInt();
       m_parameter_rules[ref].setEbvRange(std::move(ebvRange));
       m_parameter_rules[ref].setZRange(std::move(zRange));
@@ -121,11 +125,11 @@ int ParameterRuleModel::newParameterRule(int duplicate_from_row ){
 
     if (duplicate_from_row>=0){
         int ref = getValue(duplicate_from_row,7).toInt();
-        Euclid::PhosphorosUiDm::ParameterRule rule=m_parameter_rules[ref];
+        ParameterRule rule=m_parameter_rules[ref];
         m_parameter_rules[max_ref]=rule;
     }
     else{
-         m_parameter_rules[max_ref]=Euclid::PhosphorosUiDm::ParameterRule();
+         m_parameter_rules[max_ref]=ParameterRule();
     }
 
     auto list = getItemsRepresentation( m_parameter_rules.at(max_ref),max_ref);
@@ -144,10 +148,12 @@ void ParameterRuleModel::deletRule(int row){
 }
 
 
-const Euclid::PhosphorosUiDm::ParameterRule& ParameterRuleModel::getRule(int row) const{
+const ParameterRule& ParameterRuleModel::getRule(int row) const{
     int ref = getValue(row,7).toInt();
     return m_parameter_rules.at(ref);
 }
 
+}
+}
 
 

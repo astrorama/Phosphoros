@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DialogPhotometricCorrectionComputation</class>
+ <class>Euclid::PhzQtUI::DialogPhotometricCorrectionComputation</class>
  <widget class="QDialog" name="DialogPhotometricCorrectionComputation">
   <property name="geometry">
    <rect>

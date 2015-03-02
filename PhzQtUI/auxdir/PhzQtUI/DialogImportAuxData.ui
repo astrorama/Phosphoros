@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DialogImportAuxData</class>
+ <class>Euclid::PhzQtUI::DialogImportAuxData</class>
  <widget class="QDialog" name="DialogImportAuxData">
   <property name="geometry">
    <rect>

@@ -5,6 +5,10 @@
 #include "SurveyFilterMapping.h"
 #include <map>
 
+namespace Euclid {
+namespace PhzQtUI {
+
+
 /**
  * @brief The SurveyModel class
  * This class provide a Model to be used in TableView.
@@ -99,7 +103,7 @@ public:
    *
    * @param row the model row number representing the survey.
    */
-  void setFilters(std::list<Euclid::PhosphorosUiDm::FilterMapping> newFilters,
+  void setFilters(std::list<FilterMapping> newFilters,
       int row);
 
   /**
@@ -107,12 +111,15 @@ public:
    *
    * @param row the model row number representing the survey.
    */
-  const std::list<Euclid::PhosphorosUiDm::FilterMapping>& getFilters(int row);
+  const std::list<FilterMapping>& getFilters(int row);
 
 private:
-  std::map<int, Euclid::PhosphorosUiDm::SurveyFilterMapping> m_survey_filter_mappings;
+  std::map<int, SurveyFilterMapping> m_survey_filter_mappings;
   const QString getValue(int row, int column) const;
   std::string m_root_path;
 };
+
+}
+}
 
 #endif // SURVEYMODEL_H

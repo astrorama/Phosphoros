@@ -5,6 +5,9 @@
 #include <QModelIndex>
 #include "FilterMapping.h"
 
+namespace Euclid {
+namespace PhzQtUI {
+
 namespace Ui {
 class FormSurveyMapping;
 }
@@ -32,7 +35,7 @@ private slots:
 
     void filterSelectionChanged(QModelIndex, QModelIndex);
 
-    void filterEditionPopupClosing(Euclid::PhosphorosUiDm::FilterMapping);
+    void filterEditionPopupClosing(FilterMapping);
 
     void on_btn_MapToHome_clicked();
 
@@ -68,5 +71,8 @@ private:
     void setFilterMappingInView();
     void loadColumnFromFile(std::string path);
 };
+
+}
+}
 
 #endif // FORMSURVEYMAPPING_H

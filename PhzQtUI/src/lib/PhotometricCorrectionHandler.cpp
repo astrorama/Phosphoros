@@ -14,7 +14,7 @@
 #include "XYDataset/AsciiParser.h"
 
 namespace Euclid {
-namespace PhosphorosUiDm {
+namespace PhzQtUI {
 
 std::list<std::string> PhotometricCorrectionHandler::getCompatibleCorrectionFiles(std::list<std::string> selected_filters){
       std::string folder = FileUtils::getPhotCorrectionsRootPath(true);

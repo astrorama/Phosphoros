@@ -5,7 +5,7 @@
 #include "FilterMapping.h"
 
 namespace Euclid {
-namespace PhosphorosUiDm {
+namespace PhzQtUI {
 
 /**
  * @class SurveyFilterMapping

@@ -1,10 +1,13 @@
 #include "PhzQtUI/SurveyModel.h"
 
+namespace Euclid {
+namespace PhzQtUI {
+
 SurveyModel::SurveyModel(){ }
 
 void SurveyModel::loadSurvey(std::string path){
     m_root_path=path;
-    m_survey_filter_mappings=Euclid::PhosphorosUiDm::SurveyFilterMapping::loadSurveysFromFolder(path);
+    m_survey_filter_mappings=SurveyFilterMapping::loadSurveysFromFolder(path);
 
     this->setColumnCount(4);
     this->setRowCount(m_survey_filter_mappings.size());
@@ -35,14 +38,14 @@ int SurveyModel::newSurvey(int duplicate_from_row ){
 
     if (duplicate_from_row>=0){
         int ref = getValue(duplicate_from_row,3).toInt();
-        Euclid::PhosphorosUiDm::SurveyFilterMapping ref_survey=m_survey_filter_mappings.at(ref);
+        SurveyFilterMapping ref_survey=m_survey_filter_mappings.at(ref);
 
         m_survey_filter_mappings[max_ref]=ref_survey;
         m_survey_filter_mappings[max_ref].setName(m_survey_filter_mappings[max_ref].getName() + "_Copy");
 
     }
     else{
-         m_survey_filter_mappings[max_ref]=Euclid::PhosphorosUiDm::SurveyFilterMapping(m_root_path);
+         m_survey_filter_mappings[max_ref]=SurveyFilterMapping(m_root_path);
          m_survey_filter_mappings.at(max_ref).setName("New Survey Filter Mapping");
     }
 
@@ -96,7 +99,7 @@ void SurveyModel::setSourceIdColumn(std::string newSourceIdColumn, int row){
     m_survey_filter_mappings.at(ref).setSourceIdColumn(newSourceIdColumn);
 }
 
-void SurveyModel::setFilters(std::list<Euclid::PhosphorosUiDm::FilterMapping> newFilters, int row){
+void SurveyModel::setFilters(std::list<FilterMapping> newFilters, int row){
     int ref = getValue(row,3).toInt();
     m_survey_filter_mappings.at(ref).setFilters(std::move(newFilters));
 
@@ -117,7 +120,10 @@ std::string SurveyModel::getSourceIdColumn( int row){
     return m_survey_filter_mappings.at(ref).getSourceIdColumn();
 }
 
-const std::list<Euclid::PhosphorosUiDm::FilterMapping>&  SurveyModel::getFilters(int row){
+const std::list<FilterMapping>&  SurveyModel::getFilters(int row){
     int ref = getValue(row,3).toInt();
     return m_survey_filter_mappings.at(ref).getFilters();
+}
+
+}
 }

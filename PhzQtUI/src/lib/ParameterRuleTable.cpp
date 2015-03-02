@@ -2,6 +2,9 @@
 #include <QHeaderView>
 #include "PhzQtUI/ParameterRuleTable.h"
 
+namespace Euclid {
+namespace PhzQtUI {
+
 ParameterRuleTable::ParameterRuleTable(QWidget*& parent): QTableView(parent){
 
 }
@@ -11,7 +14,7 @@ ParameterRuleTable::ParameterRuleTable(QDialog*&){
 
 }
 
-void ParameterRuleTable::loadParameterRules(std::map<int,Euclid::PhosphorosUiDm::ParameterRule> parameter_rules,std::string sedRootPath ,std::string redRootPath){
+void ParameterRuleTable::loadParameterRules(std::map<int,ParameterRule> parameter_rules,std::string sedRootPath ,std::string redRootPath){
     ParameterRuleModel* new_model = new ParameterRuleModel(parameter_rules,sedRootPath,redRootPath);
     setModel(new_model);
     this->setColumnHidden(7, true);
@@ -54,7 +57,7 @@ void ParameterRuleTable::newRule(bool duplicate_selected){
 }
 
 
-void ParameterRuleTable::setRangesToSelectedRule(Euclid::PhosphorosUiDm::Range ebvRange, Euclid::PhosphorosUiDm::Range zRange){
+void ParameterRuleTable::setRangesToSelectedRule(Range ebvRange, Range zRange){
     QModelIndexList index = this->selectionModel()->selectedIndexes();
     getModel()->setRanges(std::move(ebvRange),std::move(zRange),index[0].row());
 }
@@ -71,8 +74,11 @@ void ParameterRuleTable::setRedCurvesToSelectedRule(std::string root, std::list<
 }
 
 
-const Euclid::PhosphorosUiDm::ParameterRule& ParameterRuleTable::getSelectedRule() const{
+const ParameterRule& ParameterRuleTable::getSelectedRule() const{
     QModelIndexList index = this->selectionModel()->selectedIndexes();
     return cGetModel()->getRule(index[0].row());
 
+}
+
+}
 }

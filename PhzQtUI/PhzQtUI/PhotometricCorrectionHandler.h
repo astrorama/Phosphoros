@@ -11,7 +11,7 @@
 namespace po = boost::program_options;
 
 namespace Euclid {
-namespace PhosphorosUiDm {
+namespace PhzQtUI {
 
 /**
  * @brief The PhotometricCorrectionHandler class

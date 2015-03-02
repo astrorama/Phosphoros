@@ -5,6 +5,10 @@
 #include "ParameterRule.h"
 #include "ParameterRuleModel.h"
 
+namespace Euclid {
+namespace PhzQtUI {
+
+
 /**
  * @brief The ParameterRuleTable class
  *  A tableView to display the ParameterRuleModel.
@@ -22,7 +26,7 @@ public:
         * @param sedRootPath
         * @param redRootPath
         */
-       void loadParameterRules(std::map<int,Euclid::PhosphorosUiDm::ParameterRule> init_parameter_rules, std::string sedRootPath ,std::string redRootPath);
+       void loadParameterRules(std::map<int,ParameterRule> init_parameter_rules, std::string sedRootPath ,std::string redRootPath);
 
        /**
         * @brief Check if there is a row currently selected.
@@ -34,14 +38,14 @@ public:
         * @brief Get the currently selected ParameterRule
         * @return the selected ParameterRule.
         */
-       const Euclid::PhosphorosUiDm::ParameterRule& getSelectedRule() const;
+       const ParameterRule& getSelectedRule() const;
 
        /**
         * @brief Push the E(B-V) and Redshift range to the selected ParameterRule.
         * @param ebvRange
         * @param zRange
         */
-       void setRangesToSelectedRule(Euclid::PhosphorosUiDm::Range ebvRange, Euclid::PhosphorosUiDm::Range zRange);
+       void setRangesToSelectedRule(Range ebvRange, Range zRange);
 
        /**
         * @brief Push the SED root object and SED excluded path to the selected ParameterRule.
@@ -82,4 +86,6 @@ public:
        const ParameterRuleModel *cGetModel() const;
 };
 
+}
+}
 #endif // PARAMETERRULETABLE_H

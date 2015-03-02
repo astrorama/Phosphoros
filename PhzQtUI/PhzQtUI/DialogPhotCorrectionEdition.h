@@ -4,6 +4,9 @@
 #include <QDialog>
 #include "PhzDataModel/PhotometricCorrectionMap.h"
 
+namespace Euclid {
+namespace PhzQtUI {
+
 namespace Ui {
 class DialogPhotCorrectionEdition;
 }
@@ -48,7 +51,9 @@ private slots:
 private:
     Ui::DialogPhotCorrectionEdition *ui;
     std::string m_file_path;
-    Euclid::PhzDataModel::PhotometricCorrectionMap m_map;
+    PhzDataModel::PhotometricCorrectionMap m_map;
 };
 
+}
+}
 #endif // DIALOGPHOTCORRECTIONEDITION_H

@@ -11,6 +11,9 @@
 
 namespace po = boost::program_options;
 
+namespace Euclid {
+namespace PhzQtUI {
+
 namespace Ui {
 class FormAnalysis;
 }
@@ -69,7 +72,7 @@ private slots:
 private:
     Ui::FormAnalysis *ui;
     std::list<std::string> getSelectedFilters(bool return_path=false);
-    std::list<Euclid::PhosphorosUiDm::FilterMapping> getSelectedFilterMapping();
+    std::list<FilterMapping> getSelectedFilterMapping();
 
     std::string getSelectedSurveySourceColumn();
     void enableDisablePage(bool enabled);
@@ -88,9 +91,11 @@ private:
     void setRunAnnalysisEnable(bool enabled);
     std::map < std::string, po::variable_value > getRunOptionMap();
     void updateAnalysisProgressBar(size_t step, size_t total);
-    std::map<int,Euclid::PhosphorosUiDm::SurveyFilterMapping>  m_analysis_survey_list;
-    std::map<int,Euclid::PhosphorosUiDm::ModelSet> m_analysis_model_list;
+    std::map<int,SurveyFilterMapping>  m_analysis_survey_list;
+    std::map<int,ModelSet> m_analysis_model_list;
 
 };
 
+}
+}
 #endif // FORMANALYSIS_H
