@@ -210,7 +210,7 @@ std::list<FilterMapping> FormAnalysis::getSelectedFilterMapping(){
     if (survey.second.getName().compare(ui->cb_AnalysisSurvey->currentText().toStdString())==0){
       for (auto& name : filterNames){
         for (auto& filter : survey.second.getFilters()){
-          if(filter.getName().compare(name)){
+          if(filter.getName().compare(name)==0){
             list.push_back(filter);
           }
         }
