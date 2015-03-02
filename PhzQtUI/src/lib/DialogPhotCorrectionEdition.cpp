@@ -1,6 +1,7 @@
 #include <QDir>
 #include <QStandardItemModel>
 #include <QMessageBox>
+#include <QAbstractItemView>
 
 #include "PhzQtUI/DialogPhotCorrectionEdition.h"
 #include "ui_DialogPhotCorrectionEdition.h"
@@ -45,6 +46,10 @@ void DialogPhotCorrectionEdition::setCorrectionsFile(string filePath){
     model->appendRow(items);
 
     ui->tableView->setModel(model);
+
+
+    ui->tableView->setEditTriggers(QAbstractItemView::DoubleClicked);
+
 }
 
 void DialogPhotCorrectionEdition::on_btn_Edit_clicked()
@@ -54,6 +59,18 @@ void DialogPhotCorrectionEdition::on_btn_Edit_clicked()
     ui->btn_Save->setEnabled(true);
     ui->buttonBox->setEnabled(false);
     ui->tableView->setEnabled(true);
+    ui->tableView->setEnabled(true);
+
+}
+
+
+void DialogPhotCorrectionEdition::on_tableView_doubleClicked ( const QModelIndex & ){
+     ui->btn_Edit->setEnabled(false);
+     ui->btn_Cancel->setEnabled(true);
+     ui->btn_Save->setEnabled(true);
+     ui->buttonBox->setEnabled(false);
+     ui->tableView->setEnabled(true);
+     ui->tableView->setEnabled(true);
 }
 
 void DialogPhotCorrectionEdition::on_btn_Cancel_clicked()
@@ -62,7 +79,6 @@ void DialogPhotCorrectionEdition::on_btn_Cancel_clicked()
     ui->btn_Cancel->setEnabled(false);
     ui->btn_Save->setEnabled(false);
     ui->buttonBox->setEnabled(true);
-    ui->tableView->setEnabled(false);
 
     setCorrectionsFile(m_file_path);
 }

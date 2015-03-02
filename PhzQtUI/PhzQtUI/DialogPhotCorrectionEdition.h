@@ -2,6 +2,7 @@
 #define DIALOGPHOTCORRECTIONEDITION_H
 
 #include <QDialog>
+#include <QModelIndex>
 #include "PhzDataModel/PhotometricCorrectionMap.h"
 
 namespace Euclid {
@@ -47,6 +48,12 @@ private slots:
      * switch back the popup in view
      */
     void on_btn_Save_clicked();
+
+    /**
+     * SLOT Switch the popup in edition (occure when the user starts edition by
+     * double-clicking the grid)
+     */
+    void on_tableView_doubleClicked ( const QModelIndex & );
 
 private:
     Ui::DialogPhotCorrectionEdition *ui;
