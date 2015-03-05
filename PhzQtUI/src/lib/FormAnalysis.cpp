@@ -467,6 +467,7 @@ void FormAnalysis::on_btn_BrowseOutput_clicked()
 {
   QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setOption(QFileDialog::DontUseNativeDialog);
     dialog.setNameFilter("Text-Files (*.txt)");
     dialog.setDefaultSuffix("txt");
     if (dialog.exec()){
@@ -479,6 +480,7 @@ void FormAnalysis::on_btn_BrowseOutputPdf_clicked()
 {
   QFileDialog dialog(this);
       dialog.setFileMode(QFileDialog::AnyFile);
+      dialog.setOption(QFileDialog::DontUseNativeDialog);
       dialog.setNameFilter("FITS-Files (*.fits)");
       dialog.setDefaultSuffix("fits");
       if (dialog.exec()){
