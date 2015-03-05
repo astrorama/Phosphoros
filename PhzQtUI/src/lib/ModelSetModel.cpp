@@ -99,10 +99,12 @@ int ModelSetModel::newSet(int duplicate_from_row ){
 
 
     if (duplicate_from_row>=0){
-        text_1=getName(duplicate_from_row)+ "_Copy";
+        text_1=QString::fromStdString(getDuplicateName(getName(duplicate_from_row).toStdString()));
         text_2=getNumber(duplicate_from_row);
 
         set.setParameterRules(getParameterRules(duplicate_from_row));
+
+
     }
 
      set.setName(text_1.toStdString());
@@ -132,7 +134,7 @@ void ModelSetModel::saveSet(int row,std::string oldName){
     m_set_list.at(ref).saveModelSet(oldName);
 }
 
-bool ModelSetModel::checkUniqueName(QString new_name, int id){
+bool ModelSetModel::checkUniqueName(QString new_name, int id) const{
 
 
     // TODO Complete by a check that the name can be a name of a file (no reserved char)
@@ -147,6 +149,22 @@ bool ModelSetModel::checkUniqueName(QString new_name, int id){
     }
 
     return true;
+}
+
+
+
+std::string ModelSetModel::getDuplicateName(std::string name) const{
+  auto new_name=name+ "_Copy";
+  if (checkUniqueName(QString::fromStdString(new_name),-1)){
+    return new_name;
+  }
+
+  int i=2;
+  while(!checkUniqueName(QString::fromStdString(new_name + "("+std::to_string(i)+")"),-1)){
+    ++i;
+  }
+
+  return new_name + "("+std::to_string(i)+")";
 }
 
 

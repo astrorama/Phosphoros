@@ -117,6 +117,9 @@ private:
   std::map<int, SurveyFilterMapping> m_survey_filter_mappings;
   const QString getValue(int row, int column) const;
   std::string m_root_path;
+
+
+  std::string getDuplicateName(std::string name) const;
 };
 
 }

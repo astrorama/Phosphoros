@@ -364,13 +364,12 @@ void FormAnalysis::on_btn_GetConfigGrid_clicked() {
         "It is not possible to save the Grid under the name you have provided. Please enter a new name.",
         QMessageBox::Ok);
   } else {
-      QFileDialog dialog(this);
 
-      dialog.setFileMode(QFileDialog::AnyFile);
-      if (dialog.exec()){
-          QStringList config_fileNames=dialog.selectedFiles();
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Configuration File"),
+                               "",tr("Config (*.conf)"));
+      if (fileName.length()>0){
           auto config_map = getGridConfiguration();
-          PhzUITools::ConfigurationWriter::writeConfiguration(config_map,config_fileNames[0].toStdString());
+          PhzUITools::ConfigurationWriter::writeConfiguration(config_map,fileName.toStdString());
 
       }
   }
@@ -384,25 +383,33 @@ void FormAnalysis::on_btn_RunGrid_clicked() {
         "It is not possible to save the Grid under the name you have provided. Please enter a new name.",
         QMessageBox::Ok);
   } else {
-   try{
-    auto config_map = getGridConfiguration();
-    PhzConfiguration::CreatePhotometryGridConfiguration conf { config_map };
-    PhzModeling::PhotometryGridCreator creator { conf.getSedDatasetProvider(),
-        conf.getReddeningDatasetProvider(), conf.getFilterDatasetProvider() };
 
-    auto param_space = PhzDataModel::createAxesTuple(conf.getZList(),
-        conf.getEbvList(), conf.getReddeningCurveList(), conf.getSedList());
+    if (checkGridSelection(true, false) &&
+      QMessageBox::warning(this, "Override existing file...",
+          "A Photometric Grid file with the very same name as the one you provided already exist. "
+          "Do you want to replace it?",
+                         QMessageBox::Yes|QMessageBox::No)==QMessageBox::Yes){
 
-    std::function<void(size_t,size_t)> monitor_function = std::bind(&FormAnalysis::updateGridProgressBar, this, std::placeholders::_1, std::placeholders::_2);
+     try{
+      auto config_map = getGridConfiguration();
+      PhzConfiguration::CreatePhotometryGridConfiguration conf { config_map };
+      PhzModeling::PhotometryGridCreator creator { conf.getSedDatasetProvider(),
+          conf.getReddeningDatasetProvider(), conf.getFilterDatasetProvider() };
 
-    auto grid = creator.createGrid(param_space, conf.getFilterList(),monitor_function);
-    auto output = conf.getOutputFunction();
-    output(grid);
-    }
-    catch(...){
-      QMessageBox::warning(this, "Error in the computation...",
-                        "Sorry, nn error occured during the computation.",
-                        QMessageBox::Close);
+      auto param_space = PhzDataModel::createAxesTuple(conf.getZList(),
+          conf.getEbvList(), conf.getReddeningCurveList(), conf.getSedList());
+
+      std::function<void(size_t,size_t)> monitor_function = std::bind(&FormAnalysis::updateGridProgressBar, this, std::placeholders::_1, std::placeholders::_2);
+
+      auto grid = creator.createGrid(param_space, conf.getFilterList(),monitor_function);
+      auto output = conf.getOutputFunction();
+      output(grid);
+      }
+      catch(...){
+        QMessageBox::warning(this, "Error in the computation...",
+                          "Sorry, an error occured during the computation.",
+                          QMessageBox::Close);
+      }
     }
   }
 
@@ -470,6 +477,7 @@ void FormAnalysis::on_btn_BrowseOutput_clicked()
     dialog.setOption(QFileDialog::DontUseNativeDialog);
     dialog.setNameFilter("Text-Files (*.txt)");
     dialog.setDefaultSuffix("txt");
+    dialog.setLabelText( QFileDialog::Accept, "Select" );
     if (dialog.exec()){
       ui->txt_OutputCatalog->setText(dialog.selectedFiles()[0]);
       setRunAnnalysisEnable(true);
@@ -483,6 +491,7 @@ void FormAnalysis::on_btn_BrowseOutputPdf_clicked()
       dialog.setOption(QFileDialog::DontUseNativeDialog);
       dialog.setNameFilter("FITS-Files (*.fits)");
       dialog.setDefaultSuffix("fits");
+      dialog.setLabelText( QFileDialog::Accept, "Select" );
       if (dialog.exec()){
         ui->txt_OutputPdf->setText(dialog.selectedFiles()[0]);
         setRunAnnalysisEnable(true);
@@ -491,13 +500,11 @@ void FormAnalysis::on_btn_BrowseOutputPdf_clicked()
 
 void FormAnalysis::on_btn_GetConfigAnalysis_clicked()
 {
-  QFileDialog dialog(this);
-
-   dialog.setFileMode(QFileDialog::AnyFile);
-   if (dialog.exec()){
-       QStringList config_fileNames=dialog.selectedFiles();
+  QString fileName = QFileDialog::getSaveFileName(this, tr("Save Configuration File"),
+                                 "",tr("Config (*.conf)"));
+   if (fileName.length()>0){
        auto config_map = getRunOptionMap();
-       PhzUITools::ConfigurationWriter::writeConfiguration(config_map,config_fileNames[0].toStdString());
+       PhzUITools::ConfigurationWriter::writeConfiguration(config_map,fileName.toStdString());
    }
 }
 

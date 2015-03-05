@@ -57,7 +57,9 @@ public:
      * @param id
      * @return true if the name can be used
      */
-    bool checkUniqueName(QString new_name, int id);
+    bool checkUniqueName(QString new_name, int id) const;
+
+
 
     /**
      * @brief Get the Name of the ModelSet represented by the row 'row'
@@ -109,6 +111,9 @@ private:
     void setValue(int row, int column,const QString& value);
     std::map<int,ModelSet> m_set_list;
     std::string m_root_path;
+
+
+    std::string getDuplicateName(std::string name) const;
 
 
 };

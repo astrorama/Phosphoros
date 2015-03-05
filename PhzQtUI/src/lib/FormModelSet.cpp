@@ -89,7 +89,7 @@ void FormModelSet::on_btn_SetDuplicate_clicked()
 void FormModelSet::on_btn_SetDelete_clicked()
 {
     if (QMessageBox::question( this, "Confirm deletion...",
-                                  "Do you really want to delete this Model Set?",
+                                  "Do you really want to delete the Model Set '"+ui->tableView_Set->getSelectedName()+"' ?",
                                   QMessageBox::Yes|QMessageBox::Cancel )==QMessageBox::Yes){
         ui->tableView_Set->deleteSelectedSet(true);
     }
@@ -98,6 +98,7 @@ void FormModelSet::on_btn_SetDelete_clicked()
 void FormModelSet::on_btn_SetEdit_clicked()
 {
     setModelInEdition();
+    on_btn_SetToRules_clicked();
 }
 
 void FormModelSet::on_btn_SetCancel_clicked()

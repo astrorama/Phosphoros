@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>522</width>
-    <height>593</height>
+    <width>530</width>
+    <height>525</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -204,13 +204,6 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
-      <widget class="QPushButton" name="btn_import">
-       <property name="text">
-        <string>Import and close</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -222,6 +215,20 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_cancel">
+       <property name="text">
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_import">
+       <property name="text">
+        <string>Import</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -238,29 +245,19 @@
      </property>
     </spacer>
    </item>
-   <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel</set>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <resources/>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
+   <sender>btn_cancel</sender>
+   <signal>clicked()</signal>
    <receiver>Euclid::PhzQtUI::DialogImportAuxData</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>260</x>
-     <y>568</y>
+     <x>378</x>
+     <y>493</y>
     </hint>
     <hint type="destinationlabel">
      <x>260</x>

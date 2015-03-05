@@ -41,7 +41,9 @@ int SurveyModel::newSurvey(int duplicate_from_row ){
         SurveyFilterMapping ref_survey=m_survey_filter_mappings.at(ref);
 
         m_survey_filter_mappings[max_ref]=ref_survey;
-        m_survey_filter_mappings[max_ref].setName(m_survey_filter_mappings[max_ref].getName() + "_Copy");
+
+        std::string new_name = getDuplicateName(m_survey_filter_mappings[max_ref].getName());
+        m_survey_filter_mappings[max_ref].setName(new_name);
 
     }
     else{
@@ -73,7 +75,10 @@ void SurveyModel::saveSurvey(int row,std::string oldName){
 }
 
 bool SurveyModel::checkUniqueName(QString new_name, int row) const{
-        int ref = getValue(row,3).toInt();
+        int ref = -1;
+        if (row>=0){
+          ref =getValue(row,3).toInt();
+        }
     for(auto it = m_survey_filter_mappings.begin(); it != m_survey_filter_mappings.end(); ++it ) {
         if (it->first==ref){
             continue;
@@ -123,6 +128,21 @@ std::string SurveyModel::getSourceIdColumn( int row){
 const std::list<FilterMapping>&  SurveyModel::getFilters(int row){
     int ref = getValue(row,3).toInt();
     return m_survey_filter_mappings.at(ref).getFilters();
+}
+
+std::string SurveyModel::getDuplicateName(std::string name) const{
+
+  auto new_name=name+ "_Copy";
+  if (checkUniqueName(QString::fromStdString(new_name),-1)){
+    return new_name;
+  }
+
+  int i=2;
+  while(!checkUniqueName(QString::fromStdString(new_name + "("+std::to_string(i)+")"),-1)){
+    ++i;
+  }
+
+  return new_name + "("+std::to_string(i)+")";
 }
 
 }
