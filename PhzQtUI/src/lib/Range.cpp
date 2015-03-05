@@ -19,11 +19,11 @@ Range::Range(double min,double max, double step):m_min(min), m_max(max),m_step(s
 std::string Range::getStringRepresentation() const{
 
     std::ostringstream convert;
-    convert <<"[";
-    convert << std::fixed << std::setprecision(2) << m_min;
-    convert <<" :: ";
+
+    convert << std::fixed << std::setprecision(1) << m_min;
+    convert <<" : ";
     convert<< m_max;
-    convert <<"] by ";
+    convert <<" ; ";
     convert <<  std::setprecision(4) << (m_step);
 
     return convert.str();

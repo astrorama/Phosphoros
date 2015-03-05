@@ -24,8 +24,19 @@ public:
     ParameterRule();
 
     /**
+     * @brief get Reddening Curves Number
+     * @return the cardinality of selected Reddening Curves in the the ParameterRule
+     */
+    long  getRedCurveNumber() const;
+    /**
+     * @brief get SED Number
+     * @return the cardinality of selected SED in the the ParameterRule
+     */
+    long  getSedNumber() const;
+
+    /**
      * @brief get Model Number
-     * @return the cardinality of numbers which can be build from the ParameterRule
+     * @return the cardinality of models which can be build from the ParameterRule
      */
     long long getModelNumber() const;
 

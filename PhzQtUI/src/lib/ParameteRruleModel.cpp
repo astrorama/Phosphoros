@@ -30,17 +30,15 @@ ParameterRuleModel::ParameterRuleModel(std::map<int,ParameterRule> init_paramete
 
 std::list<QString> ParameterRuleModel::getItemsRepresentation(const ParameterRule& rule, int id) const{
 
-    std::string status_sed="All";
-    if (rule.getExcludedSeds().size()>0){
-        status_sed="Some";
-    }
+    long sed_number=rule.getSedNumber();
+    long total_sed_number = sed_number+rule.getExcludedSeds().size();
+    std::string status_sed=std::to_string(sed_number)+"/"+std::to_string(total_sed_number);
 
-    std::string status_red="All";
-    if (rule.getExcludedReddenings().size()>0){
-        status_red="Some";
-    }
+    long red_number=rule.getRedCurveNumber();
+    long total_red_number = red_number+rule.getExcludedReddenings().size();
+    std::string status_red=std::to_string(red_number)+"/"+std::to_string(total_red_number);
 
-     std::list<QString> list;
+    std::list<QString> list;
 
      std::string root_sed=rule.getSedRootObject(m_sed_root_path);
      if (root_sed.length()==0){
