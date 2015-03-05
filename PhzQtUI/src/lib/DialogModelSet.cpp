@@ -43,7 +43,6 @@ DialogModelSet::DialogModelSet(QWidget *parent) :
 
 DialogModelSet::~DialogModelSet()
 {
-    delete ui;
 }
 
  void DialogModelSet::setViewMode(){

@@ -1,6 +1,7 @@
 #ifndef DIALOGOPTIONS_H
 #define DIALOGOPTIONS_H
 
+#include <memory>
 #include <QDialog>
 
 namespace Euclid {
@@ -73,7 +74,7 @@ private slots:
     void on_btn_browseRoot_clicked();
 
 private:
-    Ui::DialogOptions *ui;
+    std::unique_ptr<Ui::DialogOptions> ui;
 };
 
 }

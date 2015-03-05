@@ -1,6 +1,7 @@
 #ifndef DIALOGMODELSET_H
 #define DIALOGMODELSET_H
 
+#include <memory>
 #include <map>
 #include <QDialog>
 #include <QItemSelection>
@@ -93,7 +94,7 @@ private slots:
      void on_btn_save_clicked();
 
 private:
-    Ui::DialogModelSet *ui;
+    std::unique_ptr<Ui::DialogModelSet> ui;
     bool m_insert=false;
     bool m_view_popup=false;
     bool m_singe_line=false;

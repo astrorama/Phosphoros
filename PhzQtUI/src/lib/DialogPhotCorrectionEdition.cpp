@@ -22,7 +22,6 @@ DialogPhotCorrectionEdition::DialogPhotCorrectionEdition(QWidget *parent) :
 
 DialogPhotCorrectionEdition::~DialogPhotCorrectionEdition()
 {
-    delete ui;
 }
 
 

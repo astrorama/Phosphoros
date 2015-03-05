@@ -21,7 +21,6 @@ FormAuxDataManagement::FormAuxDataManagement(QWidget *parent) :
 
 FormAuxDataManagement::~FormAuxDataManagement()
 {
-    delete ui;
 }
 
 

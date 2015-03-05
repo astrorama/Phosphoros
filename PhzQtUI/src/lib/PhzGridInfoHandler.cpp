@@ -207,11 +207,11 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
 
 }
 
-std::map<std::string, po::variable_value> PhzGridInfoHandler::GetConfigurationMap(
+std::map<std::string, boost::program_options::variable_value> PhzGridInfoHandler::GetConfigurationMap(
     std::string output_file, const PhzDataModel::ModelAxesTuple& axes,
     const std::list<std::string>& selected_filters) {
 
-  std::map < std::string, po::variable_value > options_map;
+  std::map < std::string, boost::program_options::variable_value > options_map;
 
   auto path_filename = FileUtils::getPhotmetricGridRootPath(true)
       + QString(QDir::separator()).toStdString() + output_file;

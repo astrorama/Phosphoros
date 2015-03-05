@@ -21,7 +21,6 @@ DialogFilterMapping::DialogFilterMapping(QWidget *parent) :
 
 DialogFilterMapping::~DialogFilterMapping()
 {
-    delete ui;
 }
 
 

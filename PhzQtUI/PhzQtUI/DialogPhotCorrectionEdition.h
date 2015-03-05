@@ -1,6 +1,7 @@
 #ifndef DIALOGPHOTCORRECTIONEDITION_H
 #define DIALOGPHOTCORRECTIONEDITION_H
 
+#include <memory>
 #include <QDialog>
 #include <QModelIndex>
 #include "PhzDataModel/PhotometricCorrectionMap.h"
@@ -56,7 +57,7 @@ private slots:
     void on_tableView_doubleClicked ( const QModelIndex & );
 
 private:
-    Ui::DialogPhotCorrectionEdition *ui;
+    std::unique_ptr<Ui::DialogPhotCorrectionEdition> ui;
     std::string m_file_path;
     PhzDataModel::PhotometricCorrectionMap m_map;
 };

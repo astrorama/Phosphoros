@@ -1,6 +1,7 @@
 #ifndef DIALOGIMPORTAUXDATA_H
 #define DIALOGIMPORTAUXDATA_H
 
+#include <memory>
 #include <QDialog>
 #include <string>
 
@@ -65,7 +66,7 @@ private slots:
     void on_btn_import_clicked();
 
 private:
-    Ui::DialogImportAuxData *ui;
+    std::unique_ptr<Ui::DialogImportAuxData> ui;
     std::string m_parent_folder;
 };
 

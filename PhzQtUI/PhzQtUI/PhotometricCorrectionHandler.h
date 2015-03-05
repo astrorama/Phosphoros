@@ -4,11 +4,13 @@
 #include <string>
 #include <list>
 #include <map>
-#include <boost/program_options.hpp>
 #include "PhzDataModel/PhotometricCorrectionMap.h"
 
-
-namespace po = boost::program_options;
+namespace boost{
+namespace program_options{
+ class variable_value;
+}
+}
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -58,7 +60,7 @@ public:
    /**
     * Get the photometric corrections computation executable configuration map
     */
-   static std::map<std::string, po::variable_value> GetConfigurationMap(
+   static std::map<std::string, boost::program_options::variable_value> GetConfigurationMap(
      std::string output_file_name,
      int iteration_number,
      double tolerance,

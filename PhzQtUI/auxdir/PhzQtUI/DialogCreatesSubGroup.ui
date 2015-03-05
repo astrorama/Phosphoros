@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>Euclid::PhzQtUI::DialogCreateSubGroup</class>
- <widget class="QDialog" name="DialogCreateSubGroup">
+ <widget class="QDialog" name="Euclid::PhzQtUI::DialogCreateSubGroup">
   <property name="geometry">
    <rect>
     <x>0</x>

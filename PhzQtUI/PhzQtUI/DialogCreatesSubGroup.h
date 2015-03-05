@@ -1,6 +1,7 @@
 #ifndef DIALOGCREATESUBGROUP_H
 #define DIALOGCREATESUBGROUP_H
 
+#include <memory>
 #include <QDialog>
 
 namespace Euclid {
@@ -45,7 +46,7 @@ private slots:
     void on_pushButton_clicked();
 
 private:
-    Ui::DialogCreateSubGroup *ui;
+    std::unique_ptr<Ui::DialogCreateSubGroup> ui;
     std::string m_parent_folder_full;
 };
 

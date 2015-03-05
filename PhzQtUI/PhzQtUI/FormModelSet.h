@@ -1,6 +1,7 @@
 #ifndef FORMMODELSET_H
 #define FORMMODELSET_H
 
+#include <memory>
 #include <QWidget>
 #include <QModelIndex>
 #include "ParameterRule.h"
@@ -54,7 +55,7 @@ private slots:
 
 
 private:
-    Ui::FormModelSet *ui;
+    std::unique_ptr<Ui::FormModelSet> ui;
     void setModelInEdition();
     void setModelInView();
 

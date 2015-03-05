@@ -1,6 +1,7 @@
 #ifndef DIALOGPHOTOMETRICCORRECTIONCOMPUTATION_H
 #define DIALOGPHOTOMETRICCORRECTIONCOMPUTATION_H
 
+#include <memory>
 #include <QDialog>
 #include <list>
 #include "PhzQtUI/FilterMapping.h"
@@ -93,7 +94,7 @@ private slots:
 
 
 private:
-    Ui::DialogPhotometricCorrectionComputation *ui;
+    std::unique_ptr<Ui::DialogPhotometricCorrectionComputation> ui;
     std::list<FilterMapping> m_selected_filters;
     std::string m_id_column;
     void setRunEnability();

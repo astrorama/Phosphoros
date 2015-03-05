@@ -19,11 +19,12 @@ FormSurveyMapping::FormSurveyMapping(QWidget *parent) :
     ui(new Ui::FormSurveyMapping)
 {
     ui->setupUi(this);
+    m_filterInsert=false;
+    m_mappingInsert=false;
 }
 
 FormSurveyMapping::~FormSurveyMapping()
 {
-    delete ui;
 }
 
 

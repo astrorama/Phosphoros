@@ -1,6 +1,7 @@
 #ifndef FORMSURVEYMAPPING_H
 #define FORMSURVEYMAPPING_H
 
+#include <memory>
 #include <QWidget>
 #include <QModelIndex>
 #include "FilterMapping.h"
@@ -62,7 +63,7 @@ private slots:
     void on_btn_mappingToFilter_clicked();
 
 private:
-    Ui::FormSurveyMapping *ui;
+    std::unique_ptr<Ui::FormSurveyMapping> ui;
     bool m_mappingInsert;
     bool m_filterInsert;
     std::list<std::string> m_column_from_file;

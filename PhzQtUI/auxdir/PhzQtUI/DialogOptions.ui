@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>Euclid::PhzQtUI::DialogOptions</class>
- <widget class="QDialog" name="DialogOptions">
+ <widget class="QDialog" name="Euclid::PhzQtUI::DialogOptions">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -409,33 +409,17 @@
  <connections>
   <connection>
    <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>DialogOptions</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>DialogOptions</receiver>
-   <slot>reject()</slot>
+   <receiver>Euclid::PhzQtUI::DialogOptions</receiver>
+   <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>283</x>
+     <y>444</y>
     </hint>
     <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
+     <x>283</x>
+     <y>234</y>
     </hint>
    </hints>
   </connection>

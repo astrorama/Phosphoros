@@ -12,11 +12,11 @@ FormModelSet::FormModelSet(QWidget *parent) :
     ui(new Ui::FormModelSet)
 {
     ui->setupUi(this);
+    m_setInsert=false;
 }
 
 FormModelSet::~FormModelSet()
 {
-    delete ui;
 }
 
 

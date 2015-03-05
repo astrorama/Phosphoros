@@ -21,7 +21,6 @@ DialogOptions::DialogOptions(QWidget *parent) :
 
 DialogOptions::~DialogOptions()
 {
-    delete ui;
 }
 
 void DialogOptions::on_btn_ManageFilter_clicked()
@@ -35,6 +34,7 @@ void DialogOptions::on_btn_ManageAuxData_clicked()
     goToAuxDataManagement();
     this->close();
 }
+
 
 void DialogOptions::on_btn_editGeneral_clicked()
 {

@@ -17,7 +17,6 @@ DialogCreateSubGroup::DialogCreateSubGroup(QWidget *parent) :
 
 DialogCreateSubGroup::~DialogCreateSubGroup()
 {
-    delete ui;
 }
 
 void DialogCreateSubGroup::setParentFolder(string folderFull, string folderDisplay){

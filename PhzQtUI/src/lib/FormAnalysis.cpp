@@ -4,6 +4,7 @@
 #include <QDir>
 #include <functional>
 #include <QFileDialog>
+#include <boost/program_options.hpp>
 
 #include "PhzConfiguration/CreatePhotometryGridConfiguration.h"
 #include "PhzModeling/PhotometryGridCreator.h"
@@ -34,7 +35,6 @@ FormAnalysis::FormAnalysis(QWidget *parent) :
 }
 
 FormAnalysis::~FormAnalysis() {
-  delete ui;
 }
 
 ///////////////////////////////////////////////////
@@ -242,7 +242,7 @@ bool FormAnalysis::checkGridSelection(bool addFileCheck, bool acceptNewFile) {
   return acceptNewFile || info.exists();
 }
 
-std::map<std::string, po::variable_value> FormAnalysis::getGridConfiguration(){
+std::map<std::string, boost::program_options::variable_value> FormAnalysis::getGridConfiguration(){
   std::string file_name = FileUtils::addExt(
                ui->cb_CompatibleGrid->currentText().toStdString(), ".dat");
   ui->cb_CompatibleGrid->setItemText(ui->cb_CompatibleGrid->currentIndex (), QString::fromStdString(file_name));
@@ -263,7 +263,7 @@ std::map<std::string, po::variable_value> FormAnalysis::getGridConfiguration(){
              file_name, axes, getSelectedFilters(true));
 }
 
-std::map < std::string, po::variable_value > FormAnalysis::getRunOptionMap(){
+std::map < std::string, boost::program_options::variable_value > FormAnalysis::getRunOptionMap(){
   std::vector<std::string> filter_mappings;
     for (auto& filter : getSelectedFilterMapping()){
       filter_mappings.push_back(filter.getFilterFile()+" "+filter.getFluxColumn()+" "+filter.getErrorColumn());
@@ -272,7 +272,7 @@ std::map < std::string, po::variable_value > FormAnalysis::getRunOptionMap(){
    auto path_grid_filename = FileUtils::getPhotmetricGridRootPath(false)
                  + QString(QDir::separator()).toStdString() + ui->cb_CompatibleGrid->currentText().toStdString();
 
-   std::map < std::string, po::variable_value > options_map;
+   std::map < std::string, boost::program_options::variable_value > options_map;
    options_map["photometry-grid-file"].value() = boost::any(path_grid_filename);
    options_map["input-catalog-file"].value() = boost::any(ui->txt_inputCatalog->text().toStdString());
 
@@ -323,7 +323,10 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     QStandardItem* file_item = new QStandardItem(
         QString::fromStdString(filter.getFilterFile()));
 
-    QList<QStandardItem*> items { { item, file_item } };
+    QList<QStandardItem*> items;
+    items.push_back(item);
+    items.push_back(file_item);
+
     grid_model->appendRow(items);
   }
 

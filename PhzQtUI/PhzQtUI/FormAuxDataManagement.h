@@ -1,6 +1,6 @@
 #ifndef FORMAUXDATAMANAGEMENT_H
 #define FORMAUXDATAMANAGEMENT_H
-
+#include <memory>
 #include <QWidget>
 
 namespace Euclid {
@@ -52,7 +52,7 @@ private slots:
 
 
 private:
-    Ui::FormAuxDataManagement *ui;
+    std::unique_ptr<Ui::FormAuxDataManagement> ui;
 };
 
 }

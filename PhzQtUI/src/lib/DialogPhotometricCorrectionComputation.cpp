@@ -30,7 +30,6 @@ DialogPhotometricCorrectionComputation::DialogPhotometricCorrectionComputation(
 }
 
 DialogPhotometricCorrectionComputation::~DialogPhotometricCorrectionComputation() {
-  delete ui;
 }
 
 void DialogPhotometricCorrectionComputation::setData(string survey,
@@ -45,8 +44,8 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
   QStandardItemModel* grid_model = new QStandardItemModel();
   grid_model->setColumnCount(1);
   for (auto filter : m_selected_filters) {
-    QList<QStandardItem*> items { { new QStandardItem(
-        QString::fromStdString(filter.getName())) } };
+    QList<QStandardItem*> items;
+    items.push_back(new QStandardItem(QString::fromStdString(filter.getName())));
     grid_model->appendRow(items);
   }
 

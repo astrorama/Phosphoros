@@ -1,6 +1,7 @@
 #ifndef DIALOGFILTERMAPPING_H
 #define DIALOGFILTERMAPPING_H
 
+#include <memory>
 #include <QDialog>
 #include "FilterMapping.h"
 
@@ -53,7 +54,7 @@ private slots:
     void on_btn_save_clicked();
 
 private:
-    Ui::DialogFilterMapping *ui;
+   std::unique_ptr<Ui::DialogFilterMapping> ui;
 };
 
 }

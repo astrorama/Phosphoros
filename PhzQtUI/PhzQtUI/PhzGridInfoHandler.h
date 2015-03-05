@@ -4,11 +4,14 @@
 #include <list>
 #include <map>
 #include <string>
-#include <boost/program_options.hpp>
 #include "PhzDataModel/PhzModel.h"
 #include "PhzQtUI/ModelSet.h"
 
-namespace po = boost::program_options;
+namespace boost{
+namespace program_options{
+ class variable_value;
+}
+}
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -51,7 +54,7 @@ public:
    *
    * @param selected_filters A list of the filters names.
    */
-  static std::map<std::string, po::variable_value> GetConfigurationMap(
+  static std::map<std::string, boost::program_options::variable_value> GetConfigurationMap(
       std::string output_file,
       const PhzDataModel::ModelAxesTuple& axes,
       const std::list<std::string>& selected_filters);

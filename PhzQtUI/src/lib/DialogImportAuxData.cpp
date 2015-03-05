@@ -22,7 +22,6 @@ DialogImportAuxData::DialogImportAuxData(QWidget *parent) :
 
 DialogImportAuxData::~DialogImportAuxData()
 {
-    delete ui;
 }
 
 void DialogImportAuxData::setData(string title,string parentFolderFull,string parentFolderDisplay){

@@ -1,15 +1,19 @@
 #ifndef FORMANALYSIS_H
 #define FORMANALYSIS_H
 
+#include <memory>
 #include <QWidget>
 #include <QStandardItem>
 #include <map>
 #include <string>
-#include <boost/program_options.hpp>
 #include "SurveyFilterMapping.h"
 #include "ModelSet.h"
 
-namespace po = boost::program_options;
+namespace boost{
+namespace program_options{
+ class variable_value;
+}
+}
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -70,7 +74,7 @@ private slots:
     void on_btn_BrowseOutputPdf_clicked();
 
 private:
-    Ui::FormAnalysis *ui;
+    std::unique_ptr<Ui::FormAnalysis> ui;
     std::list<std::string> getSelectedFilters(bool return_path=false);
     std::list<FilterMapping> getSelectedFilterMapping();
 
@@ -80,7 +84,7 @@ private:
 
     void updateGridSelection();
     bool checkGridSelection(bool addFileCheck, bool acceptNewFile);
-    std::map<std::string, po::variable_value> getGridConfiguration();
+    std::map<std::string, boost::program_options::variable_value> getGridConfiguration();
 
     void updateGridProgressBar(size_t step, size_t total);
 
@@ -89,7 +93,7 @@ private:
     void setComputeCorrectionEnable();
 
     void setRunAnnalysisEnable(bool enabled);
-    std::map < std::string, po::variable_value > getRunOptionMap();
+    std::map < std::string, boost::program_options::variable_value > getRunOptionMap();
     void updateAnalysisProgressBar(size_t step, size_t total);
     std::map<int,SurveyFilterMapping>  m_analysis_survey_list;
     std::map<int,ModelSet> m_analysis_model_list;

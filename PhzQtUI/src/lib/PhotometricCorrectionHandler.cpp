@@ -6,6 +6,7 @@
 
 #include <QDir>
 #include <QFileInfo>
+#include <boost/program_options.hpp>
 
 #include "PhzDataModel/PhotometricCorrectionMap.h"
 #include "XYDataset/QualifiedName.h"
@@ -67,7 +68,7 @@ void PhotometricCorrectionHandler::writeCorrections(PhzDataModel::PhotometricCor
    out.close();
 }
 
-std::map<std::string, po::variable_value> PhotometricCorrectionHandler::GetConfigurationMap(
+std::map<std::string, boost::program_options::variable_value> PhotometricCorrectionHandler::GetConfigurationMap(
     std::string output_file_name,
     int iteration_number,
     double tolerance,
@@ -78,7 +79,7 @@ std::map<std::string, po::variable_value> PhotometricCorrectionHandler::GetConfi
     std::string z_column,
     std::vector<std::string> filter_mappings)
   {
-    std::map < std::string, po::variable_value > options_map;
+    std::map < std::string, boost::program_options::variable_value > options_map;
 
     auto path_filename = FileUtils::getPhotCorrectionsRootPath(true)
         + QString(QDir::separator()).toStdString() + output_file_name;
