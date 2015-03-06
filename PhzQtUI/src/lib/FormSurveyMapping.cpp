@@ -297,11 +297,11 @@ void FormSurveyMapping::filterSelectionChanged(QModelIndex, QModelIndex){
 void FormSurveyMapping::on_btn_AddFilter_clicked()
 {
      m_filterInsert=true;
-     DialogFilterMapping* popUp= new DialogFilterMapping();
+     std::unique_ptr<DialogFilterMapping> popUp(new DialogFilterMapping());
     popUp->setFilter(FilterMapping(),m_column_from_file);
 
     connect(
-      popUp,
+      popUp.get(),
       SIGNAL(popupClosing(FilterMapping)),
       SLOT(filterEditionPopupClosing(FilterMapping))
      );
@@ -312,12 +312,12 @@ void FormSurveyMapping::on_btn_AddFilter_clicked()
 void FormSurveyMapping::on_btn_BtnEditFilter_clicked()
 {
      m_filterInsert=false;
-     DialogFilterMapping* popUp= new DialogFilterMapping();
+     std::unique_ptr<DialogFilterMapping> popUp( new DialogFilterMapping());
 
     popUp->setFilter(  static_cast<FilterModel*>(ui->table_Filter->model())->getFilter(ui->table_Filter->selectionModel()->currentIndex().row())
                        ,m_column_from_file);
     connect(
-         popUp,
+         popUp.get(),
          SIGNAL(popupClosing(FilterMapping)),
          SLOT(filterEditionPopupClosing(FilterMapping))
         );

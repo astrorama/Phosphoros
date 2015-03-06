@@ -41,13 +41,13 @@ MainWindow::~MainWindow()
  //  - Slots opening the popup
  void MainWindow::on_btn_HomeToOption_clicked()
  {
-     DialogOptions* popUp= new DialogOptions();
+   std::unique_ptr<DialogOptions> popUp(new DialogOptions());
 
-     connect( popUp, SIGNAL(goToFilterManagement()),
+     connect( popUp.get(), SIGNAL(goToFilterManagement()),
        SLOT(navigateToFilterManagement())
       );
 
-     connect( popUp, SIGNAL(goToAuxDataManagement()),
+     connect( popUp.get(), SIGNAL(goToAuxDataManagement()),
                SLOT(navigateToAuxDataManagement())
               );
 

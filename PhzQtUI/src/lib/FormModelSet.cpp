@@ -149,14 +149,14 @@ void FormModelSet::setSelectionChanged(QModelIndex new_index, QModelIndex)
 
 void FormModelSet::on_btn_SetToRules_clicked()
 {
-    DialogModelSet* popUp= new  DialogModelSet();
+  std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet());
     popUp->loadData(ui->tableView_ParameterRule->getModel()->getParameterRules());
 
     // As PHOSPHOROS do not know how to treat sparse grid for now, block to 1 rule!
     popUp->setSingleLine();
 
     connect(
-      popUp,
+      popUp.get(),
       SIGNAL(popupClosing(std::map<int,ParameterRule>)),
       SLOT(setEditionPopupClosing(std::map<int,ParameterRule>))
      );
@@ -166,12 +166,12 @@ void FormModelSet::on_btn_SetToRules_clicked()
 
 void FormModelSet::on_btn_viewSet_clicked()
 {
-  DialogModelSet* popUp= new DialogModelSet();
+  std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet());
     popUp->loadData(ui->tableView_ParameterRule->getModel()->getParameterRules());
     popUp->setViewMode();
 
     connect(
-      popUp,
+      popUp.get(),
       SIGNAL(popupClosing(std::map<int,ParameterRule>)),
       SLOT(setEditionPopupClosing(std::map<int,ParameterRule>))
      );

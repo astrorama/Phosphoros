@@ -82,7 +82,7 @@ void FormAuxDataManagement::on_btn_RedImport_clicked()
 
 void FormAuxDataManagement::on_btn_RedSubGroup_clicked()
 {
-  DialogCreateSubGroup* popup = new DialogCreateSubGroup();
+  unique_ptr<DialogCreateSubGroup> popup (new DialogCreateSubGroup());
   auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageRed->model());
   std::string group =  model->getGroup();
   popup->setParentFolder(group,model->getRelPath(group));
@@ -109,7 +109,7 @@ void FormAuxDataManagement::on_btn_SedImport_clicked()
 
     auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageSed->model());
     std::string group =  model->getGroup();
-    DialogImportAuxData* popup= new DialogImportAuxData();
+    unique_ptr<DialogImportAuxData> popup(new DialogImportAuxData());
     popup->setData(title,group,model->getRelPath(group));
     if (popup->exec()){
         loadManagementPage(1);
@@ -118,7 +118,7 @@ void FormAuxDataManagement::on_btn_SedImport_clicked()
 
 void FormAuxDataManagement::on_btn_SedSubGroup_clicked()
 {
-  DialogCreateSubGroup* popup = new DialogCreateSubGroup();
+    unique_ptr<DialogCreateSubGroup> popup (new DialogCreateSubGroup());
     auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageSed->model());
     std::string group =  model->getGroup();
     popup->setParentFolder(group,model->getRelPath(group));
@@ -144,7 +144,7 @@ void FormAuxDataManagement::on_btn_FilterImport_clicked()
     std::string title = "Import Filter Transmission Curve(s)";
     auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageFilter->model());
     std::string group =  model->getGroup();
-    DialogImportAuxData* popup= new DialogImportAuxData();
+    unique_ptr<DialogImportAuxData> popup( new DialogImportAuxData());
     popup->setData(title,group,model->getRelPath(group));
     if (popup->exec()){
         loadManagementPage();
@@ -153,7 +153,7 @@ void FormAuxDataManagement::on_btn_FilterImport_clicked()
 
 void FormAuxDataManagement::on_btn_FilterSubGroup_clicked()
 {
-  DialogCreateSubGroup* popup = new DialogCreateSubGroup();
+  unique_ptr<DialogCreateSubGroup> popup (new DialogCreateSubGroup());
     auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageFilter->model());
     std::string group =  model->getGroup();
     popup->setParentFolder(group,model->getRelPath(group));
