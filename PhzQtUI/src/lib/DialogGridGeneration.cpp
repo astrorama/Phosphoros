@@ -8,6 +8,7 @@
 #include <QDir>
 #include <QMessageBox>
 #include "PhzQtUI/DialogGridGeneration.h"
+#include <boost/program_options.hpp>
 #include "ui_DialogGridGeneration.h"
 #include "PhzConfiguration/CreatePhotometryGridConfiguration.h"
 #include "PhzModeling/PhotometryGridCreator.h"

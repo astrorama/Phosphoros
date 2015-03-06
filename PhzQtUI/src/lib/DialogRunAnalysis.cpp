@@ -8,6 +8,7 @@
 #include <QDir>
 #include <QMessageBox>
 #include "PhzQtUI/DialogRunAnalysis.h"
+#include <boost/program_options.hpp>
 #include "ui_DialogRunAnalysis.h"
 #include "PhzLikelihood/ParallelCatalogHandler.h"
 #include "PhzConfiguration/CreatePhzCatalogConfiguration.h"

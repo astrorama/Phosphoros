@@ -11,8 +11,14 @@
 #include <memory>
 #include <QDialog>
 #include <QTimer>
-#include <boost/program_options.hpp>
 #include "ElementsKernel/Exception.h"
+#include <map>
+
+namespace boost{
+namespace program_options{
+ class variable_value;
+}
+}
 
 namespace Euclid {
 namespace PhzQtUI {
