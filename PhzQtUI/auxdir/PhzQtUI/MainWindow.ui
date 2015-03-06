@@ -32,7 +32,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Phosphoros</string>
+           <string>Phosphoros v0.2</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>

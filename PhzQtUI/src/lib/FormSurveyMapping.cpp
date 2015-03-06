@@ -38,6 +38,7 @@ void FormSurveyMapping::loadMappingPage(){
     ui->table_Map->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     ui->table_Map->update(QModelIndex());
 
+    ui->txt_MapName->clear();
     ui->cb_SourceId->clear();
     ui->cb_SourceId->addItem("");
 

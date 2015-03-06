@@ -1,7 +1,5 @@
 #include <string>
-#include<iostream>
-#include<sstream>
-#include <iomanip>
+#include <QString>
 #include "PhzQtUI/Range.h"
 
 namespace Euclid {
@@ -18,15 +16,10 @@ Range::Range(double min,double max, double step):m_min(min), m_max(max),m_step(s
 
 std::string Range::getStringRepresentation() const{
 
-    std::ostringstream convert;
+ QString string ="[" +QString::number(m_min,'g',2)+" , "+QString::number(m_max,'g',2)+"] step "+QString::number(m_step,'g',4);
 
-    convert << std::fixed << std::setprecision(1) << m_min;
-    convert <<" : ";
-    convert<< m_max;
-    convert <<" ; ";
-    convert <<  std::setprecision(4) << (m_step);
 
-    return convert.str();
+    return string.toStdString();
 }
 
 double Range::getMin() const{

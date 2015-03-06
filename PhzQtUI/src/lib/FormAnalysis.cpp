@@ -363,6 +363,8 @@ void FormAnalysis::on_btn_RunGrid_clicked() {
     std::unique_ptr<DialogGridGeneration> dialog(new DialogGridGeneration());
       dialog->setValues(ui->cb_CompatibleGrid->currentText().toStdString(), config_map);
     if (dialog->exec()) {
+      setRunAnnalysisEnable(true);
+      setComputeCorrectionEnable();
     }
   }
 }

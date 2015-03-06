@@ -29,7 +29,7 @@ void FormModelSet::loadSetPage(){
       SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
       SLOT(setSelectionChanged(QModelIndex, QModelIndex))
      );
-
+    ui->txt_SetName->clear();
     ui->tableView_Set->clearSelection();
     ui->tableView_ParameterRule->loadParameterRules(std::map<int,ParameterRule>{},"","");
     setModelInView();
