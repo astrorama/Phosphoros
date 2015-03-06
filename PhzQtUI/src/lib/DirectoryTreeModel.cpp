@@ -13,8 +13,13 @@ DirectoryTreeModel::DirectoryTreeModel(QObject *parent) :
 {
 }
 
-string DirectoryTreeModel::getRelPath(string path) const{
-    return FileUtils::removeStart(FileUtils::removeStart(path,m_root_dir),QString(QDir::separator()).toStdString());
+string DirectoryTreeModel::getRelPath(string path, string root_alias) const{
+    string name =  FileUtils::removeStart(FileUtils::removeStart(path,m_root_dir),QString(QDir::separator()).toStdString());
+    if (name.length()==0){
+      name= root_alias;
+    }
+
+    return name;
 }
 
 string DirectoryTreeModel::getFullPath(string path) const{

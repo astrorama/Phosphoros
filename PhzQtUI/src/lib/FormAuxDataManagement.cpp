@@ -68,13 +68,18 @@ void FormAuxDataManagement::on_btn_ManageToHome_clicked()
     navigateToHome();
 }
 
+
+void FormAuxDataManagement::on_btn_survey_clicked(){
+    navigateToSurvey();
+}
+
 void FormAuxDataManagement::on_btn_RedImport_clicked()
 {
     std::string title = "Import Reddening Curves";
     auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageRed->model());
     std::string group =  model->getGroup();
     DialogImportAuxData* popup= new DialogImportAuxData();
-    popup->setData(title,group,model->getRelPath(group));
+    popup->setData(title,group,model->getRelPath(group,"Reddening Curves"));
     if (popup->exec()){
         loadManagementPage(2);
     }
@@ -85,7 +90,7 @@ void FormAuxDataManagement::on_btn_RedSubGroup_clicked()
   unique_ptr<DialogCreateSubGroup> popup (new DialogCreateSubGroup());
   auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageRed->model());
   std::string group =  model->getGroup();
-  popup->setParentFolder(group,model->getRelPath(group));
+  popup->setParentFolder(group,model->getRelPath(group,"Reddening Curves"));
   if ( popup->exec()){
       loadManagementPage(2);
   }
@@ -96,7 +101,7 @@ void FormAuxDataManagement::on_btn_RedDelete_clicked()
     auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageRed->model());
     std::string selection =  model->getRootSelection().second;
     if (QMessageBox::question( this, "Confirm deletion...",
-                                  QString::fromStdString("Do you really want to delete the reddening curve(s) '"+model->getRelPath(selection)+"'?"),
+                                  QString::fromStdString("Do you really want to delete the reddening curve(s) '"+model->getRelPath(selection,"Reddening Curves")+"'?"),
                                   QMessageBox::Yes|QMessageBox::Cancel )==QMessageBox::Yes){
         FileUtils::removeDir(QString::fromStdString(selection));
         loadManagementPage(2);
@@ -110,7 +115,7 @@ void FormAuxDataManagement::on_btn_SedImport_clicked()
     auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageSed->model());
     std::string group =  model->getGroup();
     unique_ptr<DialogImportAuxData> popup(new DialogImportAuxData());
-    popup->setData(title,group,model->getRelPath(group));
+    popup->setData(title,group,model->getRelPath(group,"SEDs"));
     if (popup->exec()){
         loadManagementPage(1);
     }
@@ -121,7 +126,7 @@ void FormAuxDataManagement::on_btn_SedSubGroup_clicked()
     unique_ptr<DialogCreateSubGroup> popup (new DialogCreateSubGroup());
     auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageSed->model());
     std::string group =  model->getGroup();
-    popup->setParentFolder(group,model->getRelPath(group));
+    popup->setParentFolder(group,model->getRelPath(group,"SEDs"));
     if ( popup->exec()){
         loadManagementPage(1);
     }
@@ -132,7 +137,7 @@ void FormAuxDataManagement::on_btn_SedDelete_clicked()
     auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageSed->model());
     std::string selection =  model->getRootSelection().second;
    if (QMessageBox::question( this, "Confirm deletion...",
-                                 QString::fromStdString("Do you really want to delete the SED(s) '"+model->getRelPath(selection)+"'?"),
+                                 QString::fromStdString("Do you really want to delete the SED(s) '"+model->getRelPath(selection,"SEDs")+"'?"),
                                  QMessageBox::Yes|QMessageBox::Cancel )==QMessageBox::Yes){
        FileUtils::removeDir(QString::fromStdString(selection));
        loadManagementPage(1);
@@ -145,7 +150,7 @@ void FormAuxDataManagement::on_btn_FilterImport_clicked()
     auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageFilter->model());
     std::string group =  model->getGroup();
     unique_ptr<DialogImportAuxData> popup( new DialogImportAuxData());
-    popup->setData(title,group,model->getRelPath(group));
+    popup->setData(title,group,model->getRelPath(group,"Filters"));
     if (popup->exec()){
         loadManagementPage();
     }
@@ -156,7 +161,7 @@ void FormAuxDataManagement::on_btn_FilterSubGroup_clicked()
   unique_ptr<DialogCreateSubGroup> popup (new DialogCreateSubGroup());
     auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageFilter->model());
     std::string group =  model->getGroup();
-    popup->setParentFolder(group,model->getRelPath(group));
+    popup->setParentFolder(group,model->getRelPath(group,"Filters"));
     if ( popup->exec()){
         loadManagementPage();
     }
@@ -167,7 +172,7 @@ void FormAuxDataManagement::on_btn_FilterDelete_clicked()
     auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageFilter->model());
     std::string selection =  model->getRootSelection().second;
    if (QMessageBox::question( this, "Confirm deletion...",
-                                 QString::fromStdString("Do you really want to delete the Filter Transmission Curve(s) '"+model->getRelPath(selection)+"'?"),
+                                 QString::fromStdString("Do you really want to delete the Filter Transmission Curve(s) '"+model->getRelPath(selection,"Filters")+"'?"),
                                  QMessageBox::Yes|QMessageBox::Cancel )==QMessageBox::Yes){
        FileUtils::removeDir(QString::fromStdString(selection));
        loadManagementPage();

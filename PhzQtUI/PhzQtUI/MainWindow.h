@@ -34,6 +34,8 @@ private slots:
 
     void navigateToHome();
 
+    void navigateToSurvey();
+
     void navigateToFilterManagement();
 
     void navigateToAuxDataManagement();

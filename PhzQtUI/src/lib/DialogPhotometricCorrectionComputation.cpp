@@ -56,9 +56,11 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
 void DialogPhotometricCorrectionComputation::on_btn_TrainingCatalog_clicked() {
   QFileDialog dialog(this);
   dialog.setFileMode(QFileDialog::ExistingFile);
+  dialog.selectFile(QString::fromStdString(FileUtils::getLastUsedPath()));
   if (dialog.exec()) {
 
     QString file_name = dialog.selectedFiles()[0];
+    FileUtils::setLastUsedPath(file_name.toStdString());
 
     // Validate catalog
     auto column_reader = PhzUITools::CatalogColumnReader(

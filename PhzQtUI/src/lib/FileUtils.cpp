@@ -118,8 +118,13 @@ std::string FileUtils::removeStart(const std::string& name, const std::string& s
 
 std::string FileUtils::getRootPath()  {
     QSettings settings("SDC-CH", "PhosphorosUI");
-    QString path =settings.value(QString::fromStdString("Gerneral/root-path")).toString()+QDir::separator();
+    QString path =settings.value(QString::fromStdString("General/root-path")).toString()+QDir::separator();
     return path.toStdString();
+}
+
+void FileUtils::setRootPath(std::string path) {
+    QSettings settings("SDC-CH", "PhosphorosUI");
+    settings.setValue(QString::fromStdString("General/root-path"),QString::fromStdString(path));
 }
 
 std::string FileUtils::getModelRootPath(bool check)  {
@@ -198,5 +203,29 @@ std::string FileUtils::getPhotmetricGridRootPath(bool check) {
   }
   return info.absoluteFilePath().toStdString();
 }
+
+ std::string FileUtils::getLastUsedPath(){
+   QSettings settings("SDC-CH", "PhosphorosUI");
+
+   std::string test_value = "default";
+   if (test_value.compare(settings.value(QString::fromStdString("General/last-used-path"), QString::fromStdString(test_value)).toString().toStdString())==0){
+     return getRootPath();
+   }
+
+   return settings.value(QString::fromStdString("General/last-used-path")).toString().toStdString();
+}
+
+ void FileUtils::setLastUsedPath(std::string path){
+   QSettings settings("SDC-CH", "PhosphorosUI");
+   QFileInfo info(QString::fromStdString(path));
+   QString stored_path;
+   if (info.isDir()){
+     stored_path=info.absoluteFilePath();
+   } else{
+     stored_path=info.absolutePath();
+   }
+   settings.setValue(QString::fromStdString("General/last-used-path"),stored_path);
+}
+
 }
 }

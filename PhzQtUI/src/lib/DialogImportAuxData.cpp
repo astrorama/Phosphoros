@@ -1,7 +1,6 @@
 
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QSettings>
 #include <QMessageBox>
 #include "PhzQtUI/DialogImportAuxData.h"
 #include "ui_DialogImportAuxData.h"
@@ -33,25 +32,25 @@ void DialogImportAuxData::setData(string title,string parentFolderFull,string pa
 void DialogImportAuxData::on_btn_browseFile_clicked()
 {
     QFileDialog dialog(this);
-    QSettings settings("SDC-CH", "PhosphorosUI");
-    dialog.selectFile(settings.value(QString::fromStdString("Gerneral/root-path")).toString());
+    dialog.selectFile(QString::fromStdString(FileUtils::getLastUsedPath()));
     dialog.setFileMode(QFileDialog::ExistingFile);
     if (dialog.exec()){
         QStringList file_name=dialog.selectedFiles();
         ui->txt_file->setText(file_name[0]);
+        FileUtils::setLastUsedPath(file_name[0].toStdString());
     }
 }
 
 void DialogImportAuxData::on_btn_browseFolder_clicked()
 {
     QFileDialog dialog(this);
-    QSettings settings("SDC-CH", "PhosphorosUI");
-    dialog.selectFile(settings.value(QString::fromStdString("Gerneral/root-path")).toString());
+    dialog.selectFile(QString::fromStdString(FileUtils::getLastUsedPath()));
     dialog.setFileMode(QFileDialog::Directory);
     dialog.setOption(QFileDialog::ShowDirsOnly);
     if (dialog.exec()){
         QStringList folder_names=dialog.selectedFiles();
         ui->txt_folder->setText(folder_names[0]);
+        FileUtils::setLastUsedPath(folder_names[0].toStdString());
     }
 }
 
@@ -60,6 +59,7 @@ void DialogImportAuxData::on_rb_file_clicked()
     ui->rb_folder->setChecked(false);
     ui->frame_Folder->setEnabled(false);
     ui->frame_File->setEnabled(true);
+    ui->txt_file->setEnabled(false);
 }
 
 void DialogImportAuxData::on_rb_folder_clicked()
@@ -67,6 +67,7 @@ void DialogImportAuxData::on_rb_folder_clicked()
     ui->rb_file->setChecked(false);
     ui->frame_Folder->setEnabled(true);
     ui->frame_File->setEnabled(false);
+    ui->txt_folder->setEnabled(false);
 }
 
 void DialogImportAuxData::on_btn_import_clicked()

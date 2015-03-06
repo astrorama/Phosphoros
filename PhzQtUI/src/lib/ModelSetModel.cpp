@@ -89,7 +89,7 @@ int ModelSetModel::newSet(int duplicate_from_row ){
 
     ++max_ref;
 
-    QString text_1 = "New Model Set";
+    QString text_1 = "New_Model_Set";
     QString text_2 = "0";
 
 

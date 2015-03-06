@@ -27,10 +27,13 @@ public:
 signals:
 
     void navigateToHome();
+    void navigateToSurvey();
 
 private slots:
 
     void on_btn_ManageToHome_clicked();
+
+    void on_btn_survey_clicked();
 
     void on_btn_RedImport_clicked();
 

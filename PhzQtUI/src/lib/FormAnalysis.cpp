@@ -331,9 +331,10 @@ void FormAnalysis::on_btn_GetConfigGrid_clicked() {
         QMessageBox::Ok);
   } else {
 
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Configuration File"),
-                               "",tr("Config (*.conf)"));
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Configuration File"),QString::fromStdString(FileUtils::getLastUsedPath())
+                               ,tr("Config (*.conf)"));
       if (fileName.length()>0){
+          FileUtils::setLastUsedPath(fileName.toStdString());
           auto config_map = getGridConfiguration();
           PhzUITools::ConfigurationWriter::writeConfiguration(config_map,fileName.toStdString());
 
@@ -413,9 +414,11 @@ void FormAnalysis::onCorrectionComputed(const std::string & new_file_name){
 void FormAnalysis::on_btn_BrowseInput_clicked()
 {
   QFileDialog dialog(this);
+  dialog.selectFile(QString::fromStdString(FileUtils::getLastUsedPath()));
   dialog.setFileMode(QFileDialog::ExistingFile);
   if (dialog.exec()){
     ui->txt_inputCatalog->setText(dialog.selectedFiles()[0]);
+    FileUtils::setLastUsedPath(dialog.selectedFiles()[0].toStdString());
     setRunAnnalysisEnable(true);
   }
 
@@ -425,12 +428,14 @@ void FormAnalysis::on_btn_BrowseOutput_clicked()
 {
   QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.selectFile(QString::fromStdString(FileUtils::getLastUsedPath()));
     dialog.setOption(QFileDialog::DontUseNativeDialog);
     dialog.setNameFilter("Text-Files (*.txt)");
     dialog.setDefaultSuffix("txt");
     dialog.setLabelText( QFileDialog::Accept, "Select" );
     if (dialog.exec()){
       ui->txt_OutputCatalog->setText(dialog.selectedFiles()[0]);
+      FileUtils::setLastUsedPath(dialog.selectedFiles()[0].toStdString());
       setRunAnnalysisEnable(true);
     }
 }
@@ -439,12 +444,14 @@ void FormAnalysis::on_btn_BrowseOutputPdf_clicked()
 {
   QFileDialog dialog(this);
       dialog.setFileMode(QFileDialog::AnyFile);
+      dialog.selectFile(QString::fromStdString(FileUtils::getLastUsedPath()));
       dialog.setOption(QFileDialog::DontUseNativeDialog);
       dialog.setNameFilter("FITS-Files (*.fits)");
       dialog.setDefaultSuffix("fits");
       dialog.setLabelText( QFileDialog::Accept, "Select" );
       if (dialog.exec()){
         ui->txt_OutputPdf->setText(dialog.selectedFiles()[0]);
+        FileUtils::setLastUsedPath(dialog.selectedFiles()[0].toStdString());
         setRunAnnalysisEnable(true);
       }
 }
@@ -452,8 +459,9 @@ void FormAnalysis::on_btn_BrowseOutputPdf_clicked()
 void FormAnalysis::on_btn_GetConfigAnalysis_clicked()
 {
   QString fileName = QFileDialog::getSaveFileName(this, tr("Save Configuration File"),
-                                 "",tr("Config (*.conf)"));
+      QString::fromStdString(FileUtils::getLastUsedPath()),tr("Config (*.conf)"));
    if (fileName.length()>0){
+       FileUtils::setLastUsedPath(fileName.toStdString());
        auto config_map = getRunOptionMap();
        PhzUITools::ConfigurationWriter::writeConfiguration(config_map,fileName.toStdString());
    }

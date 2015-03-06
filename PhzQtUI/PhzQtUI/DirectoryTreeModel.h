@@ -79,7 +79,7 @@ public:
      * @param path
      * @return the relative path
      */
-    string getRelPath(string path) const;
+    string getRelPath(string path,string root_alias = "") const;
 
     /**
      * @brief Complete the relative 'path' with the root dir in order to obtain an absolute path

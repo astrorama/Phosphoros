@@ -2,7 +2,7 @@
 
 #include "PhzQtUI/DialogOptions.h"
 #include "ui_DialogOptions.h"
-#include <QSettings>
+#include "PhzQtUI/FileUtils.h"
 
 using namespace std;
 
@@ -15,8 +15,7 @@ DialogOptions::DialogOptions(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    QSettings settings("SDC-CH", "PhosphorosUI");
-    ui->txt_rootDir->setText(settings.value(QString::fromStdString("Gerneral/root-path")).toString());
+    ui->txt_rootDir->setText(QString::fromStdString(FileUtils::getRootPath()));
 }
 
 DialogOptions::~DialogOptions()
@@ -48,8 +47,7 @@ void DialogOptions::on_btn_editGeneral_clicked()
 
 void DialogOptions::on_btn_cancelGeneral_clicked()
 {
-    QSettings settings("SDC-CH", "PhosphorosUI");
-    ui->txt_rootDir->setText(settings.value(QString::fromStdString("Gerneral/root-path")).toString());
+    ui->txt_rootDir->setText(QString::fromStdString(FileUtils::getRootPath()));
 
     ui->tabWidget->setTabEnabled(0,true);
     ui->tabWidget->setTabEnabled(1,true);
@@ -61,9 +59,7 @@ void DialogOptions::on_btn_cancelGeneral_clicked()
 
 void DialogOptions::on_btn_saveGeneral_clicked()
 {
-
-     QSettings settings("SDC-CH", "PhosphorosUI");
-     settings.setValue(QString::fromStdString("Gerneral/root-path"),ui->txt_rootDir->text());
+    FileUtils::setRootPath(ui->txt_rootDir->text().toStdString());
 
     ui->tabWidget->setTabEnabled(0,true);
     ui->tabWidget->setTabEnabled(1,true);
@@ -77,9 +73,7 @@ void DialogOptions::on_btn_browseRoot_clicked()
 {
     QFileDialog dialog(this);
 
-
-    QSettings settings("SDC-CH", "PhosphorosUI");
-    dialog.selectFile(settings.value(QString::fromStdString("Gerneral/root-path")).toString());
+    dialog.selectFile(QString::fromStdString(FileUtils::getRootPath()));
     dialog.setFileMode(QFileDialog::DirectoryOnly);
     if (dialog.exec()){
 

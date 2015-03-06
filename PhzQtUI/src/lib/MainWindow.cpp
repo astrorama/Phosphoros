@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->widget_SurveyMapping,SIGNAL(navigateToFilterManagement()),SLOT(navigateToAuxDataManagement()));
 
     connect(ui->widget_AuxDataManagement,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
+    connect(ui->widget_AuxDataManagement,SIGNAL(navigateToSurvey()),SLOT(navigateToSurvey()));
 
 
     connect(ui->widget_Analysis,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
@@ -34,6 +35,11 @@ MainWindow::~MainWindow()
 //  - Slots landing on this page
  void MainWindow::navigateToHome(){
      changeMainStackedWidgetIndex(0);
+ }
+
+ void MainWindow::navigateToSurvey(){
+    changeMainStackedWidgetIndex(2);
+    ui->widget_SurveyMapping->loadMappingPage();
  }
 
  //--------------------------------------------------

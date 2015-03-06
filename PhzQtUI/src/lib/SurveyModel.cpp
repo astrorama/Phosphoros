@@ -48,7 +48,7 @@ int SurveyModel::newSurvey(int duplicate_from_row ){
     }
     else{
          m_survey_filter_mappings[max_ref]=SurveyFilterMapping(m_root_path);
-         m_survey_filter_mappings.at(max_ref).setName("New Survey Filter Mapping");
+         m_survey_filter_mappings.at(max_ref).setName("New_Survey_Filter_Mapping");
     }
 
     QList<QStandardItem*> items;

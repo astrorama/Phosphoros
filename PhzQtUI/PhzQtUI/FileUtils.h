@@ -92,6 +92,8 @@ public:
      */
     static std::string getRootPath();
 
+    static void setRootPath(std::string path);
+
     /**
      * @brief get the Model Sets Root Path
      * @param check
@@ -147,6 +149,12 @@ public:
      * @return <rootPath>/PhotometricGrid
      */
     static std::string getPhotmetricGridRootPath(bool check);
+
+    //////////////////////////////////////////////////////////
+    //// Last used path.
+    static std::string getLastUsedPath();
+
+    static void setLastUsedPath(std::string path);
 
 };
 

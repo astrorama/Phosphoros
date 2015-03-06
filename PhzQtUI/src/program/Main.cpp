@@ -14,9 +14,9 @@ int main(int argc, char *argv[])
     QSettings settings("SDC-CH", "PhosphorosUI");
 
     std::string test_value = "default";
-    if (test_value.compare(settings.value(QString::fromStdString("Gerneral/root-path"), QString::fromStdString(test_value)).toString().toStdString())==0){
+    if (test_value.compare(settings.value(QString::fromStdString("General/root-path"), QString::fromStdString(test_value)).toString().toStdString())==0){
 
-        settings.beginGroup("Gerneral");
+        settings.beginGroup("General");
         settings.setValue(QString::fromStdString("root-path"), QDir::currentPath());
         settings.endGroup();
     }
