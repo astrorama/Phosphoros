@@ -4,6 +4,7 @@
 #include <memory>
 #include <QDialog>
 #include <QModelIndex>
+#include "PhzQtUI/FilterMapping.h"
 #include "PhzDataModel/PhotometricCorrectionMap.h"
 
 namespace Euclid {
@@ -30,8 +31,10 @@ public:
      * @brief Initialise the popup by setting its internal data
      * @param filePath
      * the (relative) path of the  photometric corrections file
+     * @param filters
+     * the filter mapping allowing to display the aliases
      */
-    void setCorrectionsFile(std::string filePath);
+    void setCorrectionsFile(std::string filePath, std::list<FilterMapping> filters);
 
 private slots:
     /**
@@ -60,6 +63,7 @@ private:
     std::unique_ptr<Ui::DialogPhotCorrectionEdition> ui;
     std::string m_file_path;
     PhzDataModel::PhotometricCorrectionMap m_map;
+    std::list<FilterMapping> m_filters;
 };
 
 }

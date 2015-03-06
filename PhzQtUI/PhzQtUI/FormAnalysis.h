@@ -79,14 +79,13 @@ private:
     std::list<FilterMapping> getSelectedFilterMapping();
 
     std::string getSelectedSurveySourceColumn();
-    void enableDisablePage(bool enabled);
     void adjustPhzGridButtons(bool enabled);
 
     void updateGridSelection();
     bool checkGridSelection(bool addFileCheck, bool acceptNewFile);
     std::map<std::string, boost::program_options::variable_value> getGridConfiguration();
 
-    void updateGridProgressBar(size_t step, size_t total);
+
 
 
     void updateCorrectionSelection();
@@ -94,7 +93,6 @@ private:
 
     void setRunAnnalysisEnable(bool enabled);
     std::map < std::string, boost::program_options::variable_value > getRunOptionMap();
-    void updateAnalysisProgressBar(size_t step, size_t total);
     std::map<int,SurveyFilterMapping>  m_analysis_survey_list;
     std::map<int,ModelSet> m_analysis_model_list;
 

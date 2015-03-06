@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Euclid::PhzQtUI::DialogCreateSubGroup</class>
- <widget class="QDialog" name="Euclid::PhzQtUI::DialogCreateSubGroup">
+ <class>Euclid::PhzQtUI::DialogGridGeneration</class>
+ <widget class="QDialog" name="Euclid::PhzQtUI::DialogGridGeneration">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>766</width>
-    <height>207</height>
+    <height>173</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Create Sub-Group</string>
+   <string>Photometric Grid Generation</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="lbl_title">
        <property name="font">
         <font>
          <pointsize>17</pointsize>
@@ -26,7 +26,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Create Sub-Group</string>
+        <string>(Re)-Generation of the Grid</string>
        </property>
       </widget>
      </item>
@@ -53,61 +53,47 @@
     </widget>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Parent Group :</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="txt_parent">
-         <property name="font">
-          <font>
-           <italic>true</italic>
-          </font>
-         </property>
-         <property name="text">
-          <string>Parent</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_3">
-       <property name="font">
-        <font>
-         <pointsize>14</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
+      <widget class="QLabel" name="label">
        <property name="text">
-        <string>New Sub-Group Name :</string>
+        <string>Grid Name :</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="txt_new"/>
+      <widget class="QLabel" name="label_name">
+       <property name="font">
+        <font>
+         <italic>true</italic>
+        </font>
+       </property>
+       <property name="text">
+        <string>Name</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QProgressBar" name="progressBar">
+     <property name="value">
+      <number>24</number>
+     </property>
+    </widget>
    </item>
    <item>
     <spacer name="verticalSpacer">
@@ -117,15 +103,15 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>40</height>
+       <height>5</height>
       </size>
      </property>
     </spacer>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <spacer name="horizontalSpacer">
+      <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -142,19 +128,6 @@
        <property name="text">
         <string>Cancel</string>
        </property>
-       <property name="autoDefault">
-        <bool>false</bool>
-       </property>
-       <property name="default">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushButton">
-       <property name="text">
-        <string>Create</string>
-       </property>
       </widget>
      </item>
     </layout>
@@ -162,5 +135,22 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>btn_cancel</sender>
+   <signal>clicked()</signal>
+   <receiver>Euclid::PhzQtUI::DialogGridGeneration</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>406</x>
+     <y>239</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>215</x>
+     <y>87</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

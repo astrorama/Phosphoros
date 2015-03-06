@@ -107,10 +107,24 @@ void FormSurveyMapping::loadColumnFromFile(std::string path){
 
   auto column_reader = PhzUITools::CatalogColumnReader(path);
   m_column_from_file=column_reader.getColumnNames();
+
+  auto current_text = ui->cb_SourceId->currentText();
   ui->cb_SourceId->clear();
   ui->cb_SourceId->addItem("");
+  bool found=false;
+  int index=1;
   for(auto item : m_column_from_file){
-     ui->cb_SourceId->addItem(QString::fromStdString(item));
+    ui->cb_SourceId->addItem(QString::fromStdString(item));
+    if (item.compare(current_text.toStdString())==0){
+      found=true;
+      ui->cb_SourceId->setCurrentIndex(index);
+    }
+
+     ++index;
+  }
+
+  if (!found){
+    ui->cb_SourceId->setItemText(0,current_text);
   }
 }
 

@@ -6,8 +6,8 @@
 #include <QFileDialog>
 #include <boost/program_options.hpp>
 
-#include "PhzConfiguration/CreatePhotometryGridConfiguration.h"
-#include "PhzModeling/PhotometryGridCreator.h"
+#include "ElementsKernel/Exception.h"
+
 
 #include "PhzQtUI/FormAnalysis.h"
 #include "ui_FormAnalysis.h"
@@ -18,12 +18,11 @@
 #include "PhzQtUI/PhotometricCorrectionHandler.h"
 #include "PhzQtUI/SurveyFilterMapping.h"
 #include "PhzQtUI/PhzGridInfoHandler.h"
+#include "PhzQtUI/DialogGridGeneration.h"
+#include "PhzQtUI/DialogRunAnalysis.h"
 
 #include "PhzUITools/ConfigurationWriter.h"
 
-
-#include "PhzLikelihood/ParallelCatalogHandler.h"
-#include "PhzConfiguration/CreatePhzCatalogConfiguration.h"
 
 
 namespace Euclid {
@@ -61,37 +60,14 @@ void FormAnalysis::loadAnalysisPage() {
 
   updateGridSelection();
 
-  ui->progress_Grid->setValue(0);
-  ui->progress_Analysis->setValue(0);
 
 }
 ///////////////////////////////////////////////////
 //  Handle controls enability
-void FormAnalysis::enableDisablePage(bool enabled){
-   ui->btn_AnalysisToHome->setEnabled(enabled);
-   // 1. Survey and Model
-   ui->cb_AnalysisSurvey->setEnabled(enabled);
-   ui->cb_AnalysisModel->setEnabled(enabled);
-   ui->tableView_filter->setEnabled(enabled);
 
-   // 2. Photometry Grid
-   ui->cb_CompatibleGrid->setEnabled(enabled);
-   adjustPhzGridButtons(enabled);
-
-   // 3. Photometric Correction
-   ui->gb_corrections->setEnabled(enabled);
-
-   // 4. Run
-   ui->cb_marginalization->setEnabled(enabled);
-   ui->btn_BrowseInput->setEnabled(enabled);
-   ui->btn_BrowseOutputPdf->setEnabled(enabled);
-   ui->btn_BrowseOutput->setEnabled(enabled);
-   setRunAnnalysisEnable(enabled);
-}
 
 void FormAnalysis::updateGridSelection() {
 
-  ui->progress_Grid->setValue(0);
   ModelSet selected_model;
 
   for (auto&model : m_analysis_model_list) {
@@ -121,14 +97,7 @@ void FormAnalysis::adjustPhzGridButtons(bool enabled){
     ui->btn_RunGrid->setEnabled(enabled && name_ok);
 }
 
-void FormAnalysis::updateGridProgressBar(size_t step, size_t total) {
-  int value = (step * 100) / total;
-  ui->progress_Grid->setValue(value);
-  if(value==100){
-    setComputeCorrectionEnable();
-    setRunAnnalysisEnable(true);
-  }
-}
+
 
 void FormAnalysis::updateCorrectionSelection(){
   auto filter_map = getSelectedFilters(true);
@@ -166,13 +135,8 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
 
   ui->btn_GetConfigAnalysis->setEnabled(grid_name_ok && correction_ok && run_ok && enabled);
   ui->btn_RunAnalysis->setEnabled(grid_name_exists && correction_exists && run_ok && enabled);
-  ui->progress_Analysis->setValue(0);
 }
 
-void FormAnalysis::updateAnalysisProgressBar(size_t step, size_t total) {
-  int value = (step * 100) / total;
-  ui->progress_Analysis->setValue(value);
-}
 
 //////////////////////////////////////////////////
 // Build and handle objects for calling the processing
@@ -191,11 +155,13 @@ std::string FormAnalysis::getSelectedSurveySourceColumn() {
 
 std::list<std::string> FormAnalysis::getSelectedFilters(bool return_path) {
   std::list<std::string> res;
-  auto model = static_cast<QStandardItemModel*>(ui->tableView_filter->model());
-  for (int i = 0; i < model->rowCount(); ++i) {
-    auto item = model->item(i);
-    if( item->checkState() == Qt::CheckState::Checked){
-        res.push_back(model->item(i, return_path)->text().toStdString());
+  if (!ui->cb_AnalysisSurvey->currentText().isEmpty()){
+    auto model = static_cast<QStandardItemModel*>(ui->tableView_filter->model());
+    for (int i = 0; i < model->rowCount(); ++i) {
+      auto item = model->item(i);
+      if( item->checkState() == Qt::CheckState::Checked){
+          res.push_back(model->item(i, return_path)->text().toStdString());
+      }
     }
   }
   return res;
@@ -204,14 +170,14 @@ std::list<std::string> FormAnalysis::getSelectedFilters(bool return_path) {
 std::list<FilterMapping> FormAnalysis::getSelectedFilterMapping(){
   auto filterNames=getSelectedFilters(false);
   std::list<FilterMapping>  list;
-
-
-  for(auto& survey: m_analysis_survey_list){
-    if (survey.second.getName().compare(ui->cb_AnalysisSurvey->currentText().toStdString())==0){
-      for (auto& name : filterNames){
-        for (auto& filter : survey.second.getFilters()){
-          if(filter.getName().compare(name)==0){
-            list.push_back(filter);
+  if (!ui->cb_AnalysisSurvey->currentText().isEmpty()){
+    for(auto& survey: m_analysis_survey_list){
+      if (survey.second.getName().compare(ui->cb_AnalysisSurvey->currentText().toStdString())==0){
+        for (auto& name : filterNames){
+          for (auto& filter : survey.second.getFilters()){
+            if(filter.getName().compare(name)==0){
+              list.push_back(filter);
+            }
           }
         }
       }
@@ -376,7 +342,6 @@ void FormAnalysis::on_btn_GetConfigGrid_clicked() {
 }
 
 void FormAnalysis::on_btn_RunGrid_clicked() {
-  enableDisablePage(false);
 
   if (!checkGridSelection(true, true)) {
     QMessageBox::warning(this, "Unavailable name...",
@@ -384,37 +349,23 @@ void FormAnalysis::on_btn_RunGrid_clicked() {
         QMessageBox::Ok);
   } else {
 
-    if (checkGridSelection(true, false) &&
-      QMessageBox::warning(this, "Override existing file...",
+    if (checkGridSelection(true, false)) {
+      if (QMessageBox::warning(this, "Override existing file...",
           "A Photometric Grid file with the very same name as the one you provided already exist. "
-          "Do you want to replace it?",
-                         QMessageBox::Yes|QMessageBox::No)==QMessageBox::Yes){
-
-     try{
-      auto config_map = getGridConfiguration();
-      PhzConfiguration::CreatePhotometryGridConfiguration conf { config_map };
-      PhzModeling::PhotometryGridCreator creator { conf.getSedDatasetProvider(),
-          conf.getReddeningDatasetProvider(), conf.getFilterDatasetProvider() };
-
-      auto param_space = PhzDataModel::createAxesTuple(conf.getZList(),
-          conf.getEbvList(), conf.getReddeningCurveList(), conf.getSedList());
-
-      std::function<void(size_t,size_t)> monitor_function = std::bind(&FormAnalysis::updateGridProgressBar, this, std::placeholders::_1, std::placeholders::_2);
-
-      auto grid = creator.createGrid(param_space, conf.getFilterList(),monitor_function);
-      auto output = conf.getOutputFunction();
-      output(grid);
-      }
-      catch(...){
-        QMessageBox::warning(this, "Error in the computation...",
-                          "Sorry, an error occured during the computation.",
-                          QMessageBox::Close);
+              "Do you want to replace it?", QMessageBox::Yes | QMessageBox::No)
+          == QMessageBox::No) {
+        return;
       }
     }
-  }
 
-  enableDisablePage(true);
+    auto config_map = getGridConfiguration();
+    std::unique_ptr<DialogGridGeneration> dialog(new DialogGridGeneration());
+      dialog->setValues(ui->cb_CompatibleGrid->currentText().toStdString(), config_map);
+    if (dialog->exec()) {
+    }
+  }
 }
+
 
 //  3. Photometric Correction
 void FormAnalysis::on_gb_corrections_clicked()
@@ -430,22 +381,22 @@ void FormAnalysis::on_cb_AnalysisCorrection_currentIndexChanged(
 }
 
 void FormAnalysis::on_btn_editCorrections_clicked() {
-  DialogPhotCorrectionEdition* popup = new DialogPhotCorrectionEdition();
+  std::unique_ptr<DialogPhotCorrectionEdition> popup(new DialogPhotCorrectionEdition());
   popup->setCorrectionsFile(
-      ui->cb_AnalysisCorrection->currentText().toStdString());
+      ui->cb_AnalysisCorrection->currentText().toStdString(),
+      getSelectedFilterMapping());
   popup->exec();
 }
 
 void FormAnalysis::on_btn_computeCorrections_clicked() {
   auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
 
-  DialogPhotometricCorrectionComputation* popup =
-      new DialogPhotometricCorrectionComputation();
+std::unique_ptr<DialogPhotometricCorrectionComputation> popup(new DialogPhotometricCorrectionComputation());
   popup->setData(survey_name,getSelectedSurveySourceColumn(),
       ui->cb_AnalysisModel->currentText().toStdString(),
       ui->cb_CompatibleGrid->currentText().toStdString(), getSelectedFilterMapping());
 
-  connect( popup, SIGNAL(correctionComputed(const std::string &)),
+  connect( popup.get(), SIGNAL(correctionComputed(const std::string &)),
       SLOT(onCorrectionComputed(const std::string &)));
   popup->exec();
 
@@ -511,32 +462,26 @@ void FormAnalysis::on_btn_GetConfigAnalysis_clicked()
 void FormAnalysis::on_btn_RunAnalysis_clicked()
 {
 
-  if (QFileInfo(ui->txt_OutputCatalog->text()).exists() && QMessageBox::question(this, "Override existing file...",
-               "A Catalog file with the very same name as the one you provided already exist. Do you want to replace it?",
-               QMessageBox::Yes|QMessageBox::No)==QMessageBox::No){
-                 return;
+  if (QFileInfo(ui->txt_OutputCatalog->text()).exists()
+      && QMessageBox::question(this, "Override existing file...",
+          "A Catalog file with the very same name as the one you provided already exist. Do you want to replace it?",
+          QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+    return;
   }
 
-  if (QFileInfo(ui->txt_OutputPdf->text()).exists() && QMessageBox::question(this, "Override existing file...",
-                "A PDF file with the very same name as the one you provided already exist. Do you want to replace it?",
-                QMessageBox::Yes|QMessageBox::No)==QMessageBox::No){
-                  return;
-   }
-  enableDisablePage(false);
+  if (QFileInfo(ui->txt_OutputPdf->text()).exists()
+      && QMessageBox::question(this, "Override existing file...",
+          "A PDF file with the very same name as the one you provided already exist. Do you want to replace it?",
+          QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+    return;
+  }
   auto config_map = getRunOptionMap();
-  PhzConfiguration::CreatePhzCatalogConfiguration conf {config_map};
 
-  auto model_phot_grid = conf.getPhotometryGrid();
-  auto marginalization_func = conf.getMarginalizationFunc();
-
-  PhzLikelihood::ParallelCatalogHandler handler {conf.getPhotometricCorrectionMap(),
-                                                    model_phot_grid, marginalization_func};
-  auto catalog = conf.getCatalog();
-  auto out_ptr = conf.getOutputHandler();
-  std::function<void(size_t,size_t)> monitor_function = std::bind(&FormAnalysis::updateAnalysisProgressBar, this, std::placeholders::_1, std::placeholders::_2);
-  handler.handleSources(catalog.begin(), catalog.end(), *out_ptr, monitor_function);
-  enableDisablePage(true);
-  ui->progress_Analysis->setValue(100);
+  std::unique_ptr<DialogRunAnalysis> dialog(new DialogRunAnalysis());
+  dialog->setValues(ui->txt_OutputCatalog->text().toStdString(),
+      ui->txt_OutputPdf->text().toStdString(), config_map);
+  if (dialog->exec()) {
+  }
 }
 
 }

@@ -7,6 +7,7 @@
 #include "PhzUITools/CatalogColumnReader.h"
 #include "PhzQtUI/PhotometricCorrectionHandler.h"
 #include "PhzQtUI/FileUtils.h"
+#include "ElementsKernel/Exception.h"
 
 #include "PhzLikelihood/SourcePhzFunctor.h"
 #include "PhzConfiguration/CalculatePhotometricCorrectionConfiguration.h"
@@ -216,9 +217,19 @@ void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
     correctionComputed(output_file_name);
     accept();
   }
+  catch(const Elements::Exception & e){
+    QMessageBox::warning(this, "Error in the computation...",
+                         QString::fromStdString("Sorry, an error occurred during the computation: "+std::string(e.what())),
+                         QMessageBox::Close);
+  }
+  catch(const std::exception& e){
+     QMessageBox::warning(this, "Error in the computation...",
+         QString::fromStdString("Sorry, an error occurred during the computation: "+std::string(e.what())),
+                          QMessageBox::Close);
+   }
   catch (...){
     QMessageBox::warning(this, "Error in the computation...",
-                  "Sorry, nn error occured during the computation.",
+                  "Sorry, an error occurred during the computation.",
                   QMessageBox::Close);
   }
 }

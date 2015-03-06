@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>661</width>
-    <height>326</height>
+    <width>546</width>
+    <height>632</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -53,7 +53,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout_21">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="QLabel" name="label_28">
        <property name="text">
@@ -62,11 +62,29 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="txt_FileName">
-       <property name="enabled">
-        <bool>false</bool>
+      <widget class="QLabel" name="txt_FileName">
+       <property name="font">
+        <font>
+         <italic>true</italic>
+        </font>
+       </property>
+       <property name="text">
+        <string>File Name</string>
        </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>

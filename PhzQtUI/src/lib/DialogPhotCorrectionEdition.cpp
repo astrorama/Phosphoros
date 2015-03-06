@@ -25,27 +25,42 @@ DialogPhotCorrectionEdition::~DialogPhotCorrectionEdition()
 }
 
 
-void DialogPhotCorrectionEdition::setCorrectionsFile(string filePath){
+void DialogPhotCorrectionEdition::setCorrectionsFile(string filePath, std::list<FilterMapping> filters){
+    m_filters=std::move(filters);
     m_file_path=filePath;
     ui->txt_FileName->setText(QString::fromStdString(filePath));
     m_map = PhotometricCorrectionHandler::getCorrections(filePath);
 
     QStandardItemModel* model = new QStandardItemModel();
-    model->setColumnCount(m_map.size());
+    model->setColumnCount(3);
 
     QStringList  setHeaders;
-    QList<QStandardItem*> items;
+    setHeaders<<"Filter"<<"Transmission"<<"Correction";
+    model->setHorizontalHeaderLabels(setHeaders);
 
     for (auto& correction_pair : m_map){
-      setHeaders<<QString::fromStdString(correction_pair.first.datasetName());
+      QList<QStandardItem*> items;
+      std::string alias ="";
+      for (auto filter:m_filters){
+        if (filter.getFilterFile().compare(correction_pair.first.qualifiedName())==0){
+          alias=filter.getName();
+          break;
+        }
+      }
+      items.push_back(new QStandardItem(QString::fromStdString( alias)));
+      items[0]->setEditable(false);
+      items.push_back(new QStandardItem(QString::fromStdString( correction_pair.first.datasetName())));
+      items[1]->setEditable(false);
       items.push_back(new QStandardItem(QString::number( correction_pair.second)));
+      model->appendRow(items);
     }
 
-    model->setHorizontalHeaderLabels(setHeaders);
-    model->appendRow(items);
+
+
 
     ui->tableView->setModel(model);
 
+    ui->tableView->resizeColumnsToContents();
 
     ui->tableView->setEditTriggers(QAbstractItemView::DoubleClicked);
 
@@ -79,7 +94,7 @@ void DialogPhotCorrectionEdition::on_btn_Cancel_clicked()
     ui->btn_Save->setEnabled(false);
     ui->buttonBox->setEnabled(true);
 
-    setCorrectionsFile(m_file_path);
+    setCorrectionsFile(m_file_path,std::move(m_filters));
 }
 
 
