@@ -24,7 +24,7 @@ DialogFilterMapping::~DialogFilterMapping()
 }
 
 
-void DialogFilterMapping::setFilter(const FilterMapping& filter, const list<string>& columns){
+void DialogFilterMapping::setFilter(const FilterMapping& filter, const set<string>& columns){
     ui->cb_error->clear();
     ui->cb_error->addItem("");
     ui->cb_flux->clear();

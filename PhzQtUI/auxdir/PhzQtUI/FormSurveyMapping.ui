@@ -266,6 +266,9 @@
            </item>
            <item>
             <widget class="QPushButton" name="btn_ImportColumn">
+             <property name="toolTip">
+              <string>Select a file to be used as default catalog for this survey. The columns of the catalog will be used to populate the drop-down for the ID and the Filters columns.</string>
+             </property>
              <property name="text">
               <string>Import Columns from File</string>
              </property>

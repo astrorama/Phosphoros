@@ -91,11 +91,6 @@ void FormAnalysis::updateGridSelection() {
   ui->cb_CompatibleGrid->addItem("<Enter a new name>");
 }
 
-void FormAnalysis::adjustPhzGridButtons(bool enabled){
-    bool name_ok = checkGridSelection(false, true);
-    ui->btn_GetConfigGrid->setEnabled(enabled && name_ok);
-    ui->btn_RunGrid->setEnabled(enabled && name_ok);
-}
 
 
 
@@ -111,9 +106,28 @@ void FormAnalysis::updateCorrectionSelection(){
    }
 }
 
+void FormAnalysis::adjustPhzGridButtons(bool enabled){
+    bool name_ok = checkGridSelection(false, true);
+    ui->btn_GetConfigGrid->setEnabled(enabled && name_ok);
+    ui->btn_RunGrid->setEnabled(enabled && name_ok);
+    QString tool_tip = "";
+
+    if (!name_ok){
+      tool_tip = "Please enter a valid grid name in order to compute the Grid or export the corresponding configuration.";
+    };
+    ui->btn_GetConfigGrid->setToolTip(tool_tip);
+    ui->btn_RunGrid->setToolTip(tool_tip);
+}
+
 void FormAnalysis::setComputeCorrectionEnable(){
   bool name_exists = checkGridSelection(true, false);
     ui->btn_computeCorrections->setEnabled(name_exists && ui->gb_corrections->isChecked () );
+
+    QString tool_tip = "";
+    if (!name_exists){
+      tool_tip = "Please run the photometric grid computation before computing the photometric corrections.";
+    };
+    ui->btn_computeCorrections->setToolTip(tool_tip);
 }
 
 void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
@@ -135,6 +149,48 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
 
   ui->btn_GetConfigAnalysis->setEnabled(grid_name_ok && correction_ok && run_ok && enabled);
   ui->btn_RunAnalysis->setEnabled(grid_name_exists && correction_exists && run_ok && enabled);
+
+
+  QString tool_tip_run = "";
+  QString tool_tip_conf = "";
+  if (!grid_name_ok){
+    tool_tip_conf = tool_tip_conf + "Please enter a valid grid name. \n";
+    tool_tip_run = tool_tip_run +"Please enter a valid grid name. \n";
+  };
+
+  if (!grid_name_exists){
+    tool_tip_run = tool_tip_run + "Please run the photometric grid computation. \n";
+  }
+
+  if (!correction_ok){
+    tool_tip_conf = tool_tip_conf + "When the photometric corrections are enabled, you must provide a valid correction file name. \n";
+    tool_tip_run = tool_tip_run +"When the photometric corrections are enabled, you must provide a valid correction file name. \n";
+  }
+
+  if (!correction_exists){
+     tool_tip_run = tool_tip_run + "Please run the photometric correction computation. \n";
+  }
+
+  if (!info_input.exists()){
+     tool_tip_conf = tool_tip_conf + "Please provide a compatible input catalog (at least all the columns used for the Id and filters). \n";
+     tool_tip_run = tool_tip_run + "Please provide a compatible input catalog (at least all the columns used for the Id and filters). \n";
+   }
+
+  if (ui->txt_OutputCatalog->text().length()==0 || ui->txt_OutputPdf->text().length()==0){
+    tool_tip_conf = tool_tip_conf + "Please provide output files informations. \n";
+    tool_tip_run = tool_tip_run + "Please provide output files informations. \n";
+  }
+
+  if (!(grid_name_ok && correction_ok && run_ok)){
+    tool_tip_conf = tool_tip_conf + "Before getting the configuration.";
+  }
+
+  if (!(grid_name_exists && correction_exists && run_ok)){
+    tool_tip_run = tool_tip_run + "Before running the analysis.";
+  }
+
+  ui->btn_GetConfigAnalysis->setToolTip(tool_tip_conf);
+  ui->btn_RunAnalysis->setToolTip(tool_tip_run);
 }
 
 
@@ -300,6 +356,9 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   connect( grid_model, SIGNAL(itemChanged(QStandardItem*)),
       SLOT(onFilterSelectionItemChanged(QStandardItem*)));
 
+  // push the default catalog
+  ui->txt_inputCatalog->setText(QString::fromStdString(selected_survey.getDefaultCatalog()));
+
   updateGridSelection();
   updateCorrectionSelection();
 }
@@ -316,10 +375,7 @@ void FormAnalysis::onFilterSelectionItemChanged(QStandardItem*) {
 
 //  2. Photometry Grid
 void FormAnalysis::on_cb_CompatibleGrid_textChanged(const QString &) {
-  bool name_ok = checkGridSelection(false, true);
-  ui->btn_GetConfigGrid->setEnabled(name_ok);
-  ui->btn_RunGrid->setEnabled(name_ok);
-
+  adjustPhzGridButtons(true);
   setComputeCorrectionEnable();
   setRunAnnalysisEnable(true);
 }
@@ -369,7 +425,6 @@ void FormAnalysis::on_btn_RunGrid_clicked() {
   }
 }
 
-
 //  3. Photometric Correction
 void FormAnalysis::on_gb_corrections_clicked()
 {
@@ -392,12 +447,25 @@ void FormAnalysis::on_btn_editCorrections_clicked() {
 }
 
 void FormAnalysis::on_btn_computeCorrections_clicked() {
+
+
   auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+
+  SurveyFilterMapping selected_survey;
+
+   for (auto&survey : m_analysis_survey_list) {
+     if (survey.second.getName().compare(survey_name) == 0) {
+       selected_survey = survey.second;
+       break;
+     }
+   }
 
 std::unique_ptr<DialogPhotometricCorrectionComputation> popup(new DialogPhotometricCorrectionComputation());
   popup->setData(survey_name,getSelectedSurveySourceColumn(),
       ui->cb_AnalysisModel->currentText().toStdString(),
-      ui->cb_CompatibleGrid->currentText().toStdString(), getSelectedFilterMapping());
+      ui->cb_CompatibleGrid->currentText().toStdString(),
+      getSelectedFilterMapping(),
+      selected_survey.getDefaultCatalog());
 
   connect( popup.get(), SIGNAL(correctionComputed(const std::string &)),
       SLOT(onCorrectionComputed(const std::string &)));
@@ -416,7 +484,11 @@ void FormAnalysis::onCorrectionComputed(const std::string & new_file_name){
 void FormAnalysis::on_btn_BrowseInput_clicked()
 {
   QFileDialog dialog(this);
-  dialog.selectFile(QString::fromStdString(FileUtils::getLastUsedPath()));
+  std::string path = ui->txt_inputCatalog->text().toStdString();
+  if (path.length()==0){
+    path=FileUtils::getLastUsedPath();
+  }
+  dialog.selectFile(QString::fromStdString(path));
   dialog.setFileMode(QFileDialog::ExistingFile);
   if (dialog.exec()){
     ui->txt_inputCatalog->setText(dialog.selectedFiles()[0]);

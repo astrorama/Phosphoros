@@ -2,6 +2,7 @@
 #define SURVEYFILTERMAPPING_H
 #include <list>
 #include <map>
+#include <set>
 #include "FilterMapping.h"
 
 namespace Euclid {
@@ -116,6 +117,30 @@ public:
      */
     void saveSurvey(std::string oldName);
 
+    /**
+     * @brief get the list of column stored into the Survey.
+     */
+    const std::set<std::string>& getColumnList() const;
+
+    /**
+     * @brief Move the list of column inbto the Survey.
+     */
+    void setColumnList(std::set<std::string> new_list);
+
+
+    /**
+     * @brief set the default catalog path
+     * @param new_default_catalog
+     */
+    void setDefaultCatalog(std::string new_default_catalog);
+
+    /**
+     * @brief get the default catalog path
+     * @return the current default catalog path
+     */
+    std::string getDefaultCatalog() const;
+
+
 
 
 private:
@@ -123,6 +148,8 @@ private:
     std::string m_source_id_column;
     std::list<FilterMapping> m_filters;
     std::string m_root_path;
+    std::string m_default_catalog;
+    std::set<std::string> m_column_list;
 
 };
 

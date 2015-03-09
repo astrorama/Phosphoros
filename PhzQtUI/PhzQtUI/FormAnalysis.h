@@ -73,6 +73,7 @@ private slots:
 
     void on_btn_BrowseOutputPdf_clicked();
 
+
 private:
     std::unique_ptr<Ui::FormAnalysis> ui;
     std::list<std::string> getSelectedFilters(bool return_path=false);

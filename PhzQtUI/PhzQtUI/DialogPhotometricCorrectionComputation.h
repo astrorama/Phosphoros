@@ -42,10 +42,15 @@ public:
      * @param selected_filters
      * list of FilterMapping representing the filters to be taken into account
      * for the photometric corrections computation
+     *
+     * @param default_catalog_path the catalog path used to get the columns when
+     * constructing the survey: it is proposed as a default value for the
+     * training catalog.
      */
     void setData(std::string survey, std::string id_column, std::string model,
         std::string grid,
-        std::list<FilterMapping> selected_filters );
+        std::list<FilterMapping> selected_filters,
+        std::string default_catalog_path);
 
 signals:
    /**
@@ -66,6 +71,11 @@ private slots:
     * the specZ column.
     */
     void on_cb_SpectroColumn_currentIndexChanged(const QString &);
+
+    /**
+     * @brief SLOT trigger the refresh of the default name.
+     */
+    void on_cb_SelectionMethod_currentIndexChanged(const QString &);
 
    /**
     * @brief SLOT trigger the refresh of the run button after a change in
@@ -97,7 +107,9 @@ private:
     std::unique_ptr<Ui::DialogPhotometricCorrectionComputation> ui;
     std::list<FilterMapping> m_selected_filters;
     std::string m_id_column;
+    std::string m_concatenated_filter_names;
     void setRunEnability();
+    bool loadTestCatalog(QString file_name, bool with_warning);
 };
 
 }

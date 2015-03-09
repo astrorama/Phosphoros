@@ -2,6 +2,7 @@
 #define FORMSURVEYMAPPING_H
 
 #include <memory>
+#include <set>
 #include <QWidget>
 #include <QModelIndex>
 #include "FilterMapping.h"
@@ -63,11 +64,13 @@ private:
     std::unique_ptr<Ui::FormSurveyMapping> ui;
     bool m_mappingInsert;
     bool m_filterInsert;
-    std::list<std::string> m_column_from_file;
+    std::set<std::string> m_column_from_file;
+    std::string m_default_survey;
 
     void setFilterMappingInEdition();
     void setFilterMappingInView();
     void loadColumnFromFile(std::string path);
+    void fillCbColumns(std::string current_value="");
 };
 
 }

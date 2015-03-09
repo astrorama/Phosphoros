@@ -19,8 +19,8 @@ namespace PhzUITools {
 CatalogColumnReader::CatalogColumnReader(std::string file_name) : m_file_name(file_name) {
 }
 
-std::list<std::string> CatalogColumnReader::getColumnNames() {
-  std::list<std::string> column_names;
+std::set<std::string> CatalogColumnReader::getColumnNames() {
+  std::set<std::string> column_names;
 
   try{
     bool is_fit_file = false;
@@ -45,7 +45,7 @@ std::list<std::string> CatalogColumnReader::getColumnNames() {
     }
 
     for(int i=0; i< column_info_ptr->size();++i){
-      column_names.push_back(column_info_ptr->getName(i));
+      column_names.insert(column_info_ptr->getName(i));
     }
   } catch(...) {} // if the program is not able to read the file return an empty list...
 

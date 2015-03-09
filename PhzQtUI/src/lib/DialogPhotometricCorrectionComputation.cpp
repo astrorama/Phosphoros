@@ -35,7 +35,8 @@ DialogPhotometricCorrectionComputation::~DialogPhotometricCorrectionComputation(
 
 void DialogPhotometricCorrectionComputation::setData(string survey,
     string id_column, string model, string grid,
-    list<FilterMapping> selected_filters) {
+    list<FilterMapping> selected_filters,
+    std::string default_catalog_path) {
   m_id_column = id_column;
   m_selected_filters = selected_filters;
   ui->txt_survey->setText(QString::fromStdString(survey));
@@ -44,25 +45,31 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
 
   QStandardItemModel* grid_model = new QStandardItemModel();
   grid_model->setColumnCount(1);
+  m_concatenated_filter_names="";
   for (auto filter : m_selected_filters) {
     QList<QStandardItem*> items;
     items.push_back(new QStandardItem(QString::fromStdString(filter.getName())));
     grid_model->appendRow(items);
+    m_concatenated_filter_names=m_concatenated_filter_names+filter.getName();
   }
 
   ui->listView_Filter->setModel(grid_model);
+
+  // default catalog
+
+ if (loadTestCatalog(QString::fromStdString(default_catalog_path),false)){
+   ui->txt_catalog->setText(QString::fromStdString(default_catalog_path));
+ }
+  //default correction name
+  string default_file_name = survey+"_"+model+"_"+m_concatenated_filter_names
+      +"_"+ui->cb_SelectionMethod->currentText().toStdString();
+  ui->txt_FileName->setText(QString::fromStdString(default_file_name));
+
 }
 
-void DialogPhotometricCorrectionComputation::on_btn_TrainingCatalog_clicked() {
-  QFileDialog dialog(this);
-  dialog.setFileMode(QFileDialog::ExistingFile);
-  dialog.selectFile(QString::fromStdString(FileUtils::getLastUsedPath()));
-  if (dialog.exec()) {
 
-    QString file_name = dialog.selectedFiles()[0];
-    FileUtils::setLastUsedPath(file_name.toStdString());
-
-    // Validate catalog
+bool DialogPhotometricCorrectionComputation::loadTestCatalog(QString file_name, bool with_warning){
+  // Validate catalog
     auto column_reader = PhzUITools::CatalogColumnReader(
         file_name.toStdString());
     map<string, bool> file_columns;
@@ -96,9 +103,12 @@ void DialogPhotometricCorrectionComputation::on_btn_TrainingCatalog_clicked() {
     }
 
     if (not_found) {
+      if (with_warning){
       QMessageBox::warning(this, "Incompatible Data...",
           "The catalog file you selected has not the columns described into the Survey and therefore cannot be used. Please select anothe catalog file.",
           QMessageBox::Ok);
+      }
+      return false;
     } else {
       ui->txt_catalog->setText(file_name);
       ui->cb_SpectroColumn->clear();
@@ -108,7 +118,26 @@ void DialogPhotometricCorrectionComputation::on_btn_TrainingCatalog_clicked() {
               QString::fromStdString(column_pair.first));
         }
       }
+
+      return true;
     }
+}
+
+void DialogPhotometricCorrectionComputation::on_btn_TrainingCatalog_clicked() {
+  QFileDialog dialog(this);
+  dialog.setFileMode(QFileDialog::ExistingFile);
+
+  std::string path = ui->txt_catalog->text().toStdString();
+  if (path.length()==0){
+    path=FileUtils::getLastUsedPath();
+  }
+  dialog.selectFile(QString::fromStdString(path));
+  if (dialog.exec()) {
+
+    QString file_name = dialog.selectedFiles()[0];
+    FileUtils::setLastUsedPath(file_name.toStdString());
+    loadTestCatalog(file_name,true);
+
   }
 }
 
@@ -118,7 +147,7 @@ void DialogPhotometricCorrectionComputation::setRunEnability() {
   // A column name is selected
   run_ok &= ui->cb_SpectroColumn->currentText().length() > 0;
 
-  // An itereation number is set
+  // An iteration number is set
   run_ok &= ui->txt_Iteration->text().length() > 0;
 
   // A tolerance is set
@@ -128,6 +157,12 @@ void DialogPhotometricCorrectionComputation::setRunEnability() {
   run_ok &= ui->txt_FileName->text().length() > 0;
 
   ui->bt_Run->setEnabled(run_ok);
+}
+
+void DialogPhotometricCorrectionComputation::on_cb_SelectionMethod_currentIndexChanged(const QString & method){
+  QString default_file_name = ui->txt_survey->text()+"_"+ui->txt_Model->text()
+      +"_"+QString::fromStdString(m_concatenated_filter_names)+"_"+method;
+   ui->txt_FileName->setText(default_file_name);
 }
 
 void DialogPhotometricCorrectionComputation::on_cb_SpectroColumn_currentIndexChanged(

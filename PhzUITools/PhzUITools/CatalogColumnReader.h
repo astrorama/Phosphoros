@@ -8,7 +8,7 @@
 #ifndef CATALOGCOLUMNREADER_H_
 #define CATALOGCOLUMNREADER_H_
 
-#include<list>
+#include<set>
 #include<string>
 
 namespace Euclid {
@@ -31,7 +31,7 @@ public:
    *
    * @return the list of the column names.
    */
-  std::list<std::string> getColumnNames();
+  std::set<std::string> getColumnNames();
 
 private:
 

@@ -1,6 +1,7 @@
 #ifndef DIALOGFILTERMAPPING_H
 #define DIALOGFILTERMAPPING_H
 
+#include <set>
 #include <memory>
 #include <QDialog>
 #include "FilterMapping.h"
@@ -31,7 +32,7 @@ public:
      * @param columns
      * A (possibly empty) list of columns to be used to prepopulate the column drop downs.
      */
-    void setFilter(const FilterMapping& filter, const std::list<std::string>& columns);
+    void setFilter(const FilterMapping& filter, const std::set<std::string>& columns);
 
 signals:
     /**

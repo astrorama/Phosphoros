@@ -101,29 +101,34 @@ void FormSurveyMapping::setFilterMappingInView(){
     m_mappingInsert=false;
 }
 
+
+void FormSurveyMapping::fillCbColumns(std::string current_value){
+   ui->cb_SourceId->clear();
+   ui->cb_SourceId->addItem("");
+   bool found=false;
+   int index=1;
+   for(auto item : m_column_from_file){
+     ui->cb_SourceId->addItem(QString::fromStdString(item));
+     if (item.compare(current_value)==0){
+       found=true;
+       ui->cb_SourceId->setCurrentIndex(index);
+     }
+
+      ++index;
+   }
+
+   if (!found){
+     ui->cb_SourceId->setItemText(0,QString::fromStdString(current_value));
+   }
+}
+
 void FormSurveyMapping::loadColumnFromFile(std::string path){
 
   auto column_reader = PhzUITools::CatalogColumnReader(path);
   m_column_from_file=column_reader.getColumnNames();
 
   auto current_text = ui->cb_SourceId->currentText();
-  ui->cb_SourceId->clear();
-  ui->cb_SourceId->addItem("");
-  bool found=false;
-  int index=1;
-  for(auto item : m_column_from_file){
-    ui->cb_SourceId->addItem(QString::fromStdString(item));
-    if (item.compare(current_text.toStdString())==0){
-      found=true;
-      ui->cb_SourceId->setCurrentIndex(index);
-    }
-
-     ++index;
-  }
-
-  if (!found){
-    ui->cb_SourceId->setItemText(0,current_text);
-  }
+  fillCbColumns(current_text.toStdString());
 }
 
 
@@ -170,26 +175,15 @@ void FormSurveyMapping::on_btn_MapCancel_clicked()
          m_mappingInsert=false;
      } else{
         ui->txt_MapName->setText(QString::fromStdString(model->getName(row)));
-
-
-        int index = 0;
         std::string cb_text =model->getSourceIdColumn(row);
-        for (int i=0; i<ui->cb_SourceId->count();++i){
-            if (cb_text.compare(ui->cb_SourceId->itemText(i).toStdString())){
-                index=i;
-                break;
-            }
-        }
-        ui->cb_SourceId->setCurrentIndex(index);
-        if(index==0)
-        ui->cb_SourceId->setItemText(0,QString::fromStdString(cb_text));
+        m_column_from_file=model->getColumnList(row);
+        m_default_survey=model->getDefaultCatalog(row);
+        fillCbColumns(cb_text);
 
         FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
-
         filter_model->setFilters(model->getFilters(row));
         ui->table_Filter->setModel(filter_model);
     }
-
 
     setFilterMappingInView();
 }
@@ -213,6 +207,9 @@ void FormSurveyMapping::on_btn_MapSave_clicked()
      FilterModel* filter_model=static_cast<FilterModel*>(ui->table_Filter->model());
      model->setFilters(std::move(filter_model->getFilters()),row);
 
+     model->setColumnList(m_column_from_file,row);
+     model->setDefaultCatalog(m_default_survey,row);
+
      model->saveSurvey(row,old_name);
 
      m_filterInsert=false;
@@ -220,51 +217,46 @@ void FormSurveyMapping::on_btn_MapSave_clicked()
      setFilterMappingInView();
 }
 
-void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QModelIndex){
+void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QModelIndex) {
 
+  ui->cb_SourceId->clear();
+  ui->cb_SourceId->addItem("");
+  m_column_from_file.clear();
+  std::string cb_text ="";
   FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
-     if (new_index.isValid()){
-         SurveyModel* model=static_cast<SurveyModel*>(ui->table_Map->model());
+  if (new_index.isValid()) {
+    SurveyModel* model = static_cast<SurveyModel*>(ui->table_Map->model());
 
-         ui->txt_MapName->setText(QString::fromStdString(model->getName(new_index.row())));
+    ui->txt_MapName->setText(QString::fromStdString(model->getName(new_index.row())));
+    m_default_survey=model->getDefaultCatalog(new_index.row());
 
+    cb_text = model->getSourceIdColumn(new_index.row());
 
-         int index = 0;
-         std::string cb_text =model->getSourceIdColumn(new_index.row());
-         for (int i=0; i<ui->cb_SourceId->count();++i){
-             if (cb_text.compare(ui->cb_SourceId->itemText(i).toStdString())){
-                 index=i;
-                 break;
-             }
-         }
-         ui->cb_SourceId->setCurrentIndex(index);
-         if(index==0)
-         ui->cb_SourceId->setItemText(0,QString::fromStdString(cb_text));
+    m_column_from_file=model->getColumnList(new_index.row());
 
+    filter_model->setFilters(model->getFilters(new_index.row()));
+  } else {
+    ui->txt_MapName->setText(QString::fromStdString(""));
+    m_default_survey="";
+    ui->cb_SourceId->setCurrentIndex(0);
+    ui->cb_SourceId->clearEditText();
+  }
 
-         filter_model->setFilters(model->getFilters(new_index.row()));
-     }
-     else{
-         ui->txt_MapName->setText(QString::fromStdString(""));
-         ui->cb_SourceId->setCurrentIndex(0);
-         ui->cb_SourceId->clearEditText();
-     }
+  fillCbColumns(cb_text);
 
-     ui->table_Filter->setModel(filter_model);
-     ui->table_Filter->setColumnHidden(4, true);
-     ui->table_Filter->setSelectionBehavior(QAbstractItemView::SelectRows);
-     ui->table_Filter->setSelectionMode(QAbstractItemView::SingleSelection);
-     ui->table_Filter->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-     ui->table_Filter->update(QModelIndex());
+  ui->table_Filter->setModel(filter_model);
+  ui->table_Filter->setColumnHidden(4, true);
+  ui->table_Filter->setSelectionBehavior(QAbstractItemView::SelectRows);
+  ui->table_Filter->setSelectionMode(QAbstractItemView::SingleSelection);
+  ui->table_Filter->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+  ui->table_Filter->update(QModelIndex());
 
-     connect(
-       ui->table_Filter->selectionModel(),
-       SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
-       SLOT(filterSelectionChanged(QModelIndex, QModelIndex))
-      );
+  connect(ui->table_Filter->selectionModel(),
+      SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
+      SLOT(filterSelectionChanged(QModelIndex, QModelIndex)));
 
-     setFilterMappingInView();
- }
+  setFilterMappingInView();
+}
 
 void FormSurveyMapping::on_btn_ImportColumn_clicked()
 {
@@ -274,6 +266,9 @@ void FormSurveyMapping::on_btn_ImportColumn_clicked()
     if (dialog.exec()){
         QStringList fileNames=dialog.selectedFiles();
         loadColumnFromFile(fileNames[0].toStdString());
+
+        m_default_survey=fileNames[0].toStdString();
+
     }
 }
 

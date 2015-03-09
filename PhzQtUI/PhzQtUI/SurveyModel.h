@@ -95,6 +95,32 @@ public:
   std::string getSourceIdColumn(int row);
 
   /**
+     * @brief get the list of column stored into the Survey represented by the row 'row'.
+     * @param row the model row number representing the survey.
+     */
+  const std::set<std::string>& getColumnList(int row) const;
+
+    /**
+     * @brief Move the list of column into the survey represented by the row 'row'.
+     * @param row the model row number representing the survey.
+     */
+  void setColumnList(std::set<std::string> new_list, int row);
+
+
+  /**
+   * @brief set the default catalog path into the survey represented by the row 'row'.
+   * @param row the model row number representing the survey.
+   * @param new_default_catalog
+   */
+  void setDefaultCatalog(std::string new_default_catalog, int row);
+
+  /**
+   * @brief get the default catalog path from the survey represented by the row 'row'
+   * @return the current default catalog path
+   */
+  std::string getDefaultCatalog(int row) const;
+
+  /**
    * @brief Change the Filters Mappings the Survey represented by the given
    * row.
    *

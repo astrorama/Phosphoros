@@ -44,9 +44,27 @@ namespace PhzQtUI {
         m_filters=std::move(filters);
     }
 
+    const std::set<std::string>& SurveyFilterMapping::getColumnList() const{
+      return m_column_list;
+    }
+
+    void SurveyFilterMapping::setColumnList(std::set<std::string> new_list){
+      m_column_list=std::move(new_list);
+    }
+
     const std::list<FilterMapping>& SurveyFilterMapping::getFilters() const{
         return m_filters;
     }
+
+    void SurveyFilterMapping::setDefaultCatalog(std::string new_default_catalog){
+      m_default_catalog=new_default_catalog;
+    }
+
+    std::string SurveyFilterMapping::getDefaultCatalog() const{
+      return m_default_catalog;
+    }
+
+
 
     std::map<int,SurveyFilterMapping> SurveyFilterMapping::loadSurveysFromFolder(std::string root_path){
         QDir root_dir(QString::fromStdString(root_path));
@@ -66,44 +84,67 @@ namespace PhzQtUI {
         return map;
    }
 
-     SurveyFilterMapping SurveyFilterMapping::loadSurveyFromFile(std::string fileName, std::string root_path){
+SurveyFilterMapping SurveyFilterMapping::loadSurveyFromFile(
+    std::string fileName, std::string root_path) {
 
-        SurveyFilterMapping survey(root_path);
-        survey.setName(FileUtils::removeExt(fileName,".xml"));
+  SurveyFilterMapping survey(root_path);
+  survey.setName(FileUtils::removeExt(fileName, ".xml"));
 
+  QDomDocument doc("SurveyFilterMapping");
+  QFile file(
+      QString::fromStdString(root_path) + QDir::separator()
+          + QString::fromStdString(fileName));
+  if (!file.open(QIODevice::ReadOnly))
+    return survey;
+  if (!doc.setContent(&file)) {
+    file.close();
+    return survey;
+  }
+  file.close();
 
-        QDomDocument doc("SurveyFilterMapping");
-        QFile file(QString::fromStdString(root_path)+QDir::separator()+QString::fromStdString(fileName));
-        if (!file.open(QIODevice::ReadOnly))
-             return survey;
-        if (!doc.setContent(&file)) {
-            file.close();
-            return survey;
-        }
-        file.close();
+  QDomElement root_node = doc.documentElement();
+  survey.setName(root_node.attribute("Name").toStdString());
+  survey.setSourceIdColumn(root_node.attribute("SourceColumnId").toStdString());
+  survey.setDefaultCatalog(root_node.attribute("DefaultCatalogPath").toStdString());
 
-        QDomElement root_node = doc.documentElement();
-        survey.setName(root_node.attribute("Name").toStdString());
-        survey.setSourceIdColumn(root_node.attribute("SourceColumnId").toStdString());
+  auto columns_node = root_node.firstChildElement("AvailableColumns");
+  auto list = columns_node.childNodes();
+  survey.m_column_list.clear();
+  for (int i = 0; i < list.count(); ++i) {
+    auto node_column = list.at(i).toElement();
+    survey.m_column_list.insert(node_column.text().toStdString());
+  }
 
-        auto filters_node = root_node.firstChildElement("Filters");
+  if (survey.m_column_list.count(survey.getSourceIdColumn())==0){
+    survey.m_column_list.insert(survey.getSourceIdColumn());
+  }
 
-        auto list =filters_node.childNodes();
+  auto filters_node = root_node.firstChildElement("Filters");
 
-        for(int i=0;i<list.count();++i ){
-             FilterMapping mapping;
+   list = filters_node.childNodes();
 
-             auto node_filter = list.at(i).toElement();
-             mapping.setName(node_filter.attribute("Name").toStdString());
-             mapping.setFluxColumn(node_filter.attribute("FluxColumn").toStdString());
-             mapping.setErrorColumn(node_filter.attribute("ErrorColumn").toStdString());
-             mapping.setFilterFile(node_filter.attribute("TransmissionFile").toStdString());
+  for (int i = 0; i < list.count(); ++i) {
+    FilterMapping mapping;
 
-             survey.m_filters.push_back(mapping);
-        }
+    auto node_filter = list.at(i).toElement();
+    mapping.setName(node_filter.attribute("Name").toStdString());
+    mapping.setFluxColumn(node_filter.attribute("FluxColumn").toStdString());
 
-        return survey;
+    if (survey.m_column_list.count(mapping.getFluxColumn()) == 0) {
+      survey.m_column_list.insert(mapping.getFluxColumn());
     }
+    mapping.setErrorColumn(node_filter.attribute("ErrorColumn").toStdString());
+
+    if (survey.m_column_list.count(mapping.getErrorColumn()) == 0) {
+      survey.m_column_list.insert(mapping.getErrorColumn());
+    }
+    mapping.setFilterFile(
+        node_filter.attribute("TransmissionFile").toStdString());
+    survey.m_filters.push_back(mapping);
+  }
+
+  return survey;
+}
 
      void SurveyFilterMapping::deleteSurvey(){
          QFile(QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(getName()+".xml")).remove();
@@ -119,6 +160,7 @@ namespace PhzQtUI {
           QDomElement root = doc.createElement("SurveyFilterMapping");
           root.setAttribute("Name",QString::fromStdString(m_survey_name));
           root.setAttribute("SourceColumnId",QString::fromStdString(m_source_id_column));
+          root.setAttribute("DefaultCatalogPath",QString::fromStdString(m_default_catalog));
           doc.appendChild(root);
 
           QDomElement filters_Node = doc.createElement("Filters");
@@ -132,6 +174,16 @@ namespace PhzQtUI {
               filter_node.setAttribute("TransmissionFile",QString::fromStdString(filter.getFilterFile()));
               filters_Node.appendChild(filter_node);
           }
+
+
+          QDomElement columns_node = doc.createElement("AvailableColumns");
+                for(auto& column : m_column_list){
+                    QDomElement text_element = doc.createElement("AvailableColumn");
+                    text_element.appendChild(doc.createTextNode(QString::fromStdString(column)));
+                    columns_node.appendChild(text_element);
+                }
+          root.appendChild(columns_node);
+
           QString xml = doc.toString();
 
          stream<<xml;

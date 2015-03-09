@@ -125,9 +125,30 @@ std::string SurveyModel::getSourceIdColumn( int row){
     return m_survey_filter_mappings.at(ref).getSourceIdColumn();
 }
 
+const std::set<std::string>& SurveyModel::getColumnList(int row) const{
+  int ref = getValue(row,3).toInt();
+  return m_survey_filter_mappings.at(ref).getColumnList();
+}
+
+void SurveyModel::setColumnList(std::set<std::string> new_list, int row){
+  int ref = getValue(row,3).toInt();
+     m_survey_filter_mappings.at(ref).setColumnList(std::move(new_list));
+}
+
 const std::list<FilterMapping>&  SurveyModel::getFilters(int row){
     int ref = getValue(row,3).toInt();
     return m_survey_filter_mappings.at(ref).getFilters();
+}
+
+void SurveyModel::setDefaultCatalog(std::string new_default_catalog, int row){
+  int ref = getValue(row,3).toInt();
+     m_survey_filter_mappings.at(ref).setDefaultCatalog(new_default_catalog);
+}
+
+
+std::string SurveyModel::getDefaultCatalog(int row) const{
+  int ref = getValue(row,3).toInt();
+  return m_survey_filter_mappings.at(ref).getDefaultCatalog();
 }
 
 std::string SurveyModel::getDuplicateName(std::string name) const{
