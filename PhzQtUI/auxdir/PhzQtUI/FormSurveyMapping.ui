@@ -17,16 +17,6 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_13">
      <item>
-      <widget class="QPushButton" name="btn_MapToHome">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>Home</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QLabel" name="label_14">
        <property name="font">
         <font>
@@ -36,7 +26,7 @@
         </font>
        </property>
        <property name="text">
-        <string>&gt; Survey Filter Mapping</string>
+        <string>Survey Filter Mapping :</string>
        </property>
       </widget>
      </item>
@@ -52,13 +42,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_mappingToFilter">
-       <property name="text">
-        <string>Manage Filter Transmissions</string>
-       </property>
-      </widget>
      </item>
     </layout>
    </item>
@@ -269,9 +252,29 @@
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_11">
            <item>
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
             <widget class="QPushButton" name="btn_ImportColumn">
              <property name="text">
               <string>Import Columns from File</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string/>
              </property>
             </widget>
            </item>

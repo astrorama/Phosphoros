@@ -28,8 +28,8 @@ public:
     void loadMappingPage();
 
 signals:
-    void navigateToHome();
-    void navigateToFilterManagement();
+    void startEdition(int i);
+    void endEdition();
 
 private slots:
     void filterMappingSelectionChanged(QModelIndex, QModelIndex);
@@ -37,8 +37,6 @@ private slots:
     void filterSelectionChanged(QModelIndex, QModelIndex);
 
     void filterEditionPopupClosing(FilterMapping);
-
-    void on_btn_MapToHome_clicked();
 
     void on_btn_MapNew_clicked();
 
@@ -60,7 +58,6 @@ private slots:
 
     void on_btn_DeleteFilter_clicked();
 
-    void on_btn_mappingToFilter_clicked();
 
 private:
     std::unique_ptr<Ui::FormSurveyMapping> ui;

@@ -17,13 +17,6 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_12">
      <item>
-      <widget class="QPushButton" name="btn_ManageToHome">
-       <property name="text">
-        <string>Home</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QLabel" name="label_13">
        <property name="font">
         <font>
@@ -33,7 +26,7 @@
         </font>
        </property>
        <property name="text">
-        <string>&gt; Aux. Data Management</string>
+        <string>Aux. Data Management :</string>
        </property>
       </widget>
      </item>
@@ -80,26 +73,6 @@
            </property>
            <property name="text">
             <string>Filter Full Transmission Curves :</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_survey">
-           <property name="text">
-            <string>Go to Survey Filter Mapping</string>
            </property>
           </widget>
          </item>

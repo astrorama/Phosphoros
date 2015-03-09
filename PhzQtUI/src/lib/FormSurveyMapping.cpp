@@ -56,8 +56,8 @@ void FormSurveyMapping::loadMappingPage(){
 }
 
 void FormSurveyMapping::setFilterMappingInEdition(){
+    startEdition(0);
     ui->table_Map->setEnabled(false);
-    ui->btn_MapToHome->setEnabled(false);
     ui->btn_MapNew->setEnabled(false);
     ui->btn_MapDuplicate->setEnabled(false);
     ui->btn_MapDelete->setEnabled(false);
@@ -65,7 +65,6 @@ void FormSurveyMapping::setFilterMappingInEdition(){
     ui->btn_MapCancel->setEnabled(true);
     ui->btn_MapSave->setEnabled(true);
     ui->btn_ImportColumn->setEnabled(true);
-    ui->btn_mappingToFilter->setEnabled(false);
     ui->txt_MapName->setEnabled(true);
     ui->cb_SourceId->setEnabled(true);
     ui->btn_AddFilter->setEnabled(true);
@@ -80,11 +79,10 @@ void FormSurveyMapping::setFilterMappingInEdition(){
 }
 
 void FormSurveyMapping::setFilterMappingInView(){
-
+    endEdition();
     ui->table_Map->setEnabled(true);
     bool has_mapping_selected = ui->table_Map->selectionModel()->currentIndex().isValid();
 
-    ui->btn_MapToHome->setEnabled(true);
     ui->btn_MapNew->setEnabled(true);
     ui->btn_MapDuplicate->setEnabled(has_mapping_selected);
     ui->btn_MapDelete->setEnabled(has_mapping_selected);
@@ -92,7 +90,6 @@ void FormSurveyMapping::setFilterMappingInView(){
     ui->btn_MapCancel->setEnabled(false);
     ui->btn_MapSave->setEnabled(false);
     ui->btn_ImportColumn->setEnabled(false);
-    ui->btn_mappingToFilter->setEnabled(true);
     ui->txt_MapName->setEnabled(false);
     ui->cb_SourceId->setEnabled(false);
     ui->btn_AddFilter->setEnabled(false);
@@ -131,15 +128,6 @@ void FormSurveyMapping::loadColumnFromFile(std::string path){
 
 
 //  - Slots on this page
-void FormSurveyMapping::on_btn_MapToHome_clicked()
-{
-    navigateToHome();
-}
-
-void FormSurveyMapping::on_btn_mappingToFilter_clicked()
-{
-    navigateToFilterManagement();
-}
 
 void FormSurveyMapping::on_btn_MapNew_clicked()
 {

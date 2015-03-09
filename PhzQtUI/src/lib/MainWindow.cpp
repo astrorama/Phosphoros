@@ -17,12 +17,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->widget_ModelSet,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
 
-    connect(ui->widget_SurveyMapping,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
-    connect(ui->widget_SurveyMapping,SIGNAL(navigateToFilterManagement()),SLOT(navigateToAuxDataManagement()));
-
-    connect(ui->widget_AuxDataManagement,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
-    connect(ui->widget_AuxDataManagement,SIGNAL(navigateToSurvey()),SLOT(navigateToSurvey()));
-
 
     connect(ui->widget_Analysis,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
 }
@@ -37,25 +31,12 @@ MainWindow::~MainWindow()
      changeMainStackedWidgetIndex(0);
  }
 
- void MainWindow::navigateToSurvey(){
-    changeMainStackedWidgetIndex(2);
-    ui->widget_SurveyMapping->loadMappingPage();
- }
-
  //--------------------------------------------------
  // Option Popup
  //  - Slots opening the popup
  void MainWindow::on_btn_HomeToOption_clicked()
  {
    std::unique_ptr<DialogOptions> popUp(new DialogOptions());
-
-     connect( popUp.get(), SIGNAL(goToFilterManagement()),
-       SLOT(navigateToFilterManagement())
-      );
-
-     connect( popUp.get(), SIGNAL(goToAuxDataManagement()),
-               SLOT(navigateToAuxDataManagement())
-              );
 
      popUp->exec();
  }
@@ -69,28 +50,11 @@ void MainWindow::on_btn_HomeToModel_clicked(){
 }
 
 //------------------------------------------------
-// Filter Mapping  Page
-//  - Slots landing on this page
-void MainWindow::navigateToFilterManagement(){
-     changeMainStackedWidgetIndex(2);
-     ui->widget_SurveyMapping->loadMappingPage();
-}
-
-//------------------------------------------------
-// Aux Data Management  Page
-//  - Slots landing on this page
-void MainWindow::navigateToAuxDataManagement(){
-
-    changeMainStackedWidgetIndex(3);
-    ui->widget_AuxDataManagement->loadManagementPage();
-}
-
-//------------------------------------------------
 // Analysis page  Page
 //  - Slots landing on this page
 void MainWindow::on_btn_HomeToAnalysis_clicked()
 {
-  changeMainStackedWidgetIndex(4);
+  changeMainStackedWidgetIndex(2);
   ui->widget_Analysis->loadAnalysisPage();
 }
 

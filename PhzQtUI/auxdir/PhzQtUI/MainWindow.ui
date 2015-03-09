@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1089</width>
-    <height>903</height>
+    <width>1151</width>
+    <height>947</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -189,20 +189,6 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page_3">
-       <layout class="QVBoxLayout" name="verticalLayout_8">
-        <item>
-         <widget class="Euclid::PhzQtUI::FormSurveyMapping" name="widget_SurveyMapping" native="true"/>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="page_6">
-       <layout class="QVBoxLayout" name="verticalLayout_28">
-        <item>
-         <widget class="Euclid::PhzQtUI::FormAuxDataManagement" name="widget_AuxDataManagement" native="true"/>
-        </item>
-       </layout>
-      </widget>
       <widget class="QWidget" name="page_5">
        <layout class="QVBoxLayout" name="verticalLayout_26">
         <item>
@@ -219,7 +205,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1089</width>
+     <width>1151</width>
      <height>27</height>
     </rect>
    </property>
@@ -237,28 +223,14 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>FormSurveyMapping</class>
-   <extends>QWidget</extends>
-   <header>PhzQtUI/FormSurveyMapping.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>FormModelSet</class>
+   <class>Euclid::PhzQtUI::FormModelSet</class>
    <extends>QWidget</extends>
    <header>PhzQtUI/FormModelSet.h</header>
-   <container>1</container>
   </customwidget>
   <customwidget>
-   <class>FormAnalysis</class>
+   <class>Euclid::PhzQtUI::FormAnalysis</class>
    <extends>QWidget</extends>
    <header>PhzQtUI/FormAnalysis.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>FormAuxDataManagement</class>
-   <extends>QWidget</extends>
-   <header>PhzQtUI/FormAuxDataManagement.h</header>
-   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

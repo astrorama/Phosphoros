@@ -26,31 +26,8 @@ public:
     explicit DialogOptions(QWidget *parent = 0);
     ~DialogOptions();
 
-signals:
-    /**
-     * @brief SIGNAL goToFilterManagement: rised when the poupu is closing and the next
-     * page has to be the Survey Filter Mapping page
-     */
-    void goToFilterManagement();
-
-    /**
-     * @brief SIGNAL goToAuxDataManagement: rised when the popup is closed and the next
-     * page has to be the Aux. Data Management page
-     */
-    void goToAuxDataManagement();
 
 private slots:
-    /**
-     * @brief SLOT on_btn_ManageFilter_clicked: rise the SIGNAL goToFilterManagement
-     * and close the popup
-     */
-    void on_btn_ManageFilter_clicked();
-
-    /**
-     * @brief SLOT on_btn_ManageAuxData_clicked: rise the SIGNAL goToAuxDataManagement
-     * and close the popup
-     */
-    void on_btn_ManageAuxData_clicked();
 
     /**
      * @brief SLOT on_btn_editGeneral_clicked: turn the root path section in edition.
@@ -72,6 +49,16 @@ private slots:
      * @brief SLOT on_btn_browseRoot_clicked: Open the native Folder selector dialog.
      */
     void on_btn_browseRoot_clicked();
+
+    /**
+     * @brief SLOT Lock the user to the current tab.
+     */
+    void startEdition(int i);
+
+    /**
+     * @brief SLOT re-activate tabs and popup closing.
+     */
+    void endEdition();
 
 private:
     std::unique_ptr<Ui::DialogOptions> ui;

@@ -63,15 +63,6 @@ void FormAuxDataManagement::loadManagementPage(int index){
 
 
 //  - Slot on this page
-void FormAuxDataManagement::on_btn_ManageToHome_clicked()
-{
-    navigateToHome();
-}
-
-
-void FormAuxDataManagement::on_btn_survey_clicked(){
-    navigateToSurvey();
-}
 
 void FormAuxDataManagement::on_btn_RedImport_clicked()
 {

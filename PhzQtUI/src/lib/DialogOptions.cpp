@@ -16,23 +16,20 @@ DialogOptions::DialogOptions(QWidget *parent) :
     ui->setupUi(this);
 
     ui->txt_rootDir->setText(QString::fromStdString(FileUtils::getRootPath()));
+
+    ui->widget_survey_mapping->loadMappingPage();
+
+    connect(ui->widget_survey_mapping, SIGNAL(startEdition(int)),SLOT(startEdition(int)));
+    connect(ui->widget_survey_mapping, SIGNAL(endEdition()),SLOT(endEdition()));
+
+    ui->widget_aux_Data->loadManagementPage(0);
 }
 
 DialogOptions::~DialogOptions()
 {
 }
 
-void DialogOptions::on_btn_ManageFilter_clicked()
-{
-    goToFilterManagement();
-    this->close();
-}
 
-void DialogOptions::on_btn_ManageAuxData_clicked()
-{
-    goToAuxDataManagement();
-    this->close();
-}
 
 
 void DialogOptions::on_btn_editGeneral_clicked()
@@ -79,8 +76,26 @@ void DialogOptions::on_btn_browseRoot_clicked()
 
         QStringList fileNames=dialog.selectedFiles();
         ui->txt_rootDir->setText(fileNames[0]);
-
     }
+}
+
+void DialogOptions::startEdition(int i){
+  for (int j=0;j<3;++j){
+      if (i!=j){
+        ui->tabWidget->setTabEnabled(j,false);
+      }
+  }
+
+  ui->buttonBox->setEnabled(false);
+}
+
+void DialogOptions::endEdition(){
+
+  ui->tabWidget->setTabEnabled(0,true);
+  ui->tabWidget->setTabEnabled(1,true);
+  ui->tabWidget->setTabEnabled(2,true);
+  ui->tabWidget->setEnabled(true);
+  ui->buttonBox->setEnabled(true);
 }
 
 
