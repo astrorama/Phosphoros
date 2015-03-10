@@ -103,6 +103,7 @@ private slots:
     void on_bt_Run_clicked();
 
 
+
 private:
     std::unique_ptr<Ui::DialogPhotometricCorrectionComputation> ui;
     std::list<FilterMapping> m_selected_filters;

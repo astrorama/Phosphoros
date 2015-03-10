@@ -59,7 +59,7 @@
        <item>
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>Filter Name :</string>
+          <string>*Filter Name :</string>
          </property>
         </widget>
        </item>
@@ -90,7 +90,7 @@
        <item>
         <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>Flux Column :</string>
+          <string>*Flux Column :</string>
          </property>
         </widget>
        </item>
@@ -108,7 +108,7 @@
        <item>
         <widget class="QLabel" name="label_4">
          <property name="text">
-          <string>Error Column :</string>
+          <string>*Error Column :</string>
          </property>
         </widget>
        </item>
@@ -126,7 +126,7 @@
    <item>
     <widget class="QLabel" name="label_5">
      <property name="text">
-      <string>Filter Full Transmission :</string>
+      <string>*Filter Full Transmission :</string>
      </property>
     </widget>
    </item>

@@ -100,7 +100,7 @@
         </font>
        </property>
        <property name="text">
-        <string>New Sub-Group Name :</string>
+        <string>*New Sub-Group Name :</string>
        </property>
       </widget>
      </item>

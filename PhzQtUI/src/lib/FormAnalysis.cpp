@@ -113,10 +113,18 @@ void FormAnalysis::adjustPhzGridButtons(bool enabled){
     QString tool_tip = "";
 
     if (!name_ok){
+      ui->cb_CompatibleGrid->lineEdit()->setStyleSheet("QLineEdit { color: red }");
       tool_tip = "Please enter a valid grid name in order to compute the Grid or export the corresponding configuration.";
-    };
+    } else if (!checkGridSelection(true, false)) {
+      ui->cb_CompatibleGrid->lineEdit()->setStyleSheet("QLineEdit { color: orange }");
+    } else {
+      ui->cb_CompatibleGrid->lineEdit()->setStyleSheet("QLineEdit { color: black }");
+
+    }
     ui->btn_GetConfigGrid->setToolTip(tool_tip);
     ui->btn_RunGrid->setToolTip(tool_tip);
+
+
 }
 
 void FormAnalysis::setComputeCorrectionEnable(){
@@ -172,8 +180,11 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   }
 
   if (!info_input.exists()){
+    ui->txt_inputCatalog->setStyleSheet("QLineEdit { color: #F78181 }");
      tool_tip_conf = tool_tip_conf + "Please provide a compatible input catalog (at least all the columns used for the Id and filters). \n";
      tool_tip_run = tool_tip_run + "Please provide a compatible input catalog (at least all the columns used for the Id and filters). \n";
+   } else {
+     ui->txt_inputCatalog->setStyleSheet("QLineEdit { color: grey }");
    }
 
   if (ui->txt_OutputCatalog->text().length()==0 || ui->txt_OutputPdf->text().length()==0){
@@ -185,9 +196,21 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
     tool_tip_conf = tool_tip_conf + "Before getting the configuration.";
   }
 
+  if (QFileInfo(ui->txt_OutputCatalog->text()).exists()){
+    ui->txt_OutputCatalog->setStyleSheet("QLineEdit { color: #FAAC58 }");
+  } else {
+    ui->txt_OutputCatalog->setStyleSheet("QLineEdit { color: grey }");
+  }
+
   if (!(grid_name_exists && correction_exists && run_ok)){
     tool_tip_run = tool_tip_run + "Before running the analysis.";
   }
+
+  if (QFileInfo(ui->txt_OutputPdf->text()).exists()){
+     ui->txt_OutputPdf->setStyleSheet("QLineEdit { color: #FAAC58 }");
+   } else {
+     ui->txt_OutputPdf->setStyleSheet("QLineEdit { color: grey }");
+   }
 
   ui->btn_GetConfigAnalysis->setToolTip(tool_tip_conf);
   ui->btn_RunAnalysis->setToolTip(tool_tip_run);
@@ -419,8 +442,9 @@ void FormAnalysis::on_btn_RunGrid_clicked() {
     std::unique_ptr<DialogGridGeneration> dialog(new DialogGridGeneration());
       dialog->setValues(ui->cb_CompatibleGrid->currentText().toStdString(), config_map);
     if (dialog->exec()) {
-      setRunAnnalysisEnable(true);
+      adjustPhzGridButtons(true);
       setComputeCorrectionEnable();
+      setRunAnnalysisEnable(true);
     }
   }
 }

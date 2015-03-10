@@ -86,6 +86,13 @@ void DialogImportAuxData::on_btn_import_clicked()
         //Folder case
 
         QFileInfo info(ui->txt_folder->text());
+        if (!info.exists() ){
+          QMessageBox::warning( this, "Missing Folder...",
+                                                              "It is not possible to find the folder you want to import. Please enter the folder name again.",
+                                                              QMessageBox::Ok );
+           return;
+        }
+
         QString dest_folder=QString::fromStdString(m_parent_folder);
         if (ui->cb_createSubGroup->isChecked()){
            dest_folder=dest_folder+QDir::separator()+info.fileName();

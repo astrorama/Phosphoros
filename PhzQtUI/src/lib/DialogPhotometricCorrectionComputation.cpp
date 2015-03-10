@@ -184,7 +184,18 @@ void DialogPhotometricCorrectionComputation::on_txt_Tolerence_textChanged(
 void DialogPhotometricCorrectionComputation::on_txt_FileName_textChanged(
     const QString &) {
   setRunEnability();
+  string output_file_name=FileUtils::addExt(ui->txt_FileName->text().toStdString(),".txt");
+    auto path_filename = FileUtils::getPhotCorrectionsRootPath(true)
+           + QString(QDir::separator()).toStdString() + output_file_name;
+
+    if (QFileInfo(QString::fromStdString(path_filename)).exists()){
+       ui->txt_FileName->setStyleSheet("QLineEdit { color: orange }");
+    } else {
+      ui->txt_FileName->setStyleSheet("QLineEdit { color: black }");
+    }
 }
+
+
 
 void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
   try{

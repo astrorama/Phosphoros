@@ -142,7 +142,7 @@
       <item>
        <widget class="QLabel" name="label_4">
         <property name="text">
-         <string>File :</string>
+         <string>*File :</string>
         </property>
        </widget>
       </item>
@@ -192,7 +192,7 @@
       <item>
        <widget class="QLabel" name="label_5">
         <property name="text">
-         <string>Folder :</string>
+         <string>*Folder :</string>
         </property>
        </widget>
       </item>
