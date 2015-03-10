@@ -78,15 +78,25 @@ void FormAnalysis::updateGridSelection() {
     }
   }
 
-  auto axis = PhzGridInfoHandler::getAxesTuple(
-      selected_model);
+  auto axis = PhzGridInfoHandler::getAxesTuple( selected_model);
   auto possible_files =
       PhzGridInfoHandler::getCompatibleGridFile(axis,
           getSelectedFilters(true));
 
   ui->cb_CompatibleGrid->clear();
+  bool added=false;
   for (auto& file : possible_files) {
     ui->cb_CompatibleGrid->addItem(QString::fromStdString(file));
+    added=true;
+  }
+
+  if (!added){
+    std::string concatenated_filter_names="";
+     for (auto filter : getSelectedFilters(false)) {
+       concatenated_filter_names=concatenated_filter_names+filter;
+     }
+
+    ui->cb_CompatibleGrid->addItem(ui->cb_AnalysisSurvey->currentText()+QString::fromStdString("_"+selected_model.getName()+"_"+concatenated_filter_names));
   }
   ui->cb_CompatibleGrid->addItem("<Enter a new name>");
 }
