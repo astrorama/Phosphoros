@@ -133,7 +133,7 @@
    <item>
     <widget class="QFrame" name="frame_Folder">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -185,6 +185,9 @@
    </item>
    <item>
     <widget class="QFrame" name="frame_File">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
