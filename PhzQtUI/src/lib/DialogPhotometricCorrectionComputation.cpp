@@ -1,3 +1,5 @@
+#include <QFuture>
+#include <qtconcurrentrun.h>
 #include <QStandardItem>
 #include <QFileInfo>
 #include "PhzQtUI/DialogPhotometricCorrectionComputation.h"
@@ -195,90 +197,100 @@ void DialogPhotometricCorrectionComputation::on_txt_FileName_textChanged(
     }
 }
 
-
-
-void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
-  try{
-    string output_file_name=FileUtils::addExt(ui->txt_FileName->text().toStdString(),".txt");
-    ui->txt_FileName->setText(QString::fromStdString(output_file_name));
-
+void DialogPhotometricCorrectionComputation::disablePage(){
+     ui->btn_TrainingCatalog->setEnabled(false);
+     ui->cb_SpectroColumn->setEnabled(false);
+     ui->txt_Iteration->setEnabled(false);
+     ui->txt_Tolerence->setEnabled(false);
+     ui->cb_SelectionMethod->setEnabled(false);
+     ui->txt_FileName->setEnabled(false);
+     ui->bt_Run->setEnabled(false);
+     ui->buttonBox->setEnabled(false);
+}
+std::string DialogPhotometricCorrectionComputation::runFunction(){
+  try {
     vector<string> filter_mapping;
-    for (auto& filter : m_selected_filters){
-      filter_mapping.push_back(filter.getFilterFile()+" "+filter.getFluxColumn()+" "+filter.getErrorColumn());
+    for (auto& filter : m_selected_filters) {
+      filter_mapping.push_back(
+          filter.getFilterFile() + " " + filter.getFluxColumn() + " "
+              + filter.getErrorColumn());
     }
 
-    int max_iter_number=ui->txt_Iteration->text().toInt();
+    int max_iter_number = ui->txt_Iteration->text().toInt();
 
-    auto config_map =PhotometricCorrectionHandler::GetConfigurationMap(
-        output_file_name,
-        max_iter_number,
+    auto config_map = PhotometricCorrectionHandler::GetConfigurationMap(
+        ui->txt_FileName->text().toStdString(), max_iter_number,
         ui->txt_Tolerence->text().toDouble(),
         ui->cb_SelectionMethod->currentText().toStdString(),
         ui->txt_grid->text().toStdString(),
-        ui->txt_catalog->text().toStdString(),
-        m_id_column,
-        ui->cb_SpectroColumn->currentText().toStdString(),
-        filter_mapping
-      );
+        ui->txt_catalog->text().toStdString(), m_id_column,
+        ui->cb_SpectroColumn->currentText().toStdString(), filter_mapping);
 
-
-    auto path_filename = FileUtils::getPhotCorrectionsRootPath(true)
-        + QString(QDir::separator()).toStdString() + output_file_name;
-
-    if (QFileInfo(QString::fromStdString(path_filename)).exists() && QMessageBox::question(this, "Override existing file...",
-              "A File with the very same name as the one you provided already exist. Do you want to replace it?",
-              QMessageBox::Yes|QMessageBox::No)==QMessageBox::No){
-                return;
-    }
-
-    ui->btn_TrainingCatalog->setEnabled(false);
-    ui->cb_SpectroColumn->setEnabled(false);
-    ui->txt_Iteration->setEnabled(false);
-    ui->txt_Tolerence->setEnabled(false);
-    ui->cb_SelectionMethod->setEnabled(false);
-    ui->txt_FileName->setEnabled(false);
-    ui->bt_Run->setEnabled(false);
-    ui->buttonBox->setEnabled(false);
-
-    PhzConfiguration::CalculatePhotometricCorrectionConfiguration conf {config_map};
+    PhzConfiguration::CalculatePhotometricCorrectionConfiguration conf {
+        config_map };
     auto catalog = conf.getCatalog();
     auto model_phot_grid = conf.getPhotometryGrid();
     auto output_func = conf.getOutputFunction();
     auto stop_criteria = conf.getStopCriteria();
 
-    PhzPhotometricCorrection::FindBestFitModels<PhzLikelihood::SourcePhzFunctor> find_best_fit_models {};
-    PhzPhotometricCorrection::CalculateScaleFactorMap calculate_scale_factor_map {};
-    PhzPhotometricCorrection::PhotometricCorrectionAlgorithm phot_corr_algorighm {};
+    PhzPhotometricCorrection::FindBestFitModels<PhzLikelihood::SourcePhzFunctor> find_best_fit_models { };
+    PhzPhotometricCorrection::CalculateScaleFactorMap calculate_scale_factor_map { };
+    PhzPhotometricCorrection::PhotometricCorrectionAlgorithm phot_corr_algorighm { };
     auto selector = conf.getPhotometricCorrectionSelector();
 
-    PhzPhotometricCorrection::PhotometricCorrectionCalculator calculator {find_best_fit_models,
-                                   calculate_scale_factor_map, phot_corr_algorighm};
+    PhzPhotometricCorrection::PhotometricCorrectionCalculator calculator {
+        find_best_fit_models, calculate_scale_factor_map, phot_corr_algorighm };
 
-
-
-    auto progress_logger = [this,max_iter_number](size_t iter_no, const PhzDataModel::PhotometricCorrectionMap& ) {
-      int value = (iter_no*100.)/max_iter_number;
-      ui->progressBar->setValue(value);
-      };
-    auto phot_corr_map = calculator(catalog, model_phot_grid, stop_criteria, selector, progress_logger);
+    auto progress_logger =
+        [this,max_iter_number](size_t iter_no, const PhzDataModel::PhotometricCorrectionMap& ) {
+          int value = (iter_no*100.)/max_iter_number;
+          ui->progressBar->setValue(value);
+        };
+    auto phot_corr_map = calculator(catalog, model_phot_grid, stop_criteria,
+        selector, progress_logger);
     output_func(phot_corr_map);
-    correctionComputed(output_file_name);
-    accept();
+    correctionComputed (ui->txt_FileName->text().toStdString());
+    return "";
   }
-  catch(const Elements::Exception & e){
-    QMessageBox::warning(this, "Error in the computation...",
-                         QString::fromStdString("Sorry, an error occurred during the computation: "+std::string(e.what())),
-                         QMessageBox::Close);
+  catch (const Elements::Exception & e) {
+    return "Sorry, an error occurred during the computation: "
+        + std::string(e.what());
   }
-  catch(const std::exception& e){
-     QMessageBox::warning(this, "Error in the computation...",
-         QString::fromStdString("Sorry, an error occurred during the computation: "+std::string(e.what())),
-                          QMessageBox::Close);
-   }
-  catch (...){
+  catch (const std::exception& e) {
+    return "Sorry, an error occurred during the computation: "
+        + std::string(e.what());
+  }
+  catch (...) {
+    return "Sorry, an error occurred during the computation.";
+  }
+}
+
+void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
+  string output_file_name = FileUtils::addExt(
+      ui->txt_FileName->text().toStdString(), ".txt");
+  ui->txt_FileName->setText(QString::fromStdString(output_file_name));
+  auto path_filename = FileUtils::getPhotCorrectionsRootPath(true)
+      + QString(QDir::separator()).toStdString() + output_file_name;
+
+  if (QFileInfo(QString::fromStdString(path_filename)).exists()
+      && QMessageBox::question(this, "Override existing file...",
+          "A File with the very same name as the one you provided already exist. Do you want to replace it?",
+          QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+    return;
+  }
+
+  disablePage();
+
+  QFuture<std::string> future = QtConcurrent::run(this,
+      &DialogPhotometricCorrectionComputation::runFunction);
+  std::string message = future.result();
+  if (message.length() == 0) {
+    this->accept();
+    return;
+  } else {
     QMessageBox::warning(this, "Error in the computation...",
-                  "Sorry, an error occurred during the computation.",
-                  QMessageBox::Close);
+        QString::fromStdString(message), QMessageBox::Close);
+    this->reject();
   }
 }
 

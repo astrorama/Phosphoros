@@ -49,6 +49,8 @@ private slots:
 
 void run();
 
+std::string runFunction();
+
 private:
     std::map<std::string, boost::program_options::variable_value> m_config;
     std::unique_ptr<Ui::DialogGridGeneration> ui;

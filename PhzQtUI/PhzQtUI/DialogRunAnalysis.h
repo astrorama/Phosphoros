@@ -47,6 +47,9 @@ public:
 
 private slots:
 
+
+std::string runFunction();
+
 void run();
 
 private:

@@ -4,7 +4,8 @@
  *  Created on: Mar 6, 2015
  *      Author: fdubath
  */
-
+#include <QFuture>
+#include <qtconcurrentrun.h>
 #include <QDir>
 #include <QMessageBox>
 #include "PhzQtUI/DialogRunAnalysis.h"
@@ -48,46 +49,51 @@ void DialogRunAnalysis::updateProgressBar(size_t step, size_t total) {
   ui->progressBar->setValue(value);
 }
 
+std::string DialogRunAnalysis::runFunction(){
+  try {
+    PhzConfiguration::CreatePhzCatalogConfiguration conf { m_config };
+    auto model_phot_grid = conf.getPhotometryGrid();
+    auto marginalization_func = conf.getMarginalizationFunc();
 
-void DialogRunAnalysis::run(){
-  try{
+    PhzLikelihood::ParallelCatalogHandler handler {
+        conf.getPhotometricCorrectionMap(), model_phot_grid,
+        marginalization_func };
+    auto catalog = conf.getCatalog();
+    auto out_ptr = conf.getOutputHandler();
+    std::function<void(size_t, size_t)> monitor_function = std::bind(
+        &DialogRunAnalysis::updateProgressBar, this, std::placeholders::_1,
+        std::placeholders::_2);
+    handler.handleSources(catalog.begin(), catalog.end(), *out_ptr,
+        monitor_function);
 
-      PhzConfiguration::CreatePhzCatalogConfiguration conf { m_config };
-      auto model_phot_grid = conf.getPhotometryGrid();
-      auto marginalization_func = conf.getMarginalizationFunc();
-
-      PhzLikelihood::ParallelCatalogHandler handler {conf.getPhotometricCorrectionMap(),
-                                                        model_phot_grid, marginalization_func};
-      auto catalog = conf.getCatalog();
-      auto out_ptr = conf.getOutputHandler();
-      std::function<void(size_t,size_t)> monitor_function = std::bind(&DialogRunAnalysis::updateProgressBar, this, std::placeholders::_1, std::placeholders::_2);
-      handler.handleSources(catalog.begin(), catalog.end(), *out_ptr, monitor_function);
-      this->accept();
-      return;
-    }
-    catch(const Elements::Exception & e){
-      QMessageBox::warning(this, "Error in the computation...",
-                           QString::fromStdString("Sorry, an error occurred during the computation: "+std::string(e.what())),
-                           QMessageBox::Close);
-
-    }
-    catch(const std::exception& e){
-       QMessageBox::warning(this, "Error in the computation...",
-           QString::fromStdString("Sorry, an error occurred during the computation: "+std::string(e.what())),
-                            QMessageBox::Close);
-
-     }
-    catch(...){
-
-        QMessageBox::warning(this, "Error in the computation...",
-                          "Sorry, an error occurred during the computation.",
-                          QMessageBox::Close);
-
-      }
-    this->reject();
-
+    return "";
+  }
+  catch (const Elements::Exception & e) {
+    return "Sorry, an error occurred during the computation: "
+        + std::string(e.what());
+  }
+  catch (const std::exception& e) {
+    return "Sorry, an error occurred during the computation: "
+        + std::string(e.what());
+  }
+  catch (...) {
+    return "Sorry, an error occurred during the computation.";
+  }
 }
 
+void DialogRunAnalysis::run(){
+  QFuture<std::string> future = QtConcurrent::run(this,
+      &DialogRunAnalysis::runFunction);
+  std::string message = future.result();
+  if (message.length() == 0) {
+    this->accept();
+    return;
+  } else {
+    QMessageBox::warning(this, "Error in the computation...",
+        QString::fromStdString(message), QMessageBox::Close);
+    this->reject();
+  }
+}
 
 
 }

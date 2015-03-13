@@ -4,7 +4,8 @@
  *  Created on: Mar 6, 2015
  *      Author: fdubath
  */
-
+#include <QFuture>
+#include <qtconcurrentrun.h>
 #include <QDir>
 #include <QMessageBox>
 #include "PhzQtUI/DialogGridGeneration.h"
@@ -47,50 +48,55 @@ void DialogGridGeneration::updateGridProgressBar(size_t step, size_t total) {
   ui->progressBar->setValue(value);
 }
 
+std::string DialogGridGeneration::runFunction() {
+  try {
+    PhzConfiguration::CreatePhotometryGridConfiguration conf { m_config };
+    PhzModeling::PhotometryGridCreator creator { conf.getSedDatasetProvider(),
+        conf.getReddeningDatasetProvider(), conf.getFilterDatasetProvider() };
 
-void DialogGridGeneration::run(){
-  try{
-         PhzConfiguration::CreatePhotometryGridConfiguration conf { m_config };
-         PhzModeling::PhotometryGridCreator creator { conf.getSedDatasetProvider(),
-             conf.getReddeningDatasetProvider(), conf.getFilterDatasetProvider() };
+    auto param_space = PhzDataModel::createAxesTuple(conf.getZList(),
+        conf.getEbvList(), conf.getReddeningCurveList(), conf.getSedList());
 
-         auto param_space = PhzDataModel::createAxesTuple(conf.getZList(),
-             conf.getEbvList(), conf.getReddeningCurveList(), conf.getSedList());
+    std::function<void(size_t, size_t)> monitor_function = std::bind(
+        &DialogGridGeneration::updateGridProgressBar, this,
+        std::placeholders::_1, std::placeholders::_2);
 
-         std::function<void(size_t,size_t)> monitor_function = std::bind(&DialogGridGeneration::updateGridProgressBar, this, std::placeholders::_1, std::placeholders::_2);
+    auto grid = creator.createGrid(param_space, conf.getFilterList(),
+        monitor_function);
 
-         auto grid = creator.createGrid(param_space, conf.getFilterList(),monitor_function);
+    auto output = conf.getOutputFunction();
+    output(grid);
+    return "";
+  }
+  catch (const Elements::Exception & e) {
+    return "Sorry, an error occurred during the computation: "
+        + std::string(e.what());
+  }
+  catch (const std::exception& e) {
+    return "Sorry, an error occurred during the computation: "
+        + std::string(e.what());
+  }
+  catch (...) {
+    return "Sorry, an error occurred during the computation.";
+  }
+}
 
-//         auto run_function = std::bind(&PhzModeling::PhotometryGridCreator::createGrid, creator, param_space, conf.getFilterList(),monitor_function);
-//
-//        // std::future<std::map<std::string, boost::program_options::variable_value>>
-//         auto the_grid = std::async(std::launch::async,run_function);
-
-         auto output = conf.getOutputFunction();
-         output(grid);
-         this->accept();
-         return;
-         }
-        catch(const Elements::Exception & e){
-          QMessageBox::warning(this, "Error in the computation...",
-                               QString::fromStdString("Sorry, an error occurred during the computation: "+std::string(e.what())),
-                               QMessageBox::Close);
-
-        }
-        catch(const std::exception& e){
-           QMessageBox::warning(this, "Error in the computation...",
-               QString::fromStdString("Sorry, an error occurred during the computation: "+std::string(e.what())),
-                                QMessageBox::Close);
-
-         }
-         catch(...){
-           QMessageBox::warning(this, "Error in the computation...",
-                             "Sorry, an error occurred during the computation.",
-                             QMessageBox::Close);
-         }
-         this->reject();
+void DialogGridGeneration::run() {
+  QFuture<std::string> future = QtConcurrent::run(this,
+      &DialogGridGeneration::runFunction);
+  std::string message = future.result();
+  if (message.length() == 0) {
+    this->accept();
+    return;
+  } else {
+    QMessageBox::warning(this, "Error in the computation...",
+        QString::fromStdString(message), QMessageBox::Close);
+    this->reject();
+  }
 }
 
 }
 }
+
+
 
