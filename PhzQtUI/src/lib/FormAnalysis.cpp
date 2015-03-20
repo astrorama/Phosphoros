@@ -315,7 +315,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
          selected_model);
 
      return PhzGridInfoHandler::GetConfigurationMap(
-             file_name, axes, getSelectedFilters(true));
+             file_name, axes, getSelectedFilters(true),
+             ui->cb_igm->currentText().toStdString());
 }
 
 std::map < std::string, boost::program_options::variable_value > FormAnalysis::getRunOptionMap(){

@@ -52,7 +52,8 @@ std::string DialogGridGeneration::runFunction() {
   try {
     PhzConfiguration::CreatePhotometryGridConfiguration conf { m_config };
     PhzModeling::PhotometryGridCreator creator { conf.getSedDatasetProvider(),
-        conf.getReddeningDatasetProvider(), conf.getFilterDatasetProvider() };
+        conf.getReddeningDatasetProvider(), conf.getFilterDatasetProvider(),
+        conf.getIgmAbsorptionFunction() };
 
     auto param_space = PhzDataModel::createAxesTuple(conf.getZList(),
         conf.getEbvList(), conf.getReddeningCurveList(), conf.getSedList());

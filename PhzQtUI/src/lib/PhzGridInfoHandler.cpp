@@ -209,7 +209,7 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
 
 std::map<std::string, boost::program_options::variable_value> PhzGridInfoHandler::GetConfigurationMap(
     std::string output_file, const PhzDataModel::ModelAxesTuple& axes,
-    const std::list<std::string>& selected_filters) {
+    const std::list<std::string>& selected_filters, std::string igm_type) {
 
   std::map < std::string, boost::program_options::variable_value > options_map;
 
@@ -259,6 +259,7 @@ std::map<std::string, boost::program_options::variable_value> PhzGridInfoHandler
       FileUtils::getRedCurveRootPath(false));
   options_map["filter-root-path"].value() = boost::any(
       FileUtils::getFilterRootPath(false));
+  options_map["igm-absorption-type"].value() = boost::any(igm_type);
 
   return options_map;
 }
