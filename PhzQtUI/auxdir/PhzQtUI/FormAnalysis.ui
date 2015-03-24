@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1031</width>
-    <height>846</height>
+    <height>886</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -505,12 +505,17 @@
       <widget class="QComboBox" name="cb_marginalization">
        <item>
         <property name="text">
+         <string>MAX</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
          <string>SUM</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>MAX</string>
+         <string>BAYESIAN</string>
         </property>
        </item>
       </widget>

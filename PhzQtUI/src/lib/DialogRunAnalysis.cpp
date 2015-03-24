@@ -57,7 +57,7 @@ std::string DialogRunAnalysis::runFunction(){
 
     PhzLikelihood::ParallelCatalogHandler handler {
         conf.getPhotometricCorrectionMap(), model_phot_grid,
-        marginalization_func };
+        conf.getPriors(), marginalization_func };
     auto catalog = conf.getCatalog();
     auto out_ptr = conf.getOutputHandler();
     std::function<void(size_t, size_t)> monitor_function = std::bind(
