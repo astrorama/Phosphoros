@@ -78,17 +78,17 @@ void ParameterRule::setReddeningRootObject(std::string reddening_root_object){
     m_reddening_root_object=reddening_root_object;
 }
 
-const std::list<std::string>& ParameterRule::getExcludedSeds() const{
+const std::vector<std::string>& ParameterRule::getExcludedSeds() const{
     return m_excluded_sed;
 }
-const std::list<std::string>& ParameterRule::getExcludedReddenings() const{
+const std::vector<std::string>& ParameterRule::getExcludedReddenings() const{
     return m_excluded_reddening;
 }
 
-void ParameterRule::setExcludedSeds( std::list<std::string> excluded_sed){
+void ParameterRule::setExcludedSeds( std::vector<std::string> excluded_sed){
     m_excluded_sed=std::move(excluded_sed);
 }
-void ParameterRule::setExcludedReddenings( std::list<std::string> excluded_reddening){
+void ParameterRule::setExcludedReddenings( std::vector<std::string> excluded_reddening){
     m_excluded_reddening=std::move(excluded_reddening);
 }
 

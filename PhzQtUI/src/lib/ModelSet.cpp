@@ -91,7 +91,7 @@ ModelSet ModelSet::loadModelSetFromFile(std::string fileName,std::string root_pa
          rule.setZRange(std::move(z_range));
 
 
-         std::list<std::string> excluded_reddening_list{};
+         std::vector<std::string> excluded_reddening_list{};
          auto sub_list = node_rule.firstChildElement("ExcludedReddeningCurves").childNodes();
          for(int j=0;j<list.count();++j ){
              auto sub_node = sub_list.at(j).toElement();
@@ -101,7 +101,7 @@ ModelSet ModelSet::loadModelSetFromFile(std::string fileName,std::string root_pa
          }
          rule.setExcludedReddenings(std::move(excluded_reddening_list));
 
-         std::list<std::string> excluded_sed_list{};
+         std::vector<std::string> excluded_sed_list{};
          sub_list = node_rule.firstChildElement("ExcludedSeds").childNodes();
          for(int j=0;j<list.count();++j ){
              auto sub_node = sub_list.at(j).toElement();

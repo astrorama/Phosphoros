@@ -55,7 +55,7 @@ void DialogFilterMapping::setFilter(const FilterMapping& filter, const set<strin
     connect( treeModel_filter, SIGNAL(itemChanged(QStandardItem*)), treeModel_filter,
                  SLOT(onItemChangedSingleLeaf(QStandardItem*)));
 
-    treeModel_filter->setState(filter.getFilterFile(),list<string>());
+    treeModel_filter->setState(filter.getFilterFile(),vector<string>());
 }
 
 

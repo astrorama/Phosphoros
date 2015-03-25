@@ -42,7 +42,7 @@ public:
      * @param exclusions
      * prevent the listed element to be checked, this allow for selecting a folder but some of its sub-elements.
      */
-    void setState(std::string root, const std::list<std::string>& exclusions);
+    void setState(std::string root, const std::vector<std::string>& exclusions);
 
     /**
      * @brief Programatically check the root element of the model.
@@ -63,14 +63,14 @@ public:
      * @param root
      * @return the list of unchecked leaf
      */
-    std::list<std::string> getExclusions(std::string root) const;
+    std::vector<std::string> getExclusions(std::string root) const;
 
     /**
      * @brief get all the leaves which are checked under a given 'root'
      * @param root
      * @return the list of checked list
      */
-    std::list<std::string> getSelectedLeaf( std::string root) const;
+    std::vector<std::string> getSelectedLeaf( std::string root) const;
 
     /**
      * @brief get the current element if it represent a folder or the parent element if the current is a file.
@@ -119,7 +119,7 @@ public slots:
 
 private:
       void setEditionStatus(bool inEdition);
-      void checkDir(bool checked,std::string dir, std::list<std::string> exclusions={});
+      void checkDir(bool checked,std::string dir, const std::vector<std::string>& exclusions);
       bool m_in_edition = false;
       bool m_bypass_item_changed =false;
       std::map<std::string,QStandardItem*> m_map_dir;

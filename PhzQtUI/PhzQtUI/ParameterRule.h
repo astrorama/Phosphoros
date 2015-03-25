@@ -2,7 +2,7 @@
 #define PARAMETERRULE_H
 
 #include <string>
-#include <list>
+#include <vector>
 #include "Range.h"
 
 namespace Euclid {
@@ -70,25 +70,25 @@ public:
      * @brief get the Excluded SED list.
      * @return the Excluded SED list.
      */
-    const std::list<std::string>& getExcludedSeds() const;
+    const std::vector<std::string>& getExcludedSeds() const;
 
     /**
      * @brief set the Excluded SED list by moving in the provided list
      * @param excluded_sed
      */
-    void setExcludedSeds( std::list<std::string> excluded_sed);
+    void setExcludedSeds( std::vector<std::string> excluded_sed);
 
     /**
      * @brief get the Excluded Reddening Curve list.
      * @return the Excluded Reddening Curve list.
      */
-    const std::list<std::string>& getExcludedReddenings() const;
+    const std::vector<std::string>& getExcludedReddenings() const;
 
     /**
      * @brief set the Excluded Reddening Curve list by moving in the provided list
      * @param excluded_reddening
      */
-    void setExcludedReddenings( std::list<std::string> excluded_reddening);
+    void setExcludedReddenings( std::vector<std::string> excluded_reddening);
 
     /**
      * @brief get the E(B-V) Range.
@@ -118,8 +118,8 @@ private:
     std::string m_sed_root_object;
     std::string m_reddening_root_object;
 
-    std::list<std::string> m_excluded_sed;
-    std::list<std::string> m_excluded_reddening;
+    std::vector<std::string> m_excluded_sed;
+    std::vector<std::string> m_excluded_reddening;
 
     Range m_ebv_range;
     Range m_redshift_range;

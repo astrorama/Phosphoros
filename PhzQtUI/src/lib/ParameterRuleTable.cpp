@@ -63,12 +63,12 @@ void ParameterRuleTable::setRangesToSelectedRule(Range ebvRange, Range zRange){
 }
 
 
-void ParameterRuleTable::setSedsToSelectedRule(std::string root, std::list<std::string> exceptions){
+void ParameterRuleTable::setSedsToSelectedRule(std::string root, std::vector<std::string> exceptions){
     QModelIndexList index = this->selectionModel()->selectedIndexes();
     getModel()->setSeds(std::move(root),std::move(exceptions),index[0].row());
 }
 
-void ParameterRuleTable::setRedCurvesToSelectedRule(std::string root, std::list<std::string> exceptions){
+void ParameterRuleTable::setRedCurvesToSelectedRule(std::string root, std::vector<std::string> exceptions){
     QModelIndexList index = this->selectionModel()->selectedIndexes();
     getModel()->setRedCurves(std::move(root),std::move(exceptions),index[0].row());
 }

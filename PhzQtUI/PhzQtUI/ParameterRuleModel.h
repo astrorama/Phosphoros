@@ -52,7 +52,7 @@ public:
      * @param exceptions
      * @param row
      */
-    void setSeds(std::string root, std::list<std::string> exceptions,int row);
+    void setSeds(std::string root, std::vector<std::string> exceptions,int row);
 
     /**
      * @brief Push the Reddenig Curve root object and Reddening Curve excluded path to the ParameterRule represented by the row 'row'.
@@ -60,7 +60,7 @@ public:
      * @param exceptions
      * @param row
      */
-    void setRedCurves(std::string root, std::list<std::string> exceptions,int row);
+    void setRedCurves(std::string root, std::vector<std::string> exceptions,int row);
 
     /**
      * @brief Create a new ParameterRule and add it to the ParameterRuleModel.

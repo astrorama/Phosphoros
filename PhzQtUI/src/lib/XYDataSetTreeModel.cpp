@@ -108,7 +108,7 @@ void XYDataSetTreeModel::setEnabled(bool enable) {
 }
 
 void XYDataSetTreeModel::checkDir(bool checked, std::string dir,
-    std::list<std::string> exclusions) {
+    const std::vector<std::string>& exclusions) {
 
   if (dir.compare(".") == 0
       || dir.compare(this->item(0)->text().toStdString()) == 0) {
@@ -154,7 +154,8 @@ void XYDataSetTreeModel::onItemChangedSingleLeaf(QStandardItem* item) {
   if (m_in_edition && !m_bypass_item_changed) {
     m_bypass_item_changed = true;
     if (item->checkState() == Qt::CheckState::Checked) {
-      checkDir(false, m_root_dir);
+      auto excl = vector<string>{};
+      checkDir(false, m_root_dir,excl);
       item->setCheckState(Qt::CheckState::Checked);
     }
     m_bypass_item_changed = false;
@@ -165,7 +166,8 @@ void XYDataSetTreeModel::onItemChangedUniqueSelection(QStandardItem* item) {
   if (m_in_edition && !m_bypass_item_changed) {
     m_bypass_item_changed = true;
     if (item->checkState() == Qt::CheckState::Checked) {
-      checkDir(false, m_root_dir);
+      auto excl = vector<string>{};
+      checkDir(false, m_root_dir,excl);
       item->setCheckState(Qt::CheckState::Checked);
     } else {
       this->item(0)->setCheckState(Qt::CheckState::Checked);
@@ -183,14 +185,16 @@ void XYDataSetTreeModel::onItemChanged(QStandardItem* item) {
     if (item->parent() && item->parent()->checkState() > 0) {
       // parent checked: exclusion
       if (item->hasChildren()) {
-        checkDir(checked, item->text().toStdString());
+        auto excl = vector<string>{};
+        checkDir(checked, item->text().toStdString(),excl);
       }
     } else {
       // inclusion
-      checkDir(false, m_root_dir);
+      auto excl = vector<string>{};
+      checkDir(false, m_root_dir,excl);
       if (checked) {
         if (item->hasChildren()) {
-          checkDir(true, item->text().toStdString());
+          checkDir(true, item->text().toStdString(),excl);
         } else {
           item->setCheckState(Qt::CheckState::Checked);
         }
@@ -202,10 +206,10 @@ void XYDataSetTreeModel::onItemChanged(QStandardItem* item) {
 }
 
 void XYDataSetTreeModel::setState(std::string root,
-    const std::list<std::string>& exclusions) {
+    const std::vector<std::string>& exclusions) {
   m_bypass_item_changed = true;
-
-  checkDir(false, "");
+  auto excl = vector<string>{};
+  checkDir(false, "",excl);
 
 
   if (root.compare("") == 0 ||root.compare(".") == 0 || root.compare(item(0)->text().toStdString()) == 0
@@ -297,9 +301,9 @@ std::string XYDataSetTreeModel::getGroup() const {
   }
 }
 
-std::list<std::string> XYDataSetTreeModel::getExclusions(
+std::vector<std::string> XYDataSetTreeModel::getExclusions(
     std::string root) const {
-  std::list < std::string > list;
+  std::vector < std::string > list;
 
   auto root_item = item(0);
   if (root.compare(".") != 0 && root.compare(item(0)->text().toStdString()) != 0
@@ -315,7 +319,8 @@ std::list<std::string> XYDataSetTreeModel::getExclusions(
   for (int i = 0; i < root_item->rowCount(); ++i) {
     auto child = root_item->child(i);
     if (child->hasChildren()) {
-      list.merge(getExclusions(child->text().toStdString()));
+      auto sub_list=getExclusions(child->text().toStdString());
+      list.insert(list.end(),sub_list.begin(),sub_list.end());
     } else if (child->checkState() != Qt::CheckState::Checked) {
       list.push_back(child->text().toStdString());
     }
@@ -326,8 +331,8 @@ std::list<std::string> XYDataSetTreeModel::getExclusions(
 
 
 
-std::list<std::string> XYDataSetTreeModel::getSelectedLeaf( std::string root) const{
-  std::list < std::string > list;
+std::vector<std::string> XYDataSetTreeModel::getSelectedLeaf( std::string root) const{
+  std::vector < std::string > list;
 
   auto root_item = item(0);
     if (root.compare(".") != 0 && root.compare(item(0)->text().toStdString()) != 0
@@ -343,8 +348,9 @@ std::list<std::string> XYDataSetTreeModel::getSelectedLeaf( std::string root) co
     for (int i = 0; i < root_item->rowCount(); ++i) {
       auto child = root_item->child(i);
       if (child->hasChildren()) {
-        list.merge(getSelectedLeaf(child->text().toStdString()));
-      } else if (child->checkState() == Qt::CheckState::Checked) {
+        auto sub_list=getExclusions(child->text().toStdString());
+        list.insert(list.end(),sub_list.begin(),sub_list.end());
+       } else if (child->checkState() == Qt::CheckState::Checked) {
         list.push_back(child->text().toStdString());
       }
     }

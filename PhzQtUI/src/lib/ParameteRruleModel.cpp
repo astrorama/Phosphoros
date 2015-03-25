@@ -81,7 +81,7 @@ void ParameterRuleModel::setRanges(Range ebvRange,Range zRange,int row){
 }
 
 
-void ParameterRuleModel::setSeds(std::string root, std::list<std::string> exceptions,int row){
+void ParameterRuleModel::setSeds(std::string root, std::vector<std::string> exceptions,int row){
     int ref = getValue(row,7).toInt();
      m_parameter_rules[ref].setSedRootObject(std::move(root));
      m_parameter_rules[ref].setExcludedSeds(std::move(exceptions));
@@ -95,7 +95,7 @@ void ParameterRuleModel::setSeds(std::string root, std::list<std::string> except
      this->item(row,1)->setText(QString::fromStdString(status_sed));
 }
 
-void ParameterRuleModel::setRedCurves(std::string root, std::list<std::string> exceptions,int row){
+void ParameterRuleModel::setRedCurves(std::string root, std::vector<std::string> exceptions,int row){
     int ref = getValue(row,7).toInt();
      m_parameter_rules[ref].setReddeningRootObject(std::move(root));
      m_parameter_rules[ref].setExcludedReddenings(std::move(exceptions));

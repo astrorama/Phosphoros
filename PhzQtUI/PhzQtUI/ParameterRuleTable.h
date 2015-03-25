@@ -52,14 +52,14 @@ public:
         * @param root
         * @param exceptions
         */
-       void setSedsToSelectedRule(std::string root, std::list<std::string> exceptions);
+       void setSedsToSelectedRule(std::string root, std::vector<std::string> exceptions);
 
        /**
         * @brief Push the Reddenig Curve root object and Reddening Curve excluded path to the selected ParameterRule.
         * @param root
         * @param exceptions
         */
-       void setRedCurvesToSelectedRule(std::string root, std::list<std::string> exceptions);
+       void setRedCurvesToSelectedRule(std::string root, std::vector<std::string> exceptions);
 
        /**
         * @brief Delete the currently selected ParameterRule.
