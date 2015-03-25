@@ -73,6 +73,14 @@ private slots:
 
     void on_btn_BrowseOutputPdf_clicked();
 
+    void on_gb_cat_clicked();
+
+    void on_gb_pdf_clicked();
+
+    void on_gb_lik_clicked();
+
+    void on_btn_BrowseLikelihood_clicked();
+
 
 private:
     std::unique_ptr<Ui::FormAnalysis> ui;

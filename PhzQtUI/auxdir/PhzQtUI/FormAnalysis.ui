@@ -493,52 +493,52 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Type of marginalization :</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QComboBox" name="cb_marginalization">
-       <item>
-        <property name="text">
-         <string>MAX</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>SUM</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>BAYESIAN</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_21">
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_19">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Type of marginalization :</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QComboBox" name="cb_marginalization">
+           <item>
+            <property name="text">
+             <string>MAX</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>SUM</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>BAYESIAN</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
        <item>
         <widget class="QLabel" name="label_26">
          <property name="text">
@@ -582,54 +582,101 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_20">
        <item>
-        <widget class="QLabel" name="label_27">
-         <property name="text">
-          <string>Output Catalog name :</string>
+        <widget class="QGroupBox" name="gb_cat">
+         <property name="title">
+          <string>Generate Output Catalog with name :</string>
          </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_24">
+            <item>
+             <widget class="QLineEdit" name="txt_OutputCatalog">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btn_BrowseOutput">
+              <property name="text">
+               <string>Browse</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+         <zorder></zorder>
+         <zorder></zorder>
+         <zorder></zorder>
+         <zorder></zorder>
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_24">
-         <item>
-          <widget class="QLineEdit" name="txt_OutputCatalog">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_BrowseOutput">
-           <property name="text">
-            <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string> Output pdf file name :</string>
+        <widget class="QGroupBox" name="gb_pdf">
+         <property name="title">
+          <string>Generate Output pdf file with name :</string>
          </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_26">
+            <item>
+             <widget class="QLineEdit" name="txt_OutputPdf">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btn_BrowseOutputPdf">
+              <property name="text">
+               <string>Browse</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_26">
-         <item>
-          <widget class="QLineEdit" name="txt_OutputPdf">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_BrowseOutputPdf">
-           <property name="text">
-            <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="gb_lik">
+         <property name="title">
+          <string>Generate Likelihood file in folder :</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_27">
+            <item>
+             <widget class="QLineEdit" name="txt_likelihood">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btn_BrowseLikelihood">
+              <property name="text">
+               <string>Browse</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </item>

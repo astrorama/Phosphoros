@@ -163,7 +163,21 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   bool correction_exists = !ui->gb_corrections->isChecked() || info.exists();
 
   QFileInfo info_input(ui->txt_inputCatalog->text());
-  bool run_ok = info_input.exists() && ui->txt_OutputCatalog->text().length()>0 && ui->txt_OutputPdf->text().length()>0;
+  bool run_ok = info_input.exists();
+
+  if (ui->gb_cat->isChecked()){
+    run_ok &= ui->txt_OutputCatalog->text().length()>0;
+  }
+
+  if (ui->gb_pdf->isChecked()){
+    run_ok &= ui->txt_OutputPdf->text().length()>0;
+  }
+
+  if (ui->gb_lik->isChecked()){
+    run_ok &= ui->txt_likelihood->text().length()>0;
+  }
+
+
 
   ui->btn_GetConfigAnalysis->setEnabled(grid_name_ok && correction_ok && run_ok && enabled);
   ui->btn_RunAnalysis->setEnabled(grid_name_exists && correction_exists && run_ok && enabled);
@@ -197,30 +211,53 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
      ui->txt_inputCatalog->setStyleSheet("QLineEdit { color: grey }");
    }
 
-  if (ui->txt_OutputCatalog->text().length()==0 || ui->txt_OutputPdf->text().length()==0){
-    tool_tip_conf = tool_tip_conf + "Please provide output files informations. \n";
-    tool_tip_run = tool_tip_run + "Please provide output files informations. \n";
+
+  if (ui->gb_cat->isChecked()){
+    if (ui->txt_OutputCatalog->text().length()==0){
+        tool_tip_conf = tool_tip_conf + "Please provide the output catalog file. \n";
+        tool_tip_run = tool_tip_run + "Please provide the output catalog file. \n";
+    } else {
+      if (QFileInfo(ui->txt_OutputCatalog->text()).exists()){
+        ui->txt_OutputCatalog->setStyleSheet("QLineEdit { color: #FAAC58 }");
+      } else {
+        ui->txt_OutputCatalog->setStyleSheet("QLineEdit { color: grey }");
+      }
+    }
+  } else {
+    ui->txt_OutputCatalog->setStyleSheet("QLineEdit { color: grey }");
   }
+
+  if (ui->gb_pdf->isChecked()){
+    if (ui->txt_OutputPdf->text().length()==0){
+        tool_tip_conf = tool_tip_conf + "Please provide the output pdf file. \n";
+        tool_tip_run = tool_tip_run + "Please provide the output pdf file. \n";
+    } else {
+      if (QFileInfo(ui->txt_OutputPdf->text()).exists()){
+        ui->txt_OutputPdf->setStyleSheet("QLineEdit { color: #FAAC58 }");
+      } else {
+        ui->txt_OutputPdf->setStyleSheet("QLineEdit { color: grey }");
+      }
+    }
+  } else {
+    ui->txt_OutputPdf->setStyleSheet("QLineEdit { color: grey }");
+  }
+
+  if (ui->gb_lik->isChecked()){
+     if (ui->txt_likelihood->text().length()==0){
+         tool_tip_conf = tool_tip_conf + "Please provide the likelihood output folder. \n";
+         tool_tip_run = tool_tip_run + "Please provide the likelihood output folder. \n";
+     }
+  }
+
 
   if (!(grid_name_ok && correction_ok && run_ok)){
     tool_tip_conf = tool_tip_conf + "Before getting the configuration.";
-  }
-
-  if (QFileInfo(ui->txt_OutputCatalog->text()).exists()){
-    ui->txt_OutputCatalog->setStyleSheet("QLineEdit { color: #FAAC58 }");
-  } else {
-    ui->txt_OutputCatalog->setStyleSheet("QLineEdit { color: grey }");
   }
 
   if (!(grid_name_exists && correction_exists && run_ok)){
     tool_tip_run = tool_tip_run + "Before running the analysis.";
   }
 
-  if (QFileInfo(ui->txt_OutputPdf->text()).exists()){
-     ui->txt_OutputPdf->setStyleSheet("QLineEdit { color: #FAAC58 }");
-   } else {
-     ui->txt_OutputPdf->setStyleSheet("QLineEdit { color: grey }");
-   }
 
   ui->btn_GetConfigAnalysis->setToolTip(tool_tip_conf);
   ui->btn_RunAnalysis->setToolTip(tool_tip_run);
@@ -345,9 +382,17 @@ std::map < std::string, boost::program_options::variable_value > FormAnalysis::g
 
    options_map["marginalization-type"].value() = boost::any(ui->cb_marginalization->currentText().toStdString());
 
-   options_map["output-catalog-file"].value() = boost::any(ui->txt_OutputCatalog->text().toStdString());
-   options_map["output-pdf-file"].value() = boost::any(ui->txt_OutputPdf->text().toStdString());
+   if (ui->gb_cat->isChecked ()){
+     options_map["output-catalog-file"].value() = boost::any(ui->txt_OutputCatalog->text().toStdString());
+   }
 
+   if (ui->gb_pdf->isChecked ()){
+     options_map["output-pdf-file"].value() = boost::any(ui->txt_OutputPdf->text().toStdString());
+   }
+
+   if (ui->gb_lik->isChecked ()){
+       options_map["output-likelihood-dir"].value() = boost::any(ui->txt_likelihood->text().toStdString());
+    }
    return options_map;
 }
 //////////////////////////////////////////////////
@@ -533,6 +578,39 @@ void FormAnalysis::on_btn_BrowseInput_clicked()
 
 }
 
+
+ void FormAnalysis::on_gb_cat_clicked(){
+   setRunAnnalysisEnable(true);
+ }
+
+ void FormAnalysis::on_gb_pdf_clicked(){
+   setRunAnnalysisEnable(true);
+ }
+
+ void FormAnalysis::on_gb_lik_clicked(){
+   if (ui->gb_lik->isChecked ()){
+     QMessageBox::warning(this, "Large output volume...",
+              "Outputing multi-dimensional likelihood grids (one file per source)"
+         " will generate a large output volume.", QMessageBox::Ok );
+   }
+   setRunAnnalysisEnable(true);
+ }
+
+ void FormAnalysis::on_btn_BrowseLikelihood_clicked(){
+       QFileDialog dialog(this);
+       dialog.setFileMode(QFileDialog::DirectoryOnly);
+       dialog.selectFile(QString::fromStdString(FileUtils::getLastUsedPath()));
+       dialog.setOption(QFileDialog::DontUseNativeDialog);
+       dialog.setLabelText( QFileDialog::Accept, "Select" );
+       if (dialog.exec()){
+         ui->txt_likelihood->setText(dialog.selectedFiles()[0]);
+         FileUtils::setLastUsedPath(dialog.selectedFiles()[0].toStdString());
+         setRunAnnalysisEnable(true);
+       }
+ }
+
+
+
 void FormAnalysis::on_btn_BrowseOutput_clicked()
 {
   QFileDialog dialog(this);
@@ -592,6 +670,7 @@ void FormAnalysis::on_btn_RunAnalysis_clicked()
           QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
     return;
   }
+
   auto config_map = getRunOptionMap();
 
   std::unique_ptr<DialogRunAnalysis> dialog(new DialogRunAnalysis());
