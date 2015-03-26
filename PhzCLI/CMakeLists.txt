@@ -21,4 +21,8 @@ elements_add_executable(PhosphorosDisplayTemplates src/program/DisplayTemplates.
 elements_add_executable(PhosphorosDisplayDataset src/program/DisplayDataset.cpp
                         LINK_LIBRARIES ElementsKernel Boost PhzConfiguration MathUtils PhzModeling)
 
+elements_install_conf_files()
+
+elements_install_python_modules()
+
 elements_install_scripts()

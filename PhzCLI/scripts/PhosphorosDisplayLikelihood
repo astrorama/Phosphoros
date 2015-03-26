@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+
+import argparse
+import PhzCLI.LikelihoodPlot as plt
+
+usage = """
+        PhosphorosDisplayLikelihood -f <LIKELIHOOD_FILE> -p <PLOT_TYPE>      
+
+        Plots views of the multi-dimensional likelihood. Note that the
+        marginalization is done as simple addition. For more correct (Bayesian)
+        marginalization, see the 1D PDF output of PhosphorosFitTemplates.
+
+        """ 
+
+parser = argparse.ArgumentParser(usage, description=__doc__)
+
+parser.add_argument("-f", "--file", type=str,
+                    help="FITS file containing the likelihood grid")
+parser.add_argument("-p", "--plot-type", type=str,
+                    help="The type of plot to show (one of Ebv, Sed, Z, Sed-Z, Ebv-Z, Sed-Ebv, Sed-Ebv-Z)")
+
+args = parser.parse_args()
+
+if not args.file:
+    print "Missing file parameter (-f)"
+    exit(1)
+
+if not args.plot_type:
+    print "Missing plot type parameter (-p)"
+    exit(1)
+
+func_name = 'plot' + args.plot_type.replace('-', '')
+if hasattr(plt,func_name):
+    getattr(plt, func_name)(args.file)
+else:
+    print "No such plot type (" + args.plot_type + ")"
