@@ -6,13 +6,13 @@
 
 #include <iostream>
 #include "ElementsKernel/ProgramHeaders.h"
-#include "PhzCLI/LsPhotometryGridConfiguration.h"
+#include "PhzCLI/DisplayTemplateConfiguration.h"
 
 using namespace std;
 using namespace Euclid;
 namespace po = boost::program_options;
 
-static Elements::Logging logger = Elements::Logging::getLogger("LsPhotometryGrid");
+static Elements::Logging logger = Elements::Logging::getLogger("PhosphorosDisplayTemplate");
 
 void printGeneric(const PhzDataModel::PhotometryGrid& grid) {
   cout << "\nSED axis size: " << grid.getAxis<PhzDataModel::ModelParameter::SED>().size() << '\n';
@@ -59,15 +59,15 @@ void printPhotometry(const PhzDataModel::PhotometryGrid& grid,
   cout << '\n';
 }
 
-class LsPhotometryGrid : public Elements::Program {
+class DisplayTemplate : public Elements::Program {
   
   po::options_description defineSpecificProgramOptions() override {
-    return PhzConfiguration::LsPhotometryGridConfiguration::getProgramOptions();
+    return PhzConfiguration::DisplayTemplateConfiguration::getProgramOptions();
   }
   
   Elements::ExitCode mainMethod(map<string, po::variable_value>& args) override {
     
-    PhzConfiguration::LsPhotometryGridConfiguration conf {args};
+    PhzConfiguration::DisplayTemplateConfiguration conf {args};
     auto grid = conf.getPhotometryGrid();
     
     if (conf.showGeneric()) {
@@ -100,4 +100,4 @@ class LsPhotometryGrid : public Elements::Program {
   
 };
 
-MAIN_FOR(LsPhotometryGrid)
+MAIN_FOR(DisplayTemplate)

@@ -1,5 +1,5 @@
 /** 
- * @file LsPhotometryGridConfiguration.cpp
+ * @file DisplayTemplateConfiguration.cpp
  * @date January 26, 2015
  * @author Nikolaos Apostolakos
  */
@@ -12,7 +12,7 @@ using boost::regex;
 using boost::regex_match;
 using boost::smatch;
 #include "ElementsKernel/Logging.h"
-#include "PhzCLI/LsPhotometryGridConfiguration.h"
+#include "PhzCLI/DisplayTemplateConfiguration.h"
 
 namespace po = boost::program_options;
 
@@ -21,7 +21,7 @@ namespace PhzConfiguration {
 
 Elements::Logging logger = Elements::Logging::getLogger("PhzConfiguration");
 
-po::options_description LsPhotometryGridConfiguration::getProgramOptions() {
+po::options_description DisplayTemplateConfiguration::getProgramOptions() {
 
   po::options_description options {"LS Photometry Grid options"};
 
@@ -42,7 +42,7 @@ po::options_description LsPhotometryGridConfiguration::getProgramOptions() {
   return options;
 }
 
-LsPhotometryGridConfiguration::LsPhotometryGridConfiguration(
+DisplayTemplateConfiguration::DisplayTemplateConfiguration(
             const std::map<std::string, po::variable_value>& options)
       : PhotometryGridConfiguration(options) {
   
@@ -50,7 +50,7 @@ LsPhotometryGridConfiguration::LsPhotometryGridConfiguration(
   
 }
 
-bool LsPhotometryGridConfiguration::showGeneric() {
+bool DisplayTemplateConfiguration::showGeneric() {
   bool result = true;
   if (m_options["sed"].as<bool>() || m_options["redcurve"].as<bool>()
       || m_options["ebv"].as<bool>() || m_options["z"].as<bool>()
@@ -60,23 +60,23 @@ bool LsPhotometryGridConfiguration::showGeneric() {
   return result;
 }
 
-bool LsPhotometryGridConfiguration::showSedAxis() {
+bool DisplayTemplateConfiguration::showSedAxis() {
   return m_options["sed"].as<bool>();
 }
 
-bool LsPhotometryGridConfiguration::showReddeningCurveAxis() {
+bool DisplayTemplateConfiguration::showReddeningCurveAxis() {
   return m_options["redcurve"].as<bool>();
 }
 
-bool LsPhotometryGridConfiguration::showEbvAxis() {
+bool DisplayTemplateConfiguration::showEbvAxis() {
   return m_options["ebv"].as<bool>();
 }
 
-bool LsPhotometryGridConfiguration::showRedshiftAxis() {
+bool DisplayTemplateConfiguration::showRedshiftAxis() {
   return m_options["z"].as<bool>();
 }
 
-std::unique_ptr<std::tuple<size_t,size_t,size_t,size_t>> LsPhotometryGridConfiguration::getCellPhotCoords() {
+std::unique_ptr<std::tuple<size_t,size_t,size_t,size_t>> DisplayTemplateConfiguration::getCellPhotCoords() {
   std::unique_ptr<std::tuple<size_t,size_t,size_t,size_t>> result {};
   if (!m_options["phot"].empty()) {
     std::string coords = m_options["phot"].as<std::string>();

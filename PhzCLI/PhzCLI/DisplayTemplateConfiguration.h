@@ -1,5 +1,5 @@
 /** 
- * @file LsGridConfiguration.h
+ * @file DisplayTemplateConfiguration.h
  * @date January 26, 2015
  * @author Nikolaos Apostolakos
  */
@@ -14,18 +14,18 @@
 namespace Euclid {
 namespace PhzConfiguration {
 
-class LsPhotometryGridConfiguration : public PhotometryGridConfiguration {
+class DisplayTemplateConfiguration : public PhotometryGridConfiguration {
   
 public:
   
   static boost::program_options::options_description getProgramOptions();
   
-  LsPhotometryGridConfiguration(const std::map<std::string, boost::program_options::variable_value>& options);
+  DisplayTemplateConfiguration(const std::map<std::string, boost::program_options::variable_value>& options);
   
    /**
    * @brief destructor.
    */
-   virtual ~LsPhotometryGridConfiguration()=default;
+   virtual ~DisplayTemplateConfiguration()=default;
   
   bool showGeneric();
   
