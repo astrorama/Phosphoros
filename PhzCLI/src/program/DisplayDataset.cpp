@@ -9,9 +9,11 @@
 #include "MathUtils/interpolation/interpolation.h"
 #include "PhzConfiguration/ParameterSpaceConfiguration.h"
 #include "PhzModeling/ModelDatasetGrid.h"
+#include "PhzModeling/PhotometryGridCreator.h"
 #include "PhzModeling/ExtinctionFunctor.h"
 #include "PhzModeling/RedshiftFunctor.h"
 #include "PhzModeling/MadauIgmFunctor.h"
+#include "PhzModeling/NoIgmFunctor.h"
 
 using namespace std;
 using namespace Euclid;
@@ -47,7 +49,40 @@ std::map<XYDataset::QualifiedName, std::unique_ptr<Euclid::MathUtils::Function>>
 class PrintModelDataset : public Elements::Program {
   
   po::options_description defineSpecificProgramOptions() override {
-    return PhzConfiguration::ParameterSpaceConfiguration::getProgramOptions();
+    po::options_description options {"Display Dataset options"};
+    
+    options.add_options()
+      ("sed-root-path", po::value<std::string>(),
+        "The directory containing the sed datasets, organized in folders")
+      ("reddening-curve-root-path", po::value<std::string>(),
+          "The directory containing the reddening curves")
+      ("sed-name", po::value<std::vector<std::string>>(),
+          "The SED name")
+      ("reddening-curve-name", po::value<std::vector<std::string>>(),
+          "The reddening curve name")
+      ("ebv-value", po::value<std::vector<std::string>>(),
+          "The E(B-V) value")
+      ("z-value", po::value<std::vector<std::string>>(),
+          "The redshift value")
+      ("igm-absorption-type", po::value<std::string>(),
+            "The type of IGM absorption to apply (one of OFF, MADAU)");
+    
+    return options;
+  }
+  
+  PhzModeling::PhotometryGridCreator::IgmAbsorptionFunction getIgmFunction(
+                                      map<string, po::variable_value>& options) {
+    if (options["igm-absorption-type"].empty()) { 
+    throw Elements::Exception() << "Missing mandatory parameter igm-absorption-type";
+    }
+    if (options["igm-absorption-type"].as<std::string>() == "OFF") {
+      return PhzModeling::NoIgmFunctor{};
+    }
+    if (options["igm-absorption-type"].as<std::string>() == "MADAU") {
+      return PhzModeling::MadauIgmFunctor{};
+    }
+    throw Elements::Exception() << "Unknown IGM absorption type \"" 
+                      << options["igm-absorption-type"].as<std::string>() << "\"";
   }
   
   Elements::ExitCode mainMethod(map<string, po::variable_value>& args) override {
@@ -65,9 +100,11 @@ class PrintModelDataset : public Elements::Program {
     auto red_curve_map = convertToFunction(buildMap(*red_curve_prov,
                                             red_curve_list.begin(), red_curve_list.end()));
     
+    auto igm_function = getIgmFunction(args);
+    
     PhzModeling::ModelDatasetGrid grid {param_space, move(sed_map), move(red_curve_map),
                                PhzModeling::ExtinctionFunctor{}, PhzModeling::RedshiftFunctor{},
-                               PhzModeling::MadauIgmFunctor{}};
+                               std::move(igm_function)};
                                
     for (auto iter=grid.begin(); iter!=grid.end(); ++iter) {
       cout << "\nDataset for model with:\n";

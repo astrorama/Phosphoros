@@ -18,5 +18,5 @@ elements_add_executable(PhosphorosLsAux src/program/LsAux.cpp
 elements_add_executable(PhosphorosDisplayTemplates src/program/DisplayTemplates.cpp
                         LINK_LIBRARIES ElementsKernel Boost PhzCLI)
 
-elements_add_executable(PrintModelDataset src/program/PrintModelDataset.cpp
+elements_add_executable(PhosphorosDisplayDataset src/program/DisplayDataset.cpp
                         LINK_LIBRARIES ElementsKernel Boost PhzConfiguration MathUtils PhzModeling)
