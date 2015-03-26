@@ -656,26 +656,40 @@ void FormAnalysis::on_btn_GetConfigAnalysis_clicked()
 
 void FormAnalysis::on_btn_RunAnalysis_clicked()
 {
-
-  if (QFileInfo(ui->txt_OutputCatalog->text()).exists()
-      && QMessageBox::question(this, "Override existing file...",
-          "A Catalog file with the very same name as the one you provided already exist. Do you want to replace it?",
-          QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
-    return;
+  if (ui->gb_cat->isChecked()) {
+    if (QFileInfo(ui->txt_OutputCatalog->text()).exists()
+        && QMessageBox::question(this, "Override existing file...",
+            "A Catalog file with the very same name as the one you provided already exist. Do you want to replace it?",
+            QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+      return;
+    }
   }
 
-  if (QFileInfo(ui->txt_OutputPdf->text()).exists()
-      && QMessageBox::question(this, "Override existing file...",
-          "A PDF file with the very same name as the one you provided already exist. Do you want to replace it?",
-          QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
-    return;
+  if (ui->gb_pdf->isChecked()) {
+    if (QFileInfo(ui->txt_OutputPdf->text()).exists()
+        && QMessageBox::question(this, "Override existing file...",
+            "A PDF file with the very same name as the one you provided already exist. Do you want to replace it?",
+            QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+      return;
+    }
   }
 
   auto config_map = getRunOptionMap();
 
   std::unique_ptr<DialogRunAnalysis> dialog(new DialogRunAnalysis());
-  dialog->setValues(ui->txt_OutputCatalog->text().toStdString(),
-      ui->txt_OutputPdf->text().toStdString(), config_map);
+  std::string cat="";
+  if (ui->gb_cat->isChecked()){
+    cat=ui->txt_OutputCatalog->text().toStdString();
+  }
+  std::string pdf="";
+  if (ui->gb_pdf->isChecked()){
+      pdf=ui->txt_OutputPdf->text().toStdString();
+    }
+  std::string lik="";
+  if (ui->gb_lik->isChecked()){
+      lik=ui->txt_likelihood->text().toStdString();
+    }
+  dialog->setValues(cat,pdf,lik,config_map);
   if (dialog->exec()) {
   }
 }

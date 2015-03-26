@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>767</width>
-    <height>205</height>
+    <height>235</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -53,9 +53,9 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="lay_cat">
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="label_cat">
        <property name="text">
         <string>Output Catalog File Name :</string>
        </property>
@@ -89,9 +89,9 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
+    <layout class="QHBoxLayout" name="lay_pdf">
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="label_pdf">
        <property name="text">
         <string>Output PDF File Name :</string>
        </property>
@@ -111,6 +111,42 @@
      </item>
      <item>
       <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="lay_lik">
+     <item>
+      <widget class="QLabel" name="label_lik">
+       <property name="text">
+        <string>Output Likelihood Folder Name :</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_name_lik">
+       <property name="font">
+        <font>
+         <italic>true</italic>
+        </font>
+       </property>
+       <property name="text">
+        <string>Name</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_5">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>

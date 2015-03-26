@@ -36,11 +36,30 @@ DialogRunAnalysis::DialogRunAnalysis(QWidget *parent) :
 
 DialogRunAnalysis::~DialogRunAnalysis() {}
 
-void DialogRunAnalysis::setValues(std::string output_cat_name,std::string output_pdf_name,
+void DialogRunAnalysis::setValues(std::string output_cat_name,
+    std::string output_pdf_name, std::string output_lik_name,
     const std::map<std::string, boost::program_options::variable_value>& config) {
+  if (output_cat_name.length() > 0) {
     ui->label_name_cat->setText(QString::fromStdString(output_cat_name));
+  } else {
+    ui->label_name_cat->setVisible(false);
+    ui->label_cat->setVisible(false);
+  }
+
+  if (output_pdf_name.length() > 0) {
     ui->label_name_pdf->setText(QString::fromStdString(output_pdf_name));
-    m_config=config;
+  } else {
+    ui->label_name_pdf->setVisible(false);
+    ui->label_pdf->setVisible(false);
+  }
+
+  if (output_lik_name.length() > 0) {
+    ui->label_name_lik->setText(QString::fromStdString(output_lik_name));
+  } else {
+    ui->label_name_lik->setVisible(false);
+    ui->label_lik->setVisible(false);
+  }
+  m_config = config;
 
 }
 
