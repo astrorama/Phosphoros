@@ -12,7 +12,7 @@ elements_add_library(PhzCLI src/lib/*.cpp
                      LINK_LIBRARIES  PhzConfiguration
                      PUBLIC_HEADERS PhzCLI)
 
-elements_add_executable(LsData src/program/LsData.cpp
+elements_add_executable(PhosphorosLsAux src/program/LsAux.cpp
                         LINK_LIBRARIES ElementsKernel Boost XYDataset)
 
 elements_add_executable(LsPhotometryGrid src/program/LsPhotometryGrid.cpp

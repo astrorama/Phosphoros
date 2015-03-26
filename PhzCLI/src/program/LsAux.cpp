@@ -1,5 +1,5 @@
 /** 
- * @file LsData.cpp
+ * @file LsAux.cpp
  * @date January 27, 2015
  * @author Nikolaos Apostolakos
  */
@@ -15,9 +15,9 @@ using namespace std;
 using namespace Euclid;
 namespace po = boost::program_options;
 
-static Elements::Logging logger = Elements::Logging::getLogger("LsData");
+static Elements::Logging logger = Elements::Logging::getLogger("PhosphorosLsAux");
 
-class LsData : public Elements::Program {
+class LsAux : public Elements::Program {
   
   po::options_description defineSpecificProgramOptions() override {
     po::options_description options {};
@@ -65,4 +65,4 @@ class LsData : public Elements::Program {
   
 };
 
-MAIN_FOR(LsData)
+MAIN_FOR(LsAux)
