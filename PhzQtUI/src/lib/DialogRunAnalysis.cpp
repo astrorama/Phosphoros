@@ -12,7 +12,7 @@
 #include <boost/program_options.hpp>
 #include "ui_DialogRunAnalysis.h"
 #include "PhzLikelihood/ParallelCatalogHandler.h"
-#include "PhzConfiguration/CreatePhzCatalogConfiguration.h"
+#include "PhzConfiguration/FitTemplatesConfiguration.h"
 
 // #include <future>
 
@@ -70,7 +70,7 @@ void DialogRunAnalysis::updateProgressBar(size_t step, size_t total) {
 
 std::string DialogRunAnalysis::runFunction(){
   try {
-    PhzConfiguration::CreatePhzCatalogConfiguration conf { m_config };
+    PhzConfiguration::FitTemplatesConfiguration conf { m_config };
     auto model_phot_grid = conf.getPhotometryGrid();
     auto marginalization_func = conf.getMarginalizationFunc();
 
