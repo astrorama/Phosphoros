@@ -348,7 +348,7 @@ std::vector<std::string> XYDataSetTreeModel::getSelectedLeaf( std::string root) 
     for (int i = 0; i < root_item->rowCount(); ++i) {
       auto child = root_item->child(i);
       if (child->hasChildren()) {
-        auto sub_list=getExclusions(child->text().toStdString());
+        auto sub_list=getSelectedLeaf(child->text().toStdString());
         list.insert(list.end(),sub_list.begin(),sub_list.end());
        } else if (child->checkState() == Qt::CheckState::Checked) {
         list.push_back(child->text().toStdString());
