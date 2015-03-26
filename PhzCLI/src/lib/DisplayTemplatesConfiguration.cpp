@@ -12,7 +12,7 @@ using boost::regex;
 using boost::regex_match;
 using boost::smatch;
 #include "ElementsKernel/Logging.h"
-#include "PhzCLI/DisplayTemplateConfiguration.h"
+#include "PhzCLI/DisplayTemplatesConfiguration.h"
 
 namespace po = boost::program_options;
 
@@ -21,10 +21,15 @@ namespace PhzConfiguration {
 
 Elements::Logging logger = Elements::Logging::getLogger("PhzConfiguration");
 
-po::options_description DisplayTemplateConfiguration::getProgramOptions() {
+po::options_description DisplayTemplatesConfiguration::getProgramOptions() {
 
-  po::options_description options {"LS Photometry Grid options"};
+  po::options_description options {"Display Templates options"};
 
+  auto phot_options = PhotometryGridConfiguration::getProgramOptions();
+  for (auto o : phot_options.options()) {
+    options.add(o);
+  }
+  
   options.add_options()
   ("sed", po::bool_switch()->default_value(false),
       "Show the SED axis values")
@@ -37,12 +42,10 @@ po::options_description DisplayTemplateConfiguration::getProgramOptions() {
   ("phot", po::value<std::string>(),
       "Show the photometry of the cell (SED,REDCURVE,EBV,Z) (zero based indices)");
 
-  options.add(PhotometryGridConfiguration::getProgramOptions());
-
   return options;
 }
 
-DisplayTemplateConfiguration::DisplayTemplateConfiguration(
+DisplayTemplatesConfiguration::DisplayTemplatesConfiguration(
             const std::map<std::string, po::variable_value>& options)
       : PhotometryGridConfiguration(options) {
   
@@ -50,7 +53,7 @@ DisplayTemplateConfiguration::DisplayTemplateConfiguration(
   
 }
 
-bool DisplayTemplateConfiguration::showGeneric() {
+bool DisplayTemplatesConfiguration::showGeneric() {
   bool result = true;
   if (m_options["sed"].as<bool>() || m_options["redcurve"].as<bool>()
       || m_options["ebv"].as<bool>() || m_options["z"].as<bool>()
@@ -60,23 +63,23 @@ bool DisplayTemplateConfiguration::showGeneric() {
   return result;
 }
 
-bool DisplayTemplateConfiguration::showSedAxis() {
+bool DisplayTemplatesConfiguration::showSedAxis() {
   return m_options["sed"].as<bool>();
 }
 
-bool DisplayTemplateConfiguration::showReddeningCurveAxis() {
+bool DisplayTemplatesConfiguration::showReddeningCurveAxis() {
   return m_options["redcurve"].as<bool>();
 }
 
-bool DisplayTemplateConfiguration::showEbvAxis() {
+bool DisplayTemplatesConfiguration::showEbvAxis() {
   return m_options["ebv"].as<bool>();
 }
 
-bool DisplayTemplateConfiguration::showRedshiftAxis() {
+bool DisplayTemplatesConfiguration::showRedshiftAxis() {
   return m_options["z"].as<bool>();
 }
 
-std::unique_ptr<std::tuple<size_t,size_t,size_t,size_t>> DisplayTemplateConfiguration::getCellPhotCoords() {
+std::unique_ptr<std::tuple<size_t,size_t,size_t,size_t>> DisplayTemplatesConfiguration::getCellPhotCoords() {
   std::unique_ptr<std::tuple<size_t,size_t,size_t,size_t>> result {};
   if (!m_options["phot"].empty()) {
     std::string coords = m_options["phot"].as<std::string>();

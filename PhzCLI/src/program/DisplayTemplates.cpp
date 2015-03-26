@@ -6,7 +6,7 @@
 
 #include <iostream>
 #include "ElementsKernel/ProgramHeaders.h"
-#include "PhzCLI/DisplayTemplateConfiguration.h"
+#include "PhzCLI/DisplayTemplatesConfiguration.h"
 
 using namespace std;
 using namespace Euclid;
@@ -59,15 +59,15 @@ void printPhotometry(const PhzDataModel::PhotometryGrid& grid,
   cout << '\n';
 }
 
-class DisplayTemplate : public Elements::Program {
+class DisplayTemplates : public Elements::Program {
   
   po::options_description defineSpecificProgramOptions() override {
-    return PhzConfiguration::DisplayTemplateConfiguration::getProgramOptions();
+    return PhzConfiguration::DisplayTemplatesConfiguration::getProgramOptions();
   }
   
   Elements::ExitCode mainMethod(map<string, po::variable_value>& args) override {
     
-    PhzConfiguration::DisplayTemplateConfiguration conf {args};
+    PhzConfiguration::DisplayTemplatesConfiguration conf {args};
     auto grid = conf.getPhotometryGrid();
     
     if (conf.showGeneric()) {
@@ -100,4 +100,4 @@ class DisplayTemplate : public Elements::Program {
   
 };
 
-MAIN_FOR(DisplayTemplate)
+MAIN_FOR(DisplayTemplates)

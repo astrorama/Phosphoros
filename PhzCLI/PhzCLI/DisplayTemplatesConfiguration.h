@@ -4,8 +4,8 @@
  * @author Nikolaos Apostolakos
  */
 
-#ifndef PHZCLI_LPHOTOMETRYGRIDCONFIGURATION_H
-#define	PHZCLI_LPHOTOMETRYGRIDCONFIGURATION_H
+#ifndef PHZCLI_DISPLAYTEMPLATESCONFIGURATION_H
+#define	PHZCLI_DISPLAYTEMPLATESCONFIGURATION_H
 
 #include <set>
 #include <PhzDataModel/PhzModel.h>
@@ -14,18 +14,18 @@
 namespace Euclid {
 namespace PhzConfiguration {
 
-class DisplayTemplateConfiguration : public PhotometryGridConfiguration {
+class DisplayTemplatesConfiguration : public PhotometryGridConfiguration {
   
 public:
   
   static boost::program_options::options_description getProgramOptions();
   
-  DisplayTemplateConfiguration(const std::map<std::string, boost::program_options::variable_value>& options);
+  DisplayTemplatesConfiguration(const std::map<std::string, boost::program_options::variable_value>& options);
   
    /**
    * @brief destructor.
    */
-   virtual ~DisplayTemplateConfiguration()=default;
+   virtual ~DisplayTemplatesConfiguration()=default;
   
   bool showGeneric();
   
@@ -48,5 +48,5 @@ private:
 }
 }
 
-#endif	/* PHZCLI_LPHOTOMETRYGRIDCONFIGURATION_H */
+#endif	/* PHZCLI_DISPLAYTEMPLATESCONFIGURATION_H */
 
