@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Photometric Grid Generation</string>
+   <string>Templates Generation</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -26,7 +26,7 @@
         </font>
        </property>
        <property name="text">
-        <string>(Re)-Generation of the Grid</string>
+        <string>(Re)-Generation of the Templates</string>
        </property>
       </widget>
      </item>
@@ -57,7 +57,7 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Grid Name :</string>
+        <string>Tempolates File Name :</string>
        </property>
       </widget>
      </item>

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>View / Edit Photometric Corrections</string>
+   <string>View / Edit Photometric Zero-Point Corrections</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -26,7 +26,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Photometric Corrections </string>
+        <string>Photometric Zero-Point Corrections </string>
        </property>
       </widget>
      </item>

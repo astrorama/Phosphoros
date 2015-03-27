@@ -192,7 +192,7 @@
       </font>
      </property>
      <property name="text">
-      <string>2. Photometry Grid Selection / Generation :</string>
+      <string>2. Templates Generation / Selection :</string>
      </property>
     </widget>
    </item>
@@ -252,7 +252,7 @@
        <item>
         <widget class="QLabel" name="label_23">
          <property name="text">
-          <string>Photometry Grid :</string>
+          <string>Templates file :</string>
          </property>
         </widget>
        </item>
@@ -342,7 +342,7 @@
       </font>
      </property>
      <property name="text">
-      <string>3. Photometric Corrections :</string>
+      <string>3. Photometric Zero-Point Corrections :</string>
      </property>
     </widget>
    </item>
@@ -359,7 +359,7 @@
       <bool>true</bool>
      </property>
      <property name="title">
-      <string>Enable Photometric Corrections </string>
+      <string>Enable Photometric Zero-Point Corrections </string>
      </property>
      <property name="flat">
       <bool>true</bool>
@@ -371,7 +371,7 @@
       <item>
        <widget class="QLabel" name="label_28">
         <property name="text">
-         <string>Compatible Photometrc Corrections :</string>
+         <string>Compatible Photometrc Zero-Point Corrections :</string>
         </property>
        </widget>
       </item>
@@ -481,7 +481,7 @@
       </font>
      </property>
      <property name="text">
-      <string>4. Run :</string>
+      <string>4. Run Template Fitting :</string>
      </property>
     </widget>
    </item>

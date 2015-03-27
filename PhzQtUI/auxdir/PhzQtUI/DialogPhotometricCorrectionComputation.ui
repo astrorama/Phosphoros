@@ -26,7 +26,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Photometric Corrections  Computation</string>
+        <string>Photometric Zero-Point Corrections  Computation</string>
        </property>
       </widget>
      </item>
@@ -133,7 +133,7 @@
          <item>
           <widget class="QLabel" name="label_3">
            <property name="text">
-            <string>Photometry Grid :</string>
+            <string>Templates :</string>
            </property>
           </widget>
          </item>
