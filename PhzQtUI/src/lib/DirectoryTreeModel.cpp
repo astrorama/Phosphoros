@@ -88,7 +88,7 @@ void DirectoryTreeModel::setEnabled(bool enable){
     setEditionStatus(enable);
 }
 
-void DirectoryTreeModel::checkDir(bool checked,string dir, list<string> exclusions){
+void DirectoryTreeModel::checkDir(bool checked,string dir, vector<string> exclusions){
 
     if (dir.compare(".")==0 || dir.compare(this->item(0)->text().toStdString())==0){
         dir=m_root_dir;
@@ -181,7 +181,7 @@ void DirectoryTreeModel::onItemChanged(QStandardItem* item){
     }
 }
 
-void DirectoryTreeModel::setState(string root, const list<string>& exclusions){
+void DirectoryTreeModel::setState(string root, const vector<string>& exclusions){
     m_bypass_item_changed=true;
 
 
@@ -273,8 +273,8 @@ string DirectoryTreeModel::getGroup() const{
       }
   }
 
-list<string> DirectoryTreeModel::DirectoryTreeModel::getExclusions(string root) const{
-    list<string> list;
+vector<string> DirectoryTreeModel::DirectoryTreeModel::getExclusions(string root) const{
+  vector<string> list;
 
     auto root_item =item(0);
     if ( root.compare(".")!=0 && root.compare(item(0)->text().toStdString())!=0 && root.compare(m_root_dir)!=0  ){
@@ -289,7 +289,8 @@ list<string> DirectoryTreeModel::DirectoryTreeModel::getExclusions(string root) 
    for (int i = 0 ; i<root_item->rowCount(); ++i){
       auto child = root_item->child(i);
       if(child->hasChildren()){
-         list.merge(getExclusions(child->text().toStdString()));
+        auto sub_list=getExclusions(child->text().toStdString());
+        list.insert(list.end(),sub_list.begin(),sub_list.end());
       } else if ( child->checkState()!=Qt::CheckState::Checked){
           list.push_back(child->text().toStdString());
       }

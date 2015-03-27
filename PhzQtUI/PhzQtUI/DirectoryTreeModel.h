@@ -45,7 +45,7 @@ public:
      * @param exclusions
      * prevent the listed element to be checked, this allow for selecting a folder but some of its sub-elements.
      */
-    void setState(string root, const list<string>& exclusions);
+    void setState(string root, const vector<string>& exclusions);
 
     /**
      * @brief Programatically check the root element of the model.
@@ -66,7 +66,7 @@ public:
      * @param root
      * @return
      */
-    list<string> getExclusions(string root) const;
+    vector<string> getExclusions(string root) const;
 
     /**
      * @brief get the current element if it represent a folder or the parent element if the current is a file.
@@ -114,7 +114,7 @@ public slots:
 
 private:
       void setEditionStatus(bool inEdition);
-      void checkDir(bool checked,string dir, list<string> exclusions={});
+      void checkDir(bool checked,string dir, vector<string> exclusions={});
       bool m_in_edition = false;
       bool m_bypass_item_changed =false;
       map<string,QStandardItem*> m_map_dir;
