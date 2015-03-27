@@ -29,7 +29,13 @@ DialogOptions::~DialogOptions()
 {
 }
 
-
+void DialogOptions::EditRootPath(){
+  m_is_root_edition=true;
+  ui->label_2->setText("Welcome to Phosphoros!");
+  ui->label->setText("Please select the Root Path into which application data will be stored:" );
+  ui->tabWidget->setCurrentIndex(2);
+  on_btn_editGeneral_clicked();
+}
 
 
 void DialogOptions::on_btn_editGeneral_clicked()
@@ -37,7 +43,8 @@ void DialogOptions::on_btn_editGeneral_clicked()
     ui->tabWidget->setTabEnabled(0,false);
     ui->tabWidget->setTabEnabled(1,false);
     ui->buttonBox->setEnabled(false);
-    ui->btn_cancelGeneral->setEnabled(true);
+    ui->btn_editGeneral->setEnabled(false);
+    ui->btn_cancelGeneral->setEnabled(!m_is_root_edition);
     ui->btn_saveGeneral->setEnabled(true);
     ui->btn_browseRoot->setEnabled(true);
 }
@@ -49,6 +56,7 @@ void DialogOptions::on_btn_cancelGeneral_clicked()
     ui->tabWidget->setTabEnabled(0,true);
     ui->tabWidget->setTabEnabled(1,true);
     ui->buttonBox->setEnabled(true);
+    ui->btn_editGeneral->setEnabled(true);
     ui->btn_cancelGeneral->setEnabled(false);
     ui->btn_saveGeneral->setEnabled(false);
     ui->btn_browseRoot->setEnabled(false);
@@ -64,6 +72,10 @@ void DialogOptions::on_btn_saveGeneral_clicked()
     ui->btn_cancelGeneral->setEnabled(false);
     ui->btn_saveGeneral->setEnabled(false);
     ui->btn_browseRoot->setEnabled(false);
+
+    if (m_is_root_edition){
+      this->accept();
+    }
 }
 
 void DialogOptions::on_btn_browseRoot_clicked()

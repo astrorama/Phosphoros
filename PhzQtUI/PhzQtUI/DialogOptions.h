@@ -26,6 +26,8 @@ public:
     explicit DialogOptions(QWidget *parent = 0);
     ~DialogOptions();
 
+    void EditRootPath();
+
 
 private slots:
 
@@ -62,6 +64,7 @@ private slots:
 
 private:
     std::unique_ptr<Ui::DialogOptions> ui;
+    bool m_is_root_edition;
 };
 
 }

@@ -1,4 +1,6 @@
 
+#include <QSettings>
+#include <QDir>
 
 #include "PhzQtUI/MainWindow.h"
 #include "ui_MainWindow.h"
@@ -19,6 +21,23 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     connect(ui->widget_Analysis,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
+
+  // default value for the root-path
+  QSettings settings("SDC-CH", "PhosphorosUI");
+
+  std::string test_value = "default";
+  if (test_value.compare(
+      settings.value(QString::fromStdString("General/root-path"),
+          QString::fromStdString(test_value)).toString().toStdString()) == 0) {
+
+    settings.beginGroup("General");
+    settings.setValue(QString::fromStdString("root-path"), QDir::currentPath());
+    settings.endGroup();
+
+    std::unique_ptr<DialogOptions> popUp(new DialogOptions());
+    popUp->EditRootPath();
+    popUp->exec();
+  }
 }
 
 MainWindow::~MainWindow()
