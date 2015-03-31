@@ -11,7 +11,7 @@ class PhosphorosAction:
         self.help = help
 
 action_list = [
-    PhosphorosAction(['help'], 'help',
+    PhosphorosAction(['help', 'h', '-h', '--help'], 'help',
                      'Shows this help message'),
     PhosphorosAction(['GUI'], 'PhosphorosUI',
                      'Starts the Graphical User Interface'),
