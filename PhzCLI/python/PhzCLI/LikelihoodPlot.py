@@ -1,6 +1,7 @@
 import numpy as np
 from astropy.io import fits
 import matplotlib.pyplot as plt
+from matplotlib import cm
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 def plotEbv(file):
@@ -38,11 +39,30 @@ def plotSed(file):
         x.append(k)
         y.append(v)
     fig, ax = plt.subplots()
-    ax.plot(x,y)
+    ax.bar(x,y,align='center')
     sed_labels = [sed_name for _,sed_name in hdulist[4].data]
     ax.set_xticks(x)
     ax.set_xticklabels(sed_labels, rotation='vertical')
     plt.tight_layout()
+    plt.show()
+
+def plotZ(file):
+    hdulist = fits.open(file)
+    data = hdulist[0].data
+    res = {}
+    for z in range(len(hdulist[1].data)):
+        value = 0
+        for sed in range(len(hdulist[4].data)):
+            for ebv in range(len(hdulist[2].data)):
+                value = value + data[sed,0,ebv,z]
+        res[z] = value
+    x = []
+    y = []
+    z_values = hdulist[1].data
+    for k,v in res.items():
+        x.append(z_values[k][1])
+        y.append(v)
+    plt.plot(x,y)
     plt.show()
 
 def plotSedZ(file):
