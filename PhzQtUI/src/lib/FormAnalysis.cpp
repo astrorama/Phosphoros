@@ -191,7 +191,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   };
 
   if (!grid_name_exists){
-    tool_tip_run = tool_tip_run + "Please run the photometric grid computation. \n";
+    tool_tip_run = tool_tip_run + "Please run the model grid computation. \n";
   }
 
   if (!correction_ok){
@@ -488,7 +488,7 @@ void FormAnalysis::on_btn_RunGrid_clicked() {
 
     if (checkGridSelection(true, false)) {
       if (QMessageBox::warning(this, "Override existing file...",
-          "A Photometric Grid file with the very same name as the one you provided already exist. "
+          "A Model Grid file with the very same name as the one you provided already exist. "
               "Do you want to replace it?", QMessageBox::Yes | QMessageBox::No)
           == QMessageBox::No) {
         return;
