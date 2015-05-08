@@ -627,6 +627,7 @@ void FormAnalysis::on_cb_cat_output_type_currentIndexChanged(const QString &){
   }
 
   ui->txt_OutputCatalog->setText(QString::fromStdString(new_text));
+  setRunAnnalysisEnable(true);
 }
 
 void FormAnalysis::on_btn_BrowseOutput_clicked()
