@@ -384,6 +384,7 @@ std::map < std::string, boost::program_options::variable_value > FormAnalysis::g
 
    if (ui->gb_cat->isChecked ()){
      options_map["output-catalog-file"].value() = boost::any(ui->txt_OutputCatalog->text().toStdString());
+     options_map["output-catalog-format"].value() = boost::any(ui->cb_cat_output_type->currentText().toStdString());
    }
 
    if (ui->gb_pdf->isChecked ()){
@@ -610,6 +611,23 @@ void FormAnalysis::on_btn_BrowseInput_clicked()
  }
 
 
+void FormAnalysis::on_cb_cat_output_type_currentIndexChanged(const QString &){
+  std::string current_text = ui->txt_OutputCatalog->text().toStdString();
+  std::string new_text ="";
+  std::string old_ext = ".fits";
+  std::string new_ext = ".txt";
+  if (ui->cb_cat_output_type->currentText()=="FITS"){
+    old_ext = ".txt";
+    new_ext = ".fits";
+  }
+
+  auto pos = current_text.find_last_of(old_ext);
+  if (pos!=std::string::npos){
+    new_text=current_text.substr(0,pos+1-old_ext.length())+new_ext;
+  }
+
+  ui->txt_OutputCatalog->setText(QString::fromStdString(new_text));
+}
 
 void FormAnalysis::on_btn_BrowseOutput_clicked()
 {
@@ -617,8 +635,14 @@ void FormAnalysis::on_btn_BrowseOutput_clicked()
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.selectFile(QString::fromStdString(FileUtils::getLastUsedPath()));
     dialog.setOption(QFileDialog::DontUseNativeDialog);
-    dialog.setNameFilter("Text-Files (*.txt)");
-    dialog.setDefaultSuffix("txt");
+
+    if (ui->cb_cat_output_type->currentText()=="FITS"){
+      dialog.setNameFilter("FITS-Files (*.fits)");
+      dialog.setDefaultSuffix("fits");
+    } else {
+      dialog.setNameFilter("Text-Files (*.txt)");
+      dialog.setDefaultSuffix("txt");
+    }
     dialog.setLabelText( QFileDialog::Accept, "Select" );
     if (dialog.exec()){
       ui->txt_OutputCatalog->setText(dialog.selectedFiles()[0]);

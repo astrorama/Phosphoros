@@ -109,7 +109,7 @@
       </font>
      </property>
      <property name="text">
-      <string>1. Select File(s) to import</string>
+      <string>1. Select File(s) to Import</string>
      </property>
     </widget>
    </item>
@@ -166,7 +166,7 @@
       <item>
        <widget class="QCheckBox" name="cb_createSubGroup">
         <property name="text">
-         <string>Create a sub-group with the selected folder.</string>
+         <string>Create a Sub-Group With the Selected Folder.</string>
         </property>
        </widget>
       </item>

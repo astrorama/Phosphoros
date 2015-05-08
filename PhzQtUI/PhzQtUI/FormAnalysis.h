@@ -55,6 +55,8 @@ private slots:
 
     void on_cb_CompatibleGrid_textChanged(const QString &);
 
+    void on_cb_cat_output_type_currentIndexChanged(const QString &);
+
     void on_btn_GetConfigGrid_clicked();
 
     void on_btn_RunGrid_clicked();

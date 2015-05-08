@@ -12,7 +12,7 @@ ParameterRuleModel::ParameterRuleModel(std::map<int,ParameterRule> init_paramete
     this->setColumnCount(8);
     this->setRowCount(m_parameter_rules.size());
     QStringList  setHeaders;
-    setHeaders<<"SED(s)"<<""<<"Reddening Curve(s)"<<""<<"E(B-V) Range"<<"z Range"<<"Number of Models"<<"Hidden_Id";
+    setHeaders<<"SED(s)"<<""<<"Reddening Curve(s)"<<""<<"E(B-V) Range"<<"z Range"<<"Size"<<"Hidden_Id";
     this->setHorizontalHeaderLabels(setHeaders);
 
     int i=0;
@@ -28,30 +28,46 @@ ParameterRuleModel::ParameterRuleModel(std::map<int,ParameterRule> init_paramete
 }
 
 
+
+
+
+std::string ParameterRuleModel::getSedStatus(const ParameterRule& rule) const{
+  long sed_number=rule.getSedNumber();
+  long total_sed_number = sed_number+rule.getExcludedSeds().size();
+  return std::to_string(sed_number)+"/"+std::to_string(total_sed_number);
+}
+
+std::string ParameterRuleModel::getSedGroupName(const ParameterRule& rule) const{
+  std::string root_sed=rule.getSedRootObject(m_sed_root_path);
+  if (root_sed.length()==0){
+    root_sed="<Root>";
+  }
+
+  return root_sed;
+}
+
+std::string ParameterRuleModel::getRedStatus(const ParameterRule& rule) const{
+  long red_number=rule.getRedCurveNumber();
+  long total_red_number = red_number+rule.getExcludedReddenings().size();
+  return std::to_string(red_number)+"/"+std::to_string(total_red_number);
+}
+
+std::string ParameterRuleModel::getRedGroupName(const ParameterRule& rule) const{
+  std::string root_red=rule.getReddeningRootObject(m_red_root_path);
+  if (root_red.length()==0){
+    root_red="<Root>";
+  }
+
+  return root_red;
+}
+
 std::list<QString> ParameterRuleModel::getItemsRepresentation(const ParameterRule& rule, int id) const{
+     std::list<QString> list;
 
-    long sed_number=rule.getSedNumber();
-    long total_sed_number = sed_number+rule.getExcludedSeds().size();
-    std::string status_sed=std::to_string(sed_number)+"/"+std::to_string(total_sed_number);
-
-    long red_number=rule.getRedCurveNumber();
-    long total_red_number = red_number+rule.getExcludedReddenings().size();
-    std::string status_red=std::to_string(red_number)+"/"+std::to_string(total_red_number);
-
-    std::list<QString> list;
-
-     std::string root_sed=rule.getSedRootObject(m_sed_root_path);
-     if (root_sed.length()==0){
-       root_sed="<Root>";
-     }
-     std::string root_red=rule.getReddeningRootObject(m_red_root_path);
-     if (root_red.length()==0){
-       root_red="<Root>";
-     }
-     list.push_back(QString::fromStdString(root_sed));
-     list.push_back(QString::fromStdString(status_sed));
-     list.push_back(QString::fromStdString(root_red));
-     list.push_back(QString::fromStdString(status_red));
+     list.push_back(QString::fromStdString(getSedGroupName(rule)));
+     list.push_back(QString::fromStdString(getSedStatus(rule)));
+     list.push_back(QString::fromStdString(getRedGroupName(rule)));
+     list.push_back(QString::fromStdString(getRedStatus(rule)));
      list.push_back(QString::fromStdString(rule.getEbvRange().getStringRepresentation()));
      list.push_back(QString::fromStdString(rule.getZRange().getStringRepresentation()));
      list.push_back(QString::number(rule.getModelNumber()));
@@ -86,13 +102,8 @@ void ParameterRuleModel::setSeds(std::string root, std::vector<std::string> exce
      m_parameter_rules[ref].setSedRootObject(std::move(root));
      m_parameter_rules[ref].setExcludedSeds(std::move(exceptions));
 
-     std::string status_sed="All";
-     if (  m_parameter_rules[ref].getExcludedSeds().size()>0){
-         status_sed="Some";
-     }
-
-     this->item(row,0)->setText(QString::fromStdString(m_parameter_rules[ref].getSedRootObject(m_sed_root_path)));
-     this->item(row,1)->setText(QString::fromStdString(status_sed));
+     this->item(row,0)->setText(QString::fromStdString(getSedGroupName(m_parameter_rules[ref])));
+     this->item(row,1)->setText(QString::fromStdString(getSedStatus(m_parameter_rules[ref])));
 }
 
 void ParameterRuleModel::setRedCurves(std::string root, std::vector<std::string> exceptions,int row){
@@ -100,13 +111,8 @@ void ParameterRuleModel::setRedCurves(std::string root, std::vector<std::string>
      m_parameter_rules[ref].setReddeningRootObject(std::move(root));
      m_parameter_rules[ref].setExcludedReddenings(std::move(exceptions));
 
-     std::string status_red="All";
-     if (  m_parameter_rules[ref].getExcludedReddenings().size()>0){
-         status_red="Some";
-     }
-
-     this->item(row,2)->setText(QString::fromStdString(m_parameter_rules[ref].getReddeningRootObject(m_red_root_path)));
-     this->item(row,3)->setText(QString::fromStdString(status_red));
+     this->item(row,2)->setText(QString::fromStdString(getRedGroupName(m_parameter_rules[ref])));
+     this->item(row,3)->setText(QString::fromStdString(getRedStatus(m_parameter_rules[ref])));
 }
 
 

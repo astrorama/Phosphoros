@@ -33,7 +33,7 @@
         </font>
        </property>
        <property name="text">
-        <string>&gt; Astronomical Model Set</string>
+        <string>&gt; Model Grid Specification</string>
        </property>
       </widget>
      </item>
@@ -76,7 +76,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Astronomical Model Sets List :</string>
+            <string>List of Model Grids :</string>
            </property>
           </widget>
          </item>
@@ -165,7 +165,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Selected Astronomical Model Set :</string>
+            <string>Selected Model Grid Specification :</string>
            </property>
           </widget>
          </item>
@@ -219,7 +219,7 @@
            <item>
             <widget class="QLabel" name="label_6">
              <property name="text">
-              <string>Model Set Name :</string>
+              <string>Name :</string>
              </property>
             </widget>
            </item>
@@ -248,7 +248,7 @@
          <item>
           <widget class="QLabel" name="label_5">
            <property name="text">
-            <string>Parameters Rules</string>
+            <string>Parameter Sets</string>
            </property>
           </widget>
          </item>

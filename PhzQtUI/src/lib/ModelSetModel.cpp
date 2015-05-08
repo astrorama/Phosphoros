@@ -60,7 +60,7 @@ void ModelSetModel::loadSets(const std::string& path){
      this->setColumnCount(3);
      this->setRowCount(m_set_list.size());
      QStringList  setHeaders;
-     setHeaders<<"Model Set Name"<<"Number of Models"<<"Hidden_Id";
+     setHeaders<<"Name"<<"Total Size"<<"Hidden_Id";
      this->setHorizontalHeaderLabels(setHeaders);
 
      int i=0;
