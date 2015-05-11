@@ -14,22 +14,36 @@ namespace po = boost::program_options;
 
 static Elements::Logging logger = Elements::Logging::getLogger("PhosphorosDisplayTemplate");
 
-void printGeneric(const PhzDataModel::PhotometryGrid& grid) {
-  cout << "\nSED axis size: " << grid.getAxis<PhzDataModel::ModelParameter::SED>().size() << '\n';
-  cout << "Reddening curve axis size: " << grid.getAxis<PhzDataModel::ModelParameter::REDDENING_CURVE>().size() << '\n';
-  cout << "E(B-V) axis size: " << grid.getAxis<PhzDataModel::ModelParameter::EBV>().size() << '\n';
-  cout << "Z axis size: " << grid.getAxis<PhzDataModel::ModelParameter::Z>().size() << '\n';
-  cout << "Total grid size : " << grid.size() << "\n\n";
-}
-
 ostream& operator<<(ostream& stream, const XYDataset::QualifiedName& name) {
   stream << name.qualifiedName();
   return stream;
 }
 
-template <int I>
-void printAxis(const PhzDataModel::PhotometryGrid& grid) {
-  auto& axis = grid.getAxis<I>();
+void printGeneric(const PhzDataModel::PhotometryGridInfo& grid_info) {
+  auto sed_size = std::get<PhzDataModel::ModelParameter::SED>(grid_info.axes).size();
+  auto red_curve_size = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(grid_info.axes).size();
+  auto ebv_size = std::get<PhzDataModel::ModelParameter::EBV>(grid_info.axes).size();
+  auto z_size = std::get<PhzDataModel::ModelParameter::Z>(grid_info.axes).size();
+  cout << "\nParameter Space info\n";
+  cout << "--------------------\n";
+  cout << "SED axis size: " << sed_size << '\n';
+  cout << "Reddening curve axis size: " << red_curve_size << '\n';
+  cout << "E(B-V) axis size: " << ebv_size << '\n';
+  cout << "Z axis size: " << z_size << '\n';
+  cout << "Total grid size : " << sed_size*red_curve_size*ebv_size*z_size << "\n\n";
+  
+  cout << "\nPhotometry info\n";
+  cout << "---------------\n";
+  cout << "IGM absorption method: " << grid_info.igm_method << '\n';
+  cout << "Photometry filters:\n";
+  for (auto& f : grid_info.filter_names) {
+    cout << "    " << f << '\n';
+  }
+  cout << '\n';
+}
+
+template <typename Axis>
+void printAxis(const Axis& axis) {
   cout << "\nAxis " << axis.name() << " (" << axis.size() << ")\n";
   cout << "Index\tValue\n";
   int i {0};
@@ -68,30 +82,31 @@ class DisplayTemplates : public Elements::Program {
   Elements::ExitCode mainMethod(map<string, po::variable_value>& args) override {
     
     PhzConfiguration::DisplayTemplatesConfiguration conf {args};
-    auto grid = conf.getPhotometryGrid();
+    auto grid_info = conf.getPhotometryGridInfo();
     
     if (conf.showGeneric()) {
-      printGeneric(grid);
+      printGeneric(grid_info);
     }
     
     if (conf.showSedAxis()) {
-      printAxis<PhzDataModel::ModelParameter::SED>(grid);
+      printAxis(std::get<PhzDataModel::ModelParameter::SED>(grid_info.axes));
     }
     
     if (conf.showReddeningCurveAxis()) {
-      printAxis<PhzDataModel::ModelParameter::REDDENING_CURVE>(grid);
+      printAxis(std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(grid_info.axes));
     }
     
     if (conf.showEbvAxis()) {
-      printAxis<PhzDataModel::ModelParameter::EBV>(grid);
+      printAxis(std::get<PhzDataModel::ModelParameter::EBV>(grid_info.axes));
     }
     
     if (conf.showRedshiftAxis()) {
-      printAxis<PhzDataModel::ModelParameter::Z>(grid);
+      printAxis(std::get<PhzDataModel::ModelParameter::Z>(grid_info.axes));
     }
     
     auto phot_coords = conf.getCellPhotCoords();
     if (phot_coords) {
+      auto grid = conf.getPhotometryGrid();
       printPhotometry(grid, *phot_coords);
     }
     
