@@ -12,6 +12,7 @@
 #include <vector>
 #include <boost/program_options.hpp>
 
+#include "PhzConfiguration/PhotometryGridConfiguration.h"
 #include "PhzQtUI/PhzGridInfoHandler.h"
 #include "PhzQtUI/XYDataSetTreeModel.h"
 #include "XYDataset/QualifiedName.h"
@@ -82,22 +83,49 @@ PhzDataModel::ModelAxesTuple PhzGridInfoHandler::getAxesTuple(
 
 std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
     const PhzDataModel::ModelAxesTuple& axes,
-    const std::list<std::string>& selected_filters) {
+    const std::list<std::string>& selected_filters,
+    std::string igm_type) {
   std::string rootPath =
       FileUtils::getPhotmetricGridRootPath(true);
 
   std::list < std::string > list;
 
   QDir root_qdir(QString::fromStdString(rootPath));
-  QStringList fileNames = root_qdir.entryList(
-      QDir::Files | QDir::NoDotAndDotDot);
-  foreach (const QString &fileName, fileNames) {
+  QStringList fileNames = root_qdir.entryList(QDir::Files | QDir::NoDotAndDotDot);
+  foreach (const QString &fileName , fileNames) {
+    std::map < std::string, boost::program_options::variable_value > options_map;
+
+    // auto file_path = root_qdir.path() +QDir::separator()+ fileName;
+    auto file_path = root_qdir.absoluteFilePath(fileName);
+    options_map["photometry-grid-file"].value() = boost::any(file_path.toStdString());
+
     try { // If a file cannot be opened or is ill formated: just skip it!
-      std::ifstream in {root_qdir.absoluteFilePath(fileName).toStdString()};
-      auto grid = PhzDataModel::phzGridBinaryImport<InfoOnlyCellManager>(in);
+      auto grid_config = PhzConfiguration::PhotometryGridConfiguration(options_map);
+      auto grid_info = grid_config.getPhotometryGridInfo();
+
+      // Check the IGM type compatibility
+      if (igm_type!=grid_info.igm_method) {
+              continue;
+      }
+
+      // check the filters
+      int number_found=0;
+      int number_total=0;
+      for (auto& filter : grid_info.filter_names) {
+        if (std::find(selected_filters.begin(), selected_filters.end(), filter.qualifiedName())!=selected_filters.end()) {
+          ++number_found;
+        }
+        ++number_total;
+      }
+
+      if (number_found!=number_total || selected_filters.size() != number_found) {
+        continue;
+      }
+
 
       // check the axis
-      auto& sed_axis_file = grid.getAxis<PhzDataModel::ModelParameter::SED>();
+
+      auto& sed_axis_file = std::get<PhzDataModel::ModelParameter::SED>(grid_info.axes);
       auto& sed_axis_requested = std::get<PhzDataModel::ModelParameter::SED>(axes);
       if (sed_axis_file.size()!=sed_axis_requested.size()) {
         continue;
@@ -112,7 +140,7 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
         continue;
       }
 
-      auto& red_axis_file = grid.getAxis<PhzDataModel::ModelParameter::REDDENING_CURVE>();
+      auto& red_axis_file = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(grid_info.axes);
       auto& red_axis_requested = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(axes);
       if (red_axis_file.size()!=red_axis_requested.size()) {
         continue;
@@ -128,7 +156,7 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
       }
 
       std::vector<double> z_axis_file;
-      for(double value : grid.getAxis<PhzDataModel::ModelParameter::Z>()){
+      for(double value : std::get<PhzDataModel::ModelParameter::Z>(grid_info.axes)){
         z_axis_file.push_back(value);
       }
 
@@ -160,11 +188,11 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
       }
 
       std::vector<double> ebv_axis_file;
-      for(double value : grid.getAxis<PhzDataModel::ModelParameter::EBV>()){
+      for(double value : std::get<PhzDataModel::ModelParameter::EBV>(grid_info.axes)){
         ebv_axis_file.push_back(value);
       }
       std::vector<double> ebv_axis_requested;
-      for(double value :std::get<PhzDataModel::ModelParameter::EBV>(axes)){
+      for(double value : std::get<PhzDataModel::ModelParameter::EBV>(axes)){
         ebv_axis_requested.push_back(value);
       }
       if (ebv_axis_file.size()!=ebv_axis_requested.size()) {
@@ -187,19 +215,7 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
         continue;
       }
 
-      // check the filters
-      int number_found=0;
-      int number_total=0;
-      for (auto& filter : *grid.begin()) {
-        if (std::find(selected_filters.begin(), selected_filters.end(), filter)!=selected_filters.end()) {
-          ++number_found;
-        }
-        ++number_total;
-      }
-
-      if (number_found==number_total && selected_filters.size() == number_found) {
-        list.push_back(fileName.toStdString());
-      }
+      list.push_back(fileName.toStdString());
     } catch(...) {}
   }
 

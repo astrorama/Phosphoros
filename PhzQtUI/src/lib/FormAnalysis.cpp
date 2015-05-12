@@ -81,7 +81,8 @@ void FormAnalysis::updateGridSelection() {
   auto axis = PhzGridInfoHandler::getAxesTuple( selected_model);
   auto possible_files =
       PhzGridInfoHandler::getCompatibleGridFile(axis,
-          getSelectedFilters(true));
+          getSelectedFilters(true),
+          ui->cb_igm->currentText().toStdString());
 
   ui->cb_CompatibleGrid->clear();
   bool added=false;
@@ -96,7 +97,7 @@ void FormAnalysis::updateGridSelection() {
        concatenated_filter_names=concatenated_filter_names+filter;
      }
 
-    ui->cb_CompatibleGrid->addItem(ui->cb_AnalysisSurvey->currentText()+QString::fromStdString("_"+selected_model.getName()+"_"+concatenated_filter_names));
+    ui->cb_CompatibleGrid->addItem(ui->cb_AnalysisSurvey->currentText()+QString::fromStdString("_"+selected_model.getName()+"_")+ui->cb_igm->currentText()+QString::fromStdString("_"+concatenated_filter_names));
   }
   ui->cb_CompatibleGrid->addItem("<Enter a new name>");
 }

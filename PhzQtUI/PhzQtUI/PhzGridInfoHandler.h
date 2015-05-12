@@ -40,10 +40,13 @@ public:
    * @param axes The ModelAxesTuple containing the axes of the grid.
    *
    * @param selected_filters A list of the filters names.
+   *
+   * @param igm_type The type of inter-galactic medium absorption.
    */
   static std::list<std::string> getCompatibleGridFile(
       const PhzDataModel::ModelAxesTuple& axes,
-      const std::list<std::string> & selected_filters);
+      const std::list<std::string> & selected_filters,
+      std::string igm_type);
 
   /**
    * @breif Build a boost configuration map out of the selected parameters.
