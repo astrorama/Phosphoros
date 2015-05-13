@@ -2,6 +2,8 @@
 
 #include <QDir>
 
+#include "ElementsKernel/Real.h" // isEqual
+
 #include "PhzQtUI/ParameterRule.h"
 #include "PhzQtUI/FileUtils.h"
 #include "PhzQtUI/XYDataSetTreeModel.h"
@@ -79,7 +81,7 @@ long long ParameterRule::getModelNumber() const{
   options["reddening-curve-name"].value() = boost::any(reds);
 
   vector<string> z_range_vector;
-  is_zero |=m_redshift_range.getMin()==m_redshift_range.getMax()&&m_redshift_range.getStep()==0;
+  is_zero |=Elements::isEqual(m_redshift_range.getMin(),m_redshift_range.getMax()) && Elements::isEqual(m_redshift_range.getStep(),0.);
   string z_range=""+to_string(m_redshift_range.getMin())+" "
       +to_string(m_redshift_range.getMax())+" "
       +to_string(m_redshift_range.getStep());
@@ -87,7 +89,7 @@ long long ParameterRule::getModelNumber() const{
   options["z-range"].value() = boost::any(z_range_vector);
 
   vector<string> ebv_range_vector;
-  is_zero |=m_ebv_range.getMin()==m_ebv_range.getMax()&&m_ebv_range.getStep()==0;
+  is_zero |=Elements::isEqual(m_ebv_range.getMin(),m_ebv_range.getMax()) && Elements::isEqual(m_ebv_range.getStep(),0.);
 
   string ebv_range=""+to_string(m_ebv_range.getMin())+" "
       +to_string(m_ebv_range.getMax())+" "

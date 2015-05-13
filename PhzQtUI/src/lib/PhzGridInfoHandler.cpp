@@ -109,8 +109,8 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
       }
 
       // check the filters
-      int number_found=0;
-      int number_total=0;
+      std::size_t number_found=0;
+      std::size_t number_total=0;
       for (auto& filter : grid_info.filter_names) {
         if (std::find(selected_filters.begin(), selected_filters.end(), filter.qualifiedName())!=selected_filters.end()) {
           ++number_found;
