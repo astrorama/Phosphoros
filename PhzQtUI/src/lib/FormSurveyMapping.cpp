@@ -56,7 +56,7 @@ void FormSurveyMapping::loadMappingPage(){
 }
 
 void FormSurveyMapping::setFilterMappingInEdition(){
-    startEdition(0);
+    startEdition(2);
     ui->table_Map->setEnabled(false);
     ui->btn_MapNew->setEnabled(false);
     ui->btn_MapDuplicate->setEnabled(false);
@@ -155,7 +155,7 @@ void FormSurveyMapping::on_btn_MapDelete_clicked()
 {
     if (QMessageBox::question( this, "Confirm deletion...",
                                   "Do you really want to delete this Survey Filter Mapping Set?",
-                                  QMessageBox::Yes|QMessageBox::Cancel )==QMessageBox::Yes){
+                                  QMessageBox::No | QMessageBox::Yes )==QMessageBox::Yes){
         static_cast<SurveyModel*>(ui->table_Map->model())->deleteSurvey(ui->table_Map->selectionModel()->currentIndex().row());
     }
 }

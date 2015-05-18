@@ -37,6 +37,7 @@ void FormModelSet::loadSetPage(){
 
 void  FormModelSet::setModelInEdition(){
     ui->btn_SetToHome->setEnabled(false);
+    ui->btn_backHome->setEnabled(false);
     ui->btn_SetNew->setEnabled(false);
     ui->btn_SetDuplicate->setEnabled(false);
     ui->btn_SetDelete->setEnabled(false);
@@ -52,6 +53,7 @@ void  FormModelSet::setModelInEdition(){
 void  FormModelSet::setModelInView(){
     m_setInsert=false;
     ui->btn_SetToHome->setEnabled(true);
+    ui->btn_backHome->setEnabled(true);
     ui->btn_SetNew->setEnabled(true);
     ui->btn_viewSet->setEnabled(ui->tableView_Set->hasSelectedSet());
     ui->btn_SetDuplicate->setEnabled(ui->tableView_Set->hasSelectedSet());
@@ -72,6 +74,12 @@ void FormModelSet::on_btn_SetToHome_clicked()
      navigateToHome();
 }
 
+void FormModelSet::on_btn_backHome_clicked()
+{
+     navigateToHome();
+}
+
+
 void FormModelSet::on_btn_SetNew_clicked()
 {
      ui->tableView_Set->newSet(false);
@@ -90,7 +98,7 @@ void FormModelSet::on_btn_SetDelete_clicked()
 {
     if (QMessageBox::question( this, "Confirm deletion...",
                                   "Do you really want to delete the Model Set '"+ui->tableView_Set->getSelectedName()+"' ?",
-                                  QMessageBox::Yes|QMessageBox::Cancel )==QMessageBox::Yes){
+                                  QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
         ui->tableView_Set->deleteSelectedSet(true);
     }
 }

@@ -58,7 +58,7 @@ signals:
     * photometric corrections have been computed. The param is the (relative)
     * path of the corrections file.
     */
-    void correctionComputed(const std::string &);
+    void correctionComputed(const QString &);
 
 private slots:
     /**

@@ -249,7 +249,7 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
     auto phot_corr_map = calculator(catalog, model_phot_grid, stop_criteria,
         selector, progress_logger);
     output_func(phot_corr_map);
-    correctionComputed (ui->txt_FileName->text().toStdString());
+    correctionComputed (ui->txt_FileName->text());
     return "";
   }
   catch (const Elements::Exception & e) {

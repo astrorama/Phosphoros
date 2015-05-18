@@ -23,6 +23,8 @@ DialogOptions::DialogOptions(QWidget *parent) :
     connect(ui->widget_survey_mapping, SIGNAL(endEdition()),SLOT(endEdition()));
 
     ui->widget_aux_Data->loadManagementPage(0);
+
+    m_is_root_edition=false;
 }
 
 DialogOptions::~DialogOptions()
@@ -33,15 +35,15 @@ void DialogOptions::EditRootPath(){
   m_is_root_edition=true;
   ui->label_2->setText("Welcome to Phosphoros!");
   ui->label->setText("Please select the Root Path into which application data will be stored:" );
-  ui->tabWidget->setCurrentIndex(2);
+  ui->tabWidget->setCurrentIndex(0);
   on_btn_editGeneral_clicked();
 }
 
 
 void DialogOptions::on_btn_editGeneral_clicked()
 {
-    ui->tabWidget->setTabEnabled(0,false);
     ui->tabWidget->setTabEnabled(1,false);
+    ui->tabWidget->setTabEnabled(2,false);
     ui->buttonBox->setEnabled(false);
     ui->btn_editGeneral->setEnabled(false);
     ui->btn_cancelGeneral->setEnabled(!m_is_root_edition);
@@ -53,8 +55,8 @@ void DialogOptions::on_btn_cancelGeneral_clicked()
 {
     ui->txt_rootDir->setText(QString::fromStdString(FileUtils::getRootPath()));
 
-    ui->tabWidget->setTabEnabled(0,true);
     ui->tabWidget->setTabEnabled(1,true);
+    ui->tabWidget->setTabEnabled(2,true);
     ui->buttonBox->setEnabled(true);
     ui->btn_editGeneral->setEnabled(true);
     ui->btn_cancelGeneral->setEnabled(false);
@@ -66,8 +68,8 @@ void DialogOptions::on_btn_saveGeneral_clicked()
 {
     FileUtils::setRootPath(ui->txt_rootDir->text().toStdString());
 
-    ui->tabWidget->setTabEnabled(0,true);
     ui->tabWidget->setTabEnabled(1,true);
+    ui->tabWidget->setTabEnabled(2,true);
     ui->buttonBox->setEnabled(true);
     ui->btn_cancelGeneral->setEnabled(false);
     ui->btn_saveGeneral->setEnabled(false);

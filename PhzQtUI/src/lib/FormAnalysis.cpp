@@ -142,7 +142,7 @@ void FormAnalysis::setComputeCorrectionEnable(){
   bool name_exists = checkGridSelection(true, false);
     ui->btn_computeCorrections->setEnabled(name_exists && ui->gb_corrections->isChecked () );
 
-    QString tool_tip = "";
+    QString tool_tip = "Open the photometric zero-point correction popup.";
     if (!name_exists){
       tool_tip = "Please run the photometric grid computation before computing the photometric corrections.";
     };
@@ -253,10 +253,14 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
 
   if (!(grid_name_ok && correction_ok && run_ok)){
     tool_tip_conf = tool_tip_conf + "Before getting the configuration.";
+  } else {
+    tool_tip_conf =  "Get the configuration file.";
   }
 
   if (!(grid_name_exists && correction_exists && run_ok)){
     tool_tip_run = tool_tip_run + "Before running the analysis.";
+  }else {
+    tool_tip_run =  "Run the analysis.";
   }
 
 
@@ -402,6 +406,11 @@ std::map < std::string, boost::program_options::variable_value > FormAnalysis::g
 void FormAnalysis::on_btn_AnalysisToHome_clicked() {
   navigateToHome();
 }
+
+void FormAnalysis::on_btn_backHome_clicked() {
+  navigateToHome();
+}
+
 //  1. Survey and Model
 void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     const QString &selectedName) {
@@ -446,6 +455,11 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
 
 void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(const QString &) {
   updateGridSelection();
+}
+
+void FormAnalysis::on_cb_igm_currentIndexChanged(const QString &)
+{
+ updateGridSelection();
 }
 
 void FormAnalysis::onFilterSelectionItemChanged(QStandardItem*) {
@@ -549,16 +563,16 @@ std::unique_ptr<DialogPhotometricCorrectionComputation> popup(new DialogPhotomet
       getSelectedFilterMapping(),
       selected_survey.getDefaultCatalog());
 
-  connect( popup.get(), SIGNAL(correctionComputed(const std::string &)),
-      SLOT(onCorrectionComputed(const std::string &)));
+  connect( popup.get(), SIGNAL(correctionComputed(const QString &)),
+      SLOT(onCorrectionComputed(const QString &)));
   popup->exec();
 
 }
 
 
-void FormAnalysis::onCorrectionComputed(const std::string & new_file_name){
+void FormAnalysis::onCorrectionComputed(const QString & new_file_name){
   updateCorrectionSelection();
-  ui->cb_AnalysisCorrection->setCurrentIndex(ui->cb_AnalysisCorrection->findText(QString::fromStdString(new_file_name)));
+  ui->cb_AnalysisCorrection->setCurrentIndex(ui->cb_AnalysisCorrection->findText(new_file_name));
 }
 
 // 4. Run

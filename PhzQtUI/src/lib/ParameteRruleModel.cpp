@@ -40,7 +40,7 @@ std::string ParameterRuleModel::getSedStatus(const ParameterRule& rule) const{
 std::string ParameterRuleModel::getSedGroupName(const ParameterRule& rule) const{
   std::string root_sed=rule.getSedRootObject(m_sed_root_path);
   if (root_sed.length()==0){
-    root_sed="<Root>";
+    root_sed="<All>";
   }
 
   return root_sed;
@@ -55,7 +55,7 @@ std::string ParameterRuleModel::getRedStatus(const ParameterRule& rule) const{
 std::string ParameterRuleModel::getRedGroupName(const ParameterRule& rule) const{
   std::string root_red=rule.getReddeningRootObject(m_red_root_path);
   if (root_red.length()==0){
-    root_red="<Root>";
+    root_red="<All>";
   }
 
   return root_red;

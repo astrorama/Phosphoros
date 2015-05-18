@@ -153,7 +153,7 @@ void DialogModelSet::on_btn_delete_clicked()
 {
     if (QMessageBox::question( this, "Confirm deletion...",
                                   "Do you really want to delete this Parameter Rule?",
-                                  QMessageBox::Yes|QMessageBox::Cancel )==QMessageBox::Yes){
+                                  QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
         ui->tableView_ParameterRule->deletSelectedRule();
         turnControlsInView();
     }

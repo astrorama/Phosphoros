@@ -43,6 +43,8 @@ private slots:
 
     void on_btn_SetToHome_clicked();
 
+    void on_btn_backHome_clicked();
+
     void on_btn_SetNew_clicked();
 
     void on_btn_SetDuplicate_clicked();

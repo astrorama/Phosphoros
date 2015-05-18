@@ -65,18 +65,6 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_13">
          <item>
-          <widget class="QLabel" name="label_14">
-           <property name="font">
-            <font>
-             <pointsize>14</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Filter Full Transmission Curves :</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <spacer name="horizontalSpacer_15">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -92,7 +80,7 @@
          <item>
           <widget class="QPushButton" name="btn_FilterImport">
            <property name="text">
-            <string>Import</string>
+            <string>Import Additional Curve(s)</string>
            </property>
           </widget>
          </item>
@@ -106,11 +94,26 @@
          <item>
           <widget class="QPushButton" name="btn_FilterDelete">
            <property name="text">
-            <string>Delete</string>
+            <string>Delete Selected</string>
            </property>
           </widget>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_14">
+         <property name="font">
+          <font>
+           <pointsize>14</pointsize>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>The full transmission curves for the filter</string>
+         </property>
+         <property name="text">
+          <string>List of Available Filter Curves † :</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QTreeView" name="treeView_ManageFilter">
@@ -138,18 +141,6 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_14">
          <item>
-          <widget class="QLabel" name="label_15">
-           <property name="font">
-            <font>
-             <pointsize>14</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>SEDs :</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <spacer name="horizontalSpacer_16">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -165,7 +156,7 @@
          <item>
           <widget class="QPushButton" name="btn_SedImport">
            <property name="text">
-            <string>Import</string>
+            <string>Import Additional SED(s)</string>
            </property>
           </widget>
          </item>
@@ -179,11 +170,23 @@
          <item>
           <widget class="QPushButton" name="btn_SedDelete">
            <property name="text">
-            <string>Delete</string>
+            <string>Delete Selected</string>
            </property>
           </widget>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_15">
+         <property name="font">
+          <font>
+           <pointsize>14</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>List of Available SEDs :</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QTreeView" name="treeView_ManageSed">
@@ -205,18 +208,6 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_15">
          <item>
-          <widget class="QLabel" name="label_16">
-           <property name="font">
-            <font>
-             <pointsize>14</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Reddening Curves :</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <spacer name="horizontalSpacer_17">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -237,7 +228,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Import</string>
+            <string>Import Additional Curve(s)</string>
            </property>
           </widget>
          </item>
@@ -251,11 +242,23 @@
          <item>
           <widget class="QPushButton" name="btn_RedDelete">
            <property name="text">
-            <string>Delete</string>
+            <string>Delete Selected</string>
            </property>
           </widget>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_16">
+         <property name="font">
+          <font>
+           <pointsize>14</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>List of Available Reddening Curves :</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QTreeView" name="treeView_ManageRed">

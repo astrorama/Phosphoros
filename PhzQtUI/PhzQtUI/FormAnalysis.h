@@ -41,6 +41,8 @@ signals:
 private slots:
     void on_btn_AnalysisToHome_clicked();
 
+    void on_btn_backHome_clicked();
+
     void on_btn_editCorrections_clicked();
 
     void on_cb_AnalysisCorrection_currentIndexChanged(const QString &arg1);
@@ -53,6 +55,8 @@ private slots:
 
     void on_cb_AnalysisModel_currentIndexChanged(const QString &);
 
+    void on_cb_igm_currentIndexChanged(const QString &);
+
     void on_cb_CompatibleGrid_textChanged(const QString &);
 
     void on_cb_cat_output_type_currentIndexChanged(const QString &);
@@ -63,7 +67,7 @@ private slots:
 
     void on_gb_corrections_clicked();
 
-    void onCorrectionComputed(const std::string &);
+    void onCorrectionComputed(const QString &);
 
     void on_btn_BrowseInput_clicked();
 
