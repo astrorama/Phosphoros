@@ -141,6 +141,16 @@
                  <string>MADAU</string>
                 </property>
                </item>
+               <item>
+                <property name="text">
+                 <string>MEIKSIN</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>INOUE</string>
+                </property>
+               </item>
               </widget>
              </item>
             </layout>
@@ -350,8 +360,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1053</width>
-            <height>206</height>
+            <width>545</width>
+            <height>166</height>
            </rect>
           </property>
           <attribute name="label">
@@ -493,8 +503,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1053</width>
-            <height>199</height>
+            <width>118</width>
+            <height>82</height>
            </rect>
           </property>
           <attribute name="label">
@@ -574,7 +584,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1053</width>
+            <width>462</width>
             <height>247</height>
            </rect>
           </property>
