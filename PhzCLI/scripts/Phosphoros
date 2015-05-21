@@ -23,7 +23,7 @@ action_list = [
                      'Calculates the PHZ results for a given catalog'),
     PhosphorosAction(['display_filters', 'DF'], 'PhosphorosLsAux --type Filters',
                      'Browses the available filter transmission'),
-    PhosphorosAction(['display_sesd', 'DS'], 'PhosphorosLsAux --type Seds',
+    PhosphorosAction(['display_seds', 'DS'], 'PhosphorosLsAux --type Seds',
                      'Browses the available SED templates'),
     PhosphorosAction(['display_reddening_curves', 'DRC'], 'PhosphorosLsAux --type ReddeningCurves',
                      'Browses the available reddening curves'),
