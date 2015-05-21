@@ -12,7 +12,7 @@ using namespace std;
 using namespace Euclid;
 namespace po = boost::program_options;
 
-static Elements::Logging logger = Elements::Logging::getLogger("PhosphorosDisplayTemplate");
+static Elements::Logging logger = Elements::Logging::getLogger("PhosphorosDisplayModelGrid");
 
 ostream& operator<<(ostream& stream, const XYDataset::QualifiedName& name) {
   stream << name.qualifiedName();
