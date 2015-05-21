@@ -1,5 +1,5 @@
 /**
- * @file ComputeModelSet.cpp
+ * @file ComputeModelSed.cpp
  * @date January 27, 2015
  * @author Nikolaos Apostolakos
  */
@@ -20,7 +20,7 @@ using namespace std;
 using namespace Euclid;
 namespace po = boost::program_options;
 
-static Elements::Logging logger = Elements::Logging::getLogger("ComputeModelSet");
+static Elements::Logging logger = Elements::Logging::getLogger("ComputeModelSed");
 
 template<typename NameIter>
 std::map<XYDataset::QualifiedName, XYDataset::XYDataset> buildMap(
@@ -47,7 +47,7 @@ std::map<XYDataset::QualifiedName, std::unique_ptr<Euclid::MathUtils::Function>>
   return result;
 }
 
-class ComputeModelSet : public Elements::Program {
+class ComputeModelSed : public Elements::Program {
 
   po::options_description defineSpecificProgramOptions() override {
     po::options_description options {"Display Dataset options"};
@@ -114,4 +114,4 @@ class ComputeModelSet : public Elements::Program {
 
 };
 
-MAIN_FOR(ComputeModelSet)
+MAIN_FOR(ComputeModelSed)
