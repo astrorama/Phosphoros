@@ -12,7 +12,7 @@
 #include "ElementsKernel/Exception.h"
 
 #include "PhzLikelihood/SourcePhzFunctor.h"
-#include "PhzConfiguration/DeriveZeroPointsConfiguration.h"
+#include "PhzConfiguration/ComputePhotometricCorrectionsConfiguration.h"
 #include "PhzPhotometricCorrection/PhotometricCorrectionCalculator.h"
 #include "PhzPhotometricCorrection/FindBestFitModels.h"
 #include "PhzPhotometricCorrection/CalculateScaleFactorMap.h"
@@ -226,7 +226,7 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
         ui->txt_catalog->text().toStdString(), m_id_column,
         ui->cb_SpectroColumn->currentText().toStdString(), filter_mapping);
 
-    PhzConfiguration::DeriveZeroPointsConfiguration conf {
+    PhzConfiguration::ComputePhotometricCorrectionsConfiguration conf {
         config_map };
     auto catalog = conf.getCatalog();
     auto model_phot_grid = conf.getPhotometryGrid();
