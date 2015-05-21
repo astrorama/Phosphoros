@@ -24,6 +24,8 @@ class LsAux : public Elements::Program {
     options.add_options()
     ("data-root-path", po::value<std::string>(),
         "The directory containing the data files, organized in folders")
+    ("type", po::value<std::string>(),
+        "The type of the contents to list (one of SEDs, Filters or ReddeningCurves")
     ("group", po::value<std::string>(),
         "List the contents of the given group")
     ("data", po::value<std::string>(),
@@ -36,6 +38,9 @@ class LsAux : public Elements::Program {
     // Get the dataset provider to use. If the user didn't gave the data-root-path
     // use the current directory
     string path = args["data-root-path"].empty() ? "." : args["data-root-path"].as<std::string>();
+    if (!args["type"].empty() && args["type"].as<std::string>().size() != 0) {
+      path += "/" + args["type"].as<std::string>();
+    }
     std::unique_ptr<XYDataset::FileParser> file_parser {new XYDataset::AsciiParser{}};
     XYDataset::FileSystemProvider provider {path, std::move(file_parser)};
     
