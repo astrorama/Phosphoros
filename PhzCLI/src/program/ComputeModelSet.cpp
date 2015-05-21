@@ -1,5 +1,5 @@
-/** 
- * @file PrintModelDataset.cpp
+/**
+ * @file ComputeModelSet.cpp
  * @date January 27, 2015
  * @author Nikolaos Apostolakos
  */
@@ -20,7 +20,7 @@ using namespace std;
 using namespace Euclid;
 namespace po = boost::program_options;
 
-static Elements::Logging logger = Elements::Logging::getLogger("PrintModelDataset");
+static Elements::Logging logger = Elements::Logging::getLogger("ComputeModelSet");
 
 template<typename NameIter>
 std::map<XYDataset::QualifiedName, XYDataset::XYDataset> buildMap(
@@ -47,11 +47,11 @@ std::map<XYDataset::QualifiedName, std::unique_ptr<Euclid::MathUtils::Function>>
   return result;
 }
 
-class PrintModelDataset : public Elements::Program {
-  
+class ComputeModelSet : public Elements::Program {
+
   po::options_description defineSpecificProgramOptions() override {
     po::options_description options {"Display Dataset options"};
-    
+
     options.add_options()
       ("sed-root-path", po::value<std::string>(),
         "The directory containing the sed datasets, organized in folders")
@@ -65,17 +65,17 @@ class PrintModelDataset : public Elements::Program {
           "The E(B-V) value")
       ("z-value", po::value<std::vector<std::string>>(),
           "The redshift value");
-    
+
     auto igm_options = PhzConfiguration::IgmConfiguration::getProgramOptions().options();
     for (auto o : igm_options) {
       options.add(o);
     }
-    
+
     return options;
   }
-  
+
   Elements::ExitCode mainMethod(map<string, po::variable_value>& args) override {
-    
+
     PhzConfiguration::ParameterSpaceConfiguration ps_conf {args};
     auto sed_prov = ps_conf.getSedDatasetProvider();
     auto red_curve_prov = ps_conf.getReddeningDatasetProvider();
@@ -83,19 +83,19 @@ class PrintModelDataset : public Elements::Program {
     auto red_curve_list = ps_conf.getReddeningCurveList();
     auto ebv_list = ps_conf.getEbvList();
     auto z_list = ps_conf.getZList();
-    
+
     auto param_space = PhzDataModel::createAxesTuple(z_list, ebv_list, red_curve_list, sed_list);
     auto sed_map = buildMap(*sed_prov, sed_list.begin(), sed_list.end());
     auto red_curve_map = convertToFunction(buildMap(*red_curve_prov,
                                             red_curve_list.begin(), red_curve_list.end()));
-    
+
     PhzConfiguration::IgmConfiguration igm_conf {args};
     auto igm_function = igm_conf.getIgmAbsorptionFunction();
-    
+
     PhzModeling::ModelDatasetGrid grid {param_space, move(sed_map), move(red_curve_map),
                                PhzModeling::ExtinctionFunctor{}, PhzModeling::RedshiftFunctor{},
                                std::move(igm_function)};
-                               
+
     for (auto iter=grid.begin(); iter!=grid.end(); ++iter) {
       cout << "\nDataset for model with:\n";
       cout << "SED      " << iter.axisValue<PhzDataModel::ModelParameter::SED>().qualifiedName() << '\n';
@@ -108,10 +108,10 @@ class PrintModelDataset : public Elements::Program {
       }
     }
     cout << '\n';
-    
+
     return Elements::ExitCode::OK;
   }
-  
+
 };
 
-MAIN_FOR(PrintModelDataset)
+MAIN_FOR(ComputeModelSet)
