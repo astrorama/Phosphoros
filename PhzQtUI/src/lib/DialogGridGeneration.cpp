@@ -11,7 +11,7 @@
 #include "PhzQtUI/DialogGridGeneration.h"
 #include <boost/program_options.hpp>
 #include "ui_DialogGridGeneration.h"
-#include "PhzConfiguration/BuildTemplatesConfiguration.h"
+#include "PhzConfiguration/ComputeModelGridConfiguration.h"
 #include "PhzModeling/PhotometryGridCreator.h"
 
 // #include <future>
@@ -50,7 +50,7 @@ void DialogGridGeneration::updateGridProgressBar(size_t step, size_t total) {
 
 std::string DialogGridGeneration::runFunction() {
   try {
-    PhzConfiguration::BuildTemplatesConfiguration conf { m_config };
+    PhzConfiguration::ComputeModelGridConfiguration conf { m_config };
     PhzModeling::PhotometryGridCreator creator { conf.getSedDatasetProvider(),
         conf.getReddeningDatasetProvider(), conf.getFilterDatasetProvider(),
         conf.getIgmAbsorptionFunction() };
