@@ -15,7 +15,7 @@ elements_add_library(PhzCLI src/lib/*.cpp
 elements_add_executable(PhosphorosLsAux src/program/LsAux.cpp
                         LINK_LIBRARIES ElementsKernel Boost XYDataset)
 
-elements_add_executable(PhosphorosDisplayTemplates src/program/DisplayTemplates.cpp
+elements_add_executable(PhosphorosDisplayModelGrid src/program/DisplayModelGrid.cpp
                         LINK_LIBRARIES ElementsKernel Boost PhzCLI)
 
 elements_add_executable(PhosphorosDisplayDataset src/program/DisplayDataset.cpp

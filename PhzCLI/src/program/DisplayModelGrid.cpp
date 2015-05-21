@@ -1,4 +1,4 @@
-/** 
+/**
  * @file LsGrid.cpp
  * @date January 26, 2015
  * @author Nikolaos Apostolakos
@@ -6,7 +6,7 @@
 
 #include <iostream>
 #include "ElementsKernel/ProgramHeaders.h"
-#include "PhzCLI/DisplayTemplatesConfiguration.h"
+#include "PhzCLI/DisplayModelGridConfiguration.h"
 
 using namespace std;
 using namespace Euclid;
@@ -31,7 +31,7 @@ void printGeneric(const PhzDataModel::PhotometryGridInfo& grid_info) {
   cout << "E(B-V) axis size: " << ebv_size << '\n';
   cout << "Z axis size: " << z_size << '\n';
   cout << "Total grid size : " << sed_size*red_curve_size*ebv_size*z_size << "\n\n";
-  
+
   cout << "\nPhotometry info\n";
   cout << "---------------\n";
   cout << "IGM absorption method: " << grid_info.igm_method << '\n';
@@ -73,46 +73,46 @@ void printPhotometry(const PhzDataModel::PhotometryGrid& grid,
   cout << '\n';
 }
 
-class DisplayTemplates : public Elements::Program {
-  
+class DisplayModelGrid : public Elements::Program {
+
   po::options_description defineSpecificProgramOptions() override {
-    return PhzConfiguration::DisplayTemplatesConfiguration::getProgramOptions();
+    return PhzConfiguration::DisplayModelGridConfiguration::getProgramOptions();
   }
-  
+
   Elements::ExitCode mainMethod(map<string, po::variable_value>& args) override {
-    
-    PhzConfiguration::DisplayTemplatesConfiguration conf {args};
+
+    PhzConfiguration::DisplayModelGridConfiguration conf {args};
     auto grid_info = conf.getPhotometryGridInfo();
-    
+
     if (conf.showGeneric()) {
       printGeneric(grid_info);
     }
-    
+
     if (conf.showSedAxis()) {
       printAxis(std::get<PhzDataModel::ModelParameter::SED>(grid_info.axes));
     }
-    
+
     if (conf.showReddeningCurveAxis()) {
       printAxis(std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(grid_info.axes));
     }
-    
+
     if (conf.showEbvAxis()) {
       printAxis(std::get<PhzDataModel::ModelParameter::EBV>(grid_info.axes));
     }
-    
+
     if (conf.showRedshiftAxis()) {
       printAxis(std::get<PhzDataModel::ModelParameter::Z>(grid_info.axes));
     }
-    
+
     auto phot_coords = conf.getCellPhotCoords();
     if (phot_coords) {
       auto grid = conf.getPhotometryGrid();
       printPhotometry(grid, *phot_coords);
     }
-    
+
     return Elements::ExitCode::OK;
   }
-  
+
 };
 
-MAIN_FOR(DisplayTemplates)
+MAIN_FOR(DisplayModelGrid)
