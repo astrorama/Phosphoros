@@ -4,13 +4,13 @@ import argparse
 import PhzCLI.LikelihoodPlot as plt
 
 usage = """
-        PhosphorosDisplayLikelihood -f <LIKELIHOOD_FILE> -p <PLOT_TYPE>      
+        PhosphorosPlotPosterior -f <LIKELIHOOD_FILE> -p <PLOT_TYPE>
 
         Plots views of the multi-dimensional likelihood. Note that the
         marginalization is done as simple addition. For more correct (Bayesian)
         marginalization, see the 1D PDF output of PhosphorosFitTemplates.
 
-        """ 
+        """
 
 parser = argparse.ArgumentParser(usage, description=__doc__)
 
