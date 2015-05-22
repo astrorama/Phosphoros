@@ -33,7 +33,7 @@
         </font>
        </property>
        <property name="text">
-        <string>&gt; Model Grid Specification</string>
+        <string>&gt; Parameter Space Specification</string>
        </property>
       </widget>
      </item>
@@ -71,7 +71,7 @@
           </font>
          </property>
          <property name="text">
-          <string>List of Model Grids :</string>
+          <string>List of Parameter Space :</string>
          </property>
         </widget>
        </item>
@@ -158,7 +158,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Selected Model Grid Specification :</string>
+        <string>Selected Parameter Space Specification :</string>
        </property>
       </widget>
      </item>

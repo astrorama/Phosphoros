@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Model Grid Specification</string>
+   <string>Parameter Space Specification</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_11">
    <item>
@@ -26,7 +26,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Model Grid Specification</string>
+        <string>Parameter Space Specification</string>
        </property>
       </widget>
      </item>

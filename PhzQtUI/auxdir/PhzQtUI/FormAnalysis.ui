@@ -33,7 +33,7 @@
         </font>
        </property>
        <property name="text">
-        <string>&gt; Analysis</string>
+        <string>&gt; Compute Redshifts</string>
        </property>
       </widget>
      </item>
@@ -103,57 +103,12 @@
            <item>
             <widget class="QLabel" name="label_20">
              <property name="text">
-              <string>Model Grid Specification :</string>
+              <string>Parameter Space Specification :</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QComboBox" name="cb_AnalysisModel"/>
-           </item>
-           <item>
-            <layout class="QVBoxLayout" name="verticalLayout_2">
-             <item>
-              <widget class="QLabel" name="label_3">
-               <property name="font">
-                <font>
-                 <pointsize>11</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>IGM absorption type :</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="cb_igm">
-               <property name="font">
-                <font>
-                 <pointsize>11</pointsize>
-                </font>
-               </property>
-               <item>
-                <property name="text">
-                 <string>OFF</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>MADAU</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>MEIKSIN</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>INOUE</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-            </layout>
            </item>
            <item>
             <spacer name="verticalSpacer_6">
@@ -271,6 +226,66 @@
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_10">
            <item>
+            <widget class="QLabel" name="label_3">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>IGM absorption type :</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QWidget" name="horizontalWidget_2" native="true">
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <widget class="QComboBox" name="cb_igm">
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>OFF</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>MADAU</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>MEIKSIN</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>INOUE</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
             <widget class="QLabel" name="label_23">
              <property name="font">
               <font>
@@ -360,8 +375,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>545</width>
-            <height>166</height>
+            <width>1053</width>
+            <height>206</height>
            </rect>
           </property>
           <attribute name="label">
@@ -503,12 +518,12 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>118</width>
-            <height>82</height>
+            <width>1053</width>
+            <height>199</height>
            </rect>
           </property>
           <attribute name="label">
-           <string>4. Algorithm Selection :</string>
+           <string>4. Algorithm Options :</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_6">
            <item>
@@ -584,7 +599,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>462</width>
+            <width>1053</width>
             <height>247</height>
            </rect>
           </property>
@@ -746,7 +761,7 @@
                   </font>
                  </property>
                  <property name="title">
-                  <string>Generate Likelihood files in folder :</string>
+                  <string>Generate Posterior files in folder :</string>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>

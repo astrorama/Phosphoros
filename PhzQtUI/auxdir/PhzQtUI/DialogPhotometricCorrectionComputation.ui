@@ -258,7 +258,7 @@
    <item>
     <widget class="QLabel" name="label_7">
      <property name="text">
-      <string>Spetrometric Redshift Column :</string>
+      <string>Spetroscopic Redshift Column :</string>
      </property>
     </widget>
    </item>
@@ -411,7 +411,7 @@
    <item>
     <widget class="QLabel" name="label_9">
      <property name="text">
-      <string>Corrections File Name :</string>
+      <string>Output Corrections File Name :</string>
      </property>
     </widget>
    </item>

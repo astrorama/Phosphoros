@@ -159,10 +159,10 @@
              </size>
             </property>
             <property name="toolTip">
-             <string>Specify the model grid parameter space.</string>
+             <string>Specify the parameter space for the creation of model grid.</string>
             </property>
             <property name="text">
-             <string>Model Grid Specification †</string>
+             <string>Parameter Space Specification †</string>
             </property>
            </widget>
           </item>
@@ -175,10 +175,10 @@
              </size>
             </property>
             <property name="toolTip">
-             <string>Compute the model grid, calculate photometric zero-point correction and run template fitting in order to produce photo-z catalog.</string>
+             <string>Compute the model grid, calculate photometric photometric correction and run template fitting in order to produce photo-z catalog.</string>
             </property>
             <property name="text">
-             <string>Analysis †</string>
+             <string>Compute Redshifts †</string>
             </property>
            </widget>
           </item>
