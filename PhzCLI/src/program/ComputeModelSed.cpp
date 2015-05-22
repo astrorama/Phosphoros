@@ -50,7 +50,7 @@ std::map<XYDataset::QualifiedName, std::unique_ptr<Euclid::MathUtils::Function>>
 class ComputeModelSed : public Elements::Program {
 
   po::options_description defineSpecificProgramOptions() override {
-    po::options_description options {"Display Dataset options"};
+    po::options_description options {"Compute Model SED options"};
 
     options.add_options()
       ("sed-root-path", po::value<std::string>(),

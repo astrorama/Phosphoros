@@ -23,7 +23,7 @@ Elements::Logging logger = Elements::Logging::getLogger("PhzConfiguration");
 
 po::options_description DisplayModelGridConfiguration::getProgramOptions() {
 
-  po::options_description options {"Display Templates options"};
+  po::options_description options {"Display Model Grid options"};
 
   auto phot_options = PhotometryGridConfiguration::getProgramOptions();
   for (auto o : phot_options.options()) {
