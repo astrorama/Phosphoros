@@ -210,7 +210,7 @@
           </font>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="page">
           <property name="geometry">
@@ -218,7 +218,7 @@
             <x>0</x>
             <y>0</y>
             <width>1053</width>
-            <height>199</height>
+            <height>206</height>
            </rect>
           </property>
           <attribute name="label">
@@ -249,11 +249,6 @@
                 </property>
                 <item>
                  <property name="text">
-                  <string>OFF</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
                   <string>MADAU</string>
                  </property>
                 </item>
@@ -265,6 +260,11 @@
                 <item>
                  <property name="text">
                   <string>INOUE</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>OFF</string>
                  </property>
                 </item>
                </widget>
@@ -401,6 +401,9 @@
              </property>
              <property name="checkable">
               <bool>true</bool>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_7">
               <item>
@@ -549,17 +552,17 @@
                </property>
                <item>
                 <property name="text">
+                 <string>BAYESIAN</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
                  <string>MAX</string>
                 </property>
                </item>
                <item>
                 <property name="text">
                  <string>SUM</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>BAYESIAN</string>
                 </property>
                </item>
               </widget>

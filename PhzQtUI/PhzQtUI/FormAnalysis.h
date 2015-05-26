@@ -4,6 +4,7 @@
 #include <memory>
 #include <QWidget>
 #include <QStandardItem>
+#include <QToolBox>
 #include <map>
 #include <string>
 #include "SurveyFilterMapping.h"
@@ -101,7 +102,7 @@ private:
     std::map<std::string, boost::program_options::variable_value> getGridConfiguration();
 
 
-
+    static void setToolBoxButtonColor(QToolBox* toolBox, int index, QColor color);
 
     void updateCorrectionSelection();
     void setComputeCorrectionEnable();

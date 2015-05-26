@@ -125,12 +125,15 @@ void FormAnalysis::adjustPhzGridButtons(bool enabled){
 
     if (!name_ok){
       ui->cb_CompatibleGrid->lineEdit()->setStyleSheet("QLineEdit { color: red }");
+      setToolBoxButtonColor(ui->toolBox, 0, Qt::red);
       tool_tip = "Please enter a valid grid name in order to compute the Grid or export the corresponding configuration.";
     } else if (!checkGridSelection(true, false)) {
       ui->cb_CompatibleGrid->lineEdit()->setStyleSheet("QLineEdit { color: orange }");
+      setToolBoxButtonColor(ui->toolBox, 0, QColor("orange"));
+
     } else {
       ui->cb_CompatibleGrid->lineEdit()->setStyleSheet("QLineEdit { color: black }");
-
+      setToolBoxButtonColor(ui->toolBox, 0, ui->label_18->palette().color(QPalette::Window));
     }
     ui->btn_GetConfigGrid->setToolTip(tool_tip);
     ui->btn_RunGrid->setToolTip(tool_tip);
@@ -204,22 +207,26 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
      tool_tip_run = tool_tip_run + "Please run the photometric correction computation. \n";
   }
 
+  bool missing_input=false;
   if (!info_input.exists()){
     ui->txt_inputCatalog->setStyleSheet("QLineEdit { color: #F78181 }");
      tool_tip_conf = tool_tip_conf + "Please provide a compatible input catalog (at least all the columns used for the Id and filters). \n";
      tool_tip_run = tool_tip_run + "Please provide a compatible input catalog (at least all the columns used for the Id and filters). \n";
-   } else {
+     missing_input=true;
+  } else {
      ui->txt_inputCatalog->setStyleSheet("QLineEdit { color: grey }");
    }
 
-
+  bool missing_path=false;
   if (ui->gb_cat->isChecked()){
     if (ui->txt_OutputCatalog->text().length()==0){
         tool_tip_conf = tool_tip_conf + "Please provide the output catalog file. \n";
         tool_tip_run = tool_tip_run + "Please provide the output catalog file. \n";
+        missing_path=true;
     } else {
       if (QFileInfo(ui->txt_OutputCatalog->text()).exists()){
         ui->txt_OutputCatalog->setStyleSheet("QLineEdit { color: #FAAC58 }");
+        missing_path=true;
       } else {
         ui->txt_OutputCatalog->setStyleSheet("QLineEdit { color: grey }");
       }
@@ -232,9 +239,11 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
     if (ui->txt_OutputPdf->text().length()==0){
         tool_tip_conf = tool_tip_conf + "Please provide the output pdf file. \n";
         tool_tip_run = tool_tip_run + "Please provide the output pdf file. \n";
+        missing_path=true;
     } else {
       if (QFileInfo(ui->txt_OutputPdf->text()).exists()){
         ui->txt_OutputPdf->setStyleSheet("QLineEdit { color: #FAAC58 }");
+        missing_path=true;
       } else {
         ui->txt_OutputPdf->setStyleSheet("QLineEdit { color: grey }");
       }
@@ -247,6 +256,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
      if (ui->txt_likelihood->text().length()==0){
          tool_tip_conf = tool_tip_conf + "Please provide the likelihood output folder. \n";
          tool_tip_run = tool_tip_run + "Please provide the likelihood output folder. \n";
+         missing_path=true;
      }
   }
 
@@ -266,6 +276,19 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
 
   ui->btn_GetConfigAnalysis->setToolTip(tool_tip_conf);
   ui->btn_RunAnalysis->setToolTip(tool_tip_run);
+
+
+  if (!correction_ok){
+    setToolBoxButtonColor(ui->toolBox, 1, QColor("orange"));
+  } else {
+    setToolBoxButtonColor(ui->toolBox, 1, ui->label_18->palette().color(QPalette::Window));
+  }
+
+  if (missing_path || missing_input){
+    setToolBoxButtonColor(ui->toolBox, 3, QColor("orange"));
+  } else {
+    setToolBoxButtonColor(ui->toolBox, 3, ui->label_18->palette().color(QPalette::Window));
+  }
 }
 
 
@@ -731,6 +754,28 @@ void FormAnalysis::on_btn_RunAnalysis_clicked()
     }
   dialog->setValues(cat,pdf,lik,config_map);
   if (dialog->exec()) {
+  }
+}
+
+
+void FormAnalysis::setToolBoxButtonColor(QToolBox* toolBox, int index, QColor color)
+{
+  int i = 0;
+  foreach (QAbstractButton* button, toolBox->findChildren<QAbstractButton*>())
+  {
+    // make sure only toolbox button palettes are modified
+    if (button->metaObject()->className() == QString("QToolBoxButton"))
+    {
+      if (i == index)
+      {
+        // found correct button
+        QPalette p = button->palette();
+        p.setColor(QPalette::Button, color);
+        button->setPalette(p);
+        break;
+      }
+      i++;
+    }
   }
 }
 
