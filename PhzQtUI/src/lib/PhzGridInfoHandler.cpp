@@ -231,7 +231,7 @@ std::map<std::string, boost::program_options::variable_value> PhzGridInfoHandler
 
   auto path_filename = FileUtils::getPhotmetricGridRootPath(true)
       + QString(QDir::separator()).toStdString() + output_file;
-  options_map["output-photometry-grid"].value() = boost::any(path_filename);
+  options_map["output-model-grid"].value() = boost::any(path_filename);
 
   std::vector < std::string > sed_add_vector;
 

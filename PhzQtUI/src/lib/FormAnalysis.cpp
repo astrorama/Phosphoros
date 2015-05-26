@@ -371,7 +371,7 @@ std::map < std::string, boost::program_options::variable_value > FormAnalysis::g
                  + QString(QDir::separator()).toStdString() + ui->cb_CompatibleGrid->currentText().toStdString();
 
    std::map < std::string, boost::program_options::variable_value > options_map;
-   options_map["photometry-grid-file"].value() = boost::any(path_grid_filename);
+   options_map["model-grid-file"].value() = boost::any(path_grid_filename);
    options_map["input-catalog-file"].value() = boost::any(ui->txt_inputCatalog->text().toStdString());
 
    options_map["source-id-column-name"].value() = boost::any(getSelectedSurveySourceColumn());
@@ -385,7 +385,7 @@ std::map < std::string, boost::program_options::variable_value > FormAnalysis::g
      options_map["photometric-correction-file"].value() = boost::any(path_correction_filename);
    }
 
-   options_map["marginalization-type"].value() = boost::any(ui->cb_marginalization->currentText().toStdString());
+   options_map["axes-collapse-type"].value() = boost::any(ui->cb_marginalization->currentText().toStdString());
 
    if (ui->gb_cat->isChecked ()){
      options_map["output-catalog-file"].value() = boost::any(ui->txt_OutputCatalog->text().toStdString());

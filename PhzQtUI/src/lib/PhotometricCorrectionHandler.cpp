@@ -91,7 +91,7 @@ std::map<std::string, boost::program_options::variable_value> PhotometricCorrect
 
     auto path_grid_filename = FileUtils::getPhotmetricGridRootPath(false)
            + QString(QDir::separator()).toStdString() + photometric_grid_file;
-    options_map["photometry-grid-file"].value() = boost::any(path_grid_filename);
+    options_map["model-grid-file"].value() = boost::any(path_grid_filename);
 
     options_map["input-catalog-file"].value() = boost::any(training_catalog_file);
     options_map["source-id-column-name"].value() = boost::any(id_column);
