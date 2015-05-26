@@ -284,11 +284,11 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
     setToolBoxButtonColor(ui->toolBox, 1, ui->label_18->palette().color(QPalette::Window));
   }
 
-  if (missing_path || missing_input){
-    setToolBoxButtonColor(ui->toolBox, 3, QColor("orange"));
-  } else {
-    setToolBoxButtonColor(ui->toolBox, 3, ui->label_18->palette().color(QPalette::Window));
-  }
+//  if (missing_path || missing_input){
+//    setToolBoxButtonColor(ui->toolBox, 3, QColor("orange"));
+//  } else {
+//    setToolBoxButtonColor(ui->toolBox, 3, ui->label_18->palette().color(QPalette::Window));
+//  }
 }
 
 
