@@ -13,7 +13,7 @@ elements_add_library(PhzCLI src/lib/*.cpp
                      PUBLIC_HEADERS PhzCLI)
 
 elements_add_executable(PhosphorosLsAux src/program/LsAux.cpp
-                        LINK_LIBRARIES ElementsKernel Boost XYDataset)
+                        LINK_LIBRARIES ElementsKernel Boost XYDataset PhzCLI)
 
 elements_add_executable(PhosphorosDisplayModelGrid src/program/DisplayModelGrid.cpp
                         LINK_LIBRARIES ElementsKernel Boost PhzCLI)
