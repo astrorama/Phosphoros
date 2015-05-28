@@ -47,7 +47,8 @@ po::options_description DisplayModelGridConfiguration::getProgramOptions() {
 
 DisplayModelGridConfiguration::DisplayModelGridConfiguration(
             const std::map<std::string, po::variable_value>& options)
-      : PhotometryGridConfiguration(options) {
+      : PhosphorosPathConfiguration(options), CatalogNameConfiguration(options),
+        PhotometryGridConfiguration(options) {
 
   m_options = options;
 
