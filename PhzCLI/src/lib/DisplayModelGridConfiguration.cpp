@@ -13,6 +13,8 @@ using boost::regex_match;
 using boost::smatch;
 #include "ElementsKernel/Logging.h"
 #include "PhzCLI/DisplayModelGridConfiguration.h"
+#include "PhzConfiguration/ProgramOptionsHelper.h"
+#include "PhzConfiguration/CatalogNameConfiguration.h"
 
 namespace po = boost::program_options;
 
@@ -24,11 +26,6 @@ Elements::Logging logger = Elements::Logging::getLogger("PhzConfiguration");
 po::options_description DisplayModelGridConfiguration::getProgramOptions() {
 
   po::options_description options {"Display Model Grid options"};
-
-  auto phot_options = PhotometryGridConfiguration::getProgramOptions();
-  for (auto o : phot_options.options()) {
-    options.add(o);
-  }
 
   options.add_options()
   ("sed", po::bool_switch()->default_value(false),
@@ -42,7 +39,9 @@ po::options_description DisplayModelGridConfiguration::getProgramOptions() {
   ("phot", po::value<std::string>(),
       "Show the photometry of the cell (SED,REDCURVE,EBV,Z) (zero based indices)");
 
-  return options;
+  return merge(options)
+              (PhotometryGridConfiguration::getProgramOptions())
+              (CatalogNameConfiguration::getProgramOptions());
 }
 
 DisplayModelGridConfiguration::DisplayModelGridConfiguration(
