@@ -37,11 +37,8 @@ void DialogFilterMapping::setFilter(const FilterMapping& filter, const set<strin
     ui->cb_error->setCurrentIndex(0);
     ui->cb_flux->setCurrentIndex(0);
 
-    ui->txt_name->setText(QString::fromStdString(filter.getName()));
     ui->cb_error->setItemText(0,QString::fromStdString(filter.getErrorColumn()));
     ui->cb_flux->setItemText(0,QString::fromStdString(filter.getFluxColumn()));
-
-
 
 
     string path_filter = FileUtils::getFilterRootPath(true);
@@ -64,7 +61,6 @@ void DialogFilterMapping::on_btn_save_clicked()
     auto filter_res = static_cast<XYDataSetTreeModel*>(ui->treeView_filter->model())->getRootSelection();
 
     if (!filter_res.first
-            || ui->txt_name->text().trimmed().length()==0
             || ui->cb_flux->currentText().trimmed().length()==0
             || ui->cb_error->currentText().trimmed().length()==0
             ){
@@ -76,7 +72,6 @@ void DialogFilterMapping::on_btn_save_clicked()
     }
 
    FilterMapping filter;
-   filter.setName(ui->txt_name->text().trimmed().toStdString());
    filter.setFluxColumn(ui->cb_flux->currentText().trimmed().toStdString());
    filter.setErrorColumn(ui->cb_error->currentText().trimmed().toStdString());
    filter.setFilterFile(filter_res.second);

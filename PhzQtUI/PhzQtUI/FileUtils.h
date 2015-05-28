@@ -2,6 +2,7 @@
 #define FILEUTILS_H
 #include <QString>
 #include <string>
+#include <map>
 /**
  * @brief The FileUtils class
  */
@@ -92,7 +93,11 @@ public:
      */
     static std::string getRootPath();
 
-    static void setRootPath(std::string path);
+    static std::string getGUIConfigPath();
+
+    static void savePath(std::map<std::string,std::string> path_list);
+
+    static std::map<std::string,std::string> readPath();
 
     /**
      * @brief get the Model Sets Root Path
@@ -111,10 +116,21 @@ public:
     static std::string getMappingRootPath(bool check);
 
     /**
-     * @brief get the Filters Root Path
+     * @brief get the Catalog Root Path
      * @param check
      * if true ensure that the folder exist.
-     * @return <rootPath>/UI/Filter
+     */
+    static std::string getCatalogRootPath(bool check);
+
+    static std::string getIntermediaryProductRootPath(bool check, std::string catalog_name);
+
+    static std::string getResultRootPath(bool check, std::string catalog_name);
+
+
+    /**
+     * @brief get the Filters Root Path
+     * @param check
+     * if true ensure that thUI/Filter
      */
     static std::string getFilterRootPath(bool check);
 

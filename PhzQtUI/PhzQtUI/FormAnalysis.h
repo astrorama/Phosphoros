@@ -91,7 +91,7 @@ private slots:
 
 private:
     std::unique_ptr<Ui::FormAnalysis> ui;
-    std::list<std::string> getSelectedFilters(bool return_path=false);
+    std::list<std::string> getSelectedFilters();
     std::list<FilterMapping> getSelectedFilterMapping();
 
     std::string getSelectedSurveySourceColumn();

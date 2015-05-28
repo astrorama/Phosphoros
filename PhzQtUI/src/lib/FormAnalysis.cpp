@@ -40,8 +40,7 @@ FormAnalysis::~FormAnalysis() {
 //  Initial data load
 void FormAnalysis::loadAnalysisPage() {
   m_analysis_survey_list =
-      SurveyFilterMapping::loadSurveysFromFolder(
-          FileUtils::getMappingRootPath(false));
+      SurveyFilterMapping::loadCatalogMappings();
 
   ui->cb_AnalysisSurvey->clear();
   for (auto& survey : m_analysis_survey_list) {
@@ -81,7 +80,7 @@ void FormAnalysis::updateGridSelection() {
   auto axis = PhzGridInfoHandler::getAxesTuple( selected_model);
   auto possible_files =
       PhzGridInfoHandler::getCompatibleGridFile(axis,
-          getSelectedFilters(true),
+          getSelectedFilters(),
           ui->cb_igm->currentText().toStdString());
 
   ui->cb_CompatibleGrid->clear();
@@ -93,7 +92,7 @@ void FormAnalysis::updateGridSelection() {
 
   if (!added){
     std::string concatenated_filter_names="";
-     for (auto filter : getSelectedFilters(false)) {
+     for (auto filter : getSelectedFilters()) {
        concatenated_filter_names=concatenated_filter_names+filter;
      }
 
@@ -106,9 +105,8 @@ void FormAnalysis::updateGridSelection() {
 
 
 void FormAnalysis::updateCorrectionSelection(){
-  auto filter_map = getSelectedFilters(true);
-   auto file_list =
-       PhotometricCorrectionHandler::getCompatibleCorrectionFiles(
+  auto filter_map = getSelectedFilters();
+  auto file_list = PhotometricCorrectionHandler::getCompatibleCorrectionFiles(
            filter_map);
    ui->cb_AnalysisCorrection->clear();
 
@@ -207,26 +205,26 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
      tool_tip_run = tool_tip_run + "Please run the photometric correction computation. \n";
   }
 
-  bool missing_input=false;
+  //bool missing_input=false;
   if (!info_input.exists()){
     ui->txt_inputCatalog->setStyleSheet("QLineEdit { color: #F78181 }");
      tool_tip_conf = tool_tip_conf + "Please provide a compatible input catalog (at least all the columns used for the Id and filters). \n";
      tool_tip_run = tool_tip_run + "Please provide a compatible input catalog (at least all the columns used for the Id and filters). \n";
-     missing_input=true;
+   //  missing_input=true;
   } else {
      ui->txt_inputCatalog->setStyleSheet("QLineEdit { color: grey }");
    }
 
-  bool missing_path=false;
+ // bool missing_path=false;
   if (ui->gb_cat->isChecked()){
     if (ui->txt_OutputCatalog->text().length()==0){
         tool_tip_conf = tool_tip_conf + "Please provide the output catalog file. \n";
         tool_tip_run = tool_tip_run + "Please provide the output catalog file. \n";
-        missing_path=true;
+     //   missing_path=true;
     } else {
       if (QFileInfo(ui->txt_OutputCatalog->text()).exists()){
         ui->txt_OutputCatalog->setStyleSheet("QLineEdit { color: #FAAC58 }");
-        missing_path=true;
+   //     missing_path=true;
       } else {
         ui->txt_OutputCatalog->setStyleSheet("QLineEdit { color: grey }");
       }
@@ -239,11 +237,11 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
     if (ui->txt_OutputPdf->text().length()==0){
         tool_tip_conf = tool_tip_conf + "Please provide the output pdf file. \n";
         tool_tip_run = tool_tip_run + "Please provide the output pdf file. \n";
-        missing_path=true;
+      //  missing_path=true;
     } else {
       if (QFileInfo(ui->txt_OutputPdf->text()).exists()){
         ui->txt_OutputPdf->setStyleSheet("QLineEdit { color: #FAAC58 }");
-        missing_path=true;
+      //  missing_path=true;
       } else {
         ui->txt_OutputPdf->setStyleSheet("QLineEdit { color: grey }");
       }
@@ -256,7 +254,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
      if (ui->txt_likelihood->text().length()==0){
          tool_tip_conf = tool_tip_conf + "Please provide the likelihood output folder. \n";
          tool_tip_run = tool_tip_run + "Please provide the likelihood output folder. \n";
-         missing_path=true;
+        // missing_path=true;
      }
   }
 
@@ -307,14 +305,14 @@ std::string FormAnalysis::getSelectedSurveySourceColumn() {
   return "";
 }
 
-std::list<std::string> FormAnalysis::getSelectedFilters(bool return_path) {
+std::list<std::string> FormAnalysis::getSelectedFilters() {
   std::list<std::string> res;
   if (!ui->cb_AnalysisSurvey->currentText().isEmpty()){
     auto model = static_cast<QStandardItemModel*>(ui->tableView_filter->model());
     for (int i = 0; i < model->rowCount(); ++i) {
       auto item = model->item(i);
       if( item->checkState() == Qt::CheckState::Checked){
-          res.push_back(model->item(i, return_path)->text().toStdString());
+          res.push_back(model->item(i, true)->text().toStdString());
       }
     }
   }
@@ -322,14 +320,14 @@ std::list<std::string> FormAnalysis::getSelectedFilters(bool return_path) {
 }
 
 std::list<FilterMapping> FormAnalysis::getSelectedFilterMapping(){
-  auto filterNames=getSelectedFilters(false);
+  auto filterNames=getSelectedFilters();
   std::list<FilterMapping>  list;
   if (!ui->cb_AnalysisSurvey->currentText().isEmpty()){
     for(auto& survey: m_analysis_survey_list){
       if (survey.second.getName().compare(ui->cb_AnalysisSurvey->currentText().toStdString())==0){
         for (auto& name : filterNames){
           for (auto& filter : survey.second.getFilters()){
-            if(filter.getName().compare(name)==0){
+            if(filter.getFilterFile().compare(name)==0){
               list.push_back(filter);
             }
           }
@@ -380,7 +378,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
          selected_model);
 
      return PhzGridInfoHandler::GetConfigurationMap(
-             file_name, axes, getSelectedFilters(true),
+             file_name, axes, getSelectedFilters(),
              ui->cb_igm->currentText().toStdString());
 }
 
@@ -452,15 +450,11 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
 
   for (auto filter : selected_survey.getFilters()) {
     QStandardItem* item = new QStandardItem(
-        QString::fromStdString(filter.getName()));
-    item->setCheckable(true);
-    item->setCheckState(Qt::CheckState::Checked);
-    QStandardItem* file_item = new QStandardItem(
         QString::fromStdString(filter.getFilterFile()));
+    item->setCheckable(true);
 
     QList<QStandardItem*> items;
     items.push_back(item);
-    items.push_back(file_item);
 
     grid_model->appendRow(items);
   }
@@ -470,7 +464,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
       SLOT(onFilterSelectionItemChanged(QStandardItem*)));
 
   // push the default catalog
-  ui->txt_inputCatalog->setText(QString::fromStdString(selected_survey.getDefaultCatalog()));
+  ui->txt_inputCatalog->setText(QString::fromStdString(selected_survey.getDefaultCatalogFile()));
 
   updateGridSelection();
   updateCorrectionSelection();
@@ -584,7 +578,7 @@ std::unique_ptr<DialogPhotometricCorrectionComputation> popup(new DialogPhotomet
       ui->cb_AnalysisModel->currentText().toStdString(),
       ui->cb_CompatibleGrid->currentText().toStdString(),
       getSelectedFilterMapping(),
-      selected_survey.getDefaultCatalog());
+      selected_survey.getDefaultCatalogFile());
 
   connect( popup.get(), SIGNAL(correctionComputed(const QString &)),
       SLOT(onCorrectionComputed(const QString &)));

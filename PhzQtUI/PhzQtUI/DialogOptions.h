@@ -26,9 +26,6 @@ public:
     explicit DialogOptions(QWidget *parent = 0);
     ~DialogOptions();
 
-    void EditRootPath();
-
-
 private slots:
 
     /**
@@ -47,10 +44,19 @@ private slots:
      */
     void on_btn_saveGeneral_clicked();
 
-    /**
-     * @brief SLOT on_btn_browseRoot_clicked: Open the native Folder selector dialog.
-     */
-    void on_btn_browseRoot_clicked();
+
+    void on_btn_browseCat_clicked();
+    void on_btn_browseAux_clicked();
+    void on_btn_browseInter_clicked();
+    void on_btn_browseRes_clicked();
+
+    void on_btn_defCat_clicked();
+    void on_btn_defAux_clicked();
+    void on_btn_defInter_clicked();
+    void on_btn_defRes_clicked();
+
+
+
 
     /**
      * @brief SLOT Lock the user to the current tab.
@@ -62,9 +68,11 @@ private slots:
      */
     void endEdition();
 
+
+
 private:
+    void checkDirectories();
     std::unique_ptr<Ui::DialogOptions> ui;
-    bool m_is_root_edition;
 };
 
 }

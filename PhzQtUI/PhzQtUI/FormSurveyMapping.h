@@ -39,6 +39,8 @@ private slots:
 
     void filterEditionPopupClosing(FilterMapping);
 
+    void catalogNamePopupClosing(std::string);
+
     void on_btn_MapNew_clicked();
 
     void on_btn_MapDuplicate_clicked();
@@ -58,6 +60,8 @@ private slots:
     void on_btn_BtnEditFilter_clicked();
 
     void on_btn_DeleteFilter_clicked();
+
+    void on_btn_newCat_clicked();
 
 
 private:

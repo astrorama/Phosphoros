@@ -40,9 +40,6 @@ MainWindow::MainWindow(QWidget *parent) :
     settings.setValue(QString::fromStdString("root-path"), QDir::currentPath());
     settings.endGroup();
 
-    std::unique_ptr<DialogOptions> popUp(new DialogOptions());
-    popUp->EditRootPath();
-    popUp->exec();
   }
 }
 

@@ -5,13 +5,6 @@ namespace PhzQtUI {
 
 FilterMapping::FilterMapping(){}
 
-std::string FilterMapping::getName() const{
-    return m_name;
-}
-
-void FilterMapping::setName(std::string name){
-    m_name=name;
-}
 
 std::string FilterMapping::getFluxColumn() const{
     return m_flux_column;

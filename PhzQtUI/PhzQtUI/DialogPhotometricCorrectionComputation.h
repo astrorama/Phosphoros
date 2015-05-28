@@ -108,7 +108,6 @@ private:
     std::unique_ptr<Ui::DialogPhotometricCorrectionComputation> ui;
     std::list<FilterMapping> m_selected_filters;
     std::string m_id_column;
-    std::string m_concatenated_filter_names;
     void disablePage();
     std::string runFunction();
     void setRunEnability();

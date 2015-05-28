@@ -26,7 +26,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Survey Filter Mapping :</string>
+        <string>Catalog Filter Mapping :</string>
        </property>
       </widget>
      </item>
@@ -69,7 +69,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Survey Filter Mappings List :</string>
+            <string>Catalog Filter Mappings List :</string>
            </property>
           </widget>
          </item>
@@ -152,7 +152,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Selected Survey Filter Mapping :</string>
+            <string>Selected Catalog Filter Mapping :</string>
            </property>
           </widget>
          </item>
@@ -213,12 +213,36 @@
            <item>
             <widget class="QLabel" name="label_17">
              <property name="text">
-              <string>Survey Filter Mapping Name :</string>
+              <string>Catalog Name :</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="txt_MapName"/>
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_4">
+               <item>
+                <widget class="QComboBox" name="cb_mapName"/>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_newCat">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>100</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>New</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
            <item>
             <widget class="QLabel" name="label_18">
@@ -233,6 +257,19 @@
               <bool>true</bool>
              </property>
             </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </item>
@@ -267,10 +304,10 @@
            <item>
             <widget class="QPushButton" name="btn_ImportColumn">
              <property name="toolTip">
-              <string>Select a file to be used as default catalog for this survey. The columns of the catalog will be used to populate the drop-down for the ID and the Filters columns.</string>
+              <string>Select a file to be used as default file for this catalog. The columns of the catalog will be used to populate the drop-down for the ID and the Filters columns.</string>
              </property>
              <property name="text">
-              <string>Import Columns from File</string>
+              <string>Import Columns from File †</string>
              </property>
             </widget>
            </item>

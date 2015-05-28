@@ -32,7 +32,7 @@ void DialogPhotCorrectionEdition::setCorrectionsFile(string filePath, std::list<
     m_map = PhotometricCorrectionHandler::getCorrections(filePath);
 
     QStandardItemModel* model = new QStandardItemModel();
-    model->setColumnCount(3);
+    model->setColumnCount(2);
 
     QStringList  setHeaders;
     setHeaders<<"Filter"<<"Transmission"<<"Correction";
@@ -40,17 +40,9 @@ void DialogPhotCorrectionEdition::setCorrectionsFile(string filePath, std::list<
 
     for (auto& correction_pair : m_map){
       QList<QStandardItem*> items;
-      std::string alias ="";
-      for (auto filter:m_filters){
-        if (filter.getFilterFile().compare(correction_pair.first.qualifiedName())==0){
-          alias=filter.getName();
-          break;
-        }
-      }
-      items.push_back(new QStandardItem(QString::fromStdString( alias)));
-      items[0]->setEditable(false);
+
       items.push_back(new QStandardItem(QString::fromStdString( correction_pair.first.datasetName())));
-      items[1]->setEditable(false);
+      items[0]->setEditable(false);
       items.push_back(new QStandardItem(QString::number( correction_pair.second)));
       model->appendRow(items);
     }
