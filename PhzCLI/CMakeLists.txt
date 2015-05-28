@@ -15,6 +15,10 @@ elements_add_library(PhzCLI src/lib/*.cpp
 elements_add_executable(PhosphorosLsAux src/program/LsAux.cpp
                         LINK_LIBRARIES ElementsKernel Boost XYDataset PhzCLI)
 
+elements_alias(PhosphorosDisplayFilters PhosphorosLsAux --type Filters)
+elements_alias(PhosphorosDisplaySeds PhosphorosLsAux --type SEDs)
+elements_alias(PhosphorosDisplayReddeningCurves PhosphorosLsAux --type ReddeningCurves)
+
 elements_add_executable(PhosphorosDisplayModelGrid src/program/DisplayModelGrid.cpp
                         LINK_LIBRARIES ElementsKernel Boost PhzCLI)
 
