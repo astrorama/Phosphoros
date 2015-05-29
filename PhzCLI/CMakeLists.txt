@@ -23,7 +23,7 @@ elements_add_executable(PhosphorosDisplayModelGrid src/program/DisplayModelGrid.
                         LINK_LIBRARIES ElementsKernel Boost PhzCLI)
 
 elements_add_executable(PhosphorosComputeModelSed src/program/ComputeModelSed.cpp
-                        LINK_LIBRARIES ElementsKernel Boost PhzConfiguration MathUtils PhzModeling)
+                        LINK_LIBRARIES ElementsKernel Boost MathUtils PhzModeling PhzCLI)
 
 elements_install_conf_files()
 

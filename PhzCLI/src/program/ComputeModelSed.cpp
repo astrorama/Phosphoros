@@ -15,6 +15,7 @@
 #include "PhzModeling/RedshiftFunctor.h"
 #include "PhzModeling/MadauIgmFunctor.h"
 #include "PhzModeling/NoIgmFunctor.h"
+#include "PhzCLI/ComputeModelSedConfiguration.h"
 
 using namespace std;
 using namespace Euclid;
@@ -50,49 +51,19 @@ std::map<XYDataset::QualifiedName, std::unique_ptr<Euclid::MathUtils::Function>>
 class ComputeModelSed : public Elements::Program {
 
   po::options_description defineSpecificProgramOptions() override {
-    po::options_description options {"Compute Model SED options"};
-
-    options.add_options()
-      ("sed-root-path", po::value<std::string>(),
-        "The directory containing the sed datasets, organized in folders")
-      ("reddening-curve-root-path", po::value<std::string>(),
-          "The directory containing the reddening curves")
-      ("sed-name", po::value<std::vector<std::string>>(),
-          "The SED name")
-      ("reddening-curve-name", po::value<std::vector<std::string>>(),
-          "The reddening curve name")
-      ("ebv-value", po::value<std::vector<std::string>>(),
-          "The E(B-V) value")
-      ("z-value", po::value<std::vector<std::string>>(),
-          "The redshift value");
-
-    auto igm_options = PhzConfiguration::IgmConfiguration::getProgramOptions().options();
-    for (auto o : igm_options) {
-      options.add(o);
-    }
-
-    return options;
+    return PhzConfiguration::ComputeModelSedConfiguration::getProgramOptions();
   }
 
   Elements::ExitCode mainMethod(map<string, po::variable_value>& args) override {
+    
+    PhzConfiguration::ComputeModelSedConfiguration conf {args};
+    
+    auto grid_axes = conf.getGridAxes();
+    auto sed_map = conf.getSedMap();
+    auto red_curve_map = conf.getReddeningCurveMap();
+    auto igm_function = conf.getIgmAbsorptionFunction();
 
-    PhzConfiguration::ParameterSpaceConfiguration ps_conf {args};
-    auto sed_prov = ps_conf.getSedDatasetProvider();
-    auto red_curve_prov = ps_conf.getReddeningDatasetProvider();
-    auto sed_list = ps_conf.getSedList();
-    auto red_curve_list = ps_conf.getReddeningCurveList();
-    auto ebv_list = ps_conf.getEbvList();
-    auto z_list = ps_conf.getZList();
-
-    auto param_space = PhzDataModel::createAxesTuple(z_list, ebv_list, red_curve_list, sed_list);
-    auto sed_map = buildMap(*sed_prov, sed_list.begin(), sed_list.end());
-    auto red_curve_map = convertToFunction(buildMap(*red_curve_prov,
-                                            red_curve_list.begin(), red_curve_list.end()));
-
-    PhzConfiguration::IgmConfiguration igm_conf {args};
-    auto igm_function = igm_conf.getIgmAbsorptionFunction();
-
-    PhzModeling::ModelDatasetGrid grid {param_space, move(sed_map), move(red_curve_map),
+    PhzModeling::ModelDatasetGrid grid {grid_axes, move(sed_map), move(red_curve_map),
                                PhzModeling::ExtinctionFunctor{}, PhzModeling::RedshiftFunctor{},
                                std::move(igm_function)};
 
