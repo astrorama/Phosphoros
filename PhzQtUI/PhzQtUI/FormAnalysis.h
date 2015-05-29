@@ -60,8 +60,6 @@ private slots:
 
     void on_cb_CompatibleGrid_textChanged(const QString &);
 
-    void on_cb_cat_output_type_currentIndexChanged(const QString &);
-
     void on_btn_GetConfigGrid_clicked();
 
     void on_btn_RunGrid_clicked();
@@ -78,20 +76,15 @@ private slots:
 
     void on_btn_RunAnalysis_clicked();
 
-    void on_btn_BrowseOutputPdf_clicked();
-
-    void on_gb_cat_clicked();
-
-    void on_gb_pdf_clicked();
-
     void on_gb_lik_clicked();
 
-    void on_btn_BrowseLikelihood_clicked();
 
 
 private:
     std::unique_ptr<Ui::FormAnalysis> ui;
+    std::list<std::string> getFilters();
     std::list<std::string> getSelectedFilters();
+    std::list<std::string> getExcludedFilters();
     std::list<FilterMapping> getSelectedFilterMapping();
 
     std::string getSelectedSurveySourceColumn();

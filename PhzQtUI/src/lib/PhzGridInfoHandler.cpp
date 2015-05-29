@@ -4,6 +4,8 @@
  *  Created on: Feb 24, 2015
  *      Author: fdubath
  */
+
+
 #include <cmath>
 #include <ctgmath>
 #include <fstream>
@@ -82,22 +84,27 @@ PhzDataModel::ModelAxesTuple PhzGridInfoHandler::getAxesTuple(
 }
 
 std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
+    std::string catalog,
     const PhzDataModel::ModelAxesTuple& axes,
     const std::list<std::string>& selected_filters,
     std::string igm_type) {
-  std::string rootPath =
-      FileUtils::getPhotmetricGridRootPath(true);
 
+  std::string rootPath = FileUtils::getPhotmetricGridRootPath(true,catalog);
   std::list < std::string > list;
 
   QDir root_qdir(QString::fromStdString(rootPath));
   QStringList fileNames = root_qdir.entryList(QDir::Files | QDir::NoDotAndDotDot);
+
+
   foreach (const QString &fileName , fileNames) {
     std::map < std::string, boost::program_options::variable_value > options_map;
 
     // auto file_path = root_qdir.path() +QDir::separator()+ fileName;
     auto file_path = root_qdir.absoluteFilePath(fileName);
-    options_map["photometry-grid-file"].value() = boost::any(file_path.toStdString());
+    options_map["model-grid-file"].value() = boost::any(file_path.toStdString());
+
+    options_map["catalog-name"].value() = boost::any(catalog);
+    options_map["intermediate-products-dir"].value() = boost::any(FileUtils::getIntermediaryProductRootPath(false,""));
 
     try { // If a file cannot be opened or is ill formated: just skip it!
       auto grid_config = PhzConfiguration::PhotometryGridConfiguration(options_map);
@@ -110,15 +117,13 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
 
       // check the filters
       std::size_t number_found=0;
-      std::size_t number_total=0;
       for (auto& filter : grid_info.filter_names) {
         if (std::find(selected_filters.begin(), selected_filters.end(), filter.qualifiedName())!=selected_filters.end()) {
           ++number_found;
         }
-        ++number_total;
       }
 
-      if (number_found!=number_total || selected_filters.size() != number_found) {
+      if (selected_filters.size() != number_found) {
         continue;
       }
 
@@ -218,18 +223,23 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
       list.push_back(fileName.toStdString());
     } catch(...) {}
   }
-
   return list;
 
 }
 
 std::map<std::string, boost::program_options::variable_value> PhzGridInfoHandler::GetConfigurationMap(
+    std::string catalog,
     std::string output_file, const PhzDataModel::ModelAxesTuple& axes,
     const std::list<std::string>& selected_filters, std::string igm_type) {
 
   std::map < std::string, boost::program_options::variable_value > options_map;
 
-  auto path_filename = FileUtils::getPhotmetricGridRootPath(true)
+  options_map["phosphoros-root"].value() = boost::any(FileUtils::getRootPath());
+  options_map["aux-data-dir"].value() = boost::any(FileUtils::getAuxRootPath());
+  options_map["intermediate-products-dir"].value() = boost::any(FileUtils::getIntermediaryProductRootPath(false,""));
+  options_map["catalog-name"].value() = boost::any(catalog);
+
+  auto path_filename = FileUtils::getPhotmetricGridRootPath(true,catalog)
       + QString(QDir::separator()).toStdString() + output_file;
   options_map["output-model-grid"].value() = boost::any(path_filename);
 
@@ -269,12 +279,6 @@ std::map<std::string, boost::program_options::variable_value> PhzGridInfoHandler
   }
   options_map["filter-name"].value() = boost::any(filter_add_vector);
 
-  options_map["sed-root-path"].value() = boost::any(
-      FileUtils::getSedRootPath(false));
-  options_map["reddening-curve-root-path"].value() = boost::any(
-      FileUtils::getRedCurveRootPath(false));
-  options_map["filter-root-path"].value() = boost::any(
-      FileUtils::getFilterRootPath(false));
   options_map["igm-absorption-type"].value() = boost::any(igm_type);
 
   return options_map;

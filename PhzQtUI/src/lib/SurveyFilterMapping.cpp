@@ -57,7 +57,7 @@ namespace PhzQtUI {
     }
 
     std::list<std::string> SurveyFilterMapping::getAvailableCatalogs(){
-      auto cat_root_path = FileUtils::getCatalogRootPath(true);
+      auto cat_root_path = FileUtils::getCatalogRootPath(true,"");
       std::list<std::string> all_dirs{};
       QDirIterator directories(QString::fromStdString(cat_root_path), QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
       while(directories.hasNext()){
@@ -164,8 +164,7 @@ void SurveyFilterMapping::deleteSurvey(){
 
 void SurveyFilterMapping::saveSurvey(std::string oldName){
   // ensure the Catalog path
-  auto cat_path = QString::fromStdString(FileUtils::getCatalogRootPath(true))
-  +QDir::separator()+QString::fromStdString(getName()) +QDir::separator();
+  auto cat_path = QString::fromStdString(FileUtils::getCatalogRootPath(true,getName()))+QDir::separator();
   QFileInfo info(cat_path);
   if (!info.exists()){
      QDir().mkpath(cat_path);

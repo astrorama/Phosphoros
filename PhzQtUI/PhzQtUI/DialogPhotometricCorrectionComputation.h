@@ -50,6 +50,7 @@ public:
     void setData(std::string survey, std::string id_column, std::string model,
         std::string grid,
         std::list<FilterMapping> selected_filters,
+        std::list<std::string> excluded_filters,
         std::string default_catalog_path);
 
 signals:
@@ -107,6 +108,7 @@ private slots:
 private:
     std::unique_ptr<Ui::DialogPhotometricCorrectionComputation> ui;
     std::list<FilterMapping> m_selected_filters;
+    std::list<std::string> m_excluded_filters;
     std::string m_id_column;
     void disablePage();
     std::string runFunction();

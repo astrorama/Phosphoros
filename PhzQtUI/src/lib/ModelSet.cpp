@@ -51,7 +51,7 @@ ModelSet ModelSet::loadModelSetFromFile(std::string fileName,std::string root_pa
     model.setName(FileUtils::removeExt(fileName,".xml"));
 
 
-    QDomDocument doc("ModelSet");
+    QDomDocument doc("ParameterSpace");
     QFile file(QString::fromStdString(root_path)+QDir::separator()+QString::fromStdString(fileName));
     if (!file.open(QIODevice::ReadOnly))
          return model;
@@ -127,8 +127,8 @@ void ModelSet::saveModelSet(std::string oldName){
     file.open(QIODevice::WriteOnly );
     QTextStream stream(&file);
 
-    QDomDocument doc("ModelSet");
-    QDomElement root = doc.createElement("ModelSet");
+    QDomDocument doc("ParameterSpace");
+    QDomElement root = doc.createElement("ParameterSpace");
     root.setAttribute("Name",QString::fromStdString(getName()));
     doc.appendChild(root);
 

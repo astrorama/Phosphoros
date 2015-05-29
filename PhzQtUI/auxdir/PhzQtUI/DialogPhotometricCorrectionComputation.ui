@@ -61,7 +61,7 @@
          <item>
           <widget class="QLabel" name="label_5">
            <property name="text">
-            <string>Survey :</string>
+            <string>Catalog :</string>
            </property>
           </widget>
          </item>
@@ -97,7 +97,7 @@
          <item>
           <widget class="QLabel" name="label_4">
            <property name="text">
-            <string>Astronomical Model Set :</string>
+            <string>Parameter Space :</string>
            </property>
           </widget>
          </item>
@@ -133,7 +133,7 @@
          <item>
           <widget class="QLabel" name="label_3">
            <property name="text">
-            <string>Templates :</string>
+            <string>Model Grid :</string>
            </property>
           </widget>
          </item>
@@ -233,7 +233,7 @@
    <item>
     <widget class="QLabel" name="label_6">
      <property name="text">
-      <string>Training Catalog :</string>
+      <string>Training Catalog file :</string>
      </property>
     </widget>
    </item>

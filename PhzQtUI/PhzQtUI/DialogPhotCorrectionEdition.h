@@ -34,7 +34,7 @@ public:
      * @param filters
      * the filter mapping allowing to display the aliases
      */
-    void setCorrectionsFile(std::string filePath, std::list<FilterMapping> filters);
+    void setCorrectionsFile(std::string catalog, std::string filePath, std::list<FilterMapping> filters);
 
 private slots:
     /**
@@ -61,6 +61,7 @@ private slots:
 
 private:
     std::unique_ptr<Ui::DialogPhotCorrectionEdition> ui;
+    std::string m_catalog;
     std::string m_file_path;
     PhzDataModel::PhotometricCorrectionMap m_map;
     std::list<FilterMapping> m_filters;

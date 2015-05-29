@@ -25,17 +25,18 @@ DialogPhotCorrectionEdition::~DialogPhotCorrectionEdition()
 }
 
 
-void DialogPhotCorrectionEdition::setCorrectionsFile(string filePath, std::list<FilterMapping> filters){
+void DialogPhotCorrectionEdition::setCorrectionsFile(std::string catalog,string filePath, std::list<FilterMapping> filters){
+    m_catalog=catalog;
     m_filters=std::move(filters);
     m_file_path=filePath;
     ui->txt_FileName->setText(QString::fromStdString(filePath));
-    m_map = PhotometricCorrectionHandler::getCorrections(filePath);
+    m_map = PhotometricCorrectionHandler::getCorrections(m_catalog,filePath);
 
     QStandardItemModel* model = new QStandardItemModel();
     model->setColumnCount(2);
 
     QStringList  setHeaders;
-    setHeaders<<"Filter"<<"Transmission"<<"Correction";
+    setHeaders<<"Filter"<<"Correction";
     model->setHorizontalHeaderLabels(setHeaders);
 
     for (auto& correction_pair : m_map){
@@ -86,7 +87,7 @@ void DialogPhotCorrectionEdition::on_btn_Cancel_clicked()
     ui->btn_Save->setEnabled(false);
     ui->buttonBox->setEnabled(true);
 
-    setCorrectionsFile(m_file_path,std::move(m_filters));
+    setCorrectionsFile(m_catalog, m_file_path,std::move(m_filters));
 }
 
 
@@ -112,7 +113,7 @@ void DialogPhotCorrectionEdition::on_btn_Save_clicked()
         ++i;
       }
 
-      PhotometricCorrectionHandler::writeCorrections(m_map,m_file_path);
+      PhotometricCorrectionHandler::writeCorrections(m_catalog, m_map,m_file_path);
         ui->btn_Edit->setEnabled(true);
         ui->btn_Cancel->setEnabled(false);
         ui->btn_Save->setEnabled(false);

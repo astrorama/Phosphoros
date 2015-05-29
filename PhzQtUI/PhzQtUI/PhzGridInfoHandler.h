@@ -44,6 +44,7 @@ public:
    * @param igm_type The type of inter-galactic medium absorption.
    */
   static std::list<std::string> getCompatibleGridFile(
+      std::string catalog,
       const PhzDataModel::ModelAxesTuple& axes,
       const std::list<std::string> & selected_filters,
       std::string igm_type);
@@ -60,6 +61,7 @@ public:
    * @param igm_type The type of inter-galactic medium absorption.
    */
   static std::map<std::string, boost::program_options::variable_value> GetConfigurationMap(
+      std::string catalog,
       std::string output_file,
       const PhzDataModel::ModelAxesTuple& axes,
       const std::list<std::string>& selected_filters,

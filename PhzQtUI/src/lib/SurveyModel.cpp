@@ -5,8 +5,8 @@ namespace PhzQtUI {
 
 SurveyModel::SurveyModel(){ }
 
-void SurveyModel::loadSurvey(std::string path){
-    m_root_path=path;
+void SurveyModel::loadSurvey(){
+
     m_survey_filter_mappings=SurveyFilterMapping::loadCatalogMappings();
 
     this->setColumnCount(3);

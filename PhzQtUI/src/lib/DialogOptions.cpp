@@ -99,11 +99,11 @@ void DialogOptions::on_btn_saveGeneral_clicked()
 
     map.insert(std::make_pair("Catalogs",ui->txt_catDir->text().toStdString()));
 
-    map.insert(std::make_pair("AuxiliaryData",ui->txt_catDir->text().toStdString()));
+    map.insert(std::make_pair("AuxiliaryData",ui->txt_auxDir->text().toStdString()));
 
-    map.insert(std::make_pair("IntermediateProducts",ui->txt_catDir->text().toStdString()));
+    map.insert(std::make_pair("IntermediateProducts",ui->txt_interDir->text().toStdString()));
 
-    map.insert(std::make_pair("Results",ui->txt_catDir->text().toStdString()));
+    map.insert(std::make_pair("Results",ui->txt_resDir->text().toStdString()));
 
 
     FileUtils::savePath(map);
@@ -187,47 +187,51 @@ void DialogOptions::on_btn_browseRes_clicked(){
 
 
 void DialogOptions::on_btn_defCat_clicked(){
-    ui->txt_catDir->setText("Catalogs");
-    checkDirectories();
-  }
+  auto def = QString::fromStdString(FileUtils::getRootPaths().getCatalogsDir().generic_string());
+  ui->txt_catDir->setText(def);
+  checkDirectories();
+}
 void DialogOptions::on_btn_defAux_clicked(){
-    ui->txt_auxDir->setText("AuxiliaryData");
-    checkDirectories();
-  }
+  auto def = QString::fromStdString(FileUtils::getRootPaths().getAuxDataDir().generic_string());
+  ui->txt_auxDir->setText(def);
+  checkDirectories();
+}
 
 void DialogOptions::on_btn_defInter_clicked(){
-    ui->txt_interDir->setText("IntermediateProducts");
-    checkDirectories();
-  }
+  auto def = QString::fromStdString(FileUtils::getRootPaths().getIntermediateDir().generic_string());
+  ui->txt_interDir->setText(def);
+  checkDirectories();
+}
 
 void DialogOptions::on_btn_defRes_clicked(){
-    ui->txt_resDir->setText("Results");
-    checkDirectories();
-  }
+  auto def = QString::fromStdString(FileUtils::getRootPaths().getResultsDir().generic_string());
+  ui->txt_resDir->setText(def);
+  checkDirectories();
+}
 
 
 void DialogOptions::checkDirectories(){
-  auto root_path= QString::fromStdString(FileUtils::getRootPath()) + QDir::separator();
+  auto root_paths= FileUtils::getRootPaths();
 
-  if (ui->txt_catDir->text()==root_path + "Catalogs"){
+  if (ui->txt_catDir->text().toStdString()==root_paths.getCatalogsDir().generic_string()){
     ui->txt_catDir->setStyleSheet("QLineEdit { color: grey }");
   } else {
     ui->txt_catDir->setStyleSheet("QLineEdit { color: black }");
   }
 
-  if (ui->txt_auxDir->text()==root_path + "AuxiliaryData"){
+  if (ui->txt_auxDir->text().toStdString()==root_paths.getAuxDataDir().generic_string()){
       ui->txt_auxDir->setStyleSheet("QLineEdit { color: grey }");
   } else {
       ui->txt_auxDir->setStyleSheet("QLineEdit { color: black }");
   }
 
-  if (ui->txt_interDir->text()==root_path + "IntermediateProducts"){
+  if (ui->txt_interDir->text().toStdString()==root_paths.getIntermediateDir().generic_string()){
       ui->txt_interDir->setStyleSheet("QLineEdit { color: grey }");
   } else {
       ui->txt_interDir->setStyleSheet("QLineEdit { color: black }");
   }
 
-  if (ui->txt_resDir->text()==root_path + "Results"){
+  if (ui->txt_resDir->text().toStdString()==root_paths.getResultsDir().generic_string()){
       ui->txt_resDir->setStyleSheet("QLineEdit { color: grey }");
   } else {
       ui->txt_resDir->setStyleSheet("QLineEdit { color: black }");

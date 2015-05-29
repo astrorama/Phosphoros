@@ -3,6 +3,7 @@
 #include <QString>
 #include <string>
 #include <map>
+#include "PhzConfiguration/PhosphorosPathConfiguration.h"
 /**
  * @brief The FileUtils class
  */
@@ -93,9 +94,15 @@ public:
      */
     static std::string getRootPath();
 
+
+    static PhzConfiguration::PhosphorosPathConfiguration getRootPaths();
+
     static std::string getGUIConfigPath();
 
-    static void savePath(std::map<std::string,std::string> path_list);
+
+    static std::string getAuxRootPath();
+
+    static void savePath(const std::map<std::string,std::string>& path_list);
 
     static std::map<std::string,std::string> readPath();
 
@@ -107,24 +114,18 @@ public:
      */
     static std::string getModelRootPath(bool check);
 
-    /**
-     * @brief get the Survey Mappings RootPath
-     * @param check
-     * if true ensure that the folder exist.
-     * @return <rootPath>/UI/Survey
-     */
-    static std::string getMappingRootPath(bool check);
+
 
     /**
      * @brief get the Catalog Root Path
      * @param check
      * if true ensure that the folder exist.
      */
-    static std::string getCatalogRootPath(bool check);
+    static std::string getCatalogRootPath(bool check, const std::string& catalog_name);
 
-    static std::string getIntermediaryProductRootPath(bool check, std::string catalog_name);
+    static std::string getIntermediaryProductRootPath(bool check, const std::string& catalog_name);
 
-    static std::string getResultRootPath(bool check, std::string catalog_name);
+    static std::string getResultRootPath(bool check, const std::string& catalog_name);
 
 
     /**
@@ -156,7 +157,7 @@ public:
      * if true ensure that the folder exist.
      * @return <rootPath>/PhotometricCorrections
      */
-    static std::string getPhotCorrectionsRootPath(bool check);
+    static std::string getPhotCorrectionsRootPath(bool check, const std::string& catalog_name);
 
     /**
      * @brief get the Photometric Grid RootPath
@@ -164,13 +165,14 @@ public:
      * if true ensure that the folder exist.
      * @return <rootPath>/PhotometricGrid
      */
-    static std::string getPhotmetricGridRootPath(bool check);
+    static std::string getPhotmetricGridRootPath(bool check, const std::string& catalog_name);
+
 
     //////////////////////////////////////////////////////////
     //// Last used path.
     static std::string getLastUsedPath();
 
-    static void setLastUsedPath(std::string path);
+    static void setLastUsedPath(const std::string& path);
 
 };
 

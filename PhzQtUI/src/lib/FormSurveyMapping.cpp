@@ -33,7 +33,7 @@ FormSurveyMapping::~FormSurveyMapping()
 
 void FormSurveyMapping::loadMappingPage(){
     SurveyModel* model = new SurveyModel();
-    model->loadSurvey(FileUtils::getMappingRootPath(true));
+    model->loadSurvey();
     ui->table_Map->setModel(model);
     ui->table_Map->setColumnHidden(2, true);
     ui->table_Map->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -308,8 +308,10 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
 void FormSurveyMapping::on_btn_ImportColumn_clicked()
 {
     QFileDialog dialog(this);
-    dialog.selectFile(QString::fromStdString(FileUtils::getCatalogRootPath(true))
-    +QDir::separator()+ui->cb_mapName->currentText()+QDir::separator());
+    dialog.selectFile(
+        QString::fromStdString(FileUtils::getCatalogRootPath(true,
+            ui->cb_mapName->currentText().toStdString()))+QDir::separator());
+
     dialog.setFileMode(QFileDialog::ExistingFile);
     if (dialog.exec()){
         QStringList fileNames=dialog.selectedFiles();

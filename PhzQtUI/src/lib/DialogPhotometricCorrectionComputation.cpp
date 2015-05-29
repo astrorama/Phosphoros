@@ -37,10 +37,12 @@ DialogPhotometricCorrectionComputation::~DialogPhotometricCorrectionComputation(
 
 void DialogPhotometricCorrectionComputation::setData(string survey,
     string id_column, string model, string grid,
-    list<FilterMapping> selected_filters,
+    std::list<FilterMapping> selected_filters,
+    std::list<std::string> excluded_filters,
     std::string default_catalog_path) {
   m_id_column = id_column;
   m_selected_filters = selected_filters;
+  m_excluded_filters = excluded_filters;
   ui->txt_survey->setText(QString::fromStdString(survey));
   ui->txt_Model->setText(QString::fromStdString(model));
   ui->txt_grid->setText(QString::fromStdString(grid));
@@ -48,6 +50,11 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
   QStandardItemModel* grid_model = new QStandardItemModel();
   grid_model->setColumnCount(1);
 
+  for (auto filter : m_selected_filters) {
+     QList<QStandardItem*> items;
+     items.push_back(new QStandardItem(QString::fromStdString(filter.getFilterFile())));
+     grid_model->appendRow(items);
+   }
 
   ui->listView_Filter->setModel(grid_model);
 
@@ -156,8 +163,8 @@ void DialogPhotometricCorrectionComputation::setRunEnability() {
 }
 
 void DialogPhotometricCorrectionComputation::on_cb_SelectionMethod_currentIndexChanged(const QString & method){
-  QString default_file_name = ui->txt_survey->text()+"_"+ui->txt_Model->text()+"_"+method;
-   ui->txt_FileName->setText(default_file_name);
+  QString default_file_name = ui->txt_Model->text()+"_"+method;
+  ui->txt_FileName->setText(default_file_name);
 }
 
 void DialogPhotometricCorrectionComputation::on_cb_SpectroColumn_currentIndexChanged(
@@ -180,7 +187,7 @@ void DialogPhotometricCorrectionComputation::on_txt_FileName_textChanged(
     const QString &) {
   setRunEnability();
   string output_file_name=FileUtils::addExt(ui->txt_FileName->text().toStdString(),".txt");
-    auto path_filename = FileUtils::getPhotCorrectionsRootPath(true)
+    auto path_filename = FileUtils::getPhotCorrectionsRootPath(true,ui->txt_survey->text().toStdString())
            + QString(QDir::separator()).toStdString() + output_file_name;
 
     if (QFileInfo(QString::fromStdString(path_filename)).exists()){
@@ -202,22 +209,18 @@ void DialogPhotometricCorrectionComputation::disablePage(){
 }
 std::string DialogPhotometricCorrectionComputation::runFunction(){
   try {
-    vector<string> filter_mapping;
-    for (auto& filter : m_selected_filters) {
-      filter_mapping.push_back(
-          filter.getFilterFile() + " " + filter.getFluxColumn() + " "
-              + filter.getErrorColumn());
-    }
 
     int max_iter_number = ui->txt_Iteration->text().toInt();
 
     auto config_map = PhotometricCorrectionHandler::GetConfigurationMap(
+        ui->txt_survey->text().toStdString(),
         ui->txt_FileName->text().toStdString(), max_iter_number,
         ui->txt_Tolerence->text().toDouble(),
         ui->cb_SelectionMethod->currentText().toStdString(),
         ui->txt_grid->text().toStdString(),
         ui->txt_catalog->text().toStdString(), m_id_column,
-        ui->cb_SpectroColumn->currentText().toStdString(), filter_mapping);
+        ui->cb_SpectroColumn->currentText().toStdString(),
+        m_excluded_filters);
 
     PhzConfiguration::ComputePhotometricCorrectionsConfiguration conf {
         config_map };
@@ -262,7 +265,7 @@ void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
   string output_file_name = FileUtils::addExt(
       ui->txt_FileName->text().toStdString(), ".txt");
   ui->txt_FileName->setText(QString::fromStdString(output_file_name));
-  auto path_filename = FileUtils::getPhotCorrectionsRootPath(true)
+  auto path_filename = FileUtils::getPhotCorrectionsRootPath(true,ui->txt_survey->text().toStdString())
       + QString(QDir::separator()).toStdString() + output_file_name;
 
   if (QFileInfo(QString::fromStdString(path_filename)).exists()

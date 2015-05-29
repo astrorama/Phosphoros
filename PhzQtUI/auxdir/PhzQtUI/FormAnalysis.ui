@@ -82,7 +82,7 @@
           </font>
          </property>
          <property name="text">
-          <string>1. Survey, Model Grid Specification and Filter Selection :</string>
+          <string>1. Catalog, Model Grid Specification and Filter Selection :</string>
          </property>
         </widget>
        </item>
@@ -93,7 +93,7 @@
            <item>
             <widget class="QLabel" name="label_19">
              <property name="text">
-              <string>Survey :</string>
+              <string>Catalog :</string>
              </property>
             </widget>
            </item>
@@ -145,7 +145,7 @@
              <item>
               <widget class="QLabel" name="label_21">
                <property name="toolTip">
-                <string>List of Survey's Filters. You may exclude some filters of the analysis by unchecking them into the grid.</string>
+                <string>List of Catalog's Filters. You may exclude some filters of the analysis by unchecking them into the grid.</string>
                </property>
                <property name="text">
                 <string>Filter Selection † :</string>
@@ -609,11 +609,11 @@
           <attribute name="label">
            <string>5. Input /Output Files :</string>
           </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_12">
+          <layout class="QVBoxLayout" name="verticalLayout_8">
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_21">
              <item>
-              <layout class="QVBoxLayout" name="verticalLayout_19">
+              <layout class="QVBoxLayout" name="verticalLayout_2">
                <item>
                 <widget class="QLabel" name="label_26">
                  <property name="font">
@@ -622,7 +622,7 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>Input Catalog Name :</string>
+                  <string>Input Catalog File :</string>
                  </property>
                 </widget>
                </item>
@@ -642,6 +642,46 @@
                  </item>
                  <item>
                   <widget class="QPushButton" name="btn_BrowseInput">
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Browse</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_2">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Output Folder :</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_28">
+                 <item>
+                  <widget class="QLineEdit" name="txt_outputFolder">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                    </font>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="btn_BrowseOutput">
                    <property name="font">
                     <font>
                      <pointsize>11</pointsize>
@@ -679,46 +719,27 @@
                   </font>
                  </property>
                  <property name="title">
-                  <string>Generate Output Catalog with name :</string>
+                  <string>Generate Output Catalog with format :</string>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_3">
                   <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_24">
+                   <widget class="QComboBox" name="cb_cat_output_type">
                     <item>
-                     <widget class="QComboBox" name="cb_cat_output_type">
-                      <item>
-                       <property name="text">
-                        <string>ASCII</string>
-                       </property>
-                      </item>
-                      <item>
-                       <property name="text">
-                        <string>FITS</string>
-                       </property>
-                      </item>
-                     </widget>
+                     <property name="text">
+                      <string>ASCII</string>
+                     </property>
                     </item>
                     <item>
-                     <widget class="QLineEdit" name="txt_OutputCatalog">
-                      <property name="enabled">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
+                     <property name="text">
+                      <string>FITS</string>
+                     </property>
                     </item>
-                    <item>
-                     <widget class="QPushButton" name="btn_BrowseOutput">
-                      <property name="text">
-                       <string>Browse</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
+                   </widget>
                   </item>
                  </layout>
-                 <zorder></zorder>
                 </widget>
                </item>
                <item>
@@ -729,31 +750,15 @@
                   </font>
                  </property>
                  <property name="title">
-                  <string>Generate Output PDF file with name :</string>
+                  <string>Generate Output PDF file </string>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
                  </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_4">
-                  <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_26">
-                    <item>
-                     <widget class="QLineEdit" name="txt_OutputPdf">
-                      <property name="enabled">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="btn_BrowseOutputPdf">
-                      <property name="text">
-                       <string>Browse</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </item>
-                 </layout>
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
+                 <layout class="QVBoxLayout" name="verticalLayout_4"/>
                 </widget>
                </item>
                <item>
@@ -764,7 +769,7 @@
                   </font>
                  </property>
                  <property name="title">
-                  <string>Generate Posterior files in folder :</string>
+                  <string>Generate Posterior files </string>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
@@ -772,27 +777,21 @@
                  <property name="checked">
                   <bool>false</bool>
                  </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_5">
-                  <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_27">
-                    <item>
-                     <widget class="QLineEdit" name="txt_likelihood">
-                      <property name="enabled">
-                       <bool>false</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="btn_BrowseLikelihood">
-                      <property name="text">
-                       <string>Browse</string>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </item>
-                 </layout>
+                 <layout class="QVBoxLayout" name="verticalLayout_5"/>
                 </widget>
+               </item>
+               <item>
+                <spacer name="verticalSpacer_2">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
               </layout>
              </item>
