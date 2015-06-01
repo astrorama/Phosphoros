@@ -22,11 +22,17 @@ public:
 
   DisplayModelGridConfiguration(const std::map<std::string, boost::program_options::variable_value>& options);
 
-   /**
-   * @brief destructor.
-   */
-   virtual ~DisplayModelGridConfiguration()=default;
-
+  /**
+  * @brief destructor.
+  */
+  virtual ~DisplayModelGridConfiguration()=default;
+   
+  bool showOverall();
+  
+  bool showAllRegionsInfo();
+  
+  std::string getRegionName();
+  
   bool showGeneric();
 
   bool showSedAxis();
