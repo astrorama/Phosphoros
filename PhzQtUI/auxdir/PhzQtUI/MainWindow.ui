@@ -143,7 +143,7 @@
              </size>
             </property>
             <property name="toolTip">
-             <string>Working directory path definition, Auxiliary data management and survey fillter mapping definition.</string>
+             <string>Working directory path definition, Auxiliary data management and Catalog fillter mapping definition.</string>
             </property>
             <property name="text">
              <string>Configuration †</string>
