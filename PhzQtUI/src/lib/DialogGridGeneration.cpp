@@ -55,18 +55,20 @@ std::string DialogGridGeneration::runFunction() {
         conf.getReddeningDatasetProvider(), conf.getFilterDatasetProvider(),
         conf.getIgmAbsorptionFunction() };
 
-    auto param_space = PhzDataModel::createAxesTuple(conf.getZList(),
-        conf.getEbvList(), conf.getReddeningCurveList(), conf.getSedList());
+    auto param_space = PhzDataModel::createAxesTuple(conf.getZList().at(""),
+        conf.getEbvList().at(""), conf.getReddeningCurveList().at(""), conf.getSedList().at(""));
 
     std::function<void(size_t, size_t)> monitor_function = std::bind(
         &DialogGridGeneration::updateGridProgressBar, this,
         std::placeholders::_1, std::placeholders::_2);
 
-    auto grid = creator.createGrid(param_space, conf.getFilterList(),
-        monitor_function);
+    std::map<std::string, PhzDataModel::PhotometryGrid> result {};
+    result.emplace(std::make_pair(std::string{""}, creator.createGrid(param_space, conf.getFilterList(), monitor_function)));
+//    auto grid = creator.createGrid(param_space, conf.getFilterList(),
+//        monitor_function);
 
     auto output = conf.getOutputFunction();
-    output(grid);
+    output(result);
     return "";
   }
   catch (const Elements::Exception & e) {

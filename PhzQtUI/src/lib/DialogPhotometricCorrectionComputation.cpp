@@ -242,7 +242,7 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
           int value = (iter_no*100.)/max_iter_number;
           ui->progressBar->setValue(value);
         };
-    auto phot_corr_map = calculator(catalog, model_phot_grid, stop_criteria,
+    auto phot_corr_map = calculator(catalog, model_phot_grid.at(""), stop_criteria,
         selector, progress_logger);
     output_func(phot_corr_map);
     correctionComputed (ui->txt_FileName->text());

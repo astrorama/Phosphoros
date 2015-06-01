@@ -130,7 +130,7 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
 
       // check the axis
 
-      auto& sed_axis_file = std::get<PhzDataModel::ModelParameter::SED>(grid_info.axes);
+      auto& sed_axis_file = std::get<PhzDataModel::ModelParameter::SED>(grid_info.region_axes_map.at(""));
       auto& sed_axis_requested = std::get<PhzDataModel::ModelParameter::SED>(axes);
       if (sed_axis_file.size()!=sed_axis_requested.size()) {
         continue;
@@ -145,7 +145,7 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
         continue;
       }
 
-      auto& red_axis_file = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(grid_info.axes);
+      auto& red_axis_file = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(grid_info.region_axes_map.at(""));
       auto& red_axis_requested = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(axes);
       if (red_axis_file.size()!=red_axis_requested.size()) {
         continue;
@@ -161,7 +161,7 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
       }
 
       std::vector<double> z_axis_file;
-      for(double value : std::get<PhzDataModel::ModelParameter::Z>(grid_info.axes)){
+      for(double value : std::get<PhzDataModel::ModelParameter::Z>(grid_info.region_axes_map.at(""))){
         z_axis_file.push_back(value);
       }
 
@@ -193,7 +193,7 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
       }
 
       std::vector<double> ebv_axis_file;
-      for(double value : std::get<PhzDataModel::ModelParameter::EBV>(grid_info.axes)){
+      for(double value : std::get<PhzDataModel::ModelParameter::EBV>(grid_info.region_axes_map.at(""))){
         ebv_axis_file.push_back(value);
       }
       std::vector<double> ebv_axis_requested;

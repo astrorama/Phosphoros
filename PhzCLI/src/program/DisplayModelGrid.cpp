@@ -20,10 +20,10 @@ ostream& operator<<(ostream& stream, const XYDataset::QualifiedName& name) {
 }
 
 void printGeneric(const PhzDataModel::PhotometryGridInfo& grid_info) {
-  auto sed_size = std::get<PhzDataModel::ModelParameter::SED>(grid_info.axes).size();
-  auto red_curve_size = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(grid_info.axes).size();
-  auto ebv_size = std::get<PhzDataModel::ModelParameter::EBV>(grid_info.axes).size();
-  auto z_size = std::get<PhzDataModel::ModelParameter::Z>(grid_info.axes).size();
+  auto sed_size = std::get<PhzDataModel::ModelParameter::SED>(grid_info.region_axes_map.at("")).size();
+  auto red_curve_size = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(grid_info.region_axes_map.at("")).size();
+  auto ebv_size = std::get<PhzDataModel::ModelParameter::EBV>(grid_info.region_axes_map.at("")).size();
+  auto z_size = std::get<PhzDataModel::ModelParameter::Z>(grid_info.region_axes_map.at("")).size();
   cout << "\nParameter Space info\n";
   cout << "--------------------\n";
   cout << "SED axis size: " << sed_size << '\n';
@@ -89,25 +89,25 @@ class DisplayModelGrid : public Elements::Program {
     }
 
     if (conf.showSedAxis()) {
-      printAxis(std::get<PhzDataModel::ModelParameter::SED>(grid_info.axes));
+      printAxis(std::get<PhzDataModel::ModelParameter::SED>(grid_info.region_axes_map.at("")));
     }
 
     if (conf.showReddeningCurveAxis()) {
-      printAxis(std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(grid_info.axes));
+      printAxis(std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(grid_info.region_axes_map.at("")));
     }
 
     if (conf.showEbvAxis()) {
-      printAxis(std::get<PhzDataModel::ModelParameter::EBV>(grid_info.axes));
+      printAxis(std::get<PhzDataModel::ModelParameter::EBV>(grid_info.region_axes_map.at("")));
     }
 
     if (conf.showRedshiftAxis()) {
-      printAxis(std::get<PhzDataModel::ModelParameter::Z>(grid_info.axes));
+      printAxis(std::get<PhzDataModel::ModelParameter::Z>(grid_info.region_axes_map.at("")));
     }
 
     auto phot_coords = conf.getCellPhotCoords();
     if (phot_coords) {
-      auto grid = conf.getPhotometryGrid();
-      printPhotometry(grid, *phot_coords);
+      auto grid_map = conf.getPhotometryGrid();
+      printPhotometry(grid_map.at(""), *phot_coords);
     }
 
     return Elements::ExitCode::OK;
