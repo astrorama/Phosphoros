@@ -5,7 +5,7 @@
 
 #include "PhzQtUI/DialogPhotCorrectionEdition.h"
 #include "ui_DialogPhotCorrectionEdition.h"
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 #include "PhzQtUI/PhotometricCorrectionHandler.h"
 
 using namespace std;

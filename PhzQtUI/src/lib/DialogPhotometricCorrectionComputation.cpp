@@ -8,7 +8,7 @@
 #include <QMessageBox>
 #include "PhzUITools/CatalogColumnReader.h"
 #include "PhzQtUI/PhotometricCorrectionHandler.h"
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 #include "ElementsKernel/Exception.h"
 
 #include "PhzLikelihood/SourcePhzFunctor.h"
@@ -108,7 +108,7 @@ bool DialogPhotometricCorrectionComputation::loadTestCatalog(QString file_name, 
     if (not_found) {
       if (with_warning){
       QMessageBox::warning(this, "Incompatible Data...",
-          "The catalog file you selected has not the columns described into the Survey and therefore cannot be used. Please select anothe catalog file.",
+          "The catalog file you selected has not the columns described into the Catalog and therefore cannot be used. Please select another catalog file.",
           QMessageBox::Ok);
       }
       return false;

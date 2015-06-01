@@ -18,7 +18,7 @@
 #include "PhzQtUI/PhzGridInfoHandler.h"
 #include "PhzQtUI/XYDataSetTreeModel.h"
 #include "XYDataset/QualifiedName.h"
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 
 #include "PhzUITools/InfoOnlyCellManager.h"
 

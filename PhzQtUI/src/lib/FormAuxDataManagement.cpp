@@ -5,7 +5,7 @@
 #include "PhzQtUI/DirectoryTreeModel.h"
 #include "PhzQtUI/DialogImportAuxData.h"
 #include "PhzQtUI/DialogCreatesSubGroup.h"
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 
 
 namespace Euclid {

@@ -1,5 +1,5 @@
 #include "PhzQtUI/FilterModel.h"
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 
 namespace Euclid {
 namespace PhzQtUI {

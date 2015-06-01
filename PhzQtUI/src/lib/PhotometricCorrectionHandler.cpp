@@ -1,5 +1,5 @@
 #include "PhzQtUI/PhotometricCorrectionHandler.h"
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 
 #include <fstream>
 #include <vector>

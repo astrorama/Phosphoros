@@ -2,7 +2,7 @@
 #include <iostream>
 #include <QFile>
 #include <QDir>
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 #include "PhzQtUI/DirectoryTreeModel.h"
 
 namespace Euclid {

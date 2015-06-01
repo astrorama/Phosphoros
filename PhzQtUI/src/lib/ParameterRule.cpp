@@ -5,7 +5,7 @@
 #include "ElementsKernel/Real.h" // isEqual
 
 #include "PhzQtUI/ParameterRule.h"
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 #include "PhzQtUI/XYDataSetTreeModel.h"
 
 #include "XYDataset/FileSystemProvider.h"

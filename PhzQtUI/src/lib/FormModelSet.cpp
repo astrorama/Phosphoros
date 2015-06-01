@@ -2,7 +2,7 @@
 #include "PhzQtUI/FormModelSet.h"
 #include "ui_FormModelSet.h"
 #include "PhzQtUI/DialogModelSet.h"
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 
 namespace Euclid {
 namespace PhzQtUI {

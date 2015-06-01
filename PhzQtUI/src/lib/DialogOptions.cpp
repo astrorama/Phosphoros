@@ -2,35 +2,38 @@
 
 #include "PhzQtUI/DialogOptions.h"
 #include "ui_DialogOptions.h"
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 
 using namespace std;
 
 namespace Euclid {
 namespace PhzQtUI{
 
-DialogOptions::DialogOptions(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::DialogOptions)
+DialogOptions::DialogOptions(QWidget *parent) :DialogOptions("",parent){
+}
+
+
+
+DialogOptions::DialogOptions(std::string new_catalog_file_path, QWidget *parent):
+  QDialog(parent),
+  ui(new Ui::DialogOptions)
 {
-    ui->setupUi(this);
+     ui->setupUi(this);
 
-    ui->txt_rootDir->setText(QString::fromStdString(FileUtils::getRootPath()));
+     connect(ui->widget_survey_mapping, SIGNAL(startEdition(int)),SLOT(startEdition(int)));
+     connect(ui->widget_survey_mapping, SIGNAL(endEdition()),SLOT(endEdition()));
 
-    ui->widget_survey_mapping->loadMappingPage();
+     ui->widget_aux_Data->loadManagementPage(0);
 
-    connect(ui->widget_survey_mapping, SIGNAL(startEdition(int)),SLOT(startEdition(int)));
-    connect(ui->widget_survey_mapping, SIGNAL(endEdition()),SLOT(endEdition()));
+     auto path_map = FileUtils::readPath();
+     ui->txt_rootDir->setText(QString::fromStdString(FileUtils::getRootPath()));
+     ui->txt_catDir->setText(QString::fromStdString(path_map["Catalogs"]));
+     ui->txt_auxDir->setText(QString::fromStdString(path_map["AuxiliaryData"]));
+     ui->txt_interDir->setText(QString::fromStdString(path_map["IntermediateProducts"]));
+     ui->txt_resDir->setText(QString::fromStdString(path_map["Results"]));
+     checkDirectories();
 
-    ui->widget_aux_Data->loadManagementPage(0);
-
-
-    auto path_map = FileUtils::readPath();
-    ui->txt_catDir->setText(QString::fromStdString(path_map["Catalogs"]));
-    ui->txt_auxDir->setText(QString::fromStdString(path_map["AuxiliaryData"]));
-    ui->txt_interDir->setText(QString::fromStdString(path_map["IntermediateProducts"]));
-    ui->txt_resDir->setText(QString::fromStdString(path_map["Results"]));
-    checkDirectories();
+     ui->widget_survey_mapping->loadMappingPage(new_catalog_file_path);
 }
 
 DialogOptions::~DialogOptions()

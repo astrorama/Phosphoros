@@ -4,7 +4,7 @@
 #include <QFileInfoList>
 #include <QSettings>
 #include <QTextStream>
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -212,6 +212,86 @@ std::string FileUtils::getLastUsedPath(){
    savePath(map);
 }
 
+std::map<std::string,std::map<std::string,std::string>> FileUtils::readUserPreferences(){
+  QString path = QString::fromStdString(getGUIConfigPath())+QDir::separator() +"pref.txt";
+  QFile file(path);
+
+  auto map = std::map<std::string,std::map<std::string,std::string>>{};
+  if (file.open(QIODevice::ReadOnly)){
+    while (!file.atEnd())
+    {
+       QString line = file.readLine();
+       auto line_split = line.split(" ");
+       if (line_split.length()>2){
+         auto catalog = line_split[0].toStdString();
+         if (map.find(catalog) == map.end()){
+           auto new_cat_map= std::map<std::string,std::string>{};
+           map.insert(std::make_pair(catalog,new_cat_map));
+         }
+
+         map[catalog].insert(
+             std::make_pair(line_split[1].toStdString(),
+                            line_split[2].toStdString()));
+       }
+    }
+  }
+
+  return map;
+}
+
+void FileUtils::writeUserPreferences(std::map<std::string,std::map<std::string,std::string>> preferences){
+   QString path = QString::fromStdString(getGUIConfigPath())+QDir::separator() +"pref.txt";
+   QFile file(path);
+   file.open(QIODevice::WriteOnly );
+   QTextStream stream(&file);
+
+   for (auto& item : preferences) {
+     for (auto& sub_item :item.second){
+       stream << QString::fromStdString(item.first) << " " ;
+       stream << QString::fromStdString(sub_item.first) <<  " " ;
+       stream << QString::fromStdString(sub_item.second) << " \n";
+     }
+   }
+
+   file.close();
+}
+
+void FileUtils::setUserPreference(const std::string& catalog, const std::string& key, const std::string& value ){
+  auto map = FileUtils::readUserPreferences();
+  if (map.find(catalog) == map.end()){
+    auto new_cat_map= std::map<std::string,std::string>{};
+    map.insert(std::make_pair(catalog,new_cat_map));
+  }
+
+  if (map[catalog].find(key) == map[catalog].end()){
+    map[catalog].insert(std::make_pair(key,value));
+  } else {
+    map[catalog][key] = value;
+  }
+
+  FileUtils::writeUserPreferences(map);
+
+}
+
+std::string FileUtils::getUserPreference(const std::string& catalog, const std::string& key){
+  auto map = FileUtils::readUserPreferences();
+  if (map.find(catalog) != map.end()){
+    if (map[catalog].find(key) != map[catalog].end()){
+      return map[catalog][key];
+    }
+  }
+
+  return "";
+}
+
+void FileUtils::clearUserPreference(const std::string& catalog, const std::string& key){
+  auto map = FileUtils::readUserPreferences();
+   if (map.find(catalog) != map.end() && map[catalog].find(key) != map[catalog].end()){
+     map[catalog].erase(key);
+     FileUtils::writeUserPreferences(map);
+   }
+}
+
 std::string FileUtils::getAuxRootPath(){
    return readPath()["AuxiliaryData"];
  }
@@ -251,12 +331,16 @@ std::string FileUtils::getIntermediaryProductRootPath(bool check, const std::str
   return info.absoluteFilePath().toStdString();
 }
 
-std::string FileUtils::getResultRootPath(bool check, const std::string& catalog_name){
+std::string FileUtils::getResultRootPath(bool check, const std::string& catalog_name, const std::string& cat_file_name){
   QString path = QString::fromStdString(readPath()["Results"]);
 
   if (catalog_name.size()>0){
      path = path + QDir::separator()+ QString::fromStdString(catalog_name);
    }
+
+  if (catalog_name.size()>0){
+      path = path + QDir::separator()+ QString::fromStdString(cat_file_name);
+  }
 
   QFileInfo info(path);
   if (check){

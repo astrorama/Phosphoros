@@ -4,7 +4,7 @@
 #include <QMessageBox>
 #include "PhzQtUI/DialogCatalogName.h"
 #include "ui_DialogCatalogName.h"
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 
 using namespace std;
 

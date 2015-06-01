@@ -3,7 +3,7 @@
 #include <QFile>
 #include <QDir>
 #include <set>
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 #include "PhzQtUI/XYDataSetTreeModel.h"
 #include "XYDataset/QualifiedName.h"
 

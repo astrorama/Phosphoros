@@ -24,7 +24,10 @@ class DialogOptions : public QDialog
 
 public:
     explicit DialogOptions(QWidget *parent = 0);
+    DialogOptions(std::string new_catalog_file_path, QWidget *parent = 0);
     ~DialogOptions();
+
+
 
 private slots:
 
@@ -73,6 +76,7 @@ private slots:
 private:
     void checkDirectories();
     std::unique_ptr<Ui::DialogOptions> ui;
+
 };
 
 }

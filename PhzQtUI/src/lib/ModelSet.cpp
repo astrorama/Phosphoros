@@ -3,7 +3,7 @@
 #include <QDir>
 #include <QTextStream>
 #include <QDomDocument>
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 
 #include "PhzQtUI/ModelSet.h"
 namespace Euclid {

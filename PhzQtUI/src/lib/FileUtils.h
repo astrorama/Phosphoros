@@ -125,7 +125,7 @@ public:
 
     static std::string getIntermediaryProductRootPath(bool check, const std::string& catalog_name);
 
-    static std::string getResultRootPath(bool check, const std::string& catalog_name);
+    static std::string getResultRootPath(bool check, const std::string& catalog_name, const std::string& cat_file_name);
 
 
     /**
@@ -173,6 +173,18 @@ public:
     static std::string getLastUsedPath();
 
     static void setLastUsedPath(const std::string& path);
+
+    /////////////////////////////////////////////////////////
+    //// Preferences
+    static std::map<std::string,std::map<std::string,std::string>> readUserPreferences();
+
+    static void writeUserPreferences(std::map<std::string,std::map<std::string,std::string>> preferences);
+
+    static void setUserPreference(const std::string& catalog, const std::string& key, const std::string& value );
+
+    static void clearUserPreference(const std::string& catalog, const std::string& key);
+
+    static std::string getUserPreference(const std::string& catalog, const std::string& key);
 
 };
 

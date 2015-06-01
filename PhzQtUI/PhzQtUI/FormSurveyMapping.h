@@ -27,6 +27,7 @@ public:
     ~FormSurveyMapping();
 
     void loadMappingPage();
+    void loadMappingPage(std::string new_path);
 
 signals:
     void startEdition(int i);

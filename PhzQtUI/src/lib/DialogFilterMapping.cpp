@@ -4,7 +4,7 @@
 #include "PhzQtUI/DialogFilterMapping.h"
 #include "ui_DialogFilterMapping.h"
 #include "PhzQtUI/XYDataSetTreeModel.h"
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 
 using namespace std;
 

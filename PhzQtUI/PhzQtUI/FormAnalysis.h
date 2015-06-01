@@ -87,6 +87,8 @@ private:
     std::list<std::string> getExcludedFilters();
     std::list<FilterMapping> getSelectedFilterMapping();
 
+    void setInputCatalogName( std::string name,bool do_test=true);
+
     std::string getSelectedSurveySourceColumn();
     void adjustPhzGridButtons(bool enabled);
 

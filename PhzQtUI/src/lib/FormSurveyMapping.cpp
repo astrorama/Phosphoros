@@ -10,7 +10,7 @@
 #include "PhzQtUI/FilterModel.h"
 #include "PhzQtUI/DialogFilterMapping.h"
 #include "PhzQtUI/DialogCatalogName.h"
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 
 
 
@@ -31,34 +31,48 @@ FormSurveyMapping::~FormSurveyMapping()
 }
 
 
+void FormSurveyMapping::loadMappingPage(std::string new_path){
+     SurveyModel* model = new SurveyModel();
+     model->loadSurvey();
+     ui->table_Map->setModel(model);
+     ui->table_Map->setColumnHidden(2, true);
+     ui->table_Map->setSelectionBehavior(QAbstractItemView::SelectRows);
+     ui->table_Map->setSelectionMode(QAbstractItemView::SingleSelection);
+     ui->table_Map->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+     ui->table_Map->update(QModelIndex());
+
+     ui->cb_mapName->clear();
+     for (auto cat :SurveyFilterMapping::getAvailableCatalogs()){
+       ui->cb_mapName->addItem(QString::fromStdString(cat));
+     }
+     ui->cb_SourceId->clear();
+     ui->cb_SourceId->addItem("");
+
+     connect(
+       ui->table_Map->selectionModel(),
+       SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
+       SLOT(filterMappingSelectionChanged(QModelIndex, QModelIndex))
+      );
+
+     ui->table_Map->clearSelection() ;
+     FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
+     ui->table_Filter->setModel(filter_model);
+
+     setFilterMappingInView();
+
+     if (new_path.length()>0){
+       on_btn_MapNew_clicked();
+       loadColumnFromFile(new_path);
+       m_default_survey=new_path;
+       QFileInfo info(QString::fromStdString(new_path));
+       ui->cb_mapName->addItem(info.baseName());
+       ui->cb_mapName->setCurrentIndex(ui->cb_mapName->count()-1);
+     }
+}
+
+
 void FormSurveyMapping::loadMappingPage(){
-    SurveyModel* model = new SurveyModel();
-    model->loadSurvey();
-    ui->table_Map->setModel(model);
-    ui->table_Map->setColumnHidden(2, true);
-    ui->table_Map->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->table_Map->setSelectionMode(QAbstractItemView::SingleSelection);
-    ui->table_Map->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    ui->table_Map->update(QModelIndex());
-
-    ui->cb_mapName->clear();
-    for (auto cat :SurveyFilterMapping::getAvailableCatalogs()){
-      ui->cb_mapName->addItem(QString::fromStdString(cat));
-    }
-    ui->cb_SourceId->clear();
-    ui->cb_SourceId->addItem("");
-
-    connect(
-      ui->table_Map->selectionModel(),
-      SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
-      SLOT(filterMappingSelectionChanged(QModelIndex, QModelIndex))
-     );
-
-    ui->table_Map->clearSelection() ;
-    FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
-    ui->table_Filter->setModel(filter_model);
-
-    setFilterMappingInView();
+  loadMappingPage("");
 }
 
 void FormSurveyMapping::setFilterMappingInEdition(){

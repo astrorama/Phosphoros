@@ -1,6 +1,6 @@
 
 #include <QMessageBox>
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 #include "PhzQtUI/DialogModelSet.h"
 #include "ui_DialogModelSet.h"
 #include "PhzQtUI/XYDataSetTreeModel.h"
