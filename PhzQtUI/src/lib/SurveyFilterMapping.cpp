@@ -67,6 +67,14 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
       return m_default_catalog;
     }
 
+    void SurveyFilterMapping::setNonDetection(double non_detection){
+      m_non_detection=non_detection;
+    }
+
+    double SurveyFilterMapping::getNonDetection() const{
+      return m_non_detection;
+    }
+
     std::list<std::string> SurveyFilterMapping::getAvailableCatalogs(){
       auto cat_root_path = FileUtils::getCatalogRootPath(true,"");
       std::list<std::string> all_dirs{};
@@ -125,6 +133,7 @@ SurveyFilterMapping SurveyFilterMapping::loadCatalog(std::string name) {
   QDomElement root_node = doc.documentElement();
   survey.setSourceIdColumn(root_node.attribute("SourceColumnId").toStdString());
   survey.setDefaultCatalogFile(root_node.attribute("DefaultCatalogPath").toStdString());
+  survey.setNonDetection(root_node.attribute("NonDetection").toDouble());
 
   auto columns_node = root_node.firstChildElement("AvailableColumns");
   auto list = columns_node.childNodes();
@@ -217,6 +226,7 @@ void SurveyFilterMapping::saveSurvey(std::string oldName){
   QDomDocument doc("CatalogInfo");
   QDomElement root = doc.createElement("CatalogInfo");
   root.setAttribute("SourceColumnId",QString::fromStdString(m_source_id_column));
+  root.setAttribute("NonDetection",QString::number(m_non_detection));
   root.setAttribute("DefaultCatalogPath",QString::fromStdString(m_default_catalog));
   doc.appendChild(root);
 

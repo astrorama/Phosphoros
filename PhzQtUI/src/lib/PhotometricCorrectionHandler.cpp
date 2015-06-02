@@ -73,6 +73,7 @@ std::map<std::string, boost::program_options::variable_value> PhotometricCorrect
     std::string output_file_name,
     int iteration_number,
     double tolerance,
+    double non_detection,
     std::string method,
     std::string photometric_grid_file,
     std::string training_catalog_file,
@@ -90,6 +91,7 @@ std::map<std::string, boost::program_options::variable_value> PhotometricCorrect
     options_map["catalogs-dir"].value() = boost::any(FileUtils::getCatalogRootPath(true,""));
     options_map["intermediate-products-dir"].value() = boost::any(FileUtils::getIntermediaryProductRootPath(true,""));
     options_map["catalog-name"].value() = boost::any(catalog);
+    options_map["missing-photometry-flag"].value() = boost::any(non_detection);
 
 
     options_map["output-phot-corr-file"].value() = boost::any(path_filename);

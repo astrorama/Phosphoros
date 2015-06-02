@@ -65,6 +65,7 @@ public:
      std::string output_file_name,
      int iteration_number,
      double tolerance,
+     double non_detection,
      std::string method,
      std::string photometric_grid_file,
      std::string training_catalog_file,

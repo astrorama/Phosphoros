@@ -43,6 +43,7 @@ int SurveyModel::newSurvey(int duplicate_from_row ){
 
         std::string new_name = getDuplicateName(m_survey_filter_mappings[max_ref].getName());
         m_survey_filter_mappings[max_ref].setName(new_name);
+        m_survey_filter_mappings[max_ref].setNonDetection(ref_survey.getNonDetection());
 
     }
     else{
@@ -142,6 +143,15 @@ void SurveyModel::setDefaultCatalog(std::string new_default_catalog, int row){
      m_survey_filter_mappings.at(ref).setDefaultCatalogFile(new_default_catalog);
 }
 
+void SurveyModel::setNonDetection(double newNonDetection, int row){
+  int ref = getValue(row,2).toInt();
+  m_survey_filter_mappings.at(ref).setNonDetection(newNonDetection);
+}
+
+ double SurveyModel::getNonDetection(int row){
+   int ref = getValue(row,2).toInt();
+   return m_survey_filter_mappings.at(ref).getNonDetection();
+ }
 
 std::string SurveyModel::getDefaultCatalog(int row) const{
   int ref = getValue(row,2).toInt();

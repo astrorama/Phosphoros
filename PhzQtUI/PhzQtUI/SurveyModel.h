@@ -76,6 +76,10 @@ public:
    */
   std::string getName(int row);
 
+  void setNonDetection(double newNonDetection, int row);
+
+  double getNonDetection(int row);
+
   /**
    * @brief Change the Source column Id of the Survey represented by the given
    * row.

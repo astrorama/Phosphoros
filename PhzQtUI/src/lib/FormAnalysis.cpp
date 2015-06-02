@@ -122,8 +122,7 @@ void FormAnalysis::adjustPhzGridButtons(bool enabled) {
   } else {
     ui->cb_CompatibleGrid->lineEdit()->setStyleSheet(
         "QLineEdit { color: black }");
-    setToolBoxButtonColor(ui->toolBox, 0,
-        ui->label_18->palette().color(QPalette::Window));
+    setToolBoxButtonColor(ui->toolBox, 0,Qt::black);
   }
   ui->btn_GetConfigGrid->setToolTip(tool_tip);
   ui->btn_RunGrid->setToolTip(tool_tip);
@@ -221,8 +220,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   if (!correction_ok) {
     setToolBoxButtonColor(ui->toolBox, 1, QColor("orange"));
   } else {
-    setToolBoxButtonColor(ui->toolBox, 1,
-        ui->label_18->palette().color(QPalette::Window));
+    setToolBoxButtonColor(ui->toolBox, 1,Qt::black);
   }
 }
 
@@ -347,15 +345,17 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 }
 
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getRunOptionMap() {
-  std::vector<std::string> filter_mappings;
-  for (auto& filter : getSelectedFilterMapping()) {
-    filter_mappings.push_back(
-        filter.getFilterFile() + " " + filter.getFluxColumn() + " "
-            + filter.getErrorColumn());
+
+  auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+  double non_detection = -99.;
+  for (auto& survey_pair : m_analysis_survey_list) {
+    if (survey_pair.second.getName().compare(survey_name) == 0) {
+      non_detection = survey_pair.second.getNonDetection();
+    }
   }
 
-  auto path_grid_filename = FileUtils::getPhotmetricGridRootPath(false,
-      ui->cb_AnalysisSurvey->currentText().toStdString())
+
+  auto path_grid_filename = FileUtils::getPhotmetricGridRootPath(false,survey_name)
       + QString(QDir::separator()).toStdString()
       + ui->cb_CompatibleGrid->currentText().toStdString();
 
@@ -369,8 +369,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   options_map["results-dir"].value() = boost::any(
       FileUtils::getResultRootPath(true, "", ""));
 
-  options_map["catalog-name"].value() = boost::any(
-      ui->cb_AnalysisSurvey->currentText().toStdString());
+  options_map["catalog-name"].value() = boost::any(survey_name);
 
   options_map["phz-output-dir"].value() = boost::any(
       ui->txt_outputFolder->text().toStdString());
@@ -381,6 +380,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
       ui->txt_inputCatalog->text().toStdString());
   options_map["source-id-column-name"].value() = boost::any(
       getSelectedSurveySourceColumn());
+  options_map["missing-photometry-flag"].value() = boost::any(non_detection);
+
 
   auto filter_excluded = getExcludedFilters();
   if (filter_excluded.size() > 0) {
@@ -395,7 +396,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   if (ui->gb_corrections->isChecked()) {
     auto path_correction_filename = FileUtils::getPhotCorrectionsRootPath(true,
-        ui->cb_AnalysisSurvey->currentText().toStdString())
+        survey_name)
         + QString(QDir::separator()).toStdString()
         + ui->cb_AnalysisCorrection->currentText().toStdString();
 
@@ -631,7 +632,8 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
         ui->cb_CompatibleGrid->currentText().toStdString(),
         getSelectedFilterMapping(),
         getExcludedFilters(),
-        selected_survey.getDefaultCatalogFile());
+        selected_survey.getDefaultCatalogFile(),
+        selected_survey.getNonDetection());
 
     connect( popup.get(), SIGNAL(correctionComputed(const QString &)),
         SLOT(onCorrectionComputed(const QString &)));
@@ -825,7 +827,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
         {
           // found correct button
           QPalette p = button->palette();
-          p.setColor(QPalette::Button, color);
+          p.setColor(QPalette::ButtonText, color);
           button->setPalette(p);
           break;
         }

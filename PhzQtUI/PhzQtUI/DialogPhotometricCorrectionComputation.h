@@ -51,7 +51,8 @@ public:
         std::string grid,
         std::list<FilterMapping> selected_filters,
         std::list<std::string> excluded_filters,
-        std::string default_catalog_path);
+        std::string default_catalog_path,
+        double non_detection);
 
 signals:
    /**
@@ -110,6 +111,7 @@ private:
     std::list<FilterMapping> m_selected_filters;
     std::list<std::string> m_excluded_filters;
     std::string m_id_column;
+    double m_non_detection;
     void disablePage();
     std::string runFunction();
     void setRunEnability();
