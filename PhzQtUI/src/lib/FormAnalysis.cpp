@@ -546,10 +546,11 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
           QMessageBox::Ok);
     } else {
 
-      QString fileName = QFileDialog::getSaveFileName(this, tr("Save Configuration File"),QString::fromStdString(FileUtils::getLastUsedPath())
-          ,tr("Config (*.conf)"));
+      QString fileName = QFileDialog::getSaveFileName(this,
+          tr("Save Configuration File"),
+          QString::fromStdString(FileUtils::getRootPath())+QDir::separator()+"config",
+          tr("Config (*.conf)"));
       if (fileName.length()>0) {
-        FileUtils::setLastUsedPath(fileName.toStdString());
         auto config_map = getGridConfiguration();
         PhzUITools::ConfigurationWriter::writeConfiguration(config_map,fileName.toStdString());
 
@@ -738,9 +739,9 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   void FormAnalysis::on_btn_GetConfigAnalysis_clicked()
   {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save Configuration File"),
-        QString::fromStdString(FileUtils::getLastUsedPath()),tr("Config (*.conf)"));
+        QString::fromStdString(FileUtils::getRootPath())+QDir::separator()+"config",
+        tr("Config (*.conf)"));
     if (fileName.length()>0) {
-      FileUtils::setLastUsedPath(fileName.toStdString());
       auto config_map = getRunOptionMap();
       PhzUITools::ConfigurationWriter::writeConfiguration(config_map,fileName.toStdString());
 
