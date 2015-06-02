@@ -132,7 +132,7 @@ void DialogOptions::on_btn_saveGeneral_clicked()
 }
 
 void DialogOptions::on_btn_browseCat_clicked(){
-  auto root_path= QString::fromStdString(FileUtils::getRootPath());
+  auto root_path= QString::fromStdString(FileUtils::getCatalogRootPath(false,""));
   QFileDialog dialog(this);
   dialog.selectFile(root_path);
   dialog.setFileMode(QFileDialog::DirectoryOnly);
@@ -147,7 +147,7 @@ void DialogOptions::on_btn_browseCat_clicked(){
 }
 
 void DialogOptions::on_btn_browseAux_clicked(){
-  auto root_path= QString::fromStdString(FileUtils::getRootPath());
+  auto root_path= QString::fromStdString(FileUtils::getAuxRootPath());
    QFileDialog dialog(this);
    dialog.selectFile(root_path);
    dialog.setFileMode(QFileDialog::DirectoryOnly);
@@ -161,7 +161,7 @@ void DialogOptions::on_btn_browseAux_clicked(){
 }
 
 void DialogOptions::on_btn_browseInter_clicked(){
-  auto root_path= QString::fromStdString(FileUtils::getRootPath());
+  auto root_path= QString::fromStdString(FileUtils::getIntermediaryProductRootPath(false,""));
    QFileDialog dialog(this);
    dialog.selectFile(root_path);
    dialog.setFileMode(QFileDialog::DirectoryOnly);
@@ -175,7 +175,7 @@ void DialogOptions::on_btn_browseInter_clicked(){
 }
 
 void DialogOptions::on_btn_browseRes_clicked(){
-  auto root_path= QString::fromStdString(FileUtils::getRootPath());
+  auto root_path= QString::fromStdString(FileUtils::getResultRootPath(false,"",""));
    QFileDialog dialog(this);
    dialog.selectFile(root_path);
    dialog.setFileMode(QFileDialog::DirectoryOnly);
