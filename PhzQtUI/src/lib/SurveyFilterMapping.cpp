@@ -1,4 +1,12 @@
 #include <iostream>
+#include <fstream>
+#include <boost/regex.hpp>
+using boost::regex;
+using boost::regex_match;
+using boost::smatch;
+#include <boost/algorithm/string.hpp>
+#include "ElementsKernel/Exception.h"
+#include "ElementsKernel/Logging.h"
 #include "FileUtils.h"
 #include <QDir>
 #include <QDirIterator>
@@ -9,6 +17,9 @@
 
 namespace Euclid {
 namespace PhzQtUI {
+
+static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapping");
+
     SurveyFilterMapping::SurveyFilterMapping(){}
 
 
@@ -131,25 +142,50 @@ SurveyFilterMapping SurveyFilterMapping::loadCatalog(std::string name) {
   std::list<FilterMapping> mappings{};
 
   auto mapping_path=QString::fromStdString(FileUtils::getIntermediaryProductRootPath(true,FileUtils::removeExt(name, ".xml")))+QDir::separator();
-  QFile mapping_file(mapping_path+"filter_mapping.txt");
 
-  if (mapping_file.open(QIODevice::ReadOnly))
-  {
-     QTextStream in(&mapping_file);
-     while (!in.atEnd())
-     {
-        QString line = in.readLine();
-        auto tokens = line.split(" ");
-        if (tokens.length()==3){
-          FilterMapping mapping;
-          mapping.setFilterFile(tokens[0].toStdString());
-          mapping.setFluxColumn(tokens[1].toStdString());
-          mapping.setErrorColumn(tokens[2].toStdString());
-          mappings.push_back(mapping);
-        }
+
+   std::ifstream in {mapping_path.toStdString()+"filter_mapping.txt"};
+   std::string line;
+   regex expr {"\\s*([^\\s#]+)\\s+([^\\s#]+)\\s+([^\\s#]+)\\s*(#.*)?"};
+   while (std::getline(in, line)) {
+     boost::trim(line);
+     if (line[0] == '#') {
+       continue;
      }
-     mapping_file.close();
-  }
+     smatch match_res;
+     if (!regex_match(line, match_res, expr)) {
+       logger.error() << "Syntax error in " << mapping_path.toStdString()+"filter_mapping.txt" << ": " << line;
+       throw Elements::Exception() << "Syntax error in " << mapping_path.toStdString()+"filter_mapping.txt" << ": " << line;
+     }
+
+     FilterMapping mapping;
+     mapping.setFilterFile(match_res.str(1));
+     mapping.setFluxColumn(match_res.str(2));
+     mapping.setErrorColumn(match_res.str(3));
+     mappings.push_back(mapping);
+
+   }
+
+
+
+//  QFile mapping_file(mapping_path+"filter_mapping.txt");
+//  if (mapping_file.open(QIODevice::ReadOnly))
+//  {
+//     QTextStream in(&mapping_file);
+//     while (!in.atEnd())
+//     {
+//        QString line = in.readLine();
+//        auto tokens = line.split(" ");
+//        if (tokens.length()==3){
+//          FilterMapping mapping;
+//          mapping.setFilterFile(tokens[0].toStdString());
+//          mapping.setFluxColumn(tokens[1].toStdString());
+//          mapping.setErrorColumn(tokens[2].toStdString());
+//          mappings.push_back(mapping);
+//        }
+//     }
+//     mapping_file.close();
+//  }
 
   survey.setFilters(mappings);
 
