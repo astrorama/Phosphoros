@@ -63,7 +63,7 @@ if not executable:
 if executable[0] == 'help':
     printHelp()
 
-phosphoros_conf = os.getenv('PHOSPHOROS_ROOT', os.path.expanduser('~')+os.sep+'Phosphoros') + os.sep + 'conf'
+phosphoros_conf = os.getenv('PHOSPHOROS_ROOT', os.path.expanduser('~')+os.sep+'Phosphoros') + os.sep + 'config'
 if os.environ.get('ELEMENTS_CONF_PATH'):
     os.environ['ELEMENTS_CONF_PATH'] = phosphoros_conf + os.path.pathsep + os.environ['ELEMENTS_CONF_PATH']
 else:
