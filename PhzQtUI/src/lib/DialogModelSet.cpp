@@ -39,6 +39,7 @@ DialogModelSet::DialogModelSet(QWidget *parent) :
 
     connect( treeModel_red, SIGNAL(itemChanged(QStandardItem*)), treeModel_red,
                  SLOT(onItemChanged(QStandardItem*)));
+
 }
 
 DialogModelSet::~DialogModelSet()
@@ -101,6 +102,7 @@ void DialogModelSet::turnControlsInEdition(){
     ui->txt_zMax->setEnabled(true);
     ui->txt_zStep->setEnabled(true);
 
+    ui->txt_name->setEnabled(true);
 
     ui->tableView_ParameterRule->setEnabled(false);
 }
@@ -132,6 +134,8 @@ void DialogModelSet::turnControlsInView(){
     ui->txt_zMin->setEnabled(false);
     ui->txt_zMax->setEnabled(false);
     ui->txt_zStep->setEnabled(false);
+
+    ui->txt_name->setEnabled(false);
 
     ui->tableView_ParameterRule->setEnabled(true);
 }
@@ -177,6 +181,8 @@ void DialogModelSet::on_btn_cancel_clicked()
         ui->tableView_ParameterRule->deletSelectedRule();
     }else{
         auto selected_rule = ui->tableView_ParameterRule->getSelectedRule();
+
+        ui->txt_name->setText(QString::fromStdString(selected_rule.getName()));
         // SED
         static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedRootObject(),selected_rule.getExcludedSeds());
 
@@ -206,6 +212,16 @@ void DialogModelSet::on_btn_save_clicked()
                                           QMessageBox::Ok );
         return;
     }
+
+    if (!ui->tableView_ParameterRule->checkNameAlreadyUsed(ui->txt_name->text().toStdString())){
+      QMessageBox::warning( this, "Duplicate Name...",
+                           "The name you enter is already used, please provide another name.",
+                           QMessageBox::Ok );
+      return;
+    }
+
+    ui->tableView_ParameterRule->setNameToSelectedRule(ui->txt_name->text().toStdString());
+
 
     // SED
     string sed_root = sed_res.second;
@@ -248,6 +264,8 @@ void DialogModelSet::on_btn_save_clicked()
          ParameterRuleModel* model=ui->tableView_ParameterRule->getModel();
 
          auto selected_rule = model->getRule(new_index.row());
+
+         ui->txt_name->setText(QString::fromStdString(selected_rule.getName()));
 
          // SED
          static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedRootObject(),selected_rule.getExcludedSeds());

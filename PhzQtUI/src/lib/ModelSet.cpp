@@ -73,6 +73,7 @@ ModelSet ModelSet::loadModelSetFromFile(std::string fileName,std::string root_pa
          ParameterRule rule;
 
          auto node_rule = list.at(i).toElement();
+         rule.setName(node_rule.attribute("Name").toStdString());
          rule.setSedRootObject(node_rule.attribute("SedRootObject").toStdString());
          rule.setReddeningRootObject(node_rule.attribute("ReddeningCurveRootObject").toStdString());
 
@@ -138,6 +139,7 @@ void ModelSet::saveModelSet(std::string oldName){
     for(auto& rule_pair : m_parameter_rules){
         auto& rule = rule_pair.second;
         QDomElement rule_node = doc.createElement("ParameterRule");
+        rule_node.setAttribute("Name",QString::fromStdString(rule.getName()));
         rule_node.setAttribute("SedRootObject",QString::fromStdString(rule.getSedRootObject()));
         rule_node.setAttribute("ReddeningCurveRootObject",QString::fromStdString(rule.getReddeningRootObject()));
 

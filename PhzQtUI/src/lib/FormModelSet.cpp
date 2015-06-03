@@ -1,8 +1,14 @@
 #include <QMessageBox>
 #include "PhzQtUI/FormModelSet.h"
+#include "PhzQtUI/XYDataSetTreeModel.h"
+
 #include "ui_FormModelSet.h"
 #include "PhzQtUI/DialogModelSet.h"
 #include "FileUtils.h"
+
+#include "ElementsKernel/Exception.h"
+#include "PhzConfiguration/ParameterSpaceConfiguration.h"
+namespace po = boost::program_options;
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -124,20 +130,69 @@ void FormModelSet::on_btn_SetCancel_clicked()
 
 void FormModelSet::on_btn_SetSave_clicked()
 {
-    std::string old_name =  ui->tableView_Set->getSelectedName().toStdString();
-   if ( ui->tableView_Set->setSelectedName( ui->txt_SetName->text())){
-      ui->tableView_Set->setSelectedRules(ui->tableView_ParameterRule->getModel()->getParameterRules());
-      ui->tableView_Set->updateModelNumberForSelected();
+   std::map<std::string, po::variable_value> options;
 
-      ui->tableView_Set->saveSelectedSet(old_name);
-      setModelInView();
+   options["sed-root-path"].value() = boost::any(FileUtils::getSedRootPath(false));
+   options["reddening-curve-root-path"].value() = boost::any(FileUtils::getRedCurveRootPath(false));
+
+   for (auto& param_rule : ui->tableView_ParameterRule->getModel()->getParameterRules()){
+
+     XYDataSetTreeModel treeModel_sed;
+     treeModel_sed.loadDirectory(FileUtils::getSedRootPath(false), false,"SEDs");
+     treeModel_sed.setState(param_rule.second.getSedRootObject(),param_rule.second.getExcludedSeds());
+     auto seds = treeModel_sed.getSelectedLeaf("");
+     options["sed-name-"+param_rule.second.getName()].value() = boost::any(seds);
+
+     XYDataSetTreeModel treeModel_red;
+     treeModel_red.loadDirectory(FileUtils::getRedCurveRootPath(false), false,"Reddening Curves");
+     treeModel_red.setState(param_rule.second.getReddeningRootObject(),param_rule.second.getExcludedReddenings());
+     auto reds = treeModel_red.getSelectedLeaf("");
+     options["reddening-curve-name-"+param_rule.second.getName()].value() = boost::any(reds);
+
+     std::vector<std::string> z_range_vector;
+     std::string z_range=""+std::to_string(param_rule.second.getZRange().getMin())+" "
+           +std::to_string(param_rule.second.getZRange().getMax())+" "
+           +std::to_string(param_rule.second.getZRange().getStep());
+     z_range_vector.push_back(z_range);
+     options["z-range-"+param_rule.second.getName()].value() = boost::any(z_range_vector);
+
+     std::vector<std::string> ebv_range_vector;
+
+     std::string ebv_range=""+std::to_string(param_rule.second.getEbvRange().getMin())+" "
+         +std::to_string(param_rule.second.getEbvRange().getMax())+" "
+         +std::to_string(param_rule.second.getEbvRange().getStep());
+     ebv_range_vector.push_back(ebv_range);
+     options["ebv-range-"+param_rule.second.getName()].value() = boost::any(ebv_range_vector);
+
    }
-   else{
-       QMessageBox::warning( this,
-                             "Duplicate name...",
-                             "The name you keyed in is already used. Please enter a new name.",
-                             QMessageBox::Ok );
+
+  Euclid::PhzConfiguration::ParameterSpaceConfiguration config(options);
+
+
+  try{
+    config.getParameterSpaceRegions();
+  } catch (Elements::Exception except){
+    QMessageBox::warning( this,
+                                 "Overlapping Region...",
+                                 except.what(),
+                                 QMessageBox::Ok );
+    return;
+  }
+
+   std::string old_name =  ui->tableView_Set->getSelectedName().toStdString();
+   if (! ui->tableView_Set->setSelectedName( ui->txt_SetName->text())){
+     QMessageBox::warning( this,
+        "Duplicate name...",
+       "The name you keyed in is already used. Please enter a new name.",
+       QMessageBox::Ok );
+     return;
    }
+
+   ui->tableView_Set->setSelectedRules(ui->tableView_ParameterRule->getModel()->getParameterRules());
+   ui->tableView_Set->updateModelNumberForSelected();
+   ui->tableView_Set->saveSelectedSet(old_name);
+   setModelInView();
+
 }
 
 void FormModelSet::setSelectionChanged(QModelIndex new_index, QModelIndex)
@@ -159,9 +214,6 @@ void FormModelSet::on_btn_SetToRules_clicked()
 {
   std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet());
     popUp->loadData(ui->tableView_ParameterRule->getModel()->getParameterRules());
-
-    // As PHOSPHOROS do not know how to treat sparse grid for now, block to 1 rule!
-    popUp->setSingleLine();
 
     connect(
       popUp.get(),
