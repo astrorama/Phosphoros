@@ -39,10 +39,12 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
     string id_column, string model, string grid,
     std::list<FilterMapping> selected_filters,
     std::list<std::string> excluded_filters,
-    std::string default_catalog_path) {
+    std::string default_catalog_path,
+    double non_detection) {
   m_id_column = id_column;
   m_selected_filters = selected_filters;
   m_excluded_filters = excluded_filters;
+  m_non_detection=non_detection;
   ui->txt_survey->setText(QString::fromStdString(survey));
   ui->txt_Model->setText(QString::fromStdString(model));
   ui->txt_grid->setText(QString::fromStdString(grid));
@@ -216,6 +218,7 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
         ui->txt_survey->text().toStdString(),
         ui->txt_FileName->text().toStdString(), max_iter_number,
         ui->txt_Tolerence->text().toDouble(),
+        m_non_detection,
         ui->cb_SelectionMethod->currentText().toStdString(),
         ui->txt_grid->text().toStdString(),
         ui->txt_catalog->text().toStdString(), m_id_column,

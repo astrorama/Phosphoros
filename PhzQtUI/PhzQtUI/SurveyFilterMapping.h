@@ -76,6 +76,10 @@ public:
      */
     void setColumnList(std::set<std::string> new_list);
 
+    void setNonDetection(double non_detection);
+
+    double getNonDetection() const;
+
 
     /**
      * @brief set the default catalog path
@@ -132,6 +136,7 @@ private:
     std::list<FilterMapping> m_filters;
     std::string m_default_catalog;
     std::set<std::string> m_column_list;
+    double m_non_detection=-99.;
 
 };
 

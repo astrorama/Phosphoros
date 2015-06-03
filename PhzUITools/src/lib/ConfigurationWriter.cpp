@@ -8,6 +8,8 @@
 #include <iostream>
 #include "PhzUITools/ConfigurationWriter.h"
 
+
+
 namespace Euclid {
 namespace PhzUITools {
 
@@ -21,11 +23,11 @@ bool ConfigurationWriter::writeConfiguration(
 
   for(auto& conf_item : config){
 
-
-    try{
+    if (conf_item.second.value().type()==typeid(double)){
+      config_file<<conf_item.first<<"="<< boost::any_cast<double>(conf_item.second.value())<<"\n";
+    } else if (conf_item.second.value().type()==typeid(std::string)){
       config_file<<conf_item.first<<"="<< boost::any_cast<std::string>(conf_item.second.value())<<"\n";
-    }
-    catch(...){
+    } else{
       for (auto& item : boost::any_cast<std::vector<std::string>>(conf_item.second.value()) ){
             config_file<<conf_item.first<<"="<<item<<"\n";
           }

@@ -68,6 +68,8 @@ void FormSurveyMapping::loadMappingPage(std::string new_path){
        ui->cb_mapName->addItem(info.baseName());
        ui->cb_mapName->setCurrentIndex(ui->cb_mapName->count()-1);
      }
+
+
 }
 
 
@@ -89,6 +91,7 @@ void FormSurveyMapping::setFilterMappingInEdition(){
     ui->btn_newCat->setEnabled(true);
     ui->cb_SourceId->setEnabled(true);
     ui->btn_AddFilter->setEnabled(true);
+    ui->txt_nonDetection->setEnabled(true);
 
     ui->table_Filter->setEnabled(true);
 
@@ -117,6 +120,7 @@ void FormSurveyMapping::setFilterMappingInView(){
     ui->btn_AddFilter->setEnabled(false);
     ui->btn_BtnEditFilter->setEnabled(false);
     ui->btn_DeleteFilter->setEnabled(false);
+    ui->txt_nonDetection->setEnabled(false);
 
 
     ui->table_Filter->setEnabled(false);
@@ -215,6 +219,9 @@ void FormSurveyMapping::on_btn_MapCancel_clicked()
      } else{
 
         auto current_name = model->getName(row);
+
+        ui->txt_nonDetection->setValue(model->getNonDetection(row));
+
         for (auto i=0;i< ui->cb_mapName->count();i++){
 
                if (ui->cb_mapName->itemText(i).toStdString()==current_name){
@@ -259,6 +266,8 @@ void FormSurveyMapping::on_btn_MapSave_clicked()
      model->setName(ui->cb_mapName->currentText().toStdString(),row);
      model->setSourceIdColumn(ui->cb_SourceId->currentText().toStdString(),row);
 
+     model->setNonDetection(ui->txt_nonDetection->value(),row);
+
      FilterModel* filter_model=static_cast<FilterModel*>(ui->table_Filter->model());
      model->setFilters(std::move(filter_model->getFilters()),row);
 
@@ -297,10 +306,14 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
     m_column_from_file=model->getColumnList(new_index.row());
 
     filter_model->setFilters(model->getFilters(new_index.row()));
+
+    ui->txt_nonDetection->setValue(model->getNonDetection(new_index.row()));
+
   } else {
     m_default_survey="";
     ui->cb_SourceId->setCurrentIndex(0);
     ui->cb_SourceId->clearEditText();
+    ui->txt_nonDetection->setValue(-99.);
   }
 
   fillCbColumns(cb_text);
