@@ -716,13 +716,12 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   {
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::Directory);
-    dialog.selectFile(QString::fromStdString(FileUtils::getLastUsedPath()));
+    dialog.selectFile(ui->txt_outputFolder->text());
     dialog.setOption(QFileDialog::DontUseNativeDialog);
 
     dialog.setLabelText( QFileDialog::Accept, "Select" );
     if (dialog.exec()) {
       ui->txt_outputFolder->setText(dialog.selectedFiles()[0]);
-      FileUtils::setLastUsedPath(dialog.selectedFiles()[0].toStdString());
       setRunAnnalysisEnable(true);
     }
   }
