@@ -11,6 +11,12 @@ ModelSetModel::ModelSetModel():QStandardItemModel()
 {
 }
 
+std::map<std::string,PhzDataModel::ModelAxesTuple> ModelSetModel::getAxesTuple(int row) const{
+  int id = getValue(row,2).toInt();
+  const std::map<int,ModelSet>& ref=m_set_list;
+  return ref.at(id).getAxesTuple();
+}
+
 const QString ModelSetModel::getName(int row) const{
     return getValue(row,0);
 }

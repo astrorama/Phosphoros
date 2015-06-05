@@ -24,14 +24,6 @@ class PhzGridInfoHandler
 {
 public:
 
-  /**
-   *  @brief Build the Axes tuple from the ModelSet.
-   *
-   *  @param model_set The selected ModelSet.
-   *
-   *  @return the ModelAxesTuple matching the ModelSet.
-   */
-  static PhzDataModel::ModelAxesTuple getAxesTuple(const ModelSet& model_set);
 
   /**
    * @brief Get the name of the file containing a grid with the same axes and
@@ -45,7 +37,7 @@ public:
    */
   static std::list<std::string> getCompatibleGridFile(
       std::string catalog,
-      const PhzDataModel::ModelAxesTuple& axes,
+      const std::map<std::string,PhzDataModel::ModelAxesTuple>& axes,
       const std::list<std::string> & selected_filters,
       std::string igm_type);
 
@@ -63,7 +55,7 @@ public:
   static std::map<std::string, boost::program_options::variable_value> GetConfigurationMap(
       std::string catalog,
       std::string output_file,
-      const PhzDataModel::ModelAxesTuple& axes,
+      ModelSet model,
       const std::list<std::string>& selected_filters,
       std::string igm_type);
 };
