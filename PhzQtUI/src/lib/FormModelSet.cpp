@@ -139,8 +139,9 @@ void FormModelSet::on_btn_SetSave_clicked()
      return;
    }
 
+   auto rules =  ui->tableView_Set->getSelectedParameterRules();
    ui->tableView_Set->setSelectedRules(ui->tableView_ParameterRule->getModel()->getParameterRules());
-   ui->tableView_Set->updateModelNumberForSelected();
+
    try{
        ui->tableView_Set->getSelectedAxesTuple();
      } catch (Elements::Exception except){
@@ -148,8 +149,12 @@ void FormModelSet::on_btn_SetSave_clicked()
                                     "Overlapping Region...",
                                     except.what(),
                                     QMessageBox::Ok );
+
+       ui->tableView_Set->setSelectedRules(rules);
        return;
    }
+
+   ui->tableView_Set->updateModelNumberForSelected();
    ui->tableView_Set->saveSelectedSet(old_name);
    setModelInView();
 
