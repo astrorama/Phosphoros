@@ -59,7 +59,7 @@ public:
      */
     bool checkUniqueName(QString new_name, int id) const;
 
-
+    std::map<std::string,PhzDataModel::ModelAxesTuple> getAxesTuple(int row) const;
 
     /**
      * @brief Get the Name of the ModelSet represented by the row 'row'

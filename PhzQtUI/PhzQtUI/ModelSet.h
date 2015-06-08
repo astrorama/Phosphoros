@@ -1,9 +1,17 @@
 #ifndef MODELSET_H
 #define MODELSET_H
 
-#include <string>
 #include <map>
+#include <string>
+#include "PhzDataModel/PhzModel.h"
 #include "ParameterRule.h"
+
+
+namespace boost{
+namespace program_options{
+ class variable_value;
+}
+}
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -87,6 +95,10 @@ public:
      * @param oldName
      */
     void saveModelSet(std::string old_name);
+
+    std::map<std::string, boost::program_options::variable_value> getConfigOptions() const;
+
+    std::map<std::string,PhzDataModel::ModelAxesTuple> getAxesTuple() const;
 
 private:
     std::string m_name;

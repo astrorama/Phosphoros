@@ -28,6 +28,10 @@ po::options_description DisplayModelGridConfiguration::getProgramOptions() {
   po::options_description options {"Display Model Grid options"};
 
   options.add_options()
+  ("all-regions-info", po::bool_switch()->default_value(false),
+      "Show an overview of each parameter space region")
+  ("region", po::value<std::string>(),
+      "Specify a region to show information for")
   ("sed", po::bool_switch()->default_value(false),
       "Show the SED axis values")
   ("redcurve", po::bool_switch()->default_value(false),
@@ -53,6 +57,18 @@ DisplayModelGridConfiguration::DisplayModelGridConfiguration(
 
 }
 
+bool DisplayModelGridConfiguration::showOverall() {
+  bool result = true;
+  if (m_options["all-regions-info"].as<bool>() || m_options.count("region") > 0) {
+    result = false;
+  }
+  return result;
+}
+
+bool DisplayModelGridConfiguration::showAllRegionsInfo() {
+  return m_options["all-regions-info"].as<bool>();
+}
+
 bool DisplayModelGridConfiguration::showGeneric() {
   bool result = true;
   if (m_options["sed"].as<bool>() || m_options["redcurve"].as<bool>()
@@ -61,6 +77,10 @@ bool DisplayModelGridConfiguration::showGeneric() {
     return false;
   }
   return result;
+}
+
+std::string DisplayModelGridConfiguration::getRegionName() {
+  return m_options["region"].as<std::string>();
 }
 
 bool DisplayModelGridConfiguration::showSedAxis() {

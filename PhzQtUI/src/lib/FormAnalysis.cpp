@@ -70,7 +70,7 @@ void FormAnalysis::updateGridSelection() {
       break;
     }
   }
-  auto axis = PhzGridInfoHandler::getAxesTuple(selected_model);
+  auto axis = selected_model.getAxesTuple();
   auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
       ui->cb_AnalysisSurvey->currentText().toStdString(), axis,
       getSelectedFilters(), ui->cb_igm->currentText().toStdString());
@@ -337,10 +337,10 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
     }
   }
 
-  auto axes = PhzGridInfoHandler::getAxesTuple(selected_model);
+
 
   return PhzGridInfoHandler::GetConfigurationMap(
-      ui->cb_AnalysisSurvey->currentText().toStdString(), file_name, axes,
+      ui->cb_AnalysisSurvey->currentText().toStdString(), file_name, selected_model,
       getFilters(), ui->cb_igm->currentText().toStdString());
 }
 
@@ -716,13 +716,12 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   {
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::Directory);
-    dialog.selectFile(QString::fromStdString(FileUtils::getLastUsedPath()));
+    dialog.selectFile(ui->txt_outputFolder->text());
     dialog.setOption(QFileDialog::DontUseNativeDialog);
 
     dialog.setLabelText( QFileDialog::Accept, "Select" );
     if (dialog.exec()) {
       ui->txt_outputFolder->setText(dialog.selectedFiles()[0]);
-      FileUtils::setLastUsedPath(dialog.selectedFiles()[0].toStdString());
       setRunAnnalysisEnable(true);
     }
   }

@@ -25,6 +25,14 @@ public:
     ParameterRuleModel(std::map<int,ParameterRule> init_parameter_rules, std::string sedRootPath, std::string redRootPath);
 
     /**
+      * @briefcheck if the provided new name is already used for
+      * another ParameterRule than the one in the row 'row'.
+      * @param new_name
+      * @row
+      */
+    bool checkNameAlreadyUsed(std::string new_name,int row) const;
+
+    /**
      * @brief Returns the version of the ParameterRules handled by the ParameterRuleModel.
      * @return ParameterRules map
      */
@@ -45,6 +53,13 @@ public:
      * @param row
      */
     void setRanges(Range ebvRange,Range zRange,int row);
+
+    /**
+     * @brief Push the name to the ParameterRule represented by the row 'row'.
+     * @param new_name
+     * @param row
+     */
+    void setName(std::string new_name,int row);
 
     /**
      * @brief Push the SED root object and SED excluded path to the ParameterRule represented by the row 'row'.
@@ -84,6 +99,8 @@ public:
     const ParameterRule& getRule(int row) const;
 
 private:
+
+    std::string getParamName(const ParameterRule& rule) const;
     std::string getSedStatus(const ParameterRule& rule) const;
     std::string getSedGroupName(const ParameterRule& rule) const;
     std::string getRedStatus(const ParameterRule& rule) const;

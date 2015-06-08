@@ -29,6 +29,10 @@ ModelSetModel* ModelSetTable::getModel(){
     return static_cast<ModelSetModel*>(this->model());
 }
 
+const ModelSetModel* ModelSetTable::cGetModel() const{
+    return static_cast<ModelSetModel*>(this->model());
+}
+
 void ModelSetTable::deleteSelectedSet(bool deletFile){
     QModelIndexList index = this->selectionModel()->selectedIndexes();
     getModel()->deleteSet(index[0].row(),deletFile);
@@ -52,6 +56,11 @@ void ModelSetTable::newSet(bool duplicate_selected){
 
 bool ModelSetTable::hasSelectedSet() const{
     return this->selectionModel()->currentIndex().isValid();
+}
+
+std::map<std::string,PhzDataModel::ModelAxesTuple> ModelSetTable::getSelectedAxesTuple() const{
+  QModelIndexList index = this->selectionModel()->selectedRows();
+  return cGetModel()->getAxesTuple(index[0].row());
 }
 
 QString ModelSetTable::getSelectedName(){

@@ -1,8 +1,14 @@
 #include <QMessageBox>
 #include "PhzQtUI/FormModelSet.h"
+#include "PhzQtUI/XYDataSetTreeModel.h"
+
 #include "ui_FormModelSet.h"
 #include "PhzQtUI/DialogModelSet.h"
 #include "FileUtils.h"
+
+#include "ElementsKernel/Exception.h"
+#include "PhzConfiguration/ParameterSpaceConfiguration.h"
+namespace po = boost::program_options;
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -124,20 +130,34 @@ void FormModelSet::on_btn_SetCancel_clicked()
 
 void FormModelSet::on_btn_SetSave_clicked()
 {
-    std::string old_name =  ui->tableView_Set->getSelectedName().toStdString();
-   if ( ui->tableView_Set->setSelectedName( ui->txt_SetName->text())){
-      ui->tableView_Set->setSelectedRules(ui->tableView_ParameterRule->getModel()->getParameterRules());
-      ui->tableView_Set->updateModelNumberForSelected();
+   std::string old_name =  ui->tableView_Set->getSelectedName().toStdString();
+   if (! ui->tableView_Set->setSelectedName( ui->txt_SetName->text())){
+     QMessageBox::warning( this,
+        "Duplicate name...",
+       "The name you keyed in is already used. Please enter a new name.",
+       QMessageBox::Ok );
+     return;
+   }
 
-      ui->tableView_Set->saveSelectedSet(old_name);
-      setModelInView();
-   }
-   else{
+   auto rules =  ui->tableView_Set->getSelectedParameterRules();
+   ui->tableView_Set->setSelectedRules(ui->tableView_ParameterRule->getModel()->getParameterRules());
+
+   try{
+       ui->tableView_Set->getSelectedAxesTuple();
+     } catch (Elements::Exception except){
        QMessageBox::warning( this,
-                             "Duplicate name...",
-                             "The name you keyed in is already used. Please enter a new name.",
-                             QMessageBox::Ok );
+                                    "Overlapping Region...",
+                                    except.what(),
+                                    QMessageBox::Ok );
+
+       ui->tableView_Set->setSelectedRules(rules);
+       return;
    }
+
+   ui->tableView_Set->updateModelNumberForSelected();
+   ui->tableView_Set->saveSelectedSet(old_name);
+   setModelInView();
+
 }
 
 void FormModelSet::setSelectionChanged(QModelIndex new_index, QModelIndex)
@@ -159,9 +179,6 @@ void FormModelSet::on_btn_SetToRules_clicked()
 {
   std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet());
     popUp->loadData(ui->tableView_ParameterRule->getModel()->getParameterRules());
-
-    // As PHOSPHOROS do not know how to treat sparse grid for now, block to 1 rule!
-    popUp->setSingleLine();
 
     connect(
       popUp.get(),

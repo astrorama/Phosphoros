@@ -72,7 +72,7 @@ std::map<XYDataset::QualifiedName, XYDataset::XYDataset> ComputeModelSedConfigur
   ps_options["z-value"].value() = boost::any{std::vector<double>{ps_options["z-value"].as<double>()}};
   ParameterSpaceConfiguration ps_conf {ps_options};
   
-  auto sed_name = ps_conf.getSedList()[0];
+  auto sed_name = ps_conf.getSedList().at("")[0];
   auto provider = ps_conf.getSedDatasetProvider();
   auto dataset = provider->getDataset(sed_name);
   
@@ -91,7 +91,7 @@ std::map<XYDataset::QualifiedName, std::unique_ptr<MathUtils::Function>> Compute
   ps_options["z-value"].value() = boost::any{std::vector<double>{ps_options["z-value"].as<double>()}};
   ParameterSpaceConfiguration ps_conf {ps_options};
   
-  auto red_curve_name = ps_conf.getReddeningCurveList()[0];
+  auto red_curve_name = ps_conf.getReddeningCurveList().at("")[0];
   auto provider = ps_conf.getReddeningDatasetProvider();
   auto dataset = provider->getDataset(red_curve_name);
   auto function = MathUtils::interpolate(*dataset, MathUtils::InterpolationType::LINEAR);

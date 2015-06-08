@@ -23,6 +23,14 @@ ParameterRule::ParameterRule()
 {
 }
 
+std::string ParameterRule::getName() const{
+  return m_name;
+}
+
+void ParameterRule::setName(std::string new_name){
+   m_name=new_name;
+ }
+
 string ParameterRule::getSedRootObject(string rootPath) const{
 
    return FileUtils::removeStart(m_sed_root_object,rootPath);
@@ -102,8 +110,10 @@ long long ParameterRule::getModelNumber() const{
   }
 
   Euclid::PhzConfiguration::ParameterSpaceConfiguration config(options);
-  return config.getSedList().size()*config.getReddeningCurveList().size()*
-      config.getEbvList().size()*config.getZList().size();
+
+
+  return config.getSedList().at("").size()*config.getReddeningCurveList().at("").size()*
+      config.getEbvList().at("").size()*config.getZList().at("").size();
 }
 
 

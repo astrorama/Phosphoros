@@ -9,10 +9,10 @@ ParameterRuleModel::ParameterRuleModel(std::map<int,ParameterRule> init_paramete
   ,m_sed_root_path(sedRootPath)
   ,m_red_root_path(redRootPath)
 {
-    this->setColumnCount(8);
+    this->setColumnCount(7);
     this->setRowCount(m_parameter_rules.size());
     QStringList  setHeaders;
-    setHeaders<<"SED(s)"<<""<<"Reddening Curve(s)"<<""<<"E(B-V) Range"<<"z Range"<<"Size"<<"Hidden_Id";
+    setHeaders<<"Name"<<"SED(s)"<<"Reddening Curve(s)"<<"E(B-V) Range"<<"z Range"<<"Size"<<"Hidden_Id";
     this->setHorizontalHeaderLabels(setHeaders);
 
     int i=0;
@@ -28,7 +28,9 @@ ParameterRuleModel::ParameterRuleModel(std::map<int,ParameterRule> init_paramete
 }
 
 
-
+std::string ParameterRuleModel::getParamName(const ParameterRule& rule) const{
+  return rule.getName();
+}
 
 
 std::string ParameterRuleModel::getSedStatus(const ParameterRule& rule) const{
@@ -64,10 +66,9 @@ std::string ParameterRuleModel::getRedGroupName(const ParameterRule& rule) const
 std::list<QString> ParameterRuleModel::getItemsRepresentation(const ParameterRule& rule, int id) const{
      std::list<QString> list;
 
-     list.push_back(QString::fromStdString(getSedGroupName(rule)));
-     list.push_back(QString::fromStdString(getSedStatus(rule)));
-     list.push_back(QString::fromStdString(getRedGroupName(rule)));
-     list.push_back(QString::fromStdString(getRedStatus(rule)));
+     list.push_back(QString::fromStdString(getParamName(rule)));
+     list.push_back(QString::fromStdString(getSedGroupName(rule) +" ("+getSedStatus(rule)+")"));
+     list.push_back(QString::fromStdString(getRedGroupName(rule) +" ("+getRedStatus(rule)+")"));
      list.push_back(QString::fromStdString(rule.getEbvRange().getStringRepresentation()));
      list.push_back(QString::fromStdString(rule.getZRange().getStringRepresentation()));
      list.push_back(QString::number(rule.getModelNumber()));
@@ -80,39 +81,55 @@ const std::map<int,ParameterRule>& ParameterRuleModel::getParameterRules() const
     return m_parameter_rules;
 }
 
+bool ParameterRuleModel::checkNameAlreadyUsed(std::string new_name,int row) const{
+  int ref = getValue(row,6).toInt();
+  for(auto it = m_parameter_rules.begin(); it != m_parameter_rules.end(); ++it ) {
+    if (it->second.getName()==new_name &&  it->first!=ref){
+      return false;
+    }
+  }
+
+  return true;
+}
+
 
 const QString ParameterRuleModel::getValue(int row,int column) const{
     return this->item(row,column)->text();
 }
 
+void ParameterRuleModel::setName(std::string new_name,int row){
+  int ref = getValue(row,6).toInt();
+  m_parameter_rules[ref].setName(new_name);
+  this->item(row,0)->setText(QString::fromStdString(new_name));
+}
 
 void ParameterRuleModel::setRanges(Range ebvRange,Range zRange,int row){
-     int ref = getValue(row,7).toInt();
+     int ref = getValue(row,6).toInt();
       m_parameter_rules[ref].setEbvRange(std::move(ebvRange));
       m_parameter_rules[ref].setZRange(std::move(zRange));
 
-      this->item(row,4)->setText(QString::fromStdString( m_parameter_rules[ref].getEbvRange().getStringRepresentation()));
-      this->item(row,5)->setText(QString::fromStdString( m_parameter_rules[ref].getZRange().getStringRepresentation()));
-      this->item(row,6)->setText(QString::number( m_parameter_rules[ref].getModelNumber()));
+      this->item(row,3)->setText(QString::fromStdString( m_parameter_rules[ref].getEbvRange().getStringRepresentation()));
+      this->item(row,4)->setText(QString::fromStdString( m_parameter_rules[ref].getZRange().getStringRepresentation()));
+      this->item(row,5)->setText(QString::number( m_parameter_rules[ref].getModelNumber()));
 }
 
 
 void ParameterRuleModel::setSeds(std::string root, std::vector<std::string> exceptions,int row){
-    int ref = getValue(row,7).toInt();
+    int ref = getValue(row,6).toInt();
      m_parameter_rules[ref].setSedRootObject(std::move(root));
      m_parameter_rules[ref].setExcludedSeds(std::move(exceptions));
 
-     this->item(row,0)->setText(QString::fromStdString(getSedGroupName(m_parameter_rules[ref])));
-     this->item(row,1)->setText(QString::fromStdString(getSedStatus(m_parameter_rules[ref])));
+     this->item(row,1)->setText(QString::fromStdString(getSedGroupName(m_parameter_rules[ref])
+         +" ("+getSedStatus(m_parameter_rules[ref])+")"));
 }
 
 void ParameterRuleModel::setRedCurves(std::string root, std::vector<std::string> exceptions,int row){
-    int ref = getValue(row,7).toInt();
+    int ref = getValue(row,6).toInt();
      m_parameter_rules[ref].setReddeningRootObject(std::move(root));
      m_parameter_rules[ref].setExcludedReddenings(std::move(exceptions));
 
-     this->item(row,2)->setText(QString::fromStdString(getRedGroupName(m_parameter_rules[ref])));
-     this->item(row,3)->setText(QString::fromStdString(getRedStatus(m_parameter_rules[ref])));
+     this->item(row,2)->setText(QString::fromStdString(getRedGroupName(m_parameter_rules[ref])
+         +" ("+getRedStatus(m_parameter_rules[ref])+")"));
 }
 
 
@@ -128,12 +145,14 @@ int ParameterRuleModel::newParameterRule(int duplicate_from_row ){
     ++max_ref;
 
     if (duplicate_from_row>=0){
-        int ref = getValue(duplicate_from_row,7).toInt();
+        int ref = getValue(duplicate_from_row,6).toInt();
         ParameterRule rule=m_parameter_rules[ref];
         m_parameter_rules[max_ref]=rule;
+        m_parameter_rules[max_ref].setName(rule.getName()+" copy");
     }
     else{
          m_parameter_rules[max_ref]=ParameterRule();
+         m_parameter_rules[max_ref].setName("New Region "+ std::to_string(max_ref+1));
     }
 
     auto list = getItemsRepresentation( m_parameter_rules.at(max_ref),max_ref);
@@ -146,14 +165,14 @@ int ParameterRuleModel::newParameterRule(int duplicate_from_row ){
 }
 
 void ParameterRuleModel::deletRule(int row){
-    int ref = getValue(row,7).toInt();
+    int ref = getValue(row,6).toInt();
     m_parameter_rules.erase(ref);
     this->removeRow(row);
 }
 
 
 const ParameterRule& ParameterRuleModel::getRule(int row) const{
-    int ref = getValue(row,7).toInt();
+    int ref = getValue(row,6).toInt();
     return m_parameter_rules.at(ref);
 }
 

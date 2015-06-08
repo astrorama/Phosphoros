@@ -24,6 +24,17 @@ public:
     ParameterRule();
 
     /**
+     * @brief Get the name of the ParameterRule
+     * @return the name of the ParameterRule
+     */
+    std::string getName() const;
+
+    /**
+     * @brief Set the name of the ParameterRule
+     * @param new_name the new name of the ParameterRule
+     */
+    void setName(std::string new_name);
+    /**
      * @brief get Reddening Curves Number
      * @return the cardinality of selected Reddening Curves in the the ParameterRule
      */
@@ -115,6 +126,7 @@ public:
     void setZRange(Range z_range);
 
 private:
+    std::string m_name;
     std::string m_sed_root_object;
     std::string m_reddening_root_object;
 
