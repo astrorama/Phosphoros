@@ -35,30 +35,83 @@
 #         alias to CMake 'rebuild_cache' target
 #
 #     tests [*]_
-#         backward-compatibility target for the CMT generic Makefile
+#         backward-compatibility target for the CMT generic Makefile. Tt
+#         ensures that the "all" target has been called before.
 #
 # :Author: Marco Clemencic
+# :Author: Hubert Degaudenzi
 #
 # .. [*] Targets defined by this Makefile. 
 #
 ################################################################################
 
 # settings
-CMAKE = cmake
+CMAKE := cmake
+CTEST := ctest
+NINJA := $(shell which ninja-build 2> /dev/null)
+ifeq ($(NINJA),)
+  NINJA := $(shell which ninja 2> /dev/null)
+endif
 
-override CMAKEFLAGS += -DUSE_LOCAL_INSTALLAREA=ON
+
+# Looking for the ToolChain
+
+TOOLCHAIN_NAME := ElementsToolChain.cmake
+
+ifneq ($(wildcard $(CURDIR)/cmake/$(TOOLCHAIN_NAME)),)
+  TOOLCHAIN_FILE := $(CURDIR)/cmake/$(TOOLCHAIN_NAME)
+else
+  ifneq ($(CMAKE_PREFIX_PATH),)
+    PREFIX_LIST := $(subst :, ,$(CMAKE_PREFIX_PATH))
+    TOOLCHAIN_LIST := $(foreach dir,$(PREFIX_LIST),$(wildcard $(dir)/$(TOOLCHAIN_NAME)))
+    TOOLCHAIN_FILE := $(firstword $(TOOLCHAIN_LIST))
+  endif
+endif
+
+ifneq ($(TOOLCHAIN_FILE),)
+  # A toolchain has been found. Lets use it.
+  override CMAKEFLAGS += -DCMAKE_TOOLCHAIN_FILE=$(TOOLCHAIN_FILE)
+endif
+
+
+
+BUILD_PREFIX_NAME := build
+
+override CMAKEFLAGS += -DUSE_LOCAL_INSTALLAREA=ON -DBUILD_PREFIX_NAME:STRING=$(BUILD_PREFIX_NAME)
 
 ifndef BINARY_TAG
   ifdef CMAKECONFIG
-    BINARY_TAG=${CMAKECONFIG}
+    BINARY_TAG := ${CMAKECONFIG}
   else 
     ifdef CMTCONFIG
-      BINARY_TAG=${CMTCONFIG}
+      BINARY_TAG := ${CMTCONFIG}
     endif
   endif
 endif
 
-BUILDDIR := $(CURDIR)/build.$(BINARY_TAG)
+ifdef BINARY_TAG
+  BUILD_SUBDIR := $(BUILD_PREFIX_NAME).$(BINARY_TAG)
+else
+  BUILD_SUBDIR := $(BUILD_PREFIX_NAME)
+endif
+BUILDDIR := $(CURDIR)/$(BUILD_SUBDIR)
+
+# build tool
+
+ifneq ($(USE_NINJA),)
+  # enable Ninja
+  override CMAKEFLAGS += -GNinja
+  ifneq ($(VERBOSE),)
+    NINJAFLAGS := -v $(NINJAFLAGS)
+  endif
+  BUILD_CONF_FILE := build.ninja
+  BUILD_CMD := $(NINJA) -C $(BUILD_SUBDIR) $(NINJAFLAGS)
+#  BUILD_CMD := cd $(BUILD_SUBDIR) && $(NINJA) $(NINJAFLAGS)
+else
+  BUILD_CONF_FILE := Makefile
+  BUILD_CMD := $(MAKE) -C $(BUILD_SUBDIR)
+endif
+
 
 
 # default target
@@ -71,34 +124,43 @@ purge:
 
 # delegate any target to the build directory (except 'purge')
 ifneq ($(MAKECMDGOALS),purge)
-%: $(BUILDDIR)/Makefile FORCE
-	$(MAKE) -C build.$(BINARY_TAG) $*
+%: $(BUILDDIR)/$(BUILD_CONF_FILE) FORCE
+	+$(BUILD_CMD) $*
 endif
 
 # aliases
 .PHONY: configure tests FORCE
-ifneq ($(wildcard $(BUILDDIR)/Makefile),)
+ifneq ($(wildcard $(BUILDDIR)/$(BUILD_CONF_FILE)),)
 configure: rebuild_cache
 else
-configure: $(BUILDDIR)/Makefile
+configure: $(BUILDDIR)/$(BUILD_CONF_FILE)
 endif
 	@ # do not delegate further
 
+
+# This wrapping around the test target is used to ensure the generation of
+# the XML output from ctest. 
+test: $(BUILDDIR)/$(BUILD_CONF_FILE)
+	cd $(BUILDDIR) && $(CTEST) -T Test $(ARGS)
+
+
+# This target ensures that the "all" target is called before
+# running the tests (unlike the "test" default target of CMake)
 tests: all
-	-$(MAKE) -C build.$(BINARY_TAG) test
+	-$(BUILD_CMD) test
 
 # ensure that the target are always passed to the CMake Makefile
 FORCE:
 	@ # dummy target
 
-# Special trick to allow a non-standard makefile name
-#  If the makefile is not called 'Makefile', we get its update delegated to
-#  cmake, unless we block the delegation.
-$(lastword $(MAKEFILE_LIST)):
+# Makefiles are used as implicit targets in make, but we should not consider
+# them for delegation.
+$(MAKEFILE_LIST):
 	@ # do not delegate further
 
+
 # trigger CMake configuration
-$(BUILDDIR)/Makefile: | $(BUILDDIR)
+$(BUILDDIR)/$(BUILD_CONF_FILE): | $(BUILDDIR)
 	cd $(BUILDDIR) && $(CMAKE) $(CMAKEFLAGS) $(CURDIR)
 
 $(BUILDDIR):
