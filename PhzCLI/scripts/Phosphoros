@@ -34,7 +34,9 @@ action_list = [
     PhosphorosAction(['plot_specz_comparison', 'PSC'], 'PhosphorosPlotSpecZComparison',
                      'Shows plots comparing the PHZ result with SPECZ'),
     PhosphorosAction(['plot_posterior', 'PP'], 'PhosphorosPlotPosterior',
-                     'Plots views of a multi-dimensional posterior')
+                     'Plots views of a multi-dimensional posterior'),
+    PhosphorosAction(['order_seds', 'OS'], 'PhosphorosOrderSeds',
+                     'Orders SEDs and put them into the <order.txt> file')
 ]
 
 def printHelp():

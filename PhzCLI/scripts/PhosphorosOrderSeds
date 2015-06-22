@@ -8,6 +8,7 @@
 
 import argparse
 import os
+import sys
 import PhzCLI.OrderSeds as osed
 
 def main():
@@ -40,4 +41,8 @@ def main():
 if __name__ == '__main__':
             
     args = main()  
+    if not args.directory:
+        print("Error: directory argument (-d) is mandatory!")
+       ## raise args.(args.directory, "Can't be 'xyzzy'")
+        sys.exit()
     osed.manageOrderInDir(args.directory , start=args.start, resample=True )
