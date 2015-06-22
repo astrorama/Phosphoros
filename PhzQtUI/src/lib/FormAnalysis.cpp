@@ -369,7 +369,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   options_map["results-dir"].value() = boost::any(
       FileUtils::getResultRootPath(true, "", ""));
 
-  options_map["catalog-name"].value() = boost::any(survey_name);
+  options_map["catalog-type"].value() = boost::any(survey_name);
 
   options_map["phz-output-dir"].value() = boost::any(
       ui->txt_outputFolder->text().toStdString());

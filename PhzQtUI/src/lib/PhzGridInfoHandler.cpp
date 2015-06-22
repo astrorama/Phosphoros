@@ -47,7 +47,7 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
     auto file_path = root_qdir.absoluteFilePath(fileName);
     options_map["model-grid-file"].value() = boost::any(file_path.toStdString());
 
-    options_map["catalog-name"].value() = boost::any(catalog);
+    options_map["catalog-type"].value() = boost::any(catalog);
     options_map["intermediate-products-dir"].value() = boost::any(FileUtils::getIntermediaryProductRootPath(false,""));
 
     try { // If a file cannot be opened or is ill formated: just skip it!
@@ -206,7 +206,7 @@ std::map<std::string, boost::program_options::variable_value> PhzGridInfoHandler
   options_map["phosphoros-root"].value() = boost::any(FileUtils::getRootPath());
   options_map["aux-data-dir"].value() = boost::any(FileUtils::getAuxRootPath());
   options_map["intermediate-products-dir"].value() = boost::any(FileUtils::getIntermediaryProductRootPath(false,""));
-  options_map["catalog-name"].value() = boost::any(catalog);
+  options_map["catalog-type"].value() = boost::any(catalog);
 
   auto path_filename = FileUtils::getPhotmetricGridRootPath(true,catalog)
       + QString(QDir::separator()).toStdString() + output_file;

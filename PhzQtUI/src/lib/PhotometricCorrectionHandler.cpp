@@ -90,7 +90,7 @@ std::map<std::string, boost::program_options::variable_value> PhotometricCorrect
     options_map["phosphoros-root"].value() = boost::any(FileUtils::getRootPath());
     options_map["catalogs-dir"].value() = boost::any(FileUtils::getCatalogRootPath(true,""));
     options_map["intermediate-products-dir"].value() = boost::any(FileUtils::getIntermediaryProductRootPath(true,""));
-    options_map["catalog-name"].value() = boost::any(catalog);
+    options_map["catalog-type"].value() = boost::any(catalog);
     options_map["missing-photometry-flag"].value() = boost::any(non_detection);
 
 

@@ -22,7 +22,7 @@
       </font>
      </property>
      <property name="text">
-      <string>New Catalog Name :</string>
+      <string>New Catalog Type Name :</string>
      </property>
     </widget>
    </item>
@@ -63,22 +63,5 @@
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>btn_cancel</sender>
-   <signal>clicked()</signal>
-   <receiver>Euclid::PhzQtUI::DialogImportAuxData</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>378</x>
-     <y>493</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>260</x>
-     <y>296</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

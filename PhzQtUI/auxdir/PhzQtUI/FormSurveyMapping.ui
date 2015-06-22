@@ -213,7 +213,7 @@
            <item>
             <widget class="QLabel" name="label_17">
              <property name="text">
-              <string>Catalog Name :</string>
+              <string>Catalog Type :</string>
              </property>
             </widget>
            </item>

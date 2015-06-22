@@ -14,7 +14,7 @@ using boost::smatch;
 #include "ElementsKernel/Logging.h"
 #include "PhzCLI/DisplayModelGridConfiguration.h"
 #include "PhzConfiguration/ProgramOptionsHelper.h"
-#include "PhzConfiguration/CatalogNameConfiguration.h"
+#include "PhzConfiguration/CatalogTypeConfiguration.h"
 
 namespace po = boost::program_options;
 
@@ -45,12 +45,12 @@ po::options_description DisplayModelGridConfiguration::getProgramOptions() {
 
   return merge(options)
               (PhotometryGridConfiguration::getProgramOptions())
-              (CatalogNameConfiguration::getProgramOptions());
+              (CatalogTypeConfiguration::getProgramOptions());
 }
 
 DisplayModelGridConfiguration::DisplayModelGridConfiguration(
             const std::map<std::string, po::variable_value>& options)
-      : PhosphorosPathConfiguration(options), CatalogNameConfiguration(options),
+      : PhosphorosPathConfiguration(options), CatalogTypeConfiguration(options),
         PhotometryGridConfiguration(options) {
 
   m_options = options;
