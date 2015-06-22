@@ -121,11 +121,11 @@ public:
      * @param check
      * if true ensure that the folder exist.
      */
-    static std::string getCatalogRootPath(bool check, const std::string& catalog_name);
+    static std::string getCatalogRootPath(bool check, const std::string& catalog_type);
 
-    static std::string getIntermediaryProductRootPath(bool check, const std::string& catalog_name);
+    static std::string getIntermediaryProductRootPath(bool check, const std::string& catalog_type);
 
-    static std::string getResultRootPath(bool check, const std::string& catalog_name, const std::string& cat_file_name);
+    static std::string getResultRootPath(bool check, const std::string& catalog_type, const std::string& cat_file_name);
 
 
     /**
@@ -157,7 +157,7 @@ public:
      * if true ensure that the folder exist.
      * @return <rootPath>/PhotometricCorrections
      */
-    static std::string getPhotCorrectionsRootPath(bool check, const std::string& catalog_name);
+    static std::string getPhotCorrectionsRootPath(bool check, const std::string& catalog_type);
 
     /**
      * @brief get the Photometric Grid RootPath
@@ -165,7 +165,7 @@ public:
      * if true ensure that the folder exist.
      * @return <rootPath>/PhotometricGrid
      */
-    static std::string getPhotmetricGridRootPath(bool check, const std::string& catalog_name);
+    static std::string getPhotmetricGridRootPath(bool check, const std::string& catalog_type);
 
 
     //////////////////////////////////////////////////////////

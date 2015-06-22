@@ -12,7 +12,7 @@ void SurveyModel::loadSurvey(){
     this->setColumnCount(3);
     this->setRowCount(m_survey_filter_mappings.size());
     QStringList  setHeaders;
-    setHeaders<<"Survey Name"<<"Number of Filters"<<"Hidden_Id";
+    setHeaders<<"Catalog Type"<<"Number of Filters"<<"Hidden_Id";
     this->setHorizontalHeaderLabels(setHeaders);
 
     int i=0;

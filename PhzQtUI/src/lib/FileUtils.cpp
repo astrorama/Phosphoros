@@ -297,11 +297,11 @@ std::string FileUtils::getAuxRootPath(){
  }
 
 
-std::string FileUtils::getCatalogRootPath(bool check, const std::string& catalog_name){
+std::string FileUtils::getCatalogRootPath(bool check, const std::string& catalog_type){
   QString path = QString::fromStdString(readPath()["Catalogs"]);
 
-  if (catalog_name.size()>0){
-      path = path + QDir::separator()+ QString::fromStdString(catalog_name);
+  if (catalog_type.size()>0){
+      path = path + QDir::separator()+ QString::fromStdString(catalog_type);
   }
 
   QFileInfo info(path);
@@ -313,11 +313,11 @@ std::string FileUtils::getCatalogRootPath(bool check, const std::string& catalog
   return info.absoluteFilePath().toStdString();
 }
 
-std::string FileUtils::getIntermediaryProductRootPath(bool check, const std::string& catalog_name){
+std::string FileUtils::getIntermediaryProductRootPath(bool check, const std::string& catalog_type){
   QString path = QString::fromStdString(readPath()["IntermediateProducts"]);
 
-  if (catalog_name.size()>0){
-    path = path + QDir::separator()+ QString::fromStdString(catalog_name);
+  if (catalog_type.size()>0){
+    path = path + QDir::separator()+ QString::fromStdString(catalog_type);
   } else {
     check=false;
   }
@@ -331,14 +331,14 @@ std::string FileUtils::getIntermediaryProductRootPath(bool check, const std::str
   return info.absoluteFilePath().toStdString();
 }
 
-std::string FileUtils::getResultRootPath(bool check, const std::string& catalog_name, const std::string& cat_file_name){
+std::string FileUtils::getResultRootPath(bool check, const std::string& catalog_type, const std::string& cat_file_name){
   QString path = QString::fromStdString(readPath()["Results"]);
 
-  if (catalog_name.size()>0){
-     path = path + QDir::separator()+ QString::fromStdString(catalog_name);
+  if (catalog_type.size()>0){
+     path = path + QDir::separator()+ QString::fromStdString(catalog_type);
    }
 
-  if (catalog_name.size()>0){
+  if (catalog_type.size()>0){
       path = path + QDir::separator()+ QString::fromStdString(cat_file_name);
   }
 
@@ -398,12 +398,12 @@ std::string FileUtils::getModelRootPath(bool check)  {
     return info.absoluteFilePath().toStdString();
 }
 
-std::string FileUtils::getPhotCorrectionsRootPath(bool check, const std::string& catalog_name)  {
-    return FileUtils::getIntermediaryProductRootPath(check,catalog_name);
+std::string FileUtils::getPhotCorrectionsRootPath(bool check, const std::string& catalog_type)  {
+    return FileUtils::getIntermediaryProductRootPath(check,catalog_type);
 }
 
-std::string FileUtils::getPhotmetricGridRootPath(bool check, const std::string& catalog_name) {
-  QString path = QString::fromStdString(FileUtils::getIntermediaryProductRootPath(false,catalog_name))+QDir::separator()+"ModelGrids";
+std::string FileUtils::getPhotmetricGridRootPath(bool check, const std::string& catalog_type) {
+  QString path = QString::fromStdString(FileUtils::getIntermediaryProductRootPath(false,catalog_type))+QDir::separator()+"ModelGrids";
   QFileInfo info(path);
   if (check){
       if (!info.exists()){
