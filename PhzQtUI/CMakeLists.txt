@@ -35,3 +35,18 @@ elements_add_executable(PhosphorosUI src/program/Main.cpp
                         LINK_LIBRARIES PhzQtUI XYDataset PhzConfiguration PhzPhotometricCorrection PhzModeling PhzDataModel PhzUITools PhzLikelihood)
 
 
+elements_add_unit_test(QtUI_FileUtils_test tests/src/QtUI_FileUtils_test.cpp
+                       LINK_LIBRARIES PhzQtUI TYPE Boost)
+
+elements_add_unit_test(Range_test tests/src/Range_test.cpp
+                       LINK_LIBRARIES PhzQtUI TYPE Boost)
+elements_add_unit_test(ParameterRule_test tests/src/ParameterRule_test.cpp
+                       LINK_LIBRARIES PhzQtUI TYPE Boost)
+elements_add_unit_test(ModelSet_test tests/src/ModelSet_test.cpp
+                       LINK_LIBRARIES PhzQtUI TYPE Boost)
+
+
+elements_add_unit_test(FilterMapping_test tests/src/FilterMapping_test.cpp
+                       LINK_LIBRARIES PhzQtUI TYPE Boost)
+
+

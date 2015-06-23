@@ -22,6 +22,12 @@ std::string Range::getStringRepresentation() const{
     return string.toStdString();
 }
 
+
+std::string Range::getConfigStringRepresentation() const{
+  return std::to_string(m_min)+" " +std::to_string(m_max)+" " +std::to_string(m_step);
+}
+
+
 double Range::getMin() const{
     return m_min;
 }

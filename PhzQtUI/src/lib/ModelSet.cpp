@@ -2,7 +2,6 @@
 #include <QFile>
 #include <QDir>
 #include <QTextStream>
-#include <QDomDocument>
 #include "FileUtils.h"
 
 #include "PhzQtUI/ModelSet.h"
@@ -70,17 +69,12 @@ std::map<std::string, po::variable_value> ModelSet::getConfigOptions() const{
         options["reddening-curve-name-"+param_rule.second.getName()].value() = boost::any(reds);
 
         std::vector<std::string> z_range_vector;
-        std::string z_range=""+std::to_string(param_rule.second.getZRange().getMin())+" "
-              +std::to_string(param_rule.second.getZRange().getMax())+" "
-              +std::to_string(param_rule.second.getZRange().getStep());
+        std::string z_range=param_rule.second.getZRange().getConfigStringRepresentation();
         z_range_vector.push_back(z_range);
         options["z-range-"+param_rule.second.getName()].value() = boost::any(z_range_vector);
 
         std::vector<std::string> ebv_range_vector;
-
-        std::string ebv_range=""+std::to_string(param_rule.second.getEbvRange().getMin())+" "
-            +std::to_string(param_rule.second.getEbvRange().getMax())+" "
-            +std::to_string(param_rule.second.getEbvRange().getStep());
+        std::string ebv_range=param_rule.second.getEbvRange().getConfigStringRepresentation();
         ebv_range_vector.push_back(ebv_range);
         options["ebv-range-"+param_rule.second.getName()].value() = boost::any(ebv_range_vector);
 
@@ -97,90 +91,67 @@ std::map<std::string,PhzDataModel::ModelAxesTuple> ModelSet::getAxesTuple() cons
    return config.getParameterSpaceRegions();
 }
 
-ModelSet ModelSet::loadModelSetFromFile(std::string fileName,std::string root_path){
 
-    ModelSet model(root_path);
-    model.setName(FileUtils::removeExt(fileName,".xml"));
-
-
-    QDomDocument doc("ParameterSpace");
-    QFile file(QString::fromStdString(root_path)+QDir::separator()+QString::fromStdString(fileName));
-    if (!file.open(QIODevice::ReadOnly))
-         return model;
-    if (!doc.setContent(&file)) {
-        file.close();
-        return model;
-    }
-    file.close();
-
-    QDomElement root_node = doc.documentElement();
-    model.setName(root_node.attribute("Name").toStdString());
+ModelSet ModelSet::deserialize(QDomDocument& doc, ModelSet& model){
+      QDomElement root_node = doc.documentElement();
+      model.setName(root_node.attribute("Name").toStdString());
 
 
-    auto rules_node = root_node.firstChildElement("ParameterRules");
+      auto rules_node = root_node.firstChildElement("ParameterRules");
 
-    auto list =rules_node.childNodes();
+      auto list =rules_node.childNodes();
 
-    for(int i=0;i<list.count();++i ){
-         ParameterRule rule;
+      for(int i=0;i<list.count();++i ){
+           ParameterRule rule;
 
-         auto node_rule = list.at(i).toElement();
-         rule.setName(node_rule.attribute("Name").toStdString());
-         rule.setSedRootObject(node_rule.attribute("SedRootObject").toStdString());
-         rule.setReddeningRootObject(node_rule.attribute("ReddeningCurveRootObject").toStdString());
+           auto node_rule = list.at(i).toElement();
+           rule.setName(node_rule.attribute("Name").toStdString());
+           rule.setSedRootObject(node_rule.attribute("SedRootObject").toStdString());
+           rule.setReddeningRootObject(node_rule.attribute("ReddeningCurveRootObject").toStdString());
 
-         auto ebv_node = node_rule.firstChildElement("EbvRange");
-         Range range;
-         range.setMin(ebv_node.attribute("Min").toDouble());
-         range.setMax(ebv_node.attribute("Max").toDouble());
-         range.setStep(ebv_node.attribute("Step").toDouble());
-         rule.setEbvRange(std::move(range));
+           auto ebv_node = node_rule.firstChildElement("EbvRange");
+           Range range;
+           range.setMin(ebv_node.attribute("Min").toDouble());
+           range.setMax(ebv_node.attribute("Max").toDouble());
+           range.setStep(ebv_node.attribute("Step").toDouble());
+           rule.setEbvRange(std::move(range));
 
-         Range z_range;
-         auto z_node = node_rule.firstChildElement("ZRange");
-         z_range.setMin(z_node.attribute("Min").toDouble());
-         z_range.setMax(z_node.attribute("Max").toDouble());
-         z_range.setStep(z_node.attribute("Step").toDouble());
-         rule.setZRange(std::move(z_range));
+           Range z_range;
+           auto z_node = node_rule.firstChildElement("ZRange");
+           z_range.setMin(z_node.attribute("Min").toDouble());
+           z_range.setMax(z_node.attribute("Max").toDouble());
+           z_range.setStep(z_node.attribute("Step").toDouble());
+           rule.setZRange(std::move(z_range));
 
 
-         std::vector<std::string> excluded_reddening_list{};
-         auto sub_list = node_rule.firstChildElement("ExcludedReddeningCurves").childNodes();
-         for(int j=0;j<list.count();++j ){
-             auto sub_node = sub_list.at(j).toElement();
-             if (sub_node.hasChildNodes()){
-                 excluded_reddening_list.push_back(sub_node.text().toStdString());
-             }
-         }
-         rule.setExcludedReddenings(std::move(excluded_reddening_list));
+           std::vector<std::string> excluded_reddening_list{};
+           auto sub_list = node_rule.firstChildElement("ExcludedReddeningCurves").childNodes();
+           for(int j=0;j<sub_list.count();++j ){
+               auto sub_node = sub_list.at(j).toElement();
+               if (sub_node.hasChildNodes()){
+                   excluded_reddening_list.push_back(sub_node.text().toStdString());
+               }
+           }
+           rule.setExcludedReddenings(std::move(excluded_reddening_list));
 
-         std::vector<std::string> excluded_sed_list{};
-         sub_list = node_rule.firstChildElement("ExcludedSeds").childNodes();
-         for(int j=0;j<list.count();++j ){
-             auto sub_node = sub_list.at(j).toElement();
-             if (sub_node.hasChildNodes()){
-                excluded_sed_list.push_back(sub_node.text().toStdString());
-             }
-         }
-         rule.setExcludedSeds(std::move(excluded_sed_list));
+           std::vector<std::string> excluded_sed_list{};
+           sub_list = node_rule.firstChildElement("ExcludedSeds").childNodes();
+           for(int j=0;j<sub_list.count();++j ){
+               auto sub_node = sub_list.at(j).toElement();
+               if (sub_node.hasChildNodes()){
+                  excluded_sed_list.push_back(sub_node.text().toStdString());
+               }
+           }
+           rule.setExcludedSeds(std::move(excluded_sed_list));
 
-         model.m_parameter_rules[i]=rule;
-    }
+           model.m_parameter_rules[i]=rule;
+      }
 
-    return model;
+      return model;
 }
 
-void ModelSet::deleteModelSet(){
-    QFile(QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(getName()+".xml")).remove();
-}
-
-void ModelSet::saveModelSet(std::string oldName){
-    QFile(QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(oldName+".xml")).remove();
-    QFile file(QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(getName()+".xml"));
-    file.open(QIODevice::WriteOnly );
-    QTextStream stream(&file);
-
-    QDomDocument doc("ParameterSpace");
+QDomDocument ModelSet::serialize() const{
+  QDomDocument doc("ParameterSpace");
     QDomElement root = doc.createElement("ParameterSpace");
     root.setAttribute("Name",QString::fromStdString(getName()));
     doc.appendChild(root);
@@ -228,8 +199,40 @@ void ModelSet::saveModelSet(std::string oldName){
         rules_Node.appendChild(rule_node);
     }
 
+    return doc;
+  }
 
-    QString xml = doc.toString();
+
+ModelSet ModelSet::loadModelSetFromFile(std::string fileName,std::string root_path){
+
+    ModelSet model(root_path);
+    model.setName(FileUtils::removeExt(fileName,".xml"));
+
+
+    QDomDocument doc("ParameterSpace");
+    QFile file(QString::fromStdString(root_path)+QDir::separator()+QString::fromStdString(fileName));
+    if (!file.open(QIODevice::ReadOnly))
+         return model;
+    if (!doc.setContent(&file)) {
+        file.close();
+        return model;
+    }
+    file.close();
+
+    return deserialize(doc,model);
+}
+
+void ModelSet::deleteModelSet(){
+    QFile(QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(getName()+".xml")).remove();
+}
+
+void ModelSet::saveModelSet(std::string oldName){
+    QFile(QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(oldName+".xml")).remove();
+    QFile file(QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(getName()+".xml"));
+    file.open(QIODevice::WriteOnly );
+    QTextStream stream(&file);
+
+    QString xml = serialize().toString();
 
     stream<<xml;
     file.close();
