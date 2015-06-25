@@ -235,13 +235,6 @@
            </item>
           </layout>
          </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_18">
-           <property name="text">
-            <string>Source ID Column :</string>
-           </property>
-          </widget>
-         </item>
          <item row="3" column="0" alignment="Qt::AlignRight">
           <widget class="QPushButton" name="btn_ImportColumn">
            <property name="toolTip">
@@ -249,13 +242,6 @@
            </property>
            <property name="text">
             <string>Import Columns from File †</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="2">
-          <widget class="QLabel" name="label_17">
-           <property name="text">
-            <string>Catalog Type :</string>
            </property>
           </widget>
          </item>
@@ -299,6 +285,20 @@
           <widget class="QComboBox" name="cb_SourceId">
            <property name="editable">
             <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_17">
+           <property name="text">
+            <string>Catalog Type :</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QLabel" name="label_18">
+           <property name="text">
+            <string>Source ID Column :</string>
            </property>
           </widget>
          </item>
