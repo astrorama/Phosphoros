@@ -114,49 +114,69 @@ def compute_stats(array, col_number):
 #-------------------------------------------------------------------------------
 #
 
-def display_data(label, specZ, colZ, data, mean, median, sigma, mad, outliersPercent, sigmaNoOutliers, meanNoOutliers, filename):
-    """
-    """
-    # First plot specZ/colZ
-    styles = [ "b:s", "r--o", "g.",
-               "c-.", "m.", "y-D",
-               "r-^", "rv", "k-1" ]
+def displaySpeczPhotz(specz, photz, data):
+    
+    z_max = max(max(specz), max(photz)) + 0.1
+    data_max = max(max(data), abs(min(data))) + 0.1
 
-    fig1 = plt.subplot(2, 1, 1, aspect=1)  # 2 graphs 
-                       
-    plt.xlabel("SpecZ")
-    plt.ylabel(label)
-    plt.plot(np.arange(0, max(colZ)),np.arange(0, max(colZ)),"r")
-    plt.plot(specZ,colZ,styles[2])
-    xmax = 6 #min(plt.xlim()[1], 6)
-    plt.xlim(0, xmax)
-    plt.plot(plt.xlim(), plt.xlim(),"r")
-    x_r = [v/10. for v in range(0,int(xmax*10+1))]
+    f = plt.figure(figsize=(7, 8))
+
+    # Create the specz-photz plot
+    ax1 = plt.subplot2grid((4,3), (0,0), rowspan=3, colspan=3)
+    ax1.set_ylabel('PhotoZ')
+    # Plot the diagonal
+    ax1.plot([-0.1, z_max], [-0.1, z_max], c='k', alpha=0.2)
+    # Plot the outlier limits
+    x_r = [v/10. for v in range(0,int(z_max*10+1))]
     y1 = [0.15+1.15*x for x in x_r]
     y2 = [-0.15+.85*x for x in x_r]
-    plt.plot(x_r, y1, "r")
-    plt.plot(x_r, y2, "r")
-    plt.ylim(0, 6)
-        
-    fig2 = plt.subplot(2, 1, 2)  # 2 graphs 
-   
-    # Second plot (histogram)
-    
-    barValues, bins, patches = plt.hist(data, bins=100) 
+    ax1.plot(x_r, y1, "r", alpha=.3)
+    ax1.plot(x_r, y2, "r", alpha=.3)
+    # Plot the data
+    ax1.scatter(specz, photz, c='b', marker='o', s=10, edgecolors='none', alpha=0.6)
+    ax1.set_xlim([-0.1, z_max])
+    ax1.set_ylim([-0.1, z_max])
 
-    plt.axvline(x=0.15,color='r')
-    plt.axvline(x=-0.15,color='r')
-    plt.suptitle("Outliers >1.5 Histogram for files: %s" % filename)
-    plt.xlabel("Value")
-    plt.ylabel("Frequency")
-    plt.title('Distribution of : ('+label+' - specZ)/(1 + specZ)')
+    # Create the Dz/(1+z) plot
+    ax2 = plt.subplot2grid((4,3), (3,0), colspan=3)
+    ax2.set_ylabel('$\Delta$z/(1+z)')
+    ax2.set_xlabel('SpecZ')
+    # Plot the zero line
+    ax2.plot ([-0.1, z_max], [0, 0], c='k', alpha=0.2)
+    # Plot the outlier limits
+    ax2.plot ([-0.1, z_max], [0.15, 0.15], c='r', alpha=0.3)
+    ax2.plot ([-0.1, z_max], [-0.15, -0.15], c='r', alpha=0.3)
+    ax2.scatter(specz, data, c='b', marker='o', s=10, edgecolors='none', alpha=0.6)
+    ax2.set_xlim([-0.1, z_max])
+    ax2.set_ylim([-data_max, data_max])
+
+    f.tight_layout()
+    f.subplots_adjust(hspace=0)
+    f.show()
+
+#
+#-------------------------------------------------------------------------------
+#
+
+def displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers):
+
+    f, ax = plt.subplots(figsize=(10, 4)) 
+
+    barValues, bins, patches = plt.hist(data, bins=100)
+    ax.axvline(x=0.15, c='r', alpha=.3)
+    ax.axvline(x=-0.15, c='r', alpha = .3)
+    ax.set_xlabel("Value")
+    ax.set_ylabel("Frequency")
+    ax.set_title('Distribution of : (PhotoZ - SpecZ)/(1 + SpecZ)')
               
     # Write information
-    txt = ' Mean : %2.5f\n Median : %2.5f\n Mad : %2.5f\n Sigma : %2.5f\n Outliers : %2.5f%%\n Sigma(no outliers) : %2.5f\n Mean((no outliers) : %2.5f ' \
+    txt = '\n  Mean : %2.5f\n  Median : %2.5f\n  Mad : %2.5f\n  Sigma : %2.5f\n  Outliers : %2.5f%%\n  Sigma(no outliers) : %2.5f\n  Mean((no outliers) : %2.5f ' \
         % (mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers)
-    plt.text(max(bins)-1.8, max(barValues), txt, fontsize=15, family='sans-serif', style='italic', ha='left', va='top')
+    ax.text(ax.get_xlim()[0], ax.get_ylim()[1], txt, fontsize=10, family='sans-serif', style='italic', ha='left', va='top', alpha=.5)
     
-    plt.show() 
+    f.tight_layout()
+    f.show()
+
 #
 #-------------------------------------------------------------------------------
 #
@@ -207,7 +227,10 @@ if __name__ == '__main__':
         
     # Plot distribution
     if args.display:
-            display_data(label, specZ, colZ, data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers, args.files)
+            displaySpeczPhotz(specZ, colZ, data)
+            displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers)
+            #display_data(label, specZ, colZ, data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers, args.files)
+            plt.show()
             
     
     
