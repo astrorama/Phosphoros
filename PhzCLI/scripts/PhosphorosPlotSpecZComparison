@@ -21,12 +21,15 @@ def file_exist(file):
 #-------------------------------------------------------------------------------
 #
 
-def read_table(filename, mode='ascii'):
+def read_table(filename):
     """
     """
     print '--> Reading file : ', filename
     file_exist(filename)
-    data = Table.read(filename, format=mode)
+    try :
+        data = Table.read(filename, format='fits')
+    except:
+        data = Table.read(filename, format='ascii')
     return data
              
           
