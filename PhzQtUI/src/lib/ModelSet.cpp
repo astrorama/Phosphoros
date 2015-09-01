@@ -51,8 +51,8 @@ long long ModelSet::getModelNumber() const{
 std::map<std::string, po::variable_value> ModelSet::getConfigOptions() const{
   std::map<std::string, po::variable_value> options;
 
-      options["sed-root-path"].value() = boost::any(FileUtils::getSedRootPath(false));
-      options["reddening-curve-root-path"].value() = boost::any(FileUtils::getRedCurveRootPath(false));
+     // options["sed-root-path"].value() = boost::any(FileUtils::getSedRootPath(false));
+     // options["reddening-curve-root-path"].value() = boost::any(FileUtils::getRedCurveRootPath(false));
 
       for (auto& param_rule : getParameterRules()){
 
