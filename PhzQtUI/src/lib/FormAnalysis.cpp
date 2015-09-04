@@ -20,6 +20,7 @@
 #include "PhzQtUI/DialogGridGeneration.h"
 #include "PhzQtUI/DialogRunAnalysis.h"
 #include "PhzQtUI/DialogOptions.h"
+#include "PhzQtUI/DialogLuminosityPrior.h"
 
 #include "PhzUITools/ConfigurationWriter.h"
 #include "PhzUITools/CatalogColumnReader.h"
@@ -354,11 +355,6 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     }
   }
 
-
-  auto path_grid_filename = FileUtils::getPhotmetricGridRootPath(false,survey_name)
-      + QString(QDir::separator()).toStdString()
-      + ui->cb_CompatibleGrid->currentText().toStdString();
-
   std::map<std::string, boost::program_options::variable_value> options_map;
 
   options_map["phosphoros-root"].value() = boost::any(FileUtils::getRootPath());
@@ -371,13 +367,18 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   options_map["catalog-type"].value() = boost::any(survey_name);
 
+
   options_map["phz-output-dir"].value() = boost::any(
       ui->txt_outputFolder->text().toStdString());
 
-  options_map["model-grid-file"].value() = boost::any(path_grid_filename);
+  options_map["model-grid-file"].value() = boost::any(ui->cb_CompatibleGrid->currentText().toStdString());
 
-  options_map["input-catalog-file"].value() = boost::any(
-      ui->txt_inputCatalog->text().toStdString());
+  auto input_catalog_file = FileUtils::removeStart(ui->txt_inputCatalog->text().toStdString(),
+      FileUtils::getCatalogRootPath(false,survey_name)+QString(QDir::separator()).toStdString());
+  options_map["input-catalog-file"].value() = boost::any(input_catalog_file);
+
+
+
   options_map["source-id-column-name"].value() = boost::any(
       getSelectedSurveySourceColumn());
   options_map["missing-photometry-flag"].value() = boost::any(non_detection);
@@ -395,14 +396,9 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   std::string yes_flag = "YES";
 
   if (ui->gb_corrections->isChecked()) {
-    auto path_correction_filename = FileUtils::getPhotCorrectionsRootPath(true,
-        survey_name)
-        + QString(QDir::separator()).toStdString()
-        + ui->cb_AnalysisCorrection->currentText().toStdString();
-
     options_map["enable-photometric-correction"].value() = boost::any(yes_flag);
     options_map["photometric-correction-file"].value() = boost::any(
-        path_correction_filename);
+        ui->cb_AnalysisCorrection->currentText().toStdString());
   }
 
   options_map["axes-collapse-type"].value() = boost::any(
@@ -835,6 +831,16 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
       }
     }
   }
+
+    void FormAnalysis::on_btn_confLuminosityPrior_clicked(){
+      std::unique_ptr<DialogLuminosityPrior> dialog(new DialogLuminosityPrior());
+
+        if (dialog->exec()) {
+
+        }
+    }
+
+
 
 }
 }

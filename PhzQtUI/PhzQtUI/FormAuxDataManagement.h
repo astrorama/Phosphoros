@@ -46,6 +46,12 @@ private slots:
 
     void on_btn_FilterDelete_clicked();
 
+    void on_btn_LuminosityImport_clicked();
+
+    void on_btn_LuminositySubGroup_clicked();
+
+    void on_btn_LuminosityDelete_clicked();
+
 
 private:
     std::unique_ptr<Ui::FormAuxDataManagement> ui;

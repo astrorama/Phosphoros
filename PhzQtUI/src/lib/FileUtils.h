@@ -94,6 +94,8 @@ public:
      */
     static std::string getRootPath();
 
+    static std::string getRootPath(bool with_separator);
+
 
     static PhzConfiguration::PhosphorosPathConfiguration getRootPaths();
 
@@ -150,6 +152,14 @@ public:
      * @return <rootPath>/RedCurve
      */
     static std::string getRedCurveRootPath(bool check);
+
+    /**
+     * @brief get the Luminosity Function Curves RootPath
+     * @param check
+     * if true ensure that the folder exist.
+     * @return <rootPath>/LuminosityFunctionCurves
+     */
+    static std::string getLuminosityCurveRootPath(bool check);
 
     /**
      * @brief get the Photometric Corrections RootPath

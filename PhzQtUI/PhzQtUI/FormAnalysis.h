@@ -23,6 +23,9 @@ namespace Ui {
 class FormAnalysis;
 }
 
+///// btn_confLuminosityPrior - cb_luminosityPrior
+
+
 /**
  * @brief The FormAnalysis class
  * This Widget allows the user to configure and run the analysis
@@ -77,6 +80,8 @@ private slots:
     void on_btn_RunAnalysis_clicked();
 
     void on_gb_lik_clicked();
+
+    void on_btn_confLuminosityPrior_clicked();
 
 
 

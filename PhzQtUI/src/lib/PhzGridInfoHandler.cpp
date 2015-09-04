@@ -208,8 +208,9 @@ std::map<std::string, boost::program_options::variable_value> PhzGridInfoHandler
   options_map["intermediate-products-dir"].value() = boost::any(FileUtils::getIntermediaryProductRootPath(false,""));
   options_map["catalog-type"].value() = boost::any(catalog);
 
-  auto path_filename = FileUtils::getPhotmetricGridRootPath(true,catalog)
-      + QString(QDir::separator()).toStdString() + output_file;
+//  auto path_filename = FileUtils::getPhotmetricGridRootPath(true,catalog)
+//      + QString(QDir::separator()).toStdString() + output_file;
+  auto path_filename = output_file;
   options_map["output-model-grid"].value() = boost::any(path_filename);
 
   std::vector < std::string > filter_add_vector;

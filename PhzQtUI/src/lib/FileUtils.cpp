@@ -124,6 +124,13 @@ std::string FileUtils::getRootPath()  {
     return getRootPaths().getPhosphorosRootDir().generic_string();
 }
 
+std::string FileUtils::getRootPath(bool with_separator){
+  if (with_separator)
+    return (QString::fromStdString(getRootPaths().getPhosphorosRootDir().generic_string())+QDir::separator()).toStdString();
+
+  return getRootPath();
+}
+
 
 std::string FileUtils::getGUIConfigPath(){
   auto path = QString::fromStdString(getRootPath())+QDir::separator() + "config"+QDir::separator() +"GUI";
@@ -383,6 +390,18 @@ std::string FileUtils::getRedCurveRootPath(bool check)  {
         }
     }
     return info.absoluteFilePath().toStdString();
+}
+
+std::string FileUtils::getLuminosityCurveRootPath(bool check){
+  QString path = QString::fromStdString(readPath()["AuxiliaryData"])+QDir::separator()+"LuminosityFunctionCurves";
+     QFileInfo info(path);
+     if (check){
+         if (!info.exists()){
+             QDir().mkpath(path);
+         }
+     }
+     return info.absoluteFilePath().toStdString();
+
 }
 
 
