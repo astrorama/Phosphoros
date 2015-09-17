@@ -6,28 +6,41 @@
  *      Author: fdubath
  */
 
-#include <QFuture>
-#include <qtconcurrentrun.h>
 #include <QDir>
+#include <QFile>
+#include <QTextStream>
 #include <QMessageBox>
 #include "PhzQtUI/DialogLuminosityPrior.h"
 #include <boost/program_options.hpp>
 #include "ui_DialogLuminosityPrior.h"
 #include <QLabel>
+#include <QStandardItemModel>
+#include "FileUtils.h"
 
-#include "PhzQtUI/GridButton.h"
 #include "PhzQtUI/LuminosityFunctionInfo.h"
 #include "PhzQtUI/DialogLuminosityFunction.h"
 #include "PhzQtUI/DialogLuminositySedGroup.h"
+#include "PhzQtUI/DialogZRanges.h"
 
 
+#include "PhzQtUI/DialogFilterSelector.h"
 
-//assume 2x3 layout => 3 row 4 columns
+
+#include "ElementsKernel/Logging.h"
+
+#include "PhzConfiguration/ComputeLuminosityModelGridConfiguration.h"
+#include "PhzModeling/SparseGridCreator.h"
+#include "PhzModeling/NoIgmFunctor.h"
+
+//debug
+//#include "PhzUITools/ConfigurationWriter.h"
 
 namespace Euclid {
 namespace PhzQtUI {
 
+namespace po = boost::program_options;
 
+static Elements::Logging logger = Elements::Logging::getLogger("DialogLuminosityPrior");
 
 DialogLuminosityPrior::DialogLuminosityPrior(QWidget *parent) :
         QDialog(parent),
@@ -37,80 +50,510 @@ DialogLuminosityPrior::DialogLuminosityPrior(QWidget *parent) :
 
        ui->frame_Luminosity->setStyleSheet( "background-color: white ");
 
-
-       std::vector<double> zs {0.,1.,2.,6.};
-
-       PhzLuminosity::SedGroup group_1("Group1", {{"sed 1"},{"sed 2"},{"sed 3"}});
-       PhzLuminosity::SedGroup group_2("Group2", {{"sed 4"}});
-       m_groups.push_back(std::move(group_1));
-       m_groups.push_back(std::move(group_2));
-
-
-       for (size_t i =0; i<zs.size()-1;++i){
-          m_luminosityInfos.push_back({});
-          for (size_t j =0; j<m_groups.size();++j){
-            m_luminosityInfos[i].push_back(LuminosityFunctionInfo{});
-            m_luminosityInfos[i][j].sedGroupName=m_groups[j].getName();
-            m_luminosityInfos[i][j].z_min=zs[i];
-            m_luminosityInfos[i][j].z_max=zs[i+1];
-          }
-       }
-
-       m_luminosityInfos[1][1].phi=0.04;
-       m_luminosityInfos[2][0].is_custom=true;
-       m_luminosityInfos[2][0].curve_name="my curve";
-
-       loadGrid(m_groups,zs);
-
     }
 
 DialogLuminosityPrior::~DialogLuminosityPrior() {}
 
+void DialogLuminosityPrior::loadData(ModelSet model,
+                                     std::string survey_name,
+                                     double z_min,
+                                     double z_max){
+  m_config_folder=QString::fromStdString(FileUtils::getGUILuminosityPriorConfig(true,survey_name,model.getName()));
+  m_grid_folder=QString::fromStdString(FileUtils::getLuminosityFunctionGridRootPath(true,survey_name,model.getName()));
+  m_prior_configs=LuminosityPriorConfig::readFolder(m_config_folder.toStdString());
+  m_model=std::move(model);
+  m_survey_name=survey_name;
+  m_z_min=z_min;
+  m_z_max=z_max;
+
+  // load the main grid
+  // adjust controls
+
+  loadMainGrid();
+  manageBtnEnability(false);
+
+}
 
 
-void DialogLuminosityPrior::ClearGrid(){
-  ui->frame_Luminosity->findChildren<QWidget *>();
+void DialogLuminosityPrior::loadMainGrid(){
+  QStandardItemModel* grid_model = new QStandardItemModel();
+  grid_model->setColumnCount(6);
+
+  QStringList  setHeaders;
+  setHeaders<<"Id"<<"Name"<<"Unit"<<"Corrected for Reddening"<<"Filter"<<"Regions";
+  grid_model->setHorizontalHeaderLabels(setHeaders);
+
+  int id =0;
+  for (auto& config_pair : m_prior_configs) {
+    QList<QStandardItem*> items;
+
+    QStandardItem* item_id = new QStandardItem(QString::number(id));
+    items.push_back(item_id);
+
+    QStandardItem* item_name = new QStandardItem(QString::fromStdString(config_pair.second.getName()));
+    items.push_back(item_name);
+
+    QString mag_string ="MAGNITUDE";
+    if (!config_pair.second.getInMag()){
+      mag_string="FLUX";
+    }
+    QStandardItem* item_tp = new QStandardItem(mag_string);
+    items.push_back(item_tp);
+
+    QString red_string ="NO";
+    if (!config_pair.second.getReddened()){
+      red_string="YES";
+    }
+    QStandardItem* item_red = new QStandardItem(red_string);
+    items.push_back(item_red);
+
+    QStandardItem* item_filter = new QStandardItem(QString::fromStdString(config_pair.second.getFilterName()));
+    items.push_back(item_filter);
+
+    QStandardItem* item_nb = new QStandardItem(QString::number(config_pair.second.getLuminosityFunctionList().size()));
+    items.push_back(item_nb);
+
+
+    grid_model->appendRow(items);
+    ++id;
+  }
+  ui->table_priors->setModel(grid_model);
+
+
+  connect(
+       ui->table_priors->selectionModel(),
+       SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
+       SLOT(priorSelectionChanged(QModelIndex, QModelIndex))
+      );
+
+
+  ui->table_priors->setColumnHidden(0, true);
+  ui->table_priors->setSelectionBehavior(QAbstractItemView::SelectRows);
+  ui->table_priors->setSelectionMode(QAbstractItemView::SingleSelection);
+  ui->table_priors->resizeColumnsToContents();
+  ui->table_priors->horizontalHeader()->setStretchLastSection(true);
+
+}
+
+
+
+void DialogLuminosityPrior::priorSelectionChanged(QModelIndex new_index, QModelIndex){
+
+  int row = new_index.row();
+  std::string name=new_index.sibling(row, 1).data().toString().toStdString();
+
+  auto config = m_prior_configs.at(name);
+  ui->txt_name->setText(QString::fromStdString(config.getName()));
+
+  int cb_index =0;
+  if (!config.getInMag()){
+    cb_index=1;
+  }
+
+  ui->cb_unit->setCurrentIndex(cb_index);
+  ui->ck_reddening->setChecked(!config.getReddened());
+  ui->lb_filter->setText(QString::fromStdString(config.getFilterName()));
+
+  clearGrid();
+
+  m_groups=config.getSedGRoups();
+  m_zs=config.getZs();
+  m_luminosityInfos=std::move(config.getLuminosityFunctionArray());
+
+
+  loadGrid();
+  manageBtnEnability(false);
+}
+
+
+
+void DialogLuminosityPrior::manageBtnEnability(bool in_edition){
+ QItemSelectionModel *select = ui->table_priors->selectionModel();
+ bool has_selected_row = select->hasSelection();
+
+ ui->btn_new->setEnabled(!in_edition);
+ ui->btn_delete->setEnabled(!in_edition && has_selected_row);
+
+ ui->btn_edit->setEnabled(!in_edition && has_selected_row);
+ ui->btn_cancel->setEnabled(in_edition && has_selected_row);
+ ui->btn_save->setEnabled(in_edition && has_selected_row);
+
+ ui->btn_close->setEnabled(!in_edition);
+
+ ui->table_priors->setEnabled(!in_edition);
+ ui->txt_name->setEnabled(in_edition);
+ ui->cb_unit->setEnabled(in_edition);
+ ui->ck_reddening->setEnabled(in_edition);
+ ui->btn_filter->setEnabled(in_edition);
+ ui->btn_group->setEnabled(in_edition);
+ ui->btn_z->setEnabled(in_edition);
+
+ for (auto button : m_grid_buttons){
+   button->setEnabled(in_edition);
+ }
+}
+
+
+
+void DialogLuminosityPrior::on_btn_filter_clicked(){
+
+
+  std::unique_ptr<DialogFilterSelector> dialog(new DialogFilterSelector());
+  dialog->setFilter(ui->lb_filter->text().toStdString());
+
+  connect(dialog.get(),SIGNAL(popupClosing(std::string)),this,SLOT(filterPopupClosing(std::string)));
+  dialog->exec();
+}
+
+
+void DialogLuminosityPrior::filterPopupClosing(std::string filter){
+  ui->lb_filter->setText(QString::fromStdString(filter));
+}
+
+
+
+
+void DialogLuminosityPrior::on_btn_new_clicked(){
+  LuminosityPriorConfig new_config{};
+  new_config.setName("<New_Luminosity_Prior>");
+  new_config.setZs({m_z_min,m_z_max});
+
+  std::vector<XYDataset::QualifiedName> seds{};
+  for (auto& item : m_model.getSeds()){
+    seds.push_back({item});
+  }
+
+  PhzLuminosity::SedGroup group{"SEDs",seds};
+  new_config.setSedGroups({group});
+
+
+  LuminosityFunctionInfo info {};
+  info.z_min=m_z_min;
+  info.z_max=m_z_max;
+  info.sedGroupName="SEDs";
+  new_config.setLuminosityFunctionList({info});
+
+  m_prior_configs["<New_Luminosity_Prior>"]=new_config;
+
+  loadMainGrid();
+
+  for (size_t i=0; i<m_prior_configs.size();++i){
+    std::string name=ui->table_priors->model()->data(ui->table_priors->model()->index(i,1)).toString().toStdString();
+
+    if (name=="<New_Luminosity_Prior>"){
+      ui->table_priors->selectRow(i);
+      break;
+    }
+  }
+
+
+  manageBtnEnability(true);
+  m_new=true;
+}
+
+
+void DialogLuminosityPrior::on_btn_delete_clicked(){
+
+      ui->txt_name->setText("");
+      ui->cb_unit->setCurrentIndex(0);
+      ui->ck_reddening->setChecked(false);
+      ui->lb_filter->setText("");
+
+      QItemSelectionModel *select = ui->table_priors->selectionModel();
+      auto row_index = select->selectedRows().at(0);
+      int row = row_index.row();
+      std::string name=row_index.sibling(row, 1).data().toString().toStdString();
+
+
+      std::string old_grid_name=m_prior_configs[name].getLuminosityModelGridName();
+
+      m_prior_configs.erase(name);
+
+      loadMainGrid();
+
+      if (m_prior_configs.size()>0){
+         ui->table_priors->selectRow(m_prior_configs.size()-1);
+      }
+
+      manageBtnEnability(false);
+
+
+
+      // file handling
+      QFile::remove( m_config_folder+QDir::separator()+QString::fromStdString(name)+".xml");
+
+      if (old_grid_name.length()>0){
+         QFile::remove(m_grid_folder+QDir::separator()+QString::fromStdString(old_grid_name));
+       }
+
+}
+
+
+void DialogLuminosityPrior::on_btn_edit_clicked(){
+  manageBtnEnability(true);
+}
+
+
+void DialogLuminosityPrior::on_btn_cancel_clicked(){
+
+  if (m_new){
+
+    ui->txt_name->setText("");
+    ui->cb_unit->setCurrentIndex(0);
+    ui->ck_reddening->setChecked(false);
+    ui->lb_filter->setText("");
+
+    QItemSelectionModel *select = ui->table_priors->selectionModel();
+    auto row_index = select->selectedRows().at(0);
+    int row = row_index.row();
+    std::string name=row_index.sibling(row, 1).data().toString().toStdString();
+    m_prior_configs.erase(name);
+
+   // clearGrid();
+
+  }
+
+  loadMainGrid();
+
+  if (m_prior_configs.size()>0){
+    ui->table_priors->selectRow(m_prior_configs.size()-1);
+  }
+  manageBtnEnability(false);
+  m_new=false;
+}
+
+
+class ProgressReporter {
+public:
+  void operator()(size_t step, size_t total) {
+  }
+};
+
+void DialogLuminosityPrior::on_btn_save_clicked(){
+
+  QItemSelectionModel *select = ui->table_priors->selectionModel();
+  auto row_index = select->selectedRows().at(0);
+  int row = row_index.row();
+  std::string name=row_index.sibling(row, 1).data().toString().toStdString();
+  auto info = m_prior_configs[name];
+
+
+  // Check the name
+  QString new_name = ui->txt_name->text();
+  if (new_name.compare("<New_Luminosity_Prior>")==0 || new_name.length()==0){
+    QMessageBox::warning(this, "Missing Name...",
+                                        "Please provide a name for the Luminosity Prior.",
+                                           QMessageBox::Ok,QMessageBox::Ok);
+    return;
+  }
+
+
+  for (size_t i=0; i<m_prior_configs.size();++i){
+      std::string old_name=ui->table_priors->model()->data(ui->table_priors->model()->index(i,1)).toString().toStdString();
+      if (i!=size_t{row} && old_name==new_name.toStdString()){
+                QMessageBox::warning(this, "Duplicate Name...",
+                                               "There is already a Luminosity Prior called '"+new_name+"'. Please provide another name for the Luminosity Prior.",
+                                                  QMessageBox::Ok,QMessageBox::Ok);
+        return;
+     }
+  }
+
+
+  //check the filter
+  if (ui->lb_filter->text().length()==0){
+     QMessageBox::warning(this, "Missing Filter...",
+                                         "Please select the Filter the Luminosity is computed for.",
+                                            QMessageBox::Ok,QMessageBox::Ok);
+     return;
+   }
+
+
+  // check the functions
+  for (auto& func_vect : m_luminosityInfos){
+    for (auto&  func : func_vect){
+      if (!func.isComplete()){
+        QMessageBox::warning(this, "Missing Luminosity Function...",
+                                   "Please define all the luminosity functions in the grid.",
+                                                    QMessageBox::Ok,QMessageBox::Ok);
+             return;
+      }
+    }
+  }
+
+
+  info.setInMag(ui->cb_unit->currentIndex()==0);
+  if (info.getInMag()){
+    ui->table_priors->model()->setData(row_index.sibling(row,2),QString::fromStdString("MAGNITUDE"));
+  } else {
+    ui->table_priors->model()->setData(row_index.sibling(row,2),QString::fromStdString("FLUX"));
+
+  }
+
+
+  info.setReddened(!ui->ck_reddening->isChecked());
+  if (info.getReddened()){
+     ui->table_priors->model()->setData(row_index.sibling(row,3),QString::fromStdString("NO"));
+   } else {
+     ui->table_priors->model()->setData(row_index.sibling(row,3),QString::fromStdString("YES"));
+
+   }
+
+  info.setFilterName(ui->lb_filter->text().toStdString());
+  ui->table_priors->model()->setData(row_index.sibling(row,4),QString::fromStdString(info.getFilterName()));
+
+  info.setZs(m_zs);
+  info.setSedGroups(m_groups);
+
+  std::vector<LuminosityFunctionInfo> list{};
+  for (size_t i=0; i<info.getZs().size()-1;++i){
+    for (size_t j=0; j<info.getSedGRoups().size();++j){
+        list.push_back(m_luminosityInfos[i][j]);
+    }
+  }
+
+  info.setLuminosityFunctionList(list);
+
+  ui->table_priors->model()->setData(row_index.sibling(row,5),QString::number((info.getZs().size()-1)*info.getSedGRoups().size()));
+
+  auto old_grid_name = info.getLuminosityModelGridName();
+
+
+
+  if (ui->txt_name->text().toStdString()!=name){
+      info.setName(ui->txt_name->text().toStdString());
+      m_prior_configs.erase(name);
+      ui->table_priors->model()->setData(row_index.sibling(row,1),ui->txt_name->text());
+  }
+
+  info.setLuminosityModelGridName(info.getName()+".dat");
+
+  m_prior_configs[info.getName()]=info;
+
+  ui->table_priors->resizeColumnsToContents();
+  ui->table_priors->horizontalHeader()->setStretchLastSection(true);
+
+  manageBtnEnability(false);
+
+
+  // config file handling
+  if (!m_new){
+    QFile::remove(m_config_folder+QDir::separator()+QString::fromStdString(name)+".xml");
+  }
+
+  QFile file( m_config_folder+QDir::separator()+QString::fromStdString(info.getName())+".xml");
+  file.open(QIODevice::WriteOnly );
+  QTextStream stream(&file);
+  QString xml = info.serialize().toString();
+  stream<<xml;
+  file.close();
+
+  logger.info()<< "Create the config file :"<<( m_config_folder+QDir::separator()+QString::fromStdString(info.getName())+".xml").toStdString();
+
+  // grid computation
+  if (old_grid_name.length()>0){
+    QFile::remove(m_grid_folder+QDir::separator()+QString::fromStdString(old_grid_name));
+  }
+
+ std::map<std::string,po::variable_value>args=info.getBasicConfigOptions(false);
+
+  auto option_model = m_model.getConfigOptions();
+  option_model["catalog-type"].value() = boost::any(std::string(m_survey_name));
+  for (auto& pair :option_model){
+    args[pair.first]=pair.second;
+  }
+
+  for (auto& pair :m_model.getModelNameConfigOptions()){
+    args[pair.first]=pair.second;
+  }
+
+  // debug // PhzUITools::ConfigurationWriter::writeConfiguration(args,"output_config_debug.txt");
+
+  PhzConfiguration::ComputeLuminosityModelGridConfiguration conf {args};
+
+   auto filter_list = conf.getLuminosityFilterList();
+   PhzModeling::SparseGridCreator creator {conf.getSedDatasetProvider(),
+                                               conf.getReddeningDatasetProvider(),
+                                               conf.getFilterDatasetProvider(),
+                                               PhzModeling::NoIgmFunctor{}};
+
+   auto param_space_map = conf.getLuminosityParameterSpaceRegions();
+   auto results = creator.createGrid(param_space_map, filter_list, ProgressReporter{});
+
+   logger.info() << "Creating the grid output";
+   auto output = conf.getOutputFunction();
+   output(results);
+
+
+
+
+  m_new=false;
+
+}
+
+
+
+void DialogLuminosityPrior::on_cb_unit_currentIndexChanged(const QString &){
+  bool is_mag=ui->cb_unit->currentIndex()==0;
+
+  for (auto& funct_vect : m_luminosityInfos){
+    for (auto& funct : funct_vect){
+      funct.in_mag=is_mag;
+    }
+  }
+
+  clearGrid();
+  loadGrid();
+}
+
+
+void DialogLuminosityPrior::clearGrid(){
+  int i=0;
   for(auto child : ui->frame_Luminosity->children())
   {
+    if (i>0){
       delete child;
+    }
+    ++i;
   }
 
 }
 
-void DialogLuminosityPrior::loadGrid(const std::vector<PhzLuminosity::SedGroup>& groups, const std::vector<double>& zs){
+void DialogLuminosityPrior::loadGrid(){
+
+  m_grid_buttons.clear();
   auto frame_1 = new QFrame();
         frame_1->setFrameStyle(QFrame::NoFrame);
         frame_1->setMinimumHeight(30);
         ui->gl_Luminosity->addWidget(frame_1, 0, 0);
 
 
-        for (size_t i =0; i<groups.size();++i){
+        for (size_t i =0; i<m_groups.size();++i){
           auto frame_grp = new QFrame();
           frame_grp->setFrameStyle(QFrame::NoFrame);
           frame_grp->setMinimumHeight(30);
           auto layout= new QHBoxLayout();
           frame_grp->setLayout(layout);
-          auto label = new QLabel(QString::fromStdString(groups[i].getName()));
+          auto label = new QLabel(QString::fromStdString(m_groups[i].getName()));
           label->setAlignment(Qt::AlignCenter);
           layout->addWidget(label);
           ui->gl_Luminosity->addWidget(frame_grp, 1+i, 0);
         }
 
 
-        for (size_t i =0; i<zs.size()-1;++i){
+        for (size_t i =0; i<m_zs.size()-1;++i){
           auto frame = new QFrame();
           frame->setFrameStyle(QFrame::NoFrame);
           frame->setMinimumHeight(30);
           auto layout= new QVBoxLayout();
           frame->setLayout(layout);
-          auto label = new QLabel("z="+QString::number(zs[i],'f', 2) +" - "+QString::number(zs[i+1],'f', 2));
+          auto label = new QLabel("z="+QString::number(m_zs[i],'f', 2) +" - "+QString::number(m_zs[i+1],'f', 2));
           label->setAlignment(Qt::AlignCenter);
           layout->addWidget(label);
           ui->gl_Luminosity->addWidget(frame, 0,1+i);
        }
 
-        for (size_t i=0;i<zs.size()-1;++i){
-          for(size_t j=0;j<groups.size();++j){
+        for (size_t i=0;i<m_zs.size()-1;++i){
+          for(size_t j=0;j<m_groups.size();++j){
             auto frame = new QFrame();
             frame->setMinimumHeight(30);
             frame->setFrameStyle(QFrame::Box);
@@ -120,17 +563,15 @@ void DialogLuminosityPrior::loadGrid(const std::vector<PhzLuminosity::SedGroup>&
             auto layout = new QVBoxLayout();
             frame->setLayout(layout);
 
-            auto label = new QLabel("To be defined");
-
+            QString text_btn="To be defined";
             if (m_luminosityInfos[i][j].isComplete()){
-              label->setText(m_luminosityInfos[i][j].getDescription());
+              text_btn = m_luminosityInfos[i][j].getDescription();
             }
-            label->setAlignment(Qt::AlignCenter);
-            layout->addWidget(label);
-            GridButton * button = new GridButton(i,j,"Define");
+            GridButton * button = new GridButton(i,j,text_btn);
             button->setStyleSheet( "background-color: lightGrey ");
             connect( button, SIGNAL(GridButtonClicked(int,int)), this,SLOT(onGridButtonClicked(int,int)));
             layout->addWidget(button);
+            m_grid_buttons.push_back(button);
             ui->gl_Luminosity->addWidget(frame, j+1, i+1);
           }
         }
@@ -146,7 +587,6 @@ void DialogLuminosityPrior::onGridButtonClicked(int x,int y){
 
 }
 
-
 void DialogLuminosityPrior::luminosityFunctionPopupClosing(LuminosityFunctionInfo info, int x, int y){
   m_luminosityInfos[x][y]=info;
 
@@ -156,10 +596,10 @@ void DialogLuminosityPrior::luminosityFunctionPopupClosing(LuminosityFunctionInf
 
   if (info.isComplete()){
     layoutItem->widget()->setStyleSheet( "background-color: white ");
-    static_cast<QLabel*>(layoutItem->widget()->children()[1])->setText(info.getDescription());
+    static_cast<GridButton*>(layoutItem->widget()->children()[1])->setText(info.getDescription());
   } else {
     layoutItem->widget()->setStyleSheet( "background-color: red ");
-    static_cast<QLabel*>(layoutItem->widget()->children()[1])->setText("To be defined");
+    static_cast<GridButton*>(layoutItem->widget()->children()[1])->setText("To be defined");
   }
 
 
@@ -174,15 +614,100 @@ void DialogLuminosityPrior::on_btn_group_clicked(){
 
 }
 
-
 void DialogLuminosityPrior::groupPopupClosing(std::vector<PhzLuminosity::SedGroup> groups){
-  m_groups=std::move(groups);
+
+  bool is_mag=ui->cb_unit->currentIndex()==0;
+
 
   // update function,clear grid redraw
+  if (m_groups.size()<groups.size()){
+    for (size_t i =0; i<m_zs.size()-1;++i){
+      for (size_t j =m_groups.size(); j<groups.size();++j){
+        m_luminosityInfos[i].push_back(LuminosityFunctionInfo{});
+        m_luminosityInfos[i][j].z_min=m_zs[i];
+        m_luminosityInfos[i][j].z_max=m_zs[i+1];
+        m_luminosityInfos[i][j].in_mag=is_mag;
+      }
+    }
+  } else if (m_groups.size()>groups.size()){
+    for (size_t i =0; i<m_zs.size()-1;++i){
+      auto iter = m_luminosityInfos[i].begin();
 
- // ClearGrid();
+      for (size_t j =0; j<groups.size();++j){
+        ++iter;
+      }
+
+
+      m_luminosityInfos[i].erase(iter,m_luminosityInfos[i].end());
+    }
+  }
+
+  m_groups=std::move(groups);
+
+  for (size_t i =0; i<m_zs.size()-1;++i){
+     for (size_t j =0; j<m_groups.size();++j){
+        m_luminosityInfos[i][j].sedGroupName=m_groups[j].getName();
+     }
+  }
+
+
+  clearGrid();
+  loadGrid();
 
 }
+
+void DialogLuminosityPrior::on_btn_z_clicked(){
+   std::unique_ptr<DialogZRanges> dialog(new DialogZRanges());
+   dialog->setRanges(m_zs);
+
+   connect(dialog.get(),SIGNAL(popupClosing(std::vector<double>)),this,SLOT(zPopupClosing(std::vector<double>)));
+   dialog->exec();
+}
+void DialogLuminosityPrior::zPopupClosing(std::vector<double> zs){
+  bool is_mag=ui->cb_unit->currentIndex()==0;
+
+  // update function,clear grid redraw
+   if (m_zs.size()<zs.size()){
+     for (size_t i =m_zs.size()-1; i<zs.size()-1;++i){
+       m_luminosityInfos.push_back({});
+       for (size_t j =0; j<m_groups.size();++j){
+         m_luminosityInfos[i].push_back(LuminosityFunctionInfo{});
+         m_luminosityInfos[i][j].in_mag=is_mag;
+         m_luminosityInfos[i][j].sedGroupName=m_groups[j].getName();
+       }
+     }
+   } else if (m_zs.size()>zs.size()){
+     auto iter = m_luminosityInfos.begin();
+     for (size_t i =0; i<zs.size()-1;++i){
+         ++iter;
+     }
+
+     m_luminosityInfos.erase(iter,m_luminosityInfos.end());
+
+   }
+
+   m_zs=std::move(zs);
+
+   for (size_t i =0; i<m_zs.size()-1;++i){
+      for (size_t j =0; j<m_groups.size();++j){
+         m_luminosityInfos[i][j].z_min=m_zs[i];
+         m_luminosityInfos[i][j].z_max=m_zs[i+1];
+      }
+   }
+
+   clearGrid();
+   loadGrid();
+}
+
+
+
+   void DialogLuminosityPrior::on_btn_close_clicked(){
+     accept();
+
+   }
+
+
+
 
 }
 }

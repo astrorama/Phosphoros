@@ -16,6 +16,8 @@
 #include "PhzQtUI/GridButton.h"
 #include "PhzQtUI/LuminosityFunctionInfo.h"
 
+#include "PhzQtUI/DialogLuminosityFunctionCurveSelector.h"
+
 // #include <future>
 //http://stackoverflow.com/questions/4412796/qt-qtableview-clickable-button-in-table-row
 //assume 2x3 layout => 3 row 4 columns
@@ -56,6 +58,7 @@ void DialogLuminosityFunction::setInfo(LuminosityFunctionInfo info, int x, int y
     ui->gb_schechter->setChecked(false);
   } else {
     ui->gb_custom->setChecked(false);
+    ui->lb_curve->setText(QString::fromStdString(m_FunctionInfo.curve_name));
   }
 
   ui->txt_alpha->setValidator(new QDoubleValidator(this));
@@ -90,11 +93,25 @@ void DialogLuminosityFunction::on_btn_cancel_clicked(){
   reject();
 }
 
+
+void DialogLuminosityFunction::on_btn_curve_clicked(){
+  std::unique_ptr<DialogLuminosityFunctionCurveSelector> dialog(new DialogLuminosityFunctionCurveSelector());
+  dialog->setCurve(ui->lb_curve->text().toStdString());
+
+  connect(dialog.get(),SIGNAL(popupClosing(std::string)),this,SLOT(curvePopupClosing(std::string)));
+  dialog->exec();
+}
+
+
+void DialogLuminosityFunction::curvePopupClosing(std::string curve){
+  ui->lb_curve->setText(QString::fromStdString(curve));
+}
+
 void DialogLuminosityFunction::on_btn_save_clicked(){
 
   m_FunctionInfo.is_custom=ui->gb_custom->isChecked();
 
-  m_FunctionInfo.curve_name=ui->cb_curves->currentText().toStdString();
+  m_FunctionInfo.curve_name=ui->lb_curve->text().toStdString();
 
   m_FunctionInfo.alpha=ui->txt_alpha->text().toDouble();
   m_FunctionInfo.l=ui->txt_L->text().toDouble();

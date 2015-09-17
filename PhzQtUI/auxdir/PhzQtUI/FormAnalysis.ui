@@ -217,8 +217,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1053</width>
-            <height>206</height>
+            <width>416</width>
+            <height>166</height>
            </rect>
           </property>
           <attribute name="label">
@@ -375,8 +375,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1053</width>
-            <height>206</height>
+            <width>543</width>
+            <height>166</height>
            </rect>
           </property>
           <attribute name="label">
@@ -521,8 +521,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1053</width>
-            <height>199</height>
+            <width>458</width>
+            <height>151</height>
            </rect>
           </property>
           <attribute name="label">
@@ -607,6 +607,9 @@
                 <string>Luminosity Prior</string>
                </property>
               </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="cb_luminosityPrior_2"/>
              </item>
              <item>
               <spacer name="horizontalSpacer_5">
@@ -812,6 +815,24 @@
                   <bool>false</bool>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_4"/>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="gb_lhood">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="title">
+                  <string>Generate Likelihood files</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
                 </widget>
                </item>
                <item>

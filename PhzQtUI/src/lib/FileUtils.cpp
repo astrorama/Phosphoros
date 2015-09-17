@@ -369,6 +369,21 @@ std::string FileUtils::getFilterRootPath(bool check)  {
     }
     return info.absoluteFilePath().toStdString();
 }
+
+
+
+std::string FileUtils::getLuminosityFunctionCurveRootPath(bool check) {
+  QString path = QString::fromStdString(readPath()["AuxiliaryData"])+QDir::separator()+"LuminosityFunctionCurves";
+  QFileInfo info(path);
+  if (check){
+      if (!info.exists()){
+          QDir().mkpath(path);
+      }
+  }
+  return info.absoluteFilePath().toStdString();
+}
+
+
 std::string FileUtils::getSedRootPath(bool check)  {
 
 
@@ -392,17 +407,7 @@ std::string FileUtils::getRedCurveRootPath(bool check)  {
     return info.absoluteFilePath().toStdString();
 }
 
-std::string FileUtils::getLuminosityCurveRootPath(bool check){
-  QString path = QString::fromStdString(readPath()["AuxiliaryData"])+QDir::separator()+"LuminosityFunctionCurves";
-     QFileInfo info(path);
-     if (check){
-         if (!info.exists()){
-             QDir().mkpath(path);
-         }
-     }
-     return info.absoluteFilePath().toStdString();
 
-}
 
 
 std::string FileUtils::getModelRootPath(bool check)  {
@@ -432,8 +437,34 @@ std::string FileUtils::getPhotmetricGridRootPath(bool check, const std::string& 
   return info.absoluteFilePath().toStdString();
 }
 
+std::string FileUtils::getGUILuminosityPriorConfig(bool check, const std::string & catalog_type, const std::string& model){
+  QString path = QString::fromStdString(FileUtils::getGUIConfigPath())+QDir::separator()
+  +"LuminosityPrior"+QDir::separator()+QString::fromStdString(catalog_type)
+  +QDir::separator()+QString::fromStdString(model);
+   QFileInfo info(path);
+   if (check){
+       if (!info.exists()){
+           QDir().mkpath(path);
+       }
+   }
+   return info.absoluteFilePath().toStdString();
 
+}
 
+std::string FileUtils::getLuminosityFunctionGridRootPath(bool check, const std::string & catalog_type, const std::string& model){
+  QString path = QString::fromStdString(FileUtils::getIntermediaryProductRootPath(check,""))+QDir::separator()
+  +QString::fromStdString(catalog_type)
+  + QDir::separator()+"LuminosityModelGrids"
+  + QDir::separator()+QString::fromStdString(model);
+    QFileInfo info(path);
+    if (check){
+        if (!info.exists()){
+            QDir().mkpath(path);
+        }
+    }
+    return info.absoluteFilePath().toStdString();
+
+}
 
 }
 }

@@ -56,7 +56,6 @@ void FormAnalysis::loadAnalysisPage() {
   }
 
   updateGridSelection();
-
 }
 ///////////////////////////////////////////////////
 //  Handle controls enability
@@ -160,10 +159,12 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   QFileInfo info_input(ui->txt_inputCatalog->text());
   bool run_ok = info_input.exists();
 
+  bool lum_prior_ok = !ui->cb_luminosityPrior->isChecked() || ui->cb_luminosityPrior_2->currentText().length()>0;
+
   ui->btn_GetConfigAnalysis->setEnabled(
-      grid_name_ok && correction_ok && run_ok && enabled);
+      grid_name_ok && correction_ok && lum_prior_ok && run_ok && enabled);
   ui->btn_RunAnalysis->setEnabled(
-      grid_name_exists && correction_exists && run_ok && enabled);
+      grid_name_exists && correction_exists && lum_prior_ok && run_ok && enabled);
 
   QString tool_tip_run = "";
   QString tool_tip_conf = "";
@@ -190,6 +191,18 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
         + "Please run the photometric correction computation. \n";
   }
 
+  if (!lum_prior_ok){
+    tool_tip_conf =
+            tool_tip_conf
+                + "When the luminosity prior is enabled , you must provide a luminosity prior configuration. \n";
+        tool_tip_run =
+            tool_tip_run
+                + "When the luminosity prior is enabled , you must provide a luminosity prior configuration. \n";
+
+
+  }
+
+
   if (!info_input.exists()) {
     ui->txt_inputCatalog->setStyleSheet("QLineEdit { color: #F78181 }");
     tool_tip_conf =
@@ -203,13 +216,13 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
     ui->txt_inputCatalog->setStyleSheet("QLineEdit { color: grey }");
   }
 
-  if (!(grid_name_ok && correction_ok && run_ok)) {
+  if (!(grid_name_ok && correction_ok && lum_prior_ok && run_ok)) {
     tool_tip_conf = tool_tip_conf + "Before getting the configuration.";
   } else {
     tool_tip_conf = "Get the configuration file.";
   }
 
-  if (!(grid_name_exists && correction_exists && run_ok)) {
+  if (!(grid_name_exists && correction_exists && lum_prior_ok && run_ok)) {
     tool_tip_run = tool_tip_run + "Before running the analysis.";
   } else {
     tool_tip_run = "Run the analysis.";
@@ -223,6 +236,12 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   } else {
     setToolBoxButtonColor(ui->toolBox, 1,Qt::black);
   }
+
+  if (!lum_prior_ok) {
+     setToolBoxButtonColor(ui->toolBox, 2, QColor("orange"));
+   } else {
+     setToolBoxButtonColor(ui->toolBox, 2,Qt::black);
+   }
 }
 
 //////////////////////////////////////////////////
@@ -355,6 +374,16 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     }
   }
 
+  ModelSet selected_model;
+
+   for (auto&model : m_analysis_model_list) {
+     if (model.second.getName().compare(
+         ui->cb_AnalysisModel->currentText().toStdString()) == 0) {
+       selected_model = model.second;
+       break;
+     }
+   }
+
   std::map<std::string, boost::program_options::variable_value> options_map;
 
   options_map["phosphoros-root"].value() = boost::any(FileUtils::getRootPath());
@@ -379,8 +408,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
 
 
-  options_map["source-id-column-name"].value() = boost::any(
-      getSelectedSurveySourceColumn());
+  options_map["source-id-column-name"].value() = boost::any(getSelectedSurveySourceColumn());
   options_map["missing-photometry-flag"].value() = boost::any(non_detection);
 
 
@@ -413,13 +441,29 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   if (ui->gb_pdf->isChecked()) {
     options_map["create-output-pdf"].value() = boost::any(yes_flag);
+  }
 
+  if (ui->gb_lhood->isChecked()) {
+   options_map["create-output-likelihoods"].value() = boost::any(yes_flag);
   }
 
   if (ui->gb_lik->isChecked()) {
     options_map["create-output-posteriors"].value() = boost::any(yes_flag);
-
   }
+
+
+  if (ui->cb_luminosityPrior->isChecked()){
+    std::string lum_prior_name = ui->cb_luminosityPrior_2->currentText().toStdString();
+    auto& lum_prior_config = m_prior_config.at(lum_prior_name);
+    auto lum_prior_option =lum_prior_config.getConfigOptions();
+    options_map.insert(lum_prior_option.begin(),lum_prior_option.end());
+
+    for (auto& pair :selected_model.getModelNameConfigOptions()){
+      options_map[pair.first]=pair.second;
+      }
+  }
+
+
   return options_map;
 }
 //////////////////////////////////////////////////
@@ -493,6 +537,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   }
 
   updateGridSelection();
+  loadLuminosityPriors();
   updateCorrectionSelection();
 
   // set the correction file
@@ -515,7 +560,9 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
 }
 
   void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(const QString &) {
+
     updateGridSelection();
+    loadLuminosityPriors();
   }
 
   void FormAnalysis::on_cb_igm_currentIndexChanged(const QString &)
@@ -643,8 +690,104 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     ui->cb_AnalysisCorrection->setCurrentIndex(ui->cb_AnalysisCorrection->findText(new_file_name));
   }
 
-// 4. Run
 
+
+// 4. algorithm options
+  void FormAnalysis::on_btn_confLuminosityPrior_clicked(){
+        std::unique_ptr<DialogLuminosityPrior> dialog(new DialogLuminosityPrior());
+
+        auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+
+        ModelSet selected_model;
+
+        for (auto&model : m_analysis_model_list) {
+            if (model.second.getName().compare(
+                ui->cb_AnalysisModel->currentText().toStdString()) == 0) {
+              selected_model = model.second;
+              break;
+            }
+        }
+
+        std::vector<std::string> seds{};
+        double z_min=1000000;;
+        double z_max=0;;
+
+        for(auto& rule : selected_model.getParameterRules()){
+          auto z_range = rule.second.getZRange();
+          if (z_min>z_range.getMin()){
+            z_min=z_range.getMin();
+          }
+
+          if (z_max<z_range.getMax()){
+            z_max=z_range.getMax();
+          }
+        }
+
+        dialog->loadData(selected_model,survey_name,z_min,z_max);
+        dialog->exec();
+        loadLuminosityPriors();
+
+  }
+
+  void FormAnalysis::loadLuminosityPriors(){
+    auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+
+    ModelSet selected_model;
+
+         for (auto&model : m_analysis_model_list) {
+             if (model.second.getName().compare(
+                 ui->cb_AnalysisModel->currentText().toStdString()) == 0) {
+               selected_model = model.second;
+               break;
+             }
+         }
+
+    auto folder = FileUtils::getGUILuminosityPriorConfig(true,survey_name,selected_model.getName());
+
+    m_prior_config = LuminosityPriorConfig::readFolder(folder);
+
+    auto prior_name = FileUtils::getUserPreference(survey_name,selected_model.getName()+"_LuminosityPriorName");
+
+
+    ui->cb_luminosityPrior_2->clear();
+    int index=-1;
+    int id=0;
+    for (auto prior_pair : m_prior_config){
+      ui->cb_luminosityPrior_2->addItem(QString::fromStdString(prior_pair.first));
+
+      if (prior_name==prior_pair.first){
+        index=id;
+      }
+      ++id;
+    }
+
+
+    if (index>=0){
+      ui->cb_luminosityPrior_2->setCurrentIndex(index);
+    }
+
+    auto prior_enabled = FileUtils::getUserPreference(
+           ui->cb_AnalysisSurvey->currentText().toStdString(), ui->cb_AnalysisModel->currentText().toStdString()+"_LuminosityPriorEnabled");
+
+    ui->cb_luminosityPrior->setChecked(prior_enabled=="1");
+  }
+
+
+  void FormAnalysis::on_cb_luminosityPrior_2_currentIndexChanged(const QString &){
+    FileUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                ui->cb_AnalysisModel->currentText().toStdString()+"_LuminosityPriorName",ui->cb_luminosityPrior_2->currentText().toStdString());
+
+    setRunAnnalysisEnable(true);
+  }
+
+  void FormAnalysis::on_cb_luminosityPrior_stateChanged(int){
+    FileUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                    ui->cb_AnalysisModel->currentText().toStdString()+"_LuminosityPriorEnabled",QString::number(ui->cb_luminosityPrior->isChecked()).toStdString());
+    setRunAnnalysisEnable(true);
+  }
+
+
+// 5. Run
   void FormAnalysis::setInputCatalogName(std::string name,bool do_test) {
     bool not_found = false;
     if (do_test) {
@@ -722,10 +865,20 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     }
   }
 
+
+  void FormAnalysis::on_gb_lhood_clicked(){
+    if (ui->gb_lhood->isChecked ()) {
+          QMessageBox::warning(this, "Large output volume...",
+              "Outputing multi-dimensional likelihood grids (one file per source)"
+              " will generate a large output volume.", QMessageBox::Ok );
+        }
+        setRunAnnalysisEnable(true);
+  }
+
   void FormAnalysis::on_gb_lik_clicked() {
     if (ui->gb_lik->isChecked ()) {
       QMessageBox::warning(this, "Large output volume...",
-          "Outputing multi-dimensional likelihood grids (one file per source)"
+          "Outputing multi-dimensional posterior grids (one file per source)"
           " will generate a large output volume.", QMessageBox::Ok );
     }
     setRunAnnalysisEnable(true);
@@ -787,13 +940,18 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     }
 
     std::string lik="";
-    if (ui->gb_lik->isChecked()) {
-      lik=QString(QString(ui->txt_outputFolder->text()+QDir::separator()+"posteriors"+QDir::separator())).toStdString();
+    if (ui->gb_lhood->isChecked()) {
+      lik=QString(QString(ui->txt_outputFolder->text()+QDir::separator()+"likelihoods"+QDir::separator())).toStdString();
     }
+
+    std::string pos="";
+       if (ui->gb_lik->isChecked()) {
+         lik=QString(QString(ui->txt_outputFolder->text()+QDir::separator()+"posteriors"+QDir::separator())).toStdString();
+       }
 
     auto config_map = getRunOptionMap();
     std::unique_ptr<DialogRunAnalysis> dialog(new DialogRunAnalysis());
-    dialog->setValues(cat,pdf,lik,config_map);
+    dialog->setValues(cat,pdf,lik,pos,config_map);
     if (dialog->exec()) {
       FileUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
           "IGM",ui->cb_igm->currentText().toStdString());
@@ -831,14 +989,6 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
       }
     }
   }
-
-    void FormAnalysis::on_btn_confLuminosityPrior_clicked(){
-      std::unique_ptr<DialogLuminosityPrior> dialog(new DialogLuminosityPrior());
-
-        if (dialog->exec()) {
-
-        }
-    }
 
 
 

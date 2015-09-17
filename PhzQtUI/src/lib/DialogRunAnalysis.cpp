@@ -37,7 +37,9 @@ DialogRunAnalysis::DialogRunAnalysis(QWidget *parent) :
 DialogRunAnalysis::~DialogRunAnalysis() {}
 
 void DialogRunAnalysis::setValues(std::string output_cat_name,
-    std::string output_pdf_name, std::string output_lik_name,
+                                  std::string output_pdf_name,
+                                  std::string output_lik_name,
+                                  std::string output_pos_name,
     const std::map<std::string, boost::program_options::variable_value>& config) {
   if (output_cat_name.length() > 0) {
     ui->label_name_cat->setText(QString::fromStdString(output_cat_name));
@@ -59,6 +61,13 @@ void DialogRunAnalysis::setValues(std::string output_cat_name,
     ui->label_name_lik->setVisible(false);
     ui->label_lik->setVisible(false);
   }
+
+  if (output_pos_name.length() > 0) {
+     ui->label_name_pos->setText(QString::fromStdString(output_pos_name));
+   } else {
+     ui->label_name_pos->setVisible(false);
+     ui->label_pos->setVisible(false);
+   }
   m_config = config;
 
 }

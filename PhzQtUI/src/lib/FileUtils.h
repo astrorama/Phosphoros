@@ -137,6 +137,18 @@ public:
      */
     static std::string getFilterRootPath(bool check);
 
+
+    /**
+     * @brief get the Luminosity Function Curve Root Path
+     * @param check
+     * if true ensure the folder exists
+     */
+    static std::string getLuminosityFunctionCurveRootPath(bool check);
+
+    static std::string getGUILuminosityPriorConfig(bool check, const std::string & catalog_type, const std::string& model);
+
+    static std::string getLuminosityFunctionGridRootPath(bool check, const std::string & catalog_type, const std::string& model);
+
     /**
      * @brief get the SEDs RootPath
      * @param check
@@ -153,13 +165,6 @@ public:
      */
     static std::string getRedCurveRootPath(bool check);
 
-    /**
-     * @brief get the Luminosity Function Curves RootPath
-     * @param check
-     * if true ensure that the folder exist.
-     * @return <rootPath>/LuminosityFunctionCurves
-     */
-    static std::string getLuminosityCurveRootPath(bool check);
 
     /**
      * @brief get the Photometric Corrections RootPath

@@ -59,7 +59,7 @@ void FormAuxDataManagement::loadManagementPage(int index){
 
 
     DirectoryTreeModel* treeModel_Luminosity = new DirectoryTreeModel();
-    treeModel_Luminosity->loadDirectory(FileUtils::getLuminosityCurveRootPath(true),false, "Luminosity Function Curves");
+    treeModel_Luminosity->loadDirectory(FileUtils::getLuminosityFunctionCurveRootPath(true),false, "Luminosity Function Curves");
     treeModel_Luminosity->selectRoot();
     treeModel_Luminosity->setEnabled(true);
       ui->treeView_ManageLuminosity->setModel(treeModel_Luminosity);

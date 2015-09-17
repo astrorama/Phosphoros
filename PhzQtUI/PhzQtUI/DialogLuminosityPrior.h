@@ -12,11 +12,15 @@
 #include <QDialog>
 #include <QTimer>
 #include <map>
+#include <QModelIndex>
+
 #include "ElementsKernel/Exception.h"
 #include "PhzQtUI/LuminosityFunctionInfo.h"
 
-
+#include "PhzQtUI/LuminosityPriorConfig.h"
 #include "PhzLuminosity/SedGroup.h"
+#include "PhzQtUI/GridButton.h"
+#include "ModelSet.h"
 
 namespace boost{
 namespace program_options{
@@ -43,22 +47,71 @@ public:
     explicit DialogLuminosityPrior(QWidget *parent = 0);
     ~DialogLuminosityPrior();
 
+    void loadData(
+        ModelSet model,
+        std::string survey_name,
+        double z_min,
+        double z_max);
+
+signals:
+    void popupClosing();
 
 
 private slots:
+
+void priorSelectionChanged(QModelIndex new_index, QModelIndex);
+
+void on_btn_new_clicked();
+void on_btn_cancel_clicked();
+void on_btn_save_clicked();
+void on_btn_delete_clicked();
+void on_btn_edit_clicked();
+void on_btn_close_clicked();
+
+void on_btn_filter_clicked();
+void filterPopupClosing(std::string filter);
+
+
+void on_btn_z_clicked();
+void zPopupClosing(std::vector<double> zs);
+
+void on_cb_unit_currentIndexChanged(const QString &);
+
+
 void onGridButtonClicked(int x,int y);
 void luminosityFunctionPopupClosing(LuminosityFunctionInfo info, int x, int y);
 void on_btn_group_clicked();
 void groupPopupClosing(std::vector<PhzLuminosity::SedGroup> groups);
 
 private:
-void ClearGrid();
-void loadGrid(const std::vector<PhzLuminosity::SedGroup>& groups, const std::vector<double>& zs);
+
+void manageBtnEnability(bool in_edition);
+
+
+void loadMainGrid();
+
+void clearGrid();
+void loadGrid();
 std::unique_ptr<Ui::DialogLuminosityPrior> ui;
+
+
+std::map<std::string, LuminosityPriorConfig> m_prior_configs;
+QString m_config_folder;
+QString m_grid_folder;
+
+bool m_new=false;
+
+ModelSet m_model;
+std::string m_survey_name;
+double m_z_min;
+double m_z_max;
+
 std::vector<std::vector<LuminosityFunctionInfo>> m_luminosityInfos{};
 std::vector<PhzLuminosity::SedGroup> m_groups{};
-};
+std::vector<double> m_zs{};
 
+std::vector<GridButton*> m_grid_buttons{};
+};
 }
 }
 

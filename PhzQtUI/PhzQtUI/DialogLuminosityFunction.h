@@ -49,8 +49,11 @@ signals:
 private slots:
 void on_btn_cancel_clicked();
 void on_btn_save_clicked();
+void on_btn_curve_clicked();
 void on_gb_schechter_clicked();
 void on_gb_custom_clicked();
+
+void curvePopupClosing(std::string curve);
 
 
 private:

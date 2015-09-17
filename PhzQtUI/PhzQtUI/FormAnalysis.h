@@ -9,6 +9,7 @@
 #include <string>
 #include "SurveyFilterMapping.h"
 #include "ModelSet.h"
+#include "PhzQtUI/LuminosityPriorConfig.h"
 
 namespace boost{
 namespace program_options{
@@ -81,7 +82,12 @@ private slots:
 
     void on_gb_lik_clicked();
 
+    void on_gb_lhood_clicked();
+
     void on_btn_confLuminosityPrior_clicked();
+
+    void on_cb_luminosityPrior_2_currentIndexChanged(const QString &);
+    void on_cb_luminosityPrior_stateChanged(int);
 
 
 
@@ -91,6 +97,8 @@ private:
     std::list<std::string> getSelectedFilters();
     std::list<std::string> getExcludedFilters();
     std::list<FilterMapping> getSelectedFilterMapping();
+
+    void loadLuminosityPriors();
 
     void setInputCatalogName( std::string name,bool do_test=true);
 
@@ -111,6 +119,7 @@ private:
     std::map < std::string, boost::program_options::variable_value > getRunOptionMap();
     std::map<int,SurveyFilterMapping>  m_analysis_survey_list;
     std::map<int,ModelSet> m_analysis_model_list;
+    std::map<std::string, LuminosityPriorConfig> m_prior_config;
 
 };
 

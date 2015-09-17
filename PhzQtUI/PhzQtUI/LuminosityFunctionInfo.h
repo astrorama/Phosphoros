@@ -8,6 +8,9 @@
 #ifndef PHZQTUI_PHZQTUI_LUMINOSITYFUNCTIONINFO_H_
 #define PHZQTUI_PHZQTUI_LUMINOSITYFUNCTIONINFO_H_
 
+#include <string>
+#include <QString>
+
 namespace Euclid {
 namespace PhzQtUI {
 
@@ -33,7 +36,7 @@ public:
 
   QString getDescription(){
     if (is_custom){
-      return "Custom Curve: " + QString::fromStdString(curve_name);
+      return "Custom Curve:\n" + QString::fromStdString(curve_name);
     } else {
       QString m_l = "";
       if (in_mag){
@@ -42,7 +45,7 @@ public:
         m_l= "L*="+QString::number(l,'f', 2);
       }
 
-      return "Schechter: a=" +QString::number(alpha,'f', 2) + " phi="+QString::number(phi,'f', 2) + " " +m_l;
+      return "Schechter: a=" +QString::number(alpha,'f', 2) + "\n phi="+QString::number(phi,'f', 2) + " " +m_l;
     }
   }
 };

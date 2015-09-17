@@ -7,6 +7,7 @@
 #include "PhzQtUI/ModelSet.h"
 #include "PhzQtUI/XYDataSetTreeModel.h"
 #include "PhzConfiguration/ParameterSpaceConfiguration.h"
+#include "PhzDataModel/PhotometryGrid.h"
 namespace po = boost::program_options;
 namespace Euclid {
 namespace PhzQtUI {
@@ -48,6 +49,11 @@ long long ModelSet::getModelNumber() const{
 }
 
 
+std::map<std::string, boost::program_options::variable_value> ModelSet::getModelNameConfigOptions() const{
+  std::map<std::string, po::variable_value> options;
+    options["parameter-space-model-name"].value() = boost::any(getName());
+  return options;
+}
 std::map<std::string, po::variable_value> ModelSet::getConfigOptions() const{
   std::map<std::string, po::variable_value> options;
 
@@ -253,6 +259,35 @@ std::map<int,ParameterRule> ModelSet::getParameterRules() const{
 
 void ModelSet::setParameterRules( std::map<int,ParameterRule> parameter_rules){
     m_parameter_rules=std::move(parameter_rules);
+}
+
+
+template<typename ReturnType, int I>
+ std::vector<ReturnType> getCompleteList(const std::map<std::string, PhzDataModel::ModelAxesTuple>& grid_axis_map) {
+   std::vector<ReturnType> all_item { };
+   for (auto& sub_grid : grid_axis_map) {
+     for (auto& item : std::get<I>(sub_grid.second)) {
+       if (std::find(all_item.begin(), all_item.end(), item) == all_item.end())
+         all_item.push_back(item);
+     }
+   }
+
+   return all_item;
+ }
+
+std::vector<std::string> ModelSet::getSeds() const{
+  auto tuples = getAxesTuple();
+
+  auto seds= getCompleteList<XYDataset::QualifiedName,PhzDataModel::ModelParameter::SED>(tuples);
+
+  std::vector<std::string>  result{};
+
+  for (auto& sed : seds){
+    result.push_back(sed.qualifiedName());
+  }
+
+  return result;
+
 }
 
 }
