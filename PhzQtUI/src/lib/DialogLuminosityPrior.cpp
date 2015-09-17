@@ -140,6 +140,7 @@ void DialogLuminosityPrior::loadMainGrid(){
 void DialogLuminosityPrior::priorSelectionChanged(QModelIndex new_index, QModelIndex){
 
   size_t row = new_index.row();
+
   std::string name=new_index.sibling(row, 1).data().toString().toStdString();
 
   auto config = m_prior_configs.at(name);
@@ -162,35 +163,38 @@ void DialogLuminosityPrior::priorSelectionChanged(QModelIndex new_index, QModelI
 
 
   loadGrid();
-  manageBtnEnability(false);
+  manageBtnEnability(false,true);
 }
 
 
+void DialogLuminosityPrior::manageBtnEnability(bool in_edition,bool has_selected_row){
+
+   ui->btn_new->setEnabled(!in_edition);
+   ui->btn_delete->setEnabled(!in_edition && has_selected_row);
+
+   ui->btn_edit->setEnabled(!in_edition && has_selected_row);
+   ui->btn_cancel->setEnabled(in_edition && has_selected_row);
+   ui->btn_save->setEnabled(in_edition && has_selected_row);
+
+   ui->btn_close->setEnabled(!in_edition);
+
+   ui->table_priors->setEnabled(!in_edition);
+   ui->txt_name->setEnabled(in_edition);
+   ui->cb_unit->setEnabled(in_edition);
+   ui->ck_reddening->setEnabled(in_edition);
+   ui->btn_filter->setEnabled(in_edition);
+   ui->btn_group->setEnabled(in_edition);
+   ui->btn_z->setEnabled(in_edition);
+
+   for (auto button : m_grid_buttons){
+     button->setEnabled(in_edition);
+   }
+}
 
 void DialogLuminosityPrior::manageBtnEnability(bool in_edition){
  QItemSelectionModel *select = ui->table_priors->selectionModel();
- bool has_selected_row = select->hasSelection();
+ manageBtnEnability(in_edition,select->hasSelection());
 
- ui->btn_new->setEnabled(!in_edition);
- ui->btn_delete->setEnabled(!in_edition && has_selected_row);
-
- ui->btn_edit->setEnabled(!in_edition && has_selected_row);
- ui->btn_cancel->setEnabled(in_edition && has_selected_row);
- ui->btn_save->setEnabled(in_edition && has_selected_row);
-
- ui->btn_close->setEnabled(!in_edition);
-
- ui->table_priors->setEnabled(!in_edition);
- ui->txt_name->setEnabled(in_edition);
- ui->cb_unit->setEnabled(in_edition);
- ui->ck_reddening->setEnabled(in_edition);
- ui->btn_filter->setEnabled(in_edition);
- ui->btn_group->setEnabled(in_edition);
- ui->btn_z->setEnabled(in_edition);
-
- for (auto button : m_grid_buttons){
-   button->setEnabled(in_edition);
- }
 }
 
 

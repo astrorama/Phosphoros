@@ -86,6 +86,7 @@ void groupPopupClosing(std::vector<PhzLuminosity::SedGroup> groups);
 private:
 
 void manageBtnEnability(bool in_edition);
+void manageBtnEnability(bool in_edition,bool has_selected_row);
 
 
 void loadMainGrid();
