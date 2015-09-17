@@ -61,7 +61,7 @@ void onDeleteGroupClicked(size_t sed_group_id,size_t);
 private:
 std::vector<std::string> getNewGroupNames();
 void addGroup(PhzLuminosity::SedGroup group,size_t i, size_t i_max);
-void clearSeds(int group_id);
+void clearSeds(size_t group_id);
 
 
 void fillSedList(std::vector<std::string> seds ,size_t group_id, size_t max_group_id, QVBoxLayout* layout);

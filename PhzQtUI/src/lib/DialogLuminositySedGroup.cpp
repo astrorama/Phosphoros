@@ -103,7 +103,7 @@ void DialogLuminositySedGroup::fillSedList(std::vector<std::string> seds ,size_t
       auto btn_left = new GridButton(group_id, j, "<");
       btn_left->setMaximumWidth(30);
       sedLayout->addWidget(btn_left);
-      connect(btn_left,SIGNAL(GridButtonClicked(int,int)),this,SLOT(onMoveLeftClicked(int,int)));
+      connect(btn_left,SIGNAL(GridButtonClicked(size_t,size_t)),this,SLOT(onMoveLeftClicked(size_t,size_t)));
 
     }
 
@@ -114,7 +114,7 @@ void DialogLuminositySedGroup::fillSedList(std::vector<std::string> seds ,size_t
       auto btn_right = new GridButton(group_id, j, ">");
       btn_right->setMaximumWidth(30);
       sedLayout->addWidget(btn_right);
-      connect(btn_right,SIGNAL(GridButtonClicked(int,int)),this,SLOT(onMoveRightClicked(int,int)));
+      connect(btn_right,SIGNAL(GridButtonClicked(size_t,size_t)),this,SLOT(onMoveRightClicked(size_t,size_t)));
     }
 
     layout->addWidget(sedFrame);
@@ -234,7 +234,7 @@ void DialogLuminositySedGroup::onMoveLeftClicked(size_t sed_group_id,size_t sed_
 }
 
 
-void DialogLuminositySedGroup::clearSeds(int group_id){
+void DialogLuminositySedGroup::clearSeds(size_t group_id){
   auto group_frame = ui->frame_groups->children()[1+group_id];
 
   delete group_frame->children()[2];
@@ -270,8 +270,8 @@ void DialogLuminositySedGroup::onDeleteGroupClicked(size_t sed_group_id,size_t){
   }
 
   // move the SED into the next (or previous) group
-  int target_group_id = sed_group_id-1;
-  if (target_group_id<0){
+  size_t target_group_id = sed_group_id-1;
+  if (sed_group_id==0){
     target_group_id=1;
   }
 
