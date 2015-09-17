@@ -40,10 +40,10 @@ public:
     explicit DialogLuminosityFunction(QWidget *parent = 0);
     ~DialogLuminosityFunction();
 
-    void setInfo(LuminosityFunctionInfo info, int x, int y);
+    void setInfo(LuminosityFunctionInfo info, size_t x, size_t y);
 
 signals:
-  void popupClosing(LuminosityFunctionInfo info, int x, int y);
+  void popupClosing(LuminosityFunctionInfo info, size_t x, size_t y);
 
 
 private slots:
@@ -59,8 +59,8 @@ void curvePopupClosing(std::string curve);
 private:
 std::unique_ptr<Ui::DialogLuminosityFunction> ui;
 LuminosityFunctionInfo m_FunctionInfo;
-int m_x;
-int m_y;
+size_t m_x;
+size_t m_y;
 
 
 };

@@ -384,15 +384,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
      }
    }
 
-  std::map<std::string, boost::program_options::variable_value> options_map;
-
-  options_map["phosphoros-root"].value() = boost::any(FileUtils::getRootPath());
-  options_map["catalogs-dir"].value() = boost::any(
-      FileUtils::getCatalogRootPath(true, ""));
-  options_map["intermediate-products-dir"].value() = boost::any(
-      FileUtils::getIntermediaryProductRootPath(true, ""));
-  options_map["results-dir"].value() = boost::any(
-      FileUtils::getResultRootPath(true, "", ""));
+  std::map<std::string, boost::program_options::variable_value> options_map =
+      FileUtils::getPathConfiguration(true,false,true,true);
 
   options_map["catalog-type"].value() = boost::any(survey_name);
 
@@ -591,7 +584,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
 
       QString fileName = QFileDialog::getSaveFileName(this,
           tr("Save Configuration File"),
-          QString::fromStdString(FileUtils::getRootPath())+QDir::separator()+"config",
+          QString::fromStdString(FileUtils::getRootPath(true))+"config",
           tr("Config (*.conf)"));
       if (fileName.length()>0) {
         auto config_map = getGridConfiguration();
@@ -887,7 +880,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   void FormAnalysis::on_btn_GetConfigAnalysis_clicked()
   {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save Configuration File"),
-        QString::fromStdString(FileUtils::getRootPath())+QDir::separator()+"config",
+        QString::fromStdString(FileUtils::getRootPath(true))+"config",
         tr("Config (*.conf)"));
     if (fileName.length()>0) {
       auto config_map = getRunOptionMap();

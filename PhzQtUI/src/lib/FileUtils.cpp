@@ -13,7 +13,7 @@ FileUtils::FileUtils()
 {
 }
 
-
+////// Directory and File manipulation
 bool FileUtils::removeDir(const QString &dirName)
 {
 
@@ -88,9 +88,7 @@ bool FileUtils::starts_with(const std::string  & value, const std::string  & beg
     return std::equal(begining.begin(), begining.end(), value.begin());
 }
 
-
-
- std::string FileUtils::removeExt(const std::string& name, const std::string& ext){
+std::string FileUtils::removeExt(const std::string& name, const std::string& ext){
      if (FileUtils::ends_with(name,ext)){
          return name.substr(0,name.length()-ext.length());
      }
@@ -106,7 +104,6 @@ std::string FileUtils::addExt(const std::string& name, const std::string& ext){
    return name+ext;
 }
 
-
 std::string FileUtils::removeStart(const std::string& name, const std::string& start){
     if (FileUtils::starts_with(name,start)){
         return name.substr(start.length());
@@ -115,26 +112,27 @@ std::string FileUtils::removeStart(const std::string& name, const std::string& s
      return name;
 }
 
+
+//// Application base paths as of configuration.
  PhzConfiguration::PhosphorosPathConfiguration FileUtils::getRootPaths(){
    std::map<std::string, boost::program_options::variable_value> map{};
    return PhzConfiguration::PhosphorosPathConfiguration(map);
  }
 
-std::string FileUtils::getRootPath()  {
-    return getRootPaths().getPhosphorosRootDir().generic_string();
-}
-
 std::string FileUtils::getRootPath(bool with_separator){
-  if (with_separator)
-    return (QString::fromStdString(getRootPaths().getPhosphorosRootDir().generic_string())+QDir::separator()).toStdString();
+  QString path = QString::fromStdString(getRootPaths().getPhosphorosRootDir().generic_string());
+  if (with_separator){
+    path = path + QDir::separator();
+  }
 
-  return getRootPath();
+  return path.toStdString();
 }
 
-
+///// GUI Specific path
 std::string FileUtils::getGUIConfigPath(){
-  auto path = QString::fromStdString(getRootPath())+QDir::separator() + "config"+QDir::separator() +"GUI";
+  auto path = QString::fromStdString(getRootPath(true)) + "config"+QDir::separator() +"GUI";
   QFileInfo info(path);
+
   if (!info.exists()){
       QDir().mkpath(path);
   }
@@ -142,6 +140,97 @@ std::string FileUtils::getGUIConfigPath(){
   return path.toStdString();
 }
 
+std::string FileUtils::getGUILuminosityPriorConfig(bool check, const std::string & catalog_type, const std::string& model){
+  QString path = QString::fromStdString(FileUtils::getGUIConfigPath())+QDir::separator()
+  +"LuminosityPrior"+QDir::separator()+QString::fromStdString(catalog_type)
+  +QDir::separator()+QString::fromStdString(model);
+   QFileInfo info(path);
+
+   if (check){
+       if (!info.exists()){
+           QDir().mkpath(path);
+       }
+   }
+
+   return info.absoluteFilePath().toStdString();
+}
+
+//// Overriadable path
+
+std::string FileUtils::getCatalogRootPath(bool check, const std::string& catalog_type){
+  QString path = QString::fromStdString(readPath()["Catalogs"]);
+
+  if (catalog_type.size()>0){
+      path = path + QDir::separator()+ QString::fromStdString(catalog_type);
+  }
+
+  QFileInfo info(path);
+  if (check){
+     if (!info.exists()){
+        QDir().mkpath(path);
+     }
+  }
+  return info.absoluteFilePath().toStdString();
+}
+
+std::string FileUtils::getDefaultCatalogRootPath(){
+    return getRootPath(true)+"Catalogs";
+}
+
+std::string FileUtils::getAuxRootPath(){
+   return readPath()["AuxiliaryData"];
+}
+
+std::string FileUtils::getDefaultAuxRootPath(){
+  return getRootPath(true)+"AuxiliaryData";
+}
+
+std::string FileUtils::getIntermediaryProductRootPath(bool check, const std::string& catalog_type){
+  QString path = QString::fromStdString(readPath()["IntermediateProducts"]);
+
+  if (catalog_type.size()>0){
+    path = path + QDir::separator()+ QString::fromStdString(catalog_type);
+  } else {
+    check=false;
+  }
+
+  QFileInfo info(path);
+  if (check){
+     if (!info.exists()){
+        QDir().mkpath(path);
+     }
+  }
+  return info.absoluteFilePath().toStdString();
+}
+
+std::string FileUtils::getDefaultIntermediaryProductRootPath(){
+  return getRootPath(true)+"IntermediateProducts";
+}
+
+std::string FileUtils::getResultRootPath(bool check, const std::string& catalog_type, const std::string& cat_file_name){
+  QString path = QString::fromStdString(readPath()["Results"]);
+
+  if (catalog_type.size()>0){
+     path = path + QDir::separator()+ QString::fromStdString(catalog_type);
+   }
+
+  if (catalog_type.size()>0){
+      path = path + QDir::separator()+ QString::fromStdString(cat_file_name);
+  }
+
+  QFileInfo info(path);
+  if (check){
+     if (!info.exists()){
+        QDir().mkpath(path);
+     }
+  }
+  return info.absoluteFilePath().toStdString();
+}
+
+
+std::string FileUtils::getDefaultResultsRootPath(){
+  return getRootPath(true)+"Results";
+}
 
 void FileUtils::savePath(const std::map<std::string,std::string>& path_list){
   QString path = QString::fromStdString(getGUIConfigPath())+QDir::separator() +"path.txt";
@@ -299,64 +388,11 @@ void FileUtils::clearUserPreference(const std::string& catalog, const std::strin
    }
 }
 
-std::string FileUtils::getAuxRootPath(){
-   return readPath()["AuxiliaryData"];
- }
 
 
-std::string FileUtils::getCatalogRootPath(bool check, const std::string& catalog_type){
-  QString path = QString::fromStdString(readPath()["Catalogs"]);
 
-  if (catalog_type.size()>0){
-      path = path + QDir::separator()+ QString::fromStdString(catalog_type);
-  }
 
-  QFileInfo info(path);
-  if (check){
-     if (!info.exists()){
-        QDir().mkpath(path);
-     }
-  }
-  return info.absoluteFilePath().toStdString();
-}
 
-std::string FileUtils::getIntermediaryProductRootPath(bool check, const std::string& catalog_type){
-  QString path = QString::fromStdString(readPath()["IntermediateProducts"]);
-
-  if (catalog_type.size()>0){
-    path = path + QDir::separator()+ QString::fromStdString(catalog_type);
-  } else {
-    check=false;
-  }
-
-  QFileInfo info(path);
-  if (check){
-     if (!info.exists()){
-        QDir().mkpath(path);
-     }
-  }
-  return info.absoluteFilePath().toStdString();
-}
-
-std::string FileUtils::getResultRootPath(bool check, const std::string& catalog_type, const std::string& cat_file_name){
-  QString path = QString::fromStdString(readPath()["Results"]);
-
-  if (catalog_type.size()>0){
-     path = path + QDir::separator()+ QString::fromStdString(catalog_type);
-   }
-
-  if (catalog_type.size()>0){
-      path = path + QDir::separator()+ QString::fromStdString(cat_file_name);
-  }
-
-  QFileInfo info(path);
-  if (check){
-     if (!info.exists()){
-        QDir().mkpath(path);
-     }
-  }
-  return info.absoluteFilePath().toStdString();
-}
 
 
 std::string FileUtils::getFilterRootPath(bool check)  {
@@ -437,19 +473,7 @@ std::string FileUtils::getPhotmetricGridRootPath(bool check, const std::string& 
   return info.absoluteFilePath().toStdString();
 }
 
-std::string FileUtils::getGUILuminosityPriorConfig(bool check, const std::string & catalog_type, const std::string& model){
-  QString path = QString::fromStdString(FileUtils::getGUIConfigPath())+QDir::separator()
-  +"LuminosityPrior"+QDir::separator()+QString::fromStdString(catalog_type)
-  +QDir::separator()+QString::fromStdString(model);
-   QFileInfo info(path);
-   if (check){
-       if (!info.exists()){
-           QDir().mkpath(path);
-       }
-   }
-   return info.absoluteFilePath().toStdString();
 
-}
 
 std::string FileUtils::getLuminosityFunctionGridRootPath(bool check, const std::string & catalog_type, const std::string& model){
   QString path = QString::fromStdString(FileUtils::getIntermediaryProductRootPath(check,""))+QDir::separator()
@@ -465,6 +489,36 @@ std::string FileUtils::getLuminosityFunctionGridRootPath(bool check, const std::
     return info.absoluteFilePath().toStdString();
 
 }
+
+
+std::map<std::string, boost::program_options::variable_value> FileUtils::getPathConfiguration(bool add_cat,bool add_aux,bool add_inter, bool add_res){
+  std::map<std::string, boost::program_options::variable_value> options{};
+
+  options["phosphoros-root"].value() = boost::any(FileUtils::getRootPath(false));
+
+  std::string current_cat_path = FileUtils::getCatalogRootPath(false,"");
+  if (add_cat && current_cat_path!=FileUtils::getDefaultCatalogRootPath()){
+    options["catalogs-dir"].value() = boost::any(current_cat_path);
+  }
+
+  std::string current_aux_path = FileUtils::getAuxRootPath();
+  if (add_aux && current_aux_path!=FileUtils::getDefaultAuxRootPath()){
+     options["aux-data-dir"].value() = boost::any(current_aux_path);
+   }
+
+  std::string current_int_path = FileUtils::getIntermediaryProductRootPath(false,"");
+  if (add_inter && current_int_path!=FileUtils::getDefaultIntermediaryProductRootPath()){
+    options["intermediate-products-dir"].value() = boost::any(current_int_path);
+  }
+
+  std::string current_res_path = FileUtils::getResultRootPath(false,"","");
+  if (add_res && current_res_path!=FileUtils::getDefaultResultsRootPath()){
+    options["results-dir"].value() = boost::any(current_res_path);
+  }
+
+  return options;
+}
+
 
 }
 }

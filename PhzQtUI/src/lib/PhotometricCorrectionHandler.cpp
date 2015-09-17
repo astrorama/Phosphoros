@@ -81,15 +81,15 @@ std::map<std::string, boost::program_options::variable_value> PhotometricCorrect
     std::string z_column,
     std::list<std::string> filter_excluded)
   {
-    std::map < std::string, boost::program_options::variable_value > options_map;
+
 
     auto path_filename = FileUtils::getPhotCorrectionsRootPath(true,catalog)
         + QString(QDir::separator()).toStdString() + output_file_name;
 
 
-    options_map["phosphoros-root"].value() = boost::any(FileUtils::getRootPath());
-    options_map["catalogs-dir"].value() = boost::any(FileUtils::getCatalogRootPath(true,""));
-    options_map["intermediate-products-dir"].value() = boost::any(FileUtils::getIntermediaryProductRootPath(true,""));
+    std::map<std::string, boost::program_options::variable_value> options_map =
+           FileUtils::getPathConfiguration(true,false,true,false);
+
     options_map["catalog-type"].value() = boost::any(catalog);
     options_map["missing-photometry-flag"].value() = boost::any(non_detection);
 

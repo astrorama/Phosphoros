@@ -10,6 +10,14 @@ elements_depends_on_subdirs(PhzUITools)
 elements_depends_on_subdirs(PhzLikelihood)
 elements_depends_on_subdirs(PhzLuminosity)
 
+if(ELEMENTS_HIDE_WARNINGS)
+  if(UNIX)
+    set_property(SOURCE src/lib/DialogZRanges.cpp
+                 PROPERTY COMPILE_FLAGS -Wno-float-equal)
+  endif()
+endif()
+
+
 find_package(Qt4 REQUIRED QtCore QtGui QtXml)
 
 elements_expand_sources(PhUI_SRCS src/lib/*.cpp)

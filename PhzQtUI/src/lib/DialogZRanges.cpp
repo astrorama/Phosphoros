@@ -40,7 +40,7 @@ DialogZRanges::~DialogZRanges() {}
 
 void DialogZRanges::refresh(){
   //cleaning
-  int i = 0;
+  size_t i = 0;
    for (auto child : ui->frame_z->children()) {
      if (i > 0) {
        delete child;
@@ -50,7 +50,7 @@ void DialogZRanges::refresh(){
 
 
 
-   for (int i=0; i<m_zs.size(); ++i){
+   for (size_t i=0; i<m_zs.size(); ++i){
      auto titleFrame = new QFrame();
      titleFrame->setFrameStyle(QFrame::Box);
      auto titleLayout = new QHBoxLayout();
@@ -61,7 +61,7 @@ void DialogZRanges::refresh(){
      if (i>0 && i<m_zs.size()-1){
        auto btn_del = new GridButton(i,0,"-");
        btn_del->setMaximumWidth(30);
-       connect(btn_del,SIGNAL(GridButtonClicked(int,int)),this,SLOT(onDeleteClicked(int,int)));
+       connect(btn_del,SIGNAL(GridButtonClicked(size_t,size_t)),this,SLOT(onDeleteClicked(size_t,size_t)));
        titleLayout->addWidget(btn_del);
      }
 
@@ -75,7 +75,7 @@ void DialogZRanges::refresh(){
 void DialogZRanges::setRanges(std::vector<double> zs){
   m_zs = std::move(zs);
 
-  int max_i = m_zs.size()-1;
+  size_t max_i = m_zs.size()-1;
 
   ui->txt_new_z->setValidator(new QDoubleValidator(m_zs[0],m_zs[max_i],2,this));
 
@@ -118,8 +118,8 @@ void DialogZRanges::on_btn_add_clicked(){
 }
 
 
-void DialogZRanges::onDeleteClicked(int index,int ){
-  int running=0;
+void DialogZRanges::onDeleteClicked(size_t index,size_t ){
+  size_t running=0;
   auto z_iter = m_zs.begin();
   while(true){
      if (running==index){

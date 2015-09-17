@@ -36,7 +36,7 @@ DialogLuminosityFunction::DialogLuminosityFunction(QWidget *parent) :
 
 DialogLuminosityFunction::~DialogLuminosityFunction() {}
 
-void DialogLuminosityFunction::setInfo(LuminosityFunctionInfo info, int x, int y){
+void DialogLuminosityFunction::setInfo(LuminosityFunctionInfo info, size_t x, size_t y){
   m_FunctionInfo=std::move(info);
   m_x=x;
   m_y=y;

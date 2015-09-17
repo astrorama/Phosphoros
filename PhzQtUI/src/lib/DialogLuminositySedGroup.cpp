@@ -37,8 +37,8 @@ DialogLuminositySedGroup::~DialogLuminositySedGroup() {}
 void DialogLuminositySedGroup::setGroups(std::vector<PhzLuminosity::SedGroup> groups){
   m_groups = std::move(groups);
 
-  int i=0;
-  int max_i = m_groups.size()-1;
+  size_t i=0;
+  size_t max_i = m_groups.size()-1;
   for (auto& group : m_groups){
     addGroup(group,i,max_i);
     ++i;
@@ -48,7 +48,7 @@ void DialogLuminositySedGroup::setGroups(std::vector<PhzLuminosity::SedGroup> gr
 }
 
 
-void DialogLuminositySedGroup::addGroup(PhzLuminosity::SedGroup group, int i, int i_max){
+void DialogLuminositySedGroup::addGroup(PhzLuminosity::SedGroup group, size_t i, size_t i_max){
   auto frame = new QFrame();
       frame->setFrameStyle(QFrame::Box);
       auto layout = new QVBoxLayout();
@@ -62,7 +62,7 @@ void DialogLuminositySedGroup::addGroup(PhzLuminosity::SedGroup group, int i, in
       titleLayout->addWidget(txt_title);
       auto btn_del = new GridButton(i,0,"-");
       btn_del->setMaximumWidth(30);
-      connect(btn_del,SIGNAL(GridButtonClicked(int,int)),this,SLOT(onDeleteGroupClicked(int,int)));
+      connect(btn_del,SIGNAL(GridButtonClicked(size_t,size_t)),this,SLOT(onDeleteGroupClicked(size_t,size_t)));
 
       if (i_max==0){
         btn_del->setEnabled(false);
@@ -92,8 +92,8 @@ void DialogLuminositySedGroup::addGroup(PhzLuminosity::SedGroup group, int i, in
 }
 
 
-void DialogLuminositySedGroup::fillSedList(std::vector<std::string> seds ,int group_id, int max_group_id, QVBoxLayout* layout){
-  int j = 0;
+void DialogLuminositySedGroup::fillSedList(std::vector<std::string> seds ,size_t group_id, size_t max_group_id, QVBoxLayout* layout){
+  size_t j = 0;
   for (auto sed : seds) {
     auto sedFrame = new QFrame();
     auto sedLayout = new QHBoxLayout();
@@ -128,7 +128,7 @@ void DialogLuminositySedGroup::fillSedList(std::vector<std::string> seds ,int gr
 }
 
 
-void DialogLuminositySedGroup::onMoveRightClicked(int sed_group_id,int sed_id){
+void DialogLuminositySedGroup::onMoveRightClicked(size_t sed_group_id,size_t sed_id){
 
 
 
@@ -150,7 +150,7 @@ void DialogLuminositySedGroup::onMoveRightClicked(int sed_group_id,int sed_id){
     auto scrollFrame = new QFrame();
     auto layout2 = new QVBoxLayout();
     scrollFrame->setLayout(layout2);
-    fillSedList(m_groups[sed_group_id+1].getSedNameList(),sed_group_id+1,int{m_groups.size()-1},layout2);
+    fillSedList(m_groups[sed_group_id+1].getSedNameList(),sed_group_id+1,m_groups.size()-1,layout2);
     auto scroll = new QScrollArea();
     scroll->setWidget(scrollFrame);
     static_cast<QVBoxLayout*>(group_frame->children()[0])->addWidget(scroll);
@@ -158,33 +158,31 @@ void DialogLuminositySedGroup::onMoveRightClicked(int sed_group_id,int sed_id){
   }
 
   //remove the id from the list
-  if (sed_group_id>-1){
-    clearSeds(sed_group_id);
+  clearSeds(sed_group_id);
 
-    std::vector<XYDataset::QualifiedName> new_seds{};
-    auto old_seds = m_groups[sed_group_id].getSedNameList();
-    for (size_t j=0; j<old_seds.size();++j){
-      if (j!=sed_id){
-        new_seds.push_back({old_seds[j]});
-      }
+  std::vector<XYDataset::QualifiedName> new_seds { };
+  auto old_seds = m_groups[sed_group_id].getSedNameList();
+  for (size_t j = 0; j < old_seds.size(); ++j) {
+    if (j != sed_id) {
+      new_seds.push_back( { old_seds[j] });
     }
+  }
 
-    m_groups[sed_group_id]=PhzLuminosity::SedGroup(m_groups[sed_group_id].getName(),std::move(new_seds));
-    auto group_frame = ui->frame_groups->children()[1+sed_group_id];
+  m_groups[sed_group_id] = PhzLuminosity::SedGroup(
+      m_groups[sed_group_id].getName(), std::move(new_seds));
+  auto group_frame = ui->frame_groups->children()[1 + sed_group_id];
 
-    auto scrollFrame = new QFrame();
-    auto layout2 = new QVBoxLayout();
-    scrollFrame->setLayout(layout2);
-    fillSedList(m_groups[sed_group_id].getSedNameList(),sed_group_id,int{m_groups.size()-1},layout2);
-    auto scroll = new QScrollArea();
-    scroll->setWidget(scrollFrame);
-    static_cast<QVBoxLayout*>(group_frame->children()[0])->addWidget(scroll);
+  auto scrollFrame = new QFrame();
+  auto layout2 = new QVBoxLayout();
+  scrollFrame->setLayout(layout2);
+  fillSedList(m_groups[sed_group_id].getSedNameList(), sed_group_id, m_groups.size() - 1, layout2);
+  auto scroll = new QScrollArea();
+  scroll->setWidget(scrollFrame);
+  static_cast<QVBoxLayout*>(group_frame->children()[0])->addWidget(scroll);
 
-
-   }
 }
 
-void DialogLuminositySedGroup::onMoveLeftClicked(int sed_group_id,int sed_id){
+void DialogLuminositySedGroup::onMoveLeftClicked(size_t sed_group_id,size_t sed_id){
   //add to the new list
     if (sed_group_id>0){
       clearSeds(sed_group_id-1);
@@ -203,7 +201,7 @@ void DialogLuminositySedGroup::onMoveLeftClicked(int sed_group_id,int sed_id){
       auto scrollFrame = new QFrame();
       auto layout2 = new QVBoxLayout();
       scrollFrame->setLayout(layout2);
-      fillSedList(m_groups[sed_group_id-1].getSedNameList(),sed_group_id-1,int{m_groups.size()-1},layout2);
+      fillSedList(m_groups[sed_group_id-1].getSedNameList(),sed_group_id-1,m_groups.size()-1,layout2);
       auto scroll = new QScrollArea();
       scroll->setWidget(scrollFrame);
       static_cast<QVBoxLayout*>(group_frame->children()[0])->addWidget(scroll);
@@ -228,7 +226,7 @@ void DialogLuminositySedGroup::onMoveLeftClicked(int sed_group_id,int sed_id){
       auto scrollFrame = new QFrame();
       auto layout2 = new QVBoxLayout();
       scrollFrame->setLayout(layout2);
-      fillSedList(m_groups[sed_group_id].getSedNameList(),sed_group_id,int{m_groups.size()-1},layout2);
+      fillSedList(m_groups[sed_group_id].getSedNameList(),sed_group_id,m_groups.size()-1,layout2);
       auto scroll = new QScrollArea();
       scroll->setWidget(scrollFrame);
       static_cast<QVBoxLayout*>(group_frame->children()[0])->addWidget(scroll);
@@ -248,7 +246,7 @@ void DialogLuminositySedGroup::on_btn_add_clicked(){
 
   m_groups.push_back(PhzLuminosity::SedGroup("New_Group",{}));
 
-    int i = 0;
+    size_t i = 0;
      for (auto child : ui->frame_groups->children()) {
        if (i > m_groups.size()-2) {
          delete child;
@@ -262,8 +260,8 @@ void DialogLuminositySedGroup::on_btn_add_clicked(){
 }
 
 
-void DialogLuminositySedGroup::onDeleteGroupClicked(int sed_group_id,int){
-  int i = 0;
+void DialogLuminositySedGroup::onDeleteGroupClicked(size_t sed_group_id,size_t){
+  size_t i = 0;
   for (auto child : ui->frame_groups->children()) {
     if (i > 0) {
       delete child;
@@ -290,14 +288,14 @@ void DialogLuminositySedGroup::onDeleteGroupClicked(int sed_group_id,int){
   m_groups[target_group_id]=PhzLuminosity::SedGroup(m_groups[target_group_id].getName(),std::move(new_seds));
 
   auto iter = m_groups.begin();
-  for (int j=0; j<sed_group_id;++j ){
+  for (size_t j=0; j<sed_group_id;++j ){
     ++iter;
   }
 
   m_groups.erase(iter);
 
   i=0;
-    int max_i = m_groups.size()-1;
+  size_t max_i = m_groups.size()-1;
     for (auto& group : m_groups){
       addGroup(group,i,max_i);
       ++i;
@@ -310,7 +308,7 @@ void DialogLuminositySedGroup::onDeleteGroupClicked(int sed_group_id,int){
 
 std::vector<std::string> DialogLuminositySedGroup::getNewGroupNames(){
   std::vector<std::string>  result{};
-  int  i=0;
+  size_t  i=0;
   for (auto child : ui->frame_groups->children()) {
      if (i > 0) {
        result.push_back(static_cast<QLineEdit*>(child->children()[1]->children()[1])->text().toStdString());
@@ -344,7 +342,7 @@ void DialogLuminositySedGroup::on_btn_save_clicked(){
   // groups names are distincts
 
   auto names = getNewGroupNames();
-  for (int i=0; i<names.size();++i){
+  for (size_t i=0; i<names.size();++i){
     if (names[i].find_first_of("\t ") != std::string::npos){
       QMessageBox::warning(this, "Space in the Name",
                                                     "Please do not use space in the group names.",
@@ -354,7 +352,7 @@ void DialogLuminositySedGroup::on_btn_save_clicked(){
 
 
 
-    for (int j=i+1; j<names.size();++j){
+    for (size_t j=i+1; j<names.size();++j){
         if (names[i]==names[j]){
           QMessageBox::warning(this, "Duplicate name",
                                               "Multiple SED Groups are named '"+ QString::fromStdString(names[i])+ "'.\n"
@@ -365,7 +363,7 @@ void DialogLuminositySedGroup::on_btn_save_clicked(){
       }
   }
 
-  for (int i=0;i<m_groups.size();++i){
+  for (size_t i=0;i<m_groups.size();++i){
     std::vector<XYDataset::QualifiedName> new_seds{};
      auto old_seds = m_groups[i].getSedNameList();
      for (size_t j=0; j<old_seds.size();++j){

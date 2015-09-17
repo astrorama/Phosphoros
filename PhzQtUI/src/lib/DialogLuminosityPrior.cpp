@@ -83,7 +83,7 @@ void DialogLuminosityPrior::loadMainGrid(){
   setHeaders<<"Id"<<"Name"<<"Unit"<<"Corrected for Reddening"<<"Filter"<<"Regions";
   grid_model->setHorizontalHeaderLabels(setHeaders);
 
-  int id =0;
+  size_t id =0;
   for (auto& config_pair : m_prior_configs) {
     QList<QStandardItem*> items;
 
@@ -139,13 +139,13 @@ void DialogLuminosityPrior::loadMainGrid(){
 
 void DialogLuminosityPrior::priorSelectionChanged(QModelIndex new_index, QModelIndex){
 
-  int row = new_index.row();
+  size_t row = new_index.row();
   std::string name=new_index.sibling(row, 1).data().toString().toStdString();
 
   auto config = m_prior_configs.at(name);
   ui->txt_name->setText(QString::fromStdString(config.getName()));
 
-  int cb_index =0;
+  size_t cb_index =0;
   if (!config.getInMag()){
     cb_index=1;
   }
@@ -261,7 +261,7 @@ void DialogLuminosityPrior::on_btn_delete_clicked(){
 
       QItemSelectionModel *select = ui->table_priors->selectionModel();
       auto row_index = select->selectedRows().at(0);
-      int row = row_index.row();
+      size_t row = row_index.row();
       std::string name=row_index.sibling(row, 1).data().toString().toStdString();
 
 
@@ -305,7 +305,7 @@ void DialogLuminosityPrior::on_btn_cancel_clicked(){
 
     QItemSelectionModel *select = ui->table_priors->selectionModel();
     auto row_index = select->selectedRows().at(0);
-    int row = row_index.row();
+    size_t row = row_index.row();
     std::string name=row_index.sibling(row, 1).data().toString().toStdString();
     m_prior_configs.erase(name);
 
@@ -325,7 +325,7 @@ void DialogLuminosityPrior::on_btn_cancel_clicked(){
 
 class ProgressReporter {
 public:
-  void operator()(size_t step, size_t total) {
+  void operator()(int, int) {
   }
 };
 
@@ -333,7 +333,7 @@ void DialogLuminosityPrior::on_btn_save_clicked(){
 
   QItemSelectionModel *select = ui->table_priors->selectionModel();
   auto row_index = select->selectedRows().at(0);
-  int row = row_index.row();
+  size_t row = row_index.row();
   std::string name=row_index.sibling(row, 1).data().toString().toStdString();
   auto info = m_prior_configs[name];
 
@@ -454,21 +454,25 @@ void DialogLuminosityPrior::on_btn_save_clicked(){
     QFile::remove(m_grid_folder+QDir::separator()+QString::fromStdString(old_grid_name));
   }
 
- std::map<std::string,po::variable_value>args=info.getBasicConfigOptions(false);
 
-  auto option_model = m_model.getConfigOptions();
-  option_model["catalog-type"].value() = boost::any(std::string(m_survey_name));
-  for (auto& pair :option_model){
-    args[pair.first]=pair.second;
+  std::map<std::string, boost::program_options::variable_value> options_map =
+      FileUtils::getPathConfiguration(false,true,true,false);
+
+ for (auto& pair : info.getBasicConfigOptions(false)){
+   options_map[pair.first]=pair.second;
+ }
+
+ options_map["catalog-type"].value() = boost::any(std::string(m_survey_name));
+
+  for (auto& pair :m_model.getConfigOptions()){
+    options_map[pair.first]=pair.second;
   }
 
   for (auto& pair :m_model.getModelNameConfigOptions()){
-    args[pair.first]=pair.second;
+    options_map[pair.first]=pair.second;
   }
 
-  // debug // PhzUITools::ConfigurationWriter::writeConfiguration(args,"output_config_debug.txt");
-
-  PhzConfiguration::ComputeLuminosityModelGridConfiguration conf {args};
+  PhzConfiguration::ComputeLuminosityModelGridConfiguration conf {options_map};
 
    auto filter_list = conf.getLuminosityFilterList();
    PhzModeling::SparseGridCreator creator {conf.getSedDatasetProvider(),
@@ -507,7 +511,7 @@ void DialogLuminosityPrior::on_cb_unit_currentIndexChanged(const QString &){
 
 
 void DialogLuminosityPrior::clearGrid(){
-  int i=0;
+  size_t i=0;
   for(auto child : ui->frame_Luminosity->children())
   {
     if (i>0){
@@ -569,7 +573,7 @@ void DialogLuminosityPrior::loadGrid(){
             }
             GridButton * button = new GridButton(i,j,text_btn);
             button->setStyleSheet( "background-color: lightGrey ");
-            connect( button, SIGNAL(GridButtonClicked(int,int)), this,SLOT(onGridButtonClicked(int,int)));
+            connect( button, SIGNAL(GridButtonClicked(size_t,size_t)), this,SLOT(onGridButtonClicked(size_t,size_t)));
             layout->addWidget(button);
             m_grid_buttons.push_back(button);
             ui->gl_Luminosity->addWidget(frame, j+1, i+1);
@@ -577,17 +581,17 @@ void DialogLuminosityPrior::loadGrid(){
         }
 }
 
-void DialogLuminosityPrior::onGridButtonClicked(int x,int y){
+void DialogLuminosityPrior::onGridButtonClicked(size_t x,size_t y){
   std::unique_ptr<DialogLuminosityFunction> dialog(new DialogLuminosityFunction());
   dialog->setInfo(m_luminosityInfos[x][y],x,y);
-  connect(dialog.get(),SIGNAL(popupClosing(LuminosityFunctionInfo, int, int)),
- this,    SLOT(luminosityFunctionPopupClosing(LuminosityFunctionInfo, int, int)));
+  connect(dialog.get(),SIGNAL(popupClosing(LuminosityFunctionInfo, size_t, size_t)),
+ this,    SLOT(luminosityFunctionPopupClosing(LuminosityFunctionInfo, size_t, size_t)));
   dialog->exec();
 
 
 }
 
-void DialogLuminosityPrior::luminosityFunctionPopupClosing(LuminosityFunctionInfo info, int x, int y){
+void DialogLuminosityPrior::luminosityFunctionPopupClosing(LuminosityFunctionInfo info, size_t x, size_t y){
   m_luminosityInfos[x][y]=info;
 
   auto layoutItem = ui->gl_Luminosity->itemAtPosition(y+1, x+1);

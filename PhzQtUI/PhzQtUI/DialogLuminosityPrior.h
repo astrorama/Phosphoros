@@ -78,8 +78,8 @@ void zPopupClosing(std::vector<double> zs);
 void on_cb_unit_currentIndexChanged(const QString &);
 
 
-void onGridButtonClicked(int x,int y);
-void luminosityFunctionPopupClosing(LuminosityFunctionInfo info, int x, int y);
+void onGridButtonClicked(size_t x,size_t y);
+void luminosityFunctionPopupClosing(LuminosityFunctionInfo info, size_t x, size_t y);
 void on_btn_group_clicked();
 void groupPopupClosing(std::vector<PhzLuminosity::SedGroup> groups);
 

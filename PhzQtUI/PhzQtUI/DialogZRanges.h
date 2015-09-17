@@ -51,7 +51,7 @@ void on_btn_cancel_clicked();
 void on_btn_save_clicked();
 
 void on_btn_add_clicked();
-void onDeleteClicked(int index,int );
+void onDeleteClicked(size_t index,size_t );
 
 
 

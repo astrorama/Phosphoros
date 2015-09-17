@@ -201,17 +201,19 @@ std::map<std::string, boost::program_options::variable_value> PhzGridInfoHandler
     ModelSet model,
     const std::list<std::string>& selected_filters, std::string igm_type) {
 
-  auto options_map = model.getConfigOptions();
 
-  options_map["phosphoros-root"].value() = boost::any(FileUtils::getRootPath());
-  options_map["aux-data-dir"].value() = boost::any(FileUtils::getAuxRootPath());
-  options_map["intermediate-products-dir"].value() = boost::any(FileUtils::getIntermediaryProductRootPath(false,""));
-  options_map["catalog-type"].value() = boost::any(catalog);
+  std::map<std::string, boost::program_options::variable_value> options_map =
+         FileUtils::getPathConfiguration(false,true,true,false);
 
-//  auto path_filename = FileUtils::getPhotmetricGridRootPath(true,catalog)
-//      + QString(QDir::separator()).toStdString() + output_file;
-  auto path_filename = output_file;
-  options_map["output-model-grid"].value() = boost::any(path_filename);
+  auto model_option = model.getConfigOptions();
+  for(auto& pair : model_option){
+    options_map[pair.first]=pair.second;
+  }
+
+
+   options_map["catalog-type"].value() = boost::any(catalog);
+
+  options_map["output-model-grid"].value() = boost::any(output_file);
 
   std::vector < std::string > filter_add_vector;
   for (auto& filter_item : selected_filters) {

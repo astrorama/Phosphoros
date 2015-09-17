@@ -20,20 +20,20 @@ namespace PhzQtUI {
 class GridButton : public QPushButton {
   Q_OBJECT
 public:
-  GridButton(int x, int y, const QString &text, QWidget *parent=0) ;
+  GridButton(size_t x, size_t y, const QString &text, QWidget *parent=0) ;
 
 
   virtual ~GridButton()=default;
 
   signals:
-  void GridButtonClicked(int,int);
+  void GridButtonClicked(size_t,size_t);
 
 private slots:
   void recievClicked();
 
 private:
-  int m_x;
-  int m_y;
+  size_t m_x;
+  size_t m_y;
 };
 
 }
