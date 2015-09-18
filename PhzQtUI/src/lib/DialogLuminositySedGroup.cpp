@@ -4,12 +4,9 @@
  *  Created on: September 4, 2015
  *      Author: fdubath
  */
-#include <QFuture>
-#include <qtconcurrentrun.h>
-#include <QDir>
+
 #include <QMessageBox>
 #include "PhzQtUI/DialogLuminositySedGroup.h"
-#include <boost/program_options.hpp>
 #include "ui_DialogLuminositySedGroup.h"
 #include "XYDataset/QualifiedName.h"
 #include <QLabel>
@@ -23,13 +20,10 @@
 namespace Euclid {
 namespace PhzQtUI {
 
-
-
 DialogLuminositySedGroup::DialogLuminositySedGroup(QWidget *parent) :
         QDialog(parent),
-        ui(new Ui::DialogLuminositySedGroup)
-    {
-       ui->setupUi(this);
+        ui(new Ui::DialogLuminositySedGroup) {
+ ui->setupUi(this);
 }
 
 DialogLuminositySedGroup::~DialogLuminositySedGroup() {}
@@ -44,7 +38,6 @@ void DialogLuminositySedGroup::setGroups(std::vector<PhzLuminosity::SedGroup> gr
     ++i;
 
   }
-
 }
 
 
@@ -69,15 +62,11 @@ void DialogLuminositySedGroup::addGroup(PhzLuminosity::SedGroup group, size_t i,
       }
       titleLayout->addWidget(btn_del);
 
-
-
       layout->addWidget(titleFrame);
 
       auto scrollFrame = new QFrame();
       auto layout2 = new QVBoxLayout();
       scrollFrame->setLayout(layout2);
-
-
 
       fillSedList(group.getSedNameList(),i,i_max,layout2);
 
@@ -85,7 +74,6 @@ void DialogLuminositySedGroup::addGroup(PhzLuminosity::SedGroup group, size_t i,
       scroll->setWidget(scrollFrame);
 
       layout->addWidget(scroll);
-      layout->addStretch();
 
       ui->hl_groups->addWidget(frame);
 
@@ -122,7 +110,6 @@ void DialogLuminositySedGroup::fillSedList(std::vector<std::string> seds ,size_t
     ++j;
 
   }
-
 
 
 }
@@ -332,10 +319,12 @@ void DialogLuminositySedGroup::on_btn_save_clicked(){
   //check all group have at least 1 element
   for(auto& group : m_groups){
     if (group.getSedNameList().size()==0){
-      QMessageBox::warning(this, "Empty group",
-                                     "The SED Group '"+ QString::fromStdString(group.getName())+ "' is empty.\n"
-                                        "Please delete it or move some SED inside.",
-                                        QMessageBox::Ok,QMessageBox::Ok);
+      QMessageBox::warning(this,
+                           "Empty group",
+                           "The SED Group '"+ QString::fromStdString(group.getName())+ "' is empty.\n"
+                           "Please delete it or move some SED inside.",
+                           QMessageBox::Ok,
+                           QMessageBox::Ok);
       return;
     }
   }
@@ -344,9 +333,11 @@ void DialogLuminositySedGroup::on_btn_save_clicked(){
   auto names = getNewGroupNames();
   for (size_t i=0; i<names.size();++i){
     if (names[i].find_first_of("\t ") != std::string::npos){
-      QMessageBox::warning(this, "Space in the Name",
-                                                    "Please do not use space in the group names.",
-                                                       QMessageBox::Ok,QMessageBox::Ok);
+      QMessageBox::warning(this,
+                           "Space in the Name",
+                           "Please do not use space in the group names.",
+                           QMessageBox::Ok,
+                           QMessageBox::Ok);
                 return;
     }
 
@@ -354,10 +345,12 @@ void DialogLuminositySedGroup::on_btn_save_clicked(){
 
     for (size_t j=i+1; j<names.size();++j){
         if (names[i]==names[j]){
-          QMessageBox::warning(this, "Duplicate name",
-                                              "Multiple SED Groups are named '"+ QString::fromStdString(names[i])+ "'.\n"
-                                                 "Please ensure that the name are unique.",
-                                                 QMessageBox::Ok,QMessageBox::Ok);
+          QMessageBox::warning(this,
+                               "Duplicate name",
+                               "Multiple SED Groups are named '"+ QString::fromStdString(names[i])+ "'.\n"
+                               "Please ensure that the name are unique.",
+                               QMessageBox::Ok,
+                               QMessageBox::Ok);
           return;
         }
       }

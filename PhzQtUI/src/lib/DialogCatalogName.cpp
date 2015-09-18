@@ -14,31 +14,24 @@ namespace PhzQtUI {
 
 DialogCatalogName::DialogCatalogName(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::DialogCatalogName)
-{
-    ui->setupUi(this);
+    ui(new Ui::DialogCatalogName){
+  ui->setupUi(this);
 }
 
-DialogCatalogName::~DialogCatalogName()
-{
-}
+DialogCatalogName::~DialogCatalogName(){}
 
-
-void DialogCatalogName::on_btn_cancel_clicked()
-{
+void DialogCatalogName::on_btn_cancel_clicked(){
   reject();
 }
 
-void DialogCatalogName::on_btn_create_clicked()
-{
-    if (ui->txt_name->text().length()==0){
-       QMessageBox::warning( this, "Empty Name...","Please enter a name.", QMessageBox::Ok );
-       return;
-    }
+void DialogCatalogName::on_btn_create_clicked(){
+  if (ui->txt_name->text().length()==0){
+    QMessageBox::warning( this, "Empty Name...","Please enter a name.", QMessageBox::Ok );
+    return;
+  }
 
-
-    popupClosing(ui->txt_name->text().toStdString());
-    accept();
+  popupClosing(ui->txt_name->text().toStdString());
+  accept();
 }
 
 }

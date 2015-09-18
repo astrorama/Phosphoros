@@ -39,83 +39,118 @@ class DialogLuminosityPrior;
  * @brief The DialogLuminosityPrior class.
  * This popup show the progress-bar during analysis run.
  */
-class DialogLuminosityPrior : public QDialog
-{
-    Q_OBJECT
+class DialogLuminosityPrior : public QDialog{
+  Q_OBJECT
 
 public:
-    explicit DialogLuminosityPrior(QWidget *parent = 0);
-    ~DialogLuminosityPrior();
+  explicit DialogLuminosityPrior(QWidget *parent = 0);
+  ~DialogLuminosityPrior();
 
-    void loadData(
-        ModelSet model,
-        std::string survey_name,
-        double z_min,
-        double z_max);
+  void loadData(ModelSet model, std::string survey_name, double z_min,
+      double z_max);
+
+  // called for updating the progress bar
+  void onProgress(int current,int total);
 
 signals:
-    void popupClosing();
-
+  void popupClosing();
 
 private slots:
+  //// Luminosity prior related slots
+  // slot raised when the master grid (Prior grid) selection is changed
+  void priorSelectionChanged(QModelIndex new_index, QModelIndex);
 
-void priorSelectionChanged(QModelIndex new_index, QModelIndex);
+  // slot raised when the New (prior) button is clicked
+  void on_btn_new_clicked();
 
-void on_btn_new_clicked();
-void on_btn_cancel_clicked();
-void on_btn_save_clicked();
-void on_btn_delete_clicked();
-void on_btn_edit_clicked();
-void on_btn_close_clicked();
+  // slot raised when the delete (prior) button is clicked
+  void on_btn_delete_clicked();
 
-void on_btn_filter_clicked();
-void filterPopupClosing(std::string filter);
+  // slot raised when the Edit (prior) button is clicked
+  void on_btn_edit_clicked();
 
+  // slot raised when the Save (prior) button is clicked
+  void on_btn_save_clicked();
 
-void on_btn_z_clicked();
-void zPopupClosing(std::vector<double> zs);
+  // slot raised when the Cancel Edit (prior) button is clicked
+  void on_btn_cancel_clicked();
 
-void on_cb_unit_currentIndexChanged(const QString &);
+  //// Details edition of the Luminosity prior related slots
+  // slot raised when the MAGNITUDE/FLUX combobox is changed
+  void on_cb_unit_currentIndexChanged(const QString &);
 
+  // slot raised when the browse filter button is clicked
+  void on_btn_filter_clicked();
 
-void onGridButtonClicked(size_t x,size_t y);
-void luminosityFunctionPopupClosing(LuminosityFunctionInfo info, size_t x, size_t y);
-void on_btn_group_clicked();
-void groupPopupClosing(std::vector<PhzLuminosity::SedGroup> groups);
+  // slot raised when the filter selector popup is closing
+  void filterPopupClosing(std::string filter);
+
+  //// Luminosity Function grid related slots
+  // slot raised when the groups management button is clicked
+  void on_btn_group_clicked();
+
+  // slot raised when the groups management popup is closing
+  void groupPopupClosing(std::vector<PhzLuminosity::SedGroup> groups);
+
+  // slot raised when the redshifts management button is clicked
+  void on_btn_z_clicked();
+
+  // slot raised when the redshifts management popup is closing
+  void zPopupClosing(std::vector<double> zs);
+
+  // slot raised when aluminosity function define button is clicked
+  void onGridButtonClicked(size_t x,size_t y);
+
+  // slot raised when the Luminosity function popup is closing
+  void luminosityFunctionPopupClosing(LuminosityFunctionInfo info, size_t x, size_t y);
+
+  //// Global
+  // closing the popup
+  void on_btn_close_clicked();
 
 private:
+  void manageBtnEnability(bool in_edition, bool read_only);
 
-void manageBtnEnability(bool in_edition);
-void manageBtnEnability(bool in_edition,bool has_selected_row);
+  void manageBtnEnability(bool in_edition, bool read_only, bool has_selected_row);
+
+  void loadMainGrid();
+
+  void clearGrid();
+
+  void loadGrid();
 
 
-void loadMainGrid();
 
-void clearGrid();
-void loadGrid();
-std::unique_ptr<Ui::DialogLuminosityPrior> ui;
+  bool validateInput(const size_t& current_index) ;
+  void updateInfo(LuminosityPriorConfig& info);
+  void updatePriorRow(QModelIndex& index,const size_t& row, const LuminosityPriorConfig& info );
+  void computeModelGrid(const LuminosityPriorConfig& info );
 
+  std::unique_ptr<Ui::DialogLuminosityPrior> ui;
 
-std::map<std::string, LuminosityPriorConfig> m_prior_configs;
-QString m_config_folder;
-QString m_grid_folder;
+  QString m_config_folder;
 
-bool m_new=false;
+  QString m_grid_folder;
 
-ModelSet m_model;
-std::string m_survey_name;
-double m_z_min;
-double m_z_max;
+  ModelSet m_model;
 
-std::vector<std::vector<LuminosityFunctionInfo>> m_luminosityInfos{};
-std::vector<PhzLuminosity::SedGroup> m_groups{};
-std::vector<double> m_zs{};
+  std::string m_survey_name;
 
-std::vector<GridButton*> m_grid_buttons{};
+  double m_z_min;
+
+  double m_z_max;
+
+  std::map<std::string, LuminosityPriorConfig> m_prior_configs;
+
+  bool m_new = false;
+
+  // currently select Prior informations (needed for the Lum. Function Grid)
+  std::vector<std::vector<LuminosityFunctionInfo>> m_luminosityInfos { };
+  std::vector<PhzLuminosity::SedGroup> m_groups { };
+  std::vector<double> m_zs { };
+  std::vector<GridButton*> m_grid_buttons { };
 };
 }
 }
-
-
 
 #endif /* DIALOGLUMINOSITYPRIOR_H_*/

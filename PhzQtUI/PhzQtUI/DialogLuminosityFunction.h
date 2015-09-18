@@ -39,10 +39,17 @@ class DialogLuminosityFunction : public QDialog
 public:
     explicit DialogLuminosityFunction(QWidget *parent = 0);
     ~DialogLuminosityFunction();
-
+    /**
+     * @brief load the luminositiy function into the popup
+     * and store the calling coordinates
+     */
     void setInfo(LuminosityFunctionInfo info, size_t x, size_t y);
 
 signals:
+  /**
+   * @brief Rised when the popup is closing after a save action: return the
+   * new luminosity function info and the calling coordinates.
+   */
   void popupClosing(LuminosityFunctionInfo info, size_t x, size_t y);
 
 

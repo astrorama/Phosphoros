@@ -14,18 +14,14 @@ namespace PhzQtUI {
 
 DialogLuminosityFunctionCurveSelector::DialogLuminosityFunctionCurveSelector(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::DialogLuminosityFunctionCurveSelector)
-{
-    ui->setupUi(this);
+    ui(new Ui::DialogLuminosityFunctionCurveSelector){
+  ui->setupUi(this);
 }
 
-DialogLuminosityFunctionCurveSelector::~DialogLuminosityFunctionCurveSelector()
-{
-}
+DialogLuminosityFunctionCurveSelector::~DialogLuminosityFunctionCurveSelector(){}
 
 
 void DialogLuminosityFunctionCurveSelector::setCurve(std::string curve_name){
-
   string path_curve = FileUtils::getLuminosityFunctionCurveRootPath(true);
 
   XYDataSetTreeModel* treeModel_curve = new XYDataSetTreeModel();
@@ -34,8 +30,10 @@ void DialogLuminosityFunctionCurveSelector::setCurve(std::string curve_name){
   ui->treeView_filter->setModel(treeModel_curve);
   ui->treeView_filter->expandAll();
 
-  connect( treeModel_curve, SIGNAL(itemChanged(QStandardItem*)), treeModel_curve,
-                  SLOT(onItemChangedSingleLeaf(QStandardItem*)));
+  connect( treeModel_curve,
+           SIGNAL(itemChanged(QStandardItem*)),
+           treeModel_curve,
+           SLOT(onItemChangedSingleLeaf(QStandardItem*)));
 
   if (curve_name.length()>0){
     treeModel_curve->setState(curve_name,vector<string>());
@@ -43,24 +41,23 @@ void DialogLuminosityFunctionCurveSelector::setCurve(std::string curve_name){
 }
 
 
-void DialogLuminosityFunctionCurveSelector::on_btn_save_clicked()
-{
-    auto filter_res = static_cast<XYDataSetTreeModel*>(ui->treeView_filter->model())->getRootSelection();
+void DialogLuminosityFunctionCurveSelector::on_btn_save_clicked(){
+  auto curve_res = static_cast<XYDataSetTreeModel*>(ui->treeView_filter->model())->getRootSelection();
+  if (!curve_res.first){
+    QMessageBox::warning( this,
+                          "Missing Data...",
+                          "Please select a curve.",
+                          QMessageBox::Ok );
+    return;
+  }
 
-    if (!filter_res.first){
-
-        QMessageBox::warning( this, "Missing Data...",
-                                          "Please select a curve.",
-                                          QMessageBox::Ok );
-        return;
-    }
-   popupClosing(filter_res.second);
-   accept();
+  // return the curve to the caller
+  popupClosing(curve_res.second);
+  accept();
 }
 
-void DialogLuminosityFunctionCurveSelector::on_btn_cancel_clicked()
-{
-    reject();
+void DialogLuminosityFunctionCurveSelector::on_btn_cancel_clicked(){
+  reject();
 }
 
 }
