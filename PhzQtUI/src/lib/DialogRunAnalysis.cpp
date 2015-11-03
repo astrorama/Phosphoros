@@ -82,10 +82,11 @@ std::string DialogRunAnalysis::runFunction(){
     PhzConfiguration::ComputeRedshiftsConfiguration conf { m_config };
     auto model_phot_grid = conf.getPhotometryGrid();
     auto marginalization_func = conf.getMarginalizationFunc();
+    auto likelihood_grid_func = conf.getLikelihoodGridFunction();
 
     PhzLikelihood::ParallelCatalogHandler handler {
         conf.getPhotometricCorrectionMap(), model_phot_grid,
-        conf.getPriors(), marginalization_func };
+        likelihood_grid_func, conf.getPriors(), marginalization_func };
     auto catalog = conf.getCatalog();
     auto out_ptr = conf.getOutputHandler();
     std::function<void(size_t, size_t)> monitor_function = std::bind(

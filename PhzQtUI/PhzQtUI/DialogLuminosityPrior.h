@@ -18,7 +18,6 @@
 #include "PhzQtUI/LuminosityFunctionInfo.h"
 
 #include "PhzQtUI/LuminosityPriorConfig.h"
-#include "PhzLuminosity/SedGroup.h"
 #include "PhzQtUI/GridButton.h"
 #include "ModelSet.h"
 
@@ -90,7 +89,7 @@ private slots:
   void on_btn_group_clicked();
 
   // slot raised when the groups management popup is closing
-  void groupPopupClosing(std::vector<PhzLuminosity::SedGroup> groups);
+  void groupPopupClosing(std::vector<LuminosityPriorConfig::SedGroup> groups);
 
   // slot raised when the redshifts management button is clicked
   void on_btn_z_clicked();
@@ -146,7 +145,7 @@ private:
 
   // currently select Prior informations (needed for the Lum. Function Grid)
   std::vector<std::vector<LuminosityFunctionInfo>> m_luminosityInfos { };
-  std::vector<PhzLuminosity::SedGroup> m_groups { };
+  std::vector<LuminosityPriorConfig::SedGroup> m_groups { };
   std::vector<double> m_zs { };
   std::vector<GridButton*> m_grid_buttons { };
 };

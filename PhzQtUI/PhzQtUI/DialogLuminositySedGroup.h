@@ -14,7 +14,7 @@
 #include <QVBoxLayout>
 #include <map>
 #include "ElementsKernel/Exception.h"
-#include "PhzLuminosity/SedGroup.h"
+#include "PhzQtUI/LuminosityPriorConfig.h"
 
 namespace boost{
 namespace program_options{
@@ -41,10 +41,10 @@ public:
     explicit DialogLuminositySedGroup(QWidget *parent = 0);
     ~DialogLuminositySedGroup();
 
-    void setGroups(std::vector<PhzLuminosity::SedGroup> groups);
+    void setGroups(std::vector<LuminosityPriorConfig::SedGroup> groups);
 
 signals:
-  void popupClosing(std::vector<PhzLuminosity::SedGroup> groups);
+  void popupClosing(std::vector<LuminosityPriorConfig::SedGroup> groups);
 
 
 private slots:
@@ -60,13 +60,13 @@ void onDeleteGroupClicked(size_t sed_group_id,size_t);
 
 private:
 std::vector<std::string> getNewGroupNames();
-void addGroup(PhzLuminosity::SedGroup group,size_t i, size_t i_max);
+void addGroup(LuminosityPriorConfig::SedGroup group,size_t i, size_t i_max);
 void clearSeds(size_t group_id);
 
 
 void fillSedList(std::vector<std::string> seds ,size_t group_id, size_t max_group_id, QVBoxLayout* layout);
 std::unique_ptr<Ui::DialogLuminositySedGroup> ui;
-std::vector<PhzLuminosity::SedGroup> m_groups;
+std::vector<LuminosityPriorConfig::SedGroup> m_groups;
 
 };
 

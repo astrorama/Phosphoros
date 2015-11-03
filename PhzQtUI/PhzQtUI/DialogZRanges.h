@@ -14,7 +14,6 @@
 #include <QVBoxLayout>
 #include <map>
 #include "ElementsKernel/Exception.h"
-#include "PhzLuminosity/SedGroup.h"
 
 namespace boost{
 namespace program_options{

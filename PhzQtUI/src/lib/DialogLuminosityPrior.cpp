@@ -99,12 +99,12 @@ void DialogLuminosityPrior::on_btn_new_clicked(){
   new_config.setZs({m_z_min,m_z_max});
 
   // ...with a single group containing all the SEDs...
-  std::vector<XYDataset::QualifiedName> seds{};
+  std::vector<std::string> seds{};
   for (auto& item : m_model.getSeds()){
     seds.push_back({item});
   }
 
-  PhzLuminosity::SedGroup group{"SEDs",seds};
+  LuminosityPriorConfig::SedGroup group{"SEDs",seds};
   new_config.setSedGroups({group});
 
   LuminosityFunctionInfo info {};
@@ -291,14 +291,14 @@ void DialogLuminosityPrior::on_btn_group_clicked(){
   std::unique_ptr<DialogLuminositySedGroup> dialog(new DialogLuminositySedGroup());
   dialog->setGroups(m_groups);
   connect(dialog.get(),
-          SIGNAL(popupClosing(std::vector<PhzLuminosity::SedGroup>)),
+          SIGNAL(popupClosing(std::vector<LuminosityPriorConfig::SedGroup>)),
           this,
-          SLOT(groupPopupClosing(std::vector<PhzLuminosity::SedGroup>)));
+          SLOT(groupPopupClosing(std::vector<LuminosityPriorConfig::SedGroup>)));
   dialog->exec();
 
 }
 
-void DialogLuminosityPrior::groupPopupClosing(std::vector<PhzLuminosity::SedGroup> groups){
+void DialogLuminosityPrior::groupPopupClosing(std::vector<LuminosityPriorConfig::SedGroup> groups){
   bool is_mag=ui->cb_unit->currentIndex()==0;
 
   // update function,clear grid redraw
@@ -326,7 +326,7 @@ void DialogLuminosityPrior::groupPopupClosing(std::vector<PhzLuminosity::SedGrou
 
   for (size_t i =0; i<m_zs.size()-1;++i){
      for (size_t j =0; j<m_groups.size();++j){
-        m_luminosityInfos[i][j].sedGroupName=m_groups[j].getName();
+        m_luminosityInfos[i][j].sedGroupName=m_groups[j].first;
      }
   }
 
@@ -356,7 +356,7 @@ void DialogLuminosityPrior::zPopupClosing(std::vector<double> zs){
        for (size_t j =0; j<m_groups.size();++j){
          m_luminosityInfos[i].push_back(LuminosityFunctionInfo{});
          m_luminosityInfos[i][j].in_mag=is_mag;
-         m_luminosityInfos[i][j].sedGroupName=m_groups[j].getName();
+         m_luminosityInfos[i][j].sedGroupName=m_groups[j].first;
        }
      }
    } else if (m_zs.size()>zs.size()){
@@ -524,7 +524,7 @@ void DialogLuminosityPrior::loadGrid() {
     frame_grp->setMinimumHeight(30);
     auto layout = new QHBoxLayout();
     frame_grp->setLayout(layout);
-    auto label = new QLabel(QString::fromStdString(m_groups[i].getName()));
+    auto label = new QLabel(QString::fromStdString(m_groups[i].first));
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
     ui->gl_Luminosity->addWidget(frame_grp, 1 + i, 0);

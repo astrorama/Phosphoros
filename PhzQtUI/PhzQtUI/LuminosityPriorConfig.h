@@ -11,7 +11,6 @@
 #include <vector>
 #include <map>
 #include "PhzQtUI/LuminosityFunctionInfo.h"
-#include "PhzLuminosity/SedGroup.h"
 #include <QDomDocument>
 
 
@@ -30,6 +29,9 @@ namespace PhzQtUI {
 class LuminosityPriorConfig {
 
 public:
+  
+  using SedGroup = std::pair<std::string, std::vector<std::string>>;
+  
    std::string getName() const;
    void setName(std::string name);
 
@@ -46,8 +48,8 @@ public:
   void setLuminosityModelGridName(std::string grid_name);
 
 
-  std::vector<PhzLuminosity::SedGroup> getSedGRoups() const;
-  void setSedGroups(std::vector<PhzLuminosity::SedGroup> sed_groups);
+  std::vector<SedGroup> getSedGRoups() const;
+  void setSedGroups(std::vector<SedGroup> sed_groups);
 
   std::vector<double> getZs() const;
   void setZs(std::vector<double>  zs);
@@ -74,7 +76,7 @@ private:
     bool m_reddened = true;
     std::string m_filter_name;
     std::string m_luminosity_model_grid_name;
-    std::vector<PhzLuminosity::SedGroup> m_sed_groups;
+    std::vector<SedGroup> m_sed_groups;
     std::vector<double> m_zs;
     std::vector<LuminosityFunctionInfo> m_luminosity_function_list{};
 

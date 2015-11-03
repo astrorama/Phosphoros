@@ -55,10 +55,10 @@ bool LuminosityPriorConfig::getInMag() const{
  }
 
 
- std::vector<PhzLuminosity::SedGroup> LuminosityPriorConfig::getSedGRoups() const{
+ std::vector<LuminosityPriorConfig::SedGroup> LuminosityPriorConfig::getSedGRoups() const{
    return m_sed_groups;
  }
- void LuminosityPriorConfig::setSedGroups(std::vector<PhzLuminosity::SedGroup> sed_groups){
+ void LuminosityPriorConfig::setSedGroups(std::vector<SedGroup> sed_groups){
    m_sed_groups=std::move(sed_groups);
  }
 
@@ -95,7 +95,7 @@ bool LuminosityPriorConfig::getInMag() const{
 
    std::map<std::string,size_t> group_map;
    for(size_t j=0;j<m_sed_groups.size();++j){
-        group_map[m_sed_groups[j].getName()]=j;
+        group_map[m_sed_groups[j].first]=j;
       }
 
    for (auto info : m_luminosity_function_list){
@@ -127,13 +127,13 @@ LuminosityPriorConfig LuminosityPriorConfig::deserialize(QDomDocument& doc){
       auto seds_node = node_group.firstChildElement("Seds");
       auto sed_list =seds_node.childNodes();
 
-      std::vector<XYDataset::QualifiedName> sed_vector;
+      std::vector<std::string> sed_vector;
       for(int j=0;j<sed_list.count();++j ){
         auto node_sed = sed_list.at(j).toElement();
         sed_vector.push_back({node_sed.attribute("Name").toStdString()});
       }
 
-      config.m_sed_groups.push_back({group_name,sed_vector});
+      config.m_sed_groups.emplace_back(group_name, sed_vector);
 
     }
 
@@ -201,11 +201,11 @@ LuminosityPriorConfig LuminosityPriorConfig::deserialize(QDomDocument& doc){
 
    for (auto& group : m_sed_groups) {
      QDomElement group_node = doc.createElement("SedGroup");
-     group_node.setAttribute("Name",QString::fromStdString(group.getName()));
+     group_node.setAttribute("Name",QString::fromStdString(group.first));
      groups_node.appendChild(group_node);
      QDomElement seds_node = doc.createElement("Seds");
      group_node.appendChild(seds_node);
-     for (auto& sed : group.getSedNameList()){
+     for (auto& sed : group.second){
        QDomElement sed_Node = doc.createElement("Sed");
        sed_Node.setAttribute("Name",QString::fromStdString(sed));
        seds_node.appendChild(sed_Node);
@@ -273,11 +273,11 @@ LuminosityPriorConfig LuminosityPriorConfig::deserialize(QDomDocument& doc){
   options["luminosity-prior"].value() = boost::any(std::string("YES"));
 
   for (auto& group : m_sed_groups) {
-    std::string name = group.getName();
+    std::string name = group.first;
 
     std::string parameter = "";
 
-    std::vector<std::string> seds =group.getSedNameList();
+    std::vector<std::string> seds =group.second;
     size_t max = seds.size()-1;
     for (size_t i = 0; i < seds.size(); ++i) {
       parameter += seds[i];
