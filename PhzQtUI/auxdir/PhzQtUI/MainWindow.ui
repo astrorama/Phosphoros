@@ -10,9 +10,6 @@
     <height>731</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Phosphoros v0.3</string>
-  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>

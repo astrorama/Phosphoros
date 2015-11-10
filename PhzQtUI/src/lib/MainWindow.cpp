@@ -8,6 +8,8 @@
 #include "ui_MainWindow.h"
 #include "PhzQtUI/DialogOptions.h"
 
+#include "ThisProject.h"             // for the name and version of this very project
+
 namespace Euclid {
 namespace PhzQtUI {
 
@@ -15,7 +17,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    ui->setupUi(this);
+  QString title = QString::fromStdString(THIS_PROJECT_NAME_STRING + " " + THIS_PROJECT_VERSION_STRING);
+
+  setWindowTitle(title);
+
+  ui->setupUi(this);
 
     QPixmap pixmap( ":/logoPhUI.png" );
     ui->image_label->setTopMargin(20);
@@ -30,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
   // default value for the root-path
   QSettings settings("SDC-CH", "PhosphorosUI");
+
 
   std::string test_value = "default";
   if (test_value.compare(
