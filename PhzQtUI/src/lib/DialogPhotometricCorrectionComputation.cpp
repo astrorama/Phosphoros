@@ -1,3 +1,4 @@
+#include <chrono>
 #include <QFuture>
 #include <qtconcurrentrun.h>
 #include <QStandardItem>
@@ -10,15 +11,19 @@
 #include "PhzQtUI/PhotometricCorrectionHandler.h"
 #include "FileUtils.h"
 #include "ElementsKernel/Exception.h"
+#include "Configuration/ConfigManager.h"
+#include "Configuration/CatalogConfig.h"
 
 #include "PhzLikelihood/SourcePhzFunctor.h"
-#include "PhzConfiguration/ComputePhotometricCorrectionsConfiguration.h"
+#include "PhzConfiguration/ComputePhotometricCorrectionsConfig.h"
+#include "PhzConfiguration/PhotometryGridConfig.h"
 #include "PhzPhotometricCorrection/PhotometricCorrectionCalculator.h"
 #include "PhzPhotometricCorrection/FindBestFitModels.h"
 #include "PhzPhotometricCorrection/CalculateScaleFactorMap.h"
 #include "PhzPhotometricCorrection/PhotometricCorrectionAlgorithm.h"
 
 using namespace std;
+using namespace Euclid::PhzConfiguration;
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -225,17 +230,22 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
         ui->cb_SpectroColumn->currentText().toStdString(),
         m_excluded_filters);
 
-    PhzConfiguration::ComputePhotometricCorrectionsConfiguration conf {
-        config_map };
-    auto catalog = conf.getCatalog();
-    auto model_phot_grid = conf.getPhotometryGrid();
-    auto output_func = conf.getOutputFunction();
-    auto stop_criteria = conf.getStopCriteria();
+    long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
+                                    std::chrono::system_clock::now().time_since_epoch()).count();
+    auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+    config_manager.registerConfiguration<ComputePhotometricCorrectionsConfig>();
+    config_manager.closeRegistration();
+    config_manager.initialize(config_map);
+    
+    auto& catalog = config_manager.getConfiguration<Configuration::CatalogConfig>().getCatalog();
+    auto& model_phot_grid = config_manager.getConfiguration<PhotometryGridConfig>().getPhotometryGrid();
+    auto& output_func = config_manager.getConfiguration<ComputePhotometricCorrectionsConfig>().getOutputFunction();
+    auto& stop_criteria = config_manager.getConfiguration<ComputePhotometricCorrectionsConfig>().getStopCriteria();
 
     PhzPhotometricCorrection::FindBestFitModels<PhzLikelihood::SourcePhzFunctor> find_best_fit_models { };
     PhzPhotometricCorrection::CalculateScaleFactorMap calculate_scale_factor_map { };
     PhzPhotometricCorrection::PhotometricCorrectionAlgorithm phot_corr_algorighm { };
-    auto selector = conf.getPhotometricCorrectionSelector();
+    auto selector = config_manager.getConfiguration<ComputePhotometricCorrectionsConfig>().getPhotometricCorrectionSelector();
 
     PhzPhotometricCorrection::PhotometricCorrectionCalculator calculator {
         find_best_fit_models, calculate_scale_factor_map, phot_corr_algorighm };

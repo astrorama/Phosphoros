@@ -14,6 +14,9 @@
 #include "XYDataset/FileSystemProvider.h"
 #include "XYDataset/AsciiParser.h"
 
+#include "PhzConfiguration/ComputePhotometricCorrectionsConfig.h"
+#include "DefaultOptionsCompleter.h"
+
 namespace Euclid {
 namespace PhzQtUI {
 
@@ -116,6 +119,8 @@ std::map<std::string, boost::program_options::variable_value> PhotometricCorrect
        }
        options_map["exclude-filter"].value() = boost::any(excluded);
     }
+    
+    completeWithDefaults<PhzConfiguration::ComputePhotometricCorrectionsConfig>(options_map);
 
     return options_map;
 
