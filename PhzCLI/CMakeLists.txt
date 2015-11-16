@@ -29,3 +29,6 @@ elements_install_scripts()
 elements_add_unit_test(ComputeModelSedConfig_test tests/src/ComputeModelSedConfig_test.cpp 
                      LINK_LIBRARIES PhzCLI
                      TYPE Boost)
+elements_add_unit_test(DisplayModelGridConfig_test tests/src/DisplayModelGridConfig_test.cpp 
+                     LINK_LIBRARIES PhzCLI
+                     TYPE Boost)

@@ -7,7 +7,7 @@
 #include <iostream>
 #include <chrono>
 #include "ElementsKernel/ProgramHeaders.h"
-#include "Configuration/Configuration.h"
+#include "Configuration/ConfigManager.h"
 
 #include "PhzDataModel/PhzModel.h"
 #include "PhzModeling/ModelDatasetGrid.h"
