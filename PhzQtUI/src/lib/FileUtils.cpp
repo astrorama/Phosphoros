@@ -475,11 +475,10 @@ std::string FileUtils::getPhotmetricGridRootPath(bool check, const std::string& 
 
 
 
-std::string FileUtils::getLuminosityFunctionGridRootPath(bool check, const std::string & catalog_type, const std::string& model){
+std::string FileUtils::getLuminosityFunctionGridRootPath(bool check, const std::string & catalog_type){
   QString path = QString::fromStdString(FileUtils::getIntermediaryProductRootPath(check,""))+QDir::separator()
   +QString::fromStdString(catalog_type)
-  + QDir::separator()+"LuminosityModelGrids"
-  + QDir::separator()+QString::fromStdString(model);
+  + QDir::separator()+"LuminosityModelGrids";
     QFileInfo info(path);
     if (check){
         if (!info.exists()){

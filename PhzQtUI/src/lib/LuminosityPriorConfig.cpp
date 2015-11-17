@@ -244,18 +244,18 @@ LuminosityPriorConfig LuminosityPriorConfig::deserialize(QDomDocument& doc){
  std::map<std::string, boost::program_options::variable_value> LuminosityPriorConfig::getBasicConfigOptions(bool input) const{
    std::map<std::string, po::variable_value> options;
 
-       std::string mag_value = "MAGNITUDE";
+       std::string mag_value = "YES";
        if (!m_in_mag) {
-         mag_value = "FLUX";
+         mag_value = "NO";
        }
 
        std::string red_value = "YES";
-       if (!m_reddened) {
+       if (m_reddened) {
          red_value = "NO";
        }
 
-       options["luminosity-unit-type"].value() = boost::any(mag_value);
-       options["luminosity-with-reddening"].value() = boost::any(red_value);
+       options["luminosity-function-expressed-in-magnitude"].value() = boost::any(mag_value);
+       options["luminosity-function-corrected-for-extinction"].value() = boost::any(red_value);
        options["luminosity-filter"].value() = boost::any(m_filter_name);
        if (input){
          options["luminosity-model-grid-file"].value() = boost::any(m_luminosity_model_grid_name);
@@ -267,8 +267,8 @@ LuminosityPriorConfig LuminosityPriorConfig::deserialize(QDomDocument& doc){
  }
 
  std::map<std::string, boost::program_options::variable_value> LuminosityPriorConfig::getConfigOptions() const {
-  auto options = getBasicConfigOptions();
 
+  auto options = getBasicConfigOptions();
 
   options["luminosity-prior"].value() = boost::any(std::string("YES"));
 

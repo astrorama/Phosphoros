@@ -248,7 +248,7 @@ public:
     static std::string getLuminosityFunctionCurveRootPath(bool check);
 
 
-    static std::string getLuminosityFunctionGridRootPath(bool check, const std::string & catalog_type, const std::string& model);
+    static std::string getLuminosityFunctionGridRootPath(bool check, const std::string & catalog_type);
 
     /**
      * @brief get the SEDs RootPath

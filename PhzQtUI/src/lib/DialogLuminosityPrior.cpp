@@ -26,17 +26,28 @@
 #include "PhzQtUI/DialogZRanges.h"
 #include "PhzQtUI/DialogFilterSelector.h"
 
-#include "PhzConfiguration/ComputeLuminosityModelGridConfiguration.h"
 #include "PhzModeling/SparseGridCreator.h"
 #include "PhzModeling/NoIgmFunctor.h"
 
+#include "Configuration/ConfigManager.h"
+#include "DefaultOptionsCompleter.h"
+#include "PhzConfiguration/ComputeModelGridConfig.h"
+#include "PhzConfiguration/SedProviderConfig.h"
+#include "PhzConfiguration/ReddeningProviderConfig.h"
+#include "PhzConfiguration/FilterProviderConfig.h"
+#include "PhzConfiguration/LuminosityBandConfig.h"
+#include "PhzConfiguration/IgmConfig.h"
+#include "PhzConfiguration/ModelGridOutputConfig.h"
+#include "PhzConfiguration/ComputeLuminosityModelGridConfig.h"
+
+using namespace Euclid::PhzConfiguration;
 
 namespace Euclid {
 namespace PhzQtUI {
 
 namespace po = boost::program_options;
 
-static Elements::Logging logger = Elements::Logging::getLogger("DialogLuminosityPrior");
+static Elements::Logging dialog_logger = Elements::Logging::getLogger("DialogLuminosityPrior");
 
 DialogLuminosityPrior::DialogLuminosityPrior(QWidget *parent) :
         QDialog(parent),
@@ -49,13 +60,15 @@ DialogLuminosityPrior::~DialogLuminosityPrior() {}
 
 void DialogLuminosityPrior::loadData(ModelSet model,
                                      std::string survey_name,
+                                     std::string model_grid,
                                      double z_min,
                                      double z_max){
   m_config_folder=QString::fromStdString(FileUtils::getGUILuminosityPriorConfig(true,survey_name,model.getName()));
-  m_grid_folder=QString::fromStdString(FileUtils::getLuminosityFunctionGridRootPath(true,survey_name,model.getName()));
+  m_grid_folder=QString::fromStdString(FileUtils::getLuminosityFunctionGridRootPath(true,survey_name));
   m_prior_configs=LuminosityPriorConfig::readFolder(m_config_folder.toStdString());
   m_model=std::move(model);
   m_survey_name=survey_name;
+  m_model_grid_name=model_grid;
   m_z_min=z_min;
   m_z_max=z_max;
 
@@ -635,7 +648,7 @@ void DialogLuminosityPrior::updateInfo(LuminosityPriorConfig& info){
 
   info.setName(ui->txt_name->text().toStdString());
 
-  info.setLuminosityModelGridName(info.getName()+".dat");
+  info.setLuminosityModelGridName(m_model_grid_name+"_"+info.getName()+".dat");
 }
 
 void DialogLuminosityPrior::updatePriorRow(QModelIndex& index,const size_t& row, const LuminosityPriorConfig& info ){
@@ -682,12 +695,15 @@ private:
   DialogLuminosityPrior* m_dialog;
 };
 
-void DialogLuminosityPrior::computeModelGrid(const LuminosityPriorConfig& info ){
-  logger.info()<< "Create the config file :"<<( m_config_folder+QDir::separator()+QString::fromStdString(info.getName())+".xml").toStdString();
 
-   // grid computation
-   std::map<std::string, boost::program_options::variable_value> options_map =
-       FileUtils::getPathConfiguration(false,true,true,false);
+
+void DialogLuminosityPrior::computeModelGrid(const LuminosityPriorConfig& info ){
+  std::map<std::string, boost::program_options::variable_value> options_map;
+  completeWithDefaults<ComputeLuminosityModelGridConfig>(options_map);
+
+  for (auto&pair : FileUtils::getPathConfiguration(false,true,true,false)){
+    options_map[pair.first]=pair.second;
+  }
 
   for (auto& pair : info.getBasicConfigOptions(false)){
     options_map[pair.first]=pair.second;
@@ -695,28 +711,35 @@ void DialogLuminosityPrior::computeModelGrid(const LuminosityPriorConfig& info )
 
   options_map["catalog-type"].value() = boost::any(std::string(m_survey_name));
 
-   for (auto& pair :m_model.getConfigOptions()){
-     options_map[pair.first]=pair.second;
-   }
 
-   for (auto& pair :m_model.getModelNameConfigOptions()){
-     options_map[pair.first]=pair.second;
-   }
 
-   PhzConfiguration::ComputeLuminosityModelGridConfiguration conf {options_map};
+  options_map["model-grid-file"].value() = boost::any(m_model_grid_name);
 
-    auto filter_list = conf.getLuminosityFilterList();
-    PhzModeling::SparseGridCreator creator {conf.getSedDatasetProvider(),
-                                                conf.getReddeningDatasetProvider(),
-                                                conf.getFilterDatasetProvider(),
-                                                PhzModeling::NoIgmFunctor{}};
+  options_map["output-model-grid"].value() = boost::any(info.getLuminosityModelGridName());
 
-    auto param_space_map = conf.getLuminosityParameterSpaceRegions();
-    auto results = creator.createGrid(param_space_map, filter_list, ProgressReporter{this});
+  long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
+                                     std::chrono::system_clock::now().time_since_epoch()).count();
+  auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+  config_manager.registerConfiguration<ComputeLuminosityModelGridConfig>();
+  config_manager.closeRegistration();
+  config_manager.initialize(options_map);
 
-    logger.info() << "Creating the grid output";
-    auto output = conf.getOutputFunction();
-    output(results);
+  auto& sed_provider = config_manager.getConfiguration<SedProviderConfig>().getSedDatasetProvider();
+  auto& reddening_provider = config_manager.getConfiguration<ReddeningProviderConfig>().getReddeningDatasetProvider();
+  const auto& filter_provider = config_manager.getConfiguration<FilterProviderConfig>().getFilterDatasetProvider();
+  auto& igm_abs_func = config_manager.getConfiguration<IgmConfig>().getIgmAbsorptionFunction();
+
+  Euclid::PhzModeling::SparseGridCreator creator {
+               sed_provider, reddening_provider, filter_provider, igm_abs_func};
+
+  auto param_space_map = config_manager.getConfiguration<ComputeLuminosityModelGridConfig>().getParameterSpaceRegions();
+  std::vector<Euclid::XYDataset::QualifiedName> filter_list = {config_manager.getConfiguration<Euclid::PhzConfiguration::LuminosityBandConfig>().getLuminosityFilter()};
+
+  auto results = creator.createGrid(param_space_map, filter_list, ProgressReporter{this});
+
+  dialog_logger.info() << "Creating the grid output";
+  auto output = config_manager.getConfiguration<ModelGridOutputConfig>().getOutputFunction();
+  output(results);
 }
 
 }

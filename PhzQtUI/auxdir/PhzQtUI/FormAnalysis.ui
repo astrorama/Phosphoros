@@ -217,8 +217,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>416</width>
-            <height>166</height>
+            <width>1053</width>
+            <height>206</height>
            </rect>
           </property>
           <attribute name="label">
@@ -375,8 +375,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>543</width>
-            <height>166</height>
+            <width>1053</width>
+            <height>206</height>
            </rect>
           </property>
           <attribute name="label">
@@ -521,8 +521,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>458</width>
-            <height>151</height>
+            <width>1053</width>
+            <height>199</height>
            </rect>
           </property>
           <attribute name="label">
@@ -632,7 +632,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>Configure Luminosity Prior</string>
+                <string>Configure Luminosity Prior †</string>
                </property>
               </widget>
              </item>
@@ -659,7 +659,7 @@
             <x>0</x>
             <y>0</y>
             <width>1053</width>
-            <height>217</height>
+            <height>255</height>
            </rect>
           </property>
           <attribute name="label">

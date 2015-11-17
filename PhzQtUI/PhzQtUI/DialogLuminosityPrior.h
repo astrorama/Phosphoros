@@ -45,7 +45,8 @@ public:
   explicit DialogLuminosityPrior(QWidget *parent = 0);
   ~DialogLuminosityPrior();
 
-  void loadData(ModelSet model, std::string survey_name, double z_min,
+  void loadData(ModelSet model, std::string survey_name,
+      std::string model_grid, double z_min,
       double z_max);
 
   // called for updating the progress bar
@@ -134,6 +135,8 @@ private:
   ModelSet m_model;
 
   std::string m_survey_name;
+
+  std::string m_model_grid_name;
 
   double m_z_min;
 

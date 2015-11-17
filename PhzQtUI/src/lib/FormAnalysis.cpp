@@ -159,7 +159,15 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   QFileInfo info_input(ui->txt_inputCatalog->text());
   bool run_ok = info_input.exists();
 
+
   bool lum_prior_ok = !ui->cb_luminosityPrior->isChecked() || ui->cb_luminosityPrior_2->currentText().length()>0;
+  ui->btn_confLuminosityPrior->setEnabled(grid_name_exists);
+  if (grid_name_exists) {
+    ui->btn_confLuminosityPrior->setToolTip("Configure the Luminosity Prior");
+  } else {
+    ui->btn_confLuminosityPrior->setToolTip("You need to Generate the Model Grid before to configure the Luminosity Prior");
+  }
+
 
   ui->btn_GetConfigAnalysis->setEnabled(
       grid_name_ok && correction_ok && lum_prior_ok && run_ok && enabled);
@@ -451,9 +459,6 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     auto lum_prior_option =lum_prior_config.getConfigOptions();
     options_map.insert(lum_prior_option.begin(),lum_prior_option.end());
 
-    for (auto& pair :selected_model.getModelNameConfigOptions()){
-      options_map[pair.first]=pair.second;
-      }
   }
 
 
@@ -689,6 +694,8 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   void FormAnalysis::on_btn_confLuminosityPrior_clicked(){
         std::unique_ptr<DialogLuminosityPrior> dialog(new DialogLuminosityPrior());
 
+        std::string model_grid = ui->cb_CompatibleGrid->currentText().toStdString();
+
         auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
 
         ModelSet selected_model;
@@ -716,7 +723,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
           }
         }
 
-        dialog->loadData(selected_model,survey_name,z_min,z_max);
+        dialog->loadData(selected_model,survey_name,model_grid,z_min,z_max);
         dialog->exec();
         loadLuminosityPriors();
 
