@@ -26,6 +26,9 @@ elements_install_conf_files()
 elements_install_python_modules()
 
 elements_install_scripts()
+elements_add_unit_test(LsAuxDirConfig_test tests/src/LsAuxDirConfig_test.cpp 
+                     LINK_LIBRARIES PhzCLI
+                     TYPE Boost)
 elements_add_unit_test(ComputeModelSedConfig_test tests/src/ComputeModelSedConfig_test.cpp 
                      LINK_LIBRARIES PhzCLI
                      TYPE Boost)
