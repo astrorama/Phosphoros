@@ -12,9 +12,21 @@
 #include <boost/program_options.hpp>
 #include "ui_DialogRunAnalysis.h"
 #include "PhzLikelihood/ParallelCatalogHandler.h"
-#include "PhzConfiguration/ComputeRedshiftsConfiguration.h"
+
+
+#include "Configuration/ConfigManager.h"
+#include "DefaultOptionsCompleter.h"
+#include "PhzConfiguration/ComputeRedshiftsConfig.h"
+#include "PhzConfiguration/PhotometryGridConfig.h"
+#include "PhzConfiguration/LikelihoodGridFuncConfig.h"
+#include "PhzConfiguration/MarginalizationConfig.h"
+#include "PhzConfiguration/PhotometricCorrectionConfig.h"
+#include "PhzConfiguration/PriorConfig.h"
+#include "Configuration/CatalogConfig.h"
 
 // #include <future>
+
+using namespace Euclid::PhzConfiguration;
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -79,23 +91,41 @@ void DialogRunAnalysis::updateProgressBar(size_t step, size_t total) {
 
 std::string DialogRunAnalysis::runFunction(){
   try {
-    PhzConfiguration::ComputeRedshiftsConfiguration conf { m_config };
-    auto model_phot_grid = conf.getPhotometryGrid();
-    auto marginalization_func = conf.getMarginalizationFunc();
-    auto likelihood_grid_func = conf.getLikelihoodGridFunction();
+    completeWithDefaults<ComputeRedshiftsConfig>(m_config);
 
-    PhzLikelihood::ParallelCatalogHandler handler {
-        conf.getPhotometricCorrectionMap(), model_phot_grid,
-        likelihood_grid_func, conf.getPriors(), marginalization_func };
-    auto catalog = conf.getCatalog();
-    auto out_ptr = conf.getOutputHandler();
+    long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
+                                       std::chrono::system_clock::now().time_since_epoch()).count();
+    auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+    config_manager.registerConfiguration<ComputeRedshiftsConfig>();
+    config_manager.closeRegistration();
+    config_manager.initialize(m_config);
+
+
+
+    auto& model_phot_grid = config_manager.getConfiguration<PhotometryGridConfig>().getPhotometryGrid();
+    auto& marginalization_func = config_manager.getConfiguration<MarginalizationConfig>().getMarginalizationFunc();
+    auto& likelihood_grid_func = config_manager.getConfiguration<LikelihoodGridFuncConfig>().getLikelihoodGridFunction();
+    auto& correction_map = config_manager.getConfiguration<PhotometricCorrectionConfig>().getPhotometricCorrectionMap();
+    auto& priors = config_manager.getConfiguration<PriorConfig>().getPriors();
+
+    PhzLikelihood::ParallelCatalogHandler handler { correction_map,
+                                                    model_phot_grid,
+                                                    likelihood_grid_func,
+                                                    priors,
+                                                    marginalization_func };
+
+    auto& catalog = config_manager.getConfiguration<Configuration::CatalogConfig>().getCatalog();
+    auto out_ptr = config_manager.getConfiguration<ComputeRedshiftsConfig>().getOutputHandler();
+
     std::function<void(size_t, size_t)> monitor_function = std::bind(
         &DialogRunAnalysis::updateProgressBar, this, std::placeholders::_1,
         std::placeholders::_2);
-    handler.handleSources(catalog.begin(), catalog.end(), *out_ptr,
-        monitor_function);
+
+    handler.handleSources(catalog.begin(), catalog.end(), *out_ptr, monitor_function);
+
 
     return "";
+
   }
   catch (const Elements::Exception & e) {
     return "Sorry, an error occurred during the computation: "
