@@ -7,7 +7,7 @@
 #include "FileUtils.h"
 
 #include "ElementsKernel/Exception.h"
-#include "PhzConfiguration/ParameterSpaceConfiguration.h"
+
 namespace po = boost::program_options;
 
 namespace Euclid {

@@ -4,7 +4,8 @@
 #include <string>
 #include <map>
 #include <boost/program_options.hpp>
-#include "PhzConfiguration/PhosphorosPathConfiguration.h"
+#include "Configuration/ConfigManager.h"
+
 /**
  * @brief The FileUtils class
  */
@@ -91,7 +92,7 @@ public:
     /**
      * @brief get the default root path
      */
-    static PhzConfiguration::PhosphorosPathConfiguration getRootPaths();
+    static Configuration::ConfigManager& getRootPaths();
 
 
     /**

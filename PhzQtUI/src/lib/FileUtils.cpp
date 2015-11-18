@@ -1,10 +1,18 @@
+#include <chrono>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QFileInfoList>
 #include <QSettings>
 #include <QTextStream>
+#include "Configuration/ConfigManager.h"
+#include "PhzConfiguration/PhosphorosRootDirConfig.h"
+#include "PhzConfiguration/CatalogDirConfig.h"
+#include "PhzConfiguration/AuxDataDirConfig.h"
+#include "PhzConfiguration/IntermediateDirConfig.h"
+#include "PhzConfiguration/ResultsDirConfig.h"
 #include "FileUtils.h"
+#include "DefaultOptionsCompleter.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -114,13 +122,30 @@ std::string FileUtils::removeStart(const std::string& name, const std::string& s
 
 
 //// Application base paths as of configuration.
- PhzConfiguration::PhosphorosPathConfiguration FileUtils::getRootPaths(){
-   std::map<std::string, boost::program_options::variable_value> map{};
-   return PhzConfiguration::PhosphorosPathConfiguration(map);
- }
+Configuration::ConfigManager& FileUtils::getRootPaths() {
+  std::map<std::string, boost::program_options::variable_value> map {};
+  completeWithDefaults<PhzConfiguration::PhosphorosRootDirConfig>(map);
+  completeWithDefaults<PhzConfiguration::CatalogDirConfig>(map);
+  completeWithDefaults<PhzConfiguration::AuxDataDirConfig>(map);
+  completeWithDefaults<PhzConfiguration::IntermediateDirConfig>(map);
+  completeWithDefaults<PhzConfiguration::ResultsDirConfig>(map);
+  
+  long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
+                                   std::chrono::system_clock::now().time_since_epoch()).count();
+  auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+  config_manager.registerConfiguration<PhzConfiguration::PhosphorosRootDirConfig>();
+  config_manager.registerConfiguration<PhzConfiguration::CatalogDirConfig>();
+  config_manager.registerConfiguration<PhzConfiguration::AuxDataDirConfig>();
+  config_manager.registerConfiguration<PhzConfiguration::IntermediateDirConfig>();
+  config_manager.registerConfiguration<PhzConfiguration::ResultsDirConfig>();
+  config_manager.closeRegistration();
+  config_manager.initialize(map);
+  
+  return config_manager;
+}
 
-std::string FileUtils::getRootPath(bool with_separator){
-  QString path = QString::fromStdString(getRootPaths().getPhosphorosRootDir().generic_string());
+std::string FileUtils::getRootPath(bool with_separator) {
+  QString path = QString::fromStdString(getRootPaths().getConfiguration<PhzConfiguration::PhosphorosRootDirConfig>().getPhosphorosRootDir().generic_string());
   if (with_separator){
     path = path + QDir::separator();
   }
@@ -261,28 +286,28 @@ std::map<std::string,std::string> FileUtils::readPath(){
     }
   }
 
- auto default_paths = getRootPaths();
+ auto& default_paths = getRootPaths();
 
 
 
  if (map.find("Catalogs")== map.end()){
-   map.insert(std::make_pair("Catalogs",default_paths.getCatalogsDir().generic_string()));
+   map.insert(std::make_pair("Catalogs",default_paths.getConfiguration<PhzConfiguration::CatalogDirConfig>().getCatalogDir().generic_string()));
  }
 
  if (map.find("AuxiliaryData")== map.end()){
-   map.insert(std::make_pair("AuxiliaryData",default_paths.getAuxDataDir().generic_string()));
+   map.insert(std::make_pair("AuxiliaryData",default_paths.getConfiguration<PhzConfiguration::AuxDataDirConfig>().getAuxDataDir().generic_string()));
  }
 
  if (map.find("IntermediateProducts")== map.end()){
-   map.insert(std::make_pair("IntermediateProducts",default_paths.getIntermediateDir().generic_string()));
+   map.insert(std::make_pair("IntermediateProducts",default_paths.getConfiguration<PhzConfiguration::IntermediateDirConfig>().getIntermediateDir().generic_string()));
  }
 
  if (map.find("Results")== map.end()){
-   map.insert(std::make_pair("Results",default_paths.getResultsDir().generic_string()));
+   map.insert(std::make_pair("Results",default_paths.getConfiguration<PhzConfiguration::ResultsDirConfig>().getResultsDir().generic_string()));
  }
 
  if (map.find("LastUsed")== map.end()){
-    map.insert(std::make_pair("LastUsed",default_paths.getPhosphorosRootDir().generic_string()));
+    map.insert(std::make_pair("LastUsed",default_paths.getConfiguration<PhzConfiguration::PhosphorosRootDirConfig>().getPhosphorosRootDir().generic_string()));
  }
 
   return map;

@@ -14,11 +14,13 @@
 #include <vector>
 #include <boost/program_options.hpp>
 
-#include "PhzConfiguration/PhotometryGridConfiguration.h"
+#include "Configuration/ConfigManager.h"
+#include "PhzConfiguration/PhotometryGridConfig.h"
 #include "PhzQtUI/PhzGridInfoHandler.h"
 #include "PhzQtUI/XYDataSetTreeModel.h"
 #include "XYDataset/QualifiedName.h"
 #include "FileUtils.h"
+#include "DefaultOptionsCompleter.h"
 
 
 
@@ -51,8 +53,15 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
     options_map["intermediate-products-dir"].value() = boost::any(FileUtils::getIntermediaryProductRootPath(false,""));
 
     try { // If a file cannot be opened or is ill formated: just skip it!
-      auto grid_config = PhzConfiguration::PhotometryGridConfiguration(options_map);
-      auto grid_info = grid_config.getPhotometryGridInfo();
+      completeWithDefaults<PhzConfiguration::PhotometryGridConfig>(options_map);
+      long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
+                                    std::chrono::system_clock::now().time_since_epoch()).count();
+      auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+      config_manager.registerConfiguration<PhzConfiguration::PhotometryGridConfig>();
+      config_manager.closeRegistration();
+      config_manager.initialize(options_map);
+      
+      auto& grid_info = config_manager.getConfiguration<PhzConfiguration::PhotometryGridConfig>().getPhotometryGridInfo();
 
       // Check the IGM type compatibility
       if (igm_type!=grid_info.igm_method) {

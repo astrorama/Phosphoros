@@ -4,10 +4,13 @@
 #include <QTextStream>
 #include "FileUtils.h"
 
+#include "Configuration/ConfigManager.h"
+#include "PhzConfiguration/ParameterSpaceConfig.h"
 #include "PhzQtUI/ModelSet.h"
 #include "PhzQtUI/XYDataSetTreeModel.h"
-#include "PhzConfiguration/ParameterSpaceConfiguration.h"
 #include "PhzDataModel/PhotometryGrid.h"
+#include "DefaultOptionsCompleter.h"
+
 namespace po = boost::program_options;
 namespace Euclid {
 namespace PhzQtUI {
@@ -90,11 +93,17 @@ std::map<std::string, po::variable_value> ModelSet::getConfigOptions() const{
 }
 
 std::map<std::string,PhzDataModel::ModelAxesTuple> ModelSet::getAxesTuple() const{
+  auto options = getConfigOptions();
+  completeWithDefaults<PhzConfiguration::ParameterSpaceConfig>(options);
+  
+  long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
+                                    std::chrono::system_clock::now().time_since_epoch()).count();
+  auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+  config_manager.registerConfiguration<PhzConfiguration::ParameterSpaceConfig>();
+  config_manager.closeRegistration();
+  config_manager.initialize(options);
 
-
-   Euclid::PhzConfiguration::ParameterSpaceConfiguration config(getConfigOptions());
-
-   return config.getParameterSpaceRegions();
+  return config_manager.getConfiguration<PhzConfiguration::ParameterSpaceConfig>().getParameterSpaceRegions();
 }
 
 
