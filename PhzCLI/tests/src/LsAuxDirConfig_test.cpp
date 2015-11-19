@@ -25,8 +25,20 @@
 #include <boost/test/unit_test.hpp>
 
 #include "PhzCLI/LsAuxDirConfig.h"
+#include "ConfigManager_fixture.h"
 
 using namespace Euclid::PhzCLI;
+namespace po = boost::program_options;
+
+struct LsAuxDirConfig_fixture : public ConfigManager_fixture {
+
+  const std::string STR_CONTENT_TYPE {"type"};
+  const std::string STR_GROUP {"group"};
+  const std::string STR_DATA {"data"};
+
+  std::map<std::string, po::variable_value> options_map {};
+
+};
 
 //-----------------------------------------------------------------------------
 
@@ -34,14 +46,84 @@ BOOST_AUTO_TEST_SUITE (LsAuxDirConfig_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE( example_test ) {
+BOOST_FIXTURE_TEST_CASE(getProgramOptions_test, LsAuxDirConfig_fixture) {
 
-  BOOST_FAIL("!!!! Please implement your tests !!!!");
+  // Given
+  config_manager.registerConfiguration<LsAuxDirConfig>();
 
+  // When
+  auto options = config_manager.closeRegistration();
+
+  // Then
+  BOOST_CHECK_NO_THROW(options.find(STR_CONTENT_TYPE, false));
+  BOOST_CHECK_NO_THROW(options.find(STR_GROUP, false));
+  BOOST_CHECK_NO_THROW(options.find(STR_DATA, false));
+}
+
+//-----------------------------------------------------------------------------
+
+BOOST_FIXTURE_TEST_CASE(getGroup_test, LsAuxDirConfig_fixture) {
+
+  // Given
+  config_manager.registerConfiguration<LsAuxDirConfig>();
+  config_manager.closeRegistration();
+
+  std::string expected { "Mer" };
+  options_map["group"].value() = boost::any(expected);
+  config_manager.initialize(options_map);
+  auto result = config_manager.getConfiguration<LsAuxDirConfig>().getGroup();
+
+  BOOST_CHECK_EQUAL(result, expected);
+}
+
+//-----------------------------------------------------------------------------
+
+BOOST_FIXTURE_TEST_CASE(getDatasetToShow_test, LsAuxDirConfig_fixture) {
+
+  // Given
+  config_manager.registerConfiguration<LsAuxDirConfig>();
+  config_manager.closeRegistration();
+
+  std::string expected { "1. 2." };
+  options_map["data"].value() = boost::any(expected);
+  config_manager.initialize(options_map);
+  auto result = config_manager.getConfiguration<LsAuxDirConfig>().getDatasetToShow();
+
+  BOOST_CHECK_EQUAL(result, expected);
+}
+
+//-----------------------------------------------------------------------------
+
+BOOST_FIXTURE_TEST_CASE(showData_test, LsAuxDirConfig_fixture) {
+
+  // Given
+  config_manager.registerConfiguration<LsAuxDirConfig>();
+  config_manager.closeRegistration();
+
+  bool expected { true } ;
+  std::string data { "1. 2." };
+  options_map["data"].value() = boost::any(data);
+  config_manager.initialize(options_map);
+  auto result = config_manager.getConfiguration<LsAuxDirConfig>().showData();
+
+  BOOST_CHECK_EQUAL(result, expected);
+}
+
+//-----------------------------------------------------------------------------
+
+BOOST_FIXTURE_TEST_CASE(nodata_showData_test, LsAuxDirConfig_fixture) {
+
+  // Given
+  config_manager.registerConfiguration<LsAuxDirConfig>();
+  config_manager.closeRegistration();
+
+  bool expected { false } ;
+  config_manager.initialize(options_map);
+  auto result = config_manager.getConfiguration<LsAuxDirConfig>().showData();
+
+  BOOST_CHECK_EQUAL(result, expected);
 }
 
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE_END ()
-
-

@@ -35,7 +35,8 @@ namespace PhzCLI {
 
 /**
  * @class LsAuxDirConfig
- * @brief
+ * @brief Configuration class for the Auxiliary data used by
+ * the LsAux executable.
  *
  */
 class LsAuxDirConfig : public Configuration::Configuration {
