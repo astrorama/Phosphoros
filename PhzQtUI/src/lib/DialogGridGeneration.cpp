@@ -22,6 +22,7 @@
 #include "PhzModeling/SparseGridCreator.h"
 #include "DefaultOptionsCompleter.h"
 #include "Configuration/Utils.h"
+#include "PhzUtils/Multithreading.h"
 
 // #include <future>
 
@@ -36,13 +37,16 @@ DialogGridGeneration::DialogGridGeneration(QWidget *parent) :
     {
         ui->setupUi(this);
         ui->progressBar->setValue(0);
-        ui->btn_cancel->setEnabled(false);
+        ui->btn_cancel->setEnabled(true);
 
         m_timer.reset(new QTimer(this));
         m_timer->setInterval(100);
         m_timer->setSingleShot(true);
         connect(m_timer.get(), SIGNAL(timeout()), this, SLOT(run()));
         m_timer->start();
+        
+        connect(&m_future_watcher, SIGNAL(finished()), this, SLOT(runFinished()));
+        connect(this, SIGNAL(signalUpdateBar(int)), ui->progressBar, SLOT(setValue(int)));
     }
 
 DialogGridGeneration::~DialogGridGeneration() {}
@@ -52,11 +56,6 @@ void DialogGridGeneration::setValues(std::string grid_name,
     ui->label_name->setText(QString::fromStdString(grid_name));
     m_config=config;
 
-}
-
-void DialogGridGeneration::updateGridProgressBar(size_t step, size_t total) {
-  int value = (step * 100) / total;
-  ui->progressBar->setValue(value);
 }
 
 std::string DialogGridGeneration::runFunction() {
@@ -76,9 +75,10 @@ std::string DialogGridGeneration::runFunction() {
     Euclid::PhzModeling::SparseGridCreator creator {
                 sed_provider, reddening_provider, filter_provider, igm_abs_func};
     
-    std::function<void(size_t, size_t)> monitor_function = std::bind(
-        &DialogGridGeneration::updateGridProgressBar, this,
-        std::placeholders::_1, std::placeholders::_2);
+    auto monitor_function = [this](size_t step, size_t total) {
+      int value = (step * 100) / total;
+      emit signalUpdateBar(value);
+    };
 
     auto param_space_map = config_manager.getConfiguration<ParameterSpaceConfig>().getParameterSpaceRegions();
     auto filter_list = config_manager.getConfiguration<FilterConfig>().getFilterList();
@@ -102,10 +102,12 @@ std::string DialogGridGeneration::runFunction() {
   }
 }
 
-void DialogGridGeneration::run() {
-  QFuture<std::string> future = QtConcurrent::run(this,
-      &DialogGridGeneration::runFunction);
-  std::string message = future.result();
+void DialogGridGeneration::on_btn_cancel_clicked() {
+  PhzUtils::getStopThreadsFlag() = true;
+}
+
+void DialogGridGeneration::runFinished() {
+  auto message = m_future_watcher.result();
   if (message.length() == 0) {
     this->accept();
     return;
@@ -114,6 +116,10 @@ void DialogGridGeneration::run() {
         QString::fromStdString(message), QMessageBox::Close);
     this->reject();
   }
+}
+
+void DialogGridGeneration::run() {
+  m_future_watcher.setFuture(QtConcurrent::run(this, &DialogGridGeneration::runFunction));
 }
 
 }

@@ -10,6 +10,7 @@
 
 #include <memory>
 #include <QDialog>
+#include <QFutureWatcher>
 #include <QTimer>
 #include "ElementsKernel/Exception.h"
 #include <map>
@@ -47,16 +48,25 @@ public:
 
 private slots:
 
-void run();
+  void run();
 
-std::string runFunction();
+  void runFinished();
+
+  std::string runFunction();
+
+  void on_btn_cancel_clicked();
+
+signals:
+
+  void signalUpdateBar(int);
 
 private:
-    std::map<std::string, boost::program_options::variable_value> m_config;
-    std::unique_ptr<Ui::DialogGridGeneration> ui;
-    std::unique_ptr<QTimer> m_timer;
+  
+  QFutureWatcher<std::string> m_future_watcher {};
+  std::map<std::string, boost::program_options::variable_value> m_config;
+  std::unique_ptr<Ui::DialogGridGeneration> ui;
+  std::unique_ptr<QTimer> m_timer;
 
-    void updateGridProgressBar(size_t step, size_t total);
 };
 
 }
