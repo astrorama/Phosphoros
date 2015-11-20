@@ -31,6 +31,7 @@
 #include <boost//program_options.hpp>
 #include "Configuration/ConfigManager.h"
 #include "ElementsKernel/Logging.h"
+#include "Configuration/Utils.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -39,8 +40,7 @@ static Elements::Logging logger = Elements::Logging::getLogger("test");
 
 template <typename T>
 static void completeWithDefaults(std::map<std::string, boost::program_options::variable_value>& options_map) {
-  long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
-                                    std::chrono::system_clock::now().time_since_epoch()).count();
+  long config_manager_id = Configuration::getUniqueManagerId();
   auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
   config_manager.template registerConfiguration<T>();
   auto options_desc = config_manager.closeRegistration();

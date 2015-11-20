@@ -13,6 +13,7 @@
 #include "XYDataset/AsciiParser.h"
 #include "XYDataset/FileSystemProvider.h"
 #include "PhzCLI/LsAuxDirConfig.h"
+#include "Configuration/Utils.h"
 
 using namespace std;
 using namespace Euclid;
@@ -22,8 +23,7 @@ namespace po = boost::program_options;
 
 static Elements::Logging logger = Elements::Logging::getLogger("PhosphorosLsAux");
 
-static long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
-                                    std::chrono::system_clock::now().time_since_epoch()).count();
+static long config_manager_id = getUniqueManagerId();
 
 class LsAux : public Elements::Program {
   

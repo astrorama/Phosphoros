@@ -10,6 +10,7 @@
 #include "PhzQtUI/XYDataSetTreeModel.h"
 #include "PhzDataModel/PhotometryGrid.h"
 #include "DefaultOptionsCompleter.h"
+#include "Configuration/Utils.h"
 
 namespace po = boost::program_options;
 namespace Euclid {
@@ -96,8 +97,7 @@ std::map<std::string,PhzDataModel::ModelAxesTuple> ModelSet::getAxesTuple() cons
   auto options = getConfigOptions();
   completeWithDefaults<PhzConfiguration::ParameterSpaceConfig>(options);
   
-  long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
-                                    std::chrono::system_clock::now().time_since_epoch()).count();
+  long config_manager_id = Configuration::getUniqueManagerId();
   auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
   config_manager.registerConfiguration<PhzConfiguration::ParameterSpaceConfig>();
   config_manager.closeRegistration();

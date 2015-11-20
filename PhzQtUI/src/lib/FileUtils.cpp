@@ -13,6 +13,7 @@
 #include "PhzConfiguration/ResultsDirConfig.h"
 #include "FileUtils.h"
 #include "DefaultOptionsCompleter.h"
+#include "Configuration/Utils.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -130,8 +131,7 @@ Configuration::ConfigManager& FileUtils::getRootPaths() {
   completeWithDefaults<PhzConfiguration::IntermediateDirConfig>(map);
   completeWithDefaults<PhzConfiguration::ResultsDirConfig>(map);
   
-  long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
-                                   std::chrono::system_clock::now().time_since_epoch()).count();
+  long config_manager_id = Configuration::getUniqueManagerId();
   auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
   config_manager.registerConfiguration<PhzConfiguration::PhosphorosRootDirConfig>();
   config_manager.registerConfiguration<PhzConfiguration::CatalogDirConfig>();

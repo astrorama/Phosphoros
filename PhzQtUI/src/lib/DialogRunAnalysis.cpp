@@ -35,6 +35,7 @@
 #include "PhzModeling/SparseGridCreator.h"
 #include "PhzModeling/NoIgmFunctor.h"
 #include "PhzUtils/Multithreading.h"
+#include "Configuration/Utils.h"
 
 // #include <future>
 
@@ -49,8 +50,7 @@ bool DialogRunAnalysis::checkLuminosityGrid(){
     try{
       completeWithDefaults<ComputeRedshiftsConfig>(m_config);
 
-      long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
-                                         std::chrono::system_clock::now().time_since_epoch()).count();
+      long config_manager_id = Configuration::getUniqueManagerId();
       auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
       config_manager.registerConfiguration<ComputeRedshiftsConfig>();
       config_manager.closeRegistration();
@@ -82,8 +82,7 @@ void DialogRunAnalysis::computeLuminosityGrid(){
 
    completeWithDefaults<ComputeLuminosityModelGridConfig>(m_lum_config);
 
-   long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
-                                      std::chrono::system_clock::now().time_since_epoch()).count();
+   long config_manager_id = Configuration::getUniqueManagerId();
    auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
    config_manager.registerConfiguration<ComputeLuminosityModelGridConfig>();
    config_manager.closeRegistration();
@@ -177,8 +176,7 @@ std::string DialogRunAnalysis::runFunction(){
   try {
     completeWithDefaults<ComputeRedshiftsConfig>(m_config);
 
-    long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
-                                       std::chrono::system_clock::now().time_since_epoch()).count();
+    long config_manager_id = Configuration::getUniqueManagerId();
     auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
     config_manager.registerConfiguration<ComputeRedshiftsConfig>();
     config_manager.closeRegistration();

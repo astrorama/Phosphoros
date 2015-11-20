@@ -9,11 +9,11 @@
 
 #include <chrono>
 #include "Configuration/ConfigManager.h"
+#include "Configuration/Utils.h"
 
 struct ConfigManager_fixture {
   
-  long timestamp = std::chrono::duration_cast<std::chrono::microseconds>(
-                      std::chrono::system_clock::now().time_since_epoch()).count();
+  long timestamp = Euclid::Configuration::getUniqueManagerId();
   
   Euclid::Configuration::ConfigManager& config_manager = 
                       Euclid::Configuration::ConfigManager::getInstance(timestamp);

@@ -21,6 +21,7 @@
 #include "PhzConfiguration/ModelGridOutputConfig.h"
 #include "PhzModeling/SparseGridCreator.h"
 #include "DefaultOptionsCompleter.h"
+#include "Configuration/Utils.h"
 
 // #include <future>
 
@@ -61,8 +62,7 @@ void DialogGridGeneration::updateGridProgressBar(size_t step, size_t total) {
 std::string DialogGridGeneration::runFunction() {
   try {
     completeWithDefaults<ComputeModelGridConfig>(m_config);
-    long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
-                                    std::chrono::system_clock::now().time_since_epoch()).count();
+    long config_manager_id = Configuration::getUniqueManagerId();
     auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
     config_manager.registerConfiguration<ComputeModelGridConfig>();
     config_manager.closeRegistration();

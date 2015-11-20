@@ -21,6 +21,7 @@
 #include "PhzPhotometricCorrection/FindBestFitModels.h"
 #include "PhzPhotometricCorrection/CalculateScaleFactorMap.h"
 #include "PhzPhotometricCorrection/PhotometricCorrectionAlgorithm.h"
+#include "Configuration/Utils.h"
 
 using namespace std;
 using namespace Euclid::PhzConfiguration;
@@ -230,8 +231,7 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
         ui->cb_SpectroColumn->currentText().toStdString(),
         m_excluded_filters);
 
-    long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
-                                    std::chrono::system_clock::now().time_since_epoch()).count();
+    long config_manager_id = Configuration::getUniqueManagerId();
     auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
     config_manager.registerConfiguration<ComputePhotometricCorrectionsConfig>();
     config_manager.closeRegistration();

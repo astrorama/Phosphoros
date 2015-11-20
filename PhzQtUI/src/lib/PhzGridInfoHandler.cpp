@@ -21,6 +21,7 @@
 #include "XYDataset/QualifiedName.h"
 #include "FileUtils.h"
 #include "DefaultOptionsCompleter.h"
+#include "Configuration/Utils.h"
 
 
 
@@ -54,8 +55,7 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
 
     try { // If a file cannot be opened or is ill formated: just skip it!
       completeWithDefaults<PhzConfiguration::PhotometryGridConfig>(options_map);
-      long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
-                                    std::chrono::system_clock::now().time_since_epoch()).count();
+      long config_manager_id = Configuration::getUniqueManagerId();
       auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
       config_manager.registerConfiguration<PhzConfiguration::PhotometryGridConfig>();
       config_manager.closeRegistration();
