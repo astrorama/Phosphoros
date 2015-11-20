@@ -234,7 +234,7 @@
      <item>
       <widget class="QPushButton" name="btn_cancel">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="text">
         <string>Cancel</string>
@@ -246,22 +246,5 @@
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>btn_cancel</sender>
-   <signal>clicked()</signal>
-   <receiver>Euclid::PhzQtUI::DialogRunAnalysis</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>907</x>
-     <y>184</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>479</x>
-     <y>104</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

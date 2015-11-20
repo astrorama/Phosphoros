@@ -23,6 +23,7 @@
 #include "PhzConfiguration/PhotometricCorrectionConfig.h"
 #include "PhzConfiguration/PriorConfig.h"
 #include "Configuration/CatalogConfig.h"
+#include "PhzUtils/Multithreading.h"
 
 // #include <future>
 
@@ -37,13 +38,16 @@ DialogRunAnalysis::DialogRunAnalysis(QWidget *parent) :
     {
         ui->setupUi(this);
         ui->progressBar->setValue(0);
-        ui->btn_cancel->setEnabled(false);
+        ui->btn_cancel->setEnabled(true);
 
         m_timer.reset(new QTimer(this));
         m_timer->setInterval(100);
         m_timer->setSingleShot(true);
         connect(m_timer.get(), SIGNAL(timeout()), this, SLOT(run()));
         m_timer->start();
+        
+        connect(&m_future_watcher, SIGNAL(finished()), this, SLOT(runFinished()));
+        connect(this, SIGNAL(signalUpdateBar(int)), ui->progressBar, SLOT(setValue(int)));
     }
 
 DialogRunAnalysis::~DialogRunAnalysis() {}
@@ -84,11 +88,6 @@ void DialogRunAnalysis::setValues(std::string output_cat_name,
 
 }
 
-void DialogRunAnalysis::updateProgressBar(size_t step, size_t total) {
-  int value = (step * 100) / total;
-  ui->progressBar->setValue(value);
-}
-
 std::string DialogRunAnalysis::runFunction(){
   try {
     completeWithDefaults<ComputeRedshiftsConfig>(m_config);
@@ -117,9 +116,10 @@ std::string DialogRunAnalysis::runFunction(){
     auto& catalog = config_manager.getConfiguration<Configuration::CatalogConfig>().getCatalog();
     auto out_ptr = config_manager.getConfiguration<ComputeRedshiftsConfig>().getOutputHandler();
 
-    std::function<void(size_t, size_t)> monitor_function = std::bind(
-        &DialogRunAnalysis::updateProgressBar, this, std::placeholders::_1,
-        std::placeholders::_2);
+    auto monitor_function = [this](size_t step, size_t total) {
+      int value = (step * 100) / total;
+      emit signalUpdateBar(value);
+    };
 
     handler.handleSources(catalog.begin(), catalog.end(), *out_ptr, monitor_function);
 
@@ -140,10 +140,8 @@ std::string DialogRunAnalysis::runFunction(){
   }
 }
 
-void DialogRunAnalysis::run(){
-  QFuture<std::string> future = QtConcurrent::run(this,
-      &DialogRunAnalysis::runFunction);
-  std::string message = future.result();
+void DialogRunAnalysis::runFinished() {
+  auto message = m_future_watcher.result();
   if (message.length() == 0) {
     this->accept();
     return;
@@ -154,6 +152,13 @@ void DialogRunAnalysis::run(){
   }
 }
 
+void DialogRunAnalysis::on_btn_cancel_clicked() {
+  PhzUtils::getStopThreadsFlag() = true;
+}
+
+void DialogRunAnalysis::run() {
+  m_future_watcher.setFuture(QtConcurrent::run(this, &DialogRunAnalysis::runFunction));
+}
 
 }
 }

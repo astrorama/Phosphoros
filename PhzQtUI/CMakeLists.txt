@@ -39,7 +39,7 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 
 
 elements_add_library(PhzQtUI ${PhUI_SRCS} ${PhUI_HEADERS_MOC} ${PhUI_FORMS_HEADERS} ${PhUI_RESOURCES_RCC}
-                     LINK_LIBRARIES ElementsKernel ${QT_LIBRARIES} XYDataset PhzConfiguration PhzPhotometricCorrection PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity
+                     LINK_LIBRARIES ElementsKernel ${QT_LIBRARIES} XYDataset PhzConfiguration PhzPhotometricCorrection PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzUtils
                      INCLUDE_DIRS ElementsKernel XYDataset PhzConfiguration PhzPhotometricCorrection PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity
                      PUBLIC_HEADERS PhzQtUI)
 
