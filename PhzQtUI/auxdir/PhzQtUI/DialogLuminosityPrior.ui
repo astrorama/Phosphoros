@@ -163,7 +163,7 @@
             <item>
              <widget class="QPushButton" name="btn_save">
               <property name="text">
-               <string>Save  and  Compute</string>
+               <string>Save</string>
               </property>
              </widget>
             </item>
@@ -386,8 +386,6 @@
          </layout>
         </item>
        </layout>
-       <zorder>splitter</zorder>
-       <zorder>verticalLayoutWidget_2</zorder>
       </widget>
       <widget class="QWidget" name="page_2">
        <layout class="QVBoxLayout" name="verticalLayout_6">

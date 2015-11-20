@@ -117,6 +117,7 @@ private:
 
     void setRunAnnalysisEnable(bool enabled);
     std::map < std::string, boost::program_options::variable_value > getRunOptionMap();
+    std::map < std::string, boost::program_options::variable_value > getLuminosityOptionMap();
     std::map<int,SurveyFilterMapping>  m_analysis_survey_list;
     std::map<int,ModelSet> m_analysis_model_list;
     std::map<std::string, LuminosityPriorConfig> m_prior_config;

@@ -8,6 +8,7 @@
 #include <qtconcurrentrun.h>
 #include <QDir>
 #include <QMessageBox>
+#include "ElementsKernel/Exception.h"
 #include "PhzQtUI/DialogRunAnalysis.h"
 #include <boost/program_options.hpp>
 #include "ui_DialogRunAnalysis.h"
@@ -23,6 +24,16 @@
 #include "PhzConfiguration/PhotometricCorrectionConfig.h"
 #include "PhzConfiguration/PriorConfig.h"
 #include "Configuration/CatalogConfig.h"
+#include "PhzConfiguration/ComputeLuminosityModelGridConfig.h"
+#include "PhzConfiguration/ComputeModelGridConfig.h"
+#include "PhzConfiguration/SedProviderConfig.h"
+#include "PhzConfiguration/ReddeningProviderConfig.h"
+#include "PhzConfiguration/FilterProviderConfig.h"
+#include "PhzConfiguration/LuminosityBandConfig.h"
+#include "PhzConfiguration/IgmConfig.h"
+#include "PhzConfiguration/ModelGridOutputConfig.h"
+#include "PhzModeling/SparseGridCreator.h"
+#include "PhzModeling/NoIgmFunctor.h"
 #include "PhzUtils/Multithreading.h"
 
 // #include <future>
@@ -31,6 +42,78 @@ using namespace Euclid::PhzConfiguration;
 
 namespace Euclid {
 namespace PhzQtUI {
+
+bool DialogRunAnalysis::checkLuminosityGrid(){
+  if (m_config.count("luminosity-prior")==1 && m_config.at("luminosity-prior").as<std::string>()=="YES"){
+    //check the grid
+    try{
+      completeWithDefaults<ComputeRedshiftsConfig>(m_config);
+
+      long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
+                                         std::chrono::system_clock::now().time_since_epoch()).count();
+      auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+      config_manager.registerConfiguration<ComputeRedshiftsConfig>();
+      config_manager.closeRegistration();
+      config_manager.initialize(m_config);
+
+      return true;
+
+    } catch(const Elements::Exception&) {}
+
+    return false;
+
+  } else {
+    // The luminosity prior is not enabled: no need for a luminosity grid
+    return true;
+  }
+}
+
+class ProgressReporter {
+public:
+
+  ProgressReporter(){}
+
+  void operator()(int,int) {}
+
+};
+
+void DialogRunAnalysis::computeLuminosityGrid(){
+   std::map<std::string, boost::program_options::variable_value> options_map;
+
+   completeWithDefaults<ComputeLuminosityModelGridConfig>(m_lum_config);
+
+   long config_manager_id = std::chrono::duration_cast<std::chrono::microseconds>(
+                                      std::chrono::system_clock::now().time_since_epoch()).count();
+   auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+   config_manager.registerConfiguration<ComputeLuminosityModelGridConfig>();
+   config_manager.closeRegistration();
+
+   config_manager.initialize(m_lum_config);
+
+
+   auto& sed_provider = config_manager.getConfiguration<SedProviderConfig>().getSedDatasetProvider();
+   auto& reddening_provider = config_manager.getConfiguration<ReddeningProviderConfig>().getReddeningDatasetProvider();
+   const auto& filter_provider = config_manager.getConfiguration<FilterProviderConfig>().getFilterDatasetProvider();
+   auto& igm_abs_func = config_manager.getConfiguration<IgmConfig>().getIgmAbsorptionFunction();
+
+   Euclid::PhzModeling::SparseGridCreator creator {
+                sed_provider, reddening_provider, filter_provider, igm_abs_func};
+
+   auto param_space_map = config_manager.getConfiguration<ComputeLuminosityModelGridConfig>().getParameterSpaceRegions();
+   std::vector<Euclid::XYDataset::QualifiedName> filter_list = {config_manager.getConfiguration<Euclid::PhzConfiguration::LuminosityBandConfig>().getLuminosityFilter()};
+
+   auto results = creator.createGrid(param_space_map, filter_list, ProgressReporter{});
+
+
+   auto output = config_manager.getConfiguration<ModelGridOutputConfig>().getOutputFunction();
+   output(results);
+}
+
+
+
+
+
+
 
 DialogRunAnalysis::DialogRunAnalysis(QWidget *parent) :
         QDialog(parent),
@@ -56,7 +139,8 @@ void DialogRunAnalysis::setValues(std::string output_cat_name,
                                   std::string output_pdf_name,
                                   std::string output_lik_name,
                                   std::string output_pos_name,
-    const std::map<std::string, boost::program_options::variable_value>& config) {
+    const std::map<std::string, boost::program_options::variable_value>& config,
+    const std::map<std::string, boost::program_options::variable_value>& luminosity_config) {
   if (output_cat_name.length() > 0) {
     ui->label_name_cat->setText(QString::fromStdString(output_cat_name));
   } else {
@@ -85,6 +169,7 @@ void DialogRunAnalysis::setValues(std::string output_cat_name,
      ui->label_pos->setVisible(false);
    }
   m_config = config;
+  m_lum_config=luminosity_config;
 
 }
 
@@ -157,6 +242,11 @@ void DialogRunAnalysis::on_btn_cancel_clicked() {
 }
 
 void DialogRunAnalysis::run() {
+  if (!checkLuminosityGrid()){
+
+    computeLuminosityGrid();
+  }
+  
   m_future_watcher.setFuture(QtConcurrent::run(this, &DialogRunAnalysis::runFunction));
 }
 

@@ -464,6 +464,38 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   return options_map;
 }
+
+
+std::map < std::string, boost::program_options::variable_value > FormAnalysis::getLuminosityOptionMap(){
+  std::map<std::string, boost::program_options::variable_value> options_map =
+      FileUtils::getPathConfiguration(false, true, true, true);
+
+  if (ui->cb_luminosityPrior->isChecked()) {
+
+    LuminosityPriorConfig info;
+    for (auto prior_pair : m_prior_config) {
+      if (ui->cb_luminosityPrior_2->currentText().toStdString()
+          == prior_pair.first) {
+        info = prior_pair.second;
+      }
+    }
+
+    for (auto& pair : info.getBasicConfigOptions(false)) {
+      options_map[pair.first] = pair.second;
+    }
+
+    auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+
+    options_map["catalog-type"].value() = boost::any(std::string(survey_name));
+
+    options_map["model-grid-file"].value() = boost::any(
+        ui->cb_CompatibleGrid->currentText().toStdString());
+
+    options_map["output-model-grid"].value() = boost::any(
+        info.getLuminosityModelGridName());
+  }
+  return options_map;
+}
 //////////////////////////////////////////////////
 // User interaction
 void FormAnalysis::on_btn_AnalysisToHome_clicked() {
@@ -950,8 +982,9 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
        }
 
     auto config_map = getRunOptionMap();
+    auto config_map_luminosity = getLuminosityOptionMap();
     std::unique_ptr<DialogRunAnalysis> dialog(new DialogRunAnalysis());
-    dialog->setValues(cat,pdf,lik,pos,config_map);
+    dialog->setValues(cat,pdf,lik,pos,config_map,config_map_luminosity);
     if (dialog->exec()) {
       FileUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
           "IGM",ui->cb_igm->currentText().toStdString());

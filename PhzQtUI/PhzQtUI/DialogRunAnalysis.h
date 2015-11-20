@@ -47,7 +47,8 @@ public:
                    std::string output_pdf_name,
                    std::string output_lik_name,
                    std::string output_pos_name,
-                   const std::map<std::string, boost::program_options::variable_value>& config);
+                   const std::map<std::string, boost::program_options::variable_value>& config,
+                   const std::map<std::string, boost::program_options::variable_value>& luminosity_config);
   
 private slots:
 
@@ -67,9 +68,13 @@ private:
 
   QFutureWatcher<std::string> m_future_watcher {};
   std::map<std::string, boost::program_options::variable_value> m_config;
+  std::map<std::string, boost::program_options::variable_value> m_lum_config;
   std::unique_ptr<Ui::DialogRunAnalysis> ui;
   std::unique_ptr<QTimer> m_timer;
   
+
+    bool checkLuminosityGrid();
+    void computeLuminosityGrid();
 };
 
 }
