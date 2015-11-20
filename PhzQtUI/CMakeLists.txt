@@ -18,6 +18,9 @@ if(ELEMENTS_HIDE_WARNINGS)
 endif()
 
 
+
+include(FixPortQt4Location)
+
 find_package(Qt4 REQUIRED QtCore QtGui QtXml)
 
 elements_expand_sources(PhUI_SRCS src/lib/*.cpp)
