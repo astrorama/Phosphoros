@@ -227,6 +227,7 @@ void DialogRunAnalysis::runFinished() {
   auto message = m_future_watcher.result();
   if (message.length() == 0) {
     this->accept();
+    QMessageBox::warning(this, "", "Requested computation completed successfully", QMessageBox::Close);
     return;
   } else {
     QMessageBox::warning(this, "Error in the computation...",
