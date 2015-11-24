@@ -31,6 +31,7 @@
 #include "DefaultOptionsCompleter.h"
 
 
+#include "PhzQtUI/DialogLuminosityFunctions.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -136,6 +137,46 @@ void DialogLuminosityPrior::on_btn_new_clicked(){
   manageBtnEnability(true, false);
   m_new=true;
 }
+
+void DialogLuminosityPrior::on_btn_duplicate_clicked(){
+  // Get the parent (selected) prior name and grid name.
+  QItemSelectionModel *select = ui->table_priors->selectionModel();
+  auto row_index = select->selectedRows().at(0);
+  size_t row = row_index.row();
+  std::string name = row_index.sibling(row, 1).data().toString().toStdString();
+
+  // select the new name
+  std::string new_name = name+"(Copy)";
+  QString new_file = m_config_folder + QDir::separator() + QString::fromStdString(new_name) + ".xml";
+  size_t i=2;
+  while (QFile::exists(new_file)){
+    new_name = name + "(Copy "+QString::number(i).toStdString()+")";
+    new_file = m_config_folder + QDir::separator() + QString::fromStdString(new_name) + ".xml";
+  }
+
+  //copy the prior
+  auto new_prior = m_prior_configs[name];
+  new_prior.setName(new_name);
+
+  // add it to the local list
+  m_prior_configs[new_name]=new_prior;
+
+  // reload the popup prior grid
+  loadMainGrid();
+
+  // select the copied prior
+
+  for (int row_id=0; row_id<ui->table_priors->model()->rowCount();++row_id){
+    auto curr_name=ui->table_priors->model()->data(ui->table_priors->model()->index(row_id,1)).toString();
+    if (curr_name.toStdString()==new_name){
+      ui->table_priors->selectRow(row_id);
+      // start edition
+      manageBtnEnability(true, false);
+      break;
+    }
+  }
+}
+
 
 void DialogLuminosityPrior::on_btn_delete_clicked(){
 
@@ -379,6 +420,7 @@ void DialogLuminosityPrior::zPopupClosing(std::vector<double> zs){
    loadGrid();
 }
 
+
 void DialogLuminosityPrior::onGridButtonClicked(size_t x,size_t y){
   std::unique_ptr<DialogLuminosityFunction> dialog(new DialogLuminosityFunction());
   dialog->setInfo(m_luminosityInfos[x][y],x,y);
@@ -413,6 +455,8 @@ void DialogLuminosityPrior::manageBtnEnability(bool in_edition, bool read_only ,
 
    ui->btn_new->setEnabled(!read_only && !in_edition);
    ui->btn_delete->setEnabled(!read_only && !in_edition && has_selected_row);
+   ui->btn_duplicate->setEnabled(!read_only && !in_edition && has_selected_row);
+
 
    ui->btn_edit->setEnabled(!read_only && !in_edition && has_selected_row);
    ui->btn_cancel->setEnabled(!read_only && in_edition && has_selected_row);
@@ -427,6 +471,8 @@ void DialogLuminosityPrior::manageBtnEnability(bool in_edition, bool read_only ,
    ui->btn_filter->setEnabled(!read_only && in_edition);
    ui->btn_group->setEnabled(!read_only && in_edition);
    ui->btn_z->setEnabled(!read_only && in_edition);
+
+   ui->bulk_btn->setEnabled(!read_only && in_edition);
 
    for (auto button : m_grid_buttons){
      button->setEnabled(in_edition);
@@ -666,6 +712,24 @@ void DialogLuminosityPrior::updatePriorRow(QModelIndex& index,const size_t& row,
 }
 
 
+
+void DialogLuminosityPrior::on_bulk_btn_clicked(){
+  std::unique_ptr<DialogLuminosityFunctions> dialog(new DialogLuminosityFunctions());
+  dialog->setInfos(m_luminosityInfos,m_groups,m_zs);
+  connect(dialog.get(),
+            SIGNAL(popupClosing(std::vector<std::vector<LuminosityFunctionInfo>>)),
+            this,
+            SLOT(luminosityFunctionsPopupClosing(std::vector<std::vector<LuminosityFunctionInfo>>)));
+  dialog->exec();
+}
+
+
+
+void DialogLuminosityPrior::luminosityFunctionsPopupClosing(std::vector<std::vector<LuminosityFunctionInfo>> infos){
+  m_luminosityInfos=infos;
+  clearGrid();
+  loadGrid();
+}
 
 
 }

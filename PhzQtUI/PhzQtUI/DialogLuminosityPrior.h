@@ -56,12 +56,19 @@ signals:
   void popupClosing();
 
 private slots:
+
+void on_bulk_btn_clicked();
+
+
   //// Luminosity prior related slots
   // slot raised when the master grid (Prior grid) selection is changed
   void priorSelectionChanged(QModelIndex new_index, QModelIndex);
 
   // slot raised when the New (prior) button is clicked
   void on_btn_new_clicked();
+
+  // slot raised when the duplicate (prior) button is clicked
+  void on_btn_duplicate_clicked();
 
   // slot raised when the delete (prior) button is clicked
   void on_btn_delete_clicked();
@@ -103,6 +110,9 @@ private slots:
 
   // slot raised when the Luminosity function popup is closing
   void luminosityFunctionPopupClosing(LuminosityFunctionInfo info, size_t x, size_t y);
+
+  // slot raised when the Luminosity function*S* popup is closing
+  void luminosityFunctionsPopupClosing(std::vector<std::vector<LuminosityFunctionInfo>> infos);
 
   //// Global
   // closing the popup
