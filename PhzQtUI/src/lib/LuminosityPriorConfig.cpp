@@ -8,6 +8,7 @@
 
 #include <QDir>
 #include <QTextStream>
+#include <set>
 
 #include <boost/program_options.hpp>
 #include "PhzQtUI/LuminosityPriorConfig.h"
@@ -106,6 +107,40 @@ bool LuminosityPriorConfig::getInMag() const{
    }
 
    return result;
+ }
+
+ bool LuminosityPriorConfig::isCompatibleWithZ(double z_min, double z_max) const{
+   return m_zs[0]==z_min && m_zs[m_zs.size()-1]==z_max;
+ }
+
+ std::pair<std::vector<std::string>,std::vector<std::string>> LuminosityPriorConfig::isCompatibleWithSeds(std::vector<std::string> seds) const{
+   std::set<std::string> all_seds{};
+   for (auto & group : m_sed_groups){
+     for(auto& sed : group.second){
+       all_seds.emplace(sed);
+     }
+   }
+
+   std::vector<std::string> seds_not_in_the_parameter_space{};
+   std::vector<std::string> seds_not_in_the_config{};
+
+   for (auto& sed :seds){
+     if (all_seds.find(sed)!=all_seds.end()){
+       all_seds.erase(sed);
+     } else {
+       seds_not_in_the_config.push_back(sed);
+     }
+   }
+
+   for (auto& sed : all_seds){
+     seds_not_in_the_parameter_space.push_back(sed);
+   }
+
+   return std::make_pair(seds_not_in_the_parameter_space, seds_not_in_the_config);
+ }
+
+ bool LuminosityPriorConfig::isCompatibleWithParameterSpace(double z_min, double z_max, std::vector<std::string> seds) const{
+   return isCompatibleWithZ(z_min,z_max) && isCompatibleWithSeds(seds).first.size()==0 && isCompatibleWithSeds(seds).second.size()==0;
  }
 
 

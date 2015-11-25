@@ -329,6 +329,14 @@ void DialogLuminosityPrior::filterPopupClosing(std::string filter){
 void DialogLuminosityPrior::on_btn_group_clicked(){
   std::unique_ptr<DialogLuminositySedGroup> dialog(new DialogLuminositySedGroup());
   dialog->setGroups(m_groups);
+
+  QItemSelectionModel *select = ui->table_priors->selectionModel();
+  auto row_index = select->selectedRows().at(0);
+  size_t row = row_index.row();
+  std::string name=row_index.sibling(row, 1).data().toString().toStdString();
+  auto info = m_prior_configs[name];
+  auto sed_diff = info.isCompatibleWithSeds(m_model.getSeds());
+  dialog->setDiff(sed_diff.first,sed_diff.second);
   connect(dialog.get(),
           SIGNAL(popupClosing(std::vector<LuminosityPriorConfig::SedGroup>)),
           this,
@@ -377,6 +385,7 @@ void DialogLuminosityPrior::groupPopupClosing(std::vector<LuminosityPriorConfig:
 void DialogLuminosityPrior::on_btn_z_clicked(){
    std::unique_ptr<DialogZRanges> dialog(new DialogZRanges());
    dialog->setRanges(m_zs);
+   dialog->setMinMax(m_z_min,m_z_max);
 
    connect(dialog.get(),
            SIGNAL(popupClosing(std::vector<double>)),
@@ -489,17 +498,25 @@ void DialogLuminosityPrior::loadMainGrid(){
   grid_model->setColumnCount(6);
 
   QStringList  setHeaders;
-  setHeaders<<"Id"<<"Name"<<"Unit"<<"Corrected for Reddening"<<"Filter"<<"Regions";
+  setHeaders<<"Id"<<"Name"<<"Unit"<<"Corrected for Reddening"<<"Filter"<<"Regions"<<"Message";
   grid_model->setHorizontalHeaderLabels(setHeaders);
 
   size_t id =0;
   for (auto& config_pair : m_prior_configs) {
+
+    bool z_ok= config_pair.second.isCompatibleWithZ(m_z_min,m_z_max);
+    auto sed_diff = config_pair.second.isCompatibleWithSeds(m_model.getSeds());
+    bool param_space_ok = z_ok && sed_diff.first.size()==0 && sed_diff.second.size()==0;
     QList<QStandardItem*> items;
 
     QStandardItem* item_id = new QStandardItem(QString::number(id));
     items.push_back(item_id);
 
+
     QStandardItem* item_name = new QStandardItem(QString::fromStdString(config_pair.second.getName()));
+    if (!param_space_ok){
+      item_name->setData(QColor("orange"), Qt::BackgroundRole);
+    }
     items.push_back(item_name);
 
     QString mag_string ="MAGNITUDE";
@@ -507,6 +524,9 @@ void DialogLuminosityPrior::loadMainGrid(){
       mag_string="FLUX";
     }
     QStandardItem* item_tp = new QStandardItem(mag_string);
+    if (!param_space_ok){
+      item_tp->setData(QColor("orange"), Qt::BackgroundRole);
+    }
     items.push_back(item_tp);
 
     QString red_string ="NO";
@@ -514,14 +534,38 @@ void DialogLuminosityPrior::loadMainGrid(){
       red_string="YES";
     }
     QStandardItem* item_red = new QStandardItem(red_string);
+    if (!param_space_ok){
+      item_red->setData(QColor("orange"), Qt::BackgroundRole);
+    }
     items.push_back(item_red);
 
     QStandardItem* item_filter = new QStandardItem(QString::fromStdString(config_pair.second.getFilterName()));
+    if (!param_space_ok){
+      item_filter->setData(QColor("orange"), Qt::BackgroundRole);
+    }
     items.push_back(item_filter);
 
     QStandardItem* item_nb = new QStandardItem(QString::number(config_pair.second.getLuminosityFunctionList().size()));
+    if (!param_space_ok){
+      item_nb->setData(QColor("orange"), Qt::BackgroundRole);
+    }
     items.push_back(item_nb);
 
+
+    QString message = "";
+    if (!z_ok){
+      message = message + "Incompatibility in the redshift range, please update it.";
+    }
+
+    if (sed_diff.first.size()!=0 || sed_diff.second.size()!=0){
+      message = message + "Incompatibility in the SED's list, please update it.";
+    }
+
+    QStandardItem* item_message = new QStandardItem(message);
+    if (!param_space_ok){
+      item_message->setData(QColor("orange"), Qt::BackgroundRole);
+    }
+    items.push_back(item_message);
 
     grid_model->appendRow(items);
     ++id;
@@ -683,6 +727,19 @@ void DialogLuminosityPrior::updateInfo(LuminosityPriorConfig& info){
 }
 
 void DialogLuminosityPrior::updatePriorRow(QModelIndex& index,const size_t& row, const LuminosityPriorConfig& info ){
+
+  bool param_space_ok = info.isCompatibleWithParameterSpace(m_z_min,m_z_max,m_model.getSeds());
+
+  if (param_space_ok){
+    ui->table_priors->model()->setData(index.sibling(row, 6),"");
+    ui->table_priors->model()->setData(index.sibling(row, 1),QColor("white"), Qt::BackgroundRole);
+    ui->table_priors->model()->setData(index.sibling(row, 2),QColor("white"), Qt::BackgroundRole);
+    ui->table_priors->model()->setData(index.sibling(row, 3),QColor("white"), Qt::BackgroundRole);
+    ui->table_priors->model()->setData(index.sibling(row, 4),QColor("white"), Qt::BackgroundRole);
+    ui->table_priors->model()->setData(index.sibling(row, 5),QColor("white"), Qt::BackgroundRole);
+    ui->table_priors->model()->setData(index.sibling(row, 6),QColor("white"), Qt::BackgroundRole);
+  }
+
   ui->table_priors->model()->setData(index.sibling(row, 1), ui->txt_name->text());
 
   if (info.getInMag()) {

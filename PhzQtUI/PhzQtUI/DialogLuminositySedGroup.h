@@ -42,6 +42,14 @@ public:
     ~DialogLuminositySedGroup();
 
     void setGroups(std::vector<LuminosityPriorConfig::SedGroup> groups);
+    /**
+     * @param missing_seds
+     * SEDs not present in the parameter space to be removed
+     *
+     * @param new_seds
+     * SEDs not present in the config to be added
+     */
+    void setDiff(std::vector<std::string> missing_seds, std::vector<std::string> new_seds);
 
 signals:
   void popupClosing(std::vector<LuminosityPriorConfig::SedGroup> groups);

@@ -161,6 +161,42 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
 
 
   bool lum_prior_ok = !ui->cb_luminosityPrior->isChecked() || ui->cb_luminosityPrior_2->currentText().length()>0;
+  bool lum_prior_compatible = true;
+  if (lum_prior_ok && ui->cb_luminosityPrior->isChecked()){
+    LuminosityPriorConfig info;
+    for (auto prior_pair : m_prior_config) {
+      if (ui->cb_luminosityPrior_2->currentText().toStdString() == prior_pair.first) {
+        info = prior_pair.second;
+      }
+    }
+
+    ModelSet selected_model;
+    for (auto& model : m_analysis_model_list) {
+      if (model.second.getName().compare(
+          ui->cb_AnalysisModel->currentText().toStdString()) == 0) {
+        selected_model = model.second;
+        break;
+      }
+    }
+
+    std::vector<std::string> seds { };
+    double z_min = 1000000;
+    double z_max = 0;
+
+    for (auto& rule : selected_model.getParameterRules()) {
+      auto z_range = rule.second.getZRange();
+      if (z_min > z_range.getMin()) {
+        z_min = z_range.getMin();
+      }
+
+      if (z_max < z_range.getMax()) {
+        z_max = z_range.getMax();
+      }
+    }
+
+    lum_prior_compatible=info.isCompatibleWithParameterSpace(z_min,z_max,selected_model.getSeds());
+  }
+
   ui->btn_confLuminosityPrior->setEnabled(grid_name_exists);
   if (grid_name_exists) {
     ui->btn_confLuminosityPrior->setToolTip("Configure the Luminosity Prior");
@@ -170,9 +206,9 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
 
 
   ui->btn_GetConfigAnalysis->setEnabled(
-      grid_name_ok && correction_ok && lum_prior_ok && run_ok && enabled);
+      grid_name_ok && correction_ok && lum_prior_ok && lum_prior_compatible && run_ok && enabled);
   ui->btn_RunAnalysis->setEnabled(
-      grid_name_exists && correction_exists && lum_prior_ok && run_ok && enabled);
+      grid_name_exists && correction_exists && lum_prior_ok && lum_prior_compatible&& run_ok && enabled);
 
   QString tool_tip_run = "";
   QString tool_tip_conf = "";
@@ -200,14 +236,17 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   }
 
   if (!lum_prior_ok){
-    tool_tip_conf =
-            tool_tip_conf
+    tool_tip_conf = tool_tip_conf
                 + "When the luminosity prior is enabled , you must provide a luminosity prior configuration. \n";
-        tool_tip_run =
-            tool_tip_run
+    tool_tip_run = tool_tip_run
                 + "When the luminosity prior is enabled , you must provide a luminosity prior configuration. \n";
+  }
 
-
+  if (!lum_prior_compatible){
+    tool_tip_conf = tool_tip_conf
+                   + "The Prior is no longer compatible with the Parameter Space, please update it. \n";
+    tool_tip_run = tool_tip_run
+                   + "The Prior is no longer compatible with the Parameter Space, please update it. \n";
   }
 
 
@@ -224,13 +263,13 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
     ui->txt_inputCatalog->setStyleSheet("QLineEdit { color: grey }");
   }
 
-  if (!(grid_name_ok && correction_ok && lum_prior_ok && run_ok)) {
+  if (!(grid_name_ok && correction_ok && lum_prior_ok && lum_prior_compatible && run_ok)) {
     tool_tip_conf = tool_tip_conf + "Before getting the configuration.";
   } else {
     tool_tip_conf = "Get the configuration file.";
   }
 
-  if (!(grid_name_exists && correction_exists && lum_prior_ok && run_ok)) {
+  if (!(grid_name_exists && correction_exists && lum_prior_ok && lum_prior_compatible && run_ok)) {
     tool_tip_run = tool_tip_run + "Before running the analysis.";
   } else {
     tool_tip_run = "Run the analysis.";
@@ -245,7 +284,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
     setToolBoxButtonColor(ui->toolBox, 1,Qt::black);
   }
 
-  if (!lum_prior_ok) {
+  if (!lum_prior_ok || !lum_prior_compatible) {
      setToolBoxButtonColor(ui->toolBox, 2, QColor("orange"));
    } else {
      setToolBoxButtonColor(ui->toolBox, 2,Qt::black);

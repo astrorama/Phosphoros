@@ -34,6 +34,7 @@ public:
     return (is_custom && curve_name.length()>0) || (!is_custom && phi>0.);
   }
 
+
   QString getDescription(){
     if (is_custom){
       return "Custom Curve:\n" + QString::fromStdString(curve_name);

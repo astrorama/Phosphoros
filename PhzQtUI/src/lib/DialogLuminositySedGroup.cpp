@@ -4,7 +4,6 @@
  *  Created on: September 4, 2015
  *      Author: fdubath
  */
-
 #include <QMessageBox>
 #include "PhzQtUI/DialogLuminositySedGroup.h"
 #include "ui_DialogLuminositySedGroup.h"
@@ -30,15 +29,54 @@ DialogLuminositySedGroup::~DialogLuminositySedGroup() {}
 void DialogLuminositySedGroup::setGroups(std::vector<LuminosityPriorConfig::SedGroup> groups){
   m_groups = std::move(groups);
 
-  size_t i=0;
-  size_t max_i = m_groups.size()-1;
-  for (auto& group : m_groups){
-    addGroup(group,i,max_i);
-    ++i;
 
-  }
 }
 
+void DialogLuminositySedGroup::setDiff(std::vector<std::string> missing_seds, std::vector<std::string> new_seds){
+  if (missing_seds.size()>0){
+    for (auto& group : m_groups){
+      auto iterator = std::begin(group.second);
+      while (iterator != std::end(group.second)) {
+        std::string sed_name = *iterator;
+        if (std::find(missing_seds.begin(), missing_seds.end(), sed_name) != missing_seds.end()){
+          iterator = group.second.erase(iterator);
+        }
+        else {
+          ++iterator;
+        }
+      }
+    }
+  }
+  if (new_seds.size()>0){
+
+    std::vector<std::string> sed_to_add{};
+    for (auto & test_sed : new_seds){
+      bool found=false;
+      for (auto& group : m_groups){
+        if (std::find(group.second.begin(), group.second.end(), test_sed) != group.second.end()){
+          found=true;
+          break;
+        }
+      }
+
+      if(!found){
+        sed_to_add.push_back(test_sed);
+      }
+    }
+
+    if (sed_to_add.size()>0){
+      m_groups.push_back(LuminosityPriorConfig::SedGroup("Added_SED",new_seds));
+    }
+  }
+
+  size_t i=0;
+    size_t max_i = m_groups.size()-1;
+    for (auto& group : m_groups){
+      addGroup(group,i,max_i);
+      ++i;
+
+    }
+}
 
 void DialogLuminositySedGroup::addGroup(LuminosityPriorConfig::SedGroup group, size_t i, size_t i_max){
   auto frame = new QFrame();

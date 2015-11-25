@@ -40,6 +40,7 @@ public:
     ~DialogZRanges();
 
     void setRanges(std::vector<double> zs);
+    void setMinMax(double z_min, double z_max);
 
 signals:
   void popupClosing(std::vector<double> groups);
