@@ -139,6 +139,14 @@ class Selector(object):
             ys = hdu.data[hdu.columns[1].name]
             ax.plot(xs, ys)
             ax.set_title('1D PDF for source with ID '+str(id))
+            y_lim = ax.get_ylim()
+            y_size = y_lim[1]-y_lim[0]
+            specz = table[event.ind[0]][1]
+            ax.plot([specz, specz], y_lim, c='k', alpha=.5)
+            ax.text(specz, y_lim[0]+.9*y_size, 'SpecZ', color='k', alpha=.5)
+            phz = table[event.ind[0]][2]
+            ax.plot([phz, phz], y_lim, c='r', alpha=.5)
+            ax.text(phz, y_lim[0]+.95*y_size, 'PHZ', color='r', alpha=.5)
             plt.show()
             
 
