@@ -5,75 +5,68 @@
  */
 
 #include <iostream>
+#include <chrono>
 #include "ElementsKernel/ProgramHeaders.h"
-#include "MathUtils/interpolation/interpolation.h"
-#include "PhzConfiguration/IgmConfiguration.h"
-#include "PhzConfiguration/ParameterSpaceConfiguration.h"
+#include "Configuration/ConfigManager.h"
+
+#include "PhzDataModel/PhzModel.h"
 #include "PhzModeling/ModelDatasetGrid.h"
-#include "PhzModeling/PhotometryGridCreator.h"
 #include "PhzModeling/ExtinctionFunctor.h"
 #include "PhzModeling/RedshiftFunctor.h"
-#include "PhzModeling/MadauIgmFunctor.h"
-#include "PhzModeling/NoIgmFunctor.h"
-#include "PhzCLI/ComputeModelSedConfiguration.h"
+#include "PhzConfiguration/IgmConfig.h"
+#include "PhzCLI/ComputeModelSedConfig.h"
+#include "Configuration/Utils.h"
 
 using namespace std;
-using namespace Euclid;
+using namespace Euclid::PhzCLI;
+using namespace Euclid::Configuration;
+using namespace Euclid::PhzConfiguration;
+using namespace Euclid::PhzModeling;
+using namespace Euclid::XYDataset;
+using namespace Euclid::MathUtils;
+using namespace Euclid::PhzDataModel;
 namespace po = boost::program_options;
 
 static Elements::Logging logger = Elements::Logging::getLogger("ComputeModelSed");
 
-template<typename NameIter>
-std::map<XYDataset::QualifiedName, XYDataset::XYDataset> buildMap(
-          XYDataset::XYDatasetProvider& provider, NameIter begin, NameIter end) {
-  std::map<XYDataset::QualifiedName, XYDataset::XYDataset> result {};
-  while (begin != end) {
-    auto dataset_ptr = provider.getDataset(*begin);
-    if (!dataset_ptr) {
-      throw Elements::Exception() << "Failed to find dataset: " << begin->qualifiedName();
-    }
-    result.insert(std::make_pair(*begin, std::move(*dataset_ptr)));
-    ++begin;
-  }
-  return result;
-}
-
-std::map<XYDataset::QualifiedName, std::unique_ptr<Euclid::MathUtils::Function>>
-    convertToFunction(const std::map<XYDataset::QualifiedName, XYDataset::XYDataset>& dataset_map) {
-  std::map<XYDataset::QualifiedName, std::unique_ptr<Euclid::MathUtils::Function>> result {};
-  for (auto& pair : dataset_map) {
-    auto function_ptr = MathUtils::interpolate(pair.second, MathUtils::InterpolationType::LINEAR);
-    result.emplace(pair.first, std::move(function_ptr));
-  }
-  return result;
-}
+static long config_manager_id = getUniqueManagerId();
 
 class ComputeModelSed : public Elements::Program {
 
   po::options_description defineSpecificProgramOptions() override {
-    return PhzConfiguration::ComputeModelSedConfiguration::getProgramOptions();
+    auto& config_manager = ConfigManager::getInstance(config_manager_id);
+    config_manager.registerConfiguration<ComputeModelSedConfig>();
+    return config_manager.closeRegistration();
   }
 
   Elements::ExitCode mainMethod(map<string, po::variable_value>& args) override {
     
-    PhzConfiguration::ComputeModelSedConfiguration conf {args};
+    auto& config_manager = ConfigManager::getInstance(config_manager_id);
+    config_manager.initialize(args);
     
-    auto grid_axes = conf.getGridAxes();
-    auto sed_map = conf.getSedMap();
-    auto red_curve_map = conf.getReddeningCurveMap();
-    auto igm_function = conf.getIgmAbsorptionFunction();
+    auto& grid_axes = config_manager.getConfiguration<ComputeModelSedConfig>().getGridAxes();
+    std::map<QualifiedName, XYDataset> sed_map {};
+    for (auto& pair : config_manager.getConfiguration<ComputeModelSedConfig>().getSedMap()) {
+      std::vector<std::pair<double, double>> values {pair.second.begin(), pair.second.end()};
+      sed_map.emplace(pair.first, values);
+    }
+    std::map<QualifiedName, std::unique_ptr<Function>> red_curve_map {};
+    for (auto& pair : config_manager.getConfiguration<ComputeModelSedConfig>().getReddeningCurveMap()) {
+      red_curve_map.emplace(pair.first, pair.second->clone());
+    }
+    auto& igm_function = config_manager.getConfiguration<IgmConfig>().getIgmAbsorptionFunction();
 
-    PhzModeling::ModelDatasetGrid grid {grid_axes, move(sed_map), move(red_curve_map),
-                               PhzModeling::ExtinctionFunctor{}, PhzModeling::RedshiftFunctor{},
-                               std::move(igm_function)};
+    ModelDatasetGrid grid {grid_axes, std::move(sed_map), std::move(red_curve_map),
+                               ExtinctionFunctor{}, RedshiftFunctor{}, igm_function};
 
     for (auto iter=grid.begin(); iter!=grid.end(); ++iter) {
       cout << "\nDataset for model with:\n";
-      cout << "SED      " << iter.axisValue<PhzDataModel::ModelParameter::SED>().qualifiedName() << '\n';
-      cout << "REDCURVE " << iter.axisValue<PhzDataModel::ModelParameter::REDDENING_CURVE>().qualifiedName() << '\n';
-      cout << "EBV      " << iter.axisValue<PhzDataModel::ModelParameter::EBV>() << '\n';
-      cout << "Z        " << iter.axisValue<PhzDataModel::ModelParameter::Z>() << '\n';
-      cout << "Data:\n";
+      cout << "SED      " << iter.axisValue<ModelParameter::SED>().qualifiedName() << '\n';
+      cout << "REDCURVE " << iter.axisValue<ModelParameter::REDDENING_CURVE>().qualifiedName() << '\n';
+      cout << "EBV      " << iter.axisValue<ModelParameter::EBV>() << '\n';
+      cout << "Z        " << iter.axisValue<ModelParameter::Z>() << '\n';
+      cout << "IGM      " << config_manager.getConfiguration<IgmConfig>().getIgmAbsorptionType() << '\n';
+      cout << "\nData:\n";
       for (auto& pair : *iter) {
         cout << pair.first << '\t' << pair.second << '\n';
       }

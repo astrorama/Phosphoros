@@ -6,27 +6,39 @@
 
 #include <iostream>
 #include <set>
+#include <chrono>
 #include <boost/program_options/options_description.hpp>
 #include "ElementsKernel/ProgramHeaders.h"
+#include "Configuration/ConfigManager.h"
 #include "XYDataset/AsciiParser.h"
 #include "XYDataset/FileSystemProvider.h"
-#include "PhzCLI/LsAuxConfiguration.h"
+#include "PhzCLI/LsAuxDirConfig.h"
+#include "Configuration/Utils.h"
 
 using namespace std;
 using namespace Euclid;
+using namespace Euclid::Configuration;
+using namespace Euclid::PhzCLI;
 namespace po = boost::program_options;
 
 static Elements::Logging logger = Elements::Logging::getLogger("PhosphorosLsAux");
 
+static long config_manager_id = getUniqueManagerId();
+
 class LsAux : public Elements::Program {
   
   po::options_description defineSpecificProgramOptions() override {
-    return PhzConfiguration::LsAuxConfiguration::getProgramOptions();
+    auto& config_manager = ConfigManager::getInstance(config_manager_id);
+    config_manager.registerConfiguration<LsAuxDirConfig>();
+    return config_manager.closeRegistration();
   }
   
   Elements::ExitCode mainMethod(map<string, po::variable_value>& args) override {
     
-    PhzConfiguration::LsAuxConfiguration conf {args};
+    auto& config_manager = ConfigManager::getInstance(config_manager_id);
+    config_manager.initialize(args);
+    
+    auto& conf = config_manager.getConfiguration<LsAuxDirConfig>();
     
     auto provider = conf.getDatasetProvider();
     

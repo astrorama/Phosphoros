@@ -14,11 +14,14 @@
 #include <vector>
 #include <boost/program_options.hpp>
 
-#include "PhzConfiguration/PhotometryGridConfiguration.h"
+#include "Configuration/ConfigManager.h"
+#include "PhzConfiguration/PhotometryGridConfig.h"
 #include "PhzQtUI/PhzGridInfoHandler.h"
 #include "PhzQtUI/XYDataSetTreeModel.h"
 #include "XYDataset/QualifiedName.h"
 #include "FileUtils.h"
+#include "DefaultOptionsCompleter.h"
+#include "Configuration/Utils.h"
 
 
 
@@ -51,8 +54,14 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
     options_map["intermediate-products-dir"].value() = boost::any(FileUtils::getIntermediaryProductRootPath(false,""));
 
     try { // If a file cannot be opened or is ill formated: just skip it!
-      auto grid_config = PhzConfiguration::PhotometryGridConfiguration(options_map);
-      auto grid_info = grid_config.getPhotometryGridInfo();
+      completeWithDefaults<PhzConfiguration::PhotometryGridConfig>(options_map);
+      long config_manager_id = Configuration::getUniqueManagerId();
+      auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+      config_manager.registerConfiguration<PhzConfiguration::PhotometryGridConfig>();
+      config_manager.closeRegistration();
+      config_manager.initialize(options_map);
+      
+      auto& grid_info = config_manager.getConfiguration<PhzConfiguration::PhotometryGridConfig>().getPhotometryGridInfo();
 
       // Check the IGM type compatibility
       if (igm_type!=grid_info.igm_method) {
@@ -201,16 +210,19 @@ std::map<std::string, boost::program_options::variable_value> PhzGridInfoHandler
     ModelSet model,
     const std::list<std::string>& selected_filters, std::string igm_type) {
 
-  auto options_map = model.getConfigOptions();
 
-  options_map["phosphoros-root"].value() = boost::any(FileUtils::getRootPath());
-  options_map["aux-data-dir"].value() = boost::any(FileUtils::getAuxRootPath());
-  options_map["intermediate-products-dir"].value() = boost::any(FileUtils::getIntermediaryProductRootPath(false,""));
-  options_map["catalog-type"].value() = boost::any(catalog);
+  std::map<std::string, boost::program_options::variable_value> options_map =
+         FileUtils::getPathConfiguration(false,true,true,false);
 
-  auto path_filename = FileUtils::getPhotmetricGridRootPath(true,catalog)
-      + QString(QDir::separator()).toStdString() + output_file;
-  options_map["output-model-grid"].value() = boost::any(path_filename);
+  auto model_option = model.getConfigOptions();
+  for(auto& pair : model_option){
+    options_map[pair.first]=pair.second;
+  }
+
+
+   options_map["catalog-type"].value() = boost::any(catalog);
+
+  options_map["output-model-grid"].value() = boost::any(output_file);
 
   std::vector < std::string > filter_add_vector;
   for (auto& filter_item : selected_filters) {

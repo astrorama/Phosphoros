@@ -6,7 +6,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.table import Table
-
+import astropy.io.fits as fits
 
 
 def file_exist(file):
@@ -45,19 +45,22 @@ def create_table(files, id, specz, phz):
             print 'Catalog input without column named ', id
     ids = set.intersection(*[set(t[id]) for t in tables])
     values_map = {}
+    all_cols = {}
+    for i in ids:
+        values_map[i] = [None, None]
+        all_cols[i] = []
     for t in tables:
-        if specz in t.colnames:
-            for r in t:
-                if r[id] in ids:
-                    if not r[id] in values_map:
-                        values_map[r[id]] = [None, None]
-                    values_map[r[id]][0] = r[specz]
-        if phz in t.colnames:
-            for r in t:
-                if r[id] in ids:
-                    if not r[id] in values_map:
-                        values_map[r[id]] = [None, None]
-                    values_map[r[id]][1] = r[phz]
+        has_specz = specz in t.colnames
+        has_phz = phz in t.colnames
+        for r in t:
+            r_id = r[id]
+            if not r_id in ids:
+                continue
+            all_cols[r_id].append(r)
+            if has_specz:
+                values_map[r_id][0] = r[specz]
+            if has_phz:
+                values_map[r_id][1] = r[phz]
     i = []
     s = []
     p = []
@@ -65,7 +68,7 @@ def create_table(files, id, specz, phz):
         i.append(k)
         s.append(v[0])
         p.append(v[1])
-    return Table([i,s,p], names=(id,specz,phz))
+    return Table([i,s,p], names=(id,specz,phz)), all_cols
     
     
 def compute_stats(array, col_number):
@@ -114,7 +117,55 @@ def compute_stats(array, col_number):
 #-------------------------------------------------------------------------------
 #
 
-def displaySpeczPhotz(specz, photz, data):
+class Selector(object):
+    
+    def __init__(self, fig_list, table, all_cols, pdf_file):
+        for fig in fig_list:
+            fig.canvas.mpl_connect('pick_event', self.onpick)
+        self.fig_list = fig_list
+        self.table = table
+        self.all_cols = all_cols
+        self.have_pdf = os.path.isfile(pdf_file)
+        if self.have_pdf:
+            print 'Loading 1D PDFs. Please wait...'
+            self.hdus = fits.open(pdf_file)
+    
+    def onpick(self, event):
+        if event.mouseevent.button != 1:
+            return
+        for fig in self.fig_list:
+            if hasattr(fig, 'updateSelected'):
+                fig.updateSelected(event.ind[0])
+        if not event.mouseevent.dblclick:
+            return
+        id = self.table[event.ind[0]][0]
+        print '\nFull info for source with ID',id,':'
+        for r in self.all_cols[id]:
+            for c in r.colnames:
+                print '   ',c,'=',r[c]
+        if self.have_pdf:
+            hdu = (x for x in self.hdus if 'EXTNAME' in x.header and  x.header['EXTNAME']==str(id)).next()
+            f, ax = plt.subplots()
+            xs = hdu.data[hdu.columns[0].name]
+            ys = hdu.data[hdu.columns[1].name]
+            ax.plot(xs, ys)
+            ax.set_title('1D PDF for source with ID '+str(id))
+            y_lim = ax.get_ylim()
+            y_size = y_lim[1]-y_lim[0]
+            specz = self.table[event.ind[0]][1]
+            ax.plot([specz, specz], y_lim, c='k', alpha=.5)
+            ax.text(specz, y_lim[0]+.9*y_size, 'SpecZ', color='k', alpha=.5)
+            phz = self.table[event.ind[0]][2]
+            ax.plot([phz, phz], y_lim, c='r', alpha=.5)
+            ax.text(phz, y_lim[0]+.95*y_size, 'PHZ', color='r', alpha=.5)
+            plt.show()
+            
+
+#
+#-------------------------------------------------------------------------------
+#
+
+def displaySpeczPhotz(ids, specz, photz, data):
     
     z_max = max(max(specz), max(photz)) + 0.1
     data_max = max(max(data), abs(min(data))) + 0.1
@@ -133,7 +184,7 @@ def displaySpeczPhotz(specz, photz, data):
     ax1.plot(x_r, y1, "r", alpha=.3)
     ax1.plot(x_r, y2, "r", alpha=.3)
     # Plot the data
-    ax1.scatter(specz, photz, c='b', marker='o', s=10, edgecolors='none', alpha=0.6)
+    ax1.scatter(specz, photz, c='b', marker='o', s=10, edgecolors='none', alpha=0.6, picker=True)
     ax1.set_xlim([-0.1, z_max])
     ax1.set_ylim([-0.1, z_max])
 
@@ -146,13 +197,25 @@ def displaySpeczPhotz(specz, photz, data):
     # Plot the outlier limits
     ax2.plot ([-0.1, z_max], [0.15, 0.15], c='r', alpha=0.3)
     ax2.plot ([-0.1, z_max], [-0.15, -0.15], c='r', alpha=0.3)
-    ax2.scatter(specz, data, c='b', marker='o', s=10, edgecolors='none', alpha=0.6)
+    ax2.scatter(specz, data, c='b', marker='o', s=10, edgecolors='none', alpha=0.6, picker=True)
     ax2.set_xlim([-0.1, z_max])
     ax2.set_ylim([-data_max, data_max])
 
     f.tight_layout()
     f.subplots_adjust(hspace=0)
-    f.show()
+    
+    id_text = ax1.text(0.05, 0.95, 'selected ID:', transform=ax1.transAxes, va='top')
+    selected1 = ax1.scatter(0, 0, c='none', marker='o', s=60, edgecolors='#00EE00', linewidth='2', visible=False)
+    selected2 = ax2.scatter(0, 0, c='none', marker='o', s=60, edgecolors='#00EE00', linewidth='2', visible=False)
+    def updateSelected(index):
+        id_text.set_text('selected ID: %d' % ids[index])
+        selected1.set_visible(True)
+        selected1.set_offsets([specz[index], photz[index]])
+        selected2.set_visible(True)
+        selected2.set_offsets([specz[index], data[index]])
+        f.canvas.draw()
+    f.updateSelected = lambda x: updateSelected(x)
+    return f
 
 #
 #-------------------------------------------------------------------------------
@@ -175,8 +238,8 @@ def displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOut
     ax.text(ax.get_xlim()[0], ax.get_ylim()[1], txt, fontsize=10, family='sans-serif', style='italic', ha='left', va='top', alpha=.5)
     
     f.tight_layout()
-    f.show()
-
+    return f
+    
 #
 #-------------------------------------------------------------------------------
 #
@@ -205,6 +268,8 @@ def main():
                         help="The name of the photometric redshift column (default: Z)")
     parser.add_argument("-d", "--display", action="store_false", default=True,
                         help="Disables the plot window")
+    parser.add_argument("-pdf", "--pdf", type=str, default='',
+                        help="The FITS file with the 1D PDF")
 
     args = parser.parse_args()
             
@@ -218,7 +283,7 @@ if __name__ == '__main__':
     args = main()  
     
     # Read input files
-    table = create_table(args.files, args.id, args.specz, args.phz)
+    table, all_cols = create_table(args.files, args.id, args.specz, args.phz)
     
     col_number = 2
     label = "PhotZ"
@@ -227,10 +292,8 @@ if __name__ == '__main__':
         
     # Plot distribution
     if args.display:
-            displaySpeczPhotz(specZ, colZ, data)
-            displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers)
-            #display_data(label, specZ, colZ, data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers, args.files)
+            fig1 = displaySpeczPhotz(table[args.id], specZ, colZ, data)
+            fig2 = displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers)
+            selector = Selector((fig1, fig2), table, all_cols, args.pdf)
             plt.show()
-            
-    
     

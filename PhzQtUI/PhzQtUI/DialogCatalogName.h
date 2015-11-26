@@ -38,6 +38,9 @@ private slots:
      */
     void on_btn_create_clicked();
 
+    /**
+     * @brief SLOT on_btn_cancel_clicked
+     */
     void on_btn_cancel_clicked();
 
 

@@ -3,7 +3,9 @@
 #include <QString>
 #include <string>
 #include <map>
-#include "PhzConfiguration/PhosphorosPathConfiguration.h"
+#include <boost/program_options.hpp>
+#include "Configuration/ConfigManager.h"
+
 /**
  * @brief The FileUtils class
  */
@@ -88,24 +90,138 @@ public:
     //////////////////////////////////////////////////////////
     //// Application base paths as of configuration.
     /**
-     * @brief get the data root path. This value can be altered by the user and
-     * is used to build the other path.
-     * @return the data root path
+     * @brief get the default root path
      */
-    static std::string getRootPath();
+    static Configuration::ConfigManager& getRootPaths();
 
 
-    static PhzConfiguration::PhosphorosPathConfiguration getRootPaths();
+    /**
+     * @brief Get the Phosphoros directory. This variable cannot be altered by
+     * the user into the GUI.
+     * It gives the base of all the path in the application.
+     *
+     * @param with_separator
+     * If true the path end with a separator.
+     *
+     * @return The root path
+     */
+    static std::string getRootPath(bool with_separator);
 
+    /////////////////////////// GUI Specific path /////////////////////////
+    /**
+     * @brief Get the path into which the GUI configs are stored.
+     * it is computed as <rootPath>/config/GUI.
+     */
     static std::string getGUIConfigPath();
 
+    /**
+     * @brief Get the path into which the Luminosity GUI configs are stored.
+     * it is computed as <GUIConfigPath>/LuminosityPrior/<catalog_type>/<model>.
+     *
+     * @param check
+     * If true ensure the directory exists
+     *
+     * @param catalog_type
+     * The Catalog Type name
+     *
+     * @model
+     * The Parameter space model
+     */
+    static std::string getGUILuminosityPriorConfig(bool check, const std::string & catalog_type, const std::string& model);
 
-    static std::string getAuxRootPath();
+     /////////////////////// Overridable Paths //////////////////////////////
+    /**
+      * @brief Get the Catalog Root Path. By default it is computed as
+      * <rootPath>/Catalogs/<catalog_type> but can be overrided to
+      * <catalogRootPath>/<catalog_type> by the user in the Option popup. When the
+      * catalog_type is not set the separator is not added at the end of the path.
+      *
+      * @param check
+      * if true ensure that the folder exist.
+      *
+      * @param catalog_type
+      * The Catalog Type name
+      */
+      static std::string getCatalogRootPath(bool check, const std::string& catalog_type);
 
+      /**
+       *  @brief Get the default Catalog Root Path. It is computed as
+       *  <rootPath>/Catalogs
+       */
+      static std::string getDefaultCatalogRootPath();
+
+      /**
+       * @brief Get the Aux data Root Path. By default it is computed as
+       * <rootPath>/AuxiliaryData but can be overrided to
+       * <AuxDataRootPath>/ by the user in the Option popup.
+       */
+      static std::string getAuxRootPath();
+
+      /**
+       *  @brief Get the default Aux data Root Path. It is computed as
+       *  <rootPath>/AuxiliaryData
+       */
+      static std::string getDefaultAuxRootPath();
+
+     /**
+      * @brief Get the Intermediary Product Root Path. By default it is computed as
+      * <rootPath>/IntermediateProduct/<catalog_type> but can be overrided to
+      * <IntermediateProductRootPath>/<catalog_type> by the user in the Option popup.
+      * When the catalog_type is not set the separator is not added at the end of the path.
+      *
+      * @param check
+      * if true ensure that the folder exist.
+      *
+      * @param catalog_type
+      * The Catalog Type name
+      */
+      static std::string getIntermediaryProductRootPath(bool check, const std::string& catalog_type);
+
+      /**
+       *  @brief Get the default Intermediary Root Path. It is computed as
+       *  <rootPath>/IntermediateProduct
+       */
+      static std::string getDefaultIntermediaryProductRootPath();
+
+      /**
+       * @brief Get the Results Root Path. By default it is computed as
+       * <rootPath>/Results/<catalog_type>/<cat_file_name> but can be overrided to
+       * <ResultsRootPath>/<catalog_type>/<cat_file_name> by the user in
+       * the Option popup.
+       * When the cat_file_name and/or catalog_type is not set the separator is
+       * not added at the end of the path.
+       *
+       * @param check
+       * if true ensure that the folder exist.
+       *
+       * @param catalog_type
+       * The Catalog Type name
+       *
+       * @param cat_file_name
+       * The Catalog File name
+       */
+      static std::string getResultRootPath(bool check, const std::string& catalog_type, const std::string& cat_file_name);
+
+      /**
+       *  @brief Get the default Results Root Path. It is computed as
+       *  <rootPath>/Results
+       */
+       static std::string getDefaultResultsRootPath();
+
+
+     /**
+     * @brief save the overriadable path in the option file
+     */
     static void savePath(const std::map<std::string,std::string>& path_list);
 
+    /**
+     * @brief read the overriadable path from the option file
+     */
     static std::map<std::string,std::string> readPath();
 
+
+
+///////////////////////////////////////////////
     /**
      * @brief get the Model Sets Root Path
      * @param check
@@ -116,17 +232,6 @@ public:
 
 
 
-    /**
-     * @brief get the Catalog Root Path
-     * @param check
-     * if true ensure that the folder exist.
-     */
-    static std::string getCatalogRootPath(bool check, const std::string& catalog_type);
-
-    static std::string getIntermediaryProductRootPath(bool check, const std::string& catalog_type);
-
-    static std::string getResultRootPath(bool check, const std::string& catalog_type, const std::string& cat_file_name);
-
 
     /**
      * @brief get the Filters Root Path
@@ -134,6 +239,17 @@ public:
      * if true ensure that thUI/Filter
      */
     static std::string getFilterRootPath(bool check);
+
+
+    /**
+     * @brief get the Luminosity Function Curve Root Path
+     * @param check
+     * if true ensure the folder exists
+     */
+    static std::string getLuminosityFunctionCurveRootPath(bool check);
+
+
+    static std::string getLuminosityFunctionGridRootPath(bool check, const std::string & catalog_type);
 
     /**
      * @brief get the SEDs RootPath
@@ -150,6 +266,7 @@ public:
      * @return <rootPath>/RedCurve
      */
     static std::string getRedCurveRootPath(bool check);
+
 
     /**
      * @brief get the Photometric Corrections RootPath
@@ -185,6 +302,10 @@ public:
     static void clearUserPreference(const std::string& catalog, const std::string& key);
 
     static std::string getUserPreference(const std::string& catalog, const std::string& key);
+
+
+    /// configuration
+    static std::map<std::string, boost::program_options::variable_value> getPathConfiguration(bool add_cat,bool add_aux,bool add_inter, bool add_res);
 
 };
 

@@ -57,7 +57,7 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Tempolates File Name :</string>
+        <string>Templates File Name :</string>
        </property>
       </widget>
      </item>
