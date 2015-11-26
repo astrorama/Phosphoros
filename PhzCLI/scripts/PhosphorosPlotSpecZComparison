@@ -135,12 +135,14 @@ class Selector(object):
         for fig in self.fig_list:
             if hasattr(fig, 'updateSelected'):
                 fig.updateSelected(event.ind[0])
-        if self.have_pdf and event.mouseevent.dblclick:
-            id = self.table[event.ind[0]][0]
-            print '\nFull info for source with ID',id,':'
-            for r in self.all_cols[id]:
-                for c in r.colnames:
-                    print '   ',c,'=',r[c]
+        if not event.mouseevent.dblclick:
+            return
+        id = self.table[event.ind[0]][0]
+        print '\nFull info for source with ID',id,':'
+        for r in self.all_cols[id]:
+            for c in r.colnames:
+                print '   ',c,'=',r[c]
+        if self.have_pdf:
             hdu = (x for x in self.hdus if 'EXTNAME' in x.header and  x.header['EXTNAME']==str(id)).next()
             f, ax = plt.subplots()
             xs = hdu.data[hdu.columns[0].name]
