@@ -127,7 +127,8 @@ class Selector(object):
         self.all_cols = all_cols
         self.have_pdf = os.path.isfile(pdf_file)
         if self.have_pdf:
-            self.hdus =  fits.open(pdf_file)
+            print 'Loading 1D PDFs. Please wait...'
+            self.hdus = fits.open(pdf_file)
     
     def onpick(self, event):
         if event.mouseevent.button != 1:
