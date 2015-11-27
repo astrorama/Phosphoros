@@ -89,6 +89,7 @@ private slots:
     void on_cb_luminosityPrior_2_currentIndexChanged(const QString &);
     void on_cb_luminosityPrior_stateChanged(int);
 
+    void on_cb_volumePrior_stateChanged(int);
 
 
 private:

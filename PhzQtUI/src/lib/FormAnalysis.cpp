@@ -500,6 +500,9 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   }
 
+  if (ui->cb_volumePrior->isChecked()) {
+    options_map["volume-prior"].value() = boost::any(yes_flag);
+  }
 
   return options_map;
 }
@@ -837,10 +840,15 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
       ui->cb_luminosityPrior_2->setCurrentIndex(index);
     }
 
-    auto prior_enabled = FileUtils::getUserPreference(
+    auto luminosity_prior_enabled = FileUtils::getUserPreference(
            ui->cb_AnalysisSurvey->currentText().toStdString(), ui->cb_AnalysisModel->currentText().toStdString()+"_LuminosityPriorEnabled");
 
-    ui->cb_luminosityPrior->setChecked(prior_enabled=="1");
+    ui->cb_luminosityPrior->setChecked(luminosity_prior_enabled=="1");
+
+    auto volume_prior_enabled = FileUtils::getUserPreference(
+           ui->cb_AnalysisSurvey->currentText().toStdString(), ui->cb_AnalysisModel->currentText().toStdString()+"_VolumePriorEnabled");
+
+    ui->cb_volumePrior->setChecked(volume_prior_enabled=="1");
   }
 
 
@@ -855,6 +863,11 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     FileUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                     ui->cb_AnalysisModel->currentText().toStdString()+"_LuminosityPriorEnabled",QString::number(ui->cb_luminosityPrior->isChecked()).toStdString());
     setRunAnnalysisEnable(true);
+  }
+
+  void FormAnalysis::on_cb_volumePrior_stateChanged(int) {
+    FileUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                    ui->cb_AnalysisModel->currentText().toStdString()+"_VolumePriorEnabled",QString::number(ui->cb_volumePrior->isChecked()).toStdString());
   }
 
 

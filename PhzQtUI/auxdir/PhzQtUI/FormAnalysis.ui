@@ -69,8 +69,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1071</width>
-        <height>774</height>
+        <width>1069</width>
+        <height>780</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -217,8 +217,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>416</width>
-            <height>166</height>
+            <width>447</width>
+            <height>160</height>
            </rect>
           </property>
           <attribute name="label">
@@ -375,8 +375,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>543</width>
-            <height>166</height>
+            <width>583</width>
+            <height>160</height>
            </rect>
           </property>
           <attribute name="label">
@@ -521,8 +521,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1053</width>
-            <height>199</height>
+            <width>1051</width>
+            <height>220</height>
            </rect>
           </property>
           <attribute name="label">
@@ -656,6 +656,18 @@
             </layout>
            </item>
            <item>
+            <widget class="QCheckBox" name="cb_volumePrior">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Volume Prior</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <spacer name="verticalSpacer_3">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
@@ -675,8 +687,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1053</width>
-            <height>255</height>
+            <width>1051</width>
+            <height>254</height>
            </rect>
           </property>
           <attribute name="label">
