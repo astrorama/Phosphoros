@@ -24,13 +24,20 @@ DialogModelSet::DialogModelSet(QWidget *parent) :
     ui->txt_zMax->setValidator( new QDoubleValidator(0, 100, 2, this) );
     ui->txt_zStep->setValidator( new QDoubleValidator(0, 100, 4, this) );
 
-    XYDataSetTreeModel* treeModel_z = new XYDataSetTreeModel();
-    treeModel_z->loadDirectory(FileUtils::getSedRootPath(true),false,"SEDs");
-    ui->treeView_Sed->setModel(treeModel_z);
+    XYDataSetTreeModel* treeModel_sed = new XYDataSetTreeModel();
+    treeModel_sed->loadDirectory(FileUtils::getSedRootPath(true),false,"SEDs");
+    ui->treeView_Sed->setModel(treeModel_sed);
     ui->treeView_Sed->expandAll();
 
-    connect(treeModel_z, SIGNAL(itemChanged(QStandardItem*)), treeModel_z,
+    connect(treeModel_sed, SIGNAL(itemChanged(QStandardItem*)), treeModel_sed,
                  SLOT(onItemChanged(QStandardItem*)));
+
+    if (!treeModel_sed->item(0,0)->hasChildren()){
+         QMessageBox::warning(this, "No available SED...",
+                 "There is no SED to select. "
+                 "You can provide and manage SEDs in the \"Configuration/Aux. Data\" page.",
+                 QMessageBox::Ok);
+    }
 
     XYDataSetTreeModel* treeModel_red = new XYDataSetTreeModel();
     treeModel_red->loadDirectory(FileUtils::getRedCurveRootPath(true),false,"Reddening Curves");
@@ -39,6 +46,13 @@ DialogModelSet::DialogModelSet(QWidget *parent) :
 
     connect( treeModel_red, SIGNAL(itemChanged(QStandardItem*)), treeModel_red,
                  SLOT(onItemChanged(QStandardItem*)));
+
+    if (!treeModel_red->item(0,0)->hasChildren()){
+         QMessageBox::warning(this, "No available Reddening Curve...",
+                 "There is no reddening curve to select. "
+                 "You can provide and manage reddening curves in the \"Configuration/Aux. Data\" page.",
+                 QMessageBox::Ok);
+    }
 
 }
 
@@ -220,6 +234,29 @@ void DialogModelSet::on_btn_save_clicked()
       return;
     }
 
+
+
+  double ebv_min = ui->txt_ebvMin->text().toDouble();
+  double ebv_max = ui->txt_ebvMax->text().toDouble();
+  double ebv_step =ui->txt_ebvStep->text().toDouble();
+
+  if ((ebv_min<0.) || (ebv_min>ebv_max) || (ebv_step<=0.) || (ebv_min+ebv_step > ebv_max) ) {
+    QMessageBox::warning(this, "Not acceptable Range...",
+        "The E(B-V) range you have provided is not well formated, please check it.",
+        QMessageBox::Ok);
+    return;
+  }
+
+  double z_min = ui->txt_zMin->text().toDouble();
+  double z_max = ui->txt_zMax->text().toDouble();
+  double z_step =ui->txt_zStep->text().toDouble();
+  if ((z_min<0.) || (z_min>z_max) || (z_step<=0.) || (z_min+z_step > z_max) ) {
+    QMessageBox::warning(this, "Not acceptable Range...",
+        "The redshift range you have provided is not well formated, please check it.",
+        QMessageBox::Ok);
+    return;
+  }
+
     ui->tableView_ParameterRule->setNameToSelectedRule(ui->txt_name->text().toStdString());
 
 
@@ -234,16 +271,10 @@ void DialogModelSet::on_btn_save_clicked()
     ui->tableView_ParameterRule->setRedCurvesToSelectedRule(std::move(red_root),std::move(red_excl));
 
     // E(B-V)-range
-    Range new_ebv;
-    new_ebv.setMin(ui->txt_ebvMin->text().toDouble());
-    new_ebv.setMax(ui->txt_ebvMax->text().toDouble());
-    new_ebv.setStep(ui->txt_ebvStep->text().toDouble());
+    Range new_ebv{ebv_min, ebv_max, ebv_step};
 
     // z-range
-    Range new_z;
-    new_z.setMin(ui->txt_zMin->text().toDouble());
-    new_z.setMax(ui->txt_zMax->text().toDouble());
-    new_z.setStep(ui->txt_zStep->text().toDouble());
+    Range new_z{z_min, z_max, z_step};
 
     ui->tableView_ParameterRule->setRangesToSelectedRule(std::move(new_ebv),std::move(new_z));
 
