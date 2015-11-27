@@ -23,12 +23,17 @@
  */
 
 #include <boost/test/unit_test.hpp>
+#include <boost/filesystem/operations.hpp>
+
+#include "ElementsKernel/Temporary.h"
 
 #include "PhzCLI/LsAuxDirConfig.h"
 #include "ConfigManager_fixture.h"
 
 using namespace Euclid::PhzCLI;
+
 namespace po = boost::program_options;
+namespace fs = boost::filesystem;
 
 struct LsAuxDirConfig_fixture : public ConfigManager_fixture {
 
@@ -36,7 +41,16 @@ struct LsAuxDirConfig_fixture : public ConfigManager_fixture {
   const std::string STR_GROUP {"group"};
   const std::string STR_DATA {"data"};
 
+  Elements::TempDir temp_dir;
+  fs::path base_directory { temp_dir.path() / "euclid" / "" };
+  fs::path aux_directory = base_directory / "AuxiliaryData";
+
   std::map<std::string, po::variable_value> options_map {};
+
+  LsAuxDirConfig_fixture(){
+    fs::create_directories(base_directory);
+    fs::create_directories(aux_directory);
+  }
 
 };
 
@@ -68,8 +82,10 @@ BOOST_FIXTURE_TEST_CASE(getGroup_test, LsAuxDirConfig_fixture) {
   config_manager.registerConfiguration<LsAuxDirConfig>();
   config_manager.closeRegistration();
 
-  std::string expected { "Mer" };
+  options_map["phosphoros-root"].value() = boost::any(base_directory.string());
+  std::string expected { "MER" };
   options_map["group"].value() = boost::any(expected);
+
   config_manager.initialize(options_map);
   auto result = config_manager.getConfiguration<LsAuxDirConfig>().getGroup();
 
@@ -84,8 +100,10 @@ BOOST_FIXTURE_TEST_CASE(getDatasetToShow_test, LsAuxDirConfig_fixture) {
   config_manager.registerConfiguration<LsAuxDirConfig>();
   config_manager.closeRegistration();
 
+  options_map["phosphoros-root"].value() = boost::any(base_directory.string());
   std::string expected { "1. 2." };
   options_map["data"].value() = boost::any(expected);
+
   config_manager.initialize(options_map);
   auto result = config_manager.getConfiguration<LsAuxDirConfig>().getDatasetToShow();
 
@@ -102,7 +120,10 @@ BOOST_FIXTURE_TEST_CASE(showData_test, LsAuxDirConfig_fixture) {
 
   bool expected { true } ;
   std::string data { "1. 2." };
+
+  options_map["phosphoros-root"].value() = boost::any(base_directory.string());
   options_map["data"].value() = boost::any(data);
+
   config_manager.initialize(options_map);
   auto result = config_manager.getConfiguration<LsAuxDirConfig>().showData();
 
@@ -116,6 +137,8 @@ BOOST_FIXTURE_TEST_CASE(nodata_showData_test, LsAuxDirConfig_fixture) {
   // Given
   config_manager.registerConfiguration<LsAuxDirConfig>();
   config_manager.closeRegistration();
+
+  options_map["phosphoros-root"].value() = boost::any(base_directory.string());
 
   bool expected { false } ;
   config_manager.initialize(options_map);
