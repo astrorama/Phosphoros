@@ -37,6 +37,13 @@ void DialogFilterSelector::setFilter(std::string filter_name){
   if (filter_name.length()>0){
     treeModel_filter->setState(filter_name,vector<string>());
   }
+
+  if (!treeModel_filter->item(0,0)->hasChildren()){
+      QMessageBox::warning(this, "No available filter...",
+              "There is no filter transmission curve to select. "
+              "You can provide and manage filter transmission curves in the \"Configuration/Aux. Data\" page.",
+              QMessageBox::Ok);
+    }
 }
 
 void DialogFilterSelector::on_btn_save_clicked(){

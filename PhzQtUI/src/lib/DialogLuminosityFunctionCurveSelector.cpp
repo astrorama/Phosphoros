@@ -25,7 +25,7 @@ void DialogLuminosityFunctionCurveSelector::setCurve(std::string curve_name){
   string path_curve = FileUtils::getLuminosityFunctionCurveRootPath(true);
 
   XYDataSetTreeModel* treeModel_curve = new XYDataSetTreeModel();
-  treeModel_curve->loadDirectory(path_curve,true,"Filters");
+  treeModel_curve->loadDirectory(path_curve,true,"Functions");
   treeModel_curve->setEnabled(true);
   ui->treeView_filter->setModel(treeModel_curve);
   ui->treeView_filter->expandAll();
@@ -37,6 +37,13 @@ void DialogLuminosityFunctionCurveSelector::setCurve(std::string curve_name){
 
   if (curve_name.length()>0){
     treeModel_curve->setState(curve_name,vector<string>());
+  }
+
+  if (!treeModel_curve->item(0,0)->hasChildren()){
+    QMessageBox::warning(this, "No available function...",
+            "There is no luminosity function curve to select. "
+            "You can provide and manage luminosity function curves in the \"Configuration/Aux. Data\" page.",
+            QMessageBox::Ok);
   }
 }
 

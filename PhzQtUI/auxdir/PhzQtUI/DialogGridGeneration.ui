@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Templates Generation</string>
+   <string>Model Grid Generation</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -26,7 +26,7 @@
         </font>
        </property>
        <property name="text">
-        <string>(Re)-Generation of the Templates</string>
+        <string>(Re)-Generation of the Model Grid</string>
        </property>
       </widget>
      </item>
@@ -57,7 +57,7 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Templates File Name :</string>
+        <string>Model Grid File Name :</string>
        </property>
       </widget>
      </item>
