@@ -7,6 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from astropy.table import Table
 import astropy.io.fits as fits
+from astropy.vo.samp import SAMPIntegratedClient
+import urlparse
 
 
 def file_exist(file):
@@ -121,7 +123,8 @@ class Selector(object):
     
     def __init__(self, fig_list, table, all_cols, pdf_file):
         for fig in fig_list:
-            fig.canvas.mpl_connect('pick_event', self.onpick)
+            if hasattr(fig, 'canvas'):
+                fig.canvas.mpl_connect('pick_event', self.onpick)
         self.fig_list = fig_list
         self.table = table
         self.all_cols = all_cols
@@ -160,6 +163,54 @@ class Selector(object):
             ax.text(phz, y_lim[0]+.95*y_size, 'PHZ', color='r', alpha=.5)
             plt.show()
             
+
+#
+#-------------------------------------------------------------------------------
+#
+
+class SampUpdater(object):
+
+    def __init__(self, tablenames, id_col, table):
+        self.topcat = None
+        try:
+            self.client = SAMPIntegratedClient()
+            self.client.connect()
+            for c in self.client.get_registered_clients():
+                meta = self.client.get_metadata(c)
+                if 'samp.name' in meta and meta['samp.name'] == 'topcat':
+                    self.topcat = c
+        except:
+            pass
+        if self.topcat:
+            self.table_names = []
+            self.table_ids = []
+            self.global_ids = table[id_col]
+            self.id_col = id_col
+            for name in tablenames:
+                try:
+                    data = Table.read(name, format='fits')
+                except:
+                    continue
+                id_map = {}
+                for i in range(len(data)):
+                    id_map[data[id_col][i]] = i
+                self.table_ids.append(id_map)
+                url = urlparse.urljoin('file:', os.path.abspath(name))
+                table_name = os.path.basename(name)
+                self.table_names.append(table_name)
+                message = {'samp.mtype' : 'table.load.fits',
+                           'samp.params' : { 'url' : url,
+                                             'table-id' : table_name,
+                                             'name' : table_name }}
+                self.client.notify(self.topcat, message)
+
+    def updateSelected(self, i):
+        if self.topcat:
+            for name, ids in zip(self.table_names, self.table_ids):
+                message = {'samp.mtype' : 'table.highlight.row',
+                           'samp.params' : { 'table-id' : name,
+                                             'row' : str(ids[self.global_ids[i]]) }}
+                self.client.notify(self.topcat, message)
 
 #
 #-------------------------------------------------------------------------------
@@ -270,6 +321,8 @@ def main():
                         help="Disables the plot window")
     parser.add_argument("-pdf", "--pdf", type=str, default='',
                         help="The FITS file with the 1D PDF")
+    parser.add_argument("-samp", "--samp", action="store_true", default=False,
+                        help="Enables communication with other SAMP applications")
 
     args = parser.parse_args()
             
@@ -284,7 +337,7 @@ if __name__ == '__main__':
     
     # Read input files
     table, all_cols = create_table(args.files, args.id, args.specz, args.phz)
-    
+
     col_number = 2
     label = "PhotZ"
    
@@ -292,8 +345,11 @@ if __name__ == '__main__':
         
     # Plot distribution
     if args.display:
+            samp = None
+            if args.samp:
+                samp = SampUpdater(args.files, args.id, table)
             fig1 = displaySpeczPhotz(table[args.id], specZ, colZ, data)
             fig2 = displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers)
-            selector = Selector((fig1, fig2), table, all_cols, args.pdf)
+            selector = Selector((fig1, fig2, samp), table, all_cols, args.pdf)
             plt.show()
     
