@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <QDialog>
+#include <QFutureWatcher>
 #include <list>
 #include "PhzQtUI/FilterMapping.h"
 
@@ -62,6 +63,8 @@ signals:
     */
     void correctionComputed(const QString &);
 
+    void signalUpdateCurrentIteration(const QString&);
+
 private slots:
     /**
      * @brief SLOT open a File dialog for letting the user select the training catalog.
@@ -104,9 +107,12 @@ private slots:
      */
     void on_bt_Run_clicked();
 
+    void runFinished();
+
 
 
 private:
+    QFutureWatcher<std::string> m_future_watcher {};
     std::unique_ptr<Ui::DialogPhotometricCorrectionComputation> ui;
     std::list<FilterMapping> m_selected_filters;
     std::list<std::string> m_excluded_filters;
