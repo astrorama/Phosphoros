@@ -109,6 +109,8 @@ private slots:
 
     void runFinished();
 
+    void on_bt_Cancel_clicked();
+
 
 
 private:

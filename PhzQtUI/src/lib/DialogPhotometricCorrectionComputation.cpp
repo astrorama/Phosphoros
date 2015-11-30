@@ -22,6 +22,7 @@
 #include "PhzPhotometricCorrection/FindBestFitModels.h"
 #include "PhzPhotometricCorrection/CalculateScaleFactorMap.h"
 #include "PhzPhotometricCorrection/PhotometricCorrectionAlgorithm.h"
+#include "PhzUtils/Multithreading.h"
 #include "Configuration/Utils.h"
 
 using namespace std;
@@ -293,6 +294,9 @@ void DialogPhotometricCorrectionComputation::runFinished() {
   }
 }
 
+void DialogPhotometricCorrectionComputation::on_bt_Cancel_clicked() {
+  PhzUtils::getStopThreadsFlag() = true;
+}
 
 void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
   string output_file_name = FileUtils::addExt(
