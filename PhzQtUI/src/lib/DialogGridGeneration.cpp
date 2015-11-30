@@ -77,7 +77,11 @@ std::string DialogGridGeneration::runFunction() {
     
     auto monitor_function = [this](size_t step, size_t total) {
       int value = (step * 100) / total;
-      emit signalUpdateBar(value);
+      if (!PhzUtils::getStopThreadsFlag()) {
+        // If the user has canceled we do not want to update the progress bar,
+        // because the GUI thread might have already deleted it
+        emit signalUpdateBar(value);
+      }
     };
 
     auto param_space_map = config_manager.getConfiguration<ParameterSpaceConfig>().getParameterSpaceRegions();

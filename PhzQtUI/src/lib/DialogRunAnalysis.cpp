@@ -201,7 +201,11 @@ std::string DialogRunAnalysis::runFunction(){
 
     auto monitor_function = [this](size_t step, size_t total) {
       int value = (step * 100) / total;
-      emit signalUpdateBar(value);
+      // If the user has canceled we do not want to update the progress bar,
+      // because the GUI thread might have already deleted it
+      if (!PhzUtils::getStopThreadsFlag()) {
+        emit signalUpdateBar(value);
+      }
     };
 
     handler.handleSources(catalog.begin(), catalog.end(), *out_ptr, monitor_function);

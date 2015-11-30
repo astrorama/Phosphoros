@@ -259,9 +259,13 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
     emit signalUpdateCurrentIteration(QString::fromStdString("Iteration : 0"));
     auto progress_logger =
         [this,max_iter_number](size_t iter_no, const PhzDataModel::PhotometricCorrectionMap& ) {
-          std::stringstream iter_no_message;
-          iter_no_message << "Iteration : " << (iter_no+1);
-          emit signalUpdateCurrentIteration(QString::fromStdString(iter_no_message.str()));
+          // If the user has canceled we do not want to update the progress bar,
+          // because the GUI thread might have already deleted it
+          if (!PhzUtils::getStopThreadsFlag()) {
+            std::stringstream iter_no_message;
+            iter_no_message << "Iteration : " << (iter_no+1);
+            emit signalUpdateCurrentIteration(QString::fromStdString(iter_no_message.str()));
+          }
         };
     auto phot_corr_map = calculator(catalog, model_phot_grid, stop_criteria,
         selector, progress_logger);
