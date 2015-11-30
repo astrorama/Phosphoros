@@ -20,6 +20,7 @@
 #include "PhzQtUI/XYDataSetTreeModel.h"
 #include "XYDataset/QualifiedName.h"
 #include "FileUtils.h"
+#include "PreferencesUtils.h"
 #include "DefaultOptionsCompleter.h"
 #include "Configuration/Utils.h"
 
@@ -60,7 +61,7 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
       config_manager.registerConfiguration<PhzConfiguration::PhotometryGridConfig>();
       config_manager.closeRegistration();
       config_manager.initialize(options_map);
-      
+
       auto& grid_info = config_manager.getConfiguration<PhzConfiguration::PhotometryGridConfig>().getPhotometryGridInfo();
 
       // Check the IGM type compatibility
@@ -219,8 +220,13 @@ std::map<std::string, boost::program_options::variable_value> PhzGridInfoHandler
     options_map[pair.first]=pair.second;
   }
 
+  auto thread_options = PreferencesUtils::getThreadOverrideConfiguration();
+  for(auto& pair : thread_options){
+      options_map[pair.first]=pair.second;
+  }
 
-   options_map["catalog-type"].value() = boost::any(catalog);
+
+  options_map["catalog-type"].value() = boost::any(catalog);
 
   options_map["output-model-grid"].value() = boost::any(output_file);
 

@@ -78,7 +78,6 @@ public:
 };
 
 void DialogRunAnalysis::computeLuminosityGrid(){
-   std::map<std::string, boost::program_options::variable_value> options_map;
 
    completeWithDefaults<ComputeLuminosityModelGridConfig>(m_lum_config);
 
@@ -127,7 +126,7 @@ DialogRunAnalysis::DialogRunAnalysis(QWidget *parent) :
         m_timer->setSingleShot(true);
         connect(m_timer.get(), SIGNAL(timeout()), this, SLOT(run()));
         m_timer->start();
-        
+
         connect(&m_future_watcher, SIGNAL(finished()), this, SLOT(runFinished()));
         connect(this, SIGNAL(signalUpdateBar(int)), ui->progressBar, SLOT(setValue(int)));
     }
@@ -249,7 +248,7 @@ void DialogRunAnalysis::run() {
 
     computeLuminosityGrid();
   }
-  
+
   m_future_watcher.setFuture(QtConcurrent::run(this, &DialogRunAnalysis::runFunction));
 }
 

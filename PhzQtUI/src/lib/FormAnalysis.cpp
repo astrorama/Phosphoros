@@ -13,6 +13,7 @@
 #include "PhzQtUI/DialogPhotCorrectionEdition.h"
 #include "PhzQtUI/DialogPhotometricCorrectionComputation.h"
 #include "FileUtils.h"
+#include "PreferencesUtils.h"
 #include "PhzQtUI/ModelSet.h"
 #include "PhzQtUI/PhotometricCorrectionHandler.h"
 #include "PhzQtUI/SurveyFilterMapping.h"
@@ -434,6 +435,11 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   std::map<std::string, boost::program_options::variable_value> options_map =
       FileUtils::getPathConfiguration(true,false,true,true);
 
+  auto thread_options = PreferencesUtils::getThreadOverrideConfiguration();
+  for(auto& pair : thread_options){
+      options_map[pair.first]=pair.second;
+  }
+
   options_map["catalog-type"].value() = boost::any(survey_name);
 
 
@@ -528,6 +534,11 @@ std::map < std::string, boost::program_options::variable_value > FormAnalysis::g
 
     auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
 
+    auto thread_options = PreferencesUtils::getThreadOverrideConfiguration();
+    for(auto& pair : thread_options){
+          options_map[pair.first]=pair.second;
+    }
+
     options_map["catalog-type"].value() = boost::any(std::string(survey_name));
 
     options_map["model-grid-file"].value() = boost::any(
@@ -585,7 +596,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   setInputCatalogName(selected_survey.getDefaultCatalogFile(), false);
 
   // set the stored IGM
-  auto saved_igm = FileUtils::getUserPreference(selected_survey.getName(),
+  auto saved_igm = PreferencesUtils::getUserPreference(selected_survey.getName(),
       "IGM");
   if (saved_igm.length() > 0) {
     for (int i = 0; i < ui->cb_igm->count(); i++) {
@@ -597,7 +608,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   }
 
   // set the stored Collapse
-  auto saved_collapse = FileUtils::getUserPreference(selected_survey.getName(),
+  auto saved_collapse = PreferencesUtils::getUserPreference(selected_survey.getName(),
       "Collapse");
   if (saved_collapse.length() > 0) {
     for (int i = 0; i < ui->cb_marginalization->count(); i++) {
@@ -613,7 +624,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   updateCorrectionSelection();
 
   // set the correction file
-  auto saved_correction = FileUtils::getUserPreference(
+  auto saved_correction = PreferencesUtils::getUserPreference(
       selected_survey.getName(), "Correction");
   if (saved_correction.length() > 0) {
     for (int i = 0; i < ui->cb_AnalysisCorrection->count(); i++) {
@@ -669,7 +680,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
         auto config_map = getGridConfiguration();
         PhzUITools::ConfigurationWriter::writeConfiguration(config_map,fileName.toStdString());
 
-        FileUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+        PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
             "IGM",ui->cb_igm->currentText().toStdString());
 
       }
@@ -701,7 +712,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
         setComputeCorrectionEnable();
         setRunAnnalysisEnable(true);
 
-        FileUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+        PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
             "IGM",ui->cb_igm->currentText().toStdString());
       }
     }
@@ -820,7 +831,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
 
     m_prior_config = LuminosityPriorConfig::readFolder(folder);
 
-    auto prior_name = FileUtils::getUserPreference(survey_name,selected_model.getName()+"_LuminosityPriorName");
+    auto prior_name = PreferencesUtils::getUserPreference(survey_name,selected_model.getName()+"_LuminosityPriorName");
 
 
     ui->cb_luminosityPrior_2->clear();
@@ -840,12 +851,12 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
       ui->cb_luminosityPrior_2->setCurrentIndex(index);
     }
 
-    auto luminosity_prior_enabled = FileUtils::getUserPreference(
+    auto luminosity_prior_enabled = PreferencesUtils::getUserPreference(
            ui->cb_AnalysisSurvey->currentText().toStdString(), ui->cb_AnalysisModel->currentText().toStdString()+"_LuminosityPriorEnabled");
 
     ui->cb_luminosityPrior->setChecked(luminosity_prior_enabled=="1");
 
-    auto volume_prior_enabled = FileUtils::getUserPreference(
+    auto volume_prior_enabled = PreferencesUtils::getUserPreference(
            ui->cb_AnalysisSurvey->currentText().toStdString(), ui->cb_AnalysisModel->currentText().toStdString()+"_VolumePriorEnabled");
 
     ui->cb_volumePrior->setChecked(volume_prior_enabled=="1");
@@ -853,20 +864,20 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
 
 
   void FormAnalysis::on_cb_luminosityPrior_2_currentIndexChanged(const QString &){
-    FileUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                 ui->cb_AnalysisModel->currentText().toStdString()+"_LuminosityPriorName",ui->cb_luminosityPrior_2->currentText().toStdString());
 
     setRunAnnalysisEnable(true);
   }
 
   void FormAnalysis::on_cb_luminosityPrior_stateChanged(int){
-    FileUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                     ui->cb_AnalysisModel->currentText().toStdString()+"_LuminosityPriorEnabled",QString::number(ui->cb_luminosityPrior->isChecked()).toStdString());
     setRunAnnalysisEnable(true);
   }
 
   void FormAnalysis::on_cb_volumePrior_stateChanged(int) {
-    FileUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                     ui->cb_AnalysisModel->currentText().toStdString()+"_VolumePriorEnabled",QString::number(ui->cb_volumePrior->isChecked()).toStdString());
   }
 
@@ -977,12 +988,12 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
       auto config_map = getRunOptionMap();
       PhzUITools::ConfigurationWriter::writeConfiguration(config_map,fileName.toStdString());
 
-      FileUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
           "IGM",ui->cb_igm->currentText().toStdString());
-      FileUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
           "Collapse",ui->cb_marginalization->currentText().toStdString());
       if (ui->gb_corrections->isChecked ()) {
-        FileUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+        PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
             "Correction",ui->cb_AnalysisCorrection->currentText().toStdString());
       }
     }
@@ -1038,17 +1049,17 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     std::unique_ptr<DialogRunAnalysis> dialog(new DialogRunAnalysis());
     dialog->setValues(cat,pdf,lik,pos,config_map,config_map_luminosity);
     if (dialog->exec()) {
-      FileUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
           "IGM",ui->cb_igm->currentText().toStdString());
 
-      FileUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
           "Collapse",ui->cb_marginalization->currentText().toStdString());
 
       if (ui->gb_corrections->isChecked ()) {
-        FileUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+        PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
             "Correction",ui->cb_AnalysisCorrection->currentText().toStdString());
       } else {
-        FileUtils::clearUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+        PreferencesUtils::clearUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                     "Correction");
       }
     }

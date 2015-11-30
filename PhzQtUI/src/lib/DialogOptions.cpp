@@ -3,6 +3,8 @@
 #include "PhzQtUI/DialogOptions.h"
 #include "ui_DialogOptions.h"
 #include "FileUtils.h"
+#include "PreferencesUtils.h"
+#include "PhzUtils/Multithreading.h"
 
 using namespace std;
 
@@ -34,6 +36,14 @@ DialogOptions::DialogOptions(std::string new_catalog_file_path, QWidget *parent)
      checkDirectories();
 
      ui->widget_survey_mapping->loadMappingPage(new_catalog_file_path);
+
+    int thread_value = PreferencesUtils::getThreadNumberOverride();
+    ui->gb_thread->setChecked(thread_value>0);
+    if (thread_value>0){
+      ui->sb_thread->setValue(thread_value);
+    } else {
+      ui->sb_thread->setValue(PhzUtils::getThreadNumber());
+    }
 }
 
 DialogOptions::~DialogOptions()
@@ -61,6 +71,7 @@ void DialogOptions::on_btn_editGeneral_clicked()
     ui->btn_defAux->setEnabled(true);
     ui->btn_defInter->setEnabled(true);
     ui->btn_defRes->setEnabled(true);
+    ui->gb_thread->setEnabled(true);
 
 }
 
@@ -73,6 +84,14 @@ void DialogOptions::on_btn_cancelGeneral_clicked()
     ui->txt_interDir->setText(QString::fromStdString(path_map["IntermediateProducts"]));
     ui->txt_resDir->setText(QString::fromStdString(path_map["Results"]));
     checkDirectories();
+
+    int thread_value = PreferencesUtils::getThreadNumberOverride();
+    ui->gb_thread->setChecked(thread_value>0);
+    if (thread_value>0){
+      ui->sb_thread->setValue(thread_value);
+    } else {
+      ui->sb_thread->setValue(PhzUtils::getThreadNumber());
+    }
 
     ui->tabWidget->setTabEnabled(1,true);
     ui->tabWidget->setTabEnabled(2,true);
@@ -91,6 +110,8 @@ void DialogOptions::on_btn_cancelGeneral_clicked()
     ui->btn_defAux->setEnabled(false);
     ui->btn_defInter->setEnabled(false);
     ui->btn_defRes->setEnabled(false);
+    ui->gb_thread->setEnabled(false);
+
 
 }
 
@@ -111,6 +132,14 @@ void DialogOptions::on_btn_saveGeneral_clicked()
 
     FileUtils::savePath(map);
 
+    int thread_value=0;
+    if (ui->gb_thread->isChecked()){
+      thread_value=ui->sb_thread->value();
+    }  else {
+      ui->sb_thread->setValue(PhzUtils::getThreadNumber());
+    }
+    PreferencesUtils::setThreadNumberOverride(thread_value);
+
     ui->tabWidget->setTabEnabled(1,true);
     ui->tabWidget->setTabEnabled(2,true);
     ui->buttonBox->setEnabled(true);
@@ -128,6 +157,7 @@ void DialogOptions::on_btn_saveGeneral_clicked()
     ui->btn_defAux->setEnabled(false);
     ui->btn_defInter->setEnabled(false);
     ui->btn_defRes->setEnabled(false);
+    ui->gb_thread->setEnabled(false);
 
 }
 

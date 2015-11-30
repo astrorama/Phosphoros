@@ -291,18 +291,6 @@ public:
 
     static void setLastUsedPath(const std::string& path);
 
-    /////////////////////////////////////////////////////////
-    //// Preferences
-    static std::map<std::string,std::map<std::string,std::string>> readUserPreferences();
-
-    static void writeUserPreferences(std::map<std::string,std::map<std::string,std::string>> preferences);
-
-    static void setUserPreference(const std::string& catalog, const std::string& key, const std::string& value );
-
-    static void clearUserPreference(const std::string& catalog, const std::string& key);
-
-    static std::string getUserPreference(const std::string& catalog, const std::string& key);
-
 
     /// configuration
     static std::map<std::string, boost::program_options::variable_value> getPathConfiguration(bool add_cat,bool add_aux,bool add_inter, bool add_res);
