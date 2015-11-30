@@ -238,6 +238,7 @@ void FormSurveyMapping::on_btn_MapCancel_clicked()
         FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
         filter_model->setFilters(model->getFilters(row));
         ui->table_Filter->setModel(filter_model);
+        ui->tb_df->setText(QString::fromStdString(m_default_survey));
     }
 
     setFilterMappingInView();
@@ -308,12 +309,14 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
     filter_model->setFilters(model->getFilters(new_index.row()));
 
     ui->txt_nonDetection->setValue(model->getNonDetection(new_index.row()));
+    ui->tb_df->setText(QString::fromStdString(m_default_survey));
 
   } else {
     m_default_survey="";
     ui->cb_SourceId->setCurrentIndex(0);
     ui->cb_SourceId->clearEditText();
     ui->txt_nonDetection->setValue(-99.);
+    ui->tb_df->setText("");
   }
 
   fillCbColumns(cb_text);
@@ -345,7 +348,7 @@ void FormSurveyMapping::on_btn_ImportColumn_clicked()
         loadColumnFromFile(fileNames[0].toStdString());
 
         m_default_survey=fileNames[0].toStdString();
-
+        ui->tb_df->setText(QString::fromStdString(m_default_survey));
     }
 }
 
