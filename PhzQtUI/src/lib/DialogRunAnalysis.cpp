@@ -211,11 +211,11 @@ std::string DialogRunAnalysis::runFunction(){
 
   }
   catch (const Elements::Exception & e) {
-    return "Sorry, an error occurred during the computation: "
+    return "Sorry, an error occurred during the computation:\n"
         + std::string(e.what());
   }
   catch (const std::exception& e) {
-    return "Sorry, an error occurred during the computation: "
+    return "Sorry, an error occurred during the computation:\n"
         + std::string(e.what());
   }
   catch (...) {
