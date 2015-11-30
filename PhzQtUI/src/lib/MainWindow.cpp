@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
   QFileInfo info(root_path);
   if (!info.exists()) {
     if (QMessageBox::Apply== QMessageBox::question(this, "Missing Phosphoros directory...",
-        "The Phosphoros directory is missing. "
+        "The Phosphoros directory (specified by the environment variable 'PHOSPHOROS_ROOT') is missing.\n "
         "Click 'Apply' to create the directory '"+root_path+"' or 'Abort' to close Phosphoros.",
         QMessageBox::Apply|QMessageBox::Abort)) {
       QDir().mkpath(root_path);
