@@ -240,7 +240,7 @@ void DialogModelSet::on_btn_save_clicked()
   double ebv_max = ui->txt_ebvMax->text().toDouble();
   double ebv_step =ui->txt_ebvStep->text().toDouble();
 
-  if ((ebv_min<0.) || (ebv_min>ebv_max) || (ebv_step<=0.) || (ebv_min+ebv_step > ebv_max) ) {
+  if ((ebv_min<0.) || (ebv_min>ebv_max) || (ebv_step<0.) ) {
     QMessageBox::warning(this, "Not acceptable Range...",
         "The E(B-V) range you have provided is not well formated, please check it.",
         QMessageBox::Ok);
@@ -250,7 +250,7 @@ void DialogModelSet::on_btn_save_clicked()
   double z_min = ui->txt_zMin->text().toDouble();
   double z_max = ui->txt_zMax->text().toDouble();
   double z_step =ui->txt_zStep->text().toDouble();
-  if ((z_min<0.) || (z_min>z_max) || (z_step<=0.) || (z_min+z_step > z_max) ) {
+  if ((z_min<0.) || (z_min>z_max) || (z_step<0.) ) {
     QMessageBox::warning(this, "Not acceptable Range...",
         "The redshift range you have provided is not well formated, please check it.",
         QMessageBox::Ok);
