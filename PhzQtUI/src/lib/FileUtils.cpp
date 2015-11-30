@@ -3,7 +3,6 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QFileInfoList>
-#include <QSettings>
 #include <QTextStream>
 #include "Configuration/ConfigManager.h"
 #include "PhzConfiguration/PhosphorosRootDirConfig.h"
