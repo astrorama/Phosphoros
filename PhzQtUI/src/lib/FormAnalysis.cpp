@@ -921,9 +921,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
               "The catalog file you selected has not the columns described into the Catalog and therefore cannot be used. "
               "Do you want to create a new Catalog mapping for this file?",
               QMessageBox::Cancel|QMessageBox::Ok)==QMessageBox::Ok) {
-        std::unique_ptr<DialogOptions> popUp(new DialogOptions(name));
-        popUp->exec();
-        loadAnalysisPage();
+        navigateToNewCatalog(name);
       }
     } else {
       ui->txt_inputCatalog->setText(QString::fromStdString(name));

@@ -69,8 +69,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1069</width>
-        <height>780</height>
+        <width>1071</width>
+        <height>774</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -217,8 +217,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>447</width>
-            <height>160</height>
+            <width>416</width>
+            <height>166</height>
            </rect>
           </property>
           <attribute name="label">
@@ -375,8 +375,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>583</width>
-            <height>160</height>
+            <width>1053</width>
+            <height>206</height>
            </rect>
           </property>
           <attribute name="label">
@@ -423,7 +423,7 @@
                 <item>
                  <widget class="QLabel" name="label_28">
                   <property name="text">
-                   <string>Compatible Photometrc Zero-Point Corrections :</string>
+                   <string>Compatible Photometric Zero-Point Corrections :</string>
                   </property>
                  </widget>
                 </item>
@@ -521,8 +521,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1051</width>
-            <height>220</height>
+            <width>673</width>
+            <height>185</height>
            </rect>
           </property>
           <attribute name="label">
@@ -687,8 +687,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1051</width>
-            <height>254</height>
+            <width>1053</width>
+            <height>255</height>
            </rect>
           </property>
           <attribute name="label">

@@ -11,19 +11,12 @@ using namespace std;
 namespace Euclid {
 namespace PhzQtUI{
 
-DialogOptions::DialogOptions(QWidget *parent) :DialogOptions("",parent){
-}
-
-
-
-DialogOptions::DialogOptions(std::string new_catalog_file_path, QWidget *parent):
-  QDialog(parent),
+DialogOptions::DialogOptions(QWidget *parent) : QDialog(parent),
   ui(new Ui::DialogOptions)
 {
      ui->setupUi(this);
 
-     connect(ui->widget_survey_mapping, SIGNAL(startEdition(int)),SLOT(startEdition(int)));
-     connect(ui->widget_survey_mapping, SIGNAL(endEdition()),SLOT(endEdition()));
+
 
      ui->widget_aux_Data->loadManagementPage(0);
 
@@ -35,7 +28,6 @@ DialogOptions::DialogOptions(std::string new_catalog_file_path, QWidget *parent)
      ui->txt_resDir->setText(QString::fromStdString(path_map["Results"]));
      checkDirectories();
 
-     ui->widget_survey_mapping->loadMappingPage(new_catalog_file_path);
 
     int thread_value = PreferencesUtils::getThreadNumberOverride();
     ui->gb_thread->setChecked(thread_value>0);

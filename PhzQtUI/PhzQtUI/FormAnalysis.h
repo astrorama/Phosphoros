@@ -42,6 +42,7 @@ public:
 
 signals:
     void navigateToHome();
+    void navigateToNewCatalog(std::string);
 
 private slots:
     void on_btn_AnalysisToHome_clicked();

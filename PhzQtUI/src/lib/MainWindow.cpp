@@ -30,7 +30,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
   connect(ui->widget_ModelSet,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
 
+  connect(ui->widget_Catalog,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
+
   connect(ui->widget_Analysis,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
+  connect(ui->widget_Analysis,SIGNAL(navigateToNewCatalog(std::string)),SLOT(navigateToNewCatalog(std::string)));
+
+
+
 
   auto root_path = QString::fromStdString(FileUtils::getRootPath(false));
   QFileInfo info(root_path);
@@ -56,6 +62,11 @@ MainWindow::~MainWindow()
      changeMainStackedWidgetIndex(0);
  }
 
+ void MainWindow::navigateToNewCatalog(std::string new_name){
+   changeMainStackedWidgetIndex(2);
+   ui->widget_Catalog->loadMappingPage(new_name);
+ }
+
  //--------------------------------------------------
  // Option Popup
  //  - Slots opening the popup
@@ -74,12 +85,19 @@ void MainWindow::on_btn_HomeToModel_clicked(){
     ui->widget_ModelSet->loadSetPage();
 }
 
+
+void MainWindow::on_btn_HomeToCatalog_clicked(){
+  changeMainStackedWidgetIndex(2);
+  ui->widget_Catalog->loadMappingPage("");
+}
+
+
 //------------------------------------------------
 // Analysis page  Page
 //  - Slots landing on this page
 void MainWindow::on_btn_HomeToAnalysis_clicked()
 {
-  changeMainStackedWidgetIndex(2);
+  changeMainStackedWidgetIndex(3);
   ui->widget_Analysis->loadAnalysisPage();
 }
 

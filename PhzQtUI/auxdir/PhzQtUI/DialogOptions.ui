@@ -444,16 +444,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_3">
-      <attribute name="title">
-       <string>Catalog Filter Mapping</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="Euclid::PhzQtUI::FormSurveyMapping" name="widget_survey_mapping" native="true"/>
-       </item>
-      </layout>
-     </widget>
     </widget>
    </item>
    <item>
@@ -469,11 +459,6 @@
   </layout>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>Euclid::PhzQtUI::FormSurveyMapping</class>
-   <extends>QWidget</extends>
-   <header>PhzQtUI/FormSurveyMapping.h</header>
-  </customwidget>
   <customwidget>
    <class>Euclid::PhzQtUI::FormAuxDataManagement</class>
    <extends>QWidget</extends>
