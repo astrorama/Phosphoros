@@ -120,6 +120,7 @@ private:
     std::list<std::string> m_excluded_filters;
     std::string m_id_column;
     double m_non_detection;
+    bool m_computing = false;
     void disablePage();
     std::string runFunction();
     void setRunEnability();

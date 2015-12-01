@@ -287,7 +287,8 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
 }
 
 void DialogPhotometricCorrectionComputation::runFinished() {
- std::string message = m_future_watcher.result();
+  std::string message = m_future_watcher.result();
+  m_computing = false;
   if (message.length() == 0) {
     this->accept();
     return;
@@ -299,10 +300,15 @@ void DialogPhotometricCorrectionComputation::runFinished() {
 }
 
 void DialogPhotometricCorrectionComputation::on_bt_Cancel_clicked() {
-  PhzUtils::getStopThreadsFlag() = true;
+  if (m_computing) {
+    PhzUtils::getStopThreadsFlag() = true;
+  } else {
+    this->reject();
+  }
 }
 
 void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
+  m_computing = true;
   string output_file_name = FileUtils::addExt(
       ui->txt_FileName->text().toStdString(), ".txt");
   ui->txt_FileName->setText(QString::fromStdString(output_file_name));
