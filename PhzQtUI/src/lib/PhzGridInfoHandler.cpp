@@ -13,9 +13,9 @@
 #include <QDir>
 #include <vector>
 #include <boost/program_options.hpp>
+#include <boost/archive/binary_iarchive.hpp>
 
 #include "Configuration/ConfigManager.h"
-#include "PhzConfiguration/PhotometryGridConfig.h"
 #include "PhzQtUI/PhzGridInfoHandler.h"
 #include "PhzQtUI/XYDataSetTreeModel.h"
 #include "XYDataset/QualifiedName.h"
@@ -23,7 +23,8 @@
 #include "PreferencesUtils.h"
 #include "DefaultOptionsCompleter.h"
 #include "Configuration/Utils.h"
-
+#include "PhzDataModel/PhotometryGridInfo.h"
+#include "PhzDataModel/serialization/PhotometryGridInfo.h"
 
 
 namespace po = boost::program_options;
@@ -47,23 +48,17 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
   foreach (const QString &fileName , fileNames) {
     std::map < std::string, boost::program_options::variable_value > options_map;
 
-    // auto file_path = root_qdir.path() +QDir::separator()+ fileName;
     auto file_path = root_qdir.absoluteFilePath(fileName);
-    options_map["model-grid-file"].value() = boost::any(file_path.toStdString());
-
-    options_map["catalog-type"].value() = boost::any(catalog);
-    options_map["intermediate-products-dir"].value() = boost::any(FileUtils::getIntermediaryProductRootPath(false,""));
 
     try { // If a file cannot be opened or is ill formated: just skip it!
-      completeWithDefaults<PhzConfiguration::PhotometryGridConfig>(options_map);
-      long config_manager_id = Configuration::getUniqueManagerId();
-      auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
-      config_manager.registerConfiguration<PhzConfiguration::PhotometryGridConfig>();
-      config_manager.closeRegistration();
-      config_manager.initialize(options_map);
-
-      auto& grid_info = config_manager.getConfiguration<PhzConfiguration::PhotometryGridConfig>().getPhotometryGridInfo();
-
+      // We directly use the boost iarchive, because we just need the grid info
+      // from the beginning of the file. Reading the full file whould be very
+      // slow
+      PhzDataModel::PhotometryGridInfo grid_info;
+      std::ifstream in {file_path.toStdString()};
+      boost::archive::binary_iarchive bia {in};
+      bia >> grid_info;
+      
       // Check the IGM type compatibility
       if (igm_type!=grid_info.igm_method) {
               continue;
