@@ -1,6 +1,7 @@
 
 #include <QMessageBox>
 #include "FileUtils.h"
+#include "FormUtils.h"
 #include "PhzQtUI/DialogModelSet.h"
 #include "ui_DialogModelSet.h"
 #include "PhzQtUI/XYDataSetTreeModel.h"
@@ -215,6 +216,8 @@ void DialogModelSet::on_btn_cancel_clicked()
     turnControlsInView();
 }
 
+
+
 void DialogModelSet::on_btn_save_clicked()
 {
     auto sed_res = static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->getRootSelection();
@@ -236,9 +239,10 @@ void DialogModelSet::on_btn_save_clicked()
 
 
 
-  double ebv_min = ui->txt_ebvMin->text().toDouble();
-  double ebv_max = ui->txt_ebvMax->text().toDouble();
-  double ebv_step =ui->txt_ebvStep->text().toDouble();
+
+  double ebv_min = FormUtils::parseToDouble(ui->txt_ebvMin->text());
+  double ebv_max = FormUtils::parseToDouble(ui->txt_ebvMax->text());
+  double ebv_step = FormUtils::parseToDouble(ui->txt_ebvStep->text());
 
   if ((ebv_min<0.) || (ebv_min>ebv_max) || (ebv_step<0.) ) {
     QMessageBox::warning(this, "Not acceptable Range...",
@@ -247,9 +251,9 @@ void DialogModelSet::on_btn_save_clicked()
     return;
   }
 
-  double z_min = ui->txt_zMin->text().toDouble();
-  double z_max = ui->txt_zMax->text().toDouble();
-  double z_step =ui->txt_zStep->text().toDouble();
+  double z_min = FormUtils::parseToDouble(ui->txt_zMin->text());
+  double z_max = FormUtils::parseToDouble(ui->txt_zMax->text());
+  double z_step = FormUtils::parseToDouble(ui->txt_zStep->text());
   if ((z_min<0.) || (z_min>z_max) || (z_step<0.) ) {
     QMessageBox::warning(this, "Not acceptable Range...",
         "The redshift range you have provided is not well formated, please check it.",

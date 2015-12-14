@@ -11,6 +11,8 @@
 #include "PhzUITools/CatalogColumnReader.h"
 #include "PhzQtUI/PhotometricCorrectionHandler.h"
 #include "FileUtils.h"
+
+#include "FormUtils.h"
 #include "ElementsKernel/Exception.h"
 #include "Configuration/ConfigManager.h"
 #include "Configuration/CatalogConfig.h"
@@ -229,7 +231,8 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
     auto config_map = PhotometricCorrectionHandler::GetConfigurationMap(
         ui->txt_survey->text().toStdString(),
         ui->txt_FileName->text().toStdString(), max_iter_number,
-        ui->txt_Tolerence->text().toDouble(),
+
+        FormUtils::parseToDouble(ui->txt_Tolerence->text()),
         m_non_detection,
         ui->cb_SelectionMethod->currentText().toStdString(),
         ui->txt_grid->text().toStdString(),

@@ -3,9 +3,12 @@
 #include <QMessageBox>
 #include <QAbstractItemView>
 
+#include <QLocale>
+
 #include "PhzQtUI/DialogPhotCorrectionEdition.h"
 #include "ui_DialogPhotCorrectionEdition.h"
 #include "FileUtils.h"
+#include "FormUtils.h"
 #include "PhzQtUI/PhotometricCorrectionHandler.h"
 
 using namespace std;
@@ -95,9 +98,10 @@ void DialogPhotCorrectionEdition::on_btn_Save_clicked()
 {
     QStandardItemModel* model = static_cast<QStandardItemModel*>(ui->tableView->model());
     bool valid=true;
+    QLocale locale{};
     for (int i = 0; i< model->columnCount();++i){
          bool ok;
-         model->item(0,i)->text().toDouble(&ok);
+         locale.toDouble(model->item(0,i)->text(),&ok);
         valid= valid && ok;
     }
     if (!valid){
@@ -109,7 +113,8 @@ void DialogPhotCorrectionEdition::on_btn_Save_clicked()
 
       int i=0;
       for (auto& correction_pair : m_map){
-        correction_pair.second = model->item(0,i)->text().toDouble();
+        bool ok;
+        correction_pair.second = locale.toDouble(model->item(0,i)->text(),&ok);
         ++i;
       }
 

@@ -99,6 +99,7 @@ private:
     bool m_view_popup=false;
     bool m_singe_line=false;
 
+
     void turnControlsInEdition();
     void turnControlsInView();
 };
