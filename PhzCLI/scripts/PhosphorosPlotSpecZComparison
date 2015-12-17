@@ -360,7 +360,7 @@ if __name__ == '__main__':
     col_number = 2
     label = "PhotZ"
    
-    (specZ, colZ, data, mean, median, mad, sigma, outliersPercent,sigmaNoOutliers, meanNoOutliers) = compute_stats(table, col_number)
+    (specZ, colZ, data, mean, median, sigma, mad, outliersPercent,sigmaNoOutliers, meanNoOutliers) = compute_stats(table, col_number)
         
     # Plot distribution
     if args.display:
