@@ -283,6 +283,7 @@ def displaySpeczPhotz(ids, specz, photz, data):
         selected1.set_offsets([specz[index], photz[index]])
         selected2.set_visible(True)
         selected2.set_offsets([specz[index], data[index]])
+        plt.pause(.01)
         f.canvas.draw()
     f.updateSelected = lambda x: updateSelected(x)
     return f
