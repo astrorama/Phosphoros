@@ -20,6 +20,8 @@ elements_add_executable(PhosphorosDisplayModelGrid src/program/DisplayModelGrid.
                      LINK_LIBRARIES ElementsKernel Boost PhzCLI)
 elements_add_executable(PhosphorosComputeModelSed src/program/ComputeModelSed.cpp
                      LINK_LIBRARIES ElementsKernel Boost MathUtils PhzModeling PhzCLI)
+elements_add_executable(CreateFlatGridPrior src/program/CreateFlatGridPrior.cpp
+                     LINK_LIBRARIES ElementsKernel PhzCLI)
 
 elements_install_conf_files()
 
@@ -33,5 +35,8 @@ elements_add_unit_test(ComputeModelSedConfig_test tests/src/ComputeModelSedConfi
                      LINK_LIBRARIES PhzCLI
                      TYPE Boost)
 elements_add_unit_test(DisplayModelGridConfig_test tests/src/DisplayModelGridConfig_test.cpp 
+                     LINK_LIBRARIES PhzCLI
+                     TYPE Boost)
+elements_add_unit_test(CreateFlatGridPriorConfig_test tests/src/CreateFlatGridPriorConfig_test.cpp 
                      LINK_LIBRARIES PhzCLI
                      TYPE Boost)
