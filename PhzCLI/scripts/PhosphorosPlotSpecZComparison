@@ -42,10 +42,6 @@ def read_table(filename):
 
 def create_table(files, ids, specz, phz):
     tables = [read_table(f) for f in files]
-    if len(ids) == 1:
-        ids = [ids[0]] * len(tables)
-    if len(ids) != len(tables):
-        print 'Wrong number of ID column names (must much the number of tables)'
     for i, t in enumerate(tables):
         if not ids[i] in t.colnames:
             print 'Input catalog', files[i], 'does not have column', ids[i]
@@ -360,9 +356,15 @@ def main():
 if __name__ == '__main__':
             
     args = main()  
+
+    ids = args.id
+    if len(ids) == 1:
+        ids = [ids[0]] * len(args.files)
+    if len(ids) != len(args.files):
+        print 'Wrong number of ID column names (must much the number of catalogs or 1)'
     
     # Read input files
-    table, all_cols, orig_ids = create_table(args.files, args.id, args.specz, args.phz)
+    table, all_cols, orig_ids = create_table(args.files, ids, args.specz, args.phz)
 
     col_number = 2
     label = "PhotZ"
@@ -375,7 +377,7 @@ if __name__ == '__main__':
             fig2 = displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers)
             samp = None
             if args.samp:
-                samp = SampUpdater(args.files, args.id, table, orig_ids, (fig1, fig2))
+                samp = SampUpdater(args.files, ids, table, orig_ids, (fig1, fig2))
             selector = Selector((fig1, fig2, samp), table, all_cols, args.pdf)
             plt.show()
     
