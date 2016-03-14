@@ -198,7 +198,7 @@ def mainMethod(args):
         for metal_i, metal in enumerate(args.metalicities):
             for hf in args.hydrogen_factors:
                 for mf in args.metalic_factors:
-                    out_sed = adder(sed, metal, metal_i+2, 1., 1.4)
+                    out_sed = adder(sed, metal, metal_i+2, hf, mf)
                     t = table.Table(rows=out_sed, names=('Wave', 'Flux'))
                     t.write(os.path.join(out_dir, sed_file+'_'+str(metal)+'_'+str(hf)+'_'+str(mf)+'.sed'),
                             format='ascii.commented_header')
