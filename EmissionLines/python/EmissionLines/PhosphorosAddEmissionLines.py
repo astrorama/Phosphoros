@@ -46,32 +46,32 @@ def defineSpecificProgramOptions():
 
     parser.add_argument('--hydrogen-lines', default=None, type=str, metavar='FILE',
         help='The hydrogen lines file or OFF (default: $ELEMENTS_AUX_PATH/EmissionLines/hydrogen_lines.txt)')
-    parser.add_argument('--metalic-lines', default=None, type=str, metavar='FILE',
-        help='The metalic lines file or OFF (default: $ELEMENTS_AUX_PATH/EmissionLines/metalic_lines.txt)')
+    parser.add_argument('--metallic-lines', default=None, type=str, metavar='FILE',
+        help='The metallic lines file or OFF (default: $ELEMENTS_AUX_PATH/EmissionLines/metallic_lines.txt)')
     parser.add_argument('--hybrid-lines', default=None, type=str, metavar='FILE',
         help='The hybrid lines file or OFF (default: $ELEMENTS_AUX_PATH/EmissionLines/hybrid_lines.txt)')
-    parser.add_argument('--metalicities', default=[0.0004, 0.004, 0.01], type=float, nargs='+',
-        metavar='Z', help='The metalicities (in solar units) for each table column (default: 0.0004 0.004 0.01)')
+    parser.add_argument('--metallicities', default=[0.0004, 0.004, 0.01], type=float, nargs='+',
+        metavar='Z', help='The metallicities (in solar units) for each table column (default: 0.0004 0.004 0.01)')
     parser.add_argument('--first-metal-index', default=2, type=int,
-        help='The sindex of the first metalicity column')
+        help='The sindex of the first metallicity column')
     parser.add_argument('--ionized-photons', default=None, type=str, metavar='FILE',
-        help='The metalicity to ionized photons table (default: $ELEMENTS_AUX_PATH/EmissionLines/ionized-photons.txt)')
+        help='The metallicity to ionized photons table (default: $ELEMENTS_AUX_PATH/EmissionLines/ionized-photons.txt)')
     parser.add_argument('--sed-dir', required=True, type=str, metavar='DIR',
         help='The directory containing the SEDs to add the mission lines on')
     parser.add_argument('--hydrogen-factors', default=[0.5, 1.], type=float, nargs='+',
         help='The differnet factors of the hydrogen lines')
-    parser.add_argument('--metalic-factors', default=[0.3, 1., 2.], type=float, nargs='+',
-        help='The differnet factors (relative to H lines) of the metalic lines')
+    parser.add_argument('--metallic-factors', default=[0.3, 1., 2.], type=float, nargs='+',
+        help='The differnet factors (relative to H lines) of the metallic lines')
 
     return parser
 
 
-def readLinesFromFiles(hydrogen_file, metalic_file, hybrid_file):
+def readLinesFromFiles(hydrogen_file, metallic_file, hybrid_file):
     
     if hydrogen_file == None:
         hydrogen_file = aux_dir + os.path.sep + 'hydrogen_lines.txt'
-    if metalic_file == None:
-        metalic_file = aux_dir + os.path.sep + 'metalic_lines.txt'
+    if metallic_file == None:
+        metallic_file = aux_dir + os.path.sep + 'metallic_lines.txt'
     if hybrid_file == None:
         hybrid_file = aux_dir + os.path.sep + 'hybrid_lines.txt'
         
@@ -79,23 +79,23 @@ def readLinesFromFiles(hydrogen_file, metalic_file, hybrid_file):
         hydrogen_lines = []
     else:
         hydrogen_lines = table.Table.read(hydrogen_file, format='ascii')
-    if metalic_file == 'OFF':
-        metalic_lines = []
+    if metallic_file == 'OFF':
+        metallic_lines = []
     else:
-        metalic_lines = table.Table.read(metalic_file, format='ascii')
+        metallic_lines = table.Table.read(metallic_file, format='ascii')
     if hybrid_file == 'OFF':
         hybrid_lines = []
     else:
         hybrid_lines = table.Table.read(hybrid_file, format='ascii')
     
-    if len(hydrogen_lines) != 0 and len(metalic_lines) != 0 and len(hydrogen_lines.colnames) != len(metalic_lines.colnames):
-        logger.info('Different number of columns in files '+hydrogen_file+' and '+metalic_file)
-    if len(hybrid_lines) != 0 and len(metalic_lines) != 0 and len(hybrid_lines.colnames) != len(metalic_lines.colnames):
-        logger.info('Different number of columns in files '+hybrid_file+' and '+metalic_file)
+    if len(hydrogen_lines) != 0 and len(metallic_lines) != 0 and len(hydrogen_lines.colnames) != len(metallic_lines.colnames):
+        logger.info('Different number of columns in files '+hydrogen_file+' and '+metallic_file)
+    if len(hybrid_lines) != 0 and len(metallic_lines) != 0 and len(hybrid_lines.colnames) != len(metallic_lines.colnames):
+        logger.info('Different number of columns in files '+hybrid_file+' and '+metallic_file)
     if len(hydrogen_lines) != 0 and len(hybrid_lines) != 0 and len(hydrogen_lines.colnames) != len(hybrid_lines.colnames):
         logger.info('Different number of columns in files '+hydrogen_file+' and '+hybrid_file)
     
-    return hydrogen_lines, metalic_lines, hybrid_lines
+    return hydrogen_lines, metallic_lines, hybrid_lines
 
 
 def readIonizedPhotonsFromFile(ionized_photons_file):
@@ -139,10 +139,10 @@ def loadSed(filename):
 
 class EmissionLinesAdder(object):
     
-    def __init__(self, ionized_photons_func, hydrogen_lines, metalic_lines, hybrid_lines):
+    def __init__(self, ionized_photons_func, hydrogen_lines, metallic_lines, hybrid_lines):
         self.ionized_photons_func = ionized_photons_func
         self.hydrogen_lines = hydrogen_lines
-        self.metalic_lines = metalic_lines
+        self.metallic_lines = metallic_lines
         self.hybrid_lines = hybrid_lines
         
     def _addSingleLine(self, sed, flux, wavelength):
@@ -173,7 +173,7 @@ class EmissionLinesAdder(object):
         if b != sed[i][0]:
             sed.insert(i, (b, b_value))
             
-    def __call__(self, sed, metal, metal_index, hydrogen_factor, metalic_factor):
+    def __call__(self, sed, metal, metal_index, hydrogen_factor, metallic_factor):
         lym_cont = sed.func(1500) * self.ionized_photons_func(metal)
         h_beta_flux = lym_cont * 4.757E-13 * hydrogen_factor
         result = sed.data[:]
@@ -181,11 +181,11 @@ class EmissionLinesAdder(object):
             wavelength = l[1]
             flux = h_beta_flux * l[metal_index]
             self._addSingleLine(result, flux, wavelength)
-        for l in self.metalic_lines:
+        for l in self.metallic_lines:
             wavelength = l[1]
-            flux = h_beta_flux * l[metal_index] * metalic_factor
+            flux = h_beta_flux * l[metal_index] * metallic_factor
             self._addSingleLine(result, flux, wavelength)
-        hybrid_factor = (metalic_factor - 1) / 2 + 1
+        hybrid_factor = (metallic_factor - 1) / 2 + 1
         for l in self.hybrid_lines:
             wavelength = l[1]
             flux = h_beta_flux * l[metal_index] * hybrid_factor
@@ -195,9 +195,9 @@ class EmissionLinesAdder(object):
 
 def mainMethod(args):
 
-    hydrogen_lines, metalic_lines, hybrid_lines = readLinesFromFiles(args.hydrogen_lines, args.metalic_lines, args.hybrid_lines)
+    hydrogen_lines, metallic_lines, hybrid_lines = readLinesFromFiles(args.hydrogen_lines, args.metallic_lines, args.hybrid_lines)
     ionized_photons_func = readIonizedPhotonsFromFile(args.ionized_photons)
-    adder = EmissionLinesAdder(ionized_photons_func, hydrogen_lines, metalic_lines, hybrid_lines)
+    adder = EmissionLinesAdder(ionized_photons_func, hydrogen_lines, metallic_lines, hybrid_lines)
     
     sed_dir = getSedDir(args.sed_dir)
     out_dir = sed_dir + '_el'
@@ -208,9 +208,9 @@ def mainMethod(args):
     for sed_file in os.listdir(sed_dir):
         logger.info('Handling SED '+sed_file)
         sed = loadSed(os.path.join(sed_dir, sed_file))
-        for metal_i, metal in enumerate(args.metalicities):
+        for metal_i, metal in enumerate(args.metallicities):
             for hf in args.hydrogen_factors:
-                for mf in args.metalic_factors:
+                for mf in args.metallic_factors:
                     out_sed = adder(sed, metal, metal_i+args.first_metal_index, hf, mf)
                     t = table.Table(rows=out_sed, names=('Wave', 'Flux'))
                     t.write(os.path.join(out_dir, sed_file+'_'+str(metal)+'_'+str(hf)+'_'+str(mf)+'.sed'),
