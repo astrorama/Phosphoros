@@ -45,11 +45,11 @@ def defineSpecificProgramOptions():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--hydrogen-lines', default=None, type=str, metavar='FILE',
-        help='The hydrogen lines file (default: $ELEMENTS_AUX_PATH/EmissionLines/hydrogen_lines.txt)')
+        help='The hydrogen lines file or OFF (default: $ELEMENTS_AUX_PATH/EmissionLines/hydrogen_lines.txt)')
     parser.add_argument('--metalic-lines', default=None, type=str, metavar='FILE',
-        help='The metalic lines file (default: $ELEMENTS_AUX_PATH/EmissionLines/metalic_lines.txt)')
+        help='The metalic lines file or OFF (default: $ELEMENTS_AUX_PATH/EmissionLines/metalic_lines.txt)')
     parser.add_argument('--hybrid-lines', default=None, type=str, metavar='FILE',
-        help='The hybrid lines file (default: $ELEMENTS_AUX_PATH/EmissionLines/hybrid_lines.txt)')
+        help='The hybrid lines file or OFF (default: $ELEMENTS_AUX_PATH/EmissionLines/hybrid_lines.txt)')
     parser.add_argument('--metalicities', default=[0.0004, 0.004, 0.01], type=float, nargs='+',
         metavar='Z', help='The metalicities (in solar units) for each table column (default: 0.0004 0.004 0.01)')
     parser.add_argument('--ionized-photons', default=None, type=str, metavar='FILE',
@@ -73,14 +73,25 @@ def readLinesFromFiles(hydrogen_file, metalic_file, hybrid_file):
     if hybrid_file == None:
         hybrid_file = aux_dir + os.path.sep + 'hybrid_lines.txt'
         
-    hydrogen_lines = table.Table.read(hydrogen_file, format='ascii')
-    metalic_lines = table.Table.read(metalic_file, format='ascii')
-    hybrid_lines = table.Table.read(hybrid_file, format='ascii')
+    if hydrogen_file == 'OFF':
+        hydrogen_lines = []
+    else:
+        hydrogen_lines = table.Table.read(hydrogen_file, format='ascii')
+    if metalic_file == 'OFF':
+        metalic_lines = []
+    else:
+        metalic_lines = table.Table.read(metalic_file, format='ascii')
+    if hybrid_file == 'OFF':
+        hybrid_lines = []
+    else:
+        hybrid_lines = table.Table.read(hybrid_file, format='ascii')
     
-    if len(hydrogen_lines.colnames) != len(metalic_lines.colnames):
+    if len(hydrogen_lines) != 0 and len(metalic_lines) != 0 and len(hydrogen_lines.colnames) != len(metalic_lines.colnames):
         logger.info('Different number of columns in files '+hydrogen_file+' and '+metalic_file)
-    if len(hybrid_lines.colnames) != len(metalic_lines.colnames):
+    if len(hybrid_lines) != 0 and len(metalic_lines) != 0 and len(hybrid_lines.colnames) != len(metalic_lines.colnames):
         logger.info('Different number of columns in files '+hybrid_file+' and '+metalic_file)
+    if len(hydrogen_lines) != 0 and len(hybrid_lines) != 0 and len(hydrogen_lines.colnames) != len(hybrid_lines.colnames):
+        logger.info('Different number of columns in files '+hydrogen_file+' and '+hybrid_file)
     
     return hydrogen_lines, metalic_lines, hybrid_lines
 
