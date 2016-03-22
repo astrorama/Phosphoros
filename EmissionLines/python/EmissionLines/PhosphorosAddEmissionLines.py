@@ -52,6 +52,8 @@ def defineSpecificProgramOptions():
         help='The hybrid lines file or OFF (default: $ELEMENTS_AUX_PATH/EmissionLines/hybrid_lines.txt)')
     parser.add_argument('--metalicities', default=[0.0004, 0.004, 0.01], type=float, nargs='+',
         metavar='Z', help='The metalicities (in solar units) for each table column (default: 0.0004 0.004 0.01)')
+    parser.add_argument('--first-metal-index', default=2, type=int,
+        help='The sindex of the first metalicity column')
     parser.add_argument('--ionized-photons', default=None, type=str, metavar='FILE',
         help='The metalicity to ionized photons table (default: $ELEMENTS_AUX_PATH/EmissionLines/ionized-photons.txt)')
     parser.add_argument('--sed-dir', required=True, type=str, metavar='DIR',
@@ -209,7 +211,7 @@ def mainMethod(args):
         for metal_i, metal in enumerate(args.metalicities):
             for hf in args.hydrogen_factors:
                 for mf in args.metalic_factors:
-                    out_sed = adder(sed, metal, metal_i+2, hf, mf)
+                    out_sed = adder(sed, metal, metal_i+args.first_metal_index, hf, mf)
                     t = table.Table(rows=out_sed, names=('Wave', 'Flux'))
                     t.write(os.path.join(out_dir, sed_file+'_'+str(metal)+'_'+str(hf)+'_'+str(mf)+'.sed'),
                             format='ascii.commented_header')
