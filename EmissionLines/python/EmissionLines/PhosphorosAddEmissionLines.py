@@ -31,6 +31,7 @@ import argparse
 import os
 import math
 import astropy.table as table
+import numpy as np
 from scipy.interpolate import interp1d
 import ElementsKernel.Logging as log
 
@@ -48,8 +49,6 @@ def defineSpecificProgramOptions():
         help='The hydrogen lines file or OFF (default: $ELEMENTS_AUX_PATH/EmissionLines/hydrogen_lines.txt)')
     parser.add_argument('--metallic-lines', default=None, type=str, metavar='FILE',
         help='The metallic lines file or OFF (default: $ELEMENTS_AUX_PATH/EmissionLines/metallic_lines.txt)')
-    parser.add_argument('--hybrid-lines', default=None, type=str, metavar='FILE',
-        help='The hybrid lines file or OFF (default: $ELEMENTS_AUX_PATH/EmissionLines/hybrid_lines.txt)')
     parser.add_argument('--metallicities', default=[0.0004, 0.004, 0.01], type=float, nargs='+',
         metavar='Z', help='The metallicities (in solar units) for each table column (default: 0.0004 0.004 0.01)')
     parser.add_argument('--first-metal-index', default=2, type=int,
@@ -66,14 +65,12 @@ def defineSpecificProgramOptions():
     return parser
 
 
-def readLinesFromFiles(hydrogen_file, metallic_file, hybrid_file):
+def readLinesFromFiles(hydrogen_file, metallic_file):
     
     if hydrogen_file == None:
         hydrogen_file = aux_dir + os.path.sep + 'hydrogen_lines.txt'
     if metallic_file == None:
         metallic_file = aux_dir + os.path.sep + 'metallic_lines.txt'
-    if hybrid_file == None:
-        hybrid_file = aux_dir + os.path.sep + 'hybrid_lines.txt'
         
     if hydrogen_file == 'OFF':
         hydrogen_lines = []
@@ -83,19 +80,11 @@ def readLinesFromFiles(hydrogen_file, metallic_file, hybrid_file):
         metallic_lines = []
     else:
         metallic_lines = table.Table.read(metallic_file, format='ascii')
-    if hybrid_file == 'OFF':
-        hybrid_lines = []
-    else:
-        hybrid_lines = table.Table.read(hybrid_file, format='ascii')
     
     if len(hydrogen_lines) != 0 and len(metallic_lines) != 0 and len(hydrogen_lines.colnames) != len(metallic_lines.colnames):
         logger.info('Different number of columns in files '+hydrogen_file+' and '+metallic_file)
-    if len(hybrid_lines) != 0 and len(metallic_lines) != 0 and len(hybrid_lines.colnames) != len(metallic_lines.colnames):
-        logger.info('Different number of columns in files '+hybrid_file+' and '+metallic_file)
-    if len(hydrogen_lines) != 0 and len(hybrid_lines) != 0 and len(hydrogen_lines.colnames) != len(hybrid_lines.colnames):
-        logger.info('Different number of columns in files '+hydrogen_file+' and '+hybrid_file)
     
-    return hydrogen_lines, metallic_lines, hybrid_lines
+    return hydrogen_lines, metallic_lines
 
 
 def readIonizedPhotonsFromFile(ionized_photons_file):
@@ -139,39 +128,43 @@ def loadSed(filename):
 
 class EmissionLinesAdder(object):
     
-    def __init__(self, ionized_photons_func, hydrogen_lines, metallic_lines, hybrid_lines):
+    def __init__(self, ionized_photons_func, hydrogen_lines, metallic_lines):
         self.ionized_photons_func = ionized_photons_func
         self.hydrogen_lines = hydrogen_lines
         self.metallic_lines = metallic_lines
-        self.hybrid_lines = hybrid_lines
-        
+
     def _addSingleLine(self, sed, flux, wavelength):
-        i = 0
-        for pair in sed:
-            if pair[0] > wavelength:
-                break
-            i = i + 1
+
+        # Compute the range where we add the line flux
         a = wavelength - 1
         b = wavelength + 1
-        if a <= sed[i-1][0]:
-            b = b + sed[i-1][0] - a
-            a = sed[i-1][0]
-        if b >= sed[i][0]:
-            a = a + sed[i][0] - b
-            b = sed[i][0]
-        if a < sed[i-1][0] or b > sed[i][0]:
-            raise Exception('Too small wavelength step to add emission line')
-        total = sed[i][0] - sed[i-1][0]
-        a_value = sed[i-1][1] * (sed[i][0] - a) / total + sed[i][1] * (a - sed[i-1][0]) / total
-        b_value = sed[i-1][1] * (sed[i][0] - b) / total + sed[i][1] * (b - sed[i-1][0]) / total
-        line_value = flux + (a_value + b_value) / 2.
-        if a != sed[i-1][0]:
-            sed.insert(i, (a, a_value))
-            i = i + 1
-        sed.insert(i, (wavelength, line_value))
-        i = i + 1
-        if b != sed[i][0]:
-            sed.insert(i, (b, b_value))
+
+        # Split the parts of the sed that are not afffected by the line
+        before = [x for x in sed if x[0] < a]
+        after = [x for x in sed if x[0] > b]
+        middle = [x for x in sed if x[0] >= a and x[0] <= b]
+
+        # Compute all the knots of the part which is affected by the line by
+        # combining the ones necessary for the line and the sed middle knots
+        xs = set([x[0] for x in middle])
+        xs.add(a)
+        xs.add(b)
+        xs.add(wavelength)
+        xs = sorted(xs)
+
+        # Compute the interpolated middle part of the sed
+        sed_ys = np.interp(xs, [x for x,y in sed], [y for x,y in sed])
+
+        # Compute the emission line points
+        line_ys = [(x-a)*flux for x in xs if x<=wavelength] + [(b-x)*flux for x in xs if x>wavelength]
+
+        # Create and return the final sed
+        ys = [y1+y2 for y1,y2 in zip(sed_ys, line_ys)]
+        middle = list(zip(xs, ys))
+        del sed[:]
+        sed.extend(before)
+        sed.extend(middle)
+        sed.extend(after)
             
     def __call__(self, sed, metal, metal_index, hydrogen_factor, metallic_factor):
         lym_cont = sed.func(1500) * self.ionized_photons_func(metal)
@@ -185,19 +178,14 @@ class EmissionLinesAdder(object):
             wavelength = l[1]
             flux = h_beta_flux * l[metal_index] * metallic_factor
             self._addSingleLine(result, flux, wavelength)
-        hybrid_factor = (metallic_factor - 1) / 2 + 1
-        for l in self.hybrid_lines:
-            wavelength = l[1]
-            flux = h_beta_flux * l[metal_index] * hybrid_factor
-            self._addSingleLine(result, flux, wavelength)
         return result
 
 
 def mainMethod(args):
 
-    hydrogen_lines, metallic_lines, hybrid_lines = readLinesFromFiles(args.hydrogen_lines, args.metallic_lines, args.hybrid_lines)
+    hydrogen_lines, metallic_lines = readLinesFromFiles(args.hydrogen_lines, args.metallic_lines)
     ionized_photons_func = readIonizedPhotonsFromFile(args.ionized_photons)
-    adder = EmissionLinesAdder(ionized_photons_func, hydrogen_lines, metallic_lines, hybrid_lines)
+    adder = EmissionLinesAdder(ionized_photons_func, hydrogen_lines, metallic_lines)
     
     sed_dir = getSedDir(args.sed_dir)
     out_dir = sed_dir + '_el'
