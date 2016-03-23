@@ -61,6 +61,8 @@ def defineSpecificProgramOptions():
         help='The differnet factors of the hydrogen lines')
     parser.add_argument('--metallic-factors', default=[0.3, 1., 2.], type=float, nargs='+',
         help='The differnet factors (relative to H lines) of the metallic lines')
+    parser.add_argument('--velocity', default=None, type=float,
+        help='The velocity (in km/s) to compute the FWHM of the lines from (defaults to dirac)')
 
     return parser
 
@@ -128,16 +130,57 @@ def loadSed(filename):
 
 class EmissionLinesAdder(object):
     
-    def __init__(self, ionized_photons_func, hydrogen_lines, metallic_lines):
+    class Dirac(object):
+        
+        def getRange(self, wavelength):
+            self.a = wavelength - 1
+            self.b = wavelength + 1
+            self.wavelength = wavelength
+            return self.a, self.b
+        
+        def addKnots(self, xs):
+            xs.add(self.a)
+            xs.add(self.b)
+            xs.add(self.wavelength)
+            
+        def getValues(self, xs, flux):
+            low = [(x-self.a)*flux for x in xs if x<=self.wavelength]
+            high = [(self.b-x)*flux for x in xs if x>self.wavelength]
+            return low + high
+        
+    class Gaussian(object):
+        
+        def __init__(self, velocity):
+            self.velocity = velocity
+        
+        def getRange(self, wavelength):
+            self.fwhm = wavelength * self.velocity / 299792.458 # lambda * v / c
+            self.a = wavelength - 2 * self.fwhm
+            self.b = wavelength + 2 * self.fwhm
+            self.sigma = self.fwhm / 2.355
+            self.mu = wavelength
+            return self.a, self.b
+        
+        def addKnots(self, xs):
+            for x in np.linspace(self.a, self.b, 31):
+                xs.add(x)
+            
+        def getValues(self, xs, flux):
+            return [flux*np.exp(-np.power((x-self.mu), 2.)/(2*np.power(self.sigma, 2.)))/(self.sigma*np.sqrt(2*np.pi)) for x in xs]
+    
+    def __init__(self, ionized_photons_func, hydrogen_lines, metallic_lines, velocity):
         self.ionized_photons_func = ionized_photons_func
         self.hydrogen_lines = hydrogen_lines
         self.metallic_lines = metallic_lines
+        if (velocity == None):
+            self.handler = EmissionLinesAdder.Dirac()
+        else:
+            self.handler = EmissionLinesAdder.Gaussian(velocity)
 
     def _addSingleLine(self, sed, flux, wavelength):
 
         # Compute the range where we add the line flux
-        a = wavelength - 1
-        b = wavelength + 1
+        a,b = self.handler.getRange(wavelength)
 
         # Split the parts of the sed that are not afffected by the line
         before = [x for x in sed if x[0] < a]
@@ -147,16 +190,14 @@ class EmissionLinesAdder(object):
         # Compute all the knots of the part which is affected by the line by
         # combining the ones necessary for the line and the sed middle knots
         xs = set([x[0] for x in middle])
-        xs.add(a)
-        xs.add(b)
-        xs.add(wavelength)
+        self.handler.addKnots(xs)
         xs = sorted(xs)
 
         # Compute the interpolated middle part of the sed
         sed_ys = np.interp(xs, [x for x,y in sed], [y for x,y in sed])
 
         # Compute the emission line points
-        line_ys = [(x-a)*flux for x in xs if x<=wavelength] + [(b-x)*flux for x in xs if x>wavelength]
+        line_ys = self.handler.getValues(xs, flux)
 
         # Create and return the final sed
         ys = [y1+y2 for y1,y2 in zip(sed_ys, line_ys)]
@@ -185,7 +226,7 @@ def mainMethod(args):
 
     hydrogen_lines, metallic_lines = readLinesFromFiles(args.hydrogen_lines, args.metallic_lines)
     ionized_photons_func = readIonizedPhotonsFromFile(args.ionized_photons)
-    adder = EmissionLinesAdder(ionized_photons_func, hydrogen_lines, metallic_lines)
+    adder = EmissionLinesAdder(ionized_photons_func, hydrogen_lines, metallic_lines, args.velocity)
     
     sed_dir = getSedDir(args.sed_dir)
     out_dir = sed_dir + '_el'
