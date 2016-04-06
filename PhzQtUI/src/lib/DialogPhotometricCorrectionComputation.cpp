@@ -37,7 +37,7 @@ DialogPhotometricCorrectionComputation::DialogPhotometricCorrectionComputation(
     QWidget *parent) :
     QDialog(parent), ui(new Ui::DialogPhotometricCorrectionComputation) {
   ui->setupUi(this);
-
+  m_non_detection=0.;
   ui->txt_Iteration->setValidator(new QIntValidator(1, 1000, this));
   ui->txt_Tolerence->setValidator(new QDoubleValidator(0, 1, 8, this));
   

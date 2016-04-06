@@ -173,7 +173,7 @@ void ParameterRule::setExcludedReddenings( vector<string> excluded_reddening){
     m_excluded_reddening=move(excluded_reddening);
 }
 
-const bool ParameterRule::hasEbvRange() const{
+bool ParameterRule::hasEbvRange() const{
   return m_has_ebv_range;
 }
 
@@ -189,7 +189,7 @@ void ParameterRule::setEbvValues(std::set<double> values){
   m_ebv_value = move(values);
 }
 
-const bool ParameterRule::hasRedshiftRange() const{
+bool ParameterRule::hasRedshiftRange() const{
   return m_has_redshift_range;
 }
 

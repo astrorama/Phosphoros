@@ -45,6 +45,8 @@ DialogLuminosityPrior::DialogLuminosityPrior(QWidget *parent) :
         ui(new Ui::DialogLuminosityPrior){
   ui->setupUi(this);
   ui->frame_Luminosity->setStyleSheet( "background-color: white ");
+  m_z_min = 0.;
+  m_z_max = 3000.;
 }
 
 DialogLuminosityPrior::~DialogLuminosityPrior() {}

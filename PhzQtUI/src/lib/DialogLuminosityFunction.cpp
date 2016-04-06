@@ -21,6 +21,8 @@ DialogLuminosityFunction::DialogLuminosityFunction(QWidget *parent) :
         ui(new Ui::DialogLuminosityFunction)
     {
        ui->setupUi(this);
+       m_x=0;
+       m_y=0;
 }
 
 DialogLuminosityFunction::~DialogLuminosityFunction() {}

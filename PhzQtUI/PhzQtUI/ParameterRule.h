@@ -103,7 +103,7 @@ public:
     void setExcludedReddenings( std::vector<std::string> excluded_reddening);
 
 
-    const bool hasEbvRange() const;
+    bool hasEbvRange() const;
 
     void setHasEbvRange(bool has_range);
 
@@ -112,7 +112,7 @@ public:
     void setEbvValues(std::set<double> values);
 
 
-    const bool hasRedshiftRange() const;
+    bool hasRedshiftRange() const;
 
     void setHasRedshiftRange(bool has_range);
 
