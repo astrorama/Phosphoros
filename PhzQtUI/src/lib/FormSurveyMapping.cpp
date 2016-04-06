@@ -48,11 +48,19 @@ void FormSurveyMapping::loadMappingPage(std::string new_path){
      ui->cb_SourceId->clear();
      ui->cb_SourceId->addItem("");
 
+     disconnect(ui->table_Map->selectionModel(),SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),0,0);
      connect(
        ui->table_Map->selectionModel(),
        SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
        SLOT(filterMappingSelectionChanged(QModelIndex, QModelIndex))
       );
+
+     disconnect(ui->table_Map,SIGNAL(doubleClicked (QModelIndex)),0,0);
+     connect(
+            ui->table_Map,
+            SIGNAL(doubleClicked (QModelIndex)),
+            SLOT(mappingGridDoubleClicked(QModelIndex))
+           );
 
      ui->table_Map->clearSelection() ;
      FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
@@ -205,6 +213,11 @@ void FormSurveyMapping::on_btn_MapEdit_clicked()
     setFilterMappingInEdition();
 }
 
+void FormSurveyMapping::mappingGridDoubleClicked(QModelIndex)
+{
+   setFilterMappingInEdition();
+}
+
 void FormSurveyMapping::on_btn_newCat_clicked(){
   std::unique_ptr<DialogCatalogName> popUp(new DialogCatalogName());
   connect(
@@ -254,6 +267,8 @@ void FormSurveyMapping::on_btn_MapCancel_clicked()
         ui->table_Filter->setModel(filter_model);
         ui->tb_df->setText(QString::fromStdString(m_default_survey));
     }
+
+
 
     setFilterMappingInView();
 }
@@ -342,9 +357,15 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
   ui->table_Filter->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->table_Filter->update(QModelIndex());
 
+  disconnect(ui->table_Filter->selectionModel(),SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),0,0);
   connect(ui->table_Filter->selectionModel(),
-      SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
-      SLOT(filterSelectionChanged(QModelIndex, QModelIndex)));
+              SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
+              SLOT(filterSelectionChanged(QModelIndex, QModelIndex)));
+
+  disconnect(ui->table_Filter,SIGNAL(doubleClicked(QModelIndex)),0,0);
+  connect(ui->table_Filter,
+              SIGNAL(doubleClicked(QModelIndex)),
+              SLOT(filterGridDoubleClicked(QModelIndex)));
 
   setFilterMappingInView();
 }
@@ -386,7 +407,10 @@ void FormSurveyMapping::on_btn_AddFilter_clicked()
 
     popUp->exec();
 }
-
+void FormSurveyMapping::filterGridDoubleClicked(QModelIndex)
+{
+  on_btn_BtnEditFilter_clicked();
+}
 void FormSurveyMapping::on_btn_BtnEditFilter_clicked()
 {
      m_filterInsert=false;

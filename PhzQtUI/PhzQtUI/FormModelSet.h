@@ -33,6 +33,10 @@ signals:
 private slots:
     void setSelectionChanged(QModelIndex, QModelIndex);
 
+    void setGridDoubleClicked(QModelIndex);
+
+    void parameterGridDoubleClicked(QModelIndex);
+
     void setEditionPopupClosing(std::map<int,ParameterRule>);
 
     void on_btn_SetEdit_clicked();

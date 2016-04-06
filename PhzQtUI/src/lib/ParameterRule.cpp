@@ -72,6 +72,7 @@ long  ParameterRule::getSedNumber() const{
 }
 
 
+
 long long ParameterRule::getModelNumber() const {
 
   bool is_zero=false;
@@ -95,22 +96,41 @@ long long ParameterRule::getModelNumber() const {
   is_zero |=reds.size()==0;
   options["reddening-curve-name"].value() = boost::any(reds);
 
-  vector<string> z_range_vector;
-  is_zero |=Elements::isEqual(m_redshift_range.getMin(),m_redshift_range.getMax()) && Elements::isEqual(m_redshift_range.getStep(),0.);
-  string z_range=""+to_string(m_redshift_range.getMin())+" "
-      +to_string(m_redshift_range.getMax())+" "
-      +to_string(m_redshift_range.getStep());
-  z_range_vector.push_back(z_range);
-  options["z-range"].value() = boost::any(z_range_vector);
 
-  vector<string> ebv_range_vector;
-  is_zero |=Elements::isEqual(m_ebv_range.getMin(),m_ebv_range.getMax()) && Elements::isEqual(m_ebv_range.getStep(),0.);
+  if (m_has_redshift_range){
+    vector<string> z_range_vector;
+    is_zero |=Elements::isEqual(m_redshift_range.getMin(),m_redshift_range.getMax()) && Elements::isEqual(m_redshift_range.getStep(),0.);
+    string z_range=""+to_string(m_redshift_range.getMin())+" "
+        +to_string(m_redshift_range.getMax())+" "
+        +to_string(m_redshift_range.getStep());
+    z_range_vector.push_back(z_range);
+    options["z-range"].value() = boost::any(z_range_vector);
+  } else {
+    vector<string> z_value_vector;
+    for (auto& value : m_redshift_value){
+      z_value_vector.push_back(std::to_string(value));
+    }
+    options["z-value"].value() = boost::any(z_value_vector);
+  }
 
-  string ebv_range=""+to_string(m_ebv_range.getMin())+" "
-      +to_string(m_ebv_range.getMax())+" "
-      +to_string(m_ebv_range.getStep());
-  ebv_range_vector.push_back(ebv_range);
-  options["ebv-range"].value() = boost::any(ebv_range_vector);
+  if (m_has_ebv_range){
+    vector<string> ebv_range_vector;
+    is_zero |=Elements::isEqual(m_ebv_range.getMin(),m_ebv_range.getMax()) && Elements::isEqual(m_ebv_range.getStep(),0.);
+
+    string ebv_range=""+to_string(m_ebv_range.getMin())+" "
+        +to_string(m_ebv_range.getMax())+" "
+        +to_string(m_ebv_range.getStep());
+    ebv_range_vector.push_back(ebv_range);
+    options["ebv-range"].value() = boost::any(ebv_range_vector);
+  } else {
+
+    vector<string> ebv_value_vector;
+    for(auto& value : m_ebv_value){
+      ebv_value_vector.push_back(std::to_string(value));
+    }
+    options["ebv-value"].value() = boost::any(ebv_value_vector);
+  }
+
 
   if (is_zero){
     return 0;
@@ -148,8 +168,41 @@ const vector<string>& ParameterRule::getExcludedReddenings() const{
 void ParameterRule::setExcludedSeds( vector<string> excluded_sed){
     m_excluded_sed=move(excluded_sed);
 }
+
 void ParameterRule::setExcludedReddenings( vector<string> excluded_reddening){
     m_excluded_reddening=move(excluded_reddening);
+}
+
+const bool ParameterRule::hasEbvRange() const{
+  return m_has_ebv_range;
+}
+
+void ParameterRule::setHasEbvRange(bool has_range){
+  m_has_ebv_range = has_range;
+}
+
+const std::set<double>& ParameterRule::getEbvValues() const{
+  return m_ebv_value;
+}
+
+void ParameterRule::setEbvValues(std::set<double> values){
+  m_ebv_value = move(values);
+}
+
+const bool ParameterRule::hasRedshiftRange() const{
+  return m_has_redshift_range;
+}
+
+void ParameterRule::setHasRedshiftRange(bool has_range){
+  m_has_redshift_range = has_range;
+}
+
+const std::set<double>& ParameterRule::getRedshiftValues() const{
+  return m_redshift_value;
+}
+
+void ParameterRule::setRedshiftValues(std::set<double> values){
+  m_redshift_value = move(values);
 }
 
 const Range& ParameterRule::getEbvRange() const{
@@ -162,6 +215,7 @@ const Range& ParameterRule::getZRange() const{
 void ParameterRule::setEbvRange(Range ebv_range){
     m_ebv_range=move(ebv_range);
 }
+
 void ParameterRule::setZRange(Range z_range){
     m_redshift_range=move(z_range);
 }

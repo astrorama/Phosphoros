@@ -2,6 +2,7 @@
 #define PARAMETERRULETABLE_H
 
 #include <QTableView>
+#include <set>
 #include "ParameterRule.h"
 #include "ParameterRuleModel.h"
 
@@ -57,6 +58,13 @@ public:
         * @param zRange
         */
        void setRangesToSelectedRule(Range ebvRange, Range zRange);
+
+       void setRedshiftRangeToSelectedRule(Range range);
+       void setEbvRangeToSelectedRule(Range range);
+       void setHasEbvRangeToSelectedRule(bool has_range);
+       void setHasRedshiftRangeToSelectedRule(bool has_range);
+       void setEbvValuesToSelectedRule(std::set<double> values);
+       void setRedshiftValuesToSelectedRule(std::set<double> values);
 
        /**
         * @brief Push the SED root object and SED excluded path to the selected ParameterRule.

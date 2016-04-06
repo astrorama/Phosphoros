@@ -57,6 +57,9 @@ private slots:
       */
      void selectionChanged(QModelIndex, QModelIndex);
 
+
+     void setGridDoubleClicked(QModelIndex);
+
      /**
       * @brief SLOT on_buttonBox_rejected: The user close the popup, build the new ParameterRules map
       * and rise the SIGNAL popupClosing
@@ -93,11 +96,30 @@ private slots:
       */
      void on_btn_save_clicked();
 
+     void set_Checked_ebv_value(bool);
+     void set_Checked_ebv_range(bool);
+     void set_Checked_red_value(bool);
+     void set_Checked_red_range(bool);
+
+
+     void on_btn_add_z_clicked();
+     void onDeleteZClicked(size_t index,size_t );
+     void on_btn_add_ebv_clicked();
+     void onDeleteEbvClicked(size_t index,size_t );
+
 private:
     std::unique_ptr<Ui::DialogModelSet> ui;
     bool m_insert=false;
     bool m_view_popup=false;
     bool m_singe_line=false;
+
+    std::set<double> m_current_z_values{};
+    std::set<double> m_current_ebv_values{};
+
+    void refreshZValues();
+    void addZValues(std::set<double> values);
+    void refreshEbvValues();
+    void addEbvValues(std::set<double> values);
 
 
     void turnControlsInEdition();

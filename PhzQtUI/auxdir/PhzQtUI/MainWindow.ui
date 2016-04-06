@@ -193,7 +193,7 @@
              <string>Define the Mapping between the catalog file(s) columns and the filters</string>
             </property>
             <property name="text">
-             <string>Catalog Type Definition †</string>
+             <string>Catalog Definition †</string>
             </property>
            </widget>
           </item>
@@ -339,11 +339,6 @@
          </layout>
         </item>
        </layout>
-       <zorder>label</zorder>
-       <zorder>label_2</zorder>
-       <zorder>label_3</zorder>
-       <zorder>label_4</zorder>
-       <zorder>btn_HomeToModel</zorder>
       </widget>
       <widget class="QWidget" name="page_2">
        <layout class="QVBoxLayout" name="verticalLayout_6">

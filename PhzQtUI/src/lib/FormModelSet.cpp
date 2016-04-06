@@ -30,14 +30,29 @@ void FormModelSet::loadSetPage(){
 
     ui->tableView_Set->loadFromPath(FileUtils::getModelRootPath(true));
 
+    disconnect(ui->tableView_Set->selectionModel(),SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),0,0);
     connect(
       ui->tableView_Set->selectionModel(),
       SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
       SLOT(setSelectionChanged(QModelIndex, QModelIndex))
      );
+
+    disconnect(ui->tableView_Set,SIGNAL(doubleClicked (QModelIndex)),0,0);
+    connect(
+                ui->tableView_Set,
+                SIGNAL(doubleClicked (QModelIndex)),
+                SLOT(setGridDoubleClicked(QModelIndex))
+               );
+
+
+
     ui->txt_SetName->clear();
     ui->tableView_Set->clearSelection();
     ui->tableView_ParameterRule->loadParameterRules(std::map<int,ParameterRule>{},"","");
+    disconnect(ui->tableView_ParameterRule,SIGNAL(doubleClicked(QModelIndex)),0,0);
+    connect(ui->tableView_ParameterRule,
+                    SIGNAL(doubleClicked(QModelIndex)),
+                    SLOT(parameterGridDoubleClicked(QModelIndex)));
     setModelInView();
 }
 
@@ -109,6 +124,11 @@ void FormModelSet::on_btn_SetDelete_clicked()
     }
 }
 
+void FormModelSet::setGridDoubleClicked(QModelIndex)
+{
+  on_btn_SetEdit_clicked();
+}
+
 void FormModelSet::on_btn_SetEdit_clicked()
 {
     setModelInEdition();
@@ -146,7 +166,7 @@ void FormModelSet::on_btn_SetSave_clicked()
        ui->tableView_Set->getSelectedAxesTuple();
      } catch (Elements::Exception except){
        QMessageBox::warning( this,
-                                    "Overlapping Region...",
+                                    "Overlapping Regions...",
                                     except.what(),
                                     QMessageBox::Ok );
 
@@ -173,6 +193,15 @@ void FormModelSet::setSelectionChanged(QModelIndex new_index, QModelIndex)
         ui->tableView_ParameterRule->loadParameterRules(std::map<int,ParameterRule>{},"","");
     }
     setModelInView();
+}
+
+
+void FormModelSet::parameterGridDoubleClicked(QModelIndex){
+  if (ui->btn_viewSet->isEnabled()){
+    on_btn_viewSet_clicked();
+  } else if (ui->btn_SetToRules->isEnabled()){
+    on_btn_SetToRules_clicked();
+  }
 }
 
 void FormModelSet::on_btn_SetToRules_clicked()

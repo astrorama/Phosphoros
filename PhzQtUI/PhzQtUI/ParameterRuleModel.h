@@ -2,6 +2,7 @@
 #define PARAMETERRULEMODEL_H
 
 #include <QStandardItemModel>
+#include <set>
 #include "ParameterRule.h"
 
 namespace Euclid {
@@ -54,6 +55,13 @@ public:
      */
     void setRanges(Range ebvRange,Range zRange,int row);
 
+    void setRedshiftRange(Range zRange,int row);
+    void setEbvRange(Range ebvRange,int row);
+    void setHasEbvRange(bool has_range,int row);
+    void setHasRedshiftRange(bool has_range,int row);
+    void setEbvValues(std::set<double> values,int row);
+    void setRedshiftValues(std::set<double> values,int row);
+
     /**
      * @brief Push the name to the ParameterRule represented by the row 'row'.
      * @param new_name
@@ -98,7 +106,10 @@ public:
      */
     const ParameterRule& getRule(int row) const;
 
+
+
 private:
+    QString getSetRepresentation(std::set<double> values) const;
 
     std::string getParamName(const ParameterRule& rule) const;
     std::string getSedStatus(const ParameterRule& rule) const;

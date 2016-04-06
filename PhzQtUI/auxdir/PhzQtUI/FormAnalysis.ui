@@ -70,7 +70,7 @@
         <x>0</x>
         <y>0</y>
         <width>1071</width>
-        <height>774</height>
+        <height>776</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -217,8 +217,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>416</width>
-            <height>166</height>
+            <width>417</width>
+            <height>162</height>
            </rect>
           </property>
           <attribute name="label">
@@ -375,8 +375,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1053</width>
-            <height>206</height>
+            <width>544</width>
+            <height>162</height>
            </rect>
           </property>
           <attribute name="label">
@@ -521,8 +521,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>673</width>
-            <height>185</height>
+            <width>674</width>
+            <height>179</height>
            </rect>
           </property>
           <attribute name="label">
@@ -688,7 +688,7 @@
             <x>0</x>
             <y>0</y>
             <width>1053</width>
-            <height>255</height>
+            <height>253</height>
            </rect>
           </property>
           <attribute name="label">
@@ -814,12 +814,12 @@
                    <widget class="QComboBox" name="cb_cat_output_type">
                     <item>
                      <property name="text">
-                      <string>ASCII</string>
+                      <string>FITS</string>
                      </property>
                     </item>
                     <item>
                      <property name="text">
-                      <string>FITS</string>
+                      <string>ASCII</string>
                      </property>
                     </item>
                    </widget>

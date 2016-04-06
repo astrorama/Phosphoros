@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include "Range.h"
 
 namespace Euclid {
@@ -101,6 +102,25 @@ public:
      */
     void setExcludedReddenings( std::vector<std::string> excluded_reddening);
 
+
+    const bool hasEbvRange() const;
+
+    void setHasEbvRange(bool has_range);
+
+    const std::set<double>& getEbvValues() const;
+
+    void setEbvValues(std::set<double> values);
+
+
+    const bool hasRedshiftRange() const;
+
+    void setHasRedshiftRange(bool has_range);
+
+    const std::set<double>& getRedshiftValues() const;
+
+    void setRedshiftValues(std::set<double> values);
+
+
     /**
      * @brief get the E(B-V) Range.
      * @return the E(B-V) Range.
@@ -132,6 +152,12 @@ private:
 
     std::vector<std::string> m_excluded_sed;
     std::vector<std::string> m_excluded_reddening;
+
+    bool m_has_ebv_range = true;
+    bool m_has_redshift_range = true;
+
+    std::set<double> m_ebv_value{0.};
+    std::set<double> m_redshift_value{0.};
 
     Range m_ebv_range;
     Range m_redshift_range;

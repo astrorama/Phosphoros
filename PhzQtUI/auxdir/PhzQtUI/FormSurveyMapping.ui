@@ -33,7 +33,7 @@
         </font>
        </property>
        <property name="text">
-        <string>&gt; Catalog Type Definition :</string>
+        <string>&gt; Catalog Definition :</string>
        </property>
       </widget>
      </item>
@@ -76,7 +76,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Catalog Type List :</string>
+            <string>Catalog List :</string>
            </property>
           </widget>
          </item>
@@ -159,7 +159,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Define Selected Catalog Filter Mapping :</string>
+            <string>Selected Catalog :</string>
            </property>
           </widget>
          </item>
@@ -288,7 +288,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="label_17">
            <property name="text">
-            <string>Catalog Type :</string>
+            <string>Catalog Name :</string>
            </property>
           </widget>
          </item>
@@ -334,7 +334,7 @@
          <item>
           <widget class="QLabel" name="label_16">
            <property name="text">
-            <string>Filters :</string>
+            <string>Filters Mapping :</string>
            </property>
           </widget>
          </item>

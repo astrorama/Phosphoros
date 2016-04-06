@@ -78,16 +78,31 @@ std::map<std::string, po::variable_value> ModelSet::getConfigOptions() const{
         auto reds = treeModel_red.getSelectedLeaf("");
         options["reddening-curve-name-"+param_rule.second.getName()].value() = boost::any(reds);
 
-        std::vector<std::string> z_range_vector;
-        std::string z_range=param_rule.second.getZRange().getConfigStringRepresentation();
-        z_range_vector.push_back(z_range);
-        options["z-range-"+param_rule.second.getName()].value() = boost::any(z_range_vector);
+        if (param_rule.second.hasRedshiftRange()){
+          std::vector<std::string> z_range_vector;
+          std::string z_range=param_rule.second.getZRange().getConfigStringRepresentation();
+          z_range_vector.push_back(z_range);
+          options["z-range-"+param_rule.second.getName()].value() = boost::any(z_range_vector);
+        } else {
+           std::vector<std::string>  z_value_vector;
+           for (auto& value : param_rule.second.getRedshiftValues()){
+               z_value_vector.push_back(std::to_string(value));
+           }
+           options["z-value-"+param_rule.second.getName()].value() = boost::any(z_value_vector);
+        }
 
-        std::vector<std::string> ebv_range_vector;
-        std::string ebv_range=param_rule.second.getEbvRange().getConfigStringRepresentation();
-        ebv_range_vector.push_back(ebv_range);
-        options["ebv-range-"+param_rule.second.getName()].value() = boost::any(ebv_range_vector);
-
+        if (param_rule.second.hasEbvRange()){
+            std::vector<std::string> ebv_range_vector;
+            std::string ebv_range=param_rule.second.getEbvRange().getConfigStringRepresentation();
+            ebv_range_vector.push_back(ebv_range);
+            options["ebv-range-"+param_rule.second.getName()].value() = boost::any(ebv_range_vector);
+        } else {
+           std::vector<std::string> ebv_value_vector;
+           for (auto& value : param_rule.second.getEbvValues()){
+             ebv_value_vector.push_back(std::to_string(value));
+            }
+            options["ebv-value-"+param_rule.second.getName()].value() = boost::any(ebv_value_vector);
+        }
       }
 
       return options;
@@ -96,7 +111,7 @@ std::map<std::string, po::variable_value> ModelSet::getConfigOptions() const{
 std::map<std::string,PhzDataModel::ModelAxesTuple> ModelSet::getAxesTuple() const{
   auto options = getConfigOptions();
   completeWithDefaults<PhzConfiguration::ParameterSpaceConfig>(options);
-  
+
   long config_manager_id = Configuration::getUniqueManagerId();
   auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
   config_manager.registerConfiguration<PhzConfiguration::ParameterSpaceConfig>();
@@ -106,7 +121,7 @@ std::map<std::string,PhzDataModel::ModelAxesTuple> ModelSet::getAxesTuple() cons
   return config_manager.getConfiguration<PhzConfiguration::ParameterSpaceConfig>().getParameterSpaceRegions();
 }
 
-
+// TODO
 ModelSet ModelSet::deserialize(QDomDocument& doc, ModelSet& model){
       QDomElement root_node = doc.documentElement();
       model.setName(root_node.attribute("Name").toStdString());
@@ -124,19 +139,54 @@ ModelSet ModelSet::deserialize(QDomDocument& doc, ModelSet& model){
            rule.setSedRootObject(node_rule.attribute("SedRootObject").toStdString());
            rule.setReddeningRootObject(node_rule.attribute("ReddeningCurveRootObject").toStdString());
 
-           auto ebv_node = node_rule.firstChildElement("EbvRange");
-           Range range;
-           range.setMin(ebv_node.attribute("Min").toDouble());
-           range.setMax(ebv_node.attribute("Max").toDouble());
-           range.setStep(ebv_node.attribute("Step").toDouble());
-           rule.setEbvRange(std::move(range));
+           bool has_ebv_range = node_rule.attribute("HasEbvRange","1").toInt();
+           rule.setHasEbvRange(has_ebv_range);
+           if (has_ebv_range){
+             auto ebv_node = node_rule.firstChildElement("EbvRange");
+             Range range;
+             range.setMin(ebv_node.attribute("Min").toDouble());
+             range.setMax(ebv_node.attribute("Max").toDouble());
+             range.setStep(ebv_node.attribute("Step").toDouble());
+             rule.setEbvRange(std::move(range));
+           } else {
+             std::set<double> ebv_value_set{};
+             auto ebv_sub_list = node_rule.firstChildElement("EbvValues").childNodes();
+             for(int j=0;j<ebv_sub_list.count();++j ){
+                auto sub_node = ebv_sub_list.at(j).toElement();
+                if (sub_node.hasChildNodes()){
+                  ebv_value_set.insert(sub_node.text().toDouble());
+                }
+             }
 
-           Range z_range;
-           auto z_node = node_rule.firstChildElement("ZRange");
-           z_range.setMin(z_node.attribute("Min").toDouble());
-           z_range.setMax(z_node.attribute("Max").toDouble());
-           z_range.setStep(z_node.attribute("Step").toDouble());
-           rule.setZRange(std::move(z_range));
+             if (ebv_value_set.size()>0){
+               rule.setEbvValues(std::move(ebv_value_set));
+             }
+           }
+
+           bool has_redshift_range = node_rule.attribute("HasZRange","1").toInt();
+           rule.setHasRedshiftRange(has_redshift_range);
+           if (has_redshift_range){
+             Range z_range;
+             auto z_node = node_rule.firstChildElement("ZRange");
+             z_range.setMin(z_node.attribute("Min").toDouble());
+             z_range.setMax(z_node.attribute("Max").toDouble());
+             z_range.setStep(z_node.attribute("Step").toDouble());
+             rule.setZRange(std::move(z_range));
+           } else {
+              std::set<double> z_value_set { };
+              auto z_sub_list =
+                  node_rule.firstChildElement("ZValues").childNodes();
+              for (int j = 0; j < z_sub_list.count(); ++j) {
+                auto sub_node = z_sub_list.at(j).toElement();
+                if (sub_node.hasChildNodes()) {
+                  z_value_set.insert(sub_node.text().toDouble());
+                }
+              }
+
+              if (z_value_set.size() > 0) {
+                rule.setRedshiftValues(std::move(z_value_set));
+              }
+           }
 
 
            std::vector<std::string> excluded_reddening_list{};
@@ -181,19 +231,41 @@ QDomDocument ModelSet::serialize() const{
         rule_node.setAttribute("SedRootObject",QString::fromStdString(rule.getSedRootObject()));
         rule_node.setAttribute("ReddeningCurveRootObject",QString::fromStdString(rule.getReddeningRootObject()));
 
-        QDomElement ebv_range_node = doc.createElement("EbvRange");
-        const Range& ebv_range=rule.getEbvRange();
-        ebv_range_node.setAttribute("Min",ebv_range.getMin());
-        ebv_range_node.setAttribute("Max",ebv_range.getMax());
-        ebv_range_node.setAttribute("Step",ebv_range.getStep());
-        rule_node.appendChild(ebv_range_node);
+        rule_node.setAttribute("HasEbvRange", QString::number(rule.hasEbvRange()));
+        if (rule.hasEbvRange()){
+          QDomElement ebv_range_node = doc.createElement("EbvRange");
+          const Range& ebv_range=rule.getEbvRange();
+          ebv_range_node.setAttribute("Min",ebv_range.getMin());
+          ebv_range_node.setAttribute("Max",ebv_range.getMax());
+          ebv_range_node.setAttribute("Step",ebv_range.getStep());
+          rule_node.appendChild(ebv_range_node);
+        } else {
+          QDomElement ebv_value_node = doc.createElement("EbvValues");
+          for(auto& values : rule.getEbvValues()){
+             QDomElement value_element = doc.createElement("Value");
+             value_element.appendChild(doc.createTextNode(QString::number(values)));
+             ebv_value_node.appendChild(value_element);
+          }
+          rule_node.appendChild(ebv_value_node);
+        }
 
-        QDomElement z_range_node = doc.createElement("ZRange");
-        const Range& redshift_range=rule.getZRange();
-        z_range_node.setAttribute("Min",redshift_range.getMin());
-        z_range_node.setAttribute("Max",redshift_range.getMax());
-        z_range_node.setAttribute("Step",redshift_range.getStep());
-        rule_node.appendChild(z_range_node);
+        rule_node.setAttribute("HasZRange", QString::number(rule.hasRedshiftRange()));
+        if (rule.hasRedshiftRange()){
+          QDomElement z_range_node = doc.createElement("ZRange");
+          const Range& redshift_range=rule.getZRange();
+          z_range_node.setAttribute("Min",redshift_range.getMin());
+          z_range_node.setAttribute("Max",redshift_range.getMax());
+          z_range_node.setAttribute("Step",redshift_range.getStep());
+          rule_node.appendChild(z_range_node);
+        } else {
+          QDomElement z_value_node = doc.createElement("ZValues");
+          for(auto& values : rule.getRedshiftValues()){
+            QDomElement value_element = doc.createElement("Value");
+            value_element.appendChild(doc.createTextNode(QString::number(values)));
+            z_value_node.appendChild(value_element);
+          }
+          rule_node.appendChild(z_value_node);
+        }
 
         QDomElement excluded_sed_node = doc.createElement("ExcludedSeds");
         for(auto& excluded : rule.getExcludedSeds()){

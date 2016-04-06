@@ -35,7 +35,11 @@ signals:
 private slots:
     void filterMappingSelectionChanged(QModelIndex, QModelIndex);
 
+    void mappingGridDoubleClicked(QModelIndex);
+
     void filterSelectionChanged(QModelIndex, QModelIndex);
+
+    void filterGridDoubleClicked(QModelIndex);
 
     void filterEditionPopupClosing(FilterMapping);
 

@@ -63,14 +63,37 @@ std::string ParameterRuleModel::getRedGroupName(const ParameterRule& rule) const
   return root_red;
 }
 
+QString ParameterRuleModel::getSetRepresentation(std::set<double> values) const{
+  QString list="";
+  bool first=true;
+  for (auto& value : values){
+    if ( ! first){
+      list += "; ";
+    }
+    list += QString::number(value);
+    first = false;
+  }
+  return list;
+}
+
 std::list<QString> ParameterRuleModel::getItemsRepresentation(const ParameterRule& rule, int id) const{
      std::list<QString> list;
 
      list.push_back(QString::fromStdString(getParamName(rule)));
      list.push_back(QString::fromStdString(getSedGroupName(rule) +" ("+getSedStatus(rule)+")"));
      list.push_back(QString::fromStdString(getRedGroupName(rule) +" ("+getRedStatus(rule)+")"));
-     list.push_back(QString::fromStdString(rule.getEbvRange().getStringRepresentation()));
-     list.push_back(QString::fromStdString(rule.getZRange().getStringRepresentation()));
+
+     if (rule.hasEbvRange()){
+       list.push_back(QString::fromStdString(rule.getEbvRange().getStringRepresentation()));
+     } else {
+       list.push_back(getSetRepresentation(rule.getEbvValues()));
+     }
+
+     if (rule.hasRedshiftRange()){
+       list.push_back(QString::fromStdString(rule.getZRange().getStringRepresentation()));
+     } else {
+       list.push_back(getSetRepresentation(rule.getRedshiftValues()));
+     }
      list.push_back(QString::number(rule.getModelNumber()));
      list.push_back(QString::number(id));
 
@@ -112,6 +135,42 @@ void ParameterRuleModel::setRanges(Range ebvRange,Range zRange,int row){
       this->item(row,4)->setText(QString::fromStdString( m_parameter_rules[ref].getZRange().getStringRepresentation()));
       this->item(row,5)->setText(QString::number( m_parameter_rules[ref].getModelNumber()));
 }
+
+
+void ParameterRuleModel::setRedshiftRange(Range zRange,int row){
+  int ref = getValue(row,6).toInt();
+  m_parameter_rules[ref].setZRange(std::move(zRange));
+  this->item(row,4)->setText(QString::fromStdString( m_parameter_rules[ref].getZRange().getStringRepresentation()));
+  this->item(row,5)->setText(QString::number( m_parameter_rules[ref].getModelNumber()));
+
+}
+void ParameterRuleModel::setEbvRange(Range ebvRange,int row){
+  int ref = getValue(row,6).toInt();
+  m_parameter_rules[ref].setEbvRange(std::move(ebvRange));
+  this->item(row,3)->setText(QString::fromStdString( m_parameter_rules[ref].getEbvRange().getStringRepresentation()));
+  this->item(row,5)->setText(QString::number( m_parameter_rules[ref].getModelNumber()));
+
+}
+void ParameterRuleModel::setHasEbvRange(bool has_range,int row){
+  int ref = getValue(row,6).toInt();
+  m_parameter_rules[ref].setHasEbvRange(has_range);
+}
+void ParameterRuleModel::setHasRedshiftRange(bool has_range,int row){
+  int ref = getValue(row,6).toInt();
+  m_parameter_rules[ref].setHasRedshiftRange(has_range);
+ }
+void ParameterRuleModel::setEbvValues(std::set<double> values,int row){
+  int ref = getValue(row,6).toInt();
+  m_parameter_rules[ref].setEbvValues(values);
+  this->item(row,3)->setText(getSetRepresentation(values));
+  this->item(row,5)->setText(QString::number( m_parameter_rules[ref].getModelNumber()));
+ }
+void ParameterRuleModel::setRedshiftValues(std::set<double> values,int row){
+  int ref = getValue(row,6).toInt();
+  m_parameter_rules[ref].setRedshiftValues(values);
+  this->item(row,4)->setText(getSetRepresentation(values));
+  this->item(row,5)->setText(QString::number( m_parameter_rules[ref].getModelNumber()));
+ }
 
 
 void ParameterRuleModel::setSeds(std::string root, std::vector<std::string> exceptions,int row){
