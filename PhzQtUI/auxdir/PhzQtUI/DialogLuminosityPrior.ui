@@ -363,39 +363,61 @@
            </layout>
           </item>
           <item>
-           <widget class="QFrame" name="frame_Luminosity">
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
+           <widget class="QScrollArea" name="scrollArea">
+            <property name="widgetResizable">
+             <bool>true</bool>
             </property>
-            <property name="frameShadow">
-             <enum>QFrame::Sunken</enum>
-            </property>
-            <property name="lineWidth">
-             <number>2</number>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout">
-             <item>
-              <layout class="QGridLayout" name="gl_Luminosity">
-               <property name="spacing">
-                <number>0</number>
-               </property>
-              </layout>
-             </item>
-            </layout>
+            <widget class="QWidget" name="scrollAreaWidgetContents">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>940</width>
+               <height>225</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_7">
+              <item>
+               <widget class="QFrame" name="frame_Luminosity">
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Sunken</enum>
+                </property>
+                <property name="lineWidth">
+                 <number>2</number>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout">
+                 <item>
+                  <layout class="QGridLayout" name="gl_Luminosity">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>919</width>
+                  <height>176</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+             <zorder>frame_Luminosity</zorder>
+             <zorder>frame_Luminosity</zorder>
+             <zorder>verticalSpacer_2</zorder>
+            </widget>
            </widget>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
           </item>
          </layout>
         </item>

@@ -82,13 +82,21 @@ MainWindow::~MainWindow()
 //  - Slots landing on this page
 void MainWindow::on_btn_HomeToModel_clicked(){
     changeMainStackedWidgetIndex(1);
-    ui->widget_ModelSet->loadSetPage();
+
+    if (!m_model_loaded){
+      ui->widget_ModelSet->loadSetPage();
+      m_model_loaded=true;
+    }
 }
 
 
 void MainWindow::on_btn_HomeToCatalog_clicked(){
   changeMainStackedWidgetIndex(2);
-  ui->widget_Catalog->loadMappingPage("");
+
+  if (!m_mapping_loaded){
+    ui->widget_Catalog->loadMappingPage("");
+    m_mapping_loaded=true;
+  }
 }
 
 
@@ -98,7 +106,11 @@ void MainWindow::on_btn_HomeToCatalog_clicked(){
 void MainWindow::on_btn_HomeToAnalysis_clicked()
 {
   changeMainStackedWidgetIndex(3);
-  ui->widget_Analysis->loadAnalysisPage();
+
+  if (!m_analysis_loaded){
+    ui->widget_Analysis->loadAnalysisPage();
+    m_analysis_loaded = true;
+  }
 }
 
 }

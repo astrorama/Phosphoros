@@ -9,7 +9,7 @@
 #include "ElementsKernel/Real.h" // isEqual
 
 using namespace Euclid::PhzQtUI;
-
+/*
 struct ModelSet_Fixture {
   std::string ref_name = "Parameter_space_config_name";
   std::string ref_rule_1_name = "Rule_1";
@@ -121,4 +121,4 @@ BOOST_FIXTURE_TEST_CASE(serialize_test, ModelSet_Fixture) {
 
 // Ends the test suite
 BOOST_AUTO_TEST_SUITE_END ()
-
+*/

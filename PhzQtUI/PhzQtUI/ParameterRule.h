@@ -4,7 +4,14 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <map>
 #include "Range.h"
+
+namespace boost{
+namespace program_options{
+ class variable_value;
+}
+}
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -103,18 +110,16 @@ public:
     void setExcludedReddenings( std::vector<std::string> excluded_reddening);
 
 
-    bool hasEbvRange() const;
+    const std::string getEbvRangeString() const;
 
-    void setHasEbvRange(bool has_range);
+    const std::string getRedshiftRangeString() const;
+
+
 
     const std::set<double>& getEbvValues() const;
 
     void setEbvValues(std::set<double> values);
 
-
-    bool hasRedshiftRange() const;
-
-    void setHasRedshiftRange(bool has_range);
 
     const std::set<double>& getRedshiftValues() const;
 
@@ -122,45 +127,56 @@ public:
 
 
     /**
-     * @brief get the E(B-V) Range.
-     * @return the E(B-V) Range.
+     * @brief get the E(B-V) Ranges.
+     * @return the E(B-V) Ranges.
      */
-    const Range& getEbvRange() const;
+    const std::vector<Range>& getEbvRanges() const;
 
     /**
-     * @brief set the E(B-V) Range by moving in the provided range
-     * @param ebv_range
+     * @brief set the E(B-V) Ranges by moving in the provided ranges
+     * @param ebv_ranges
      */
-    void setEbvRange(Range ebv_range);
+    void setEbvRanges(std::vector<Range> ebv_ranges);
 
     /**
-     * @brief get the redshift Range.
-     * @return the redshiftRange.
+     * @brief get the redshift Ranges.
+     * @return the redshift Ranges.
      */
-    const Range& getZRange() const;
+    const std::vector<Range>& getZRanges() const;
 
     /**
-     * @brief set the redshift Range by moving in the provided range
-     * @param z_range
+     * @brief set the redshift Ranges by moving in the provided ranges
+     * @param z_ranges
      */
-    void setZRange(Range z_range);
+    void setZRanges(std::vector<Range> z_ranges);
+
+
+    std::map<std::string, boost::program_options::variable_value> getConfigOptions(std::string region) const;
+
+
+    std::string getRedshiftStringValueList() const;
+    std::string getEbvStringValueList() const ;
+
+
+    static std::set<double> parseValueList(const std::string& list);
 
 private:
+    std::string getAxisStringValue(std::vector<double> axis) const;
+    std::string getStringValueList(const std::set<double>& list) const;
     std::string m_name;
+
     std::string m_sed_root_object;
     std::string m_reddening_root_object;
 
     std::vector<std::string> m_excluded_sed;
     std::vector<std::string> m_excluded_reddening;
 
-    bool m_has_ebv_range = true;
-    bool m_has_redshift_range = true;
 
-    std::set<double> m_ebv_value{0.};
-    std::set<double> m_redshift_value{0.};
+    std::set<double> m_ebv_values{};
+    std::set<double> m_redshift_values{};
 
-    Range m_ebv_range;
-    Range m_redshift_range;
+    std::vector<Range> m_ebv_ranges{};
+    std::vector<Range> m_redshift_ranges{};
 };
 
 }

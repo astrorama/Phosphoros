@@ -68,37 +68,25 @@ void ParameterRuleTable::setNameToSelectedRule(std::string new_name){
   getModel()->setName(new_name,index[0].row());
 }
 
-void ParameterRuleTable::setRangesToSelectedRule(Range ebvRange, Range zRange){
-    QModelIndexList index = this->selectionModel()->selectedIndexes();
-    getModel()->setRanges(std::move(ebvRange),std::move(zRange),index[0].row());
+void ParameterRuleTable::setRedshiftRangesToSelectedRule(std::vector<Range> ranges){
+  QModelIndexList index = this->selectionModel()->selectedIndexes();
+  getModel()->setRedshiftRanges(std::move(ranges),index[0].row());
 }
 
-void ParameterRuleTable::setRedshiftRangeToSelectedRule(Range range){
+void ParameterRuleTable::setEbvRangesToSelectedRule(std::vector<Range> ranges){
   QModelIndexList index = this->selectionModel()->selectedIndexes();
-  getModel()->setRedshiftRange(range,index[0].row());
+  getModel()->setEbvRanges(ranges,index[0].row());
+}
 
-}
-void ParameterRuleTable::setEbvRangeToSelectedRule(Range range){
-  QModelIndexList index = this->selectionModel()->selectedIndexes();
-  getModel()->setEbvRange(range,index[0].row());
-}
-void ParameterRuleTable::setHasEbvRangeToSelectedRule(bool has_range){
-  QModelIndexList index = this->selectionModel()->selectedIndexes();
-  getModel()->setHasEbvRange(has_range,index[0].row());
-}
-void ParameterRuleTable::setHasRedshiftRangeToSelectedRule(bool has_range){
-  QModelIndexList index = this->selectionModel()->selectedIndexes();
-  getModel()->setHasRedshiftRange(has_range,index[0].row());
-}
 void ParameterRuleTable::setEbvValuesToSelectedRule(std::set<double> values){
   QModelIndexList index = this->selectionModel()->selectedIndexes();
   getModel()->setEbvValues(values,index[0].row());
 }
+
 void ParameterRuleTable::setRedshiftValuesToSelectedRule(std::set<double> values){
   QModelIndexList index = this->selectionModel()->selectedIndexes();
   getModel()->setRedshiftValues(values,index[0].row());
 }
-
 
 void ParameterRuleTable::setSedsToSelectedRule(std::string root, std::vector<std::string> exceptions){
     QModelIndexList index = this->selectionModel()->selectedIndexes();

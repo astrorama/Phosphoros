@@ -96,16 +96,13 @@ private slots:
       */
      void on_btn_save_clicked();
 
-     void set_Checked_ebv_value(bool);
-     void set_Checked_ebv_range(bool);
-     void set_Checked_red_value(bool);
-     void set_Checked_red_range(bool);
+     void onZDeleteClicked(size_t,size_t );
 
+     void onZAddClicked();
 
-     void on_btn_add_z_clicked();
-     void onDeleteZClicked(size_t index,size_t );
-     void on_btn_add_ebv_clicked();
-     void onDeleteEbvClicked(size_t index,size_t );
+     void onEbvDeleteClicked(size_t,size_t );
+
+     void onEbvAddClicked();
 
 private:
     std::unique_ptr<Ui::DialogModelSet> ui;
@@ -113,17 +110,13 @@ private:
     bool m_view_popup=false;
     bool m_singe_line=false;
 
-    std::set<double> m_current_z_values{};
-    std::set<double> m_current_ebv_values{};
-
-    void refreshZValues();
-    void addZValues(std::set<double> values);
-    void refreshEbvValues();
-    void addEbvValues(std::set<double> values);
-
+    int m_current_z_range_id=0;
+    int m_current_ebv_range_id=0;
 
     void turnControlsInEdition();
     void turnControlsInView();
+    void populateZRangesAndValues(ParameterRule selected_rule);
+    void populateEbvRangesAndValues(ParameterRule selected_rule);
 };
 
 }

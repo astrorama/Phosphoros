@@ -185,17 +185,29 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
     double z_max = 0;
 
     for (auto& rule : selected_model.getParameterRules()) {
-      auto z_range = rule.second.getZRange();
-      if (z_min > z_range.getMin()) {
-        z_min = z_range.getMin();
+      for (auto& z_range : rule.second.getZRanges()) {
+        if (z_min > z_range.getMin()) {
+          z_min = z_range.getMin();
+        }
+
+        if (z_max < z_range.getMax()) {
+          z_max = z_range.getMax();
+        }
       }
 
-      if (z_max < z_range.getMax()) {
-        z_max = z_range.getMax();
+      for (double value : rule.second.getRedshiftValues()) {
+        if (z_min > value) {
+          z_min = value;
+        }
+
+        if (z_max < value) {
+          z_max = value;
+        }
       }
     }
 
     lum_prior_compatible=info.isCompatibleWithParameterSpace(z_min,z_max,selected_model.getSeds());
+
   }
 
   ui->btn_confLuminosityPrior->setEnabled(grid_name_exists);
@@ -794,17 +806,29 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
         }
 
         std::vector<std::string> seds{};
-        double z_min=1000000;;
-        double z_max=0;;
 
-        for(auto& rule : selected_model.getParameterRules()){
-          auto z_range = rule.second.getZRange();
-          if (z_min>z_range.getMin()){
-            z_min=z_range.getMin();
+        double z_min=1000000;
+        double z_max=0;
+
+        for (auto& rule : selected_model.getParameterRules()) {
+          for (auto& z_range : rule.second.getZRanges()) {
+            if (z_min > z_range.getMin()) {
+              z_min = z_range.getMin();
+            }
+
+            if (z_max < z_range.getMax()) {
+              z_max = z_range.getMax();
+            }
           }
 
-          if (z_max<z_range.getMax()){
-            z_max=z_range.getMax();
+          for (double value : rule.second.getRedshiftValues()) {
+            if (z_min > value) {
+              z_min = value;
+            }
+
+            if (z_max < value) {
+              z_max = value;
+            }
           }
         }
 

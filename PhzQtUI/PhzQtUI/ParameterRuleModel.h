@@ -2,6 +2,7 @@
 #define PARAMETERRULEMODEL_H
 
 #include <QStandardItemModel>
+#include <vector>
 #include <set>
 #include "ParameterRule.h"
 
@@ -47,19 +48,12 @@ public:
      */
     const QString getValue(int row,int column) const;
 
-    /**
-     * @brief Push the E(B-V) and Redshift range to the ParameterRule represented by the row 'row'.
-     * @param ebvRange
-     * @param zRange
-     * @param row
-     */
-    void setRanges(Range ebvRange,Range zRange,int row);
+    void setRedshiftRanges(std::vector<Range> z_ranges, int row);
 
-    void setRedshiftRange(Range zRange,int row);
-    void setEbvRange(Range ebvRange,int row);
-    void setHasEbvRange(bool has_range,int row);
-    void setHasRedshiftRange(bool has_range,int row);
+    void setEbvRanges(std::vector<Range> ebv_ranges, int row);
+
     void setEbvValues(std::set<double> values,int row);
+
     void setRedshiftValues(std::set<double> values,int row);
 
     /**
@@ -109,7 +103,6 @@ public:
 
 
 private:
-    QString getSetRepresentation(std::set<double> values) const;
 
     std::string getParamName(const ParameterRule& rule) const;
     std::string getSedStatus(const ParameterRule& rule) const;

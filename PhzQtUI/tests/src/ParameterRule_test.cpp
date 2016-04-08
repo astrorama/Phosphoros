@@ -9,7 +9,7 @@
 #include "ElementsKernel/Real.h" // isEqual
 
 using namespace Euclid::PhzQtUI;
-
+/*
 struct ParameterRule_Fixture {
   std::string ref_name="ref_rule_name";
   Range ref_z_range=Range{0.1,5.5,0.2};
@@ -79,6 +79,6 @@ BOOST_FIXTURE_TEST_CASE(setter_test, ParameterRule_Fixture) {
 
 
 BOOST_AUTO_TEST_SUITE_END ()
-
+*/
 
 

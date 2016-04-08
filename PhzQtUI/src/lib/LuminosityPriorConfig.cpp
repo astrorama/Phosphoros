@@ -260,13 +260,13 @@ LuminosityPriorConfig LuminosityPriorConfig::deserialize(QDomDocument& doc){
        funct_node.setAttribute("CurveName",QString::fromStdString(function.curve_name));
      }else {
 
-       funct_node.setAttribute("Alpha",QString::fromStdString(std::to_string(function.alpha)));
-       funct_node.setAttribute("Phi0",QString::fromStdString(std::to_string(function.phi)));
+       funct_node.setAttribute("Alpha",QString::number(function.alpha));
+       funct_node.setAttribute("Phi0",QString::number(function.phi));
 
        if (m_in_mag){
-         funct_node.setAttribute("M0",QString::fromStdString(std::to_string(function.m)));
+         funct_node.setAttribute("M0",QString::number(function.m));
        } else {
-         funct_node.setAttribute("L0",QString::fromStdString(std::to_string(function.l)));
+         funct_node.setAttribute("L0",QString::number(function.l));
        }
      }
      functions_node.appendChild(funct_node);

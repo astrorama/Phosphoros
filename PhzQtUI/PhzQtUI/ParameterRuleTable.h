@@ -3,6 +3,7 @@
 
 #include <QTableView>
 #include <set>
+#include <vector>
 #include "ParameterRule.h"
 #include "ParameterRuleModel.h"
 
@@ -52,18 +53,13 @@ public:
         * @param new_name the new name
         */
        void setNameToSelectedRule(std::string new_name);
-       /**
-        * @brief Push the E(B-V) and Redshift range to the selected ParameterRule.
-        * @param ebvRange
-        * @param zRange
-        */
-       void setRangesToSelectedRule(Range ebvRange, Range zRange);
 
-       void setRedshiftRangeToSelectedRule(Range range);
-       void setEbvRangeToSelectedRule(Range range);
-       void setHasEbvRangeToSelectedRule(bool has_range);
-       void setHasRedshiftRangeToSelectedRule(bool has_range);
+       void setRedshiftRangesToSelectedRule(std::vector<Range> ranges);
+
+       void setEbvRangesToSelectedRule(std::vector<Range> ranges);
+
        void setEbvValuesToSelectedRule(std::set<double> values);
+
        void setRedshiftValuesToSelectedRule(std::set<double> values);
 
        /**
