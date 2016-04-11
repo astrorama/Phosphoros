@@ -447,8 +447,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   std::map<std::string, boost::program_options::variable_value> options_map =
       FileUtils::getPathConfiguration(true,false,true,true);
 
-  auto thread_options = PreferencesUtils::getThreadOverrideConfiguration();
-  for(auto& pair : thread_options){
+  auto global_options = PreferencesUtils::getGlobalConfigurations();
+  for(auto& pair : global_options){
       options_map[pair.first]=pair.second;
   }
 
@@ -546,8 +546,8 @@ std::map < std::string, boost::program_options::variable_value > FormAnalysis::g
 
     auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
 
-    auto thread_options = PreferencesUtils::getThreadOverrideConfiguration();
-    for(auto& pair : thread_options){
+    auto global_options = PreferencesUtils::getGlobalConfigurations();
+    for(auto& pair : global_options){
           options_map[pair.first]=pair.second;
     }
 

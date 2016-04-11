@@ -58,6 +58,11 @@ private slots:
     void on_btn_defRes_clicked();
 
 
+    void on_btn_edit_cosmo_clicked();
+    void on_btn_cancel_cosmo_clicked();
+    void on_btn_save_cosmo_clicked();
+
+
 
 
     /**

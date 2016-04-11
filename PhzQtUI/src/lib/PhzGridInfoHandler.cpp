@@ -215,8 +215,8 @@ std::map<std::string, boost::program_options::variable_value> PhzGridInfoHandler
     options_map[pair.first]=pair.second;
   }
 
-  auto thread_options = PreferencesUtils::getThreadOverrideConfiguration();
-  for(auto& pair : thread_options){
+  auto global_options = PreferencesUtils::getGlobalConfigurations();
+  for(auto& pair : global_options){
       options_map[pair.first]=pair.second;
   }
 

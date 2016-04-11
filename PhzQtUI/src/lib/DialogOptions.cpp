@@ -5,6 +5,7 @@
 #include "FileUtils.h"
 #include "PreferencesUtils.h"
 #include "PhzUtils/Multithreading.h"
+#include "PhysicsUtils/CosmologicalParameters.h"
 
 using namespace std;
 
@@ -15,8 +16,9 @@ DialogOptions::DialogOptions(QWidget *parent) : QDialog(parent),
   ui(new Ui::DialogOptions)
 {
      ui->setupUi(this);
-
-
+     ui->txt_hubble_param->setValidator(new  QDoubleValidator(0,1000,4));
+     ui->txt_omega_matter->setValidator(new  QDoubleValidator(-10,10,4));
+     ui->txt_omega_lambda->setValidator(new  QDoubleValidator(-10,10,4));
 
      ui->widget_aux_Data->loadManagementPage(0);
 
@@ -36,6 +38,11 @@ DialogOptions::DialogOptions(QWidget *parent) : QDialog(parent),
     } else {
       ui->sb_thread->setValue(PhzUtils::getThreadNumber());
     }
+
+    auto cosmology = PreferencesUtils::getCosmologicalParameters();
+    ui->txt_hubble_param->setText(QString::number(cosmology.getHubbleConstant()));
+    ui->txt_omega_matter->setText(QString::number(cosmology.getOmegaM()));
+    ui->txt_omega_lambda->setText(QString::number(cosmology.getOmegaLambda()));
 }
 
 DialogOptions::~DialogOptions()
@@ -44,15 +51,10 @@ DialogOptions::~DialogOptions()
 
 void DialogOptions::on_btn_editGeneral_clicked()
 {
-    ui->tabWidget->setTabEnabled(1,false);
-    ui->tabWidget->setTabEnabled(2,false);
-    ui->buttonBox->setEnabled(false);
+    startEdition(0);
     ui->btn_editGeneral->setEnabled(false);
     ui->btn_cancelGeneral->setEnabled(true);
     ui->btn_saveGeneral->setEnabled(true);
-
-
-
 
     ui->btn_browseCat->setEnabled(true);
     ui->btn_browseAux->setEnabled(true);
@@ -262,6 +264,54 @@ void DialogOptions::checkDirectories(){
   }
 }
 
+void DialogOptions::on_btn_edit_cosmo_clicked(){
+  startEdition(2);
+
+  ui->txt_hubble_param->setEnabled(true);
+  ui->txt_omega_matter->setEnabled(true);
+  ui->txt_omega_lambda->setEnabled(true);
+  ui->btn_edit_cosmo->setEnabled(false);
+  ui->btn_cancel_cosmo->setEnabled(true);
+  ui->btn_save_cosmo->setEnabled(true);
+}
+
+void DialogOptions::on_btn_cancel_cosmo_clicked(){
+
+  auto cosmology = PreferencesUtils::getCosmologicalParameters();
+  ui->txt_hubble_param->setText(QString::number(cosmology.getHubbleConstant()));
+  ui->txt_omega_matter->setText(QString::number(cosmology.getOmegaM()));
+  ui->txt_omega_lambda->setText(QString::number(cosmology.getOmegaLambda()));
+
+  ui->txt_hubble_param->setEnabled(false);
+  ui->txt_omega_matter->setEnabled(false);
+  ui->txt_omega_lambda->setEnabled(false);
+  ui->btn_edit_cosmo->setEnabled(true);
+  ui->btn_cancel_cosmo->setEnabled(false);
+  ui->btn_save_cosmo->setEnabled(false);
+
+  endEdition();
+
+}
+
+void DialogOptions::on_btn_save_cosmo_clicked(){
+  double hubble = ui->txt_hubble_param->text().toDouble();
+  double omega_m = ui->txt_omega_matter->text().toDouble();
+  double omega_l = ui->txt_omega_lambda->text().toDouble();
+  PhysicsUtils::CosmologicalParameters cosmology{omega_m, omega_l, hubble};
+  PreferencesUtils::setCosmologicalParameters(cosmology);
+  ui->txt_hubble_param->setText(QString::number(cosmology.getHubbleConstant()));
+  ui->txt_omega_matter->setText(QString::number(cosmology.getOmegaM()));
+  ui->txt_omega_lambda->setText(QString::number(cosmology.getOmegaLambda()));
+
+  ui->txt_hubble_param->setEnabled(false);
+  ui->txt_omega_matter->setEnabled(false);
+  ui->txt_omega_lambda->setEnabled(false);
+  ui->btn_edit_cosmo->setEnabled(true);
+  ui->btn_cancel_cosmo->setEnabled(false);
+  ui->btn_save_cosmo->setEnabled(false);
+  endEdition();
+}
+
 
 void DialogOptions::startEdition(int i){
   for (int j=0;j<3;++j){
@@ -281,7 +331,6 @@ void DialogOptions::endEdition(){
   ui->tabWidget->setEnabled(true);
   ui->buttonBox->setEnabled(true);
 }
-
 
 }
 }

@@ -5,6 +5,7 @@
 #include <map>
 #include <boost/program_options.hpp>
 #include "Configuration/ConfigManager.h"
+#include "PhysicsUtils/CosmologicalParameters.h"
 
 /**
  * @brief The PreferencesUtils class
@@ -34,7 +35,12 @@ public:
 
     static void setThreadNumberOverride(int value);
 
-    static std::map<std::string, boost::program_options::variable_value> getThreadOverrideConfiguration();
+    static PhysicsUtils::CosmologicalParameters getCosmologicalParameters();
+
+    static void setCosmologicalParameters(const PhysicsUtils::CosmologicalParameters& parameters);
+
+
+    static std::map<std::string, boost::program_options::variable_value> getGlobalConfigurations();
 
 
 };

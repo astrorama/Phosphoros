@@ -9,6 +9,7 @@ elements_depends_on_subdirs(PhzDataModel)
 elements_depends_on_subdirs(PhzUITools)
 elements_depends_on_subdirs(PhzLikelihood)
 elements_depends_on_subdirs(PhzLuminosity)
+elements_depends_on_subdirs(PhysicsUtils)
 
 if(ELEMENTS_HIDE_WARNINGS)
   if(UNIX)

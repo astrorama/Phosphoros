@@ -119,16 +119,48 @@ void PreferencesUtils::setThreadNumberOverride(int value){
 }
 
 
-std::map<std::string, boost::program_options::variable_value> PreferencesUtils::getThreadOverrideConfiguration(){
+PhysicsUtils::CosmologicalParameters PreferencesUtils::getCosmologicalParameters(){
+  auto value_omega_m = getUserPreference("_global_preferences_", "Cosmological-Parameter-Omega-Matter");
+  auto value_omega_l = getUserPreference("_global_preferences_", "Cosmological-Parameter-Omega-Lambda");
+  auto value_hubble = getUserPreference("_global_preferences_", "Cosmological-Parameter-Hubble");
+  if (value_omega_l.length()==0 || value_omega_m.length()==0 || value_hubble.length()==0){
+    return PhysicsUtils::CosmologicalParameters{};
+  }
+
+  return PhysicsUtils::CosmologicalParameters{ std::stod(value_omega_m),
+                                               std::stod(value_omega_l),
+                                               std::stod(value_hubble)
+                                             };
+}
+
+void PreferencesUtils::setCosmologicalParameters(const PhysicsUtils::CosmologicalParameters& parameters){
+  setUserPreference("_global_preferences_",
+                    "Cosmological-Parameter-Omega-Matter",
+                    std::to_string(parameters.getOmegaM()));
+
+  setUserPreference("_global_preferences_",
+                    "Cosmological-Parameter-Omega-Lambda",
+                    std::to_string(parameters.getOmegaLambda()));
+
+  setUserPreference("_global_preferences_",
+                    "Cosmological-Parameter-Hubble",
+                    std::to_string(parameters.getHubbleConstant()));
+}
+
+std::map<std::string, boost::program_options::variable_value> PreferencesUtils::getGlobalConfigurations(){
   std::map<std::string, boost::program_options::variable_value> options{};
   int value = getThreadNumberOverride();
   if (value>0){
     options["thread-no"].value() = boost::any(value);
   }
 
+  auto cosmology = getCosmologicalParameters();
+  options["cosmology-omega-m"].value() = boost::any(cosmology.getOmegaM());
+  options["cosmology-omega-lambda"].value() = boost::any(cosmology.getOmegaLambda());
+  options["cosmology-hubble-constant"].value() = boost::any(cosmology.getHubbleConstant());
+
   return options;
 }
-
 
 }
 }
