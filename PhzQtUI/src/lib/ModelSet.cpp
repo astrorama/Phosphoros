@@ -60,8 +60,6 @@ std::map<std::string, boost::program_options::variable_value> ModelSet::getModel
 }
 std::map<std::string, po::variable_value> ModelSet::getConfigOptions() const{
   std::map<std::string, po::variable_value> options;
-  options["sed-root-path"].value() = boost::any(FileUtils::getSedRootPath(false));
-  options["reddening-curve-root-path"].value() = boost::any(FileUtils::getRedCurveRootPath(false));
   for (auto& param_rule : getParameterRules()){
     for (auto& option : param_rule.second.getConfigOptions(param_rule.second.getName())){
       options[option.first] = option.second ;
@@ -114,6 +112,18 @@ ModelSet ModelSet::deserialize(QDomDocument& doc, ModelSet& model) {
       }
 
       std::vector<Range> ebv_ranges { };
+      /*for backward compatibility */
+      auto ebv_node = node_rule.firstChildElement("EbvRange");
+      if (!ebv_node.isNull()){
+        Range range;
+        range.setMin(ebv_node.attribute("Min").toDouble());
+        range.setMax(ebv_node.attribute("Max").toDouble());
+        range.setStep(ebv_node.attribute("Step").toDouble());
+        ebv_ranges.push_back(std::move(range));
+      }
+      /******************************/
+
+
       auto ebv_range_node_list = node_rule.firstChildElement("EbvRanges").childNodes();
       for (int j = 0; j < ebv_range_node_list.count(); ++j) {
         auto range_node = ebv_range_node_list.at(j).toElement();
@@ -142,6 +152,17 @@ ModelSet ModelSet::deserialize(QDomDocument& doc, ModelSet& model) {
       }
 
       std::vector<Range> z_ranges { };
+      /*for backward compatibility */;
+      auto z_node = node_rule.firstChildElement("ZRange");
+      if (!z_node.isNull()){
+        Range range;
+        range.setMin(z_node.attribute("Min").toDouble());
+        range.setMax(z_node.attribute("Max").toDouble());
+        range.setStep(z_node.attribute("Step").toDouble());
+        z_ranges.push_back(std::move(range));
+      }
+      /******************************/
+
       auto z_range_node_list = node_rule.firstChildElement("ZRanges").childNodes();
       for (int j = 0; j < z_range_node_list.count(); ++j) {
         auto range_node = z_range_node_list.at(j).toElement();

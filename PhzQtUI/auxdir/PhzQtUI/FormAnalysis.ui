@@ -148,7 +148,7 @@
                 <string>List of Catalog's Filters. You may exclude some filters of the analysis by unchecking them into the grid.</string>
                </property>
                <property name="text">
-                <string>Filter Selection † :</string>
+                <string>Filter Selection  :</string>
                </property>
               </widget>
              </item>
@@ -443,7 +443,7 @@
                 <item>
                  <widget class="QPushButton" name="btn_computeCorrections">
                   <property name="text">
-                   <string>Compute Corrections †</string>
+                   <string>Compute Corrections </string>
                   </property>
                  </widget>
                 </item>
@@ -649,7 +649,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>Configure Luminosity Prior †</string>
+                <string>Configure Luminosity Prior </string>
                </property>
               </widget>
              </item>
@@ -935,7 +935,7 @@
        <item>
         <widget class="QPushButton" name="btn_GetConfigAnalysis">
          <property name="text">
-          <string>Get Config. File †</string>
+          <string>Get Config. File </string>
          </property>
         </widget>
        </item>
@@ -946,7 +946,7 @@
        <item>
         <widget class="QPushButton" name="btn_RunAnalysis">
          <property name="text">
-          <string>Run †</string>
+          <string>Run </string>
          </property>
         </widget>
        </item>

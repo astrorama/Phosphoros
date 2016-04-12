@@ -102,21 +102,6 @@
          </layout>
         </item>
         <item>
-         <widget class="QLabel" name="label_4">
-          <property name="font">
-           <font>
-            <pointsize>9</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>Items displaying a '†' show help when hovered.</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
            <spacer name="horizontalSpacer_10">
@@ -145,10 +130,10 @@
              </font>
             </property>
             <property name="toolTip">
-             <string>Working directory path definition, Auxiliary data management and Catalog fillter mapping definition.</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Working directory path definition, Auxiliary data management and Cosmological parameters definition.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
-             <string>Configuration †</string>
+             <string>Configuration </string>
             </property>
            </widget>
           </item>
@@ -193,7 +178,7 @@
              <string>Define the Mapping between the catalog file(s) columns and the filters</string>
             </property>
             <property name="text">
-             <string>Catalog Definition †</string>
+             <string>Catalog Definition </string>
             </property>
            </widget>
           </item>
@@ -214,7 +199,7 @@
              <string>Specify the parameter space for the creation of model grid.</string>
             </property>
             <property name="text">
-             <string>Parameter Space Specification †</string>
+             <string>Parameter Space Specification </string>
             </property>
            </widget>
           </item>
@@ -295,7 +280,7 @@
              <string>Compute the model grid, calculate photometric photometric correction and run template fitting in order to produce photo-z catalog.</string>
             </property>
             <property name="text">
-             <string>Compute Redshifts †</string>
+             <string>Compute Redshifts </string>
             </property>
            </widget>
           </item>

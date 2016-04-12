@@ -111,7 +111,7 @@
           <string>The full transmission curves for the filter</string>
          </property>
          <property name="text">
-          <string>List of Available Filter Curves † :</string>
+          <string>List of Available Filter Curves  :</string>
          </property>
         </widget>
        </item>
@@ -326,7 +326,7 @@
           <string>The Luminosity Function (of the Magnitude or in Flux)</string>
          </property>
          <property name="text">
-          <string>List of Available Luminosity Function Curves † :</string>
+          <string>List of Available Luminosity Function Curves  :</string>
          </property>
         </widget>
        </item>

@@ -16,9 +16,9 @@ DialogOptions::DialogOptions(QWidget *parent) : QDialog(parent),
   ui(new Ui::DialogOptions)
 {
      ui->setupUi(this);
-     ui->txt_hubble_param->setValidator(new  QDoubleValidator(0,1000,4));
-     ui->txt_omega_matter->setValidator(new  QDoubleValidator(-10,10,4));
-     ui->txt_omega_lambda->setValidator(new  QDoubleValidator(-10,10,4));
+     ui->txt_hubble_param->setValidator(new  QDoubleValidator(0,1000,20));
+     ui->txt_omega_matter->setValidator(new  QDoubleValidator(-10,10,20));
+     ui->txt_omega_lambda->setValidator(new  QDoubleValidator(-10,10,20));
 
      ui->widget_aux_Data->loadManagementPage(0);
 
@@ -273,6 +273,7 @@ void DialogOptions::on_btn_edit_cosmo_clicked(){
   ui->btn_edit_cosmo->setEnabled(false);
   ui->btn_cancel_cosmo->setEnabled(true);
   ui->btn_save_cosmo->setEnabled(true);
+  ui->btn_default_cosmo->setEnabled(true);
 }
 
 void DialogOptions::on_btn_cancel_cosmo_clicked(){
@@ -288,6 +289,7 @@ void DialogOptions::on_btn_cancel_cosmo_clicked(){
   ui->btn_edit_cosmo->setEnabled(true);
   ui->btn_cancel_cosmo->setEnabled(false);
   ui->btn_save_cosmo->setEnabled(false);
+  ui->btn_default_cosmo->setEnabled(false);
 
   endEdition();
 
@@ -309,9 +311,18 @@ void DialogOptions::on_btn_save_cosmo_clicked(){
   ui->btn_edit_cosmo->setEnabled(true);
   ui->btn_cancel_cosmo->setEnabled(false);
   ui->btn_save_cosmo->setEnabled(false);
+  ui->btn_default_cosmo->setEnabled(false);
   endEdition();
 }
 
+
+
+void DialogOptions::on_btn_default_cosmo_clicked(){
+  PhysicsUtils::CosmologicalParameters cosmology{};
+  ui->txt_hubble_param->setText(QString::number(cosmology.getHubbleConstant()));
+  ui->txt_omega_matter->setText(QString::number(cosmology.getOmegaM()));
+  ui->txt_omega_lambda->setText(QString::number(cosmology.getOmegaLambda()));
+}
 
 void DialogOptions::startEdition(int i){
   for (int j=0;j<3;++j){

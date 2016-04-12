@@ -43,7 +43,6 @@ private:
     std::unique_ptr<Ui::MainWindow> ui;
     bool m_model_loaded = false;
     bool m_mapping_loaded = false;
-    bool m_analysis_loaded = false;
 
 };
 

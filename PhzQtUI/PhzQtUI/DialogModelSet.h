@@ -5,8 +5,10 @@
 #include <map>
 #include <QDialog>
 #include <QItemSelection>
+#include <QVBoxLayout>
 
 #include "ParameterRule.h"
+#include "PhzQtUI/GridButton.h"
 namespace Euclid {
 namespace PhzQtUI {
 
@@ -98,11 +100,11 @@ private slots:
 
      void onZDeleteClicked(size_t,size_t );
 
-     void onZAddClicked();
+     void on_btn_add_z_range_clicked();
 
      void onEbvDeleteClicked(size_t,size_t );
 
-     void onEbvAddClicked();
+     void on_btn_add_ebv_range_clicked();
 
 private:
     std::unique_ptr<Ui::DialogModelSet> ui;
@@ -117,6 +119,15 @@ private:
     void turnControlsInView();
     void populateZRangesAndValues(ParameterRule selected_rule);
     void populateEbvRangesAndValues(ParameterRule selected_rule);
+
+    QFrame* createRangeControls(GridButton* del_button, int range_id, bool enabled );
+    QFrame* createRangeControls(GridButton* del_button, int range_id, bool enabled, const Range& range);
+
+    void cleanRangeControl(QVBoxLayout* ranges_layout);
+    void SetRangeControlsEnabled(QVBoxLayout* ranges_layout, bool is_enabled);
+    std::vector<Range> getRanges(QVBoxLayout* ranges_layout);
+
+    void deleteRangeAt(QVBoxLayout* ranges_layout, size_t range_id);
 };
 
 }

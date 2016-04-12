@@ -369,25 +369,67 @@
           <attribute name="title">
            <string>E(B-V)</string>
           </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <layout class="QVBoxLayout" name="verticalLayout_5">
            <item>
-            <widget class="QLabel" name="label_17">
-             <property name="text">
-              <string>E(B-V) Ranges :</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
              <item>
-              <widget class="QTableView" name="ebv_table"/>
+              <widget class="QLabel" name="label_17">
+               <property name="text">
+                <string>Ranges :</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_5">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_add_ebv_range">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Add</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
            <item>
+            <widget class="QScrollArea" name="scroll_ebv">
+             <property name="widgetResizable">
+              <bool>true</bool>
+             </property>
+             <widget class="QWidget" name="scrollAreaWidgetContents_2">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>831</width>
+                <height>130</height>
+               </rect>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_3">
+               <item>
+                <layout class="QVBoxLayout" name="Layout_ebv_range"/>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
+           <item>
             <widget class="QLabel" name="label_18">
              <property name="text">
-              <string>E(B-V) Values (coma separated) :</string>
+              <string>Values (coma separated) :</string>
              </property>
             </widget>
            </item>
@@ -396,29 +438,71 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="tab_5">
+         <widget class="QWidget" name="tab_2">
           <attribute name="title">
            <string>Redshift</string>
           </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_17">
+          <layout class="QVBoxLayout" name="verticalLayout">
            <item>
-            <widget class="QLabel" name="label_15">
-             <property name="text">
-              <string>Redshift Ranges :</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
              <item>
-              <widget class="QTableView" name="z_table"/>
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>Ranges :</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_add_z_range">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Add</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
            <item>
-            <widget class="QLabel" name="label_16">
+            <widget class="QScrollArea" name="scroll_z">
+             <property name="widgetResizable">
+              <bool>true</bool>
+             </property>
+             <widget class="QWidget" name="scrollAreaWidgetContents">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>831</width>
+                <height>130</height>
+               </rect>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_2">
+               <item>
+                <layout class="QVBoxLayout" name="Layout_z_range"/>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_19">
              <property name="text">
-              <string>Redshift Values (coma separated) :</string>
+              <string>Values (coma separated) :</string>
              </property>
             </widget>
            </item>

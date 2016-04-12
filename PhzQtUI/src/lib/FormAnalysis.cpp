@@ -447,10 +447,15 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   std::map<std::string, boost::program_options::variable_value> options_map =
       FileUtils::getPathConfiguration(true,false,true,true);
 
-  auto global_options = PreferencesUtils::getGlobalConfigurations();
+  auto global_options = PreferencesUtils::getThreadConfigurations();
   for(auto& pair : global_options){
       options_map[pair.first]=pair.second;
   }
+
+  global_options = PreferencesUtils::getCosmologyConfigurations();
+   for(auto& pair : global_options){
+       options_map[pair.first]=pair.second;
+   }
 
   options_map["catalog-type"].value() = boost::any(survey_name);
 
@@ -546,7 +551,7 @@ std::map < std::string, boost::program_options::variable_value > FormAnalysis::g
 
     auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
 
-    auto global_options = PreferencesUtils::getGlobalConfigurations();
+    auto global_options = PreferencesUtils::getThreadConfigurations();
     for(auto& pair : global_options){
           options_map[pair.first]=pair.second;
     }

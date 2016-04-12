@@ -1,6 +1,7 @@
 
 #include <QMessageBox>
 #include <QStandardItemModel>
+#include "ElementsKernel/Exception.h"
 #include "FileUtils.h"
 #include "FormUtils.h"
 #include "PhzQtUI/DialogModelSet.h"
@@ -52,33 +53,9 @@ DialogModelSet::DialogModelSet(QWidget *parent) :
                  QMessageBox::Ok);
     }
 
-
-    QStandardItemModel* z_model = new QStandardItemModel();
-    z_model->setColumnCount(5);
-
-    QStringList  z_setHeaders;
-    z_setHeaders<<"Min"<<"Max"<<"Step"<<""<<"ref";
-    z_model->setHorizontalHeaderLabels(z_setHeaders);
-    ui->z_table->setColumnHidden(4,true);
-    ui->z_table->setModel(z_model);
-    ui->z_table->setEditTriggers(QAbstractItemView::DoubleClicked);
-    DoubleValidatorItemDelegate *itDelegate = new  DoubleValidatorItemDelegate();
-    ui->z_table->setItemDelegate(itDelegate);
-
-    QStandardItemModel* ebv_model = new QStandardItemModel();
-    ebv_model->setColumnCount(5);
-
-    QStringList ebv_setHeaders;
-    ebv_setHeaders << "Min" << "Max" << "Step" << "" << "ref";
-    ebv_model->setHorizontalHeaderLabels(ebv_setHeaders);
-    ui->ebv_table->setColumnHidden(4, true);
-    ui->ebv_table->setModel(ebv_model);
-    ui->ebv_table->setEditTriggers(QAbstractItemView::DoubleClicked);
-    DoubleValidatorItemDelegate *ebv_itDelegate = new DoubleValidatorItemDelegate();
-    ui->ebv_table->setItemDelegate(ebv_itDelegate);
-
-
-
+    QRegExp rx("(\\s*(\\d+|\\d+\\.\\d*)\\s*(,|$))*");
+    ui->txt_ebv_values->setValidator(new QRegExpValidator(rx));
+    ui->txt_z_values->setValidator(new QRegExpValidator(rx));
 
 
 }
@@ -140,18 +117,17 @@ void DialogModelSet::turnControlsInEdition(){
     static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setEnabled(true);
     static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setEnabled(true);
 
-
-
-
     ui->txt_name->setEnabled(true);
-
     ui->tableView_ParameterRule->setEnabled(false);
 
   // Redshift & E(B-V)
-    ui->txt_z_values->setEnabled(true);
-    ui->z_table->setEnabled(true);
     ui->txt_ebv_values->setEnabled(true);
-    ui->ebv_table->setEnabled(true);
+    ui->btn_add_z_range->setEnabled(true);
+    SetRangeControlsEnabled(ui->Layout_ebv_range,true);
+
+    ui->txt_z_values->setEnabled(true);
+    ui->btn_add_ebv_range->setEnabled(true);
+    SetRangeControlsEnabled(ui->Layout_z_range,true);
 }
 
 void DialogModelSet::turnControlsInView(){
@@ -180,12 +156,17 @@ void DialogModelSet::turnControlsInView(){
     ui->tableView_ParameterRule->setEnabled(true);
 
     // Redshift & E(B-V)
+    ui->txt_ebv_values->setEnabled(false);
+    ui->btn_add_z_range->setEnabled(false);
+    SetRangeControlsEnabled(ui->Layout_ebv_range,false);
 
     ui->txt_z_values->setEnabled(false);
-    ui->z_table->setEnabled(false);
-    ui->txt_ebv_values->setEnabled(false);
-    ui->ebv_table->setEnabled(false);
+    ui->btn_add_ebv_range->setEnabled(false);
+    SetRangeControlsEnabled(ui->Layout_z_range,false);
 }
+
+
+
 
 
 void DialogModelSet::on_buttonBox_rejected()
@@ -278,6 +259,26 @@ void DialogModelSet::on_btn_save_clicked()
     }
 
 
+    // Redshift and E(B-V)
+    auto new_z_ranges = getRanges( ui->Layout_z_range);
+    auto new_ebv_ranges = getRanges( ui->Layout_ebv_range);
+
+    auto old_z_ranges =ui->tableView_ParameterRule->getSelectedRule().getZRanges();
+    auto old_ebv_ranges =ui->tableView_ParameterRule->getSelectedRule().getEbvRanges();
+
+    try {
+        ui->tableView_ParameterRule->setRedshiftRangesToSelectedRule(std::move(new_z_ranges));
+        ui->tableView_ParameterRule->setEbvRangesToSelectedRule(std::move(new_ebv_ranges));
+    } catch (const Elements::Exception& e) {
+        QMessageBox::warning( this, "Error while setting ranges...",
+                                  e.what(),
+                                  QMessageBox::Ok );
+
+        ui->tableView_ParameterRule->setRedshiftRangesToSelectedRule(std::move(old_z_ranges));
+        ui->tableView_ParameterRule->setEbvRangesToSelectedRule(std::move(old_ebv_ranges));
+        return;
+    }
+
     ui->tableView_ParameterRule->setNameToSelectedRule(ui->txt_name->text().toStdString());
 
 
@@ -291,30 +292,15 @@ void DialogModelSet::on_btn_save_clicked()
     vector<string> red_excl = static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->getExclusions(red_root);
     ui->tableView_ParameterRule->setRedCurvesToSelectedRule(std::move(red_root),std::move(red_excl));
 
-    // Redshift
-    std::vector<Range> new_z_ranges{};
-    for (int i = 0; i<ui->z_table->model()->rowCount()-1; ++i){
-      double min = ui->z_table->model()->data(ui->z_table->model()->index(i,0)).toDouble();
-      double max = ui->z_table->model()->data(ui->z_table->model()->index(i,1)).toDouble();
-      double step = ui->z_table->model()->data(ui->z_table->model()->index(i,2)).toDouble();
-      new_z_ranges.push_back({min,max,step});
-    }
-    ui->tableView_ParameterRule->setRedshiftRangesToSelectedRule(std::move(new_z_ranges));
+
+
     auto new_z_values = ParameterRule::parseValueList(ui->txt_z_values->text().toStdString());
     ui->tableView_ParameterRule->setRedshiftValuesToSelectedRule(std::move(new_z_values));
 
     ui->txt_z_values->setText(QString::fromStdString(ui->tableView_ParameterRule->getSelectedRule().getRedshiftStringValueList()));
 
 
-    // E(B-V)
-    std::vector<Range> new_ebv_ranges{};
-    for (int i = 0; i<ui->ebv_table->model()->rowCount()-1; ++i){
-      double min = ui->ebv_table->model()->data(ui->ebv_table->model()->index(i,0)).toDouble();
-      double max = ui->ebv_table->model()->data(ui->ebv_table->model()->index(i,1)).toDouble();
-      double step = ui->ebv_table->model()->data(ui->ebv_table->model()->index(i,2)).toDouble();
-      new_ebv_ranges.push_back({min,max,step});
-    }
-    ui->tableView_ParameterRule->setEbvRangesToSelectedRule(std::move(new_ebv_ranges));
+
     auto new_ebv_values = ParameterRule::parseValueList(ui->txt_ebv_values->text().toStdString());
     ui->tableView_ParameterRule->setEbvValuesToSelectedRule(std::move(new_ebv_values));
     ui->txt_ebv_values->setText(QString::fromStdString(ui->tableView_ParameterRule->getSelectedRule().getEbvStringValueList()));
@@ -331,6 +317,8 @@ void DialogModelSet::on_btn_save_clicked()
     static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getReddeningRootObject(),selected_rule.getExcludedReddenings());
 
 }
+
+
 
  void DialogModelSet::selectionChanged(QModelIndex new_index, QModelIndex){
      if (new_index.isValid()){
@@ -356,14 +344,10 @@ void DialogModelSet::on_btn_save_clicked()
          static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setState("",{});
          static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setState("",{});
 
-         // Redshift & E(B-V)
-         for (int i = ui->z_table->model()->rowCount()-1; i>=0;--i){
-            ui->z_table->model()->removeRow(i);
-         }
+
+         cleanRangeControl( ui->Layout_z_range);
          ui->txt_z_values->clear();
-         for (int i = ui->ebv_table->model()->rowCount()-1; i>=0;--i){
-            ui->ebv_table->model()->removeRow(i);
-         }
+         cleanRangeControl( ui->Layout_ebv_range);
          ui->txt_ebv_values->clear();
 
      }
@@ -371,145 +355,173 @@ void DialogModelSet::on_btn_save_clicked()
  }
 
 
+
+
+
+
  void DialogModelSet::populateZRangesAndValues(ParameterRule selected_rule){
-   for (int i = ui->z_table->model()->rowCount()-1; i>=0;--i){
-              ui->z_table->model()->removeRow(i);
-            }
+  ui->txt_z_values->setText(QString::fromStdString(selected_rule.getRedshiftStringValueList()));
+  cleanRangeControl( ui->Layout_z_range);
+  m_current_z_range_id = 0;
 
-            int i=0;
-            m_current_z_range_id=0;
-            for (auto& range : selected_rule.getZRanges()){
-              QList<QStandardItem*> items;
-              items.push_back(new QStandardItem(QString::number(range.getMin())));
-              items.push_back(new QStandardItem(QString::number(range.getMax())));
-              items.push_back(new QStandardItem(QString::number(range.getStep())));
-              items.push_back(new QStandardItem());
-              items.push_back(new QStandardItem(QString::number(m_current_z_range_id)));
+  for (auto& range : selected_rule.getZRanges()) {
+    auto del_button = new GridButton(0, m_current_z_range_id, "Delete");
+    connect(del_button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
+        SLOT(onZDeleteClicked(size_t,size_t)));
+    ui->Layout_z_range->addWidget(createRangeControls(del_button, m_current_z_range_id, false, range));
+    ++m_current_z_range_id;
 
-              static_cast<QStandardItemModel*>(ui->z_table->model())->appendRow(items);
-
-              QModelIndex index = ui->z_table->model()->index(i,3);
-
-              GridButton* button = new GridButton(i,m_current_z_range_id,"-");
-
-              connect(button,SIGNAL(GridButtonClicked(size_t,size_t)),this,SLOT(onZDeleteClicked(size_t,size_t)));
-              ui->z_table->setIndexWidget(index, button);
-              ++i;
-              ++m_current_z_range_id;
-            }
-            ui->z_table->model()->insertRow(i);
-            QModelIndex index_add = ui->z_table->model()->index(i,3);
-
-            QPushButton* button_Add = new QPushButton("Add");
-
-            connect(button_Add,SIGNAL(clicked()),this,SLOT(onZAddClicked()));
-            ui->z_table->setIndexWidget(index_add, button_Add);
-            ui->z_table->setSpan(i,0,1,4);
-            ui->z_table->setColumnHidden(4,true);
-
-            ui->txt_z_values->setText(QString::fromStdString(selected_rule.getRedshiftStringValueList()));
- }
-
+  }
+}
 
  void DialogModelSet::populateEbvRangesAndValues(ParameterRule selected_rule){
-   for (int i = ui->ebv_table->model()->rowCount()-1; i>=0;--i){
-              ui->ebv_table->model()->removeRow(i);
-            }
+   ui->txt_ebv_values->setText(QString::fromStdString(selected_rule.getEbvStringValueList()));
+   cleanRangeControl( ui->Layout_ebv_range);
+   m_current_ebv_range_id = 0;
 
-            int i=0;
-            m_current_ebv_range_id=0;
-            for (auto& range : selected_rule.getEbvRanges()){
-              QList<QStandardItem*> items;
-              items.push_back(new QStandardItem(QString::number(range.getMin())));
-              items.push_back(new QStandardItem(QString::number(range.getMax())));
-              items.push_back(new QStandardItem(QString::number(range.getStep())));
-              items.push_back(new QStandardItem());
-              items.push_back(new QStandardItem(QString::number(m_current_ebv_range_id)));
-
-              static_cast<QStandardItemModel*>(ui->ebv_table->model())->appendRow(items);
-
-              QModelIndex index = ui->ebv_table->model()->index(i,3);
-
-              GridButton* button = new GridButton(i,m_current_ebv_range_id,"-");
-
-              connect(button,SIGNAL(GridButtonClicked(size_t,size_t)),this,SLOT(onEbvDeleteClicked(size_t,size_t)));
-              ui->ebv_table->setIndexWidget(index, button);
-              ++i;
-              ++m_current_ebv_range_id;
-            }
-            ui->ebv_table->model()->insertRow(i);
-            QModelIndex index_add = ui->ebv_table->model()->index(i,3);
-
-            QPushButton* button_Add = new QPushButton("Add");
-
-            connect(button_Add,SIGNAL(clicked()),this,SLOT(onEbvAddClicked()));
-            ui->ebv_table->setIndexWidget(index_add, button_Add);
-            ui->ebv_table->setSpan(i,0,1,4);
-            ui->ebv_table->setColumnHidden(4,true);
-
-            ui->txt_ebv_values->setText(QString::fromStdString(selected_rule.getEbvStringValueList()));
+   for (auto& range : selected_rule.getEbvRanges()) {
+       auto del_button = new GridButton(0, m_current_ebv_range_id, "Delete");
+       connect(del_button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
+           SLOT(onEbvDeleteClicked(size_t,size_t)));
+       ui->Layout_ebv_range->addWidget(createRangeControls(del_button, m_current_ebv_range_id, false, range));
+       ++m_current_ebv_range_id;
+     }
  }
 
  void DialogModelSet::onZDeleteClicked(size_t,size_t ref){
-   int rows = ui->z_table->model()->rowCount();
-   for(int i = 0; i < rows; ++i)
-   {
-       if(ui->z_table->model()->data( ui->z_table->model()->index(i,4)) == QString::number(ref))
-       {
-         ui->z_table->model()->removeRow(i);
-         break;
-       }
-   }
+   deleteRangeAt(ui->Layout_z_range, ref);
  }
 
  void DialogModelSet::onEbvDeleteClicked(size_t,size_t ref){
-   int rows = ui->ebv_table->model()->rowCount();
-   for(int i = 0; i < rows; ++i)
-   {
-       if(ui->ebv_table->model()->data( ui->ebv_table->model()->index(i,4)) == QString::number(ref))
-       {
-         ui->ebv_table->model()->removeRow(i);
-         break;
-       }
+   deleteRangeAt(ui->Layout_ebv_range, ref);
+ }
+
+
+
+void DialogModelSet::on_btn_add_z_range_clicked() {
+  auto del_button = new GridButton(0, m_current_z_range_id, "Delete");
+  connect(del_button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
+      SLOT(onZDeleteClicked(size_t,size_t)));
+  ui->Layout_z_range->addWidget(createRangeControls(del_button, m_current_z_range_id, true));
+  ++m_current_z_range_id;
+}
+
+void DialogModelSet::on_btn_add_ebv_range_clicked() {
+  auto del_button = new GridButton(0, m_current_ebv_range_id, "Delete");
+  connect(del_button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
+      SLOT(onEbvDeleteClicked(size_t,size_t)));
+  ui->Layout_ebv_range->addWidget(createRangeControls(del_button, m_current_ebv_range_id, true));
+  ++m_current_ebv_range_id;
+}
+
+
+QFrame* DialogModelSet::createRangeControls(GridButton* del_button, int range_id, bool enabled ){
+   return createRangeControls(del_button, enabled, range_id,{-1,-1,-1});
+ }
+
+QFrame* DialogModelSet::createRangeControls(GridButton* del_button, int range_id, bool enabled, const Range& range){
+  bool do_create_void = range.getStep()<0;
+
+  auto range_frame = new QFrame();
+  auto range_layout = new QHBoxLayout();
+  range_frame->setLayout(range_layout);
+  auto lbl_min = new QLabel("Min :");
+  range_layout->addWidget(lbl_min);
+  auto txt_min = new QLineEdit();
+  if (!do_create_void){
+    txt_min->setText(QString::number(range.getMin()));
+  }
+  txt_min->setValidator(new QDoubleValidator(0, 10000, 20));
+  txt_min->setEnabled(enabled);
+  range_layout->addWidget(txt_min);
+
+  auto lbl_max = new QLabel("Max :");
+  range_layout->addWidget(lbl_max);
+  auto txt_max = new QLineEdit();
+  if (!do_create_void){
+    txt_max->setText(QString::number(range.getMax()));
+  }
+  txt_max->setValidator(new QDoubleValidator(0, 10000, 20));
+  txt_max->setEnabled(enabled);
+  range_layout->addWidget(txt_max);
+
+  auto lbl_step = new QLabel("Step :");
+  range_layout->addWidget(lbl_step);
+  auto txt_step = new QLineEdit();
+  if (!do_create_void){
+    txt_step->setText(QString::number(range.getStep()));
+  }
+  txt_step->setValidator(new QDoubleValidator(0, 10000, 20));
+  txt_step->setEnabled(enabled);
+  range_layout->addWidget(txt_step);
+
+
+  del_button->setEnabled(enabled);
+  range_layout->addWidget(del_button);
+
+  auto lbl_id = new QLabel(QString::number(range_id));
+  lbl_id->setVisible(false);
+  range_layout->addWidget(lbl_id);
+
+  return range_frame;
+}
+
+
+
+
+void DialogModelSet::cleanRangeControl(QVBoxLayout* ranges_layout) {
+  for (int i = ranges_layout->count() - 1; i >= 0; --i) {
+    QWidget *widget = ranges_layout->itemAt(i)->widget();
+    if (widget != NULL) {
+      delete widget;
+    }
+  }
+}
+
+
+void DialogModelSet::SetRangeControlsEnabled(QVBoxLayout* ranges_layout, bool is_enabled) {
+  for (int i = 0; i < ranges_layout->count(); ++i) {
+    QWidget *range_frame = ranges_layout->itemAt(i)->widget();
+    if (range_frame != NULL) {
+      auto range_layout = range_frame->layout();
+      range_layout->itemAt(1)->widget()->setEnabled(is_enabled);
+      range_layout->itemAt(3)->widget()->setEnabled(is_enabled);
+      range_layout->itemAt(5)->widget()->setEnabled(is_enabled);
+      range_layout->itemAt(6)->widget()->setEnabled(is_enabled);
+    }
+  }
+}
+
+
+std::vector<Range> DialogModelSet::getRanges(QVBoxLayout* ranges_layout) {
+  std::vector<Range> new_ranges { };
+
+  for (int i = 0; i < ranges_layout->count(); ++i) {
+    QWidget *range_frame = ranges_layout->itemAt(i)->widget();
+    if (range_frame != NULL) {
+      auto range_layout = range_frame->layout();
+      double min = static_cast<QLineEdit*>(range_layout->itemAt(1)->widget())->text().toDouble();
+      double max = static_cast<QLineEdit*>(range_layout->itemAt(3)->widget())->text().toDouble();
+      double step = static_cast<QLineEdit*>(range_layout->itemAt(5)->widget())->text().toDouble();
+      new_ranges.push_back( { min, max, step });
+    }
+  }
+
+  return new_ranges;
+}
+
+void DialogModelSet::deleteRangeAt(QVBoxLayout* ranges_layout, size_t range_id) {
+ for (int i = 0; i < ranges_layout->count(); ++i) {
+   QWidget *range_frame = ranges_layout->itemAt(i)->widget();
+   if (range_frame != NULL) {
+     auto range_layout = range_frame->layout();
+     if (range_id == static_cast<QLabel*>(range_layout->itemAt(7)->widget())->text().toUInt()) {
+       delete range_frame;
+       break;
+     }
    }
  }
-
- void DialogModelSet::onZAddClicked(){
-   int id = ui->z_table->model()->rowCount()-1;
-   ui->z_table->model()->insertRow(id);
-
-   GridButton* button = new GridButton(id,m_current_z_range_id,"-");
-
-   ui->z_table->model()->setData( ui->z_table->model()->index(id,0), QString::number(0.));
-   ui->z_table->model()->setData( ui->z_table->model()->index(id,1), QString::number(0.));
-   ui->z_table->model()->setData( ui->z_table->model()->index(id,2), QString::number(0.));
-   ui->z_table->model()->setData( ui->z_table->model()->index(id,4), QString::number(m_current_z_range_id));
-   ++m_current_z_range_id;
-   connect(button,SIGNAL(GridButtonClicked(size_t,size_t)),this,SLOT(onZDeleteClicked(size_t,size_t)));
-
-   QModelIndex index = ui->z_table->model()->index(id,3);
-   ui->z_table->setIndexWidget(index, button);
- }
-
- void DialogModelSet::onEbvAddClicked(){
-   int id = ui->ebv_table->model()->rowCount()-1;
-   ui->ebv_table->model()->insertRow(id);
-
-   GridButton* button = new GridButton(id,m_current_ebv_range_id,"-");
-
-   ui->ebv_table->model()->setData( ui->ebv_table->model()->index(id,0), QString::number(0.));
-   ui->ebv_table->model()->setData( ui->ebv_table->model()->index(id,1), QString::number(0.));
-   ui->ebv_table->model()->setData( ui->ebv_table->model()->index(id,2), QString::number(0.));
-   ui->ebv_table->model()->setData( ui->ebv_table->model()->index(id,4), QString::number(m_current_ebv_range_id));
-   ++m_current_ebv_range_id;
-   connect(button,SIGNAL(GridButtonClicked(size_t,size_t)),this,SLOT(onEbvDeleteClicked(size_t,size_t)));
-
-   QModelIndex index = ui->ebv_table->model()->index(id,3);
-   ui->ebv_table->setIndexWidget(index, button);
- }
-
-
-
+}
 
 }
 }

@@ -107,10 +107,9 @@ void MainWindow::on_btn_HomeToAnalysis_clicked()
 {
   changeMainStackedWidgetIndex(3);
 
-  if (!m_analysis_loaded){
     ui->widget_Analysis->loadAnalysisPage();
-    m_analysis_loaded = true;
-  }
+
+
 }
 
 }

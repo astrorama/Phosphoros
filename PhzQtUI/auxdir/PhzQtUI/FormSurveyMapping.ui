@@ -314,7 +314,7 @@
               <string>Select a file to be used as default file for this catalog. The columns of the catalog will be used to populate the drop-down for the ID and the Filters columns.</string>
              </property>
              <property name="text">
-              <string>Select File and Import Columns †</string>
+              <string>Select File and Import Columns </string>
              </property>
             </widget>
            </item>

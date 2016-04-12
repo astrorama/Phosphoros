@@ -97,7 +97,7 @@
             <string>The Phosphoros Root Path can be modified with the environment variable $PHOSPHOROS_ROOT.</string>
            </property>
            <property name="text">
-            <string>Phosphoros Root Path † :</string>
+            <string>Phosphoros Root Path  :</string>
            </property>
           </widget>
          </item>
@@ -448,7 +448,7 @@
       <attribute name="title">
        <string>Cosmology</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
@@ -515,98 +515,75 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_18">
-         <item>
-          <widget class="QLabel" name="label_12">
-           <property name="toolTip">
-            <string>The Phosphoros Root Path can be modified with the environment variable $PHOSPHOROS_ROOT.</string>
-           </property>
-           <property name="text">
-            <string>Hubble Constant H (km/s)/Mpc  :</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="txt_hubble_param">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_16">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_9">
-         <property name="text">
-          <string>Assuming  Ωm + Ωk +  Ωλ = 1</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_17">
-         <item>
-          <widget class="QLabel" name="label_11">
-           <property name="toolTip">
-            <string>The Phosphoros Root Path can be modified with the environment variable $PHOSPHOROS_ROOT.</string>
-           </property>
-           <property name="text">
-            <string>Matter density parameter Ωm  :</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="txt_omega_matter">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_15">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </item>
-       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <widget class="QLabel" name="label_10">
-           <property name="toolTip">
-            <string>The Phosphoros Root Path can be modified with the environment variable $PHOSPHOROS_ROOT.</string>
-           </property>
-           <property name="text">
-            <string>Dark energy density parameter Ωλ  :</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="txt_omega_lambda">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-          </widget>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_12">
+             <property name="toolTip">
+              <string>The Phosphoros Root Path can be modified with the environment variable $PHOSPHOROS_ROOT.</string>
+             </property>
+             <property name="text">
+              <string>Hubble Constant H  :</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLineEdit" name="txt_omega_matter">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QLineEdit" name="txt_omega_lambda">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="txt_hubble_param">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_9">
+             <property name="text">
+              <string>Assuming  Ωm + Ωk +  Ωλ = 1</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_11">
+             <property name="toolTip">
+              <string>The Phosphoros Root Path can be modified with the environment variable $PHOSPHOROS_ROOT.</string>
+             </property>
+             <property name="text">
+              <string>Matter density parameter Ωm  :</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_10">
+             <property name="toolTip">
+              <string>The Phosphoros Root Path can be modified with the environment variable $PHOSPHOROS_ROOT.</string>
+             </property>
+             <property name="text">
+              <string>Dark energy density parameter Ωλ  :</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="label_13">
+             <property name="text">
+              <string> km/s/Mpc</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
          <item>
           <spacer name="horizontalSpacer_2">
@@ -620,6 +597,20 @@
             </size>
            </property>
           </spacer>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <widget class="QPushButton" name="btn_default_cosmo">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Reset to default</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </item>
@@ -659,6 +650,35 @@
    <header>PhzQtUI/FormAuxDataManagement.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>btn_editGeneral</tabstop>
+  <tabstop>txt_rootDir</tabstop>
+  <tabstop>txt_catDir</tabstop>
+  <tabstop>btn_browseCat</tabstop>
+  <tabstop>btn_defCat</tabstop>
+  <tabstop>txt_auxDir</tabstop>
+  <tabstop>btn_browseAux</tabstop>
+  <tabstop>btn_defAux</tabstop>
+  <tabstop>txt_interDir</tabstop>
+  <tabstop>btn_browseInter</tabstop>
+  <tabstop>btn_defInter</tabstop>
+  <tabstop>txt_resDir</tabstop>
+  <tabstop>btn_browseRes</tabstop>
+  <tabstop>btn_defRes</tabstop>
+  <tabstop>gb_thread</tabstop>
+  <tabstop>sb_thread</tabstop>
+  <tabstop>btn_cancelGeneral</tabstop>
+  <tabstop>btn_saveGeneral</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>btn_edit_cosmo</tabstop>
+  <tabstop>txt_hubble_param</tabstop>
+  <tabstop>txt_omega_matter</tabstop>
+  <tabstop>txt_omega_lambda</tabstop>
+  <tabstop>btn_default_cosmo</tabstop>
+  <tabstop>btn_cancel_cosmo</tabstop>
+  <tabstop>btn_save_cosmo</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

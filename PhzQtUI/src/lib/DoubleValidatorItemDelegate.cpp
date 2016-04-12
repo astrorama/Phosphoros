@@ -11,11 +11,11 @@ DoubleValidatorItemDelegate::DoubleValidatorItemDelegate(QObject *parent) :
 }
 
 QWidget *DoubleValidatorItemDelegate::createEditor(QWidget *parent,
-                                    const QStyleOptionViewItem &option,
-                                    const QModelIndex &index) const
+                                    const QStyleOptionViewItem &,
+                                    const QModelIndex &) const
 {
     QLineEdit *editor = new QLineEdit(parent);
-    editor->setValidator(new  QDoubleValidator(0,10000,4));
+    editor->setValidator(new  QDoubleValidator(0,10000,20));
     return editor;
 }
 
@@ -41,7 +41,7 @@ void DoubleValidatorItemDelegate::setModelData(QWidget *editor,
 
 void DoubleValidatorItemDelegate::updateEditorGeometry(QWidget *editor,
                                         const QStyleOptionViewItem &option,
-                                        const QModelIndex &index) const
+                                        const QModelIndex &) const
 {
     editor->setGeometry(option.rect);
 }

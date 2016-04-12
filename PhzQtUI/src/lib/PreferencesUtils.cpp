@@ -147,13 +147,22 @@ void PreferencesUtils::setCosmologicalParameters(const PhysicsUtils::Cosmologica
                     std::to_string(parameters.getHubbleConstant()));
 }
 
-std::map<std::string, boost::program_options::variable_value> PreferencesUtils::getGlobalConfigurations(){
+
+
+std::map<std::string, boost::program_options::variable_value> PreferencesUtils::getThreadConfigurations(){
   std::map<std::string, boost::program_options::variable_value> options{};
   int value = getThreadNumberOverride();
   if (value>0){
     options["thread-no"].value() = boost::any(value);
   }
 
+
+
+  return options;
+}
+
+std::map<std::string, boost::program_options::variable_value> PreferencesUtils::getCosmologyConfigurations(){
+  std::map<std::string, boost::program_options::variable_value> options{};
   auto cosmology = getCosmologicalParameters();
   options["cosmology-omega-m"].value() = boost::any(cosmology.getOmegaM());
   options["cosmology-omega-lambda"].value() = boost::any(cosmology.getOmegaLambda());

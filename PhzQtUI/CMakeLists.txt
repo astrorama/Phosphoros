@@ -1,6 +1,7 @@
 elements_subdir(PhzQtUI)
 
 
+elements_depends_on_subdirs(ElementsKernel)
 elements_depends_on_subdirs(XYDataset)
 elements_depends_on_subdirs(PhzConfiguration)
 elements_depends_on_subdirs(PhzPhotometricCorrection)

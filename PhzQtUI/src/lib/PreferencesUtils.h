@@ -40,7 +40,10 @@ public:
     static void setCosmologicalParameters(const PhysicsUtils::CosmologicalParameters& parameters);
 
 
-    static std::map<std::string, boost::program_options::variable_value> getGlobalConfigurations();
+    static std::map<std::string, boost::program_options::variable_value> getThreadConfigurations();
+
+    static std::map<std::string, boost::program_options::variable_value> getCosmologyConfigurations();
+
 
 
 };
