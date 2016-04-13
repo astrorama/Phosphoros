@@ -110,7 +110,7 @@ private:
     std::string getRedStatus(const ParameterRule& rule) const;
     std::string getRedGroupName(const ParameterRule& rule) const;
 
-    std::list<QString> getItemsRepresentation(const ParameterRule& rule,int id) const;
+    std::list<QString> getItemsRepresentation(ParameterRule& rule,int id) const;
     std::map<int,ParameterRule> m_parameter_rules;
     std::string m_sed_root_path;
     std::string m_red_root_path;

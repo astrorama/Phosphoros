@@ -43,10 +43,10 @@ std::map<int,ModelSet> ModelSet::loadModelSetsFromFolder(std::string root_path){
     return map;
 }
 
-long long ModelSet::getModelNumber() const{
+long long ModelSet::getModelNumber(bool recompute ) {
     long long result=0;
     for(auto it = m_parameter_rules.begin(); it != m_parameter_rules.end(); ++it ){
-        result+=it->second.getModelNumber();
+        result+=it->second.getModelNumber(recompute);
     }
 
     return result;
@@ -90,13 +90,22 @@ ModelSet ModelSet::deserialize(QDomDocument& doc, ModelSet& model) {
     auto rules_node = root_node.firstChildElement("ParameterRules");
     auto list = rules_node.childNodes();
     for (int i = 0; i < list.count(); ++i) {
-      ParameterRule rule;
-
       auto node_rule = list.at(i).toElement();
+      bool ok;
+      auto number = node_rule.attribute("ModelNumber").toLongLong(&ok);
+      if (!ok){
+        number=-1;
+      }
+
+      ParameterRule rule{number};
+
+
       rule.setName(node_rule.attribute("Name").toStdString());
       rule.setSedRootObject(node_rule.attribute("SedRootObject").toStdString());
       rule.setReddeningRootObject(
           node_rule.attribute("ReddeningCurveRootObject").toStdString());
+
+
 
       std::set<double> ebv_value_set { };
       auto ebv_sub_list = node_rule.firstChildElement("EbvValues").childNodes();
@@ -204,7 +213,7 @@ ModelSet ModelSet::deserialize(QDomDocument& doc, ModelSet& model) {
     return model;
   }
 
-QDomDocument ModelSet::serialize() const{
+QDomDocument ModelSet::serialize(){
     QDomDocument doc("ParameterSpace");
     QDomElement root = doc.createElement("ParameterSpace");
     root.setAttribute("Name", QString::fromStdString(getName()));
@@ -218,11 +227,12 @@ QDomDocument ModelSet::serialize() const{
       rule_node.setAttribute("Name", QString::fromStdString(rule.getName()));
       rule_node.setAttribute("SedRootObject", QString::fromStdString(rule.getSedRootObject()));
       rule_node.setAttribute("ReddeningCurveRootObject", QString::fromStdString(rule.getReddeningRootObject()));
+      rule_node.setAttribute("ModelNumber", QString::number(rule.getModelNumber()));
 
       QDomElement ebv_values_node = doc.createElement("EbvValues");
       for (auto& value : rule.getEbvValues()) {
         QDomElement value_element = doc.createElement("Value");
-        value_element.appendChild(doc.createTextNode(QString::number(value)));
+        value_element.appendChild(doc.createTextNode(QString::number(value,'g',20)));
         ebv_values_node.appendChild(value_element);
       }
       rule_node.appendChild(ebv_values_node);
@@ -240,7 +250,7 @@ QDomDocument ModelSet::serialize() const{
       QDomElement z_value_node = doc.createElement("ZValues");
       for (auto& values : rule.getRedshiftValues()) {
         QDomElement value_element = doc.createElement("Value");
-        value_element.appendChild(doc.createTextNode(QString::number(values)));
+        value_element.appendChild(doc.createTextNode(QString::number(values,'g',20)));
         z_value_node.appendChild(value_element);
       }
       rule_node.appendChild(z_value_node);

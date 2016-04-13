@@ -64,7 +64,7 @@ std::string ParameterRuleModel::getRedGroupName(const ParameterRule& rule) const
 }
 
 
-std::list<QString> ParameterRuleModel::getItemsRepresentation(const ParameterRule& rule, int id) const{
+std::list<QString> ParameterRuleModel::getItemsRepresentation(ParameterRule& rule, int id) const{
      std::list<QString> list;
 
      list.push_back(QString::fromStdString(getParamName(rule)));
@@ -109,14 +109,14 @@ void ParameterRuleModel::setRedshiftRanges(std::vector<Range> z_ranges,int row){
   int ref = getValue(row,6).toInt();
   m_parameter_rules[ref].setZRanges(std::move(z_ranges));
   this->item(row,4)->setText(QString::fromStdString( m_parameter_rules[ref].getRedshiftRangeString()));
-  this->item(row,5)->setText(QString::number( m_parameter_rules[ref].getModelNumber()));
+  this->item(row,5)->setText(QString::number( m_parameter_rules[ref].getModelNumber(true)));
 }
 
 void ParameterRuleModel::setEbvRanges(std::vector<Range> ebv_ranges,int row){
   int ref = getValue(row,6).toInt();
   m_parameter_rules[ref].setEbvRanges(std::move(ebv_ranges));
   this->item(row,3)->setText(QString::fromStdString( m_parameter_rules[ref].getEbvRangeString()));
-  this->item(row,5)->setText(QString::number( m_parameter_rules[ref].getModelNumber()));
+  this->item(row,5)->setText(QString::number( m_parameter_rules[ref].getModelNumber(true)));
 
 }
 
@@ -124,14 +124,14 @@ void ParameterRuleModel::setEbvValues(std::set<double> values,int row){
   int ref = getValue(row,6).toInt();
   m_parameter_rules[ref].setEbvValues(values);
   this->item(row,3)->setText(QString::fromStdString( m_parameter_rules[ref].getEbvRangeString()));
-  this->item(row,5)->setText(QString::number( m_parameter_rules[ref].getModelNumber()));
+  this->item(row,5)->setText(QString::number( m_parameter_rules[ref].getModelNumber(true)));
  }
 
 void ParameterRuleModel::setRedshiftValues(std::set<double> values,int row){
   int ref = getValue(row,6).toInt();
   m_parameter_rules[ref].setRedshiftValues(values);
   this->item(row,4)->setText(QString::fromStdString(m_parameter_rules[ref].getRedshiftRangeString()));
-  this->item(row,5)->setText(QString::number( m_parameter_rules[ref].getModelNumber()));
+  this->item(row,5)->setText(QString::number( m_parameter_rules[ref].getModelNumber(true)));
  }
 
 void ParameterRuleModel::setSeds(std::string root, std::vector<std::string> exceptions,int row){

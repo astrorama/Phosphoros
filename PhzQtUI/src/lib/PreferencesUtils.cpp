@@ -136,15 +136,15 @@ PhysicsUtils::CosmologicalParameters PreferencesUtils::getCosmologicalParameters
 void PreferencesUtils::setCosmologicalParameters(const PhysicsUtils::CosmologicalParameters& parameters){
   setUserPreference("_global_preferences_",
                     "Cosmological-Parameter-Omega-Matter",
-                    std::to_string(parameters.getOmegaM()));
+                    QString::number(parameters.getOmegaM(),'g',20).toStdString());
 
   setUserPreference("_global_preferences_",
                     "Cosmological-Parameter-Omega-Lambda",
-                    std::to_string(parameters.getOmegaLambda()));
+                    QString::number(parameters.getOmegaLambda(),'g',20).toStdString());
 
   setUserPreference("_global_preferences_",
                     "Cosmological-Parameter-Hubble",
-                    std::to_string(parameters.getHubbleConstant()));
+                    QString::number(parameters.getHubbleConstant(),'g',20).toStdString());
 }
 
 

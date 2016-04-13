@@ -214,27 +214,28 @@ void DialogModelSet::on_btn_cancel_clicked()
 {
   if (m_insert) {
     ui->tableView_ParameterRule->deletSelectedRule();
+    turnControlsInView();
   } else {
     auto selected_rule = ui->tableView_ParameterRule->getSelectedRule();
 
     ui->txt_name->setText(QString::fromStdString(selected_rule.getName()));
-    // SED
-    static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setState(
-        selected_rule.getSedRootObject(), selected_rule.getExcludedSeds());
-
-    // Reddening Curve
-    static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setState(
-        selected_rule.getReddeningRootObject(),
-        selected_rule.getExcludedReddenings());
 
     // E(B-V)
     populateEbvRangesAndValues(selected_rule);
 
-  // Redshift
+    // Redshift
     populateZRangesAndValues(selected_rule);
 
+    turnControlsInView();
+    // SED
+    static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedRootObject(),selected_rule.getExcludedSeds());
+
+    // Reddening Curve
+    static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getReddeningRootObject(),selected_rule.getExcludedReddenings());
+
+
   }
-  turnControlsInView();
+
 }
 
 
@@ -268,16 +269,25 @@ void DialogModelSet::on_btn_save_clicked()
 
     try {
         ui->tableView_ParameterRule->setRedshiftRangesToSelectedRule(std::move(new_z_ranges));
-        ui->tableView_ParameterRule->setEbvRangesToSelectedRule(std::move(new_ebv_ranges));
     } catch (const Elements::Exception& e) {
-        QMessageBox::warning( this, "Error while setting ranges...",
+        QMessageBox::warning( this, "Error while setting redshift ranges...",
                                   e.what(),
                                   QMessageBox::Ok );
 
         ui->tableView_ParameterRule->setRedshiftRangesToSelectedRule(std::move(old_z_ranges));
-        ui->tableView_ParameterRule->setEbvRangesToSelectedRule(std::move(old_ebv_ranges));
         return;
     }
+
+    try {
+          ui->tableView_ParameterRule->setEbvRangesToSelectedRule(std::move(new_ebv_ranges));
+      } catch (const Elements::Exception& e) {
+          QMessageBox::warning( this, "Error while setting E(B-V) ranges...",
+                                    e.what(),
+                                    QMessageBox::Ok );
+
+          ui->tableView_ParameterRule->setEbvRangesToSelectedRule(std::move(old_ebv_ranges));
+          return;
+      }
 
     ui->tableView_ParameterRule->setNameToSelectedRule(ui->txt_name->text().toStdString());
 
@@ -404,6 +414,7 @@ void DialogModelSet::on_btn_add_z_range_clicked() {
       SLOT(onZDeleteClicked(size_t,size_t)));
   ui->Layout_z_range->addWidget(createRangeControls(del_button, m_current_z_range_id, true));
   ++m_current_z_range_id;
+  turnControlsInEdition();
 }
 
 void DialogModelSet::on_btn_add_ebv_range_clicked() {
@@ -412,6 +423,7 @@ void DialogModelSet::on_btn_add_ebv_range_clicked() {
       SLOT(onEbvDeleteClicked(size_t,size_t)));
   ui->Layout_ebv_range->addWidget(createRangeControls(del_button, m_current_ebv_range_id, true));
   ++m_current_ebv_range_id;
+  turnControlsInEdition();
 }
 
 
@@ -429,7 +441,7 @@ QFrame* DialogModelSet::createRangeControls(GridButton* del_button, int range_id
   range_layout->addWidget(lbl_min);
   auto txt_min = new QLineEdit();
   if (!do_create_void){
-    txt_min->setText(QString::number(range.getMin()));
+    txt_min->setText(QString::number(range.getMin(),'g',15));
   }
   txt_min->setValidator(new QDoubleValidator(0, 10000, 20));
   txt_min->setEnabled(enabled);
@@ -439,7 +451,7 @@ QFrame* DialogModelSet::createRangeControls(GridButton* del_button, int range_id
   range_layout->addWidget(lbl_max);
   auto txt_max = new QLineEdit();
   if (!do_create_void){
-    txt_max->setText(QString::number(range.getMax()));
+    txt_max->setText(QString::number(range.getMax(),'g',15));
   }
   txt_max->setValidator(new QDoubleValidator(0, 10000, 20));
   txt_max->setEnabled(enabled);
@@ -449,7 +461,7 @@ QFrame* DialogModelSet::createRangeControls(GridButton* del_button, int range_id
   range_layout->addWidget(lbl_step);
   auto txt_step = new QLineEdit();
   if (!do_create_void){
-    txt_step->setText(QString::number(range.getStep()));
+    txt_step->setText(QString::number(range.getStep(),'g',15));
   }
   txt_step->setValidator(new QDoubleValidator(0, 10000, 20));
   txt_step->setEnabled(enabled);

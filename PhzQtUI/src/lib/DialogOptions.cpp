@@ -40,9 +40,9 @@ DialogOptions::DialogOptions(QWidget *parent) : QDialog(parent),
     }
 
     auto cosmology = PreferencesUtils::getCosmologicalParameters();
-    ui->txt_hubble_param->setText(QString::number(cosmology.getHubbleConstant()));
-    ui->txt_omega_matter->setText(QString::number(cosmology.getOmegaM()));
-    ui->txt_omega_lambda->setText(QString::number(cosmology.getOmegaLambda()));
+    ui->txt_hubble_param->setText(QString::number(cosmology.getHubbleConstant(),'g',15));
+    ui->txt_omega_matter->setText(QString::number(cosmology.getOmegaM(),'g',15));
+    ui->txt_omega_lambda->setText(QString::number(cosmology.getOmegaLambda(),'g',15));
 }
 
 DialogOptions::~DialogOptions()
@@ -279,9 +279,9 @@ void DialogOptions::on_btn_edit_cosmo_clicked(){
 void DialogOptions::on_btn_cancel_cosmo_clicked(){
 
   auto cosmology = PreferencesUtils::getCosmologicalParameters();
-  ui->txt_hubble_param->setText(QString::number(cosmology.getHubbleConstant()));
-  ui->txt_omega_matter->setText(QString::number(cosmology.getOmegaM()));
-  ui->txt_omega_lambda->setText(QString::number(cosmology.getOmegaLambda()));
+  ui->txt_hubble_param->setText(QString::number(cosmology.getHubbleConstant(),'g',15));
+  ui->txt_omega_matter->setText(QString::number(cosmology.getOmegaM(),'g',15));
+  ui->txt_omega_lambda->setText(QString::number(cosmology.getOmegaLambda(),'g',15));
 
   ui->txt_hubble_param->setEnabled(false);
   ui->txt_omega_matter->setEnabled(false);
@@ -301,9 +301,9 @@ void DialogOptions::on_btn_save_cosmo_clicked(){
   double omega_l = ui->txt_omega_lambda->text().toDouble();
   PhysicsUtils::CosmologicalParameters cosmology{omega_m, omega_l, hubble};
   PreferencesUtils::setCosmologicalParameters(cosmology);
-  ui->txt_hubble_param->setText(QString::number(cosmology.getHubbleConstant()));
-  ui->txt_omega_matter->setText(QString::number(cosmology.getOmegaM()));
-  ui->txt_omega_lambda->setText(QString::number(cosmology.getOmegaLambda()));
+  ui->txt_hubble_param->setText(QString::number(cosmology.getHubbleConstant(),'g',15));
+  ui->txt_omega_matter->setText(QString::number(cosmology.getOmegaM(),'g',15));
+  ui->txt_omega_lambda->setText(QString::number(cosmology.getOmegaLambda(),'g',15));
 
   ui->txt_hubble_param->setEnabled(false);
   ui->txt_omega_matter->setEnabled(false);
@@ -319,9 +319,9 @@ void DialogOptions::on_btn_save_cosmo_clicked(){
 
 void DialogOptions::on_btn_default_cosmo_clicked(){
   PhysicsUtils::CosmologicalParameters cosmology{};
-  ui->txt_hubble_param->setText(QString::number(cosmology.getHubbleConstant()));
-  ui->txt_omega_matter->setText(QString::number(cosmology.getOmegaM()));
-  ui->txt_omega_lambda->setText(QString::number(cosmology.getOmegaLambda()));
+  ui->txt_hubble_param->setText(QString::number(cosmology.getHubbleConstant(),'g',15));
+  ui->txt_omega_matter->setText(QString::number(cosmology.getOmegaM(),'g',15));
+  ui->txt_omega_lambda->setText(QString::number(cosmology.getOmegaLambda(),'g',15));
 }
 
 void DialogOptions::startEdition(int i){

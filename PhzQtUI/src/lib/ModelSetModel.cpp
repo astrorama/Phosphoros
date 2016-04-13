@@ -81,7 +81,7 @@ void ModelSetModel::loadSets(const std::string& path){
 
 void ModelSetModel::updateModelCount(int row){
     int key = getRef(row).toInt();
-    this->item(row,1)->setText(QString::number(m_set_list[key].getModelNumber()));
+    this->item(row,1)->setText(QString::number(m_set_list[key].getModelNumber(true)));
 }
 
 int ModelSetModel::newSet(int duplicate_from_row ){

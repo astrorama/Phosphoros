@@ -30,6 +30,12 @@ ParameterRule::ParameterRule()
 {
 }
 
+
+
+ParameterRule::ParameterRule(long long model_number): m_model_number(model_number){
+
+}
+
 std::string ParameterRule::getName() const{
   return m_name;
 }
@@ -163,8 +169,9 @@ std::map<std::string, boost::program_options::variable_value> ParameterRule::get
 }
 
 
-long long ParameterRule::getModelNumber() const {
+long long ParameterRule::getModelNumber(bool recompute) {
 
+ if (m_model_number<0 || recompute){
   bool is_zero=false;
   auto options = getConfigOptions("");
 
@@ -183,22 +190,25 @@ long long ParameterRule::getModelNumber() const {
 
 
   if (is_zero){
-    return 0;
-  }
+    m_model_number = 0;
+  } else {
+    options["sed-root-path"].value() = boost::any(FileUtils::getSedRootPath(false));
+    options["reddening-curve-root-path"].value() = boost::any(FileUtils::getRedCurveRootPath(false));
+    completeWithDefaults<PhzConfiguration::ParameterSpaceConfig>(options);
+    long config_manager_id = Configuration::getUniqueManagerId();
+    auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+    config_manager.registerConfiguration<PhzConfiguration::ParameterSpaceConfig>();
+    config_manager.closeRegistration();
+    config_manager.initialize(options);
 
-  options["sed-root-path"].value() = boost::any(FileUtils::getSedRootPath(false));
-  options["reddening-curve-root-path"].value() = boost::any(FileUtils::getRedCurveRootPath(false));
-  completeWithDefaults<PhzConfiguration::ParameterSpaceConfig>(options);
-  long config_manager_id = Configuration::getUniqueManagerId();
-  auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
-  config_manager.registerConfiguration<PhzConfiguration::ParameterSpaceConfig>();
-  config_manager.closeRegistration();
-  config_manager.initialize(options);
+    m_model_number = config_manager.getConfiguration<PhzConfiguration::SedConfig>().getSedList().at("").size() *
+        config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getReddeningCurveList().at("").size() *
+        config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getEbvList().at("").size() *
+        config_manager.getConfiguration<PhzConfiguration::RedshiftConfig>().getZList().at("").size();
 
-  return config_manager.getConfiguration<PhzConfiguration::SedConfig>().getSedList().at("").size() *
-      config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getReddeningCurveList().at("").size() *
-      config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getEbvList().at("").size() *
-      config_manager.getConfiguration<PhzConfiguration::RedshiftConfig>().getZList().at("").size();
+   }
+ }
+  return m_model_number;
 }
 
 
@@ -233,38 +243,28 @@ void ParameterRule::setEbvValues(std::set<double> values){
   m_ebv_values = move(values);
 }
 
-// TODO
 const std::string ParameterRule::getEbvRangeString() const {
   bool is_zero = false;
   auto options = getConfigOptions("");
-
-  XYDataSetTreeModel treeModel_sed;
-  treeModel_sed.loadDirectory(FileUtils::getSedRootPath(false), false, "SEDs");
-  treeModel_sed.setState(getSedRootObject(), getExcludedSeds());
-  is_zero |= treeModel_sed.getSelectedLeaf("").size() == 0;
 
   XYDataSetTreeModel treeModel_red;
   treeModel_red.loadDirectory(FileUtils::getRedCurveRootPath(false), false,
       "Reddening Curves");
   treeModel_red.setState(getReddeningRootObject(), getExcludedReddenings());
   is_zero |= treeModel_red.getSelectedLeaf("").size() == 0;
-
-  is_zero |= m_redshift_ranges.size() == 0 && m_redshift_values.size() == 0;
   is_zero |= m_ebv_ranges.size() == 0 && m_ebv_values.size() == 0;
 
   if (is_zero) {
     return "";
   }
 
-  options["sed-root-path"].value() = boost::any(
-      FileUtils::getSedRootPath(false));
   options["reddening-curve-root-path"].value() = boost::any(
       FileUtils::getRedCurveRootPath(false));
-  completeWithDefaults<PhzConfiguration::ParameterSpaceConfig>(options);
+  completeWithDefaults<PhzConfiguration::ReddeningConfig>(options);
   long config_manager_id = Configuration::getUniqueManagerId();
   auto& config_manager = Configuration::ConfigManager::getInstance(
       config_manager_id);
-  config_manager.registerConfiguration<PhzConfiguration::ParameterSpaceConfig>();
+  config_manager.registerConfiguration<PhzConfiguration::ReddeningConfig>();
   config_manager.closeRegistration();
   config_manager.initialize(options);
 
@@ -279,34 +279,17 @@ const std::string ParameterRule::getEbvRangeString() const {
 const std::string ParameterRule::getRedshiftRangeString() const {
   bool is_zero = false;
   auto options = getConfigOptions("");
-
-  XYDataSetTreeModel treeModel_sed;
-  treeModel_sed.loadDirectory(FileUtils::getSedRootPath(false), false, "SEDs");
-  treeModel_sed.setState(getSedRootObject(), getExcludedSeds());
-  is_zero |= treeModel_sed.getSelectedLeaf("").size() == 0;
-
-  XYDataSetTreeModel treeModel_red;
-  treeModel_red.loadDirectory(FileUtils::getRedCurveRootPath(false), false,
-      "Reddening Curves");
-  treeModel_red.setState(getReddeningRootObject(), getExcludedReddenings());
-  is_zero |= treeModel_red.getSelectedLeaf("").size() == 0;
-
   is_zero |= m_redshift_ranges.size() == 0 && m_redshift_values.size() == 0;
-  is_zero |= m_ebv_ranges.size() == 0 && m_ebv_values.size() == 0;
 
   if (is_zero) {
     return "";
   }
 
-  options["sed-root-path"].value() = boost::any(
-      FileUtils::getSedRootPath(false));
-  options["reddening-curve-root-path"].value() = boost::any(
-      FileUtils::getRedCurveRootPath(false));
-  completeWithDefaults<PhzConfiguration::ParameterSpaceConfig>(options);
+  completeWithDefaults<PhzConfiguration::RedshiftConfig>(options);
   long config_manager_id = Configuration::getUniqueManagerId();
   auto& config_manager = Configuration::ConfigManager::getInstance(
       config_manager_id);
-  config_manager.registerConfiguration<PhzConfiguration::ParameterSpaceConfig>();
+  config_manager.registerConfiguration<PhzConfiguration::RedshiftConfig>();
   config_manager.closeRegistration();
   config_manager.initialize(options);
 

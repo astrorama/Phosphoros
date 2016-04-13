@@ -31,6 +31,8 @@ public:
      */
     ParameterRule();
 
+    ParameterRule(long long model_number);
+
     /**
      * @brief Get the name of the ParameterRule
      * @return the name of the ParameterRule
@@ -57,7 +59,7 @@ public:
      * @brief get Model Number
      * @return the cardinality of models which can be build from the ParameterRule
      */
-    long long getModelNumber() const;
+    long long getModelNumber(bool recompute = false);
 
     /**
      * @brief get the Sed Root Object
@@ -177,6 +179,8 @@ private:
 
     std::vector<Range> m_ebv_ranges{};
     std::vector<Range> m_redshift_ranges{};
+
+    long long m_model_number = -1;
 };
 
 }
