@@ -40,10 +40,10 @@ void DialogZRanges::refresh(){
 
    for (size_t i=0; i<m_zs.size(); ++i){
      auto titleFrame = new QFrame();
-     titleFrame->setFrameStyle(QFrame::Box);
+     //titleFrame->setFrameStyle(QFrame::Box);
      auto titleLayout = new QHBoxLayout();
      titleFrame->setLayout(titleLayout);
-     auto txt_title = new QLineEdit(QString::number(m_zs[i]));
+     auto txt_title = new QLineEdit(QString::number(m_zs[i],'g',15));
      titleLayout->addWidget(txt_title);
 
      if (i>0 && i<m_zs.size()-1){
@@ -63,7 +63,7 @@ void DialogZRanges::setRanges(std::vector<double> zs){
 
   size_t max_i = m_zs.size()-1;
 
-  ui->txt_new_z->setValidator(new QDoubleValidator(m_zs[0],m_zs[max_i],2,this));
+  ui->txt_new_z->setValidator(new QDoubleValidator(m_zs[0],m_zs[max_i],20,this));
 
   refresh();
 }
