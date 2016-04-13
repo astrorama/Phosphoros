@@ -80,7 +80,6 @@ void DialogPhotCorrectionEdition::on_tableView_doubleClicked ( const QModelIndex
      ui->btn_Save->setEnabled(true);
      ui->buttonBox->setEnabled(false);
      ui->tableView->setEnabled(true);
-     ui->tableView->setEnabled(true);
 }
 
 void DialogPhotCorrectionEdition::on_btn_Cancel_clicked()
@@ -98,10 +97,9 @@ void DialogPhotCorrectionEdition::on_btn_Save_clicked()
 {
     QStandardItemModel* model = static_cast<QStandardItemModel*>(ui->tableView->model());
     bool valid=true;
-    QLocale locale{};
-    for (int i = 0; i< model->columnCount();++i){
+    for (int i = 0; i< model->rowCount();++i){
          bool ok;
-         locale.toDouble(model->item(0,i)->text(),&ok);
+         model->item(i,1)->text().toDouble(&ok);
         valid= valid && ok;
     }
     if (!valid){
@@ -114,7 +112,7 @@ void DialogPhotCorrectionEdition::on_btn_Save_clicked()
       int i=0;
       for (auto& correction_pair : m_map){
         bool ok;
-        correction_pair.second = locale.toDouble(model->item(0,i)->text(),&ok);
+        correction_pair.second = model->item(i,1)->text().toDouble(&ok);
         ++i;
       }
 
@@ -123,6 +121,7 @@ void DialogPhotCorrectionEdition::on_btn_Save_clicked()
         ui->btn_Cancel->setEnabled(false);
         ui->btn_Save->setEnabled(false);
         ui->tableView->setEnabled(false);
+        ui->buttonBox->setEnabled(true);
     }
 }
 
