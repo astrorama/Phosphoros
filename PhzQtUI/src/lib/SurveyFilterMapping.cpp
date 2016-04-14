@@ -78,7 +78,7 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
     std::list<std::string> SurveyFilterMapping::getAvailableCatalogs(){
       auto cat_root_path = FileUtils::getCatalogRootPath(true,"");
       std::list<std::string> all_dirs{};
-      QDirIterator directories(QString::fromStdString(cat_root_path), QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+      QDirIterator directories(QString::fromStdString(cat_root_path), QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
       while(directories.hasNext()){
               directories.next();
               all_dirs.push_back(directories.fileName().toStdString());
@@ -89,27 +89,32 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
     }
 
 std::map<int,SurveyFilterMapping> SurveyFilterMapping::loadCatalogMappings(){
-  auto additional_info_path = QString::fromStdString(FileUtils::getGUIConfigPath())+QDir::separator()+"Catalogs";
-  QFileInfo info(additional_info_path);
-  if (!info.exists()){
-    QDir().mkpath(additional_info_path);
+  auto catalog_config_path = QString::fromStdString(FileUtils::getGUIConfigPath())+QDir::separator()+"Catalogs";
+
+
+
+  std::map<int,SurveyFilterMapping> mappings{};
+  int id = 0;
+
+  // 1) list the folders under the Catalog folder
+  for (auto& catalog_name : getAvailableCatalogs()){
+    // look for existing config
+    auto catalog_conf = catalog_config_path+QDir::separator()+QString::fromStdString(catalog_name)+".xml";
+
+    QFileInfo info(catalog_conf);
+     if (info.exists()){
+       mappings[id]= SurveyFilterMapping::loadCatalog(catalog_name+".xml");
+     } else {
+       SurveyFilterMapping mapping{};
+       mapping.setName(catalog_name);
+       mapping.ReadFilters();
+       mappings[id]=std::move(mapping);
+     }
+     ++id;
   }
 
-  QDir root_dir(additional_info_path);
 
-  std::map<int,SurveyFilterMapping> map ;
-  QStringList fileNames = root_dir.entryList(QDir::Files | QDir::NoDotAndDotDot );
-
-  int count=0;
-  foreach (const QString &fileName, fileNames) {
-    try{
-      auto survey = SurveyFilterMapping::loadCatalog(fileName.toStdString());
-      map[count]=survey;
-      ++count;
-    } catch (...){} //if a file do not open correctly: just skip it...
-  }
-
-  return map;
+  return mappings;
 }
 
 SurveyFilterMapping SurveyFilterMapping::loadCatalog(std::string name) {
@@ -147,58 +152,46 @@ SurveyFilterMapping SurveyFilterMapping::loadCatalog(std::string name) {
     survey.m_column_list.insert(survey.getSourceIdColumn());
   }
 
-  // read the filter mapping info
-  std::list<FilterMapping> mappings{};
-
-  auto mapping_path=QString::fromStdString(FileUtils::getIntermediaryProductRootPath(true,FileUtils::removeExt(name, ".xml")))+QDir::separator();
-
-
-   std::ifstream in {mapping_path.toStdString()+"filter_mapping.txt"};
-   std::string line;
-   regex expr {"\\s*([^\\s#]+)\\s+([^\\s#]+)\\s+([^\\s#]+)\\s*(#.*)?"};
-   while (std::getline(in, line)) {
-     boost::trim(line);
-     if (line[0] == '#') {
-       continue;
-     }
-     smatch match_res;
-     if (!regex_match(line, match_res, expr)) {
-       logger.error() << "Syntax error in " << mapping_path.toStdString()+"filter_mapping.txt" << ": " << line;
-       throw Elements::Exception() << "Syntax error in " << mapping_path.toStdString()+"filter_mapping.txt" << ": " << line;
-     }
-
-     FilterMapping mapping;
-     mapping.setFilterFile(match_res.str(1));
-     mapping.setFluxColumn(match_res.str(2));
-     mapping.setErrorColumn(match_res.str(3));
-     mappings.push_back(mapping);
-
-   }
-
-
-
-//  QFile mapping_file(mapping_path+"filter_mapping.txt");
-//  if (mapping_file.open(QIODevice::ReadOnly))
-//  {
-//     QTextStream in(&mapping_file);
-//     while (!in.atEnd())
-//     {
-//        QString line = in.readLine();
-//        auto tokens = line.split(" ");
-//        if (tokens.length()==3){
-//          FilterMapping mapping;
-//          mapping.setFilterFile(tokens[0].toStdString());
-//          mapping.setFluxColumn(tokens[1].toStdString());
-//          mapping.setErrorColumn(tokens[2].toStdString());
-//          mappings.push_back(mapping);
-//        }
-//     }
-//     mapping_file.close();
-//  }
-
-  survey.setFilters(mappings);
+  survey.ReadFilters();
 
   return survey;
+}
+
+
+void SurveyFilterMapping::ReadFilters(){
+  std::list<FilterMapping> mappings { };
+
+  auto mapping_path = QString::fromStdString(
+      FileUtils::getIntermediaryProductRootPath(true, getName()))
+      + QDir::separator() + "filter_mapping.txt";
+
+  try{
+    std::ifstream in { mapping_path.toStdString() };
+    std::string line;
+    regex expr { "\\s*([^\\s#]+)\\s+([^\\s#]+)\\s+([^\\s#]+)\\s*(#.*)?" };
+    while (std::getline(in, line)) {
+      boost::trim(line);
+      if (line[0] == '#') {
+        continue;
+      }
+      smatch match_res;
+      if (!regex_match(line, match_res, expr)) {
+        logger.error() << "Syntax error in "
+            << mapping_path.toStdString() + "filter_mapping.txt" << ": " << line;
+        throw Elements::Exception() << "Syntax error in "
+            << mapping_path.toStdString() + "filter_mapping.txt" << ": " << line;
+      }
+
+      FilterMapping mapping;
+      mapping.setFilterFile(match_res.str(1));
+      mapping.setFluxColumn(match_res.str(2));
+      mapping.setErrorColumn(match_res.str(3));
+      mappings.push_back(mapping);
+
+    }
+  } catch (...){}
+
+  setFilters(mappings);
 }
 
 void SurveyFilterMapping::deleteSurvey(){

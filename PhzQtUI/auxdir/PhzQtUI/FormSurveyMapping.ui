@@ -33,7 +33,7 @@
         </font>
        </property>
        <property name="text">
-        <string>&gt; Catalog Definition :</string>
+        <string>&gt; Catalog Type Definition :</string>
        </property>
       </widget>
      </item>
@@ -51,6 +51,18 @@
       </spacer>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_3">
+     <property name="font">
+      <font>
+       <pointsize>9</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Define the Folder containing the Catalog files, the Filters found into the Catalog and the corresponding files columns.</string>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="Line" name="line_6">
@@ -76,7 +88,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Catalog List :</string>
+            <string>Catalog Type List :</string>
            </property>
           </widget>
          </item>
@@ -104,13 +116,6 @@
           <widget class="QPushButton" name="btn_MapDuplicate">
            <property name="text">
             <string>Duplicate</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_MapDelete">
-           <property name="text">
-            <string>Delete</string>
            </property>
           </widget>
          </item>
@@ -152,6 +157,19 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_14">
          <item>
+          <widget class="QLabel" name="lbl_catalog_name">
+           <property name="font">
+            <font>
+             <pointsize>14</pointsize>
+             <italic>true</italic>
+            </font>
+           </property>
+           <property name="text">
+            <string>Selected</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QLabel" name="label_15">
            <property name="font">
             <font>
@@ -159,7 +177,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Selected Catalog :</string>
+            <string>Catalog Type :</string>
            </property>
           </widget>
          </item>
@@ -215,91 +233,14 @@
        </item>
        <item>
         <layout class="QGridLayout" name="gridLayout_2">
-         <item row="1" column="1">
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Fixed</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>0</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="0" column="2">
+         <item row="2" column="0">
           <widget class="QLabel" name="label_2">
            <property name="text">
             <string>Non Detection Flag (Missing Photometry) :</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="2">
-          <widget class="QDoubleSpinBox" name="txt_nonDetection">
-           <property name="minimum">
-            <double>-10000000.000000000000000</double>
-           </property>
-           <property name="maximum">
-            <double>10000000.000000000000000</double>
-           </property>
-           <property name="value">
-            <double>-99.000000000000000</double>
-           </property>
-          </widget>
-         </item>
          <item row="1" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout">
-           <item>
-            <layout class="QVBoxLayout" name="verticalLayout_4">
-             <item>
-              <widget class="QComboBox" name="cb_mapName"/>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btn_newCat">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>New</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item row="2" column="2">
-          <widget class="QLabel" name="label_18">
-           <property name="text">
-            <string>Source ID Column :</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_17">
-           <property name="text">
-            <string>Catalog Name :</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="2">
-          <widget class="QComboBox" name="cb_SourceId">
-           <property name="editable">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout_3">
            <item>
             <widget class="QLineEdit" name="tb_df">
@@ -320,12 +261,76 @@
            </item>
           </layout>
          </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Default Catalog File :</string>
+         <item row="1" column="1">
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>0</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="1" column="2">
+          <widget class="QComboBox" name="cb_SourceId">
+           <property name="editable">
+            <bool>true</bool>
            </property>
           </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QLabel" name="label_18">
+           <property name="text">
+            <string>Source ID Column :</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <widget class="QDoubleSpinBox" name="txt_nonDetection">
+             <property name="minimum">
+              <double>-10000000.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>10000000.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>-99.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item row="0" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Default Catalog File : </string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </item>

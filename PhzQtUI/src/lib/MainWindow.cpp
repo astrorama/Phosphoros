@@ -50,6 +50,8 @@ MainWindow::MainWindow(QWidget *parent) :
       exit(0);
     }
   }
+
+  FileUtils::buildDirectories();
 }
 
 MainWindow::~MainWindow()

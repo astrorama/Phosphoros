@@ -129,7 +129,7 @@ Configuration::ConfigManager& FileUtils::getRootPaths() {
   completeWithDefaults<PhzConfiguration::AuxDataDirConfig>(map);
   completeWithDefaults<PhzConfiguration::IntermediateDirConfig>(map);
   completeWithDefaults<PhzConfiguration::ResultsDirConfig>(map);
-  
+
   long config_manager_id = Configuration::getUniqueManagerId();
   auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
   config_manager.registerConfiguration<PhzConfiguration::PhosphorosRootDirConfig>();
@@ -139,7 +139,7 @@ Configuration::ConfigManager& FileUtils::getRootPaths() {
   config_manager.registerConfiguration<PhzConfiguration::ResultsDirConfig>();
   config_manager.closeRegistration();
   config_manager.initialize(map);
-  
+
   return config_manager;
 }
 
@@ -202,7 +202,11 @@ std::string FileUtils::getDefaultCatalogRootPath(){
 }
 
 std::string FileUtils::getAuxRootPath(){
-   return readPath()["AuxiliaryData"];
+  auto aux_data_folder = QString::fromStdString(readPath()["AuxiliaryData"]);
+
+
+
+  return aux_data_folder.toStdString();
 }
 
 std::string FileUtils::getDefaultAuxRootPath(){
@@ -214,8 +218,6 @@ std::string FileUtils::getIntermediaryProductRootPath(bool check, const std::str
 
   if (catalog_type.size()>0){
     path = path + QDir::separator()+ QString::fromStdString(catalog_type);
-  } else {
-    check=false;
   }
 
   QFileInfo info(path);
@@ -402,14 +404,18 @@ std::string FileUtils::getPhotCorrectionsRootPath(bool check, const std::string&
 }
 
 std::string FileUtils::getPhotmetricGridRootPath(bool check, const std::string& catalog_type) {
-  QString path = QString::fromStdString(FileUtils::getIntermediaryProductRootPath(false,catalog_type))+QDir::separator()+"ModelGrids";
-  QFileInfo info(path);
-  if (check){
-      if (!info.exists()){
-          QDir().mkpath(path);
-      }
+  if (catalog_type.length()>0){
+    QString path = QString::fromStdString(FileUtils::getIntermediaryProductRootPath(false,catalog_type))+QDir::separator()+"ModelGrids";
+    QFileInfo info(path);
+    if (check){
+        if (!info.exists()){
+            QDir().mkpath(path);
+        }
+    }
+    return info.absoluteFilePath().toStdString();
   }
-  return info.absoluteFilePath().toStdString();
+
+  return "";
 }
 
 
@@ -426,6 +432,38 @@ std::string FileUtils::getLuminosityFunctionGridRootPath(bool check, const std::
     }
     return info.absoluteFilePath().toStdString();
 
+}
+
+
+void FileUtils::buildDirectories(){
+  auto aux_data_folder = QString::fromStdString(FileUtils::getAuxRootPath());
+
+  std::vector<QString> folders{};
+
+  folders.push_back(aux_data_folder);
+  folders.push_back(aux_data_folder + QDir::separator()+"AxisPriors");
+  folders.push_back(aux_data_folder + QDir::separator()+"AxisPriors"+ QDir::separator()+"ebv");
+  folders.push_back(aux_data_folder + QDir::separator()+"AxisPriors"+ QDir::separator()+"red-curve");
+  folders.push_back(aux_data_folder + QDir::separator()+"AxisPriors"+ QDir::separator()+"sed");
+  folders.push_back(aux_data_folder + QDir::separator()+"AxisPriors"+ QDir::separator()+"z");
+  folders.push_back(aux_data_folder + QDir::separator()+"GenericPriors");
+
+  FileUtils::getFilterRootPath(true);
+  FileUtils::getSedRootPath(true);
+  FileUtils::getRedCurveRootPath(true);
+  FileUtils::getLuminosityFunctionCurveRootPath(true);
+
+  FileUtils::getGUIConfigPath();
+  FileUtils::getCatalogRootPath(true,"");
+  FileUtils::getIntermediaryProductRootPath(true,"");
+  FileUtils::getResultRootPath(true,"","");
+
+    for (auto& path : folders){
+      QFileInfo info(path);
+        if (!info.exists()){
+              QDir().mkpath(path);
+        }
+    }
 }
 
 

@@ -36,15 +36,16 @@ int SurveyModel::newSurvey(int duplicate_from_row ){
     ++max_ref;
 
     if (duplicate_from_row>=0){
-        int ref = getValue(duplicate_from_row,3).toInt();
+        m_survey_filter_mappings[max_ref]=SurveyFilterMapping{};
+
+        int ref = getValue(duplicate_from_row,2).toInt();
         SurveyFilterMapping ref_survey=m_survey_filter_mappings.at(ref);
 
-        m_survey_filter_mappings[max_ref]=ref_survey;
-
-        std::string new_name = getDuplicateName(m_survey_filter_mappings[max_ref].getName());
-        m_survey_filter_mappings[max_ref].setName(new_name);
+        m_survey_filter_mappings[max_ref].setName(getDuplicateName(ref_survey.getName()));
         m_survey_filter_mappings[max_ref].setNonDetection(ref_survey.getNonDetection());
-
+        m_survey_filter_mappings[max_ref].setSourceIdColumn(ref_survey.getSourceIdColumn());
+        m_survey_filter_mappings[max_ref].setColumnList(ref_survey.getColumnList());
+        m_survey_filter_mappings[max_ref].setFilters(ref_survey.getFilters());
     }
     else{
          m_survey_filter_mappings[max_ref]=SurveyFilterMapping{};

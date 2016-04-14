@@ -138,6 +138,8 @@ private:
     std::set<std::string> m_column_list;
     double m_non_detection=-99.;
 
+    void ReadFilters();
+
 };
 
 }

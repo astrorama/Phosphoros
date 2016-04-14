@@ -4,6 +4,7 @@
 #include <memory>
 #include <QDialog>
 #include <string>
+#include <list>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -24,12 +25,9 @@ public:
     explicit DialogCatalogName(QWidget *parent = 0);
     ~DialogCatalogName();
 
-signals:
-    /**
-     * @brief SIGNAL popupClosing: rised when the dialog is saved and the popup close.
-     * The argument is the new name.
-     */
-    void popupClosing(std::string);
+    void setDefaultName(std::string default_name);
+    void setExistingNames( std::list<std::string> existing_names);
+    std::string getName() const;
 
 private slots:
 
@@ -46,6 +44,8 @@ private slots:
 
 private:
     std::unique_ptr<Ui::DialogCatalogName> ui;
+    std::string m_name;
+    std::list<std::string> m_existing_names;
 
 };
 

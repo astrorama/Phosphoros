@@ -285,6 +285,9 @@ public:
     static std::string getPhotmetricGridRootPath(bool check, const std::string& catalog_type);
 
 
+
+    static void buildDirectories();
+
     //////////////////////////////////////////////////////////
     //// Last used path.
     static std::string getLastUsedPath();
