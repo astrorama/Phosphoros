@@ -6,7 +6,7 @@
 #include "FormUtils.h"
 #include "PhzQtUI/DialogModelSet.h"
 #include "ui_DialogModelSet.h"
-#include "PhzQtUI/XYDataSetTreeModel.h"
+#include "PhzQtUI/DataSetTreeModel.h"
 
 #include "PhzQtUI/GridButton.h"
 #include "PhzQtUI/DoubleValidatorItemDelegate.h"
@@ -17,36 +17,39 @@ using namespace std;
 namespace Euclid{
 namespace PhzQtUI {
 
-DialogModelSet::DialogModelSet(QWidget *parent) :
+DialogModelSet::DialogModelSet(DatasetRepo seds_repository,
+    DatasetRepo redenig_curves_repository, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::DialogModelSet)
+    ui(new Ui::DialogModelSet),
+    m_seds_repository(seds_repository),
+    m_redenig_curves_repository(redenig_curves_repository)
 {
     ui->setupUi(this);
 
-    XYDataSetTreeModel* treeModel_sed = new XYDataSetTreeModel();
-    treeModel_sed->loadDirectory(FileUtils::getSedRootPath(true),false,"SEDs");
+    DataSetTreeModel* treeModel_sed = new DataSetTreeModel(m_seds_repository);
+    treeModel_sed->load();
     ui->treeView_Sed->setModel(treeModel_sed);
-    ui->treeView_Sed->expandAll();
+    ui->treeView_Sed->collapseAll();
 
     connect(treeModel_sed, SIGNAL(itemChanged(QStandardItem*)), treeModel_sed,
                  SLOT(onItemChanged(QStandardItem*)));
 
-    if (!treeModel_sed->item(0,0)->hasChildren()){
+    if (treeModel_sed->rowCount() == 0){
          QMessageBox::warning(this, "No available SED...",
                  "There is no SED to select. "
                  "You can provide and manage SEDs in the \"Configuration/Aux. Data\" page.",
                  QMessageBox::Ok);
     }
 
-    XYDataSetTreeModel* treeModel_red = new XYDataSetTreeModel();
-    treeModel_red->loadDirectory(FileUtils::getRedCurveRootPath(true),false,"Reddening Curves");
+    DataSetTreeModel* treeModel_red = new DataSetTreeModel(m_redenig_curves_repository);
+    treeModel_red->load();
     ui->treeView_Reddening->setModel(treeModel_red);
-    ui->treeView_Reddening->expandAll();
+    ui->treeView_Reddening->collapseAll();
 
     connect( treeModel_red, SIGNAL(itemChanged(QStandardItem*)), treeModel_red,
                  SLOT(onItemChanged(QStandardItem*)));
 
-    if (!treeModel_red->item(0,0)->hasChildren()){
+    if (treeModel_red->rowCount() == 0){
          QMessageBox::warning(this, "No available Reddening Curve...",
                  "There is no reddening curve to select. "
                  "You can provide and manage reddening curves in the \"Configuration/Aux. Data\" page.",
@@ -78,7 +81,10 @@ DialogModelSet::~DialogModelSet()
 
 
 void DialogModelSet::loadData(const map<int,ParameterRule>& init_parameter_rules){
-    ui->tableView_ParameterRule->loadParameterRules(init_parameter_rules, FileUtils::getSedRootPath(false), FileUtils::getRedCurveRootPath(false));
+    ui->tableView_ParameterRule->loadParameterRules(
+        init_parameter_rules,
+        m_seds_repository,
+        m_redenig_curves_repository);
 
 
     connect(
@@ -114,8 +120,8 @@ void DialogModelSet::turnControlsInEdition(){
     ui->btn_cancel->setEnabled(true);
     ui->btn_save->setEnabled(true);
 
-    static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setEnabled(true);
-    static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setEnabled(true);
+    static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setEnabled(true);
+    static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setEnabled(true);
 
     ui->txt_name->setEnabled(true);
     ui->tableView_ParameterRule->setEnabled(false);
@@ -146,8 +152,8 @@ void DialogModelSet::turnControlsInView(){
     ui->btn_cancel->setEnabled(false);
     ui->btn_save->setEnabled(false);
 
-    static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setEnabled(false);
-    static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setEnabled(false);
+    static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setEnabled(false);
+    static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setEnabled(false);
 
 
 
@@ -227,37 +233,46 @@ void DialogModelSet::on_btn_cancel_clicked()
     populateZRangesAndValues(selected_rule);
 
     turnControlsInView();
+
     // SED
-    static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedRootObject(),selected_rule.getExcludedSeds());
-
+    static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedSelection());
     // Reddening Curve
-    static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getReddeningRootObject(),selected_rule.getExcludedReddenings());
-
+    static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getRedCurveSelection());
 
   }
-
 }
 
 
 
 void DialogModelSet::on_btn_save_clicked()
 {
-    auto sed_res = static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->getRootSelection();
-    auto red_res =  static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->getRootSelection();
+  auto sed_selection = static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->getState();
+  auto red_curve_selection = static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->getState();
 
-    if(!sed_res.first|| !red_res.first){
-        QMessageBox::warning( this, "Missing Data...",
-                                          "Please provide SED(s) and Reddening Curve(s) selection.",
-                                          QMessageBox::Ok );
-        return;
-    }
+  if (sed_selection.isEmpty() ){
+    QMessageBox::warning( this,
+                          "Missing Data...",
+                          "Please provide SED(s) and Reddening Curve(s) selection.",
+                          QMessageBox::Ok );
+    return;
+  }
 
-    if (!ui->tableView_ParameterRule->checkNameAlreadyUsed(ui->txt_name->text().toStdString())){
-      QMessageBox::warning( this, "Duplicate Name...",
-                           "The name you enter is already used, please provide another name.",
-                           QMessageBox::Ok );
-      return;
-    }
+  if (red_curve_selection.isEmpty()){
+    QMessageBox::warning( this,
+                          "Missing Data...",
+                          "Please provide SED(s) and Reddening Curve(s) selection.",
+                          QMessageBox::Ok );
+    return;
+  }
+
+
+  if (!ui->tableView_ParameterRule->checkNameAlreadyUsed(ui->txt_name->text().toStdString())){
+    QMessageBox::warning( this,
+                          "Duplicate Name...",
+                          "The name you enter is already used, please provide another name.",
+                          QMessageBox::Ok );
+    return;
+  }
 
 
     // Redshift and E(B-V)
@@ -293,14 +308,10 @@ void DialogModelSet::on_btn_save_clicked()
 
 
     // SED
-    string sed_root = sed_res.second;
-    vector<string> sed_excl = static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->getExclusions(sed_root);
-    ui->tableView_ParameterRule->setSedsToSelectedRule(std::move(sed_root),std::move(sed_excl));
+    ui->tableView_ParameterRule->setSedsToSelectedRule(std::move(sed_selection));
 
     // Reddeing Curves
-    string red_root =red_res.second;
-    vector<string> red_excl = static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->getExclusions(red_root);
-    ui->tableView_ParameterRule->setRedCurvesToSelectedRule(std::move(red_root),std::move(red_excl));
+    ui->tableView_ParameterRule->setRedCurvesToSelectedRule(std::move(red_curve_selection));
 
 
 
@@ -321,13 +332,12 @@ void DialogModelSet::on_btn_save_clicked()
     auto selected_rule = ui->tableView_ParameterRule->getSelectedRule();
 
     // SED
-    static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedRootObject(),selected_rule.getExcludedSeds());
-
+    static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedSelection());
     // Reddening Curve
-    static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getReddeningRootObject(),selected_rule.getExcludedReddenings());
+    static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getRedCurveSelection());
+
 
 }
-
 
 
  void DialogModelSet::selectionChanged(QModelIndex new_index, QModelIndex){
@@ -339,10 +349,9 @@ void DialogModelSet::on_btn_save_clicked()
          ui->txt_name->setText(QString::fromStdString(selected_rule.getName()));
 
          // SED
-         static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedRootObject(),selected_rule.getExcludedSeds());
-
+         static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedSelection());
          // Reddening Curve
-         static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getReddeningRootObject(),selected_rule.getExcludedReddenings());
+         static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getRedCurveSelection());
 
 
          // Redshift & E(B-V)
@@ -351,8 +360,10 @@ void DialogModelSet::on_btn_save_clicked()
      }
      else{
 
-         static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setState("",{});
-         static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setState("",{});
+        // SED
+        static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setState({});
+        // Reddening Curve
+        static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setState({});
 
 
          cleanRangeControl( ui->Layout_z_range);
@@ -363,10 +374,6 @@ void DialogModelSet::on_btn_save_clicked()
      }
      turnControlsInView();
  }
-
-
-
-
 
 
  void DialogModelSet::populateZRangesAndValues(ParameterRule selected_rule){

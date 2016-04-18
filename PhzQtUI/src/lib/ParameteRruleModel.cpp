@@ -4,10 +4,10 @@ namespace Euclid {
 namespace PhzQtUI {
 
 
-ParameterRuleModel::ParameterRuleModel(std::map<int,ParameterRule> init_parameter_rules, std::string sedRootPath, std::string redRootPath):
+ParameterRuleModel::ParameterRuleModel(std::map<int,ParameterRule> init_parameter_rules, DatasetRepo sed_repo, DatasetRepo red_curve_repo):
     m_parameter_rules(init_parameter_rules) //copy the rules
-  ,m_sed_root_path(sedRootPath)
-  ,m_red_root_path(redRootPath)
+  ,m_sed_repo(sed_repo)
+  ,m_red_curve_repo(red_curve_repo)
 {
     this->setColumnCount(7);
     this->setRowCount(m_parameter_rules.size());
@@ -34,33 +34,23 @@ std::string ParameterRuleModel::getParamName(const ParameterRule& rule) const{
 
 
 std::string ParameterRuleModel::getSedStatus(const ParameterRule& rule) const{
-  long sed_number=rule.getSedNumber();
-  long total_sed_number = sed_number+rule.getExcludedSeds().size();
-  return std::to_string(sed_number)+"/"+std::to_string(total_sed_number);
+  auto sed_number=rule.getSedNumber(m_sed_repo);
+  return std::to_string(sed_number.first)+"/"+std::to_string(sed_number.second);
+
 }
 
 std::string ParameterRuleModel::getSedGroupName(const ParameterRule& rule) const{
-  std::string root_sed=rule.getSedRootObject(m_sed_root_path);
-  if (root_sed.length()==0){
-    root_sed="<All>";
-  }
-
-  return root_sed;
+  return rule.getSedGroupName();
 }
 
 std::string ParameterRuleModel::getRedStatus(const ParameterRule& rule) const{
-  long red_number=rule.getRedCurveNumber();
-  long total_red_number = red_number+rule.getExcludedReddenings().size();
-  return std::to_string(red_number)+"/"+std::to_string(total_red_number);
+  auto red_number=rule.getRedCurveNumber(m_red_curve_repo);
+  return std::to_string(red_number.first)+"/"+std::to_string(red_number.second);
+
 }
 
 std::string ParameterRuleModel::getRedGroupName(const ParameterRule& rule) const{
-  std::string root_red=rule.getReddeningRootObject(m_red_root_path);
-  if (root_red.length()==0){
-    root_red="<All>";
-  }
-
-  return root_red;
+  return rule.getRedCurveGroupName();
 }
 
 
@@ -69,7 +59,7 @@ std::list<QString> ParameterRuleModel::getItemsRepresentation(ParameterRule& rul
 
      list.push_back(QString::fromStdString(getParamName(rule)));
      list.push_back(QString::fromStdString(getSedGroupName(rule) +" ("+getSedStatus(rule)+")"));
-     list.push_back(QString::fromStdString(getRedGroupName(rule) +" ("+getRedStatus(rule)+")"));
+     list.push_back(QString::fromStdString(getRedGroupName(rule)+" ("+getRedStatus(rule)+")"));
      list.push_back(QString::fromStdString(rule.getEbvRangeString()));
      list.push_back(QString::fromStdString(rule.getRedshiftRangeString()));
      list.push_back(QString::number(rule.getModelNumber()));
@@ -134,19 +124,17 @@ void ParameterRuleModel::setRedshiftValues(std::set<double> values,int row){
   this->item(row,5)->setText(QString::number( m_parameter_rules[ref].getModelNumber(true)));
  }
 
-void ParameterRuleModel::setSeds(std::string root, std::vector<std::string> exceptions,int row){
+void ParameterRuleModel::setSeds(DatasetSelection state_selection,int row){
     int ref = getValue(row,6).toInt();
-     m_parameter_rules[ref].setSedRootObject(std::move(root));
-     m_parameter_rules[ref].setExcludedSeds(std::move(exceptions));
+     m_parameter_rules[ref].setSedSelection(std::move(state_selection));
 
      this->item(row,1)->setText(QString::fromStdString(getSedGroupName(m_parameter_rules[ref])
          +" ("+getSedStatus(m_parameter_rules[ref])+")"));
 }
 
-void ParameterRuleModel::setRedCurves(std::string root, std::vector<std::string> exceptions,int row){
+void ParameterRuleModel::setRedCurves(DatasetSelection state_selection,int row){
     int ref = getValue(row,6).toInt();
-     m_parameter_rules[ref].setReddeningRootObject(std::move(root));
-     m_parameter_rules[ref].setExcludedReddenings(std::move(exceptions));
+     m_parameter_rules[ref].setRedCurveSelection(std::move(state_selection));
 
      this->item(row,2)->setText(QString::fromStdString(getRedGroupName(m_parameter_rules[ref])
          +" ("+getRedStatus(m_parameter_rules[ref])+")"));

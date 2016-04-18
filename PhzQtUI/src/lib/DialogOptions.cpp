@@ -6,21 +6,31 @@
 #include "PreferencesUtils.h"
 #include "PhzUtils/Multithreading.h"
 #include "PhysicsUtils/CosmologicalParameters.h"
+#include "XYDataset/AsciiParser.h"
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
 
 using namespace std;
 
 namespace Euclid {
 namespace PhzQtUI{
 
-DialogOptions::DialogOptions(QWidget *parent) : QDialog(parent),
-  ui(new Ui::DialogOptions)
+DialogOptions::DialogOptions(DatasetRepo seds_repository,
+                             DatasetRepo redenig_curves_repository,
+                             QWidget *parent) :
+  QDialog(parent),
+  ui(new Ui::DialogOptions),
+  m_seds_repository(seds_repository),
+  m_redenig_curves_repository(redenig_curves_repository)
 {
      ui->setupUi(this);
      ui->txt_hubble_param->setValidator(new  QDoubleValidator(0,1000,20));
      ui->txt_omega_matter->setValidator(new  QDoubleValidator(-10,10,20));
      ui->txt_omega_lambda->setValidator(new  QDoubleValidator(-10,10,20));
 
+     ui->widget_aux_Data->setRepositories(m_seds_repository, m_redenig_curves_repository);
      ui->widget_aux_Data->loadManagementPage(0);
+
 
      auto path_map = FileUtils::readPath();
      ui->txt_rootDir->setText(QString::fromStdString(FileUtils::getRootPath(false)));
@@ -153,6 +163,13 @@ void DialogOptions::on_btn_saveGeneral_clicked()
     ui->btn_defRes->setEnabled(false);
     ui->gb_thread->setEnabled(false);
 
+    std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
+    std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(false), std::move(sed_file_parser) });
+    m_seds_repository->resetProvider(std::move(sed_provider));
+
+    std::unique_ptr <XYDataset::FileParser > reddening_file_parser {new XYDataset::AsciiParser { } };
+    std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(new XYDataset::FileSystemProvider{  FileUtils::getRedCurveRootPath(false), std::move(reddening_file_parser) });
+    m_redenig_curves_repository->resetProvider(std::move(red_curve_provider));
 }
 
 void DialogOptions::on_btn_browseCat_clicked(){

@@ -23,9 +23,13 @@ FormAuxDataManagement::~FormAuxDataManagement()
 {
 }
 
+void FormAuxDataManagement::setRepositories(DatasetRepo seds_repository,
+        DatasetRepo redenig_curves_repository){
+  m_seds_repository=seds_repository;
+  m_redenig_curves_repository=redenig_curves_repository;
+}
 
 void FormAuxDataManagement::loadManagementPage(int index){
-
     DirectoryTreeModel* treeModel_filter = new DirectoryTreeModel();
     treeModel_filter->loadDirectory(FileUtils::getFilterRootPath(true),false, "Filters");
     treeModel_filter->selectRoot();
@@ -84,6 +88,7 @@ void FormAuxDataManagement::on_btn_RedImport_clicked()
     popup->setData(title,group,model->getRelPath(group,"Reddening Curves"));
     if (popup->exec()){
         loadManagementPage(2);
+        m_redenig_curves_repository->reload();
     }
 }
 
@@ -107,6 +112,7 @@ void FormAuxDataManagement::on_btn_RedDelete_clicked()
                                   QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
         FileUtils::removeDir(QString::fromStdString(selection));
         loadManagementPage(2);
+        m_redenig_curves_repository->reload();
     }
 }
 
@@ -120,6 +126,7 @@ void FormAuxDataManagement::on_btn_SedImport_clicked()
     popup->setData(title,group,model->getRelPath(group,"SEDs"));
     if (popup->exec()){
         loadManagementPage(1);
+        m_seds_repository->reload();
     }
 }
 
@@ -143,6 +150,7 @@ void FormAuxDataManagement::on_btn_SedDelete_clicked()
                                  QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
        FileUtils::removeDir(QString::fromStdString(selection));
        loadManagementPage(1);
+       m_seds_repository->reload();
    }
 }
 

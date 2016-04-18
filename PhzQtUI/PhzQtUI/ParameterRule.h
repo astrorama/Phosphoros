@@ -6,6 +6,9 @@
 #include <set>
 #include <map>
 #include "Range.h"
+#include "DatasetSelection.h"
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
 
 namespace boost{
 namespace program_options{
@@ -15,6 +18,10 @@ namespace program_options{
 
 namespace Euclid {
 namespace PhzQtUI {
+
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
+
+
 
 /**
  * @class ParameterRule
@@ -48,74 +55,33 @@ public:
      * @brief get Reddening Curves Number
      * @return the cardinality of selected Reddening Curves in the the ParameterRule
      */
-    long  getRedCurveNumber() const;
+    std::pair<long,long>  getRedCurveNumber(DatasetRepo redenig_curves_repository) const;
+
+    std::string getRedCurveGroupName() const;
+
     /**
      * @brief get SED Number
      * @return the cardinality of selected SED in the the ParameterRule
      */
-    long  getSedNumber() const;
+    std::pair<long,long> getSedNumber(DatasetRepo sed_repository) const;
+
+    std::string getSedGroupName() const;
 
     /**
      * @brief get Model Number
      * @return the cardinality of models which can be build from the ParameterRule
      */
-    long long getModelNumber(bool recompute = false);
+    long long getModelNumber(bool recompute=false);
 
-    /**
-     * @brief get the Sed Root Object
-     * @param rootPath
-     * @return the root object path after trimming the root path.
-     */
-    std::string getSedRootObject(std::string rootPath="") const;
-
-    /**
-     * @brief set the SedRootObject
-     * @param sed_root_object
-     */
-    void setSedRootObject(std::string sed_root_object);
-
-    /**
-     * @brief get the Reddening Root Object
-     * @param rootPath
-     * @return the root object path after trimming the root path.
-     */
-    std::string getReddeningRootObject(std::string rootPath="") const;
-
-    /**
-     * @brief set the ReddeningRootObject
-     * @param reddening_root_object
-     */
-    void setReddeningRootObject(std::string reddening_root_object);
-
-    /**
-     * @brief get the Excluded SED list.
-     * @return the Excluded SED list.
-     */
-    const std::vector<std::string>& getExcludedSeds() const;
-
-    /**
-     * @brief set the Excluded SED list by moving in the provided list
-     * @param excluded_sed
-     */
-    void setExcludedSeds( std::vector<std::string> excluded_sed);
-
-    /**
-     * @brief get the Excluded Reddening Curve list.
-     * @return the Excluded Reddening Curve list.
-     */
-    const std::vector<std::string>& getExcludedReddenings() const;
-
-    /**
-     * @brief set the Excluded Reddening Curve list by moving in the provided list
-     * @param excluded_reddening
-     */
-    void setExcludedReddenings( std::vector<std::string> excluded_reddening);
 
 
     const std::string getEbvRangeString() const;
 
     const std::string getRedshiftRangeString() const;
 
+    std::string getRedshiftStringValueList() const;
+
+    std::string getEbvStringValueList() const ;
 
 
     const std::set<double>& getEbvValues() const;
@@ -156,23 +122,21 @@ public:
     std::map<std::string, boost::program_options::variable_value> getConfigOptions(std::string region) const;
 
 
-    std::string getRedshiftStringValueList() const;
-    std::string getEbvStringValueList() const ;
+    void setRedCurveSelection(DatasetSelection red_curve_selection);
+    void setSedSelection(DatasetSelection sed_selection);
+
+    const DatasetSelection& getRedCurveSelection() const;
+    const DatasetSelection& getSedSelection() const;
 
 
     static std::set<double> parseValueList(const std::string& list);
 
 private:
+    std::pair<long,long> getSelectionNumbers(DatasetSelection selection, DatasetRepo repository) const;
     std::string getAxisStringValue(std::vector<double> axis) const;
     std::string getStringValueList(const std::set<double>& list) const;
+
     std::string m_name;
-
-    std::string m_sed_root_object;
-    std::string m_reddening_root_object;
-
-    std::vector<std::string> m_excluded_sed;
-    std::vector<std::string> m_excluded_reddening;
-
 
     std::set<double> m_ebv_values{};
     std::set<double> m_redshift_values{};
@@ -181,6 +145,9 @@ private:
     std::vector<Range> m_redshift_ranges{};
 
     long long m_model_number = -1;
+
+    DatasetSelection m_red_curve_selection;
+    DatasetSelection m_sed_selection;
 };
 
 }

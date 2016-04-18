@@ -11,6 +11,7 @@
 
 #include "XYDataset/FileSystemProvider.h"
 #include "XYDataset/AsciiParser.h"
+#include "XYDataset/QualifiedName.h"
 #include "Configuration/ConfigManager.h"
 #include "PhzConfiguration/ParameterSpaceConfig.h"
 #include "PhzConfiguration/SedConfig.h"
@@ -18,6 +19,8 @@
 #include "PhzConfiguration/RedshiftConfig.h"
 #include "DefaultOptionsCompleter.h"
 #include "Configuration/Utils.h"
+
+
 
 namespace po = boost::program_options;
 using namespace std;
@@ -29,7 +32,6 @@ namespace PhzQtUI {
 ParameterRule::ParameterRule()
 {
 }
-
 
 
 ParameterRule::ParameterRule(long long model_number): m_model_number(model_number){
@@ -44,37 +46,88 @@ void ParameterRule::setName(std::string new_name){
    m_name=new_name;
  }
 
-string ParameterRule::getSedRootObject(string rootPath) const{
 
-   return FileUtils::removeStart(m_sed_root_object,rootPath);
+
+std::string ParameterRule::getRedCurveGroupName() const{
+  return m_red_curve_selection.getBaseGroupName();
 }
 
-string ParameterRule::getReddeningRootObject(string rootPath) const{
-
-    return FileUtils::removeStart(m_reddening_root_object,rootPath);
-
+std::pair<long,long>  ParameterRule::getRedCurveNumber(DatasetRepo redenig_curves_repository) const{
+  return getSelectionNumbers(m_red_curve_selection, redenig_curves_repository);
 }
 
-long  ParameterRule::getRedCurveNumber() const{
-  long red_factor = 1;
-     unique_ptr < XYDataset::FileParser >  red_file_parser {new XYDataset::AsciiParser { } };
-     XYDataset::FileSystemProvider red_provider { FileUtils::getRedCurveRootPath(false), move(red_file_parser) };
-     auto unordered = red_provider.listContents(m_reddening_root_object);
-     if (red_factor<long(unordered.size())){
-       red_factor=unordered.size();
+
+std::string ParameterRule::getSedGroupName() const{
+  return m_sed_selection.getBaseGroupName();
+}
+
+std::pair<long,long> ParameterRule::getSedNumber(DatasetRepo seds_repository) const{
+  return getSelectionNumbers(m_sed_selection, seds_repository);
+}
+
+std::pair<long,long> ParameterRule::getSelectionNumbers(DatasetSelection selection, DatasetRepo repository) const{
+  auto full_list = repository->getContent();
+
+   std::set<XYDataset::QualifiedName> selected_items { };
+
+   for (auto& item : full_list) {
+
+     // add groups
+     for (auto& group : selection.getGroupes()) {
+       XYDataset::QualifiedName group_name(group);
+       if (item.belongsInGroup(group_name)) {
+         selected_items.insert(item);
+       }
      }
-    return red_factor-getExcludedReddenings().size();
-}
 
-long  ParameterRule::getSedNumber() const{
-  long sed_factor = 1;
-    unique_ptr < XYDataset::FileParser > file_parser {new XYDataset::AsciiParser { } };
-    XYDataset::FileSystemProvider provider { FileUtils::getSedRootPath(false), move(file_parser) };
-     auto unordered = provider.listContents(m_sed_root_object);
-     if (sed_factor<long(unordered.size())){
-       sed_factor=unordered.size();
+     //isolated
+     for (auto& lone : selection.getIsolated()) {
+       XYDataset::QualifiedName lone_name(lone);
+
+       if (item == lone_name) {
+         selected_items.insert(item);
+       }
      }
-     return sed_factor-getExcludedSeds().size();
+   }
+
+   std::vector<XYDataset::QualifiedName> final_items { };
+   for (auto& item : selected_items) {
+     // excluded
+     bool excluded=false;
+     for (auto& exclusion : selection.getExclusions()) {
+       XYDataset::QualifiedName exclusion_name(exclusion);
+
+       if (item == exclusion_name) {
+         excluded=true;
+         break;
+       }
+     }
+
+     if (!excluded){
+       final_items.push_back(item);
+     }
+
+   }
+
+   long total = 0;
+   if (selection.hasMultipleGroups()) {
+     total = repository->getContent().size();
+   } else {
+     if (selection.getIsolated().size() == 1) {
+       total = 1;
+     } else {
+       auto group_name = XYDataset::QualifiedName(
+           selection.getGroupes()[0]);
+       for (auto& item : repository->getContent()) {
+         if (item.belongsInGroup(group_name)) {
+           ++total;
+         }
+       }
+     }
+   }
+
+   long selected = final_items.size();
+   return std::make_pair<long,long>(std::move(selected),std::move(total));
 }
 
 std::string ParameterRule::getStringValueList(const std::set<double>& list) const{
@@ -121,17 +174,26 @@ std::map<std::string, boost::program_options::variable_value> ParameterRule::get
   }
 
   map<string, po::variable_value> options;
-  XYDataSetTreeModel treeModel_sed;
-  treeModel_sed.loadDirectory(FileUtils::getSedRootPath(false), false,"SEDs");
-  treeModel_sed.setState(getSedRootObject(),getExcludedSeds());
-  auto seds = treeModel_sed.getSelectedLeaf("");
-  options["sed-name"+postfix].value() = boost::any(seds);
 
-  XYDataSetTreeModel treeModel_red;
-  treeModel_red.loadDirectory(FileUtils::getRedCurveRootPath(false), false,"Reddening Curves");
-  treeModel_red.setState(getReddeningRootObject(),getExcludedReddenings());
-  auto reds = treeModel_red.getSelectedLeaf("");
-  options["reddening-curve-name"+postfix].value() = boost::any(reds);
+ if (m_sed_selection.getGroupes().size()>0){
+  options["sed-group"+postfix].value() = boost::any(m_sed_selection.getGroupes());
+ }
+ if (m_sed_selection.getIsolated().size()>0){
+  options["sed-name"+postfix].value() = boost::any(m_sed_selection.getIsolated());
+ }
+ if (m_sed_selection.getExclusions().size()>0){
+  options["sed-exclude"+postfix].value() = boost::any(m_sed_selection.getExclusions());
+ }
+
+ if (m_red_curve_selection.getGroupes().size()>0){
+  options["reddening-curve-group"+postfix].value() = boost::any(m_red_curve_selection.getGroupes());
+ }
+ if (m_red_curve_selection.getIsolated().size()>0){
+  options["reddening-curve-name"+postfix].value() = boost::any(m_red_curve_selection.getIsolated());
+ }
+ if (m_red_curve_selection.getExclusions().size()>0){
+  options["reddening-curve-exclude"+postfix].value() = boost::any(m_red_curve_selection.getExclusions());
+ }
 
   vector<string> z_range_vector;
   for (auto& range : m_redshift_ranges){
@@ -175,16 +237,8 @@ long long ParameterRule::getModelNumber(bool recompute) {
   bool is_zero=false;
   auto options = getConfigOptions("");
 
-  XYDataSetTreeModel treeModel_sed;
-  treeModel_sed.loadDirectory(FileUtils::getSedRootPath(false), false,"SEDs");
-  treeModel_sed.setState(getSedRootObject(),getExcludedSeds());
-  is_zero |= treeModel_sed.getSelectedLeaf("").size()==0;
-
-  XYDataSetTreeModel treeModel_red;
-  treeModel_red.loadDirectory(FileUtils::getRedCurveRootPath(false), false,"Reddening Curves");
-  treeModel_red.setState(getReddeningRootObject(),getExcludedReddenings());
-  is_zero |= treeModel_red.getSelectedLeaf("").size()==0;
-
+  is_zero |= m_sed_selection.isEmpty();
+  is_zero |= m_red_curve_selection.isEmpty();
   is_zero |= m_redshift_ranges.size()==0 && m_redshift_values.size()==0;
   is_zero |= m_ebv_ranges.size()==0 && m_ebv_values.size()==0;
 
@@ -212,28 +266,7 @@ long long ParameterRule::getModelNumber(bool recompute) {
 }
 
 
-void ParameterRule::setSedRootObject(string sed_root_object){
-    m_sed_root_object=sed_root_object;
-}
 
-void ParameterRule::setReddeningRootObject(string reddening_root_object){
-    m_reddening_root_object=reddening_root_object;
-}
-
-const vector<string>& ParameterRule::getExcludedSeds() const{
-    return m_excluded_sed;
-}
-const vector<string>& ParameterRule::getExcludedReddenings() const{
-    return m_excluded_reddening;
-}
-
-void ParameterRule::setExcludedSeds( vector<string> excluded_sed){
-    m_excluded_sed=move(excluded_sed);
-}
-
-void ParameterRule::setExcludedReddenings( vector<string> excluded_reddening){
-    m_excluded_reddening=move(excluded_reddening);
-}
 
 const std::set<double>& ParameterRule::getEbvValues() const{
   return m_ebv_values;
@@ -247,11 +280,7 @@ const std::string ParameterRule::getEbvRangeString() const {
   bool is_zero = false;
   auto options = getConfigOptions("");
 
-  XYDataSetTreeModel treeModel_red;
-  treeModel_red.loadDirectory(FileUtils::getRedCurveRootPath(false), false,
-      "Reddening Curves");
-  treeModel_red.setState(getReddeningRootObject(), getExcludedReddenings());
-  is_zero |= treeModel_red.getSelectedLeaf("").size() == 0;
+  is_zero |= m_red_curve_selection.isEmpty();
   is_zero |= m_ebv_ranges.size() == 0 && m_ebv_values.size() == 0;
 
   if (is_zero) {
@@ -273,6 +302,7 @@ const std::string ParameterRule::getEbvRangeString() const {
           "");
 
   return getAxisStringValue(axis);
+  return "";
 
 }
 
@@ -301,8 +331,6 @@ const std::string ParameterRule::getRedshiftRangeString() const {
 }
 
 
-
-
 std::string ParameterRule::getAxisStringValue(std::vector<double> axis) const{
    auto min = *(axis.begin());
    auto max = *(--(axis.end()));
@@ -318,7 +346,7 @@ std::string ParameterRule::getAxisStringValue(std::vector<double> axis) const{
    }
 
    return "[" + QString::number(min, 'g', 2).toStdString() + ", "
-       + QString::number(max, 'g', 2).toStdString() + "] size "
+       + QString::number(max, 'g', 2).toStdString() + "] #"
        + std::to_string(size);
 }
 
@@ -345,6 +373,25 @@ void ParameterRule::setEbvRanges(std::vector<Range> ebv_ranges){
 void ParameterRule::setZRanges(std::vector<Range> z_ranges){
     m_redshift_ranges=move(z_ranges);
 }
+
+
+void ParameterRule::setRedCurveSelection(DatasetSelection red_curve_selection){
+  m_red_curve_selection = std::move(red_curve_selection);
+}
+
+void ParameterRule::setSedSelection(DatasetSelection sed_selection){
+  m_sed_selection = std::move(sed_selection);
+}
+
+const DatasetSelection& ParameterRule::getRedCurveSelection() const{
+  return m_red_curve_selection;
+}
+
+const DatasetSelection& ParameterRule::getSedSelection() const{
+  return m_sed_selection;
+}
+
+
 
 }
 }

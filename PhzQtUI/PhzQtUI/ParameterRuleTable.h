@@ -6,10 +6,13 @@
 #include <vector>
 #include "ParameterRule.h"
 #include "ParameterRuleModel.h"
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
 
 namespace Euclid {
 namespace PhzQtUI {
 
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 /**
  * @brief The ParameterRuleTable class
@@ -28,7 +31,7 @@ public:
         * @param sedRootPath
         * @param redRootPath
         */
-       void loadParameterRules(std::map<int,ParameterRule> init_parameter_rules, std::string sedRootPath ,std::string redRootPath);
+       void loadParameterRules(std::map<int,ParameterRule> init_parameter_rules, DatasetRepo sed_repo, DatasetRepo red_curve_repo);
 
        /**
         * @brief Check if there is a row currently selected.
@@ -62,19 +65,11 @@ public:
 
        void setRedshiftValuesToSelectedRule(std::set<double> values);
 
-       /**
-        * @brief Push the SED root object and SED excluded path to the selected ParameterRule.
-        * @param root
-        * @param exceptions
-        */
-       void setSedsToSelectedRule(std::string root, std::vector<std::string> exceptions);
 
-       /**
-        * @brief Push the Reddenig Curve root object and Reddening Curve excluded path to the selected ParameterRule.
-        * @param root
-        * @param exceptions
-        */
-       void setRedCurvesToSelectedRule(std::string root, std::vector<std::string> exceptions);
+
+       void setSedsToSelectedRule(DatasetSelection state_selection);
+
+       void setRedCurvesToSelectedRule(DatasetSelection state_selection);
 
        /**
         * @brief Delete the currently selected ParameterRule.

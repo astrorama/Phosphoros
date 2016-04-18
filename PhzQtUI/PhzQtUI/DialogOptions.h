@@ -3,6 +3,8 @@
 
 #include <memory>
 #include <QDialog>
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -12,6 +14,8 @@ namespace PhzQtUI {
 namespace Ui {
 class DialogOptions;
 }
+
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 /**
  * @brief The DialogOptions class
@@ -23,7 +27,9 @@ class DialogOptions : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogOptions(QWidget *parent = 0);
+    explicit DialogOptions( DatasetRepo seds_repository,
+                            DatasetRepo redenig_curves_repository,
+                            QWidget *parent = 0);
     ~DialogOptions();
 
 
@@ -81,6 +87,9 @@ private slots:
 private:
     void checkDirectories();
     std::unique_ptr<Ui::DialogOptions> ui;
+
+    DatasetRepo m_seds_repository;
+    DatasetRepo m_redenig_curves_repository;
 
 };
 

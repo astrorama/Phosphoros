@@ -6,6 +6,7 @@
 #include "PhzQtUI/MainWindow.h"
 #include "ui_MainWindow.h"
 #include "PhzQtUI/DialogOptions.h"
+#include "XYDataset/AsciiParser.h"
 
 #include "ThisProject.h"             // for the name and version of this very project
 
@@ -52,6 +53,18 @@ MainWindow::MainWindow(QWidget *parent) :
   }
 
   FileUtils::buildDirectories();
+
+
+
+  std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
+  std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(false), std::move(sed_file_parser) });
+  m_seds_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(sed_provider)));
+  m_seds_repository->reload();
+
+  std::unique_ptr <XYDataset::FileParser > reddening_file_parser {new XYDataset::AsciiParser { } };
+  std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(new XYDataset::FileSystemProvider{  FileUtils::getRedCurveRootPath(false), std::move(reddening_file_parser) });
+  m_redenig_curves_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(red_curve_provider)});
+  m_redenig_curves_repository->reload();
 }
 
 MainWindow::~MainWindow()
@@ -74,7 +87,7 @@ MainWindow::~MainWindow()
  //  - Slots opening the popup
  void MainWindow::on_btn_HomeToOption_clicked()
  {
-   std::unique_ptr<DialogOptions> popUp(new DialogOptions());
+   std::unique_ptr<DialogOptions> popUp(new DialogOptions(m_seds_repository, m_redenig_curves_repository));
 
      popUp->exec();
  }
@@ -86,7 +99,7 @@ void MainWindow::on_btn_HomeToModel_clicked(){
     changeMainStackedWidgetIndex(1);
 
     if (!m_model_loaded){
-      ui->widget_ModelSet->loadSetPage();
+      ui->widget_ModelSet->loadSetPage(m_seds_repository, m_redenig_curves_repository);
       m_model_loaded=true;
     }
 }

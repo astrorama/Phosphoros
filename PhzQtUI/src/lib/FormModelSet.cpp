@@ -26,7 +26,11 @@ FormModelSet::~FormModelSet()
 }
 
 
-void FormModelSet::loadSetPage(){
+void FormModelSet::loadSetPage(DatasetRepo seds_repository,
+    DatasetRepo redenig_curves_repository){
+
+    m_seds_repository=seds_repository;
+    m_redenig_curves_repository=redenig_curves_repository;
 
     ui->tableView_Set->loadFromPath(FileUtils::getModelRootPath(true));
 
@@ -48,7 +52,7 @@ void FormModelSet::loadSetPage(){
 
     ui->txt_SetName->clear();
     ui->tableView_Set->clearSelection();
-    ui->tableView_ParameterRule->loadParameterRules(std::map<int,ParameterRule>{},"","");
+    ui->tableView_ParameterRule->loadParameterRules(std::map<int,ParameterRule>{},m_seds_repository,m_redenig_curves_repository);
     disconnect(ui->tableView_ParameterRule,SIGNAL(doubleClicked(QModelIndex)),0,0);
     connect(ui->tableView_ParameterRule,
                     SIGNAL(doubleClicked(QModelIndex)),
@@ -142,7 +146,10 @@ void FormModelSet::on_btn_SetCancel_clicked()
         m_setInsert=false;
     }else{
         ui->txt_SetName->setText(QString(ui->tableView_Set->getSelectedName()));
-        ui->tableView_ParameterRule->loadParameterRules(ui->tableView_Set->getSelectedParameterRules(),FileUtils::getSedRootPath(false),FileUtils::getRedCurveRootPath(false));
+        ui->tableView_ParameterRule->loadParameterRules(
+            ui->tableView_Set->getSelectedParameterRules(),
+            m_seds_repository,
+            m_redenig_curves_repository);
     }
 
     setModelInView();
@@ -186,11 +193,17 @@ void FormModelSet::setSelectionChanged(QModelIndex new_index, QModelIndex)
         ModelSetModel* model=ui->tableView_Set->getModel();
         ui->txt_SetName->setText(model->getName(new_index.row()));
 
-        ui->tableView_ParameterRule->loadParameterRules(model->getParameterRules(new_index.row()),FileUtils::getSedRootPath(false),FileUtils::getRedCurveRootPath(false));
+        ui->tableView_ParameterRule->loadParameterRules(
+            model->getParameterRules(new_index.row()),
+            m_seds_repository,
+            m_redenig_curves_repository);
     }
     else{
         ui->txt_SetName->setText("");
-        ui->tableView_ParameterRule->loadParameterRules(std::map<int,ParameterRule>{},"","");
+        ui->tableView_ParameterRule->loadParameterRules(
+            std::map<int,ParameterRule>{},
+            m_seds_repository,
+            m_redenig_curves_repository);
     }
     setModelInView();
 }
@@ -206,7 +219,7 @@ void FormModelSet::parameterGridDoubleClicked(QModelIndex){
 
 void FormModelSet::on_btn_SetToRules_clicked()
 {
-  std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet());
+  std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet(m_seds_repository, m_redenig_curves_repository));
     popUp->loadData(ui->tableView_ParameterRule->getModel()->getParameterRules());
 
     connect(
@@ -220,7 +233,7 @@ void FormModelSet::on_btn_SetToRules_clicked()
 
 void FormModelSet::on_btn_viewSet_clicked()
 {
-  std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet());
+  std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet(m_seds_repository, m_redenig_curves_repository));
     popUp->loadData(ui->tableView_ParameterRule->getModel()->getParameterRules());
     popUp->setViewMode();
 
@@ -235,7 +248,8 @@ void FormModelSet::on_btn_viewSet_clicked()
 
 void FormModelSet::setEditionPopupClosing(std::map<int,ParameterRule> rules){
 
-     ui->tableView_ParameterRule->loadParameterRules(rules,FileUtils::getSedRootPath(false),FileUtils::getRedCurveRootPath(false));
+     ui->tableView_ParameterRule->loadParameterRules(rules, m_seds_repository,
+                     m_redenig_curves_repository);
  }
 
 }

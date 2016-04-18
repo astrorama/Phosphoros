@@ -5,6 +5,9 @@
 #include <QWidget>
 #include <QModelIndex>
 #include "ParameterRule.h"
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
+
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -12,6 +15,9 @@ namespace PhzQtUI {
 namespace Ui {
 class FormModelSet;
 }
+
+
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 /**
  * @brief The FormModelSet class
@@ -25,7 +31,8 @@ public:
     explicit FormModelSet(QWidget *parent = 0);
     ~FormModelSet();
 
-     void loadSetPage();
+     void loadSetPage(DatasetRepo seds_repository,
+         DatasetRepo redenig_curves_repository);
 
 signals:
     void navigateToHome();
@@ -66,6 +73,8 @@ private:
     void setModelInView();
 
     bool m_setInsert;
+    DatasetRepo m_seds_repository;
+    DatasetRepo m_redenig_curves_repository;
 };
 
 }

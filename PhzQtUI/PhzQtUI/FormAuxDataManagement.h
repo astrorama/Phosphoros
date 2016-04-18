@@ -2,13 +2,21 @@
 #define FORMAUXDATAMANAGEMENT_H
 #include <memory>
 #include <QWidget>
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
 
 namespace Euclid {
 namespace PhzQtUI {
 
+
+
+
 namespace Ui {
 class FormAuxDataManagement;
 }
+
+
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 /**
  * @brief The FormAuxDataManagement class
@@ -22,6 +30,9 @@ class FormAuxDataManagement : public QWidget
 public:
     explicit FormAuxDataManagement(QWidget *parent = 0);
     ~FormAuxDataManagement();
+
+    void setRepositories(DatasetRepo seds_repository,
+        DatasetRepo redenig_curves_repository);
     void loadManagementPage(int index=0);
 
 
@@ -55,6 +66,8 @@ private slots:
 
 private:
     std::unique_ptr<Ui::FormAuxDataManagement> ui;
+    DatasetRepo m_seds_repository;
+    DatasetRepo m_redenig_curves_repository;
 };
 
 }

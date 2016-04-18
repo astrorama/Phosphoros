@@ -9,12 +9,16 @@
 
 #include "ParameterRule.h"
 #include "PhzQtUI/GridButton.h"
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
 namespace Euclid {
 namespace PhzQtUI {
 
 namespace Ui {
 class DialogModelSet;
 }
+
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 /**
  * @brief The DialogModelSet class
@@ -25,7 +29,8 @@ class DialogModelSet : public QDialog
     Q_OBJECT
 
 public:
-    explicit DialogModelSet(QWidget *parent = 0);
+    explicit DialogModelSet(DatasetRepo seds_repository,
+        DatasetRepo redenig_curves_repository, QWidget *parent = 0);
     ~DialogModelSet();
 
     /**
@@ -128,6 +133,10 @@ private:
     std::vector<Range> getRanges(QVBoxLayout* ranges_layout);
 
     void deleteRangeAt(QVBoxLayout* ranges_layout, size_t range_id);
+
+
+    DatasetRepo m_seds_repository;
+    DatasetRepo m_redenig_curves_repository;
 };
 
 }

@@ -14,8 +14,8 @@ ParameterRuleTable::ParameterRuleTable(QDialog*&){
 
 }
 
-void ParameterRuleTable::loadParameterRules(std::map<int,ParameterRule> parameter_rules,std::string sedRootPath ,std::string redRootPath){
-    ParameterRuleModel* new_model = new ParameterRuleModel(parameter_rules,sedRootPath,redRootPath);
+void ParameterRuleTable::loadParameterRules(std::map<int,ParameterRule> parameter_rules, DatasetRepo sed_repo, DatasetRepo red_curve_repo){
+    ParameterRuleModel* new_model = new ParameterRuleModel(parameter_rules,sed_repo,red_curve_repo);
     setModel(new_model);
     this->setColumnHidden(6, true);
     this->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -88,14 +88,14 @@ void ParameterRuleTable::setRedshiftValuesToSelectedRule(std::set<double> values
   getModel()->setRedshiftValues(values,index[0].row());
 }
 
-void ParameterRuleTable::setSedsToSelectedRule(std::string root, std::vector<std::string> exceptions){
+void ParameterRuleTable::setSedsToSelectedRule(DatasetSelection state_selection){
     QModelIndexList index = this->selectionModel()->selectedIndexes();
-    getModel()->setSeds(std::move(root),std::move(exceptions),index[0].row());
+    getModel()->setSeds(state_selection,index[0].row());
 }
 
-void ParameterRuleTable::setRedCurvesToSelectedRule(std::string root, std::vector<std::string> exceptions){
+void ParameterRuleTable::setRedCurvesToSelectedRule(DatasetSelection state_selection){
     QModelIndexList index = this->selectionModel()->selectedIndexes();
-    getModel()->setRedCurves(std::move(root),std::move(exceptions),index[0].row());
+    getModel()->setRedCurves(state_selection,index[0].row());
 }
 
 

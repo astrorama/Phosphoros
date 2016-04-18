@@ -98,13 +98,7 @@ ModelSet ModelSet::deserialize(QDomDocument& doc, ModelSet& model) {
       }
 
       ParameterRule rule{number};
-
-
       rule.setName(node_rule.attribute("Name").toStdString());
-      rule.setSedRootObject(node_rule.attribute("SedRootObject").toStdString());
-      rule.setReddeningRootObject(
-          node_rule.attribute("ReddeningCurveRootObject").toStdString());
-
 
 
       std::set<double> ebv_value_set { };
@@ -186,26 +180,63 @@ ModelSet ModelSet::deserialize(QDomDocument& doc, ModelSet& model) {
         rule.setZRanges(z_ranges);
       }
 
-      std::vector<std::string> excluded_reddening_list { };
-      auto sub_list =
-          node_rule.firstChildElement("ExcludedReddeningCurves").childNodes();
-      for (int j = 0; j < sub_list.count(); ++j) {
-        auto sub_node = sub_list.at(j).toElement();
-        if (sub_node.hasChildNodes()) {
-          excluded_reddening_list.push_back(sub_node.text().toStdString());
+      auto sed_node_list = node_rule.firstChildElement("SedsSelection");
+      DatasetSelection sed_selection{};
+      if (!sed_node_list.isNull()){
+        std::vector<std::string> groups{};
+        auto group_nodes = sed_node_list.firstChildElement("SedGroups").childNodes();
+         for (int j = 0; j < group_nodes.count(); ++j) {
+           auto group_node = group_nodes.at(j).toElement();
+           groups.push_back(group_node.text().toStdString());
         }
-      }
-      rule.setExcludedReddenings(std::move(excluded_reddening_list));
 
-      std::vector<std::string> excluded_sed_list { };
-      sub_list = node_rule.firstChildElement("ExcludedSeds").childNodes();
-      for (int j = 0; j < sub_list.count(); ++j) {
-        auto sub_node = sub_list.at(j).toElement();
-        if (sub_node.hasChildNodes()) {
-          excluded_sed_list.push_back(sub_node.text().toStdString());
+        std::vector<std::string> isolated{};
+        auto isolated_nodes = sed_node_list.firstChildElement("SedIsolated").childNodes();
+         for (int j = 0; j < isolated_nodes.count(); ++j) {
+           auto isolated_node = isolated_nodes.at(j).toElement();
+           isolated.push_back(isolated_node.text().toStdString());
         }
+
+        std::vector<std::string> excluded{};
+        auto excluded_nodes = sed_node_list.firstChildElement("SedExcluded").childNodes();
+         for (int j = 0; j < excluded_nodes.count(); ++j) {
+           auto excluded_node = excluded_nodes.at(j).toElement();
+           excluded.push_back(excluded_node.text().toStdString());
+        }
+        sed_selection.setGroupes(groups);
+        sed_selection.setIsolated(isolated);
+        sed_selection.setExclusions(excluded);
       }
-      rule.setExcludedSeds(std::move(excluded_sed_list));
+      rule.setSedSelection(sed_selection);
+
+      auto red_curve_node_list = node_rule.firstChildElement("RedCurvesSelection");
+      DatasetSelection red_selection{};
+      if (!red_curve_node_list.isNull()){
+        std::vector<std::string> groups{};
+        auto group_nodes = red_curve_node_list.firstChildElement("RedCurveGroups").childNodes();
+         for (int j = 0; j < group_nodes.count(); ++j) {
+           auto group_node = group_nodes.at(j).toElement();
+           groups.push_back(group_node.text().toStdString());
+        }
+
+        std::vector<std::string> isolated{};
+        auto isolated_nodes = red_curve_node_list.firstChildElement("RedCurveIsolated").childNodes();
+         for (int j = 0; j < isolated_nodes.count(); ++j) {
+           auto isolated_node = isolated_nodes.at(j).toElement();
+           isolated.push_back(isolated_node.text().toStdString());
+        }
+
+        std::vector<std::string> excluded{};
+        auto excluded_nodes = red_curve_node_list.firstChildElement("RedCurveExcluded").childNodes();
+         for (int j = 0; j < excluded_nodes.count(); ++j) {
+           auto excluded_node = excluded_nodes.at(j).toElement();
+           excluded.push_back(excluded_node.text().toStdString());
+        }
+        red_selection.setGroupes(groups);
+        red_selection.setIsolated(isolated);
+        red_selection.setExclusions(excluded);
+      }
+      rule.setRedCurveSelection(red_selection);
 
       model.m_parameter_rules[i] = rule;
     }
@@ -225,8 +256,6 @@ QDomDocument ModelSet::serialize(){
       auto& rule = rule_pair.second;
       QDomElement rule_node = doc.createElement("ParameterRule");
       rule_node.setAttribute("Name", QString::fromStdString(rule.getName()));
-      rule_node.setAttribute("SedRootObject", QString::fromStdString(rule.getSedRootObject()));
-      rule_node.setAttribute("ReddeningCurveRootObject", QString::fromStdString(rule.getReddeningRootObject()));
       rule_node.setAttribute("ModelNumber", QString::number(rule.getModelNumber()));
 
       QDomElement ebv_values_node = doc.createElement("EbvValues");
@@ -265,22 +294,59 @@ QDomDocument ModelSet::serialize(){
       }
       rule_node.appendChild(z_ranges_node);
 
-      QDomElement excluded_sed_node = doc.createElement("ExcludedSeds");
-      for (auto& excluded : rule.getExcludedSeds()) {
-        QDomElement text_element = doc.createElement("ExcludedPath");
-        text_element.appendChild(doc.createTextNode(QString::fromStdString(excluded)));
-        excluded_sed_node.appendChild(text_element);
+      QDomElement seds_node = doc.createElement("SedsSelection");
+      QDomElement sed_groups_node = doc.createElement("SedGroups");
+      for (auto& group : rule.getSedSelection().getGroupes()){
+        QDomElement text_element = doc.createElement("SedGroup");
+        text_element.appendChild(doc.createTextNode(QString::fromStdString(group)));
+        sed_groups_node.appendChild(text_element);
       }
-      rule_node.appendChild(excluded_sed_node);
 
-      QDomElement excluded_red_node = doc.createElement(
-          "ExcludedReddeningCurves");
-      for (auto& excluded : rule.getExcludedReddenings()) {
-        QDomElement text_element = doc.createElement("ExcludedPath");
-        text_element.appendChild( doc.createTextNode(QString::fromStdString(excluded)));
-        excluded_red_node.appendChild(text_element);
+      QDomElement sed_isolated_node = doc.createElement("SedIsolated");
+      for (auto& lone : rule.getSedSelection().getIsolated()){
+        QDomElement text_element = doc.createElement("SedLone");
+        text_element.appendChild(doc.createTextNode(QString::fromStdString(lone)));
+        sed_isolated_node.appendChild(text_element);
       }
-      rule_node.appendChild(excluded_red_node);
+
+      QDomElement sed_excluded_node = doc.createElement("SedExcluded");
+      for (auto& excluded : rule.getSedSelection().getExclusions()){
+        QDomElement text_element = doc.createElement("SedExclud");
+        text_element.appendChild(doc.createTextNode(QString::fromStdString(excluded)));
+        sed_excluded_node.appendChild(text_element);
+      }
+
+      seds_node.appendChild(sed_groups_node);
+      seds_node.appendChild(sed_isolated_node);
+      seds_node.appendChild(sed_excluded_node);
+      rule_node.appendChild(seds_node);
+
+      QDomElement reds_node = doc.createElement("RedCurvesSelection");
+      QDomElement red_groups_node = doc.createElement("RedCurveGroups");
+      for (auto& group : rule.getRedCurveSelection().getGroupes()){
+        QDomElement text_element = doc.createElement("RedCurveGroup");
+        text_element.appendChild(doc.createTextNode(QString::fromStdString(group)));
+        red_groups_node.appendChild(text_element);
+      }
+
+      QDomElement red_isolated_node = doc.createElement("RedCurveIsolated");
+      for (auto& lone : rule.getRedCurveSelection().getIsolated()){
+        QDomElement text_element = doc.createElement("RedCurveLone");
+        text_element.appendChild(doc.createTextNode(QString::fromStdString(lone)));
+        red_isolated_node.appendChild(text_element);
+      }
+
+      QDomElement red_excluded_node = doc.createElement("RedCurveExcluded");
+      for (auto& excluded : rule.getRedCurveSelection().getExclusions()){
+        QDomElement text_element = doc.createElement("RedCurveExclud");
+        text_element.appendChild(doc.createTextNode(QString::fromStdString(excluded)));
+        red_excluded_node.appendChild(text_element);
+      }
+
+      reds_node.appendChild(red_groups_node);
+      reds_node.appendChild(red_isolated_node);
+      reds_node.appendChild(red_excluded_node);
+      rule_node.appendChild(reds_node);
 
       rules_Node.appendChild(rule_node);
     }

@@ -5,9 +5,14 @@
 #include <vector>
 #include <set>
 #include "ParameterRule.h"
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
 
 namespace Euclid {
 namespace PhzQtUI {
+
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
+
 
 /**
  * @brief The ParameterRuleModel class
@@ -24,7 +29,7 @@ public:
      * @param sedRootPath
      * @param redRootPath
      */
-    ParameterRuleModel(std::map<int,ParameterRule> init_parameter_rules, std::string sedRootPath, std::string redRootPath);
+    ParameterRuleModel(std::map<int,ParameterRule> init_parameter_rules, DatasetRepo sed_repo, DatasetRepo red_curve_repo);
 
     /**
       * @briefcheck if the provided new name is already used for
@@ -63,21 +68,11 @@ public:
      */
     void setName(std::string new_name,int row);
 
-    /**
-     * @brief Push the SED root object and SED excluded path to the ParameterRule represented by the row 'row'.
-     * @param root
-     * @param exceptions
-     * @param row
-     */
-    void setSeds(std::string root, std::vector<std::string> exceptions,int row);
 
-    /**
-     * @brief Push the Reddenig Curve root object and Reddening Curve excluded path to the ParameterRule represented by the row 'row'.
-     * @param root
-     * @param exceptions
-     * @param row
-     */
-    void setRedCurves(std::string root, std::vector<std::string> exceptions,int row);
+    void setSeds(DatasetSelection state_selection, int row);
+
+    void setRedCurves(DatasetSelection state_selection, int row);
+
 
     /**
      * @brief Create a new ParameterRule and add it to the ParameterRuleModel.
@@ -112,8 +107,8 @@ private:
 
     std::list<QString> getItemsRepresentation(ParameterRule& rule,int id) const;
     std::map<int,ParameterRule> m_parameter_rules;
-    std::string m_sed_root_path;
-    std::string m_red_root_path;
+    DatasetRepo m_sed_repo;
+    DatasetRepo m_red_curve_repo;
 };
 
 }
