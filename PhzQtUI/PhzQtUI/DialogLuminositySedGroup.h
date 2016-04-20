@@ -60,19 +60,13 @@ void on_btn_cancel_clicked();
 void on_btn_save_clicked();
 
 void on_btn_add_clicked();
-void onMoveRightClicked(size_t sed_group_id,size_t sed_id);
-void onMoveLeftClicked(size_t sed_group_id,size_t sed_id);
 void onDeleteGroupClicked(size_t sed_group_id,size_t);
 
 
 
 private:
-std::vector<std::string> getNewGroupNames();
+void readNewGroups();
 void addGroup(LuminosityPriorConfig::SedGroup group,size_t i, size_t i_max);
-void clearSeds(size_t group_id);
-
-
-void fillSedList(std::vector<std::string> seds ,size_t group_id, size_t max_group_id, QVBoxLayout* layout);
 std::unique_ptr<Ui::DialogLuminositySedGroup> ui;
 std::vector<LuminosityPriorConfig::SedGroup> m_groups;
 

@@ -59,6 +59,8 @@ private slots:
 
 void on_bulk_btn_clicked();
 
+void priorGridDoubleClicked(QModelIndex);
+
 
   //// Luminosity prior related slots
   // slot raised when the master grid (Prior grid) selection is changed
