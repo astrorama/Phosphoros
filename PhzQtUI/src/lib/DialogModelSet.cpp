@@ -435,7 +435,7 @@ void DialogModelSet::on_btn_add_ebv_range_clicked() {
 
 
 QFrame* DialogModelSet::createRangeControls(GridButton* del_button, int range_id, bool enabled ){
-   return createRangeControls(del_button, enabled, range_id,{-1,-1,-1});
+   return createRangeControls(del_button, range_id, enabled,{-1,-1,-1});
  }
 
 QFrame* DialogModelSet::createRangeControls(GridButton* del_button, int range_id, bool enabled, const Range& range){
@@ -480,8 +480,8 @@ QFrame* DialogModelSet::createRangeControls(GridButton* del_button, int range_id
 
   auto lbl_id = new QLabel(QString::number(range_id));
   lbl_id->setVisible(false);
-  range_layout->addWidget(lbl_id);
 
+  range_layout->addWidget(lbl_id);
   return range_frame;
 }
 
@@ -530,11 +530,13 @@ std::vector<Range> DialogModelSet::getRanges(QVBoxLayout* ranges_layout) {
 }
 
 void DialogModelSet::deleteRangeAt(QVBoxLayout* ranges_layout, size_t range_id) {
+
  for (int i = 0; i < ranges_layout->count(); ++i) {
    QWidget *range_frame = ranges_layout->itemAt(i)->widget();
    if (range_frame != NULL) {
      auto range_layout = range_frame->layout();
-     if (range_id == static_cast<QLabel*>(range_layout->itemAt(7)->widget())->text().toUInt()) {
+     size_t value = static_cast<QLabel*>(range_layout->itemAt(7)->widget())->text().toUInt();
+     if (range_id == value) {
        delete range_frame;
        break;
      }

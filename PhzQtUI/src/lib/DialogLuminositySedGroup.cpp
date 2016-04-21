@@ -20,7 +20,7 @@
 
 #include "PhzQtUI/SedGroupModel.h"
 
-#include <iostream>
+
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -210,7 +210,7 @@ void DialogLuminositySedGroup::on_btn_cancel_clicked(){
 void DialogLuminositySedGroup::on_btn_save_clicked(){
   readNewGroups();
 
-  for (int i=0; i <m_groups.size();++i){
+  for (size_t i=0; i <m_groups.size();++i){
     auto& group_1 = m_groups[i];
 
     if (group_1.second.size()==0){
@@ -234,7 +234,7 @@ void DialogLuminositySedGroup::on_btn_save_clicked(){
 
 
 
-    for (int j=i+1; j <m_groups.size();++j){
+    for (size_t j=i+1; j <m_groups.size();++j){
        auto& group_2 = m_groups[j];
         if (group_1.first==group_2.first){
           QMessageBox::warning(this,
