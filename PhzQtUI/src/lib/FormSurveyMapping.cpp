@@ -15,6 +15,8 @@
 #include "FileUtils.h"
 
 
+#include "PhzQtUI/FilterMappingItemDelegate.h"
+
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -94,14 +96,12 @@ void FormSurveyMapping::setFilterMappingInEdition(){
     ui->btn_MapSave->setEnabled(true);
     ui->btn_ImportColumn->setEnabled(true);
     ui->cb_SourceId->setEnabled(true);
-    ui->btn_AddFilter->setEnabled(true);
+    ui->btn_SelectFilters->setEnabled(true);
     ui->txt_nonDetection->setEnabled(true);
 
     ui->table_Filter->setEnabled(true);
 
-    bool has_filter_selected = ui->table_Filter->selectionModel()->currentIndex().isValid();
-    ui->btn_BtnEditFilter->setEnabled(has_filter_selected);
-    ui->btn_DeleteFilter->setEnabled(has_filter_selected);
+
 
     m_filterInsert=false;
 }
@@ -121,9 +121,7 @@ void FormSurveyMapping::setFilterMappingInView(){
     ui->btn_MapSave->setEnabled(false);
     ui->btn_ImportColumn->setEnabled(false);
     ui->cb_SourceId->setEnabled(false);
-    ui->btn_AddFilter->setEnabled(false);
-    ui->btn_BtnEditFilter->setEnabled(false);
-    ui->btn_DeleteFilter->setEnabled(false);
+    ui->btn_SelectFilters->setEnabled(false);
     ui->txt_nonDetection->setEnabled(false);
 
 
@@ -257,6 +255,7 @@ void FormSurveyMapping::on_btn_MapCancel_clicked()
     setFilterMappingInView();
 }
 
+
 void FormSurveyMapping::on_btn_MapSave_clicked()
 {
     SurveyModel* model=static_cast<SurveyModel*>(ui->table_Map->model());
@@ -267,17 +266,14 @@ void FormSurveyMapping::on_btn_MapSave_clicked()
 
      model->setNonDetection(ui->txt_nonDetection->value(),row);
 
-     FilterModel* filter_model=static_cast<FilterModel*>(ui->table_Filter->model());
-     model->setFilters(std::move(filter_model->getFilters()),row);
+
+     model->setFilters(getMappingFromGrid(),row);
 
      model->setColumnList(m_column_from_file,row);
      model->setDefaultCatalog(m_default_survey,row);
 
      model->saveSurvey(row,old_name);
 
-     //FileUtils::getCatalogRootPath(true, old_name);
-
-     //m_mappingInsert=false;
 
      m_filterInsert=false;
 
@@ -306,6 +302,8 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
     ui->tb_df->setText(QString::fromStdString(m_default_survey));
     ui->lbl_catalog_name->setText(QString::fromStdString(model->getName(new_index.row())));
 
+    ui->table_Filter->setItemDelegate(new FilterMappingItemDelegate(m_column_from_file));
+
   } else {
     m_default_survey="";
     ui->cb_SourceId->setCurrentIndex(0);
@@ -313,6 +311,7 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
     ui->txt_nonDetection->setValue(-99.);
     ui->tb_df->setText("");
     ui->lbl_catalog_name->setText("Selected");
+    ui->table_Filter->setItemDelegate(new FilterMappingItemDelegate({}));
   }
 
   fillCbColumns(cb_text);
@@ -324,19 +323,13 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
   ui->table_Filter->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
   ui->table_Filter->update(QModelIndex());
 
-  disconnect(ui->table_Filter->selectionModel(),SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),0,0);
-  connect(ui->table_Filter->selectionModel(),
-              SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
-              SLOT(filterSelectionChanged(QModelIndex, QModelIndex)));
-
-  disconnect(ui->table_Filter,SIGNAL(doubleClicked(QModelIndex)),0,0);
-  connect(ui->table_Filter,
-              SIGNAL(doubleClicked(QModelIndex)),
-              SLOT(filterGridDoubleClicked(QModelIndex)));
 
   setFilterMappingInView();
 }
 
+
+
+// todo reload the grid
 void FormSurveyMapping::on_btn_ImportColumn_clicked()
 {
   SurveyModel* model=static_cast<SurveyModel*>(ui->table_Map->model());
@@ -353,72 +346,91 @@ void FormSurveyMapping::on_btn_ImportColumn_clicked()
         QStringList fileNames=dialog.selectedFiles();
         loadColumnFromFile(fileNames[0].toStdString());
 
+        ui->table_Filter->setItemDelegate(new FilterMappingItemDelegate(m_column_from_file));
+
         m_default_survey=fileNames[0].toStdString();
         ui->tb_df->setText(QString::fromStdString(m_default_survey));
     }
 }
 
-void FormSurveyMapping::filterSelectionChanged(QModelIndex, QModelIndex){
-     bool has_filter_selected = ui->table_Filter->selectionModel()->currentIndex().isValid();
-     ui->btn_BtnEditFilter->setEnabled(has_filter_selected);
-     ui->btn_DeleteFilter->setEnabled(has_filter_selected);
+
+std::vector<std::string> FormSurveyMapping::getGridFiltersNames() const{
+  std::vector<std::string> filters{};
+   for (int i=0; i<ui->table_Filter->model()->rowCount();++i){
+     filters.push_back(ui->table_Filter->model()->data(ui->table_Filter->model()->index(i,3)).toString().toStdString());
+   }
+   return filters;
 }
 
-void FormSurveyMapping::on_btn_AddFilter_clicked()
+
+// to get from the controls
+std::vector<FilterMapping> FormSurveyMapping::getMappingFromGrid() const{
+  std::vector<FilterMapping> filters{};
+     for (int i=0; i<ui->table_Filter->model()->rowCount();++i){
+       auto name = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i,3)).toString().toStdString();
+       auto flux = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i,1)).toString().toStdString();
+       auto err = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i,2)).toString().toStdString();
+       FilterMapping mapping{};
+       mapping.setFilterFile(name);
+       mapping.setFluxColumn(flux);
+       mapping.setErrorColumn(err);
+       filters.push_back(mapping);
+     }
+     return filters;
+}
+
+void FormSurveyMapping::on_btn_SelectFilters_clicked()
 {
-     m_filterInsert=true;
-     std::unique_ptr<DialogFilterMapping> popUp(new DialogFilterMapping());
-    popUp->setFilter(FilterMapping(),m_column_from_file);
+  auto filters = getGridFiltersNames();
+  for (int i=0; i<ui->table_Filter->model()->rowCount();++i){
+    filters.push_back(ui->table_Filter->model()->data(ui->table_Filter->model()->index(i,0)).toString().toStdString());
+  }
 
-    connect(
-      popUp.get(),
-      SIGNAL(popupClosing(FilterMapping)),
-      SLOT(filterEditionPopupClosing(FilterMapping))
-     );
+  m_filterInsert=true;
+  std::unique_ptr<DialogFilterMapping> popUp(new DialogFilterMapping());
+  popUp->setFilters(filters);
 
-    popUp->exec();
-}
-void FormSurveyMapping::filterGridDoubleClicked(QModelIndex)
-{
-  on_btn_BtnEditFilter_clicked();
-}
-void FormSurveyMapping::on_btn_BtnEditFilter_clicked()
-{
-     m_filterInsert=false;
-     std::unique_ptr<DialogFilterMapping> popUp( new DialogFilterMapping());
+  connect(popUp.get(), SIGNAL(popupClosing(std::vector<std::string>)),
+      SLOT(filterEditionPopupClosing(std::vector<std::string>)));
 
-    popUp->setFilter(  static_cast<FilterModel*>(ui->table_Filter->model())->getFilter(ui->table_Filter->selectionModel()->currentIndex().row())
-                       ,m_column_from_file);
-    connect(
-         popUp.get(),
-         SIGNAL(popupClosing(FilterMapping)),
-         SLOT(filterEditionPopupClosing(FilterMapping))
-        );
-
-    popUp->exec();
+  popUp->exec();
 }
 
-void FormSurveyMapping::filterEditionPopupClosing(FilterMapping filter){
-  FilterModel* filter_model=static_cast<FilterModel*>(ui->table_Filter->model());
 
-    if (m_filterInsert){
-         filter_model->addFilter(filter);
-         m_filterInsert=false;
-    } else{
-          int row = ui->table_Filter->selectionModel()->currentIndex().row();
-          filter_model->setFilter(filter,row);
-    }
+// todo update the filters lists and the grid
+// tableView->setIndexWidget(tableView->model()->index(2, 1), new QPushButton);
+void FormSurveyMapping::filterEditionPopupClosing(std::vector<std::string> filters){
+
+   auto existing_filters = getMappingFromGrid();
+   std::vector<FilterMapping> new_filters{};
+   for (auto& filter : existing_filters){
+     auto iter = std::find(filters.begin(), filters.end(), filter.getFilterFile());
+     if (iter!=filters.end()){
+       new_filters.push_back(filter);
+       filters.erase(iter);
+     }
+   }
+
+   for (auto& new_filter:filters){
+     FilterMapping new_filter_mapping{};
+     new_filter_mapping.setFilterFile(new_filter);
+     new_filters.push_back(new_filter_mapping);
+   }
+
+   FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
+   filter_model->setFilters(new_filters);
+
+   ui->table_Filter->setModel(filter_model);
+   ui->table_Filter->setColumnHidden(3, true);
+   ui->table_Filter->setSelectionBehavior(QAbstractItemView::SelectRows);
+   ui->table_Filter->setSelectionMode(QAbstractItemView::SingleSelection);
+   ui->table_Filter->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+   ui->table_Filter->update(QModelIndex());
+
+
+
 }
 
-void FormSurveyMapping::on_btn_DeleteFilter_clicked()
-{
-    if (QMessageBox::question( this, "Confirm deletion...",
-                                  "Do you really want to delete this Filter?",
-                                  QMessageBox::Yes|QMessageBox::Cancel )==QMessageBox::Yes){
-      FilterModel* model=static_cast<FilterModel*>(ui->table_Filter->model());
-        model->deleteFilter(ui->table_Filter->selectionModel()->currentIndex().row());
-    }
-}
 
 }
 }

@@ -4,7 +4,7 @@
 #include <memory>
 #include <QDialog>
 #include <string>
-#include <list>
+#include <vector>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -26,7 +26,7 @@ public:
     ~DialogCatalogName();
 
     void setDefaultName(std::string default_name);
-    void setExistingNames( std::list<std::string> existing_names);
+    void setExistingNames( std::vector<std::string> existing_names);
     std::string getName() const;
 
 private slots:
@@ -45,7 +45,7 @@ private slots:
 private:
     std::unique_ptr<Ui::DialogCatalogName> ui;
     std::string m_name;
-    std::list<std::string> m_existing_names;
+    std::vector<std::string> m_existing_names;
 
 };
 

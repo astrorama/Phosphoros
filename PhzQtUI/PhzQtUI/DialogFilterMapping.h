@@ -2,6 +2,8 @@
 #define DIALOGFILTERMAPPING_H
 
 #include <set>
+#include <string>
+#include <vector>
 #include <memory>
 #include <QDialog>
 #include "FilterMapping.h"
@@ -28,18 +30,16 @@ public:
     /**
      * @brief Initialise the popup by setting its internal data
      * @param filter
-     * the FilterMapping to be modified.
-     * @param columns
-     * A (possibly empty) list of columns to be used to prepopulate the column drop downs.
+     * the filter list to be modified.
      */
-    void setFilter(const FilterMapping& filter, const std::set<std::string>& columns);
+    void setFilters(const std::vector<std::string>& filters);
 
 signals:
     /**
      * @brief SIGNAL popupClosing: rised when the FilterMapping is saved and the popup close.
-     * The argument is the modifed FilterMapping.
+     * The argument is the modifed filter list.
      */
-    void popupClosing(FilterMapping);
+    void popupClosing( std::vector<std::string>);
 
 
 private slots:

@@ -339,7 +339,7 @@
          <item>
           <widget class="QLabel" name="label_16">
            <property name="text">
-            <string>Filters Mapping :</string>
+            <string>Filters Mapping (Click on the column cell to edit it):</string>
            </property>
           </widget>
          </item>
@@ -357,23 +357,9 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="btn_AddFilter">
+          <widget class="QPushButton" name="btn_SelectFilters">
            <property name="text">
-            <string>Add</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_BtnEditFilter">
-           <property name="text">
-            <string>Edit</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_DeleteFilter">
-           <property name="text">
-            <string>Delete</string>
+            <string>Select Filters</string>
            </property>
           </widget>
          </item>
@@ -382,13 +368,19 @@
        <item>
         <widget class="QTableView" name="table_Filter">
          <property name="editTriggers">
-          <set>QAbstractItemView::NoEditTriggers</set>
+          <set>QAbstractItemView::AllEditTriggers</set>
          </property>
          <property name="showDropIndicator" stdset="0">
           <bool>false</bool>
          </property>
          <property name="dragDropOverwriteMode">
           <bool>false</bool>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::SingleSelection</enum>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectItems</enum>
          </property>
          <property name="sortingEnabled">
           <bool>true</bool>

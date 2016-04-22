@@ -133,7 +133,7 @@ public:
    *
    * @param row the model row number representing the survey.
    */
-  void setFilters(std::list<FilterMapping> newFilters,
+  void setFilters(std::vector<FilterMapping> newFilters,
       int row);
 
   /**
@@ -141,7 +141,7 @@ public:
    *
    * @param row the model row number representing the survey.
    */
-  const std::list<FilterMapping>& getFilters(int row);
+  const std::vector<FilterMapping>& getFilters(int row);
 
 private:
   std::map<int, SurveyFilterMapping> m_survey_filter_mappings;

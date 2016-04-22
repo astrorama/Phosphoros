@@ -28,7 +28,7 @@ void DialogCatalogName::setDefaultName(std::string default_name){
   ui->txt_name->setText(QString::fromStdString(default_name));
 }
 
-void DialogCatalogName::setExistingNames( std::list<std::string> existing_names){
+void DialogCatalogName::setExistingNames( std::vector<std::string> existing_names){
   m_existing_names = std::move(existing_names);
 }
 

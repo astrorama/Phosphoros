@@ -2,6 +2,8 @@
 #define DIRECTORYTREEMODEL_H
 
 #include <QStandardItemModel>
+#include <vector>
+#include <string>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -43,6 +45,10 @@ public:
      * prevent the listed element to be checked, this allow for selecting a folder but some of its sub-elements.
      */
     void setState(std::string root, const std::vector<std::string>& exclusions);
+
+    void setState(const std::vector<std::string>& selected_leaves);
+
+    const std::vector<std::string> getSelectedLeaves() const;
 
     /**
      * @brief Programatically check the root element of the model.

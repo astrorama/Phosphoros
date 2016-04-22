@@ -3,6 +3,8 @@
 
 #include <memory>
 #include <set>
+#include <string>
+#include <vector>
 #include <QWidget>
 #include <QModelIndex>
 #include "FilterMapping.h"
@@ -37,11 +39,7 @@ private slots:
 
     void mappingGridDoubleClicked(QModelIndex);
 
-    void filterSelectionChanged(QModelIndex, QModelIndex);
-
-    void filterGridDoubleClicked(QModelIndex);
-
-    void filterEditionPopupClosing(FilterMapping);
+    void filterEditionPopupClosing(std::vector<std::string>);
 
     void on_btn_MapNew_clicked();
 
@@ -55,11 +53,7 @@ private slots:
 
     void on_btn_ImportColumn_clicked();
 
-    void on_btn_AddFilter_clicked();
-
-    void on_btn_BtnEditFilter_clicked();
-
-    void on_btn_DeleteFilter_clicked();
+    void on_btn_SelectFilters_clicked();
 
     void on_btn_CatToHome_clicked();
 
@@ -77,6 +71,10 @@ private:
     void setFilterMappingInView();
     void loadColumnFromFile(std::string path);
     void fillCbColumns(std::string current_value="");
+
+    std::vector<std::string> getGridFiltersNames() const;
+    std::vector<FilterMapping> getMappingFromGrid() const;
+
 };
 
 }

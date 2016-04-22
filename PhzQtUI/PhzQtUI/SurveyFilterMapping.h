@@ -1,6 +1,6 @@
 #ifndef SURVEYFILTERMAPPING_H
 #define SURVEYFILTERMAPPING_H
-#include <list>
+#include <vector>
 #include <map>
 #include <set>
 #include "FilterMapping.h"
@@ -58,13 +58,13 @@ public:
      * @brief set the Filters by moving the provided object into the SurveyFilterMapping
      * @param filters
      */
-    void setFilters(std::list<FilterMapping> filters);
+    void setFilters(std::vector<FilterMapping> filters);
 
     /**
      * @brief get the filters Filters
      * @return a const ref on the filter list
      */
-    const std::list<FilterMapping>& getFilters() const;
+    const std::vector<FilterMapping>& getFilters() const;
 
     /**
      * @brief get the list of column stored into the Survey.
@@ -98,7 +98,7 @@ public:
   /**
    * @brief get the list of available catalogs
    */
-  static std::list<std::string> getAvailableCatalogs();
+  static std::vector<std::string> getAvailableCatalogs();
 
   /**
    * @brief Read from the disk all the SurveyFilterMapping .
@@ -133,7 +133,7 @@ public:
 private:
     std::string m_survey_name;
     std::string m_source_id_column;
-    std::list<FilterMapping> m_filters;
+    std::vector<FilterMapping> m_filters;
     std::string m_default_catalog;
     std::set<std::string> m_column_list;
     double m_non_detection=-99.;

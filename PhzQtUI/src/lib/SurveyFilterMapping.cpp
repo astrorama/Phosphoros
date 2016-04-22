@@ -43,7 +43,7 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
         return m_source_id_column;
     }
 
-    void SurveyFilterMapping::setFilters(std::list<FilterMapping> filters){
+    void SurveyFilterMapping::setFilters(std::vector<FilterMapping> filters){
         m_filters=std::move(filters);
     }
 
@@ -55,7 +55,7 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
       m_column_list=std::move(new_list);
     }
 
-    const std::list<FilterMapping>& SurveyFilterMapping::getFilters() const{
+    const std::vector<FilterMapping>& SurveyFilterMapping::getFilters() const{
         return m_filters;
     }
 
@@ -75,9 +75,9 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
       return m_non_detection;
     }
 
-    std::list<std::string> SurveyFilterMapping::getAvailableCatalogs(){
+    std::vector<std::string> SurveyFilterMapping::getAvailableCatalogs(){
       auto cat_root_path = FileUtils::getCatalogRootPath(true,"");
-      std::list<std::string> all_dirs{};
+      std::vector<std::string> all_dirs{};
       QDirIterator directories(QString::fromStdString(cat_root_path), QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
       while(directories.hasNext()){
               directories.next();
@@ -159,7 +159,7 @@ SurveyFilterMapping SurveyFilterMapping::loadCatalog(std::string name) {
 
 
 void SurveyFilterMapping::ReadFilters(){
-  std::list<FilterMapping> mappings { };
+  std::vector<FilterMapping> mappings { };
 
   auto mapping_path = QString::fromStdString(
       FileUtils::getIntermediaryProductRootPath(true, getName()))

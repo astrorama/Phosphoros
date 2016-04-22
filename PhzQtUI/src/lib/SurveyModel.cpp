@@ -104,7 +104,7 @@ void SurveyModel::setSourceIdColumn(std::string newSourceIdColumn, int row){
     m_survey_filter_mappings.at(ref).setSourceIdColumn(newSourceIdColumn);
 }
 
-void SurveyModel::setFilters(std::list<FilterMapping> newFilters, int row){
+void SurveyModel::setFilters(std::vector<FilterMapping> newFilters, int row){
     int ref = getValue(row,2).toInt();
     m_survey_filter_mappings.at(ref).setFilters(std::move(newFilters));
 
@@ -134,7 +134,7 @@ void SurveyModel::setColumnList(std::set<std::string> new_list, int row){
      m_survey_filter_mappings.at(ref).setColumnList(std::move(new_list));
 }
 
-const std::list<FilterMapping>&  SurveyModel::getFilters(int row){
+const std::vector<FilterMapping>&  SurveyModel::getFilters(int row){
     int ref = getValue(row,2).toInt();
     return m_survey_filter_mappings.at(ref).getFilters();
 }
