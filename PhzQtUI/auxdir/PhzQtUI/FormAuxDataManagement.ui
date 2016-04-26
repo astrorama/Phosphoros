@@ -46,6 +46,13 @@
     </layout>
    </item>
    <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Import, organize or remove aux. data files to the local database</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="Line" name="line_10">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -80,7 +87,7 @@
          <item>
           <widget class="QPushButton" name="btn_FilterImport">
            <property name="text">
-            <string>Import Additional Curve(s)</string>
+            <string>Import</string>
            </property>
           </widget>
          </item>
@@ -94,7 +101,7 @@
          <item>
           <widget class="QPushButton" name="btn_FilterDelete">
            <property name="text">
-            <string>Delete Selected</string>
+            <string>Delete Selection</string>
            </property>
           </widget>
          </item>
@@ -156,7 +163,7 @@
          <item>
           <widget class="QPushButton" name="btn_SedImport">
            <property name="text">
-            <string>Import Additional SED(s)</string>
+            <string>Import</string>
            </property>
           </widget>
          </item>
@@ -170,7 +177,7 @@
          <item>
           <widget class="QPushButton" name="btn_SedDelete">
            <property name="text">
-            <string>Delete Selected</string>
+            <string>Delete Selection</string>
            </property>
           </widget>
          </item>
@@ -228,7 +235,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Import Additional Curve(s)</string>
+            <string>Import</string>
            </property>
           </widget>
          </item>
@@ -242,7 +249,7 @@
          <item>
           <widget class="QPushButton" name="btn_RedDelete">
            <property name="text">
-            <string>Delete Selected</string>
+            <string>Delete Selection</string>
            </property>
           </widget>
          </item>
@@ -295,7 +302,7 @@
          <item>
           <widget class="QPushButton" name="btn_LuminosityImport">
            <property name="text">
-            <string>Import Additional Curve(s)</string>
+            <string>Import</string>
            </property>
           </widget>
          </item>
@@ -309,7 +316,7 @@
          <item>
           <widget class="QPushButton" name="btn_LuminosityDelete">
            <property name="text">
-            <string>Delete Selected</string>
+            <string>Delete Selection</string>
            </property>
           </widget>
          </item>

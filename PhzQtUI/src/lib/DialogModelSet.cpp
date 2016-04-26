@@ -12,6 +12,7 @@
 #include "PhzQtUI/DoubleValidatorItemDelegate.h"
 #include "PhzQtUI/ParameterRule.h"
 
+
 using namespace std;
 
 namespace Euclid{
@@ -74,57 +75,38 @@ DialogModelSet::~DialogModelSet()
      turnControlsInView();
  }
 
- void DialogModelSet::setSingleLine(){
-     m_singe_line=true;
-     turnControlsInView();
- }
+
+void DialogModelSet::loadData(int ref ,const std::map<int,ParameterRule>& init_parameter_rules){
+  m_rules=init_parameter_rules;
+  m_ref=ref;
+
+  auto selected_rule = m_rules[m_ref];
+
+          ui->txt_name->setText(QString::fromStdString(selected_rule.getName()));
+
+          // SED
+          static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedSelection());
+          // Reddening Curve
+          static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getRedCurveSelection());
 
 
-void DialogModelSet::loadData(const map<int,ParameterRule>& init_parameter_rules){
-    ui->tableView_ParameterRule->loadParameterRules(
-        init_parameter_rules,
-        m_seds_repository,
-        m_redenig_curves_repository);
+          // Redshift & E(B-V)
+          populateZRangesAndValues(selected_rule);
+          populateEbvRangesAndValues(selected_rule);
 
 
-    connect(
-      ui->tableView_ParameterRule->selectionModel(),
-      SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
-      SLOT(selectionChanged(QModelIndex, QModelIndex))
-     );
-
-    disconnect(ui->tableView_ParameterRule,SIGNAL(doubleClicked(QModelIndex)),0,0);
-     connect(ui->tableView_ParameterRule,
-                       SIGNAL(doubleClicked(QModelIndex)),
-                       SLOT(setGridDoubleClicked(QModelIndex)));
-
-    if (ui->tableView_ParameterRule->model()->rowCount()>0){
-      ui->tableView_ParameterRule->selectRow(0);
-    }
-
-
-    turnControlsInView();
+  turnControlsInEdition();
 }
 
 
 
 void DialogModelSet::turnControlsInEdition(){
-    ui->buttonBox->setEnabled(false);
-
-
-    ui->btn_new->setEnabled(false);
-    ui->btn_duplicate->setEnabled(false);
-    ui->btn_delete->setEnabled(false);
-
-    ui->btn_edit->setEnabled(false);
-    ui->btn_cancel->setEnabled(true);
-    ui->btn_save->setEnabled(true);
+    ui->buttonBox->setEnabled(true);
 
     static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setEnabled(true);
     static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setEnabled(true);
 
     ui->txt_name->setEnabled(true);
-    ui->tableView_ParameterRule->setEnabled(false);
 
   // Redshift & E(B-V)
     ui->txt_ebv_values->setEnabled(true);
@@ -138,28 +120,13 @@ void DialogModelSet::turnControlsInEdition(){
 
 void DialogModelSet::turnControlsInView(){
 
-    bool accepte_new_line = !m_singe_line || ui->tableView_ParameterRule->model()->rowCount()==0;
-    m_insert=false;
     ui->buttonBox->setEnabled(true);
-
-    bool has_rule=ui->tableView_ParameterRule->hasSelectedPArameterRule();
-
-    ui->btn_new->setEnabled(!m_view_popup && accepte_new_line);
-    ui->btn_duplicate->setEnabled(!m_view_popup && has_rule && accepte_new_line);
-    ui->btn_delete->setEnabled(!m_view_popup && has_rule);
-
-    ui->btn_edit->setEnabled(!m_view_popup && has_rule);
-    ui->btn_cancel->setEnabled(false);
-    ui->btn_save->setEnabled(false);
+    ui->buttonBox->button(QDialogButtonBox::StandardButton::Save)->setEnabled(false);
 
     static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setEnabled(false);
     static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setEnabled(false);
 
-
-
     ui->txt_name->setEnabled(false);
-
-    ui->tableView_ParameterRule->setEnabled(true);
 
     // Redshift & E(B-V)
     ui->txt_ebv_values->setEnabled(false);
@@ -173,81 +140,35 @@ void DialogModelSet::turnControlsInView(){
 
 
 
-
-
 void DialogModelSet::on_buttonBox_rejected()
 {
-    this->popupClosing(ui->tableView_ParameterRule->getModel()->getParameterRules());
+  this->popupClosing(m_ref,m_rules[m_ref],false);
 }
 
-void DialogModelSet::on_btn_new_clicked()
+
+void DialogModelSet::on_buttonBox_accepted()
 {
-    ui->tableView_ParameterRule->newRule(false);
-    m_insert=true;
-    turnControlsInEdition();
-}
 
-void DialogModelSet::on_btn_delete_clicked()
-{
-    if (QMessageBox::question( this, "Confirm deletion...",
-                                  "Do you really want to delete this Parameter Rule?",
-                                  QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
-        ui->tableView_ParameterRule->deletSelectedRule();
-        turnControlsInView();
-    }
-}
-
-void DialogModelSet::on_btn_duplicate_clicked()
-{
-    ui->tableView_ParameterRule->newRule(true);
-    m_insert=true;
-    turnControlsInEdition();
-}
-
-
-void DialogModelSet::setGridDoubleClicked(QModelIndex){
-  if (!m_view_popup){
-    turnControlsInEdition();
-  }
-}
-
-void DialogModelSet::on_btn_edit_clicked()
-{
-    turnControlsInEdition();
-}
-
-void DialogModelSet::on_btn_cancel_clicked()
-{
-  if (m_insert) {
-    ui->tableView_ParameterRule->deletSelectedRule();
-    turnControlsInView();
-  } else {
-    auto selected_rule = ui->tableView_ParameterRule->getSelectedRule();
-
-    ui->txt_name->setText(QString::fromStdString(selected_rule.getName()));
-
-    // E(B-V)
-    populateEbvRangesAndValues(selected_rule);
-
-    // Redshift
-    populateZRangesAndValues(selected_rule);
-
-    turnControlsInView();
-
-    // SED
-    static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedSelection());
-    // Reddening Curve
-    static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getRedCurveSelection());
-
-  }
-}
-
-
-
-void DialogModelSet::on_btn_save_clicked()
-{
   auto sed_selection = static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->getState();
   auto red_curve_selection = static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->getState();
+
+  if (ui->txt_name->text().trimmed().size()==0){
+    QMessageBox::warning( this,
+                             "Missing Data...",
+                             "Please provide a name.",
+                             QMessageBox::Ok );
+       return;
+  }
+  for(auto it = m_rules.begin(); it != m_rules.end(); ++it ) {
+    if (it->second.getName()==ui->txt_name->text().toStdString() &&  it->first!=m_ref){
+      QMessageBox::warning( this,
+                               "Duplicate Name...",
+                               "The name you enter is already used, please provide another name.",
+                               QMessageBox::Ok );
+         return;
+    }
+  }
+
 
   if (sed_selection.isEmpty() ){
     QMessageBox::warning( this,
@@ -266,114 +187,73 @@ void DialogModelSet::on_btn_save_clicked()
   }
 
 
-  if (!ui->tableView_ParameterRule->checkNameAlreadyUsed(ui->txt_name->text().toStdString())){
-    QMessageBox::warning( this,
-                          "Duplicate Name...",
-                          "The name you enter is already used, please provide another name.",
-                          QMessageBox::Ok );
-    return;
-  }
-
 
     // Redshift and E(B-V)
     auto new_z_ranges = getRanges( ui->Layout_z_range);
     auto new_ebv_ranges = getRanges( ui->Layout_ebv_range);
 
-    auto old_z_ranges =ui->tableView_ParameterRule->getSelectedRule().getZRanges();
-    auto old_ebv_ranges =ui->tableView_ParameterRule->getSelectedRule().getEbvRanges();
+
+
+    auto old_z_ranges =m_rules[m_ref].getZRanges();
+    auto old_ebv_ranges =m_rules[m_ref].getEbvRanges();
 
     try {
-        ui->tableView_ParameterRule->setRedshiftRangesToSelectedRule(std::move(new_z_ranges));
+      m_rules[m_ref].setZRanges(std::move(new_z_ranges));
+      m_rules[m_ref].getModelNumber(true);
     } catch (const Elements::Exception& e) {
         QMessageBox::warning( this, "Error while setting redshift ranges...",
                                   e.what(),
                                   QMessageBox::Ok );
 
-        ui->tableView_ParameterRule->setRedshiftRangesToSelectedRule(std::move(old_z_ranges));
+        m_rules[m_ref].setZRanges(std::move(old_z_ranges));
         return;
     }
 
     try {
-          ui->tableView_ParameterRule->setEbvRangesToSelectedRule(std::move(new_ebv_ranges));
+      m_rules[m_ref].setEbvRanges(std::move(new_ebv_ranges));
+      m_rules[m_ref].getModelNumber(true);
       } catch (const Elements::Exception& e) {
           QMessageBox::warning( this, "Error while setting E(B-V) ranges...",
                                     e.what(),
                                     QMessageBox::Ok );
 
-          ui->tableView_ParameterRule->setEbvRangesToSelectedRule(std::move(old_ebv_ranges));
+          m_rules[m_ref].setEbvRanges(std::move(old_ebv_ranges));
           return;
       }
 
-    ui->tableView_ParameterRule->setNameToSelectedRule(ui->txt_name->text().toStdString());
+
+      m_rules[m_ref].setName(ui->txt_name->text().toStdString());
 
 
     // SED
-    ui->tableView_ParameterRule->setSedsToSelectedRule(std::move(sed_selection));
+      m_rules[m_ref].setSedSelection(std::move(sed_selection));
 
     // Reddeing Curves
-    ui->tableView_ParameterRule->setRedCurvesToSelectedRule(std::move(red_curve_selection));
+      m_rules[m_ref].setRedCurveSelection(std::move(red_curve_selection));
 
 
 
     auto new_z_values = ParameterRule::parseValueList(ui->txt_z_values->text().toStdString());
-    ui->tableView_ParameterRule->setRedshiftValuesToSelectedRule(std::move(new_z_values));
-
-    ui->txt_z_values->setText(QString::fromStdString(ui->tableView_ParameterRule->getSelectedRule().getRedshiftStringValueList()));
+    m_rules[m_ref].setRedshiftValues(std::move(new_z_values));
 
 
 
     auto new_ebv_values = ParameterRule::parseValueList(ui->txt_ebv_values->text().toStdString());
-    ui->tableView_ParameterRule->setEbvValuesToSelectedRule(std::move(new_ebv_values));
-    ui->txt_ebv_values->setText(QString::fromStdString(ui->tableView_ParameterRule->getSelectedRule().getEbvStringValueList()));
+    m_rules[m_ref].setEbvValues(std::move(new_ebv_values));
 
 
-    turnControlsInView();
-
-    auto selected_rule = ui->tableView_ParameterRule->getSelectedRule();
-
-    // SED
-    static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedSelection());
-    // Reddening Curve
-    static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getRedCurveSelection());
+    m_rules[m_ref].getModelNumber(true);
 
 
+
+
+    this->popupClosing(m_ref,m_rules[m_ref],true);
+    this->close();
 }
 
 
- void DialogModelSet::selectionChanged(QModelIndex new_index, QModelIndex){
-     if (new_index.isValid()){
-         ParameterRuleModel* model=ui->tableView_ParameterRule->getModel();
-
-         auto selected_rule = model->getRule(new_index.row());
-
-         ui->txt_name->setText(QString::fromStdString(selected_rule.getName()));
-
-         // SED
-         static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedSelection());
-         // Reddening Curve
-         static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getRedCurveSelection());
 
 
-         // Redshift & E(B-V)
-         populateZRangesAndValues(selected_rule);
-         populateEbvRangesAndValues(selected_rule);
-     }
-     else{
-
-        // SED
-        static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setState({});
-        // Reddening Curve
-        static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setState({});
-
-
-         cleanRangeControl( ui->Layout_z_range);
-         ui->txt_z_values->clear();
-         cleanRangeControl( ui->Layout_ebv_range);
-         ui->txt_ebv_values->clear();
-
-     }
-     turnControlsInView();
- }
 
 
  void DialogModelSet::populateZRangesAndValues(ParameterRule selected_rule){

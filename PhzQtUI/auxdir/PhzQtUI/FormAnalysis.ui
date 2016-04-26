@@ -217,8 +217,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>417</width>
-            <height>162</height>
+            <width>1053</width>
+            <height>209</height>
            </rect>
           </property>
           <attribute name="label">
@@ -375,8 +375,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>544</width>
-            <height>162</height>
+            <width>1053</width>
+            <height>209</height>
            </rect>
           </property>
           <attribute name="label">
@@ -407,23 +407,35 @@
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_7">
               <item>
-               <widget class="QLabel" name="label_24">
-                <property name="font">
-                 <font>
-                  <pointsize>14</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>3. Photometric Zero-Point Corrections :</string>
-                </property>
-               </widget>
+               <layout class="QHBoxLayout" name="horizontalLayout_3">
+                <item>
+                 <widget class="QPushButton" name="btn_computeCorrections">
+                  <property name="text">
+                   <string>Compute New Corrections </string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_5">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
               </item>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_2">
                 <item>
                  <widget class="QLabel" name="label_28">
                   <property name="text">
-                   <string>Compatible Photometric Zero-Point Corrections :</string>
+                   <string>Select Existing Compatible Corrections :</string>
                   </property>
                  </widget>
                 </item>
@@ -439,13 +451,6 @@
                    </size>
                   </property>
                  </spacer>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="btn_computeCorrections">
-                  <property name="text">
-                   <string>Compute Corrections </string>
-                  </property>
-                 </widget>
                 </item>
                </layout>
               </item>
@@ -521,8 +526,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>674</width>
-            <height>179</height>
+            <width>1053</width>
+            <height>219</height>
            </rect>
           </property>
           <attribute name="label">

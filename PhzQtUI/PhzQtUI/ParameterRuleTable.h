@@ -71,6 +71,8 @@ public:
 
        void setRedCurvesToSelectedRule(DatasetSelection state_selection);
 
+       int getSelectedRuleId() const;
+
        /**
         * @brief Delete the currently selected ParameterRule.
         */

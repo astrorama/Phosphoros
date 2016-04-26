@@ -8,6 +8,7 @@
 
 #include "ElementsKernel/Exception.h"
 
+
 namespace po = boost::program_options;
 
 namespace Euclid {
@@ -57,6 +58,7 @@ void FormModelSet::loadSetPage(DatasetRepo seds_repository,
     connect(ui->tableView_ParameterRule,
                     SIGNAL(doubleClicked(QModelIndex)),
                     SLOT(parameterGridDoubleClicked(QModelIndex)));
+
     setModelInView();
 }
 
@@ -66,11 +68,13 @@ void  FormModelSet::setModelInEdition(){
     ui->btn_SetNew->setEnabled(false);
     ui->btn_SetDuplicate->setEnabled(false);
     ui->btn_SetDelete->setEnabled(false);
-    ui->btn_viewSet->setEnabled(false);
     ui->btn_SetEdit->setEnabled(false);
     ui->btn_SetCancel->setEnabled(true);
     ui->btn_SetSave->setEnabled(true);
-    ui->btn_SetToRules->setEnabled(true);
+    ui->btn_new_set->setEnabled(true);
+    ui->btn_viewSet->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
+    ui->btn_duplicate_set->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
+    ui->btn_delete_set->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
     ui->txt_SetName->setEnabled(true);
     ui->tableView_Set->setEnabled(false);
 }
@@ -80,13 +84,15 @@ void  FormModelSet::setModelInView(){
     ui->btn_SetToHome->setEnabled(true);
     ui->btn_backHome->setEnabled(true);
     ui->btn_SetNew->setEnabled(true);
-    ui->btn_viewSet->setEnabled(ui->tableView_Set->hasSelectedSet());
+    ui->btn_viewSet->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
     ui->btn_SetDuplicate->setEnabled(ui->tableView_Set->hasSelectedSet());
     ui->btn_SetDelete->setEnabled(ui->tableView_Set->hasSelectedSet());
     ui->btn_SetEdit->setEnabled(ui->tableView_Set->hasSelectedSet());
     ui->btn_SetCancel->setEnabled(false);
     ui->btn_SetSave->setEnabled(false);
-    ui->btn_SetToRules->setEnabled(false);
+    ui->btn_new_set->setEnabled(false);
+    ui->btn_duplicate_set->setEnabled(false);
+    ui->btn_delete_set->setEnabled(false);
     ui->txt_SetName->setEnabled(false);
     ui->tableView_Set->setEnabled(true);
 }
@@ -122,7 +128,7 @@ void FormModelSet::on_btn_SetDuplicate_clicked()
 void FormModelSet::on_btn_SetDelete_clicked()
 {
     if (QMessageBox::question( this, "Confirm deletion...",
-                                  "Do you really want to delete the Model Set '"+ui->tableView_Set->getSelectedName()+"' ?",
+                                  "Do you really want to delete the Parameter Space '"+ui->tableView_Set->getSelectedName()+"' ?",
                                   QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
         ui->tableView_Set->deleteSelectedSet(true);
     }
@@ -136,7 +142,6 @@ void FormModelSet::setGridDoubleClicked(QModelIndex)
 void FormModelSet::on_btn_SetEdit_clicked()
 {
     setModelInEdition();
-    on_btn_SetToRules_clicked();
 }
 
 void FormModelSet::on_btn_SetCancel_clicked()
@@ -197,6 +202,14 @@ void FormModelSet::setSelectionChanged(QModelIndex new_index, QModelIndex)
             model->getParameterRules(new_index.row()),
             m_seds_repository,
             m_redenig_curves_repository);
+        disconnect(ui->tableView_ParameterRule->selectionModel(),SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),0,0);
+        connect(ui->tableView_ParameterRule->selectionModel(),
+                               SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
+                               SLOT(rulesSelectionChanged(QModelIndex, QModelIndex)));
+
+        if (model->getParameterRules(new_index.row()).size()>0){
+          ui->tableView_ParameterRule->selectRow(0);
+        }
     }
     else{
         ui->txt_SetName->setText("");
@@ -210,47 +223,126 @@ void FormModelSet::setSelectionChanged(QModelIndex new_index, QModelIndex)
 
 
 void FormModelSet::parameterGridDoubleClicked(QModelIndex){
-  if (ui->btn_viewSet->isEnabled()){
-    on_btn_viewSet_clicked();
-  } else if (ui->btn_SetToRules->isEnabled()){
-    on_btn_SetToRules_clicked();
+  on_btn_viewSet_clicked();
+}
+
+
+
+
+
+void FormModelSet::rulesSelectionChanged(QModelIndex, QModelIndex) {
+  if (!ui->btn_SetSave->isEnabled()) {
+    setModelInView();
+  } else {
+    setModelInEdition();
   }
 }
 
-void FormModelSet::on_btn_SetToRules_clicked()
-{
-  std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet(m_seds_repository, m_redenig_curves_repository));
-    popUp->loadData(ui->tableView_ParameterRule->getModel()->getParameterRules());
-
-    connect(
-      popUp.get(),
-      SIGNAL(popupClosing(std::map<int,ParameterRule>)),
-      SLOT(setEditionPopupClosing(std::map<int,ParameterRule>))
-     );
-
-    popUp->exec();
-}
 
 void FormModelSet::on_btn_viewSet_clicked()
 {
   std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet(m_seds_repository, m_redenig_curves_repository));
-    popUp->loadData(ui->tableView_ParameterRule->getModel()->getParameterRules());
-    popUp->setViewMode();
+     int refid = ui->tableView_ParameterRule->getSelectedRuleId();
+    popUp->loadData(refid,ui->tableView_ParameterRule->getModel()->getParameterRules());
+
+    if (!ui->btn_SetSave->isEnabled()){
+      popUp->setViewMode();
+    }
 
     connect(
       popUp.get(),
-      SIGNAL(popupClosing(std::map<int,ParameterRule>)),
-      SLOT(setEditionPopupClosing(std::map<int,ParameterRule>))
+      SIGNAL(popupClosing(int,ParameterRule,bool)),
+      SLOT(setEditionPopupClosing(int,ParameterRule,bool))
      );
 
     popUp->exec();
 }
 
-void FormModelSet::setEditionPopupClosing(std::map<int,ParameterRule> rules){
 
-     ui->tableView_ParameterRule->loadParameterRules(rules, m_seds_repository,
+void FormModelSet::on_btn_new_set_clicked(){
+  std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet(m_seds_repository, m_redenig_curves_repository));
+      auto current_list = ui->tableView_ParameterRule->getModel()->getParameterRules();
+      current_list.insert(std::make_pair(-1,ParameterRule{}));
+      popUp->loadData(-1,current_list);
+
+      connect(
+        popUp.get(),
+        SIGNAL(popupClosing(int,ParameterRule,bool)),
+        SLOT(setEditionPopupClosing(int,ParameterRule,bool))
+       );
+
+      popUp->exec();
+}
+
+
+void FormModelSet::on_btn_duplicate_set_clicked(){
+  std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet(m_seds_repository, m_redenig_curves_repository));
+        auto current_list = ui->tableView_ParameterRule->getModel()->getParameterRules();
+        auto rule = ui->tableView_ParameterRule->getSelectedRule();
+        rule.setName(rule.getName()+"_Copy");
+        current_list.insert(std::make_pair(-1,rule));
+        popUp->loadData(-1,current_list);
+
+        connect(
+          popUp.get(),
+          SIGNAL(popupClosing(int,ParameterRule,bool)),
+          SLOT(setEditionPopupClosing(int,ParameterRule,bool))
+         );
+
+        popUp->exec();
+}
+
+
+void FormModelSet::on_btn_delete_set_clicked(){
+
+  auto rule_name = QString::fromStdString(ui->tableView_ParameterRule->getSelectedRule().getName());
+  if (QMessageBox::question( this, "Confirm deletion...",
+                                   "Do you really want to delete the Sub-space '"+rule_name+"' ?",
+                                   QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
+         ui->tableView_ParameterRule->deletSelectedRule();
+     }
+}
+
+void FormModelSet::setEditionPopupClosing(int ref ,ParameterRule rule ,bool validated){
+  if (validated){
+    auto current_rules = ui->tableView_ParameterRule->getModel()->getParameterRules();
+    if (ref<0){
+      // insert the new rule
+      int max_ref=-1;
+      for(auto& rules : current_rules) {
+        if (rules.first>max_ref){
+          max_ref=rules.first;
+        }
+      }
+
+      ++max_ref;
+      current_rules.insert(std::make_pair(max_ref,rule));
+    } else {
+      //update current rule
+      current_rules[ref]=rule;
+
+    }
+    int current_row = 0;
+    if (ui->tableView_ParameterRule->getModel()->getParameterRules().size()>0 ){
+      ui->tableView_ParameterRule->selectionModel()->selectedIndexes()[0].row();
+    }
+    ui->tableView_ParameterRule->loadParameterRules(current_rules, m_seds_repository,
                      m_redenig_curves_repository);
+    if (current_rules.size()>0 ){
+      if (ref>0) {
+             ui->tableView_ParameterRule->selectRow(current_row);
+      } else {
+        ui->tableView_ParameterRule->selectRow(current_rules.size()-1);
+      }
+    }
+
+    if (!ui->btn_SetSave->isEnabled()) {
+       setModelInView();
+     } else {
+       setModelInEdition();
+     }
  }
+}
 
 }
 }

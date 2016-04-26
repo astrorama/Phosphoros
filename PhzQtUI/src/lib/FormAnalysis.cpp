@@ -20,7 +20,6 @@
 #include "PhzQtUI/PhzGridInfoHandler.h"
 #include "PhzQtUI/DialogGridGeneration.h"
 #include "PhzQtUI/DialogRunAnalysis.h"
-#include "PhzQtUI/DialogOptions.h"
 #include "PhzQtUI/DialogLuminosityPrior.h"
 
 #include "PhzUITools/ConfigurationWriter.h"

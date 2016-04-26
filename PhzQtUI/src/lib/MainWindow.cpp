@@ -5,7 +5,6 @@
 #include "FileUtils.h"
 #include "PhzQtUI/MainWindow.h"
 #include "ui_MainWindow.h"
-#include "PhzQtUI/DialogOptions.h"
 #include "XYDataset/AsciiParser.h"
 
 #include "ThisProject.h"             // for the name and version of this very project
@@ -32,6 +31,8 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(ui->widget_ModelSet,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
 
   connect(ui->widget_Catalog,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
+
+  connect(ui->widget_configuration,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
 
   connect(ui->widget_Analysis,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
   connect(ui->widget_Analysis,SIGNAL(navigateToNewCatalog(std::string)),SLOT(navigateToNewCatalog(std::string)));
@@ -87,9 +88,8 @@ MainWindow::~MainWindow()
  //  - Slots opening the popup
  void MainWindow::on_btn_HomeToOption_clicked()
  {
-   std::unique_ptr<DialogOptions> popUp(new DialogOptions(m_seds_repository, m_redenig_curves_repository));
-
-     popUp->exec();
+   changeMainStackedWidgetIndex(4);
+   ui->widget_configuration->loadOptionPage(m_seds_repository, m_redenig_curves_repository);
  }
 
 //------------------------------------------------

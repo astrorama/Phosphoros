@@ -71,7 +71,7 @@
           </font>
          </property>
          <property name="text">
-          <string>List of Parameter Space :</string>
+          <string>Parameter Spaces :</string>
          </property>
         </widget>
        </item>
@@ -158,7 +158,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Selected Parameter Space Specification :</string>
+        <string>Selected Parameter Space :</string>
        </property>
       </widget>
      </item>
@@ -241,7 +241,7 @@
      <item>
       <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>Parameter Sets</string>
+        <string>Sub-Spaces of the Parameter Space :</string>
        </property>
       </widget>
      </item>
@@ -261,14 +261,28 @@
      <item>
       <widget class="QPushButton" name="btn_viewSet">
        <property name="text">
-        <string>View</string>
+        <string>View/Edit</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_SetToRules">
+      <widget class="QPushButton" name="btn_new_set">
        <property name="text">
-        <string>Edit</string>
+        <string>New</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_duplicate_set">
+       <property name="text">
+        <string>Duplicate</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_delete_set">
+       <property name="text">
+        <string>Delete</string>
        </property>
       </widget>
      </item>

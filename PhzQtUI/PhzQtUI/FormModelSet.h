@@ -39,12 +39,13 @@ signals:
 
 private slots:
     void setSelectionChanged(QModelIndex, QModelIndex);
+    void rulesSelectionChanged(QModelIndex, QModelIndex);
 
     void setGridDoubleClicked(QModelIndex);
 
     void parameterGridDoubleClicked(QModelIndex);
 
-    void setEditionPopupClosing(std::map<int,ParameterRule>);
+    void setEditionPopupClosing(int,ParameterRule,bool);
 
     void on_btn_SetEdit_clicked();
 
@@ -62,9 +63,11 @@ private slots:
 
     void on_btn_SetDelete_clicked();
 
-    void on_btn_SetToRules_clicked();
     void on_btn_viewSet_clicked();
 
+    void on_btn_new_set_clicked();
+    void on_btn_duplicate_set_clicked();
+    void on_btn_delete_set_clicked();
 
 
 private:

@@ -99,6 +99,11 @@ void ParameterRuleTable::setRedCurvesToSelectedRule(DatasetSelection state_selec
 }
 
 
+int ParameterRuleTable::getSelectedRuleId() const{
+  QModelIndexList index = this->selectionModel()->selectedIndexes();
+  return cGetModel()->getValue(index[0].row(),6).toInt();
+}
+
 const ParameterRule& ParameterRuleTable::getSelectedRule() const{
     QModelIndexList index = this->selectionModel()->selectedIndexes();
     return cGetModel()->getRule(index[0].row());

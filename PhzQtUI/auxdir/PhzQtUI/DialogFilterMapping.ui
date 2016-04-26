@@ -26,7 +26,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Select Photometric Filter to be mapped</string>
+        <string>Select Photometric Filters</string>
        </property>
       </widget>
      </item>
@@ -55,7 +55,7 @@
    <item>
     <widget class="QLabel" name="label_5">
      <property name="text">
-      <string>Filter Full Transmission :</string>
+      <string>Filter Transmission Curves:</string>
      </property>
     </widget>
    </item>

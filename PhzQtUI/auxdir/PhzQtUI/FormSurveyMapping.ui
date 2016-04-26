@@ -56,11 +56,11 @@
     <widget class="QLabel" name="label_3">
      <property name="font">
       <font>
-       <pointsize>9</pointsize>
+       <pointsize>11</pointsize>
       </font>
      </property>
      <property name="text">
-      <string>Define the Folder containing the Catalog files, the Filters found into the Catalog and the corresponding files columns.</string>
+      <string>Select filter curves and define their mapping to columns names</string>
      </property>
     </widget>
    </item>
@@ -88,7 +88,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Catalog Type List :</string>
+            <string>Catalog Types :</string>
            </property>
           </widget>
          </item>
@@ -326,7 +326,7 @@
            <item>
             <widget class="QLabel" name="label">
              <property name="text">
-              <string>Default Catalog File : </string>
+              <string>Model Catalog File : </string>
              </property>
             </widget>
            </item>
@@ -339,7 +339,7 @@
          <item>
           <widget class="QLabel" name="label_16">
            <property name="text">
-            <string>Filters Mapping (Click on the column cell to edit it):</string>
+            <string>Filter Mapping (Click on the column cell to edit it):</string>
            </property>
           </widget>
          </item>

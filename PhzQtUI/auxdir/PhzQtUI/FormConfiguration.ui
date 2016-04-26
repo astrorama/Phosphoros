@@ -1,19 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Euclid::PhzQtUI::DialogOptions</class>
- <widget class="QDialog" name="Euclid::PhzQtUI::DialogOptions">
+ <class>Euclid::PhzQtUI::FormConfiguration</class>
+ <widget class="QWidget" name="Euclid::PhzQtUI::FormConfiguration">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>990</width>
-    <height>791</height>
+    <width>1090</width>
+    <height>829</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Configuration</string>
+   <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QPushButton" name="btn_ConfigToHome">
+       <property name="text">
+        <string>Home</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="font">
+        <font>
+         <pointsize>17</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>&gt; Configuration</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
@@ -25,9 +70,9 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <widget class="QLabel" name="label_2">
+          <widget class="QLabel" name="label_3">
            <property name="font">
             <font>
              <pointsize>17</pointsize>
@@ -41,7 +86,7 @@
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer_4">
+          <spacer name="horizontalSpacer_5">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -90,7 +135,7 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
          <item>
           <widget class="QLabel" name="label">
            <property name="toolTip">
@@ -135,9 +180,9 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <layout class="QHBoxLayout" name="horizontalLayout_9">
          <item>
-          <widget class="QLabel" name="label_3">
+          <widget class="QLabel" name="label_4">
            <property name="text">
             <string>Catalogs Directory :</string>
            </property>
@@ -190,9 +235,9 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_9">
+        <layout class="QHBoxLayout" name="horizontalLayout_10">
          <item>
-          <widget class="QLabel" name="label_4">
+          <widget class="QLabel" name="label_5">
            <property name="text">
             <string>Auxiliary Data Directory :</string>
            </property>
@@ -245,9 +290,9 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_10">
+        <layout class="QHBoxLayout" name="horizontalLayout_11">
          <item>
-          <widget class="QLabel" name="label_5">
+          <widget class="QLabel" name="label_6">
            <property name="text">
             <string>Intermediate Products Directory :</string>
            </property>
@@ -300,9 +345,9 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_11">
+        <layout class="QHBoxLayout" name="horizontalLayout_15">
          <item>
-          <widget class="QLabel" name="label_6">
+          <widget class="QLabel" name="label_7">
            <property name="text">
             <string>Results Directory :</string>
            </property>
@@ -324,7 +369,7 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_15">
+        <layout class="QHBoxLayout" name="horizontalLayout_16">
          <item>
           <widget class="QLineEdit" name="txt_resDir">
            <property name="enabled">
@@ -355,7 +400,7 @@
         </layout>
        </item>
        <item>
-        <widget class="Line" name="line_2">
+        <widget class="Line" name="line_4">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -383,7 +428,7 @@
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
-           <widget class="QLabel" name="label_7">
+           <widget class="QLabel" name="label_8">
             <property name="text">
              <string>Thread Number :</string>
             </property>
@@ -397,7 +442,7 @@
            </widget>
           </item>
           <item>
-           <spacer name="horizontalSpacer">
+           <spacer name="horizontalSpacer_2">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -413,7 +458,7 @@
         </widget>
        </item>
        <item>
-        <widget class="Line" name="line_4">
+        <widget class="Line" name="line_5">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -452,7 +497,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
-          <widget class="QLabel" name="label_8">
+          <widget class="QLabel" name="label_9">
            <property name="font">
             <font>
              <pointsize>17</pointsize>
@@ -466,7 +511,7 @@
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer_5">
+          <spacer name="horizontalSpacer_6">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -508,14 +553,14 @@
         </layout>
        </item>
        <item>
-        <widget class="Line" name="line_5">
+        <widget class="Line" name="line_6">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
           <layout class="QGridLayout" name="gridLayout">
            <item row="0" column="0">
@@ -550,7 +595,7 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_9">
+            <widget class="QLabel" name="label_10">
              <property name="text">
               <string>Assuming  Ωm + Ωk +  Ωλ = 1</string>
              </property>
@@ -567,7 +612,7 @@
             </widget>
            </item>
            <item row="3" column="0">
-            <widget class="QLabel" name="label_10">
+            <widget class="QLabel" name="label_13">
              <property name="toolTip">
               <string>The Phosphoros Root Path can be modified with the environment variable $PHOSPHOROS_ROOT.</string>
              </property>
@@ -577,7 +622,7 @@
             </widget>
            </item>
            <item row="0" column="2">
-            <widget class="QLabel" name="label_13">
+            <widget class="QLabel" name="label_14">
              <property name="text">
               <string> km/s/Mpc</string>
              </property>
@@ -586,7 +631,7 @@
           </layout>
          </item>
          <item>
-          <spacer name="horizontalSpacer_2">
+          <spacer name="horizontalSpacer_3">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -632,14 +677,28 @@
     </widget>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Close</set>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout_7">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>1069</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_ConfbackHome">
+       <property name="text">
+        <string>Back to Home</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
@@ -650,52 +709,6 @@
    <header>PhzQtUI/FormAuxDataManagement.h</header>
   </customwidget>
  </customwidgets>
- <tabstops>
-  <tabstop>btn_editGeneral</tabstop>
-  <tabstop>txt_rootDir</tabstop>
-  <tabstop>txt_catDir</tabstop>
-  <tabstop>btn_browseCat</tabstop>
-  <tabstop>btn_defCat</tabstop>
-  <tabstop>txt_auxDir</tabstop>
-  <tabstop>btn_browseAux</tabstop>
-  <tabstop>btn_defAux</tabstop>
-  <tabstop>txt_interDir</tabstop>
-  <tabstop>btn_browseInter</tabstop>
-  <tabstop>btn_defInter</tabstop>
-  <tabstop>txt_resDir</tabstop>
-  <tabstop>btn_browseRes</tabstop>
-  <tabstop>btn_defRes</tabstop>
-  <tabstop>gb_thread</tabstop>
-  <tabstop>sb_thread</tabstop>
-  <tabstop>btn_cancelGeneral</tabstop>
-  <tabstop>btn_saveGeneral</tabstop>
-  <tabstop>tabWidget</tabstop>
-  <tabstop>btn_edit_cosmo</tabstop>
-  <tabstop>txt_hubble_param</tabstop>
-  <tabstop>txt_omega_matter</tabstop>
-  <tabstop>txt_omega_lambda</tabstop>
-  <tabstop>btn_default_cosmo</tabstop>
-  <tabstop>btn_cancel_cosmo</tabstop>
-  <tabstop>btn_save_cosmo</tabstop>
-  <tabstop>buttonBox</tabstop>
- </tabstops>
  <resources/>
- <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>rejected()</signal>
-   <receiver>Euclid::PhzQtUI::DialogOptions</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>283</x>
-     <y>444</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>283</x>
-     <y>234</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
