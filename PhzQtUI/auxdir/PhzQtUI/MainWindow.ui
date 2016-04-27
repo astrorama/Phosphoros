@@ -187,7 +187,7 @@
              <string>Define the Mapping between the catalog file(s) columns and the filters</string>
             </property>
             <property name="text">
-             <string>Catalog Definition </string>
+             <string>Catalog Type Definition </string>
             </property>
            </widget>
           </item>
@@ -286,7 +286,7 @@
              </font>
             </property>
             <property name="toolTip">
-             <string>Compute the model grid, calculate photometric photometric correction and run template fitting in order to produce photo-z catalog.</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Compute the model grid, calculate photometric correction, specify luminosity prior and run template fitting in order to produce photo-z catalog.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string>Compute Redshifts </string>

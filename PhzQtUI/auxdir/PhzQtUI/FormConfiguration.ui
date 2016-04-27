@@ -168,6 +168,9 @@
            <property name="enabled">
             <bool>false</bool>
            </property>
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The Phosphoros Root Path can be modified with the environment variable $PHOSPHOROS_ROOT.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
           </widget>
          </item>
         </layout>
@@ -412,7 +415,7 @@
           <bool>false</bool>
          </property>
          <property name="title">
-          <string>Override the Number of Thread</string>
+          <string>Override the Maximum Number of Thread</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
