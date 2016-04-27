@@ -65,7 +65,11 @@ std::string DatasetSelection::getBaseGroupName() const {
     return this->getIsolated()[0];
   }
 
-  return getGroupes()[0];
+  if ( getGroupes().size() > 0){
+    return getGroupes()[0];
+  }
+
+  return "";
 }
 
 

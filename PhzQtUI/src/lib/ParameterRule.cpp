@@ -116,12 +116,13 @@ std::pair<long,long> ParameterRule::getSelectionNumbers(DatasetSelection selecti
      if (selection.getIsolated().size() == 1) {
        total = 1;
      } else {
-       auto group_name = XYDataset::QualifiedName(
-           selection.getGroupes()[0]);
-       for (auto& item : repository->getContent()) {
-         if (item.belongsInGroup(group_name)) {
-           ++total;
-         }
+       if (selection.getGroupes().size()>0){
+        auto group_name = XYDataset::QualifiedName(selection.getGroupes()[0]);
+        for (auto& item : repository->getContent()) {
+          if (item.belongsInGroup(group_name)) {
+            ++total;
+          }
+        }
        }
      }
    }
