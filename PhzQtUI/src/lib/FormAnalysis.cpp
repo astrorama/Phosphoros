@@ -41,26 +41,27 @@ FormAnalysis::~FormAnalysis() {
 void FormAnalysis::loadAnalysisPage() {
   m_analysis_survey_list = SurveyFilterMapping::loadCatalogMappings();
 
-  ui->cb_AnalysisSurvey->clear();
-  for (auto& survey : m_analysis_survey_list) {
-    ui->cb_AnalysisSurvey->addItem(
-        QString::fromStdString(survey.second.getName()));
-  }
+    ui->cb_AnalysisSurvey->clear();
+    for (auto& survey : m_analysis_survey_list) {
+      ui->cb_AnalysisSurvey->addItem(
+          QString::fromStdString(survey.second.getName()));
+    }
 
-  m_analysis_model_list = ModelSet::loadModelSetsFromFolder(
-      FileUtils::getModelRootPath(false));
-  ui->cb_AnalysisModel->clear();
-  for (auto& model : m_analysis_model_list) {
-    ui->cb_AnalysisModel->addItem(
-        QString::fromStdString(model.second.getName()));
-  }
+    m_analysis_model_list = ModelSet::loadModelSetsFromFolder(
+        FileUtils::getModelRootPath(false));
+    ui->cb_AnalysisModel->clear();
+    for (auto& model : m_analysis_model_list) {
+      ui->cb_AnalysisModel->addItem(
+          QString::fromStdString(model.second.getName()));
+    }
 
-  updateGridSelection();
+    updateGridSelection();
 }
 ///////////////////////////////////////////////////
 //  Handle controls enability
 
 void FormAnalysis::updateGridSelection() {
+try{
   ModelSet selected_model;
 
   for (auto&model : m_analysis_model_list) {
@@ -70,6 +71,7 @@ void FormAnalysis::updateGridSelection() {
       break;
     }
   }
+
   auto axis = selected_model.getAxesTuple();
   auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
       ui->cb_AnalysisSurvey->currentText().toStdString(), axis,
@@ -89,6 +91,11 @@ void FormAnalysis::updateGridSelection() {
   }
 
   ui->cb_CompatibleGrid->addItem("<Enter a new name>");
+} catch (Elements::Exception){
+  if (ui->cb_AnalysisModel->currentIndex()>-1){
+    ui->cb_AnalysisModel->removeItem(ui->cb_AnalysisModel->currentIndex());
+  }
+  }
 }
 
 void FormAnalysis::updateCorrectionSelection() {
