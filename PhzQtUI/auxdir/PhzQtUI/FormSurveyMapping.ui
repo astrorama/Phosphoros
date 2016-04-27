@@ -33,7 +33,7 @@
         </font>
        </property>
        <property name="text">
-        <string>&gt; Catalog Type Definition :</string>
+        <string>&gt; Catalog Type Definition</string>
        </property>
       </widget>
      </item>

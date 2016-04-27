@@ -4,6 +4,7 @@
 #include <QDir>
 
 #include "ElementsKernel/Real.h" // isEqual
+#include "ElementsKernel/Exception.h" // isEqual
 
 #include "PhzQtUI/ParameterRule.h"
 #include "FileUtils.h"
@@ -252,15 +253,19 @@ long long ParameterRule::getModelNumber(bool recompute) {
     completeWithDefaults<PhzConfiguration::ParameterSpaceConfig>(options);
     long config_manager_id = Configuration::getUniqueManagerId();
     auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
-    config_manager.registerConfiguration<PhzConfiguration::ParameterSpaceConfig>();
-    config_manager.closeRegistration();
-    config_manager.initialize(options);
 
-    m_model_number = config_manager.getConfiguration<PhzConfiguration::SedConfig>().getSedList().at("").size() *
-        config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getReddeningCurveList().at("").size() *
-        config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getEbvList().at("").size() *
-        config_manager.getConfiguration<PhzConfiguration::RedshiftConfig>().getZList().at("").size();
+    try{
+      config_manager.registerConfiguration<PhzConfiguration::ParameterSpaceConfig>();
+      config_manager.closeRegistration();
+      config_manager.initialize(options);
 
+      m_model_number = config_manager.getConfiguration<PhzConfiguration::SedConfig>().getSedList().at("").size() *
+          config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getReddeningCurveList().at("").size() *
+          config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getEbvList().at("").size() *
+          config_manager.getConfiguration<PhzConfiguration::RedshiftConfig>().getZList().at("").size();
+    } catch (Elements::Exception){
+      m_model_number=0;
+    }
    }
  }
   return m_model_number;

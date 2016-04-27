@@ -200,6 +200,7 @@ void DialogModelSet::on_buttonBox_accepted()
     try {
       m_rules[m_ref].setZRanges(std::move(new_z_ranges));
       m_rules[m_ref].getModelNumber(true);
+      m_rules[m_ref].getRedshiftRangeString();
     } catch (const Elements::Exception& e) {
         QMessageBox::warning( this, "Error while setting redshift ranges...",
                                   e.what(),
@@ -212,6 +213,7 @@ void DialogModelSet::on_buttonBox_accepted()
     try {
       m_rules[m_ref].setEbvRanges(std::move(new_ebv_ranges));
       m_rules[m_ref].getModelNumber(true);
+      m_rules[m_ref].getEbvRangeString();
       } catch (const Elements::Exception& e) {
           QMessageBox::warning( this, "Error while setting E(B-V) ranges...",
                                     e.what(),
