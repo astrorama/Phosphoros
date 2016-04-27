@@ -151,10 +151,17 @@ void FormModelSet::on_btn_SetCancel_clicked()
         m_setInsert=false;
     }else{
         ui->txt_SetName->setText(QString(ui->tableView_Set->getSelectedName()));
-        ui->tableView_ParameterRule->loadParameterRules(
-            ui->tableView_Set->getSelectedParameterRules(),
-            m_seds_repository,
-            m_redenig_curves_repository);
+
+        ui->tableView_ParameterRule->loadParameterRules(ui->tableView_Set->getSelectedParameterRules(), m_seds_repository,
+                            m_redenig_curves_repository);
+        if (ui->tableView_Set->getSelectedParameterRules().size()>0 ){
+          ui->tableView_ParameterRule->selectRow(0);
+        }
+
+        disconnect(ui->tableView_ParameterRule->selectionModel(),SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),0,0);
+        connect(ui->tableView_ParameterRule->selectionModel(),
+                                    SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
+                                    SLOT(rulesSelectionChanged(QModelIndex, QModelIndex)));
     }
 
     setModelInView();
@@ -324,7 +331,7 @@ void FormModelSet::setEditionPopupClosing(int ref ,ParameterRule rule ,bool vali
     }
     int current_row = 0;
     if (ui->tableView_ParameterRule->getModel()->getParameterRules().size()>0 ){
-      ui->tableView_ParameterRule->selectionModel()->selectedIndexes()[0].row();
+      current_row = ui->tableView_ParameterRule->selectionModel()->selectedIndexes()[0].row();
     }
     ui->tableView_ParameterRule->loadParameterRules(current_rules, m_seds_repository,
                      m_redenig_curves_repository);
