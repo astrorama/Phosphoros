@@ -36,7 +36,14 @@ class DialogZRanges : public QDialog
     Q_OBJECT
 
 public:
+    /**
+     * @brief Constructor
+     */
     explicit DialogZRanges(QWidget *parent = 0);
+
+    /**
+     * @brief Destructor
+     */
     ~DialogZRanges();
 
     void setRanges(std::vector<double> zs);

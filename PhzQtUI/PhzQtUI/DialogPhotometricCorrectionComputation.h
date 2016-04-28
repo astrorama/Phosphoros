@@ -22,7 +22,14 @@ class DialogPhotometricCorrectionComputation : public QDialog
     Q_OBJECT
 
 public:
+    /**
+     * @brief Constructor
+     */
     explicit DialogPhotometricCorrectionComputation(QWidget *parent = 0);
+
+    /**
+     * @brief Destructor
+     */
     ~DialogPhotometricCorrectionComputation();
 
     /**

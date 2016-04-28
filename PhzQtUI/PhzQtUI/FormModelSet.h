@@ -63,11 +63,13 @@ private slots:
 
     void on_btn_SetDelete_clicked();
 
-    void on_btn_viewSet_clicked();
+    void on_btn_open_region_clicked();
 
-    void on_btn_new_set_clicked();
-    void on_btn_duplicate_set_clicked();
-    void on_btn_delete_set_clicked();
+    void on_btn_new_region_clicked();
+
+    void on_btn_duplicate_region_clicked();
+
+    void on_btn_delete_region_clicked();
 
 
 private:

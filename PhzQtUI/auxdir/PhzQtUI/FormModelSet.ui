@@ -259,28 +259,28 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_viewSet">
+      <widget class="QPushButton" name="btn_open_region">
        <property name="text">
         <string>Open</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_new_set">
+      <widget class="QPushButton" name="btn_new_region">
        <property name="text">
         <string>New</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_duplicate_set">
+      <widget class="QPushButton" name="btn_duplicate_region">
        <property name="text">
         <string>Duplicate</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_delete_set">
+      <widget class="QPushButton" name="btn_delete_region">
        <property name="text">
         <string>Delete</string>
        </property>

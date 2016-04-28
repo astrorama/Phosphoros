@@ -14,41 +14,50 @@ class DialogLuminosityFunctionCurveSelector;
 }
 
 /**
- * @brief The DialogLuminosityFunctionCurveSelector class
- * This popup allows the user to select a curve.
+ * @class DialogLuminosityFunctionCurveSelector
+ * @brief This popup allows the user to select a luminosity function curve.
  */
-class DialogLuminosityFunctionCurveSelector : public QDialog
-{
-    Q_OBJECT
+class DialogLuminosityFunctionCurveSelector: public QDialog {
+  Q_OBJECT
 
 public:
-    explicit DialogLuminosityFunctionCurveSelector(QWidget *parent = 0);
-    ~DialogLuminosityFunctionCurveSelector();
+  /**
+   * @brief Constructor
+   */
+  explicit DialogLuminosityFunctionCurveSelector(QWidget *parent = 0);
 
-    void setCurve(std::string curve_name);
+  /**
+   * @brief Destructor
+   */
+  ~DialogLuminosityFunctionCurveSelector();
 
-signals:
-    /**
-     * @brief SIGNAL popupClosing: rised when the popup is closed.
-     * The argument is the curve Name.
-     */
-    void popupClosing(std::string);
+  /**
+   * @brief set the curve name at the opening of the popup.
+   * @parame curve_name The name of the curve displayed when the popup opens.
+   */
+  void setCurve(std::string curve_name);
 
+  signals:
+  /**
+   * @brief SIGNAL popupClosing: rised when the popup is closed.
+   * The argument is the curve Name.
+   */
+  void popupClosing(std::string);
 
 private slots:
-    /**
-     * @brief SLOT on_btn_cancel_clicked: close the popup
-     */
-    void on_btn_cancel_clicked();
+  /**
+   * @brief SLOT on_btn_cancel_clicked: close the popup
+   */
+  void on_btn_cancel_clicked();
 
-    /**
-     * @brief SLOT on_btn_save_clicked: rises the
-     *  SIGNAL popupClosing and close the popup.
-     */
-    void on_btn_save_clicked();
+  /**
+   * @brief SLOT on_btn_save_clicked: rises the
+   *  SIGNAL popupClosing and close the popup.
+   */
+  void on_btn_save_clicked();
 
 private:
-   std::unique_ptr<Ui::DialogLuminosityFunctionCurveSelector> ui;
+  std::unique_ptr<Ui::DialogLuminosityFunctionCurveSelector> ui;
 };
 
 }

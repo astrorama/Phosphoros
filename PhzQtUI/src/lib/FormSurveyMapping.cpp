@@ -258,7 +258,18 @@ void FormSurveyMapping::on_btn_MapCancel_clicked()
 
 void FormSurveyMapping::on_btn_MapSave_clicked()
 {
-    SurveyModel* model=static_cast<SurveyModel*>(ui->table_Map->model());
+  auto filters = getMappingFromGrid();
+  for (auto&filter : filters){
+        if (filter.getFluxColumn().length()==0 || filter.getErrorColumn().length()==0){
+          QMessageBox::warning( this,
+                                     "Missing Data...",
+                                     "Please provide a name for all the Flux and Error Columns.",
+                                     QMessageBox::Ok );
+               return;
+        }
+      }
+
+  SurveyModel* model=static_cast<SurveyModel*>(ui->table_Map->model());
      int row = ui->table_Map->selectionModel()->currentIndex().row();
 
      std::string old_name=model->getName(row);
@@ -267,7 +278,10 @@ void FormSurveyMapping::on_btn_MapSave_clicked()
      model->setNonDetection(ui->txt_nonDetection->value(),row);
 
 
-     model->setFilters(getMappingFromGrid(),row);
+
+
+
+     model->setFilters(std::move(filters),row);
 
      model->setColumnList(m_column_from_file,row);
      model->setDefaultCatalog(m_default_survey,row);

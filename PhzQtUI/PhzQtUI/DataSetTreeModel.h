@@ -10,63 +10,96 @@
 namespace Euclid {
 namespace PhzQtUI {
 
-typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>>DatasetRepo;
 
 /**
- * @brief The DirectoryTreeModel class
- * This class provide a Model to be used in TreeView. It display a folder hierarchy
- * below a provided path and provide a set of possible behavior on user interaction.
- * Each item (or only file item) present a check box allowing the user to select it.
+ * @class DataSetTreeModel
+ * @brief This class provide a Model to associate the data structure returned
+ * by a DatasetRepository<YDataset::FileSystemProvider> to a TreeView.
+ * It display a group hierarchy with no root items and allow multiple items
+ * selection. The selection state is set and retrieve using a DatasetSelection
+ * object.
  */
-class DataSetTreeModel : public QStandardItemModel
-{
-    Q_OBJECT
+class DataSetTreeModel: public QStandardItemModel {
+  Q_OBJECT
 public:
-    explicit DataSetTreeModel(DatasetRepo srepository,
-                                QObject *parent = 0);
+  /**
+   * @brief Constructor
+   * @param repository A pointer on a
+   * DatasetRepository<YDataset::FileSystemProvider> containing the data
+   * structure to be displayed
+   * @param parent the parent QObject
+   */
+  explicit DataSetTreeModel(DatasetRepo repository, QObject *parent = 0);
 
+  /**
+   * @brief Read the provided repository and create the items needed to
+   * represent it. To be called once.
+   */
+  void load();
 
-    void load();
+  /**
+   * @brief Turn the model Enabled (In edition: the user can check/uncheck
+   * elements)/Disabled(read-only)
+   * @param enable
+   */
+  void setEnabled(bool enable);
 
-    /**
-     * @brief Turn the model Enabled(In edition: the user can check/uncheck elements)/Disabled(read-only)
-     * @param enable
-     */
-    void setEnabled(bool enable);
+  /**
+   * @brief Set the selection state
+   * @param selection A DatasetSelection object encoding the selection state.
+   */
+  void setState(const DatasetSelection& selection);
 
-    void setState(const DatasetSelection& selection);
-
-    DatasetSelection getState() const;
-
+  /**
+   * @brief Get the selection state
+   * @return A DatasetSelection object encoding the selection state.
+   */
+  DatasetSelection getState() const;
 
 public slots:
-      /**
-       * @brief SLOT onItemChanged To be connected to the ItemChanged SIGNAL,
-       * Behavior -> Sub-tree check, allow exclusions:
-       * When an unchecked folder is checked, check all its children (recursivelly)
-       * When a checked folder is unchecked, uncheck all its children (recursivelly)
-       * When an item which parent is not checked is checked uncheck all but it (and its children if any)
-       */
-      void onItemChanged(QStandardItem*);
-
-
+  /**
+   * @brief SLOT onItemChanged To be connected to the ItemChanged SIGNAL.
+   */
+  void onItemChanged(QStandardItem*);
 
 private:
 
-      static std::string getGroupName(XYDataset::QualifiedName qualified_name);
+  /**
+   * @brief Get the name of the enclosing group
+   * @param qualified_name The name of the item.
+   */
+  static std::string getGroupName(XYDataset::QualifiedName qualified_name);
 
-      void clearState();
-      void checkGroup(XYDataset::QualifiedName name );
-      void partialCheckParentGroups(XYDataset::QualifiedName child );
+  /**
+   * @brief Uncheck all items.
+   */
+  void clearState();
 
-      void setEditionStatus(bool inEdition);
+  /**
+   * @brief Check a group and its children
+   * @param name the name of the group.
+   */
+  void checkGroup(XYDataset::QualifiedName name);
 
-      bool m_in_edition = false;
-      std::map<std::string,QStandardItem*> m_map_dir;
-      DatasetRepo m_repository;
+  /**
+   * @brief look for a group which is the direct parent of the provided child,
+   * mark it as partially checked
+   * @param child The item/group name of wich the parent has to be checked
+   */
+  void partialCheckParentGroups(XYDataset::QualifiedName child);
+
+  /**
+   * @brief Set the edition flag of the class
+   * @param inEdition the new edition status.
+   */
+  void setEditionStatus(bool inEdition);
+
+  bool m_in_edition = false;
+  std::map<std::string, QStandardItem*> m_map_dir;
+  DatasetRepo m_repository;
 
 };
-
 
 }
 }

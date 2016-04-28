@@ -71,10 +71,10 @@ void  FormModelSet::setModelInEdition(){
     ui->btn_SetEdit->setEnabled(false);
     ui->btn_SetCancel->setEnabled(true);
     ui->btn_SetSave->setEnabled(true);
-    ui->btn_new_set->setEnabled(true);
-    ui->btn_viewSet->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
-    ui->btn_duplicate_set->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
-    ui->btn_delete_set->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
+    ui->btn_new_region->setEnabled(true);
+    ui->btn_open_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
+    ui->btn_duplicate_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
+    ui->btn_delete_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
     ui->txt_SetName->setEnabled(true);
     ui->tableView_Set->setEnabled(false);
 }
@@ -84,15 +84,15 @@ void  FormModelSet::setModelInView(){
     ui->btn_SetToHome->setEnabled(true);
     ui->btn_backHome->setEnabled(true);
     ui->btn_SetNew->setEnabled(true);
-    ui->btn_viewSet->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
+    ui->btn_open_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
     ui->btn_SetDuplicate->setEnabled(ui->tableView_Set->hasSelectedSet());
     ui->btn_SetDelete->setEnabled(ui->tableView_Set->hasSelectedSet());
     ui->btn_SetEdit->setEnabled(ui->tableView_Set->hasSelectedSet());
     ui->btn_SetCancel->setEnabled(false);
     ui->btn_SetSave->setEnabled(false);
-    ui->btn_new_set->setEnabled(false);
-    ui->btn_duplicate_set->setEnabled(false);
-    ui->btn_delete_set->setEnabled(false);
+    ui->btn_new_region->setEnabled(false);
+    ui->btn_duplicate_region->setEnabled(false);
+    ui->btn_delete_region->setEnabled(false);
     ui->txt_SetName->setEnabled(false);
     ui->tableView_Set->setEnabled(true);
 }
@@ -230,7 +230,7 @@ void FormModelSet::setSelectionChanged(QModelIndex new_index, QModelIndex)
 
 
 void FormModelSet::parameterGridDoubleClicked(QModelIndex){
-  on_btn_viewSet_clicked();
+  on_btn_open_region_clicked();
 }
 
 
@@ -246,7 +246,7 @@ void FormModelSet::rulesSelectionChanged(QModelIndex, QModelIndex) {
 }
 
 
-void FormModelSet::on_btn_viewSet_clicked()
+void FormModelSet::on_btn_open_region_clicked()
 {
   std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet(m_seds_repository, m_redenig_curves_repository));
      int refid = ui->tableView_ParameterRule->getSelectedRuleId();
@@ -266,7 +266,7 @@ void FormModelSet::on_btn_viewSet_clicked()
 }
 
 
-void FormModelSet::on_btn_new_set_clicked(){
+void FormModelSet::on_btn_new_region_clicked(){
   std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet(m_seds_repository, m_redenig_curves_repository));
       auto current_list = ui->tableView_ParameterRule->getModel()->getParameterRules();
       current_list.insert(std::make_pair(-1,ParameterRule{}));
@@ -282,7 +282,7 @@ void FormModelSet::on_btn_new_set_clicked(){
 }
 
 
-void FormModelSet::on_btn_duplicate_set_clicked(){
+void FormModelSet::on_btn_duplicate_region_clicked(){
   std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet(m_seds_repository, m_redenig_curves_repository));
         auto current_list = ui->tableView_ParameterRule->getModel()->getParameterRules();
         auto rule = ui->tableView_ParameterRule->getSelectedRule();
@@ -300,7 +300,7 @@ void FormModelSet::on_btn_duplicate_set_clicked(){
 }
 
 
-void FormModelSet::on_btn_delete_set_clicked(){
+void FormModelSet::on_btn_delete_region_clicked(){
 
   auto rule_name = QString::fromStdString(ui->tableView_ParameterRule->getSelectedRule().getName());
   if (QMessageBox::question( this, "Confirm deletion...",

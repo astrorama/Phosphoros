@@ -6,6 +6,7 @@
 #include "PhzQtUI/DialogImportAuxData.h"
 #include "PhzQtUI/DialogCreatesSubGroup.h"
 #include "FileUtils.h"
+#include "XYDataset/AsciiParser.h"
 
 
 namespace Euclid {
@@ -88,7 +89,12 @@ void FormAuxDataManagement::on_btn_RedImport_clicked()
     popup->setData(title,group,model->getRelPath(group,"Reddening Curves"));
     if (popup->exec()){
         loadManagementPage(2);
-        m_redenig_curves_repository->reload();
+
+
+        std::unique_ptr <XYDataset::FileParser > reddening_file_parser {new XYDataset::AsciiParser { } };
+         std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(new XYDataset::FileSystemProvider{  FileUtils::getRedCurveRootPath(false), std::move(reddening_file_parser) });
+         m_redenig_curves_repository->resetProvider(std::move(red_curve_provider));
+
     }
 }
 
@@ -112,7 +118,10 @@ void FormAuxDataManagement::on_btn_RedDelete_clicked()
                                   QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
         FileUtils::removeDir(QString::fromStdString(selection));
         loadManagementPage(2);
-        m_redenig_curves_repository->reload();
+        std::unique_ptr <XYDataset::FileParser > reddening_file_parser {new XYDataset::AsciiParser { } };
+         std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(new XYDataset::FileSystemProvider{  FileUtils::getRedCurveRootPath(false), std::move(reddening_file_parser) });
+         m_redenig_curves_repository->resetProvider(std::move(red_curve_provider));
+
     }
 }
 
@@ -126,7 +135,12 @@ void FormAuxDataManagement::on_btn_SedImport_clicked()
     popup->setData(title,group,model->getRelPath(group,"SEDs"));
     if (popup->exec()){
         loadManagementPage(1);
-        m_seds_repository->reload();
+
+        std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
+                std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(false), std::move(sed_file_parser) });
+                m_seds_repository->resetProvider(std::move(sed_provider));
+
+
     }
 }
 
@@ -150,7 +164,10 @@ void FormAuxDataManagement::on_btn_SedDelete_clicked()
                                  QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
        FileUtils::removeDir(QString::fromStdString(selection));
        loadManagementPage(1);
-       m_seds_repository->reload();
+       std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
+                    std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(false), std::move(sed_file_parser) });
+                    m_seds_repository->resetProvider(std::move(sed_provider));
+
    }
 }
 

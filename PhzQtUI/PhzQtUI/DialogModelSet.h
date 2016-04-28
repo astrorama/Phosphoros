@@ -18,89 +18,114 @@ namespace Ui {
 class DialogModelSet;
 }
 
-typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
+typedef std::shared_ptr<
+    PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>>DatasetRepo;
 
 /**
- * @brief The DialogModelSet class
- * This popup allows the user to view/edit the Parameter Rules of a Model Set.
+ * @class DialogModelSet
+ * @brief This popup allows the user to view/edit a Parameter Rules of a Model Set.
  */
-class DialogModelSet : public QDialog
-{
-    Q_OBJECT
+class DialogModelSet: public QDialog {
+  Q_OBJECT
 
 public:
-    explicit DialogModelSet(DatasetRepo seds_repository,
-        DatasetRepo redenig_curves_repository, QWidget *parent = 0);
-    ~DialogModelSet();
+  /**
+   * @brief Constructor
+   * @param seds_repository a pointer on  DatasetRepository<FileSystemProvider>
+   * storing the available SEDs
+   * @param redenig_curves_repository a pointer on  DatasetRepository<FileSystemProvider>
+   * storing the available Reddening Curves
+   *
+   */
+  explicit DialogModelSet(DatasetRepo seds_repository,
+      DatasetRepo redenig_curves_repository, QWidget *parent = 0);
 
-    /**
-     * @brief Initialise the popup by setting its internal data
-     * @param init_parameter_rules
-     * the map of ParameterRules to be displayed/modified
-     */
-    void loadData(int ref, const std::map<int,ParameterRule>&);
+  /**
+   * @brief Destructor
+   */
+  ~DialogModelSet();
 
-    /**
-     * @brief When called, set the popup in read-only.
-     */
-    void setViewMode();
+  /**
+   * @brief Initialise the popup by setting its internal data
+   * @param init_parameter_rules
+   * the map of ParameterRules to be displayed/modified
+   */
+  void loadData(int ref, const std::map<int, ParameterRule>&);
 
+  /**
+   * @brief When called, set the popup in read-only.
+   */
+  void setViewMode();
 
-signals:
-    /**
-      * @brief SIGNAL popupClosing: rised when the the popup close.
-      * The argument is the modifed  ParameterRule.
-      */
-     void popupClosing(int,ParameterRule,bool);
+  signals:
+  /**
+   * @brief SIGNAL popupClosing: rised when the the popup close.
+   * The argument is the modifed  ParameterRule.
+   */
+  void popupClosing(int,ParameterRule,bool);
 
 private slots:
 
+  /**
+   * @brief SLOT on_buttonBox_rejected: The user close the popup
+   */
+  void on_buttonBox_rejected();
 
-     /**
-      * @brief SLOT on_buttonBox_rejected: The user close the popup, build the new ParameterRules map
-      * and rise the SIGNAL popupClosing
-      */
-     void on_buttonBox_rejected();
+  /**
+   * @brief SLOT on_buttonBox_accepted: The user close the popup,
+   * and rise the SIGNAL popupClosing
+   */
 
-     void on_buttonBox_accepted();
+  void on_buttonBox_accepted();
 
+  /**
+   * @brief SLOT raised when the user delete a redshift range
+   */
+  void onZDeleteClicked(size_t, size_t);
 
+  /**
+   * @brief SLOT raised when the user add a redshift range
+   */
+  void on_btn_add_z_range_clicked();
 
-     void onZDeleteClicked(size_t,size_t );
+  /**
+   * @brief SLOT raised when the user delete a E(B-V) range
+   */
+  void onEbvDeleteClicked(size_t, size_t);
 
-     void on_btn_add_z_range_clicked();
-
-     void onEbvDeleteClicked(size_t,size_t );
-
-     void on_btn_add_ebv_range_clicked();
+  /**
+   * @brief SLOT raised when the user add a E(B-V) range
+   */
+  void on_btn_add_ebv_range_clicked();
 
 private:
-    std::unique_ptr<Ui::DialogModelSet> ui;
-    bool m_view_popup=false;
+  void turnControlsInEdition();
+  void turnControlsInView();
+  void populateZRangesAndValues(ParameterRule selected_rule);
+  void populateEbvRangesAndValues(ParameterRule selected_rule);
 
-    int m_current_z_range_id=0;
-    int m_current_ebv_range_id=0;
+  QFrame* createRangeControls(GridButton* del_button, int range_id,
+      bool enabled);
+  QFrame* createRangeControls(GridButton* del_button, int range_id,
+      bool enabled, const Range& range);
 
-    void turnControlsInEdition();
-    void turnControlsInView();
-    void populateZRangesAndValues(ParameterRule selected_rule);
-    void populateEbvRangesAndValues(ParameterRule selected_rule);
+  void cleanRangeControl(QVBoxLayout* ranges_layout);
+  void SetRangeControlsEnabled(QVBoxLayout* ranges_layout, bool is_enabled);
+  std::vector<Range> getRanges(QVBoxLayout* ranges_layout);
 
-    QFrame* createRangeControls(GridButton* del_button, int range_id, bool enabled );
-    QFrame* createRangeControls(GridButton* del_button, int range_id, bool enabled, const Range& range);
+  void deleteRangeAt(QVBoxLayout* ranges_layout, size_t range_id);
 
-    void cleanRangeControl(QVBoxLayout* ranges_layout);
-    void SetRangeControlsEnabled(QVBoxLayout* ranges_layout, bool is_enabled);
-    std::vector<Range> getRanges(QVBoxLayout* ranges_layout);
+  std::unique_ptr<Ui::DialogModelSet> ui;
+  bool m_view_popup = false;
 
-    void deleteRangeAt(QVBoxLayout* ranges_layout, size_t range_id);
+  int m_current_z_range_id = 0;
+  int m_current_ebv_range_id = 0;
 
+  DatasetRepo m_seds_repository;
+  DatasetRepo m_redenig_curves_repository;
 
-    DatasetRepo m_seds_repository;
-    DatasetRepo m_redenig_curves_repository;
-
-    int m_ref;
-    std::map<int,ParameterRule> m_rules;
+  int m_ref;
+  std::map<int, ParameterRule> m_rules;
 };
 
 }

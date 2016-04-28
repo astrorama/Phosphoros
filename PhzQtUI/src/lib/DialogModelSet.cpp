@@ -9,7 +9,6 @@
 #include "PhzQtUI/DataSetTreeModel.h"
 
 #include "PhzQtUI/GridButton.h"
-#include "PhzQtUI/DoubleValidatorItemDelegate.h"
 #include "PhzQtUI/ParameterRule.h"
 
 

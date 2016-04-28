@@ -37,7 +37,14 @@ class DialogRunAnalysis : public QDialog
     Q_OBJECT
 
 public:
+    /**
+     * @brief Constructor
+     */
     explicit DialogRunAnalysis(QWidget *parent = 0);
+
+    /**
+     * @brief Destructor
+     */
     ~DialogRunAnalysis();
 
     /**
