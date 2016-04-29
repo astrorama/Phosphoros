@@ -71,12 +71,14 @@ void FormConfiguration::loadOptionPage(DatasetRepo seds_repository,
 //  - Slots on this page
 void FormConfiguration::on_btn_ConfigToHome_clicked()
 {
-     navigateToHome();
+     navigateToHome(do_need_reset);
+     do_need_reset=false;
 }
 
 void FormConfiguration::on_btn_ConfbackHome_clicked()
 {
-     navigateToHome();
+     navigateToHome(do_need_reset);
+     do_need_reset=false;
 }
 
 
@@ -186,6 +188,8 @@ void FormConfiguration::on_btn_saveGeneral_clicked(){
       std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(new XYDataset::FileSystemProvider{  FileUtils::getRedCurveRootPath(false), std::move(reddening_file_parser) });
       m_redenig_curves_repository->resetProvider(std::move(red_curve_provider));
 
+
+      do_need_reset=true;
       endEdition();
 }
 

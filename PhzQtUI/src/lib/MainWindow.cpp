@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
   connect(ui->widget_Catalog,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
 
-  connect(ui->widget_configuration,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
+  connect(ui->widget_configuration,SIGNAL(navigateToHome(bool)),SLOT(navigateToHomeWithReset(bool)));
 
   connect(ui->widget_Analysis,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
   connect(ui->widget_Analysis,SIGNAL(navigateToNewCatalog(std::string)),SLOT(navigateToNewCatalog(std::string)));
@@ -77,6 +77,15 @@ MainWindow::~MainWindow()
  void MainWindow::navigateToHome(){
      changeMainStackedWidgetIndex(0);
  }
+
+ void MainWindow::navigateToHomeWithReset(bool reset){
+     changeMainStackedWidgetIndex(0);
+     if (reset){
+       m_model_loaded=false;
+       m_mapping_loaded=false;
+     }
+ }
+
 
  void MainWindow::navigateToNewCatalog(std::string new_name){
    changeMainStackedWidgetIndex(2);

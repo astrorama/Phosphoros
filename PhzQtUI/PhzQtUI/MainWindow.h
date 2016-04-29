@@ -42,6 +42,9 @@ private slots:
     void navigateToHome();
 
 
+    void navigateToHomeWithReset(bool);
+
+
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;

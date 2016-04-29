@@ -48,7 +48,7 @@ signals:
 /**
  * @brief SIGNAL Called when the user want to go back to the home page.
  */
-    void navigateToHome();
+    void navigateToHome(bool reset);
 
 private slots:
 
@@ -151,6 +151,7 @@ void endEdition();
 private:
     std::unique_ptr<Ui::FormConfiguration> ui;
 
+    bool do_need_reset = false;
     void checkDirectories();
     DatasetRepo m_seds_repository;
     DatasetRepo m_redenig_curves_repository;
