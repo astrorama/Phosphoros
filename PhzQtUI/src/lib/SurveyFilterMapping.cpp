@@ -177,9 +177,9 @@ void SurveyFilterMapping::ReadFilters(){
       smatch match_res;
       if (!regex_match(line, match_res, expr)) {
         logger.error() << "Syntax error in "
-            << mapping_path.toStdString() + "filter_mapping.txt" << ": " << line;
+            << mapping_path.toStdString() << ": " << line;
         throw Elements::Exception() << "Syntax error in "
-            << mapping_path.toStdString() + "filter_mapping.txt" << ": " << line;
+            << mapping_path.toStdString() << ": " << line;
       }
 
       FilterMapping mapping;
