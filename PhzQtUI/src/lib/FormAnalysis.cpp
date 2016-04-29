@@ -933,7 +933,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
         file_columns[getSelectedSurveySourceColumn()] = false;
       } else {
         not_found = true;
-        missing_columns += getSelectedSurveySourceColumn();
+        missing_columns += "'"+getSelectedSurveySourceColumn()+"'";
       }
 
       for (auto& filter : getSelectedFilterMapping()) {
@@ -944,7 +944,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
           if (not_found){
             missing_columns+=", ";
           }
-          missing_columns += filter.getFluxColumn();
+          missing_columns += "'"+filter.getFluxColumn()+"'";
           not_found = true;
         }
 
@@ -955,7 +955,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
           if (not_found){
              missing_columns+=", ";
           }
-          missing_columns += filter.getErrorColumn();
+          missing_columns += "'"+filter.getErrorColumn()+"'";
           not_found = true;
         }
       }

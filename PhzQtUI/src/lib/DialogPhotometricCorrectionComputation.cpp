@@ -103,7 +103,7 @@ bool DialogPhotometricCorrectionComputation::loadTestCatalog(QString file_name, 
       file_columns[m_id_column] = false;
     } else {
       not_found = true;
-      missing_columns += m_id_column;
+      missing_columns += "'"+m_id_column+"'";
     }
 
     for (auto& filter : m_selected_filters) {
@@ -114,7 +114,7 @@ bool DialogPhotometricCorrectionComputation::loadTestCatalog(QString file_name, 
         if (not_found){
           missing_columns+=", ";
         }
-        missing_columns += filter.getFluxColumn();
+        missing_columns += "'"+filter.getFluxColumn()+"'";
         not_found = true;
       }
 
@@ -126,7 +126,7 @@ bool DialogPhotometricCorrectionComputation::loadTestCatalog(QString file_name, 
         if (not_found){
                  missing_columns+=", ";
          }
-        missing_columns += filter.getErrorColumn();
+        missing_columns += "'"+filter.getErrorColumn()+"'";
         not_found = true;
       }
     }
