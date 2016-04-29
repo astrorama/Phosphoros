@@ -91,6 +91,7 @@ void FormSurveyMapping::setFilterMappingInEdition(){
     ui->table_Map->setEnabled(false);
     ui->btn_MapNew->setEnabled(false);
     ui->btn_MapDuplicate->setEnabled(false);
+    ui->btn_map_delete->setEnabled(false);
     ui->btn_MapEdit->setEnabled(false);
     ui->btn_MapCancel->setEnabled(true);
     ui->btn_MapSave->setEnabled(true);
@@ -116,6 +117,7 @@ void FormSurveyMapping::setFilterMappingInView(){
     ui->btn_CatToHome->setEnabled(true);
     ui->btn_MapNew->setEnabled(true);
     ui->btn_MapDuplicate->setEnabled(has_mapping_selected);
+    ui->btn_map_delete->setEnabled(has_mapping_selected);
     ui->btn_MapEdit->setEnabled(has_mapping_selected);
     ui->btn_MapCancel->setEnabled(false);
     ui->btn_MapSave->setEnabled(false);
@@ -212,6 +214,49 @@ void FormSurveyMapping::on_btn_MapDuplicate_clicked()
     } else {
       on_btn_MapCancel_clicked();
     }
+}
+
+
+void FormSurveyMapping::on_btn_map_delete_clicked(){
+
+  SurveyModel* model = static_cast<SurveyModel*>(ui->table_Map->model());
+
+  int row = ui->table_Map->selectionModel()->currentIndex().row();
+  std::string catalog_name = model->getName(row);
+
+  std::string catalog_path = FileUtils::getCatalogRootPath(false, catalog_name);
+  std::string intermediate_path = FileUtils::getIntermediaryProductRootPath(
+      false, catalog_name);
+  std::string result_path = FileUtils::getResultRootPath(false, catalog_name,
+      "");
+
+  if (QMessageBox::question(this, "Confirm deletion...",
+      "Do you really want to delete the Catalog Type '"
+          + QString::fromStdString(catalog_name) + "' ?\n \n"
+              "!!! WARNING !!!\n"
+              "This action will also DELETE :\n"
+              "    - The Catalog folder  '"
+          + QString::fromStdString(catalog_path)
+          + "' and its content,\n"
+              "    - All the related intermediate products (Model Grids,...) you may have computed and stored in '"
+          + QString::fromStdString(intermediate_path) + "',\n"
+              "\nHowever related results in the folder '"
+          + QString::fromStdString(result_path) + "' will not be deleted.",
+      QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+
+    bool success=true;
+    // The intermediate folder
+    success &= FileUtils::removeDir(QString::fromStdString(intermediate_path));
+
+    // The catalog folder
+    success &= FileUtils::removeDir(QString::fromStdString(catalog_path));
+
+    if (success){
+      // The xml file
+      model->deleteSurvey(row);
+    }
+
+  }
 }
 
 
