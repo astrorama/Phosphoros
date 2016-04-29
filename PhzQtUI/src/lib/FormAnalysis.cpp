@@ -918,63 +918,37 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
 
 
 // 5. Run
-  void FormAnalysis::setInputCatalogName(std::string name,bool do_test) {
-    bool not_found = false;
-    std::string missing_columns="";
-    if (do_test) {
-      auto column_reader = PhzUITools::CatalogColumnReader(name);
-      std::map<std::string, bool> file_columns;
+void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
+  if (do_test) {
+    std::vector<std::string> needed_columns { };
 
-      for (auto& name : column_reader.getColumnNames()) {
-        file_columns[name] = true;
-      }
-
-      if (file_columns.count(getSelectedSurveySourceColumn()) == 1) {
-        file_columns[getSelectedSurveySourceColumn()] = false;
-      } else {
-        not_found = true;
-        missing_columns += "'"+getSelectedSurveySourceColumn()+"'";
-      }
-
-      for (auto& filter : getSelectedFilterMapping()) {
-        if (file_columns.count(filter.getFluxColumn()) == 1) {
-          file_columns[filter.getFluxColumn()] = false;
-
-        } else {
-          if (not_found){
-            missing_columns+=", ";
-          }
-          missing_columns += "'"+filter.getFluxColumn()+"'";
-          not_found = true;
-        }
-
-        if (file_columns.count(filter.getErrorColumn()) == 1) {
-          file_columns[filter.getErrorColumn()] = false;
-
-        } else {
-          if (not_found){
-             missing_columns+=", ";
-          }
-          missing_columns += "'"+filter.getErrorColumn()+"'";
-          not_found = true;
-        }
-      }
+    needed_columns.push_back(getSelectedSurveySourceColumn());
+    for (auto& filter : getSelectedFilterMapping()) {
+      needed_columns.push_back(filter.getFluxColumn());
+      needed_columns.push_back(filter.getErrorColumn());
     }
 
-    if (not_found) {
+    std::string missing = FileUtils::checkFileColumns(name, needed_columns);
+    if (missing.size() > 0) {
       if (QMessageBox::question(this, "Incompatible Data...",
-              "The catalog file you selected has not the columns described into the Catalog and therefore cannot be used. \n"
-              "Missing column(s):"+QString::fromStdString(missing_columns)+"\n"
+          "The catalog file you selected has not the columns described into the Catalog and therefore cannot be used. \n"
+              "Missing column(s):" + QString::fromStdString(missing) + "\n"
               "Do you want to create a new Catalog mapping for this file?",
-              QMessageBox::Cancel|QMessageBox::Ok)==QMessageBox::Ok) {
+          QMessageBox::Cancel | QMessageBox::Ok) == QMessageBox::Ok) {
         navigateToNewCatalog(name);
       }
-    } else {
-      ui->txt_inputCatalog->setText(QString::fromStdString(name));
-      QFileInfo info(QString::fromStdString(name));
-      ui->txt_outputFolder->setText(QString::fromStdString(FileUtils::getResultRootPath(false,ui->cb_AnalysisSurvey->currentText().toStdString(), info.baseName().toStdString())));
+      return;
     }
   }
+
+  ui->txt_inputCatalog->setText(QString::fromStdString(name));
+  QFileInfo info(QString::fromStdString(name));
+  ui->txt_outputFolder->setText(
+      QString::fromStdString(
+          FileUtils::getResultRootPath(false,
+              ui->cb_AnalysisSurvey->currentText().toStdString(),
+              info.baseName().toStdString())));
+}
 
   void FormAnalysis::on_btn_BrowseInput_clicked()
   {

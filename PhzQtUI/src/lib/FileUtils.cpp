@@ -14,6 +14,8 @@
 #include "DefaultOptionsCompleter.h"
 #include "Configuration/Utils.h"
 
+#include "PhzUITools/CatalogColumnReader.h"
+
 namespace Euclid {
 namespace PhzQtUI {
 
@@ -335,6 +337,41 @@ std::string FileUtils::getLastUsedPath(){
 }
 
 
+ std::string FileUtils::checkFileColumns(const std::string& file_name,
+  const std::vector<std::string>& requiered_columns) {
+bool not_found = false;
+std::string missing_columns = "";
+
+auto column_reader = PhzUITools::CatalogColumnReader(file_name);
+std::map<std::string, bool> file_columns;
+
+for (auto& name : column_reader.getColumnNames()) {
+  file_columns[name] = true;
+}
+
+for (auto& column : requiered_columns) {
+  if (file_columns.count(column) == 1) {
+    file_columns[column] = false;
+
+  } else {
+    if (not_found) {
+      missing_columns += ", ";
+    }
+    missing_columns += "'" + column + "'";
+    not_found = true;
+  }
+
+}
+
+if (not_found){
+  return missing_columns;
+} else {
+  return "";
+}
+
+}
+
+
 
 std::string FileUtils::getFilterRootPath(bool check)  {
     QString path = QString::fromStdString(readPath()["AuxiliaryData"])+QDir::separator()+"Filters";
@@ -385,7 +422,17 @@ std::string FileUtils::getRedCurveRootPath(bool check)  {
 }
 
 
+std::string FileUtils::getCatalogConfigRootPath(bool check)  {
+    QString path = QString::fromStdString(FileUtils::getGUIConfigPath())+QDir::separator()+"Catalogs";
+    QFileInfo info(path);
+         if (check){
 
+        if (!info.exists()){
+            QDir().mkpath(path);
+        }
+    }
+    return info.absoluteFilePath().toStdString();
+}
 
 std::string FileUtils::getModelRootPath(bool check)  {
     QString path = QString::fromStdString(FileUtils::getGUIConfigPath())+QDir::separator()+"ParameterSpace";

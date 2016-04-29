@@ -87,6 +87,9 @@ public:
     static std::string removeStart(const std::string& name, const std::string& start);
 
 
+    static std::string checkFileColumns(const std::string & file_name, const std::vector<std::string>& requiered_columns);
+
+
     //////////////////////////////////////////////////////////
     //// Application base paths as of configuration.
     /**
@@ -128,6 +131,25 @@ public:
      * The Parameter space model
      */
     static std::string getGUILuminosityPriorConfig(bool check, const std::string & catalog_type, const std::string& model);
+
+    /**
+       * @brief get the Model Sets Root Path
+       * @param check
+       * if true ensure that the folder exist.
+       * @return <rootPath>/UI/ModelSet
+       */
+      static std::string getModelRootPath(bool check);
+
+      /**
+         * @brief get the Catalog Config Root Path
+         * @param check
+         * if true ensure that the folder exist.
+         * @return <rootPath>/UI/Catalogs
+         */
+        static std::string getCatalogConfigRootPath(bool check);
+
+
+
 
      /////////////////////// Overridable Paths //////////////////////////////
     /**
@@ -222,21 +244,13 @@ public:
 
 
 ///////////////////////////////////////////////
-    /**
-     * @brief get the Model Sets Root Path
-     * @param check
-     * if true ensure that the folder exist.
-     * @return <rootPath>/UI/ModelSet
-     */
-    static std::string getModelRootPath(bool check);
-
 
 
 
     /**
      * @brief get the Filters Root Path
      * @param check
-     * if true ensure that thUI/Filter
+     * if true ensure that Auxdata/Filter
      */
     static std::string getFilterRootPath(bool check);
 
