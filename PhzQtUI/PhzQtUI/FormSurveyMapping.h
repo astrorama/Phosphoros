@@ -45,6 +45,8 @@ private slots:
 
     void on_btn_MapDuplicate_clicked();
 
+    void on_btn_map_delete_clicked();
+
     void on_btn_MapEdit_clicked();
 
     void on_btn_MapCancel_clicked();
