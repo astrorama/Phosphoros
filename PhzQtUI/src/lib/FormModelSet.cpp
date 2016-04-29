@@ -173,7 +173,7 @@ void FormModelSet::on_btn_SetSave_clicked()
    if (! ui->tableView_Set->setSelectedName( ui->txt_SetName->text())){
      QMessageBox::warning( this,
         "Duplicate name...",
-       "The name you keyed in is already used. Please enter a new name.",
+       "Parameter Space Name already exists, please enter a new name.",
        QMessageBox::Ok );
      return;
    }
