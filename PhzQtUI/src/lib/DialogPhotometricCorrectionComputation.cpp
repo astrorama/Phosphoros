@@ -40,7 +40,7 @@ DialogPhotometricCorrectionComputation::DialogPhotometricCorrectionComputation(
   m_non_detection=0.;
   ui->txt_Iteration->setValidator(new QIntValidator(1, 1000, this));
   ui->txt_Tolerence->setValidator(new QDoubleValidator(0, 1, 8, this));
-  
+
   connect(this, SIGNAL(signalUpdateCurrentIteration(const QString&)),
           ui->txt_current_iteration, SLOT(setText(const QString&)));
   connect(&m_future_watcher, SIGNAL(finished()), this, SLOT(runFinished()));
@@ -98,11 +98,12 @@ bool DialogPhotometricCorrectionComputation::loadTestCatalog(QString file_name, 
     }
 
     bool not_found = false;
-
+    std::string missing_columns="";
     if (file_columns.count(m_id_column) == 1) {
       file_columns[m_id_column] = false;
     } else {
       not_found = true;
+      missing_columns += m_id_column;
     }
 
     for (auto& filter : m_selected_filters) {
@@ -110,13 +111,22 @@ bool DialogPhotometricCorrectionComputation::loadTestCatalog(QString file_name, 
         file_columns[filter.getFluxColumn()] = false;
 
       } else {
+        if (not_found){
+          missing_columns+=", ";
+        }
+        missing_columns += filter.getFluxColumn();
         not_found = true;
       }
 
       if (file_columns.count(filter.getErrorColumn()) == 1) {
+
         file_columns[filter.getErrorColumn()] = false;
 
       } else {
+        if (not_found){
+                 missing_columns+=", ";
+         }
+        missing_columns += filter.getErrorColumn();
         not_found = true;
       }
     }
@@ -124,7 +134,8 @@ bool DialogPhotometricCorrectionComputation::loadTestCatalog(QString file_name, 
     if (not_found) {
       if (with_warning){
       QMessageBox::warning(this, "Incompatible Data...",
-          "The catalog file you selected has not the columns described into the Catalog and therefore cannot be used. Please select another catalog file.",
+          "The catalog file you selected has not the columns described into the Catalog and therefore cannot be used.\n"
+          "Missing column(s):"+QString::fromStdString(missing_columns)+"\n Please select another catalog file.",
           QMessageBox::Ok);
       }
       return false;
@@ -245,7 +256,7 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
     config_manager.registerConfiguration<ComputePhotometricCorrectionsConfig>();
     config_manager.closeRegistration();
     config_manager.initialize(config_map);
-    
+
     auto& catalog = config_manager.getConfiguration<Configuration::CatalogConfig>().getCatalog();
     auto& model_phot_grid = config_manager.getConfiguration<PhotometryGridConfig>().getPhotometryGrid();
     auto& output_func = config_manager.getConfiguration<ComputePhotometricCorrectionsConfig>().getOutputFunction();

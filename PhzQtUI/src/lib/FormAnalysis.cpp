@@ -920,6 +920,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
 // 5. Run
   void FormAnalysis::setInputCatalogName(std::string name,bool do_test) {
     bool not_found = false;
+    std::string missing_columns="";
     if (do_test) {
       auto column_reader = PhzUITools::CatalogColumnReader(name);
       std::map<std::string, bool> file_columns;
@@ -932,6 +933,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
         file_columns[getSelectedSurveySourceColumn()] = false;
       } else {
         not_found = true;
+        missing_columns += getSelectedSurveySourceColumn();
       }
 
       for (auto& filter : getSelectedFilterMapping()) {
@@ -939,6 +941,10 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
           file_columns[filter.getFluxColumn()] = false;
 
         } else {
+          if (not_found){
+            missing_columns+=", ";
+          }
+          missing_columns += filter.getFluxColumn();
           not_found = true;
         }
 
@@ -946,6 +952,10 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
           file_columns[filter.getErrorColumn()] = false;
 
         } else {
+          if (not_found){
+             missing_columns+=", ";
+          }
+          missing_columns += filter.getErrorColumn();
           not_found = true;
         }
       }
@@ -953,7 +963,8 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
 
     if (not_found) {
       if (QMessageBox::question(this, "Incompatible Data...",
-              "The catalog file you selected has not the columns described into the Catalog and therefore cannot be used. "
+              "The catalog file you selected has not the columns described into the Catalog and therefore cannot be used. \n"
+              "Missing column(s):"+QString::fromStdString(missing_columns)+"\n"
               "Do you want to create a new Catalog mapping for this file?",
               QMessageBox::Cancel|QMessageBox::Ok)==QMessageBox::Ok) {
         navigateToNewCatalog(name);
