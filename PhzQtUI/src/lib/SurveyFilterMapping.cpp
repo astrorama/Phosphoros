@@ -9,6 +9,7 @@ using boost::smatch;
 #include "ElementsKernel/Logging.h"
 #include "FileUtils.h"
 #include <QDir>
+#include <QFileInfo>
 #include <QDirIterator>
 #include <QTextStream>
 #include <QDomDocument>
@@ -91,7 +92,11 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
 std::map<int,SurveyFilterMapping> SurveyFilterMapping::loadCatalogMappings(){
   auto catalog_config_path = QString::fromStdString(FileUtils::getGUIConfigPath())+QDir::separator()+"Catalogs";
 
+  QFileInfo info(catalog_config_path);
 
+   if (!info.exists()){
+       QDir().mkpath(catalog_config_path);
+   }
 
   std::map<int,SurveyFilterMapping> mappings{};
   int id = 0;
