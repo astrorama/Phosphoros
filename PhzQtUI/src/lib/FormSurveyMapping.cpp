@@ -303,6 +303,15 @@ void FormSurveyMapping::on_btn_MapCancel_clicked()
 
 void FormSurveyMapping::on_btn_MapSave_clicked()
 {
+
+  if (ui->cb_SourceId->currentText().trimmed().length()==0){
+            QMessageBox::warning( this,
+                                       "Missing Data...",
+                                       "Please provide the name of the Source ID Column.",
+                                       QMessageBox::Ok );
+                 return;
+          }
+
   auto filters = getMappingFromGrid();
   for (auto&filter : filters){
         if (filter.getFluxColumn().length()==0 || filter.getErrorColumn().length()==0){
