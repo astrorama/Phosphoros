@@ -86,8 +86,7 @@ void FormSurveyMapping::loadMappingPage(){
 
 void FormSurveyMapping::setFilterMappingInEdition(){
 
-    ui->btn_BackHome->setEnabled(false);
-    ui->btn_CatToHome->setEnabled(false);
+  ui->frm_nav->setEnabled(false);
     ui->table_Map->setEnabled(false);
     ui->btn_MapNew->setEnabled(false);
     ui->btn_MapDuplicate->setEnabled(false);
@@ -113,8 +112,8 @@ void FormSurveyMapping::setFilterMappingInView(){
     bool has_mapping_selected = ui->table_Map->selectionModel()->currentIndex().isValid();
 
 
-    ui->btn_BackHome->setEnabled(true);
-    ui->btn_CatToHome->setEnabled(true);
+    ui->frm_nav->setEnabled(true);
+
     ui->btn_MapNew->setEnabled(true);
     ui->btn_MapDuplicate->setEnabled(has_mapping_selected);
     ui->btn_map_delete->setEnabled(has_mapping_selected);
@@ -164,12 +163,17 @@ void FormSurveyMapping::loadColumnFromFile(std::string path){
 
 //  - Slots on this page
 
-void FormSurveyMapping::on_btn_CatToHome_clicked(){
-  navigateToHome();
+void FormSurveyMapping::on_btn_ToAnalysis_clicked(){
+  navigateToComputeRedshift(false);
 }
-
-void FormSurveyMapping::on_btn_BackHome_clicked(){
-  navigateToHome();
+void FormSurveyMapping::on_btn_ToOption_clicked(){
+  navigateToConfig();
+}
+void FormSurveyMapping::on_btn_ToModel_clicked(){
+  navigateToParameter(false);
+}
+void FormSurveyMapping::on_btn_exit_clicked(){
+  quit(true);
 }
 
 void FormSurveyMapping::on_btn_MapNew_clicked()

@@ -48,19 +48,22 @@ signals:
 /**
  * @brief SIGNAL Called when the user want to go back to the home page.
  */
-    void navigateToHome(bool reset);
+
+
+    void navigateToParameter(bool);
+
+    void navigateToCatalog(bool);
+
+    void navigateToComputeRedshift(bool);
+
+    void quit(bool);
 
 private slots:
 
-/**
- * @brief SLOT Navigation to home triggered
- */
-void on_btn_ConfigToHome_clicked();
-
-/**
- * @brief SLOT Navigation to home triggered
- */
-void on_btn_ConfbackHome_clicked();
+void on_btn_ToAnalysis_clicked();
+void on_btn_ToCatalog_clicked();
+void on_btn_ToModel_clicked();
+void on_btn_exit_clicked();
 
 /**
  * @brief SLOT on_btn_editGeneral_clicked: turn the root path section in edition.

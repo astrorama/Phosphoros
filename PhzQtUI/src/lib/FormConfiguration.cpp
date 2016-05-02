@@ -27,6 +27,23 @@ FormConfiguration::~FormConfiguration()
 }
 
 
+void FormConfiguration::on_btn_ToAnalysis_clicked(){
+  navigateToComputeRedshift(do_need_reset);
+  do_need_reset=false;
+}
+void FormConfiguration::on_btn_ToCatalog_clicked(){
+  navigateToCatalog(do_need_reset);
+  do_need_reset=false;
+}
+void FormConfiguration::on_btn_ToModel_clicked(){
+  navigateToParameter(do_need_reset);
+  do_need_reset=false;
+}
+void FormConfiguration::on_btn_exit_clicked(){
+  quit(true);
+}
+
+
 void FormConfiguration::loadOptionPage(DatasetRepo seds_repository,
     DatasetRepo redenig_curves_repository) {
 
@@ -67,19 +84,6 @@ void FormConfiguration::loadOptionPage(DatasetRepo seds_repository,
 
 
 
-
-//  - Slots on this page
-void FormConfiguration::on_btn_ConfigToHome_clicked()
-{
-     navigateToHome(do_need_reset);
-     do_need_reset=false;
-}
-
-void FormConfiguration::on_btn_ConfbackHome_clicked()
-{
-     navigateToHome(do_need_reset);
-     do_need_reset=false;
-}
 
 
 
@@ -342,9 +346,7 @@ void FormConfiguration::startEdition(int i){
         ui->tabWidget->setTabEnabled(j,false);
       }
   }
-
-  ui->btn_ConfbackHome->setEnabled(false);
-  ui->btn_ConfigToHome->setEnabled(false);
+  ui->frm_nav->setEnabled(false);
 }
 
 
@@ -354,8 +356,8 @@ void FormConfiguration::endEdition(){
   ui->tabWidget->setTabEnabled(1,true);
   ui->tabWidget->setTabEnabled(2,true);
   ui->tabWidget->setEnabled(true);
-  ui->btn_ConfbackHome->setEnabled(true);
-  ui->btn_ConfigToHome->setEnabled(true);
+
+  ui->frm_nav->setEnabled(true);
 }
 
 void FormConfiguration::checkDirectories(){

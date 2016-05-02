@@ -573,13 +573,7 @@ std::map < std::string, boost::program_options::variable_value > FormAnalysis::g
 }
 //////////////////////////////////////////////////
 // User interaction
-void FormAnalysis::on_btn_AnalysisToHome_clicked() {
-  navigateToHome();
-}
 
-void FormAnalysis::on_btn_backHome_clicked() {
-  navigateToHome();
-}
 
 //  1. Survey and Model
 void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
@@ -1101,7 +1095,18 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
     }
   }
 
-
+  void FormAnalysis::on_btn_ToModel_clicked(){
+    navigateToParameter(false);
+  }
+  void FormAnalysis::on_btn_ToOption_clicked(){
+    navigateToConfig();
+  }
+  void FormAnalysis::on_btn_ToCatalog_clicked(){
+    navigateToCatalog(false);
+  }
+  void FormAnalysis::on_btn_exit_clicked(){
+    quit(true);
+  }
 
 }
 }

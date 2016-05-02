@@ -28,13 +28,28 @@ MainWindow::MainWindow(QWidget *parent) :
 
   connect( this, SIGNAL(changeMainStackedWidgetIndex(int)), ui->mainStackedWidget, SLOT(setCurrentIndex(int)) );
 
-  connect(ui->widget_ModelSet,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
 
-  connect(ui->widget_Catalog,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
+  connect(ui->widget_ModelSet,SIGNAL(navigateToConfig()),SLOT(navigateToConfig()));
+  connect(ui->widget_ModelSet,SIGNAL(navigateToCatalog(bool)),SLOT(navigateToCatalog(bool)));
+  connect(ui->widget_ModelSet,SIGNAL(navigateToComputeRedshift(bool)),SLOT(navigateToComputeRedshift(bool)));
+  connect(ui->widget_ModelSet,SIGNAL(quit(bool)),SLOT(quit(bool)));
 
-  connect(ui->widget_configuration,SIGNAL(navigateToHome(bool)),SLOT(navigateToHomeWithReset(bool)));
+  connect(ui->widget_Catalog,SIGNAL(navigateToConfig()),SLOT(navigateToConfig()));
+  connect(ui->widget_Catalog,SIGNAL(navigateToParameter(bool)),SLOT(navigateToParameter(bool)));
+  connect(ui->widget_Catalog,SIGNAL(navigateToComputeRedshift(bool)),SLOT(navigateToComputeRedshift(bool)));
+  connect(ui->widget_Catalog,SIGNAL(quit(bool)),SLOT(quit(bool)));
+
+  connect(ui->widget_configuration,SIGNAL(navigateToCatalog(bool)),SLOT(navigateToCatalog(bool)));
+  connect(ui->widget_configuration,SIGNAL(navigateToParameter(bool)),SLOT(navigateToParameter(bool)));
+  connect(ui->widget_configuration,SIGNAL(navigateToComputeRedshift(bool)),SLOT(navigateToComputeRedshift(bool)));
+  connect(ui->widget_configuration,SIGNAL(quit(bool)),SLOT(quit(bool)));
 
   connect(ui->widget_Analysis,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
+  connect(ui->widget_Analysis,SIGNAL(navigateToCatalog(bool)),SLOT(navigateToCatalog(bool)));
+  connect(ui->widget_Analysis,SIGNAL(navigateToParameter(bool)),SLOT(navigateToParameter(bool)));
+  connect(ui->widget_Analysis,SIGNAL(navigateToConfig()),SLOT(navigateToConfig()));
+  connect(ui->widget_Analysis,SIGNAL(quit(bool)),SLOT(quit(bool)));
+
   connect(ui->widget_Analysis,SIGNAL(navigateToNewCatalog(std::string)),SLOT(navigateToNewCatalog(std::string)));
 
 
@@ -85,6 +100,40 @@ MainWindow::~MainWindow()
        m_mapping_loaded=false;
      }
  }
+
+void MainWindow::navigateToParameter(bool reset){
+  if (reset){
+        m_model_loaded=false;
+        m_mapping_loaded=false;
+      }
+  on_btn_HomeToModel_clicked();
+}
+
+void MainWindow::navigateToCatalog(bool reset){
+  if (reset){
+        m_model_loaded=false;
+        m_mapping_loaded=false;
+      }
+  on_btn_HomeToCatalog_clicked();
+}
+
+void MainWindow::navigateToComputeRedshift(bool reset){
+  if (reset){
+        m_model_loaded=false;
+        m_mapping_loaded=false;
+      }
+  on_btn_HomeToAnalysis_clicked();
+}
+
+//Todo confirmation
+
+void MainWindow::quit(bool){
+  this->close();
+}
+
+void MainWindow::navigateToConfig(){
+  on_btn_HomeToOption_clicked();
+}
 
 
  void MainWindow::navigateToNewCatalog(std::string new_name){

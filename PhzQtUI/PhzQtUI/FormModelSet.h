@@ -35,9 +35,25 @@ public:
          DatasetRepo redenig_curves_repository);
 
 signals:
-    void navigateToHome();
+
+void navigateToCatalog(bool);
+
+void navigateToConfig();
+
+void navigateToComputeRedshift(bool);
+
+void quit(bool);
+
 
 private slots:
+
+void on_btn_ToAnalysis_clicked();
+void on_btn_ToOption_clicked();
+void on_btn_ToCatalog_clicked();
+void on_btn_exit_clicked();
+
+
+
     void setSelectionChanged(QModelIndex, QModelIndex);
     void rulesSelectionChanged(QModelIndex, QModelIndex);
 
@@ -53,9 +69,6 @@ private slots:
 
     void on_btn_SetSave_clicked();
 
-    void on_btn_SetToHome_clicked();
-
-    void on_btn_backHome_clicked();
 
     void on_btn_SetNew_clicked();
 

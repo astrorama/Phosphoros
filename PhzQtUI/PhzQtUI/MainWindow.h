@@ -41,8 +41,17 @@ private slots:
 
     void navigateToHome();
 
-
     void navigateToHomeWithReset(bool);
+
+    void navigateToParameter(bool);
+
+    void navigateToCatalog(bool);
+
+    void navigateToComputeRedshift(bool);
+
+    void navigateToConfig();
+
+    void quit(bool);
 
 
 

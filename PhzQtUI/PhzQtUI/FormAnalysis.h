@@ -41,13 +41,26 @@ public:
     void loadAnalysisPage();
 
 signals:
-    void navigateToHome();
+
+void navigateToParameter(bool);
+
+void navigateToConfig();
+
+void navigateToCatalog(bool);
+
+void quit(bool);
+
+
+
     void navigateToNewCatalog(std::string);
 
 private slots:
-    void on_btn_AnalysisToHome_clicked();
 
-    void on_btn_backHome_clicked();
+void on_btn_ToOption_clicked();
+void on_btn_ToCatalog_clicked();
+void on_btn_exit_clicked();
+void on_btn_ToModel_clicked();
+
 
     void on_btn_editCorrections_clicked();
 

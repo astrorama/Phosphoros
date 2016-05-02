@@ -63,8 +63,7 @@ void FormModelSet::loadSetPage(DatasetRepo seds_repository,
 }
 
 void  FormModelSet::setModelInEdition(){
-    ui->btn_SetToHome->setEnabled(false);
-    ui->btn_backHome->setEnabled(false);
+  ui->frm_nav->setEnabled(false);
     ui->btn_SetNew->setEnabled(false);
     ui->btn_SetDuplicate->setEnabled(false);
     ui->btn_SetDelete->setEnabled(false);
@@ -81,8 +80,7 @@ void  FormModelSet::setModelInEdition(){
 
 void  FormModelSet::setModelInView(){
     m_setInsert=false;
-    ui->btn_SetToHome->setEnabled(true);
-    ui->btn_backHome->setEnabled(true);
+    ui->frm_nav->setEnabled(true);
     ui->btn_SetNew->setEnabled(true);
     ui->btn_open_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
     ui->btn_SetDuplicate->setEnabled(ui->tableView_Set->hasSelectedSet());
@@ -100,14 +98,17 @@ void  FormModelSet::setModelInView(){
 
 
 //  - Slots on this page
-void FormModelSet::on_btn_SetToHome_clicked()
-{
-     navigateToHome();
+void FormModelSet::on_btn_ToAnalysis_clicked(){
+  navigateToComputeRedshift(false);
 }
-
-void FormModelSet::on_btn_backHome_clicked()
-{
-     navigateToHome();
+void FormModelSet::on_btn_ToOption_clicked(){
+  navigateToConfig();
+}
+void FormModelSet::on_btn_ToCatalog_clicked(){
+  navigateToCatalog(false);
+}
+void FormModelSet::on_btn_exit_clicked(){
+  quit(true);
 }
 
 

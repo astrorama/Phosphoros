@@ -32,9 +32,24 @@ public:
     void loadMappingPage(std::string new_path);
 
 signals:
-    void navigateToHome();
+
+void navigateToParameter(bool);
+
+void navigateToConfig();
+
+void navigateToComputeRedshift(bool);
+
+void quit(bool);
+
 
 private slots:
+
+void on_btn_ToAnalysis_clicked();
+void on_btn_ToOption_clicked();
+void on_btn_ToModel_clicked();
+void on_btn_exit_clicked();
+
+
     void filterMappingSelectionChanged(QModelIndex, QModelIndex);
 
     void mappingGridDoubleClicked(QModelIndex);
@@ -57,9 +72,6 @@ private slots:
 
     void on_btn_SelectFilters_clicked();
 
-    void on_btn_CatToHome_clicked();
-
-    void on_btn_BackHome_clicked();
 
 
 private:
