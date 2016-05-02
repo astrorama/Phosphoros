@@ -44,7 +44,6 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(ui->widget_configuration,SIGNAL(navigateToComputeRedshift(bool)),SLOT(navigateToComputeRedshift(bool)));
   connect(ui->widget_configuration,SIGNAL(quit(bool)),SLOT(quit(bool)));
 
-  connect(ui->widget_Analysis,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
   connect(ui->widget_Analysis,SIGNAL(navigateToCatalog(bool)),SLOT(navigateToCatalog(bool)));
   connect(ui->widget_Analysis,SIGNAL(navigateToParameter(bool)),SLOT(navigateToParameter(bool)));
   connect(ui->widget_Analysis,SIGNAL(navigateToConfig()),SLOT(navigateToConfig()));
