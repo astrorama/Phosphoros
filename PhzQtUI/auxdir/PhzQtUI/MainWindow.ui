@@ -20,9 +20,6 @@
       <widget class="QWidget" name="page">
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_7"/>
-        </item>
-        <item>
          <widget class="QLabel" name="label">
           <property name="font">
            <font>
@@ -123,7 +120,7 @@
            <widget class="QPushButton" name="btn_HomeToOption">
             <property name="minimumSize">
              <size>
-              <width>300</width>
+              <width>350</width>
               <height>30</height>
              </size>
             </property>
@@ -174,7 +171,7 @@
            <widget class="QPushButton" name="btn_HomeToCatalog">
             <property name="minimumSize">
              <size>
-              <width>300</width>
+              <width>350</width>
               <height>30</height>
              </size>
             </property>
@@ -225,7 +222,7 @@
            <widget class="QPushButton" name="btn_HomeToModel">
             <property name="minimumSize">
              <size>
-              <width>300</width>
+              <width>350</width>
               <height>30</height>
              </size>
             </property>
@@ -276,7 +273,7 @@
            <widget class="QPushButton" name="btn_HomeToAnalysis">
             <property name="minimumSize">
              <size>
-              <width>300</width>
+              <width>350</width>
               <height>30</height>
              </size>
             </property>
