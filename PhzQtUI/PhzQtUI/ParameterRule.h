@@ -36,7 +36,7 @@ public:
    */
   ParameterRule();
 
-  ParameterRule(long long model_number);
+  explicit ParameterRule(long long model_number);
 
   /**
    * @brief Get the name of the ParameterRule

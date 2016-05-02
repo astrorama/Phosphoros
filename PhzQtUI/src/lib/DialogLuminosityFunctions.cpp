@@ -79,7 +79,6 @@ void DialogLuminosityFunctions::on_btn_cancel_clicked(){
 void DialogLuminosityFunctions::on_btn_save_clicked(){
 
   for (size_t group_id=0; group_id<m_groups.size();++group_id){
-     std::string group_name = m_groups[group_id].first;
      for (size_t range_id=0; range_id<m_zs.size()-1;++range_id){
        auto row_id = group_id*(m_zs.size()-1)+range_id;
 

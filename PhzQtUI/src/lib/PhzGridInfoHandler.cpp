@@ -47,7 +47,6 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
 
 
     foreach (const QString &fileName , fileNames) {
-      std::map < std::string, boost::program_options::variable_value > options_map;
 
       auto file_path = root_qdir.absoluteFilePath(fileName);
 

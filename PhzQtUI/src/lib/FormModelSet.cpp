@@ -183,7 +183,7 @@ void FormModelSet::on_btn_SetSave_clicked()
 
    try{
        ui->tableView_Set->getSelectedAxesTuple();
-     } catch (Elements::Exception except){
+     } catch (Elements::Exception& except){
        QMessageBox::warning( this,
                                     "Overlapping Regions...",
                                     except.what(),

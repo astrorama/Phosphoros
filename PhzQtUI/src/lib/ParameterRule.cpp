@@ -263,7 +263,7 @@ long long ParameterRule::getModelNumber(bool recompute) {
           config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getReddeningCurveList().at("").size() *
           config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getEbvList().at("").size() *
           config_manager.getConfiguration<PhzConfiguration::RedshiftConfig>().getZList().at("").size();
-    } catch (Elements::Exception){
+    } catch (Elements::Exception&){
       m_model_number=0;
     }
    }
@@ -308,8 +308,6 @@ const std::string ParameterRule::getEbvRangeString() const {
           "");
 
   return getAxisStringValue(axis);
-  return "";
-
 }
 
 const std::string ParameterRule::getRedshiftRangeString() const {

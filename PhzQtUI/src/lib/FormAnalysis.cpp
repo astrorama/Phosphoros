@@ -91,7 +91,7 @@ try{
   }
 
   ui->cb_CompatibleGrid->addItem("<Enter a new name>");
-} catch (Elements::Exception){
+} catch (Elements::Exception&){
   if (ui->cb_AnalysisModel->currentIndex()>-1){
     ui->cb_AnalysisModel->removeItem(ui->cb_AnalysisModel->currentIndex());
   }
@@ -186,7 +186,6 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
       }
     }
 
-    std::vector<std::string> seds { };
     double z_min = 1000000;
     double z_max = 0;
 
@@ -815,8 +814,6 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
               break;
             }
         }
-
-        std::vector<std::string> seds{};
 
         double z_min=1000000;
         double z_max=0;
