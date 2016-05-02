@@ -28,6 +28,7 @@ SedGroupModel::SedGroupModel(QObject *parent) : QStandardItemModel(parent){
      auto item2 = new QStandardItem();
      auto item3 = new QStandardItem();
      item->setText(QString::fromStdString(item_q_name.datasetName()));
+     item->setEditable(false);
      item2->setText(QString::fromStdString(item_q_name.qualifiedName()));
      item3->setText(QString::number(0));
      item->setDropEnabled(false);
@@ -57,6 +58,7 @@ SedGroupModel::SedGroupModel(QObject *parent) : QStandardItemModel(parent){
          auto item2 = new QStandardItem();
          auto item3 = new QStandardItem();
          item->setText(QString::fromStdString(group));
+         item->setEditable(false);
          item2->setText(QString::fromStdString(group));
          item3->setText(QString::number(1));
          item->setDropEnabled(false);
@@ -80,6 +82,7 @@ SedGroupModel::SedGroupModel(QObject *parent) : QStandardItemModel(parent){
                auto item2 = new QStandardItem();
                auto item3 = new QStandardItem();
                item->setText(QString::fromStdString(group));
+               item->setEditable(false);
                item2->setText(QString::fromStdString(group));
                item->setDropEnabled(false);
                item3->setText(QString::number(1));
@@ -94,6 +97,7 @@ SedGroupModel::SedGroupModel(QObject *parent) : QStandardItemModel(parent){
    auto item2 = new QStandardItem();
    auto item3 = new QStandardItem();
    item->setText(QString::fromStdString(item_q_name.datasetName()));
+   item->setEditable(false);
    item2->setText(QString::fromStdString(item_q_name.qualifiedName()));
    item3->setText(QString::number(0));
    item->setDropEnabled(false);
