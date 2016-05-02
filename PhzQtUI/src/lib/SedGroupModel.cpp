@@ -31,7 +31,7 @@ SedGroupModel::SedGroupModel(QObject *parent) : QStandardItemModel(parent){
      item->setEditable(false);
      item2->setText(QString::fromStdString(item_q_name.qualifiedName()));
      item3->setText(QString::number(0));
-     item->setDropEnabled(false);
+   //  item->setDropEnabled(false);
      this->appendRow({item,item2,item3});
      return;
    }
@@ -61,7 +61,7 @@ SedGroupModel::SedGroupModel(QObject *parent) : QStandardItemModel(parent){
          item->setEditable(false);
          item2->setText(QString::fromStdString(group));
          item3->setText(QString::number(1));
-         item->setDropEnabled(false);
+        // item->setDropEnabled(false);
          this->appendRow({item,item2,item3});
          parent = item;
        }
@@ -84,7 +84,7 @@ SedGroupModel::SedGroupModel(QObject *parent) : QStandardItemModel(parent){
                item->setText(QString::fromStdString(group));
                item->setEditable(false);
                item2->setText(QString::fromStdString(group));
-               item->setDropEnabled(false);
+              // item->setDropEnabled(false);
                item3->setText(QString::number(1));
                parent->appendRow({item,item2,item3});
                parent = item;
@@ -100,7 +100,7 @@ SedGroupModel::SedGroupModel(QObject *parent) : QStandardItemModel(parent){
    item->setEditable(false);
    item2->setText(QString::fromStdString(item_q_name.qualifiedName()));
    item3->setText(QString::number(0));
-   item->setDropEnabled(false);
+   //item->setDropEnabled(false);
    parent->appendRow({item,item2,item3});
 
  }
