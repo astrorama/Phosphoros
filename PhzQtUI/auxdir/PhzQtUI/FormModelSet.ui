@@ -90,6 +90,9 @@
         <property name="toolTip">
          <string>Specify the parameter space for the creation of model grid.</string>
         </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(210, 210, 210)</string>
+        </property>
         <property name="text">
          <string>Parameter Spaces</string>
         </property>

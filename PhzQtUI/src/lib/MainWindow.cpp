@@ -22,9 +22,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
   ui->setupUi(this);
   this->layout()->setSpacing(0);
-  this->layout()->setMargin(0);
-  ui->page_layout->setSpacing(0);
-  ui->page_layout->setMargin(0);
+  this->layout()->setContentsMargins(0,0,0,0);
+  ui->mainStackedWidget->setContentsMargins(0,0,0,0);
+//  ui->page_layout->setSpacing(0);
+//  ui->page_layout->setContentsMargins(0,0,0,0);
+//  this->setStyleSheet("background-color: green");
 
   QPixmap pixmap( ":/logoPhUI.png" );
   ui->image_label->setTopMargin(20);
