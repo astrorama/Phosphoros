@@ -13,6 +13,7 @@ namespace PhzQtUI {
  * dropdown filled with the provided list of columns
  */
 class FilterMappingItemDelegate: public QItemDelegate {
+  Q_OBJECT
 public:
   /**
    * @brief constructor
@@ -40,6 +41,9 @@ public:
    */
   virtual void setModelData(QWidget * editor, QAbstractItemModel * model,
       const QModelIndex & index) const override;
+
+  signals:
+  void editionStarting() const;
 
 private:
   std::set<std::string> m_columns;

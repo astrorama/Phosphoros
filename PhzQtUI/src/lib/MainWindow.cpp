@@ -21,6 +21,10 @@ MainWindow::MainWindow(QWidget *parent) :
   setWindowTitle(title);
 
   ui->setupUi(this);
+  this->layout()->setSpacing(0);
+  this->layout()->setMargin(0);
+  ui->page_layout->setSpacing(0);
+  ui->page_layout->setMargin(0);
 
   QPixmap pixmap( ":/logoPhUI.png" );
   ui->image_label->setTopMargin(20);

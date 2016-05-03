@@ -126,9 +126,17 @@ void FormSurveyMapping::setFilterMappingInView(){
     ui->txt_nonDetection->setEnabled(false);
 
 
-    ui->table_Filter->setEnabled(false);
+   // ui->table_Filter->setEnabled(false);
     m_mappingInsert=false;
 }
+
+
+void FormSurveyMapping::on_gridEditionStart(){
+  if (ui->frm_nav->isEnabled()){
+    setFilterMappingInEdition();
+  }
+}
+
 
 
 void FormSurveyMapping::fillCbColumns(std::string current_value){
@@ -374,7 +382,13 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
     ui->tb_df->setText(QString::fromStdString(m_default_survey));
     ui->lbl_catalog_name->setText(QString::fromStdString(model->getName(new_index.row())));
 
-    ui->table_Filter->setItemDelegate(new FilterMappingItemDelegate(m_column_from_file));
+    auto delegate_item = new FilterMappingItemDelegate(m_column_from_file);
+    ui->table_Filter->setItemDelegate(delegate_item);
+    connect(
+           delegate_item,
+           SIGNAL(editionStarting()),
+           SLOT(on_gridEditionStart())
+          );
 
   } else {
     m_default_survey="";
@@ -384,6 +398,8 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
     ui->tb_df->setText("");
     ui->lbl_catalog_name->setText("Selected");
     ui->table_Filter->setItemDelegate(new FilterMappingItemDelegate({}));
+
+
   }
 
   fillCbColumns(cb_text);
@@ -397,6 +413,7 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
 
 
   setFilterMappingInView();
+
 }
 
 

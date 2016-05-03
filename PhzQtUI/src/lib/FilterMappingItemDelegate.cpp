@@ -50,6 +50,7 @@ QWidget * FilterMappingItemDelegate::createEditor(QWidget * parent , const QStyl
     return 0;
   }
 
+  editionStarting();
   auto combo = new QComboBox(parent);
   combo->setEditable(true);
 

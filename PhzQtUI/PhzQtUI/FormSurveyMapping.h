@@ -44,6 +44,8 @@ void quit(bool);
 
 private slots:
 
+void on_gridEditionStart();
+
 void on_btn_ToAnalysis_clicked();
 void on_btn_ToOption_clicked();
 void on_btn_ToModel_clicked();

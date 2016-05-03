@@ -39,23 +39,47 @@ FormAnalysis::~FormAnalysis() {
 ///////////////////////////////////////////////////
 //  Initial data load
 void FormAnalysis::loadAnalysisPage() {
-  m_analysis_survey_list = SurveyFilterMapping::loadCatalogMappings();
+  auto saved_catalog = PreferencesUtils::getUserPreference("_compute_redshifts_",
+      "catalog");
+  auto saved_parameter_space = PreferencesUtils::getUserPreference("_compute_redshifts_",
+      "parameter_space");
 
+
+  m_analysis_survey_list = SurveyFilterMapping::loadCatalogMappings();
     ui->cb_AnalysisSurvey->clear();
     for (auto& survey : m_analysis_survey_list) {
       ui->cb_AnalysisSurvey->addItem(
           QString::fromStdString(survey.second.getName()));
     }
 
-    m_analysis_model_list = ModelSet::loadModelSetsFromFolder(
-        FileUtils::getModelRootPath(false));
+
+
+    m_analysis_model_list = ModelSet::loadModelSetsFromFolder( FileUtils::getModelRootPath(false));
     ui->cb_AnalysisModel->clear();
     for (auto& model : m_analysis_model_list) {
-      ui->cb_AnalysisModel->addItem(
-          QString::fromStdString(model.second.getName()));
+      ui->cb_AnalysisModel->addItem(  QString::fromStdString(model.second.getName()));
     }
 
+
+
+    for (int i = 0; i < ui->cb_AnalysisSurvey->count(); i++) {
+        if (ui->cb_AnalysisSurvey->itemText(i).toStdString() == saved_catalog) {
+          ui->cb_AnalysisSurvey->setCurrentIndex(i);
+          break;
+        }
+      }
+
+
+    for (int i = 0; i < ui->cb_AnalysisModel->count(); i++) {
+        if (ui->cb_AnalysisModel->itemText(i).toStdString() == saved_parameter_space) {
+          ui->cb_AnalysisModel->setCurrentIndex(i);
+          break;
+        }
+      }
+
+
     updateGridSelection();
+
 }
 ///////////////////////////////////////////////////
 //  Handle controls enability
@@ -579,6 +603,10 @@ std::map < std::string, boost::program_options::variable_value > FormAnalysis::g
 void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     const QString &selectedName) {
 
+
+  PreferencesUtils::setUserPreference("_compute_redshifts_",
+            "catalog",selectedName.toStdString());
+
   SurveyFilterMapping selected_survey;
 
   for (auto&survey : m_analysis_survey_list) {
@@ -658,7 +686,9 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   }
 }
 
-  void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(const QString &) {
+  void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(const QString &model_name) {
+    PreferencesUtils::setUserPreference("_compute_redshifts_",
+               "parameter_space",model_name.toStdString());
 
     updateGridSelection();
     loadLuminosityPriors();
