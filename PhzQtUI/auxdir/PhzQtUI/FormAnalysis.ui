@@ -167,18 +167,6 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_9">
        <item>
-        <widget class="QLabel" name="label_18">
-         <property name="font">
-          <font>
-           <pointsize>14</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>1. Catalog, Model Grid Specification and Filter Selection :</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QFrame" name="frame">
          <property name="minimumSize">
           <size>
@@ -216,7 +204,7 @@
               <item>
                <widget class="QLabel" name="label_20">
                 <property name="text">
-                 <string>Parameter Space Specification :</string>
+                 <string>Parameter Space :</string>
                 </property>
                </widget>
               </item>
@@ -326,12 +314,12 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>417</width>
-            <height>162</height>
+            <width>1003</width>
+            <height>440</height>
            </rect>
           </property>
           <attribute name="label">
-           <string>2. Model Grid Generation / Selection :</string>
+           <string>1. Model Grid Generation / Selection</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_10">
            <item>
@@ -484,12 +472,12 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>543</width>
-            <height>160</height>
+            <width>1003</width>
+            <height>440</height>
            </rect>
           </property>
           <attribute name="label">
-           <string>3. Photometric Zero-Point Corrections :</string>
+           <string>2. Photometric Zero-Point Corrections</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_11">
            <item>
@@ -635,12 +623,12 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>667</width>
-            <height>179</height>
+            <width>1003</width>
+            <height>440</height>
            </rect>
           </property>
           <attribute name="label">
-           <string>4. Algorithm Options :</string>
+           <string>3. Algorithm Options</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_6">
            <item>
@@ -802,11 +790,11 @@
             <x>0</x>
             <y>0</y>
             <width>1003</width>
-            <height>410</height>
+            <height>440</height>
            </rect>
           </property>
           <attribute name="label">
-           <string>5. Input /Output Files :</string>
+           <string>4. Input /Output Files</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_8">
            <item>
