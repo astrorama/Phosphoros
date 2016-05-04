@@ -172,7 +172,7 @@ void DialogModelSet::on_buttonBox_accepted()
   if (sed_selection.isEmpty() ){
     QMessageBox::warning( this,
                           "Missing Data...",
-                          "Please provide SED(s) and Reddening Curve(s) selection.",
+                          "Please provide SED(s) selection.",
                           QMessageBox::Ok );
     return;
   }
@@ -180,7 +180,7 @@ void DialogModelSet::on_buttonBox_accepted()
   if (red_curve_selection.isEmpty()){
     QMessageBox::warning( this,
                           "Missing Data...",
-                          "Please provide SED(s) and Reddening Curve(s) selection.",
+                          "Please provide Reddening Curve(s) selection.",
                           QMessageBox::Ok );
     return;
   }
