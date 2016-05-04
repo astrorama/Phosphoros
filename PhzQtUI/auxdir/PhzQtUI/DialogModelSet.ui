@@ -238,6 +238,16 @@
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_5">
            <item>
+            <widget class="QLabel" name="label_18">
+             <property name="text">
+              <string>Values (coma separated) :</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txt_ebv_values"/>
+           </item>
+           <item>
             <layout class="QHBoxLayout" name="horizontalLayout_4">
              <item>
               <widget class="QLabel" name="label_17">
@@ -306,16 +316,6 @@
              </widget>
             </widget>
            </item>
-           <item>
-            <widget class="QLabel" name="label_18">
-             <property name="text">
-              <string>Values (coma separated) :</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="txt_ebv_values"/>
-           </item>
           </layout>
          </widget>
          <widget class="QWidget" name="tab_2">
@@ -323,6 +323,16 @@
            <string>Redshift</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout">
+           <item>
+            <widget class="QLabel" name="label_19">
+             <property name="text">
+              <string>Values (coma separated) :</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txt_z_values"/>
+           </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <item>
@@ -391,16 +401,6 @@
               </layout>
              </widget>
             </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_19">
-             <property name="text">
-              <string>Values (coma separated) :</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="txt_z_values"/>
            </item>
           </layout>
          </widget>
