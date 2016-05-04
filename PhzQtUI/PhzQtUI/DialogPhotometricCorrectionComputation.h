@@ -129,6 +129,7 @@ private:
     double m_non_detection;
     bool m_computing = false;
     void disablePage();
+    void enablePage();
     std::string runFunction();
     void setRunEnability();
     bool loadTestCatalog(QString file_name, bool with_warning);

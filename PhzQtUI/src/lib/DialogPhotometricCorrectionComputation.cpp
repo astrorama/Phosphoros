@@ -234,6 +234,20 @@ void DialogPhotometricCorrectionComputation::disablePage(){
      ui->bt_Run->setEnabled(false);
      ui->bt_Cancel->setEnabled(true);
 }
+
+void DialogPhotometricCorrectionComputation::enablePage(){
+     ui->btn_TrainingCatalog->setEnabled(true);
+     ui->cb_SpectroColumn->setEnabled(true);
+     ui->txt_Iteration->setEnabled(true);
+     ui->txt_Tolerence->setEnabled(true);
+     ui->cb_SelectionMethod->setEnabled(true);
+     ui->txt_FileName->setEnabled(true);
+     ui->bt_Run->setEnabled(true);
+     ui->bt_Cancel->setEnabled(true);
+     ui->txt_current_iteration->setText("");
+}
+
+
 std::string DialogPhotometricCorrectionComputation::runFunction(){
   try {
 
@@ -309,7 +323,7 @@ void DialogPhotometricCorrectionComputation::runFinished() {
   } else {
     QMessageBox::warning(this, "Error in the computation...",
         QString::fromStdString(message), QMessageBox::Close);
-    this->reject();
+    enablePage();
   }
 }
 
