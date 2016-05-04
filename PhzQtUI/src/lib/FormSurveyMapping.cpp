@@ -377,6 +377,8 @@ void FormSurveyMapping::on_btn_MapSave_clicked()
      m_filterInsert=false;
 
      setFilterMappingInView();
+     filterMappingSelectionChanged(ui->table_Map->selectionModel()->currentIndex(),ui->table_Map->selectionModel()->currentIndex());
+
 }
 
 void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QModelIndex) {
