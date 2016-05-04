@@ -14,6 +14,7 @@
 #include "PhzQtUI/DialogCatalogName.h"
 #include "FileUtils.h"
 
+#include "PreferencesUtils.h"
 
 #include "PhzQtUI/FilterMappingItemDelegate.h"
 
@@ -33,6 +34,20 @@ FormSurveyMapping::FormSurveyMapping(QWidget *parent) :
 FormSurveyMapping::~FormSurveyMapping()
 {
 }
+
+void FormSurveyMapping::updateSelection(){
+  auto saved_catalog = PreferencesUtils::getUserPreference("_global_selection_",
+      "catalog");
+
+  for (int i=0;i<ui->table_Map->model()->rowCount();++i){
+    auto index = ui->table_Map->model()->index(i,0);
+    if (ui->table_Map->model()->data(index).toString().toStdString() == saved_catalog){
+      ui->table_Map->selectRow(i);
+      break;
+    }
+  }
+}
+
 
 
 void FormSurveyMapping::loadMappingPage(std::string new_path){
@@ -75,6 +90,8 @@ void FormSurveyMapping::loadMappingPage(std::string new_path){
        ui->tb_df->setText(QString::fromStdString(m_default_survey));
        QFileInfo info(QString::fromStdString(new_path));
      }
+
+     updateSelection();
 
 
 }
@@ -355,6 +372,8 @@ void FormSurveyMapping::on_btn_MapSave_clicked()
      model->saveSurvey(row,old_name);
 
 
+     PreferencesUtils::setUserPreference("_global_selection_",
+                "catalog",model->getName(row));
      m_filterInsert=false;
 
      setFilterMappingInView();
@@ -368,7 +387,13 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
   std::string cb_text ="";
   FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
   if (new_index.isValid()) {
+
+
     SurveyModel* model = static_cast<SurveyModel*>(ui->table_Map->model());
+
+
+    PreferencesUtils::setUserPreference("_global_selection_",
+               "catalog",model->getName(new_index.row()));
 
     m_default_survey=model->getDefaultCatalog(new_index.row());
 

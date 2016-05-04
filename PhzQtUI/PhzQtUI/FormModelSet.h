@@ -34,6 +34,9 @@ public:
      void loadSetPage(DatasetRepo seds_repository,
          DatasetRepo redenig_curves_repository);
 
+
+     void updateSelection();
+
 signals:
 
 void navigateToCatalog(bool);

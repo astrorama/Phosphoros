@@ -7,6 +7,7 @@
 #include "FileUtils.h"
 
 #include "ElementsKernel/Exception.h"
+#include "PreferencesUtils.h"
 
 
 namespace po = boost::program_options;
@@ -24,6 +25,20 @@ FormModelSet::FormModelSet(QWidget *parent) :
 
 FormModelSet::~FormModelSet()
 {
+}
+
+
+void FormModelSet::updateSelection(){
+  auto saved_catalog = PreferencesUtils::getUserPreference("_global_selection_",
+        "parameter_space");
+
+    for (int i=0;i<ui->tableView_Set->model()->rowCount();++i){
+      auto index = ui->tableView_Set->model()->index(i,0);
+      if (ui->tableView_Set->model()->data(index).toString().toStdString() == saved_catalog){
+        ui->tableView_Set->selectRow(i);
+        break;
+      }
+    }
 }
 
 
@@ -58,6 +73,8 @@ void FormModelSet::loadSetPage(DatasetRepo seds_repository,
     connect(ui->tableView_ParameterRule,
                     SIGNAL(doubleClicked(QModelIndex)),
                     SLOT(parameterGridDoubleClicked(QModelIndex)));
+
+    updateSelection();
 
     setModelInView();
 }
@@ -196,6 +213,9 @@ void FormModelSet::on_btn_SetSave_clicked()
 
    ui->tableView_Set->updateModelNumberForSelected();
    ui->tableView_Set->saveSelectedSet(old_name);
+
+   PreferencesUtils::setUserPreference("_global_selection_",
+                         "parameter_space",ui->tableView_Set->getSelectedName().toStdString());
    setModelInView();
 
 }
@@ -205,6 +225,9 @@ void FormModelSet::setSelectionChanged(QModelIndex new_index, QModelIndex)
     if (new_index.isValid()){
         ModelSetModel* model=ui->tableView_Set->getModel();
         ui->txt_SetName->setText(model->getName(new_index.row()));
+
+        PreferencesUtils::setUserPreference("_global_selection_",
+                      "parameter_space",model->getName(new_index.row()).toStdString());
 
         ui->tableView_ParameterRule->loadParameterRules(
             model->getParameterRules(new_index.row()),

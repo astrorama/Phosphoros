@@ -31,6 +31,8 @@ public:
     void loadMappingPage();
     void loadMappingPage(std::string new_path);
 
+    void updateSelection();
+
 signals:
 
 void navigateToParameter(bool);

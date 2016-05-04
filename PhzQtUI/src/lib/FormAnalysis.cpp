@@ -39,9 +39,9 @@ FormAnalysis::~FormAnalysis() {
 ///////////////////////////////////////////////////
 //  Initial data load
 void FormAnalysis::loadAnalysisPage() {
-  auto saved_catalog = PreferencesUtils::getUserPreference("_compute_redshifts_",
+  auto saved_catalog = PreferencesUtils::getUserPreference("_global_selection_",
       "catalog");
-  auto saved_parameter_space = PreferencesUtils::getUserPreference("_compute_redshifts_",
+  auto saved_parameter_space = PreferencesUtils::getUserPreference("_global_selection_",
       "parameter_space");
 
 
@@ -604,7 +604,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     const QString &selectedName) {
 
 
-  PreferencesUtils::setUserPreference("_compute_redshifts_",
+  PreferencesUtils::setUserPreference("_global_selection_",
             "catalog",selectedName.toStdString());
 
   SurveyFilterMapping selected_survey;
@@ -687,7 +687,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
 }
 
   void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(const QString &model_name) {
-    PreferencesUtils::setUserPreference("_compute_redshifts_",
+    PreferencesUtils::setUserPreference("_global_selection_",
                "parameter_space",model_name.toStdString());
 
     updateGridSelection();

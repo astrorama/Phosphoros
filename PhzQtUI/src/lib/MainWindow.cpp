@@ -165,6 +165,8 @@ void MainWindow::on_btn_HomeToModel_clicked(){
       ui->widget_ModelSet->loadSetPage(m_seds_repository, m_redenig_curves_repository);
       m_model_loaded=true;
     }
+
+    ui->widget_ModelSet->updateSelection();
 }
 
 
@@ -175,6 +177,8 @@ void MainWindow::on_btn_HomeToCatalog_clicked(){
     ui->widget_Catalog->loadMappingPage("");
     m_mapping_loaded=true;
   }
+
+  ui->widget_Catalog->updateSelection();
 }
 
 
