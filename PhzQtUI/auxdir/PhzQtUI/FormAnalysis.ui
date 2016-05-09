@@ -164,8 +164,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1037</width>
-        <height>813</height>
+        <width>1039</width>
+        <height>814</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -317,8 +317,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>447</width>
-            <height>160</height>
+            <width>1021</width>
+            <height>458</height>
            </rect>
           </property>
           <attribute name="label">
@@ -333,7 +333,7 @@
               </font>
              </property>
              <property name="text">
-              <string>IGM absorption type :</string>
+              <string>IGM Absorption Type :</string>
              </property>
             </widget>
            </item>
@@ -475,8 +475,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>553</width>
-            <height>160</height>
+            <width>1021</width>
+            <height>458</height>
            </rect>
           </property>
           <attribute name="label">
@@ -626,8 +626,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>690</width>
-            <height>177</height>
+            <width>1021</width>
+            <height>458</height>
            </rect>
           </property>
           <attribute name="label">
@@ -792,8 +792,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1019</width>
-            <height>465</height>
+            <width>1021</width>
+            <height>458</height>
            </rect>
           </property>
           <attribute name="label">
@@ -909,7 +909,7 @@
                   </font>
                  </property>
                  <property name="title">
-                  <string>Generate Output Catalog with format :</string>
+                  <string>Generate Output Catalog with Format :</string>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
@@ -940,7 +940,7 @@
                   </font>
                  </property>
                  <property name="title">
-                  <string>Generate Output PDF file </string>
+                  <string>Generate Output PDF File </string>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
@@ -959,7 +959,7 @@
                   </font>
                  </property>
                  <property name="title">
-                  <string>Generate Likelihood files</string>
+                  <string>Generate Likelihood Files</string>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
@@ -977,7 +977,7 @@
                   </font>
                  </property>
                  <property name="title">
-                  <string>Generate Posterior files </string>
+                  <string>Generate Posterior Files </string>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
