@@ -38,7 +38,7 @@ void DataSetTreeModel::load() {
 
 
   size_t max_depth=0;
-  std::vector<std::set < std::string >> group_sets {{} };
+  std::vector<std::set < std::string >> group_sets {};
   auto separator = QString(QDir::separator()).toStdString();
 
   for (auto& name : unordered) {
@@ -48,7 +48,7 @@ void DataSetTreeModel::load() {
 
        if (depth>max_depth){
          for (size_t curr_depth= max_depth+1; curr_depth<=depth;++curr_depth){
-           group_sets.push_back({});
+           group_sets.push_back(std::set < std::string >{});
          }
 
          max_depth=depth;

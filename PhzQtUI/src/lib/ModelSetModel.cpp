@@ -101,7 +101,7 @@ int ModelSetModel::newSet(int duplicate_from_row ){
 
 
     ModelSet set(m_root_path);
-    set.setParameterRules({});
+    set.setParameterRules(std::map<int,ParameterRule>{});
 
 
     if (duplicate_from_row>=0){

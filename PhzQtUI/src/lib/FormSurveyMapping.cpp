@@ -424,7 +424,7 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
     ui->txt_nonDetection->setValue(-99.);
     ui->tb_df->setText("");
     ui->lbl_catalog_name->setText("Selected");
-    ui->table_Filter->setItemDelegate(new FilterMappingItemDelegate({}));
+    ui->table_Filter->setItemDelegate(new FilterMappingItemDelegate(std::set<std::string>{}));
 
 
   }
