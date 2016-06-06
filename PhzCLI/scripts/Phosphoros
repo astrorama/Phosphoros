@@ -37,6 +37,8 @@ action_list = [
                      'Shows plots comparing the PHZ result with SPECZ'),
     PhosphorosAction(['plot_posterior', 'PP'], 'PhosphorosPlotPosterior',
                      'Plots views of a multi-dimensional posterior'),
+    PhosphorosAction(['plot_photometry_comparison', 'PPC'], 'PhosphorosPlotPhotometryComparison',
+                     'Plots the best fitted model and observed photometries'),
     PhosphorosAction(['order_seds', 'OS'], 'PhosphorosOrderSeds',
                      'Orders SEDs and put them into the <order.txt> file'),
     PhosphorosAction(['create_flat_grid_prior', 'CFGP'], 'CreateFlatGridPrior',
