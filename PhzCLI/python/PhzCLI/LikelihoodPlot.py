@@ -20,14 +20,8 @@ class Region:
 def getRegions(file):
     hdulist = fits.open(file)
     regions = []
-    norm_log_list = []
     for i in range((len(hdulist)-1)/5):
-        norm_log_list.append(hdulist[5*i+1].header['NORM_LOG'])
-        regions.append(Region(hdulist[5*i+1].header['EXTNAME'], hdulist[5*i+1].data, hdulist[5*i+5].data, hdulist[5*i+4].data, hdulist[5*i+3].data, hdulist[5*i+2].data))
-    max_norm_log = max(norm_log_list)
-    for norm_log, r in zip(norm_log_list, regions):
-        factor = np.exp(norm_log - max_norm_log)
-        r.data = r.data * factor
+        regions.append(Region(hdulist[5*i+1].header['EXTNAME'], np.exp(hdulist[5*i+1].data), hdulist[5*i+5].data, hdulist[5*i+4].data, hdulist[5*i+3].data, hdulist[5*i+2].data))
     return regions
 
 
