@@ -37,25 +37,18 @@ void DataSetTreeModel::load() {
   auto& unordered = m_repository->getContent();
 
 
-  size_t max_depth=0;
   std::vector<std::set < std::string >> group_sets {};
-  auto separator = QString(QDir::separator()).toStdString();
 
   for (auto& name : unordered) {
      std::string group_name = DataSetTreeModel::getGroupName(name);
-     if (group_name.length()>0){
-       size_t depth = std::count(group_name.begin(), group_name.end(),separator[0]);
-
-       if (depth>max_depth){
-         for (size_t curr_depth= max_depth+1; curr_depth<=depth;++curr_depth){
-           group_sets.push_back(std::set < std::string >{});
-         }
-
-         max_depth=depth;
-       }
-
-       group_sets[depth].insert(group_name);
+     if (group_name.empty()) {
+       continue;
      }
+     size_t depth = std::count(group_name.begin(), group_name.end(), '/');
+     for (auto i = group_sets.size(); i <= depth; ++i) {
+       group_sets.emplace_back();
+     }
+     group_sets[depth].insert(group_name);
   }
 
   // create the groups
