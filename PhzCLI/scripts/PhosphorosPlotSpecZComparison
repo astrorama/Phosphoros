@@ -31,7 +31,14 @@ def read_table(filename):
     try :
         data = Table.read(filename, format='fits')
     except:
-        data = Table.read(filename, format='ascii')
+        with open(filename) as f:
+            all_lines = f.readlines()
+        header_lines = [l for l in all_lines if l.strip().startswith('#')]
+        data_lines = [l for l in all_lines if l.strip() != '' and not l.strip().startswith('#')]
+        column_no = len(data_lines[0].strip().split())
+        header_lines = [l for l in header_lines if len(l.replace('#','').strip().split()) == column_no]
+        text = ''.join(header_lines + data_lines)
+        data = Table.read(text, format='ascii')
     return data
              
           
@@ -40,7 +47,7 @@ def read_table(filename):
 #
 
 
-def create_table(files, ids, specz, phz):
+def create_table(files, ids, specz, phz, pdf):
     tables = [read_table(f) for f in files]
     for i, t in enumerate(tables):
         if not ids[i] in t.colnames:
@@ -50,12 +57,16 @@ def create_table(files, ids, specz, phz):
     values_map = {}
     all_cols = {}
     orig_ids = []
+    found_pdf = False
     for i in id_inter:
-        values_map[i] = [None, None]
+        values_map[i] = [None, None, None]
         all_cols[i] = []
     for i,t in enumerate(tables):
         has_specz = specz in t.colnames
         has_phz = phz in t.colnames
+        has_pdf = pdf in t.colnames
+        if has_pdf:
+            found_pdf = True
         orig_ids.append([])
         for r in t:
             r_id = r[ids[i]]
@@ -67,15 +78,26 @@ def create_table(files, ids, specz, phz):
                 values_map[r_id][0] = r[specz]
             if has_phz:
                 values_map[r_id][1] = r[phz]
+            if has_pdf:
+                values_map[r_id][2] = r[pdf]
     i = []
     s = []
     p = []
+    pd = []
     for k,v in values_map.iteritems():
         i.append(k)
         s.append(v[0])
         p.append(v[1])
-    return Table([i,s,p], names=('ID',specz,phz)), all_cols, orig_ids
+        if found_pdf:
+            pd.append(v[2])
+    if found_pdf:
+        return Table([i,s,p,pd], names=('ID',specz,phz,pdf)), all_cols, orig_ids
+    else:
+        return Table([i,s,p], names=('ID',specz,phz)), all_cols, orig_ids
     
+#
+#-------------------------------------------------------------------------------
+#
     
 def compute_stats(array, col_number):
     """
@@ -123,19 +145,61 @@ def compute_stats(array, col_number):
 #-------------------------------------------------------------------------------
 #
 
+def read_pdfs(table, pdf_name, files):
+    print 'Loading 1D PDFs. Please wait...'
+    
+    if pdf_name in table.colnames:
+        zs = []
+        for filename in files:
+            try:
+                hdus = fits.open(filename)
+                comment = str(hdus[1].header['COMMENT']).replace('\n','')
+                if 'Z-BINS :' in comment:
+                    comment = comment[comment.index('Z-BINS :')+8:]
+                    comment = comment[comment.index('{')+1:comment.index('}')]
+                    zs = [float(z) for z in comment.split(',')]
+                    break
+            except:
+                pass
+            with open(filename) as f:
+                header_lines = [l for l in f.readlines() if l.strip().startswith('#')]
+            z_bins = [l for l in header_lines if l.replace('#','').strip().startswith('Z-BINS :')]
+            if len(z_bins) > 0:
+                zs = [float(z) for z in z_bins[0][z_bins[0].index(':')+1:].strip()[1:-1].split(',')]
+                break
+        pdfs = {}
+        for r in table:
+            data = r[pdf_name]
+            if isinstance(data, str):
+                data = [float(v) for v in data.split(',')]
+            pdfs[r['ID']] = data
+        return zs, pdfs
+
+    if os.path.isfile(pdf_name):
+        hdus = fits.open(pdf_name)
+        pdfs = {}
+        for hdu in hdus[1:]:
+            zs = hdu.data[hdu.columns[0].name]
+            pdfs[int(hdu.header['EXTNAME'])] = hdu.data[hdu.columns[1].name]
+        return zs, pdfs
+
+    return [], []
+
+#
+#-------------------------------------------------------------------------------
+#
+
 class Selector(object):
     
-    def __init__(self, fig_list, table, all_cols, pdf_file):
+    def __init__(self, fig_list, table, all_cols, zs, pdfs):
         for fig in fig_list:
             if hasattr(fig, 'canvas'):
                 fig.canvas.mpl_connect('pick_event', self.onpick)
         self.fig_list = fig_list
         self.table = table
         self.all_cols = all_cols
-        self.have_pdf = os.path.isfile(pdf_file)
-        if self.have_pdf:
-            print 'Loading 1D PDFs. Please wait...'
-            self.hdus = fits.open(pdf_file)
+        self.zs = zs
+        self.pdfs = pdfs
     
     def onpick(self, event):
         if event.mouseevent.button != 1:
@@ -150,12 +214,10 @@ class Selector(object):
         for r in self.all_cols[id]:
             for c in r.colnames:
                 print '   ',c,'=',r[c]
-        if self.have_pdf:
-            hdu = (x for x in self.hdus if 'EXTNAME' in x.header and  x.header['EXTNAME']==str(id)).next()
+        print 'HAHAHAHHAHA', zs
+        if len(self.zs) > 0:
             f, ax = plt.subplots()
-            xs = hdu.data[hdu.columns[0].name]
-            ys = hdu.data[hdu.columns[1].name]
-            ax.plot(xs, ys)
+            ax.plot(self.zs, self.pdfs[id])
             ax.set_title('1D PDF for source with ID '+str(id))
             y_lim = ax.get_ylim()
             y_size = y_lim[1]-y_lim[0]
@@ -342,7 +404,7 @@ def main():
     parser.add_argument("-d", "--display", action="store_false", default=True,
                         help="Disables the plot window")
     parser.add_argument("-pdf", "--pdf", type=str, default='',
-                        help="The FITS file with the 1D PDF")
+                        help="The FITS file or the table column containings the 1D PDF")
     parser.add_argument("-samp", "--samp", action="store_true", default=False,
                         help="Enables communication with other SAMP applications")
 
@@ -364,7 +426,10 @@ if __name__ == '__main__':
         print 'Wrong number of ID column names (must much the number of catalogs or 1)'
     
     # Read input files
-    table, all_cols, orig_ids = create_table(args.files, ids, args.specz, args.phz)
+    table, all_cols, orig_ids = create_table(args.files, ids, args.specz, args.phz, args.pdf)
+
+    # Read PDFs if available
+    zs, pdfs = read_pdfs(table, args.pdf, args.files)
 
     col_number = 2
     label = "PhotZ"
@@ -378,6 +443,6 @@ if __name__ == '__main__':
             samp = None
             if args.samp:
                 samp = SampUpdater(args.files, ids, table, orig_ids, (fig1, fig2))
-            selector = Selector((fig1, fig2, samp), table, all_cols, args.pdf)
+            selector = Selector((fig1, fig2, samp), table, all_cols, zs, pdfs)
             plt.show()
     
