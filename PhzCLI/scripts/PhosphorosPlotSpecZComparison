@@ -214,7 +214,6 @@ class Selector(object):
         for r in self.all_cols[id]:
             for c in r.colnames:
                 print '   ',c,'=',r[c]
-        print 'HAHAHAHHAHA', zs
         if len(self.zs) > 0:
             f, ax = plt.subplots()
             ax.plot(self.zs, self.pdfs[id])
@@ -403,7 +402,7 @@ def main():
                         help="The name of the photometric redshift column (default: Z)")
     parser.add_argument("-d", "--display", action="store_false", default=True,
                         help="Disables the plot window")
-    parser.add_argument("-pdf", "--pdf", type=str, default='',
+    parser.add_argument("-pdf", "--pdf", type=str, default='1D-PDF',
                         help="The FITS file or the table column containings the 1D PDF")
     parser.add_argument("-samp", "--samp", action="store_true", default=False,
                         help="Enables communication with other SAMP applications")
