@@ -31,8 +31,7 @@
 #include "Configuration/ConfigManager.h"
 #include "Configuration/Utils.h"
 #include "GridContainer/serialize.h"
-#include "PhzDataModel/PriorGrid.h"
-#include "PhzDataModel/LikelihoodGrid.h"
+#include "PhzDataModel/DoubleGrid.h"
 #include "PhzConfiguration/PhotometryGridConfig.h"
 #include "PhzCLI/CreateFlatGridPriorConfig.h"
 
@@ -69,7 +68,7 @@ public:
     auto& regions = config_manager.getConfiguration<PhzConfiguration::PhotometryGridConfig>()
                                                     .getPhotometryGridInfo().region_axes_map;
     for (auto& pair : regions) {
-      PhzDataModel::PriorGrid grid {pair.second};
+      PhzDataModel::DoubleGrid grid {pair.second};
       for (auto& cell : grid) {
         cell = 1;
       }
