@@ -44,6 +44,8 @@ void FormAnalysis::loadAnalysisPage() {
   auto saved_parameter_space = PreferencesUtils::getUserPreference("_global_selection_",
       "parameter_space");
 
+  ui->cb_z_col->clear();
+  ui->cb_z_col->addItem("");
 
   m_analysis_survey_list = SurveyFilterMapping::loadCatalogMappings();
     ui->cb_AnalysisSurvey->clear();
@@ -120,6 +122,16 @@ try{
     ui->cb_AnalysisModel->removeItem(ui->cb_AnalysisModel->currentIndex());
   }
   }
+}
+
+void FormAnalysis::fillCbColumns(std::set<std::string> columns){
+   ui->cb_z_col->clear();
+   ui->cb_z_col->addItem("");
+   for(auto item : columns){
+     ui->cb_z_col->addItem(QString::fromStdString(item));
+   }
+
+   ui->cb_z_col->setEnabled(true);
 }
 
 void FormAnalysis::updateCorrectionSelection() {
@@ -514,6 +526,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   }
 
   std::string yes_flag = "YES";
+  std::string no_flag = "NO";
 
   if (ui->gb_corrections->isChecked()) {
     options_map["enable-photometric-correction"].value() = boost::any(yes_flag);
@@ -524,15 +537,20 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   options_map["axes-collapse-type"].value() = boost::any(
       ui->cb_marginalization->currentText().toStdString());
 
-  if (ui->gb_cat->isChecked()) {
 
-    options_map["create-output-catalog"].value() = boost::any(yes_flag);
-    options_map["output-catalog-format"].value() = boost::any(
+  options_map["output-catalog-format"].value() = boost::any(
         ui->cb_cat_output_type->currentText().toStdString());
+
+  if (ui->gb_fix_z->isChecked()) {
+    options_map["fixed-redshift-column"].value() = boost::any(ui->cb_z_col->currentText().toStdString());
   }
 
-  if (ui->gb_pdf->isChecked()) {
-    options_map["create-output-pdf"].value() = boost::any(yes_flag);
+  if (ui->gb_best_model->isChecked()) {
+     options_map["create-output-best-model"].value() = boost::any(yes_flag);
+   }
+
+  if (!ui->gb_pdf->isChecked()) {
+    options_map["create-output-pdf"].value() = boost::any(no_flag);
   }
 
   if (ui->gb_lhood->isChecked()) {
@@ -549,11 +567,14 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     auto& lum_prior_config = m_prior_config.at(lum_prior_name);
     auto lum_prior_option =lum_prior_config.getConfigOptions();
     options_map.insert(lum_prior_option.begin(),lum_prior_option.end());
+    options_map["luminosity-prior-effectiveness"].value() = boost::any(ui->dsp_eff_lum->value());
+
 
   }
 
   if (ui->cb_volumePrior->isChecked()) {
     options_map["volume-prior"].value() = boost::any(yes_flag);
+    options_map["volume-prior-effectiveness"].value() = boost::any(ui->dsp_eff_vol->value());
   }
 
   return options_map;
@@ -635,6 +656,9 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   ui->tableView_filter->setModel(grid_model);
   connect(grid_model, SIGNAL(itemChanged(QStandardItem*)),
       SLOT(onFilterSelectionItemChanged(QStandardItem*)));
+
+  //update the column of the default catalog file
+  fillCbColumns(selected_survey.getColumnList());
 
   // push the default catalog
   setInputCatalogName(selected_survey.getDefaultCatalogFile(), false);
@@ -1038,29 +1062,24 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
     }
   }
 
-  void FormAnalysis::on_btn_RunAnalysis_clicked()
-  {
+  void FormAnalysis::on_btn_RunAnalysis_clicked(){
 
-    std::string cat="";
-    if (ui->gb_cat->isChecked()) {
+  std::string cat = QString(ui->txt_outputFolder->text() + QDir::separator() + "phz_cat").toStdString();
+  if (ui->cb_cat_output_type->currentText() == "ASCII") {
+    cat = cat + ".txt";
+  } else {
+    cat = cat + ".fits";
+  }
 
-      cat=QString(ui->txt_outputFolder->text()+QDir::separator()+"phz_cat").toStdString();
-      if (ui->cb_cat_output_type->currentText()=="ASCII") {
-        cat=cat+".txt";
-      }
-      else {
-        cat=cat+".fits";
-      }
-
-      if (QFileInfo(QString::fromStdString(cat)).exists()) {
-        if (QMessageBox::question(this, "Override existing file...",
-                "A Photometric Redshift Catalog for the same input catalog file already exists. Do you want to replace it?",
-                QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
-          return;
-        }
-      }
-
+  if (QFileInfo(QString::fromStdString(cat)).exists()) {
+    if (QMessageBox::question(this, "Override existing file...",
+        "A Photometric Redshift Catalog for the same input catalog file already exists. Do you want to replace it?",
+        QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+      return;
     }
+  }
+
+
     std::string pdf="";
     if (ui->gb_pdf->isChecked()) {
       pdf=QString(ui->txt_outputFolder->text()+QDir::separator()+"pdf.fits").toStdString();

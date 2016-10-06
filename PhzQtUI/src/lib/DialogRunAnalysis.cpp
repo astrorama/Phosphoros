@@ -189,6 +189,19 @@ std::string DialogRunAnalysis::runFunction(){
     auto& correction_map = config_manager.getConfiguration<PhotometricCorrectionConfig>().getPhotometricCorrectionMap();
     auto& priors = config_manager.getConfiguration<PriorConfig>().getPriors();
 
+//    std::map<int,std::vector<XYDataset::QualifiedName>> non_numerical_axis_order{};
+//    non_numerical_axis_order[PhzDataModel::ModelParameter::REDDENING_CURVE] = config_manager.getConfiguration<ReddeningProviderConfig>().getReddeningDatasetProvider()->listContents("");
+//    non_numerical_axis_order[PhzDataModel::ModelParameter::SED] = config_manager.getConfiguration<SedProviderConfig>().getSedDatasetProvider()->listContents("");
+//
+//
+//    PhzLikelihood::ParallelCatalogHandler handler { correction_map,
+//                                                    model_phot_grid,
+//                                                    likelihood_grid_func,
+//                                                    priors,
+//                                                    non_numerical_axis_order,
+//                                                    marginalization_func };
+
+
     PhzLikelihood::ParallelCatalogHandler handler { correction_map,
                                                     model_phot_grid,
                                                     likelihood_grid_func,

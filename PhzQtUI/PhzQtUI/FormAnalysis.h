@@ -113,6 +113,8 @@ private:
     std::list<std::string> getExcludedFilters();
     std::list<FilterMapping> getSelectedFilterMapping();
 
+    void fillCbColumns(std::set<std::string> columns);
+
     void loadLuminosityPriors();
 
     void setInputCatalogName( std::string name,bool do_test=true);
