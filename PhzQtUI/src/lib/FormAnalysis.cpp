@@ -25,6 +25,8 @@
 #include "PhzUITools/ConfigurationWriter.h"
 #include "PhzUITools/CatalogColumnReader.h"
 
+#include "PhzDataModel/PhzModel.h"
+
 namespace Euclid {
 namespace PhzQtUI {
 
@@ -549,10 +551,6 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
      options_map["create-output-best-model"].value() = boost::any(yes_flag);
    }
 
-  if (!ui->gb_pdf->isChecked()) {
-    options_map["create-output-pdf"].value() = boost::any(no_flag);
-  }
-
   if (ui->gb_lhood->isChecked()) {
    options_map["create-output-likelihoods"].value() = boost::any(yes_flag);
   }
@@ -568,13 +566,39 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     auto lum_prior_option =lum_prior_config.getConfigOptions();
     options_map.insert(lum_prior_option.begin(),lum_prior_option.end());
     options_map["luminosity-prior-effectiveness"].value() = boost::any(ui->dsp_eff_lum->value());
-
-
   }
 
   if (ui->cb_volumePrior->isChecked()) {
     options_map["volume-prior"].value() = boost::any(yes_flag);
     options_map["volume-prior-effectiveness"].value() = boost::any(ui->dsp_eff_vol->value());
+  }
+
+
+  std::string pdf_output_type = "VECTOR-COLUMN";
+  if (ui->cbb_pdf_out->currentIndex()==1){
+    pdf_output_type = "INDIVIDUAL-HDUS";
+  }
+  options_map["output-pdf-format"].value() = boost::any(pdf_output_type);
+
+  std::vector<std::string> pdf_output_axis{};
+  if (ui->cb_pdf_z->isChecked()) {
+    pdf_output_axis.push_back(PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::Z));
+  }
+
+  if (ui->cb_pdf_ebv->isChecked()) {
+    pdf_output_axis.push_back(PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::EBV));
+  }
+
+  if (ui->cb_pdf_red->isChecked()) {
+    pdf_output_axis.push_back(PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::REDDENING_CURVE));
+  }
+
+  if (ui->cb_pdf_sed->isChecked()) {
+      pdf_output_axis.push_back(PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::SED));
+  }
+
+  if (pdf_output_axis.size()>0){
+    options_map["create-output-pdf"].value() = boost::any(pdf_output_axis);
   }
 
   return options_map;
@@ -1079,18 +1103,88 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
     }
   }
 
+std::string pdf="";
+if (ui->cbb_pdf_out->currentIndex()==1){
 
-    std::string pdf="";
-    if (ui->gb_pdf->isChecked()) {
-      pdf=QString(ui->txt_outputFolder->text()+QDir::separator()+"pdf.fits").toStdString();
+  std:string file_path =  QString(ui->txt_outputFolder->text()+QDir::separator()).toStdString();
+
+  if (ui->cb_pdf_z->isChecked()){
+      std::string file_name=file_path+PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::Z)+"_pdf.fits";
       if (QFileInfo(QString::fromStdString(pdf)).exists()) {
         if (QMessageBox::question(this, "Override existing file...",
-                "A PDF file for the same input catalog file already exists. Do you want to replace it?",
-                QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+                       QString::fromStdString("A "+PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::Z)+"-PDF file for the same input catalog file already exists. Do you want to replace it?"),
+                       QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
           return;
         }
       }
-    }
+
+      if (pdf.length()>0){
+        pdf=pdf+ " ; ";
+      }
+      pdf=pdf + PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::Z)+"_pdf.fits";
+
+  }
+
+  if (ui->cb_pdf_ebv->isChecked()){
+       std::string file_name=file_path+PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::EBV)+"_pdf.fits";
+       if (QFileInfo(QString::fromStdString(pdf)).exists()) {
+         if (QMessageBox::question(this, "Override existing file...",
+                        QString::fromStdString("A "+PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::EBV)+"-PDF file for the same input catalog file already exists. Do you want to replace it?"),
+                        QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+           return;
+         }
+       }
+
+       if (pdf.length()>0){
+         pdf=pdf+ " ; ";
+       }
+       pdf=pdf + PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::EBV)+"_pdf.fits";
+
+   }
+
+  if (ui->cb_pdf_red->isChecked()){
+       std::string file_name=file_path+PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::REDDENING_CURVE)+"_pdf.fits";
+       if (QFileInfo(QString::fromStdString(pdf)).exists()) {
+         if (QMessageBox::question(this, "Override existing file...",
+                        QString::fromStdString("A "+PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::REDDENING_CURVE)+"-PDF file for the same input catalog file already exists. Do you want to replace it?"),
+                        QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+           return;
+         }
+       }
+
+       if (pdf.length()>0){
+         pdf=pdf+ " ; ";
+       }
+       pdf=pdf + PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::REDDENING_CURVE)+"_pdf.fits";
+
+   }
+
+  if (ui->cb_pdf_sed->isChecked()){
+       std::string file_name=file_path+PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::SED)+"_pdf.fits";
+       if (QFileInfo(QString::fromStdString(pdf)).exists()) {
+         if (QMessageBox::question(this, "Override existing file...",
+                        QString::fromStdString("A "+PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::SED)+"-PDF file for the same input catalog file already exists. Do you want to replace it?"),
+                        QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+           return;
+         }
+       }
+
+       if (pdf.length()>0){
+         pdf=pdf+ " ; ";
+       }
+       pdf=pdf + PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::SED)+"_pdf.fits";
+
+   }
+
+
+  if (pdf.length()>0){
+    pdf=file_path +pdf;
+  }
+}
+
+
+
+
 
     std::string lik="";
     if (ui->gb_lhood->isChecked()) {

@@ -1081,23 +1081,116 @@
                 </widget>
                </item>
                <item>
-                <widget class="QGroupBox" name="gb_pdf">
-                 <property name="font">
-                  <font>
-                   <pointsize>11</pointsize>
-                  </font>
+                <layout class="QHBoxLayout" name="horizontalLayout_11">
+                 <item>
+                  <widget class="QLabel" name="label_10">
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Output PDF as </string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QComboBox" name="cbb_pdf_out">
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                    </font>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>catalog column</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>separated file</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="label_11">
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>for axis:</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayout_3">
+                 <property name="spacing">
+                  <number>0</number>
                  </property>
-                 <property name="title">
-                  <string>Generate Output PDF File </string>
+                 <property name="leftMargin">
+                  <number>12</number>
                  </property>
-                 <property name="checkable">
-                  <bool>true</bool>
+                 <property name="rightMargin">
+                  <number>0</number>
                  </property>
-                 <property name="checked">
-                  <bool>false</bool>
-                 </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_4"/>
-                </widget>
+                 <item>
+                  <widget class="QCheckBox" name="cb_pdf_z">
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Redshift</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="cb_pdf_ebv">
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>E(B-V)</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="cb_pdf_red">
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Reddening Curve</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="cb_pdf_sed">
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>SED</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
                </item>
                <item>
                 <widget class="QGroupBox" name="gb_lhood">
