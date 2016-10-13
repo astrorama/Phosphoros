@@ -734,12 +734,45 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   }
 }
 
+template<typename ReturnType, int I>
+ int countCompleteList(const std::map<std::string, PhzDataModel::ModelAxesTuple>& grid_axis_map) {
+   std::vector<ReturnType> all_item { };
+   for (auto& sub_grid : grid_axis_map) {
+     for (auto& item : std::get<I>(sub_grid.second)) {
+       if (std::find(all_item.begin(), all_item.end(), item) == all_item.end())
+         all_item.push_back(item);
+     }
+   }
+
+   return all_item.size();
+ }
+
+
   void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(const QString &model_name) {
     PreferencesUtils::setUserPreference("_global_selection_",
                "parameter_space",model_name.toStdString());
 
     updateGridSelection();
     loadLuminosityPriors();
+
+    ui->cb_pdf_z->setChecked(false);
+    ui->cb_pdf_ebv->setChecked(false);
+    ui->cb_pdf_red->setChecked(false);
+    ui->cb_pdf_sed->setChecked(false);
+    ModelSet selected_model;
+
+     for (auto&model : m_analysis_model_list) {
+       if (model.second.getName().compare(
+           ui->cb_AnalysisModel->currentText().toStdString()) == 0) {
+         selected_model = model.second;
+         break;
+       }
+     }
+     auto tuples = selected_model.getAxesTuple();
+     ui->cb_pdf_z->setEnabled(countCompleteList<double,PhzDataModel::ModelParameter::Z>(tuples)>1);
+     ui->cb_pdf_ebv->setEnabled(countCompleteList<double,PhzDataModel::ModelParameter::EBV>(tuples)>1);
+     ui->cb_pdf_red->setEnabled(countCompleteList<XYDataset::QualifiedName,PhzDataModel::ModelParameter::REDDENING_CURVE>(tuples)>1);
+     ui->cb_pdf_sed->setEnabled(countCompleteList<XYDataset::QualifiedName,PhzDataModel::ModelParameter::SED>(tuples)>1);
   }
 
   void FormAnalysis::on_cb_igm_currentIndexChanged(const QString &)

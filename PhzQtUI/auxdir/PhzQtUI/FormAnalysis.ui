@@ -317,8 +317,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1021</width>
-            <height>458</height>
+            <width>417</width>
+            <height>162</height>
            </rect>
           </property>
           <attribute name="label">
@@ -475,8 +475,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1021</width>
-            <height>458</height>
+            <width>543</width>
+            <height>160</height>
            </rect>
           </property>
           <attribute name="label">
@@ -626,8 +626,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1021</width>
-            <height>458</height>
+            <width>733</width>
+            <height>258</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1144,6 +1144,9 @@
                  </property>
                  <item>
                   <widget class="QCheckBox" name="cb_pdf_z">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="font">
                     <font>
                      <pointsize>11</pointsize>
@@ -1156,6 +1159,9 @@
                  </item>
                  <item>
                   <widget class="QCheckBox" name="cb_pdf_ebv">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="font">
                     <font>
                      <pointsize>11</pointsize>
@@ -1168,6 +1174,9 @@
                  </item>
                  <item>
                   <widget class="QCheckBox" name="cb_pdf_red">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="font">
                     <font>
                      <pointsize>11</pointsize>
@@ -1180,6 +1189,9 @@
                  </item>
                  <item>
                   <widget class="QCheckBox" name="cb_pdf_sed">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
                    <property name="font">
                     <font>
                      <pointsize>11</pointsize>
