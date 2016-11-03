@@ -67,7 +67,7 @@ elements_add_python_program(PhosphorosAddEmissionLines EmissionLines.PhosphorosA
 # Use the following macro for scripts and aux files:
 #  elements_install_scripts()
 #===============================================================================
-elements_install_scripts()
+
 
 #===============================================================================
 # Add the elements_install_conf_files macro 

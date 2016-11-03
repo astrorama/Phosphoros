@@ -134,7 +134,6 @@ DialogRunAnalysis::DialogRunAnalysis(QWidget *parent) :
 DialogRunAnalysis::~DialogRunAnalysis() {}
 
 void DialogRunAnalysis::setValues(std::string output_cat_name,
-                                  std::string output_pdf_name,
                                   std::string output_lik_name,
                                   std::string output_pos_name,
     const std::map<std::string, boost::program_options::variable_value>& config,
@@ -146,12 +145,10 @@ void DialogRunAnalysis::setValues(std::string output_cat_name,
     ui->label_cat->setVisible(false);
   }
 
-  if (output_pdf_name.length() > 0) {
-    ui->label_name_pdf->setText(QString::fromStdString(output_pdf_name));
-  } else {
+
     ui->label_name_pdf->setVisible(false);
     ui->label_pdf->setVisible(false);
-  }
+
 
   if (output_lik_name.length() > 0) {
     ui->label_name_lik->setText(QString::fromStdString(output_lik_name));
@@ -184,22 +181,17 @@ std::string DialogRunAnalysis::runFunction(){
 
 
     auto& model_phot_grid = config_manager.getConfiguration<PhotometryGridConfig>().getPhotometryGrid();
-    auto& marginalization_func = config_manager.getConfiguration<MarginalizationConfig>().getMarginalizationFunc();
+    auto& marginalization_func_list = config_manager.getConfiguration<MarginalizationConfig>().getMarginalizationFuncList();
     auto& likelihood_grid_func = config_manager.getConfiguration<LikelihoodGridFuncConfig>().getLikelihoodGridFunction();
     auto& correction_map = config_manager.getConfiguration<PhotometricCorrectionConfig>().getPhotometricCorrectionMap();
     auto& priors = config_manager.getConfiguration<PriorConfig>().getPriors();
 
-    std::map<int,std::vector<XYDataset::QualifiedName>> non_numerical_axis_order{};
-    non_numerical_axis_order[PhzDataModel::ModelParameter::REDDENING_CURVE] = config_manager.getConfiguration<ReddeningProviderConfig>().getReddeningDatasetProvider()->listContents("");
-    non_numerical_axis_order[PhzDataModel::ModelParameter::SED] = config_manager.getConfiguration<SedProviderConfig>().getSedDatasetProvider()->listContents("");
 
-
-    PhzLikelihood::ParallelCatalogHandler handler { correction_map,
+    PhzLikelihood::ParallelCatalogHandler handler ( correction_map,
                                                     model_phot_grid,
                                                     likelihood_grid_func,
                                                     priors,
-                                                    non_numerical_axis_order,
-                                                    marginalization_func };
+                                                    marginalization_func_list );
 
     auto& catalog = config_manager.getConfiguration<Configuration::CatalogConfig>().getCatalog();
     auto out_ptr = config_manager.getConfiguration<ComputeRedshiftsConfig>().getOutputHandler();

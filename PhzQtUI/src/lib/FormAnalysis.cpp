@@ -582,19 +582,19 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   std::vector<std::string> pdf_output_axis{};
   if (ui->cb_pdf_z->isChecked()) {
-    pdf_output_axis.push_back(PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::Z));
+    pdf_output_axis.push_back(PhzDataModel::ModelParameterTraits<PhzDataModel::ModelParameter::Z>::name);
   }
 
   if (ui->cb_pdf_ebv->isChecked()) {
-    pdf_output_axis.push_back(PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::EBV));
+    pdf_output_axis.push_back(PhzDataModel::ModelParameterTraits<PhzDataModel::ModelParameter::EBV>::name);
   }
 
   if (ui->cb_pdf_red->isChecked()) {
-    pdf_output_axis.push_back(PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::REDDENING_CURVE));
+    pdf_output_axis.push_back(PhzDataModel::ModelParameterTraits<PhzDataModel::ModelParameter::REDDENING_CURVE>::name);
   }
 
   if (ui->cb_pdf_sed->isChecked()) {
-      pdf_output_axis.push_back(PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::SED));
+      pdf_output_axis.push_back(PhzDataModel::ModelParameterTraits<PhzDataModel::ModelParameter::SED>::name);
   }
 
   if (pdf_output_axis.size()>0){
@@ -755,24 +755,7 @@ template<typename ReturnType, int I>
     updateGridSelection();
     loadLuminosityPriors();
 
-    ui->cb_pdf_z->setChecked(false);
-    ui->cb_pdf_ebv->setChecked(false);
-    ui->cb_pdf_red->setChecked(false);
-    ui->cb_pdf_sed->setChecked(false);
-    ModelSet selected_model;
 
-     for (auto&model : m_analysis_model_list) {
-       if (model.second.getName().compare(
-           ui->cb_AnalysisModel->currentText().toStdString()) == 0) {
-         selected_model = model.second;
-         break;
-       }
-     }
-     auto tuples = selected_model.getAxesTuple();
-     ui->cb_pdf_z->setEnabled(countCompleteList<double,PhzDataModel::ModelParameter::Z>(tuples)>1);
-     ui->cb_pdf_ebv->setEnabled(countCompleteList<double,PhzDataModel::ModelParameter::EBV>(tuples)>1);
-     ui->cb_pdf_red->setEnabled(countCompleteList<XYDataset::QualifiedName,PhzDataModel::ModelParameter::REDDENING_CURVE>(tuples)>1);
-     ui->cb_pdf_sed->setEnabled(countCompleteList<XYDataset::QualifiedName,PhzDataModel::ModelParameter::SED>(tuples)>1);
   }
 
   void FormAnalysis::on_cb_igm_currentIndexChanged(const QString &)
@@ -1128,96 +1111,13 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
     cat = cat + ".fits";
   }
 
-  if (QFileInfo(QString::fromStdString(cat)).exists()) {
+  if (QDir(ui->txt_outputFolder->text()).exists()){
     if (QMessageBox::question(this, "Override existing file...",
-        "A Photometric Redshift Catalog for the same input catalog file already exists. Do you want to replace it?",
-        QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
-      return;
-    }
+           "The output folder you selected already exists. Do you want to replace its content?",
+           QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+         return;
+       }
   }
-
-std::string pdf="";
-if (ui->cbb_pdf_out->currentIndex()==1){
-
-  std:string file_path =  QString(ui->txt_outputFolder->text()+QDir::separator()).toStdString();
-
-  if (ui->cb_pdf_z->isChecked()){
-      std::string file_name=file_path+PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::Z)+"_pdf.fits";
-      if (QFileInfo(QString::fromStdString(pdf)).exists()) {
-        if (QMessageBox::question(this, "Override existing file...",
-                       QString::fromStdString("A "+PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::Z)+"-PDF file for the same input catalog file already exists. Do you want to replace it?"),
-                       QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
-          return;
-        }
-      }
-
-      if (pdf.length()>0){
-        pdf=pdf+ " ; ";
-      }
-      pdf=pdf + PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::Z)+"_pdf.fits";
-
-  }
-
-  if (ui->cb_pdf_ebv->isChecked()){
-       std::string file_name=file_path+PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::EBV)+"_pdf.fits";
-       if (QFileInfo(QString::fromStdString(pdf)).exists()) {
-         if (QMessageBox::question(this, "Override existing file...",
-                        QString::fromStdString("A "+PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::EBV)+"-PDF file for the same input catalog file already exists. Do you want to replace it?"),
-                        QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
-           return;
-         }
-       }
-
-       if (pdf.length()>0){
-         pdf=pdf+ " ; ";
-       }
-       pdf=pdf + PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::EBV)+"_pdf.fits";
-
-   }
-
-  if (ui->cb_pdf_red->isChecked()){
-       std::string file_name=file_path+PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::REDDENING_CURVE)+"_pdf.fits";
-       if (QFileInfo(QString::fromStdString(pdf)).exists()) {
-         if (QMessageBox::question(this, "Override existing file...",
-                        QString::fromStdString("A "+PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::REDDENING_CURVE)+"-PDF file for the same input catalog file already exists. Do you want to replace it?"),
-                        QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
-           return;
-         }
-       }
-
-       if (pdf.length()>0){
-         pdf=pdf+ " ; ";
-       }
-       pdf=pdf + PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::REDDENING_CURVE)+"_pdf.fits";
-
-   }
-
-  if (ui->cb_pdf_sed->isChecked()){
-       std::string file_name=file_path+PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::SED)+"_pdf.fits";
-       if (QFileInfo(QString::fromStdString(pdf)).exists()) {
-         if (QMessageBox::question(this, "Override existing file...",
-                        QString::fromStdString("A "+PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::SED)+"-PDF file for the same input catalog file already exists. Do you want to replace it?"),
-                        QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
-           return;
-         }
-       }
-
-       if (pdf.length()>0){
-         pdf=pdf+ " ; ";
-       }
-       pdf=pdf + PhzDataModel::ModelParameter::NAME_MAP.at(PhzDataModel::ModelParameter::SED)+"_pdf.fits";
-
-   }
-
-
-  if (pdf.length()>0){
-    pdf=file_path +pdf;
-  }
-}
-
-
-
-
 
     std::string lik="";
     if (ui->gb_lhood->isChecked()) {
@@ -1232,7 +1132,7 @@ if (ui->cbb_pdf_out->currentIndex()==1){
     auto config_map = getRunOptionMap();
     auto config_map_luminosity = getLuminosityOptionMap();
     std::unique_ptr<DialogRunAnalysis> dialog(new DialogRunAnalysis());
-    dialog->setValues(cat,pdf,lik,pos,config_map,config_map_luminosity);
+    dialog->setValues(cat,lik,pos,config_map,config_map_luminosity);
     if (dialog->exec()) {
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
           "IGM",ui->cb_igm->currentText().toStdString());

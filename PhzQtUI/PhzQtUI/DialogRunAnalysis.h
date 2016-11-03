@@ -51,7 +51,6 @@ public:
      * @brief Initialise the popup by setting its internal data
      */
     void setValues(std::string output_cat_name,
-                   std::string output_pdf_name,
                    std::string output_lik_name,
                    std::string output_pos_name,
                    const std::map<std::string, boost::program_options::variable_value>& config,
