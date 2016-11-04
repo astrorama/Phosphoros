@@ -1,0 +1,390 @@
+
+# /
+/.project
+/.cproject
+/.settings
+/build.*
+/InstallArea
+/*.log
+/.pydevproject
+/*.pyc
+
+# /EmissionLines/
+/EmissionLines/.project
+/EmissionLines/.cproject
+/EmissionLines/.settings
+/EmissionLines/build.*
+/EmissionLines/InstallArea
+/EmissionLines/*.log
+/EmissionLines/.pydevproject
+/EmissionLines/*.pyc
+
+# /EmissionLines/EmissionLines/
+/EmissionLines/EmissionLines/.project
+/EmissionLines/EmissionLines/.cproject
+/EmissionLines/EmissionLines/.settings
+/EmissionLines/EmissionLines/build.*
+/EmissionLines/EmissionLines/InstallArea
+/EmissionLines/EmissionLines/*.log
+/EmissionLines/EmissionLines/.pydevproject
+/EmissionLines/EmissionLines/*.pyc
+
+# /EmissionLines/auxdir/
+/EmissionLines/auxdir/.project
+/EmissionLines/auxdir/.cproject
+/EmissionLines/auxdir/.settings
+/EmissionLines/auxdir/build.*
+/EmissionLines/auxdir/InstallArea
+/EmissionLines/auxdir/*.log
+/EmissionLines/auxdir/.pydevproject
+/EmissionLines/auxdir/*.pyc
+
+# /EmissionLines/auxdir/EmissionLines/
+/EmissionLines/auxdir/EmissionLines/.project
+/EmissionLines/auxdir/EmissionLines/.cproject
+/EmissionLines/auxdir/EmissionLines/.settings
+/EmissionLines/auxdir/EmissionLines/build.*
+/EmissionLines/auxdir/EmissionLines/InstallArea
+/EmissionLines/auxdir/EmissionLines/*.log
+/EmissionLines/auxdir/EmissionLines/.pydevproject
+/EmissionLines/auxdir/EmissionLines/*.pyc
+
+# /EmissionLines/conf/
+/EmissionLines/conf/.project
+/EmissionLines/conf/.cproject
+/EmissionLines/conf/.settings
+/EmissionLines/conf/build.*
+/EmissionLines/conf/InstallArea
+/EmissionLines/conf/*.log
+/EmissionLines/conf/.pydevproject
+/EmissionLines/conf/*.pyc
+
+# /EmissionLines/conf/EmissionLines/
+/EmissionLines/conf/EmissionLines/.project
+/EmissionLines/conf/EmissionLines/.cproject
+/EmissionLines/conf/EmissionLines/.settings
+/EmissionLines/conf/EmissionLines/build.*
+/EmissionLines/conf/EmissionLines/InstallArea
+/EmissionLines/conf/EmissionLines/*.log
+/EmissionLines/conf/EmissionLines/.pydevproject
+/EmissionLines/conf/EmissionLines/*.pyc
+
+# /EmissionLines/doc/
+/EmissionLines/doc/.project
+/EmissionLines/doc/.cproject
+/EmissionLines/doc/.settings
+/EmissionLines/doc/build.*
+/EmissionLines/doc/InstallArea
+/EmissionLines/doc/*.log
+/EmissionLines/doc/.pydevproject
+/EmissionLines/doc/*.pyc
+
+# /EmissionLines/python/
+/EmissionLines/python/.project
+/EmissionLines/python/.cproject
+/EmissionLines/python/.settings
+/EmissionLines/python/build.*
+/EmissionLines/python/InstallArea
+/EmissionLines/python/*.log
+/EmissionLines/python/.pydevproject
+/EmissionLines/python/*.pyc
+
+# /EmissionLines/python/EmissionLines/
+/EmissionLines/python/EmissionLines/.project
+/EmissionLines/python/EmissionLines/.cproject
+/EmissionLines/python/EmissionLines/.settings
+/EmissionLines/python/EmissionLines/build.*
+/EmissionLines/python/EmissionLines/InstallArea
+/EmissionLines/python/EmissionLines/*.log
+/EmissionLines/python/EmissionLines/.pydevproject
+/EmissionLines/python/EmissionLines/*.pyc
+
+# /EmissionLines/scripts/
+/EmissionLines/scripts/.project
+/EmissionLines/scripts/.cproject
+/EmissionLines/scripts/.settings
+/EmissionLines/scripts/build.*
+/EmissionLines/scripts/InstallArea
+/EmissionLines/scripts/*.log
+/EmissionLines/scripts/.pydevproject
+/EmissionLines/scripts/*.pyc
+
+# /EmissionLines/tests/
+/EmissionLines/tests/.project
+/EmissionLines/tests/.cproject
+/EmissionLines/tests/.settings
+/EmissionLines/tests/build.*
+/EmissionLines/tests/InstallArea
+/EmissionLines/tests/*.log
+/EmissionLines/tests/.pydevproject
+/EmissionLines/tests/*.pyc
+
+# /EmissionLines/tests/src/
+/EmissionLines/tests/src/.project
+/EmissionLines/tests/src/.cproject
+/EmissionLines/tests/src/.settings
+/EmissionLines/tests/src/build.*
+/EmissionLines/tests/src/InstallArea
+/EmissionLines/tests/src/*.log
+/EmissionLines/tests/src/.pydevproject
+/EmissionLines/tests/src/*.pyc
+
+# /PhzCLI/
+/PhzCLI/.project
+/PhzCLI/.cproject
+/PhzCLI/.settings
+/PhzCLI/build.*
+/PhzCLI/InstallArea
+/PhzCLI/*.log
+/PhzCLI/.pydevproject
+/PhzCLI/*.pyc
+
+# /PhzCLI/PhzCLI/
+/PhzCLI/PhzCLI/.project
+/PhzCLI/PhzCLI/.cproject
+/PhzCLI/PhzCLI/.settings
+/PhzCLI/PhzCLI/build.*
+/PhzCLI/PhzCLI/InstallArea
+/PhzCLI/PhzCLI/*.log
+/PhzCLI/PhzCLI/.pydevproject
+/PhzCLI/PhzCLI/*.pyc
+
+# /PhzCLI/conf/
+/PhzCLI/conf/.project
+/PhzCLI/conf/.cproject
+/PhzCLI/conf/.settings
+/PhzCLI/conf/build.*
+/PhzCLI/conf/InstallArea
+/PhzCLI/conf/*.log
+/PhzCLI/conf/.pydevproject
+/PhzCLI/conf/*.pyc
+
+# /PhzCLI/conf/PhzCLI/
+/PhzCLI/conf/PhzCLI/.project
+/PhzCLI/conf/PhzCLI/.cproject
+/PhzCLI/conf/PhzCLI/.settings
+/PhzCLI/conf/PhzCLI/build.*
+/PhzCLI/conf/PhzCLI/InstallArea
+/PhzCLI/conf/PhzCLI/*.log
+/PhzCLI/conf/PhzCLI/.pydevproject
+/PhzCLI/conf/PhzCLI/*.pyc
+
+# /PhzCLI/python/
+/PhzCLI/python/.project
+/PhzCLI/python/.cproject
+/PhzCLI/python/.settings
+/PhzCLI/python/build.*
+/PhzCLI/python/InstallArea
+/PhzCLI/python/*.log
+/PhzCLI/python/.pydevproject
+/PhzCLI/python/*.pyc
+
+# /PhzCLI/python/PhzCLI/
+/PhzCLI/python/PhzCLI/.project
+/PhzCLI/python/PhzCLI/.cproject
+/PhzCLI/python/PhzCLI/.settings
+/PhzCLI/python/PhzCLI/build.*
+/PhzCLI/python/PhzCLI/InstallArea
+/PhzCLI/python/PhzCLI/*.log
+/PhzCLI/python/PhzCLI/.pydevproject
+/PhzCLI/python/PhzCLI/*.pyc
+
+# /PhzCLI/scripts/
+/PhzCLI/scripts/.project
+/PhzCLI/scripts/.cproject
+/PhzCLI/scripts/.settings
+/PhzCLI/scripts/build.*
+/PhzCLI/scripts/InstallArea
+/PhzCLI/scripts/*.log
+/PhzCLI/scripts/.pydevproject
+/PhzCLI/scripts/*.pyc
+
+# /PhzCLI/src/
+/PhzCLI/src/.project
+/PhzCLI/src/.cproject
+/PhzCLI/src/.settings
+/PhzCLI/src/build.*
+/PhzCLI/src/InstallArea
+/PhzCLI/src/*.log
+/PhzCLI/src/.pydevproject
+/PhzCLI/src/*.pyc
+
+# /PhzCLI/src/lib/
+/PhzCLI/src/lib/.project
+/PhzCLI/src/lib/.cproject
+/PhzCLI/src/lib/.settings
+/PhzCLI/src/lib/build.*
+/PhzCLI/src/lib/InstallArea
+/PhzCLI/src/lib/*.log
+/PhzCLI/src/lib/.pydevproject
+/PhzCLI/src/lib/*.pyc
+
+# /PhzCLI/src/program/
+/PhzCLI/src/program/.project
+/PhzCLI/src/program/.cproject
+/PhzCLI/src/program/.settings
+/PhzCLI/src/program/build.*
+/PhzCLI/src/program/InstallArea
+/PhzCLI/src/program/*.log
+/PhzCLI/src/program/.pydevproject
+/PhzCLI/src/program/*.pyc
+
+# /PhzCLI/tests/
+/PhzCLI/tests/.project
+/PhzCLI/tests/.cproject
+/PhzCLI/tests/.settings
+/PhzCLI/tests/build.*
+/PhzCLI/tests/InstallArea
+/PhzCLI/tests/*.log
+/PhzCLI/tests/.pydevproject
+/PhzCLI/tests/*.pyc
+
+# /PhzCLI/tests/src/
+/PhzCLI/tests/src/.project
+/PhzCLI/tests/src/.cproject
+/PhzCLI/tests/src/.settings
+/PhzCLI/tests/src/build.*
+/PhzCLI/tests/src/InstallArea
+/PhzCLI/tests/src/*.log
+/PhzCLI/tests/src/.pydevproject
+/PhzCLI/tests/src/*.pyc
+
+# /PhzQtUI/
+/PhzQtUI/.project
+/PhzQtUI/.cproject
+/PhzQtUI/.settings
+/PhzQtUI/build.*
+/PhzQtUI/InstallArea
+/PhzQtUI/*.log
+/PhzQtUI/.pydevproject
+/PhzQtUI/*.pyc
+
+# /PhzQtUI/PhzQtUI/
+/PhzQtUI/PhzQtUI/.project
+/PhzQtUI/PhzQtUI/.cproject
+/PhzQtUI/PhzQtUI/.settings
+/PhzQtUI/PhzQtUI/build.*
+/PhzQtUI/PhzQtUI/InstallArea
+/PhzQtUI/PhzQtUI/*.log
+/PhzQtUI/PhzQtUI/.pydevproject
+/PhzQtUI/PhzQtUI/*.pyc
+
+# /PhzQtUI/auxdir/
+/PhzQtUI/auxdir/.project
+/PhzQtUI/auxdir/.cproject
+/PhzQtUI/auxdir/.settings
+/PhzQtUI/auxdir/build.*
+/PhzQtUI/auxdir/InstallArea
+/PhzQtUI/auxdir/*.log
+/PhzQtUI/auxdir/.pydevproject
+/PhzQtUI/auxdir/*.pyc
+
+# /PhzQtUI/auxdir/PhzQtUI/
+/PhzQtUI/auxdir/PhzQtUI/.project
+/PhzQtUI/auxdir/PhzQtUI/.cproject
+/PhzQtUI/auxdir/PhzQtUI/.settings
+/PhzQtUI/auxdir/PhzQtUI/build.*
+/PhzQtUI/auxdir/PhzQtUI/InstallArea
+/PhzQtUI/auxdir/PhzQtUI/*.log
+/PhzQtUI/auxdir/PhzQtUI/.pydevproject
+/PhzQtUI/auxdir/PhzQtUI/*.pyc
+
+# /PhzQtUI/src/
+/PhzQtUI/src/.project
+/PhzQtUI/src/.cproject
+/PhzQtUI/src/.settings
+/PhzQtUI/src/build.*
+/PhzQtUI/src/InstallArea
+/PhzQtUI/src/*.log
+/PhzQtUI/src/.pydevproject
+/PhzQtUI/src/*.pyc
+
+# /PhzQtUI/src/lib/
+/PhzQtUI/src/lib/.project
+/PhzQtUI/src/lib/.cproject
+/PhzQtUI/src/lib/.settings
+/PhzQtUI/src/lib/build.*
+/PhzQtUI/src/lib/InstallArea
+/PhzQtUI/src/lib/*.log
+/PhzQtUI/src/lib/.pydevproject
+/PhzQtUI/src/lib/*.pyc
+
+# /PhzQtUI/src/program/
+/PhzQtUI/src/program/.project
+/PhzQtUI/src/program/.cproject
+/PhzQtUI/src/program/.settings
+/PhzQtUI/src/program/build.*
+/PhzQtUI/src/program/InstallArea
+/PhzQtUI/src/program/*.log
+/PhzQtUI/src/program/.pydevproject
+/PhzQtUI/src/program/*.pyc
+
+# /PhzQtUI/tests/
+/PhzQtUI/tests/.project
+/PhzQtUI/tests/.cproject
+/PhzQtUI/tests/.settings
+/PhzQtUI/tests/build.*
+/PhzQtUI/tests/InstallArea
+/PhzQtUI/tests/*.log
+/PhzQtUI/tests/.pydevproject
+/PhzQtUI/tests/*.pyc
+
+# /PhzQtUI/tests/src/
+/PhzQtUI/tests/src/.project
+/PhzQtUI/tests/src/.cproject
+/PhzQtUI/tests/src/.settings
+/PhzQtUI/tests/src/build.*
+/PhzQtUI/tests/src/InstallArea
+/PhzQtUI/tests/src/*.log
+/PhzQtUI/tests/src/.pydevproject
+/PhzQtUI/tests/src/*.pyc
+
+# /PhzUITools/
+/PhzUITools/.project
+/PhzUITools/.cproject
+/PhzUITools/.settings
+/PhzUITools/build.*
+/PhzUITools/InstallArea
+/PhzUITools/*.log
+/PhzUITools/.pydevproject
+/PhzUITools/*.pyc
+
+# /PhzUITools/PhzUITools/
+/PhzUITools/PhzUITools/.project
+/PhzUITools/PhzUITools/.cproject
+/PhzUITools/PhzUITools/.settings
+/PhzUITools/PhzUITools/build.*
+/PhzUITools/PhzUITools/InstallArea
+/PhzUITools/PhzUITools/*.log
+/PhzUITools/PhzUITools/.pydevproject
+/PhzUITools/PhzUITools/*.pyc
+
+# /PhzUITools/src/
+/PhzUITools/src/.project
+/PhzUITools/src/.cproject
+/PhzUITools/src/.settings
+/PhzUITools/src/build.*
+/PhzUITools/src/InstallArea
+/PhzUITools/src/*.log
+/PhzUITools/src/.pydevproject
+/PhzUITools/src/*.pyc
+
+# /PhzUITools/src/lib/
+/PhzUITools/src/lib/.project
+/PhzUITools/src/lib/.cproject
+/PhzUITools/src/lib/.settings
+/PhzUITools/src/lib/build.*
+/PhzUITools/src/lib/InstallArea
+/PhzUITools/src/lib/*.log
+/PhzUITools/src/lib/.pydevproject
+/PhzUITools/src/lib/*.pyc
+
+# /cmake/
+/cmake/.project
+/cmake/.cproject
+/cmake/.settings
+/cmake/build.*
+/cmake/InstallArea
+/cmake/*.log
+/cmake/.pydevproject
+/cmake/*.pyc
