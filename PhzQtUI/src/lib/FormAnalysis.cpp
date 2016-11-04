@@ -547,15 +547,15 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     options_map["fixed-redshift-column"].value() = boost::any(ui->cb_z_col->currentText().toStdString());
   }
 
-  if (ui->gb_best_model->isChecked()) {
+  if (ui->cb_best_model_cols->isChecked()) {
      options_map["create-output-best-model"].value() = boost::any(yes_flag);
    }
 
-  if (ui->gb_lhood->isChecked()) {
+  if (ui->cb_gen_likelihood->isChecked()) {
    options_map["create-output-likelihoods"].value() = boost::any(yes_flag);
   }
 
-  if (ui->gb_lik->isChecked()) {
+  if (ui->cb_gen_posterior->isChecked()) {
     options_map["create-output-posteriors"].value() = boost::any(yes_flag);
   }
 
@@ -582,19 +582,19 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   std::vector<std::string> pdf_output_axis{};
   if (ui->cb_pdf_z->isChecked()) {
-    pdf_output_axis.push_back(PhzDataModel::ModelParameterTraits<PhzDataModel::ModelParameter::Z>::name);
+    pdf_output_axis.push_back(PhzDataModel::ModelParameterTraits<PhzDataModel::ModelParameter::Z>::name());
   }
 
   if (ui->cb_pdf_ebv->isChecked()) {
-    pdf_output_axis.push_back(PhzDataModel::ModelParameterTraits<PhzDataModel::ModelParameter::EBV>::name);
+    pdf_output_axis.push_back(PhzDataModel::ModelParameterTraits<PhzDataModel::ModelParameter::EBV>::name());
   }
 
   if (ui->cb_pdf_red->isChecked()) {
-    pdf_output_axis.push_back(PhzDataModel::ModelParameterTraits<PhzDataModel::ModelParameter::REDDENING_CURVE>::name);
+    pdf_output_axis.push_back(PhzDataModel::ModelParameterTraits<PhzDataModel::ModelParameter::REDDENING_CURVE>::name());
   }
 
   if (ui->cb_pdf_sed->isChecked()) {
-      pdf_output_axis.push_back(PhzDataModel::ModelParameterTraits<PhzDataModel::ModelParameter::SED>::name);
+      pdf_output_axis.push_back(PhzDataModel::ModelParameterTraits<PhzDataModel::ModelParameter::SED>::name());
   }
 
   if (pdf_output_axis.size()>0){
@@ -1064,8 +1064,8 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
   }
 
 
-  void FormAnalysis::on_gb_lhood_clicked(){
-    if (ui->gb_lhood->isChecked ()) {
+  void FormAnalysis::on_cb_gen_likelihood_clicked(){
+    if (ui->cb_gen_likelihood->isChecked ()) {
           QMessageBox::warning(this, "Large output volume...",
               "Outputing multi-dimensional likelihood grids (one file per source)"
               " will generate a large output volume.", QMessageBox::Ok );
@@ -1073,8 +1073,8 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
         setRunAnnalysisEnable(true);
   }
 
-  void FormAnalysis::on_gb_lik_clicked() {
-    if (ui->gb_lik->isChecked ()) {
+  void FormAnalysis::on_cb_gen_posterior_clicked() {
+    if (ui->cb_gen_posterior->isChecked ()) {
       QMessageBox::warning(this, "Large output volume...",
           "Outputing multi-dimensional posterior grids (one file per source)"
           " will generate a large output volume.", QMessageBox::Ok );
@@ -1120,12 +1120,12 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
   }
 
     std::string lik="";
-    if (ui->gb_lhood->isChecked()) {
+    if (ui->cb_gen_likelihood->isChecked()) {
       lik=QString(QString(ui->txt_outputFolder->text()+QDir::separator()+"likelihoods"+QDir::separator())).toStdString();
     }
 
     std::string pos="";
-       if (ui->gb_lik->isChecked()) {
+       if (ui->cb_gen_posterior->isChecked()) {
          lik=QString(QString(ui->txt_outputFolder->text()+QDir::separator()+"posteriors"+QDir::separator())).toStdString();
        }
 

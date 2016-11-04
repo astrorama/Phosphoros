@@ -94,9 +94,9 @@ void on_btn_ToModel_clicked();
 
     void on_btn_RunAnalysis_clicked();
 
-    void on_gb_lik_clicked();
+    void on_cb_gen_posterior_clicked();
 
-    void on_gb_lhood_clicked();
+    void on_cb_gen_likelihood_clicked();
 
     void on_btn_confLuminosityPrior_clicked();
 
