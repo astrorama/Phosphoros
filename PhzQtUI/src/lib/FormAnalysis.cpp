@@ -1106,35 +1106,11 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
 
   void FormAnalysis::on_btn_RunAnalysis_clicked(){
 
-  std::string cat = QString(ui->txt_outputFolder->text() + QDir::separator() + "phz_cat").toStdString();
-  if (ui->cb_cat_output_type->currentText() == "ASCII") {
-    cat = cat + ".txt";
-  } else {
-    cat = cat + ".fits";
-  }
-
-  if (QDir(ui->txt_outputFolder->text()).exists()){
-    if (QMessageBox::question(this, "Override existing file...",
-           "The output folder you selected already exists. Do you want to replace its content?",
-           QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
-         return;
-       }
-  }
-
-    std::string lik="";
-    if (ui->cb_gen_likelihood->isChecked()) {
-      lik=QString(QString(ui->txt_outputFolder->text()+QDir::separator()+"likelihoods"+QDir::separator())).toStdString();
-    }
-
-    std::string pos="";
-       if (ui->cb_gen_posterior->isChecked()) {
-         lik=QString(QString(ui->txt_outputFolder->text()+QDir::separator()+"posteriors"+QDir::separator())).toStdString();
-       }
-
+    std::string out_dir = ui->txt_outputFolder->text().toStdString();
     auto config_map = getRunOptionMap();
     auto config_map_luminosity = getLuminosityOptionMap();
     std::unique_ptr<DialogRunAnalysis> dialog(new DialogRunAnalysis());
-    dialog->setValues(cat,lik,pos,config_map,config_map_luminosity);
+    dialog->setValues(out_dir, config_map, config_map_luminosity);
     if (dialog->exec()) {
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
           "IGM",ui->cb_igm->currentText().toStdString());
