@@ -549,6 +549,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   if (ui->cb_best_model_cols->isChecked()) {
      options_map["create-output-best-model"].value() = boost::any(yes_flag);
+   } else {
+     options_map["create-output-best-model"].value() = boost::any(no_flag);
    }
 
   if (ui->cb_gen_likelihood->isChecked()) {
