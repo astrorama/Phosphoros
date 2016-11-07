@@ -317,8 +317,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1019</width>
-            <height>465</height>
+            <width>448</width>
+            <height>160</height>
            </rect>
           </property>
           <attribute name="label">
@@ -475,8 +475,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1019</width>
-            <height>465</height>
+            <width>560</width>
+            <height>160</height>
            </rect>
           </property>
           <attribute name="label">
@@ -626,8 +626,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1019</width>
-            <height>465</height>
+            <width>794</width>
+            <height>262</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1035,7 +1035,7 @@
               </layout>
              </item>
              <item>
-              <widget class="QGroupBox" name="">
+              <widget class="QGroupBox" name="groupBox">
                <property name="font">
                 <font>
                  <pointsize>10</pointsize>
@@ -1120,7 +1120,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QGroupBox" name="">
+              <widget class="QGroupBox" name="groupBox">
                <property name="font">
                 <font>
                  <pointsize>10</pointsize>
@@ -1274,7 +1274,7 @@
                <property name="minimumSize">
                 <size>
                  <width>0</width>
-                 <height>50</height>
+                 <height>0</height>
                 </size>
                </property>
                <property name="font">
@@ -1324,10 +1324,6 @@
                  </spacer>
                 </item>
                </layout>
-               <zorder>cb_gen_likelihood</zorder>
-               <zorder></zorder>
-               <zorder>cb_gen_likelihood</zorder>
-               <zorder>cb_gen_posterior</zorder>
                <zorder>cb_gen_likelihood</zorder>
                <zorder>cb_gen_posterior</zorder>
                <zorder>horizontalSpacer_11</zorder>
