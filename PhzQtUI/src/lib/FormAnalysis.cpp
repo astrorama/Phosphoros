@@ -584,19 +584,19 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   std::vector<std::string> pdf_output_axis{};
   if (ui->cb_pdf_z->isChecked()) {
-    pdf_output_axis.push_back(PhzDataModel::ModelParameterTraits<PhzDataModel::ModelParameter::Z>::name());
+    pdf_output_axis.push_back("Z");
   }
 
   if (ui->cb_pdf_ebv->isChecked()) {
-    pdf_output_axis.push_back(PhzDataModel::ModelParameterTraits<PhzDataModel::ModelParameter::EBV>::name());
+    pdf_output_axis.push_back("EBV");
   }
 
   if (ui->cb_pdf_red->isChecked()) {
-    pdf_output_axis.push_back(PhzDataModel::ModelParameterTraits<PhzDataModel::ModelParameter::REDDENING_CURVE>::name());
+    pdf_output_axis.push_back("REDDENING-CURVE");
   }
 
   if (ui->cb_pdf_sed->isChecked()) {
-      pdf_output_axis.push_back(PhzDataModel::ModelParameterTraits<PhzDataModel::ModelParameter::SED>::name());
+      pdf_output_axis.push_back("SED");
   }
 
   if (pdf_output_axis.size()>0){
