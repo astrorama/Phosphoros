@@ -1,118 +1,127 @@
-#! /usr/bin/env python
-# Author Nicolas Morisset
+#!/usr/bin/env python
+
 
 import os
-import sys
-import numpy as np
-import matplotlib.pyplot as plt
-from astropy.table import Table
+import numbers
+import urlparse
+import astropy.table as table
 import astropy.io.fits as fits
 from astropy.vo.samp import SAMPIntegratedClient
-import urlparse
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 
-def file_exist(file):
-    """
-    """
-    if not os.path.exists(file):  
-       print '--> Error File not found : ', file
-       print '--> Program aborted!'          
-       sys.exit()
+def check_file_exists(filename):
+    if not os.path.exists(filename):  
+       print 'ERROR : File', filename, 'not found'       
+       exit(-1)
     
 #
 #-------------------------------------------------------------------------------
 #
 
 def read_table(filename):
-    """
-    """
-    print '--> Reading file : ', filename
-    file_exist(filename)
+    print 'Reading file: ', filename
+    check_file_exists(filename)
     try :
-        data = Table.read(filename, format='fits')
+        data = table.Table.read(filename, format='fits')
     except:
         with open(filename) as f:
             all_lines = f.readlines()
         header_lines = [l for l in all_lines if l.strip().startswith('#')]
+        comments = [l.replace('#','').strip() for l in header_lines]
         data_lines = [l for l in all_lines if l.strip() != '' and not l.strip().startswith('#')]
         column_no = len(data_lines[0].strip().split())
         header_lines = [l for l in header_lines if len(l.replace('#','').strip().split()) == column_no]
         text = ''.join(header_lines + data_lines)
-        data = Table.read(text, format='ascii')
+        data = table.Table.read(text, format='ascii')
+        data.meta = {'COMMENT': comments}
+        for pdf_col in [col for col in data.colnames if col.endswith('-1D-PDF')]:
+            pdf_data = [np.array(col_data.split(',')).astype(np.float) for col_data in data[pdf_col]]
+            data.rename_column(pdf_col, pdf_col+'_str')
+            data.add_column(table.Column(name=pdf_col, data=pdf_data))
     return data
-             
-          
+    
 #
 #-------------------------------------------------------------------------------
 #
 
+def read_specz_catalog(filename, id_col, specz_col):
+    specz_cat = read_table(filename)
+    if not id_col in specz_cat.colnames:
+        print 'ERROR : Spec-z catalog does not have column with name', id_col
+        exit(-1)
+    if not id_col == 'ID':
+        specz_cat.rename_column(id_col, 'ID')
+    if not specz_col in specz_cat.colnames:
+        print 'ERROR : Spec-z catalog does not have column with name', specz_col
+        exit(-1)
+    if not specz_col == 'SPECZ':
+        specz_cat.rename_column(specz_col, 'SPECZ')
+    return specz_cat
+    
+#
+#-------------------------------------------------------------------------------
+#
 
-def create_table(files, ids, specz, phz, pdf):
-    tables = [read_table(f) for f in files]
-    for i, t in enumerate(tables):
-        if not ids[i] in t.colnames:
-            print 'Input catalog', files[i], 'does not have column', ids[i]
-            exit()
-    id_inter = set.intersection(*[set(t[ids[i]]) for i,t in enumerate(tables)])
-    values_map = {}
-    all_cols = {}
-    orig_ids = []
-    found_pdf = False
-    for i in id_inter:
-        values_map[i] = [None, None, None]
-        all_cols[i] = []
-    for i,t in enumerate(tables):
-        has_specz = specz in t.colnames
-        has_phz = phz in t.colnames
-        has_pdf = pdf in t.colnames
-        if has_pdf:
-            found_pdf = True
-        orig_ids.append([])
-        for r in t:
-            r_id = r[ids[i]]
-            orig_ids[-1].append(r_id)
-            if not r_id in id_inter:
-                continue
-            all_cols[r_id].append(r)
-            if has_specz:
-                values_map[r_id][0] = r[specz]
-            if has_phz:
-                values_map[r_id][1] = r[phz]
-            if has_pdf:
-                values_map[r_id][2] = r[pdf]
-    i = []
-    s = []
-    p = []
-    pd = []
-    for k,v in values_map.iteritems():
-        i.append(k)
-        s.append(v[0])
-        p.append(v[1])
-        if found_pdf:
-            pd.append(v[2])
-    if found_pdf:
-        return Table([i,s,p,pd], names=('ID',specz,phz,pdf)), all_cols, orig_ids
-    else:
-        return Table([i,s,p], names=('ID',specz,phz)), all_cols, orig_ids
+def read_phosphoros_catalog(out_dir):
+    phos_cat_name = out_dir + '/phz_cat.fits'
+    if not os.path.exists(phos_cat_name):
+        phos_cat_name = out_dir + '/phz_cat.txt'
+    phos_cat = read_table(phos_cat_name)
+    phos_cat.add_column(table.Column(np.arange(len(phos_cat)), name='Index'))
+    return phos_cat
+    
+#
+#-------------------------------------------------------------------------------
+#
+
+def get_pdf_bins_from_comment(comment_lines, parameter):
+    type_map = {'SED':str, 'REDDENING-CURVE':str, 'EBV':float, 'Z':float}
+    bins_str = ''.join(comment_lines)
+    bins_str = bins_str[bins_str.index(parameter+'-BINS :'):]
+    bins_str = bins_str[bins_str.index('{')+1: bins_str.index('}')]
+    bins = [type_map[parameter](value) for value in bins_str.split(',')]
+    return bins
+    
+#
+#-------------------------------------------------------------------------------
+#
+
+def read_pdfs(catalog, out_dir):
+    print 'Loading the 1D-PDFs...'
+    filename_map = {'SED':'sed', 'REDDENING-CURVE':'red_curve', 'EBV':'ebv', 'Z':'z'}
+    
+    def read(parameter):
+        if parameter+'-1D-PDF' in catalog.colnames:
+            print '    ' + parameter + ': Using catlog column ' + parameter+'-1D-PDF'
+            return parameter, get_pdf_bins_from_comment(catalog.meta['COMMENT'], parameter), catalog[parameter+'-1D-PDF']
+        elif os.path.exists(out_dir+'/pdf_'+filename_map[parameter]+'.fits'):
+            print '    ' + parameter + ': Reading file ' + out_dir+'/pdf_'+filename_map[parameter]+'.fits'
+            hdus = fits.open(out_dir+'/pdf_'+filename_map[parameter]+'.fits')
+            return parameter, hdus[1].data[hdus[1].columns[0].name], [hdus[s['Index']+1].data['Probability'] for s in catalog]
+        else:
+            print '    ' + parameter + ': No 1D PDF found'
+            return None
+    
+    result = [read(p) for p in ['SED', 'REDDENING-CURVE', 'EBV', 'Z']]
+    result = [r for r in result if r != None]
+    return result
     
 #
 #-------------------------------------------------------------------------------
 #
     
-def compute_stats(array, col_number):
+def compute_stats(specz, phz):
     """
     Computes mean, median, sigma and outliers 
-    Array contents : sourceIdArr speczArr redshift sedname ebv max
     
     Returns outliers array
     """
-    # 
-    specZ = array.field(1)
-    colZ  = array.field(col_number)
- 
-
-    diffArr = colZ - specZ
-    plusArr = 1 + specZ  
+    
+    diffArr = phz - specz
+    plusArr = 1 + specz  
     dataArr = diffArr / plusArr
     
     mean     = np.average(dataArr)
@@ -124,7 +133,7 @@ def compute_stats(array, col_number):
     
     absDataArr = abs(dataArr)
     outliers = [i for i in absDataArr if i > 0.15]
-    outliersPercent =  len(outliers)*100. / len(colZ)
+    outliersPercent =  len(outliers)*100. / len(phz)
  
     # Without outliers
     noOutliersArr   = [i for i in absDataArr if i <= 0.15]
@@ -139,216 +148,85 @@ def compute_stats(array, col_number):
     print '--> Outliers            : ', outliersPercent, '%'
     print '--> Sigma (no outliers) : ', sigmaNoOutliers     
    
-    return (specZ, colZ, dataArr, mean, median, sigma, mad, outliersPercent, sigmaNoOutliers, meanNoOutliers)
+    return dataArr, mean, median, sigma, mad, outliersPercent, sigmaNoOutliers, meanNoOutliers
 
 #
 #-------------------------------------------------------------------------------
 #
 
-def read_pdfs(table, pdf_name, files):
-    print 'Loading 1D PDFs. Please wait...'
+class SpeczPhotozPlot(object):
     
-    if pdf_name in table.colnames:
-        zs = []
-        for filename in files:
-            try:
-                hdus = fits.open(filename)
-                comment = str(hdus[1].header['COMMENT']).replace('\n','')
-                if 'Z-BINS :' in comment:
-                    comment = comment[comment.index('Z-BINS :')+8:]
-                    comment = comment[comment.index('{')+1:comment.index('}')]
-                    zs = [float(z) for z in comment.split(',')]
-                    break
-            except:
-                pass
-            with open(filename) as f:
-                header_lines = [l for l in f.readlines() if l.strip().startswith('#')]
-            z_bins = [l for l in header_lines if l.replace('#','').strip().startswith('Z-BINS :')]
-            if len(z_bins) > 0:
-                zs = [float(z) for z in z_bins[0][z_bins[0].index(':')+1:].strip()[1:-1].split(',')]
-                break
-        pdfs = {}
-        for r in table:
-            data = r[pdf_name]
-            if isinstance(data, str):
-                data = [float(v) for v in data.split(',')]
-            pdfs[r['ID']] = data
-        return zs, pdfs
-
-    if os.path.isfile(pdf_name):
-        hdus = fits.open(pdf_name)
-        pdfs = {}
-        for hdu in hdus[1:]:
-            zs = hdu.data[hdu.columns[0].name]
-            pdfs[int(hdu.header['EXTNAME'])] = hdu.data[hdu.columns[1].name]
-        return zs, pdfs
-
-    return [], []
-
-#
-#-------------------------------------------------------------------------------
-#
-
-class Selector(object):
+    def _createSpeczPhotozPlot(self):
+        self.spzPhzAx = plt.subplot2grid((4,3), (0,0), rowspan=3, colspan=3)
+        self.spzPhzAx.set_ylabel('PhotoZ')
+        # Plot the diagonal
+        self.spzPhzAx.plot([-0.1, self.z_max], [-0.1, self.z_max], c='k', alpha=0.2)
+        # Plot the outlier limits
+        x_r = [v/10. for v in range(0,int(self.z_max*10+1))]
+        y1 = [0.15+1.15*x for x in x_r]
+        y2 = [-0.15+.85*x for x in x_r]
+        self.spzPhzAx.plot(x_r, y1, "r", alpha=.3)
+        self.spzPhzAx.plot(x_r, y2, "r", alpha=.3)
+        # Plot the data
+        self.spzPhzAx.scatter(self.specz, self.photz, c='b', marker='o', s=10, edgecolors='none', alpha=0.6, picker=True)
+        self.spzPhzAx.set_xlim([-0.1, self.z_max])
+        self.spzPhzAx.set_ylim([-0.1, self.z_max])
     
-    def __init__(self, fig_list, table, all_cols, zs, pdfs):
-        for fig in fig_list:
-            if hasattr(fig, 'canvas'):
-                fig.canvas.mpl_connect('pick_event', self.onpick)
-        self.fig_list = fig_list
-        self.table = table
-        self.all_cols = all_cols
-        self.zs = zs
-        self.pdfs = pdfs
+    def _createDeltaZPlot(self):
+        self.deltaZAx = plt.subplot2grid((4,3), (3,0), colspan=3)
+        self.deltaZAx.set_ylabel('$\Delta$z/(1+z)')
+        self.deltaZAx.set_xlabel('SpecZ')
+        # Plot the zero line
+        self.deltaZAx.plot ([-0.1, self.z_max], [0, 0], c='k', alpha=0.2)
+        # Plot the outlier limits
+        self.deltaZAx.plot ([-0.1, self.z_max], [0.15, 0.15], c='r', alpha=0.3)
+        self.deltaZAx.plot ([-0.1, self.z_max], [-0.15, -0.15], c='r', alpha=0.3)
+        self.deltaZAx.scatter(self.specz, self.data, c='b', marker='o', s=10, edgecolors='none', alpha=0.6, picker=True)
+        self.deltaZAx.set_xlim([-0.1, self.z_max])
+        self.deltaZAx.set_ylim([-self.data_max, self.data_max])
+        
+    def _createSelected(self):
+        self.id_text = self.spzPhzAx.text(0.05, 0.95, 'selected ID:', transform=self.spzPhzAx.transAxes, va='top')
+        self.selected1 = self.spzPhzAx.scatter(0, 0, c='none', marker='o', s=60, edgecolors='#00EE00', linewidth='2', visible=False)
+        self.selected2 = self.deltaZAx.scatter(0, 0, c='none', marker='o', s=60, edgecolors='#00EE00', linewidth='2', visible=False)
     
-    def onpick(self, event):
-        if event.mouseevent.button != 1:
-            return
-        for fig in self.fig_list:
-            if hasattr(fig, 'updateSelected'):
-                fig.updateSelected(event.ind[0])
-        if not event.mouseevent.dblclick:
-            return
-        id = self.table[event.ind[0]][0]
-        print '\nFull info for source with ID',id,':'
-        for r in self.all_cols[id]:
-            for c in r.colnames:
-                print '   ',c,'=',r[c]
-        if len(self.zs) > 0:
-            f, ax = plt.subplots()
-            ax.plot(self.zs, self.pdfs[id])
-            ax.set_title('1D PDF for source with ID '+str(id))
-            y_lim = ax.get_ylim()
-            y_size = y_lim[1]-y_lim[0]
-            specz = self.table[event.ind[0]][1]
-            ax.plot([specz, specz], y_lim, c='k', alpha=.5)
-            ax.text(specz, y_lim[0]+.9*y_size, 'SpecZ', color='k', alpha=.5)
-            phz = self.table[event.ind[0]][2]
-            ax.plot([phz, phz], y_lim, c='r', alpha=.5)
-            ax.text(phz, y_lim[0]+.95*y_size, 'PHZ', color='r', alpha=.5)
-            plt.show()
-            
-
-#
-#-------------------------------------------------------------------------------
-#
-
-class SampUpdater(object):
-
-    def __init__(self, tablenames, id_col, table, orig_ids, update_listeners):
-        self.topcat = None
-        self.update_listeners = update_listeners
-        try:
-            self.client = SAMPIntegratedClient()
-            self.client.connect()
-            for c in self.client.get_registered_clients():
-                meta = self.client.get_metadata(c)
-                if 'samp.name' in meta and meta['samp.name'] == 'topcat':
-                    self.topcat = c
-        except:
-            pass
-        if self.topcat:
-            self.client.bind_receive_notification('table.highlight.row', self.rowNotification)
-            self.table_urls = []
-            self.table_ids = []
-            self.global_ids = table['ID']
-            self.global_ids_reverse = {}
-            for i in range(len(self.global_ids)):
-                self.global_ids_reverse[self.global_ids[i]] = i
-            self.id_col = id_col
-            self.orig_ids = orig_ids
-            for ti, name in enumerate(tablenames):
-                try:
-                    data = Table.read(name, format='fits')
-                except:
-                    continue
-                id_map = {}
-                for i in range(len(data)):
-                    id_map[data[id_col[ti]][i]] = i
-                self.table_ids.append(id_map)
-                url = 'file:' + os.path.abspath(name)
-                table_name = os.path.basename(name)
-                self.table_urls.append(url)
-                message = {'samp.mtype' : 'table.load.fits',
-                           'samp.params' : { 'url' : url,
-                                             'name' : table_name }}
-                self.client.notify(self.topcat, message)
-
-    def updateSelected(self, i):
-        if self.topcat:
-            for url, ids in zip(self.table_urls, self.table_ids):
-                message = {'samp.mtype' : 'table.highlight.row',
-                           'samp.params' : { 'url' : url,
-                                             'row' : str(ids[self.global_ids[i]]) }}
-                self.client.notify_all(message)
-
-    def rowNotification(self, private_key, sender_id, mtype, params, extra):
-        url = params['url']
-        if not url in self.table_urls:
-            return
-        i = self.table_urls.index(url)
-        row = int(params['row'])
-        id = self.orig_ids[i][row]
-        global_row = self.global_ids_reverse[id]
-        for l in self.update_listeners:
-            l.updateSelected(global_row)
-
-#
-#-------------------------------------------------------------------------------
-#
-
-def displaySpeczPhotz(ids, specz, photz, data):
+    def _updatePlots(self):
+        if self.selected_index == None:
+            return []
+        self.id_text.set_text('selected ID: %d' % self.ids[self.selected_index])
+        self.selected1.set_visible(True)
+        self.selected1.set_offsets([self.specz[self.selected_index], self.photz[self.selected_index]])
+        self.selected2.set_visible(True)
+        self.selected2.set_offsets([self.specz[self.selected_index], self.data[self.selected_index]])
+        return self.id_text, self.selected1, self.selected2
     
-    z_max = max(max(specz), max(photz)) + 0.1
-    data_max = max(max(data), abs(min(data))) + 0.1
+    def _makeTightLayout(self):
+        self.fig.tight_layout()
+        self.fig.subplots_adjust(hspace=0)
 
-    f = plt.figure(figsize=(7, 8))
-
-    # Create the specz-photz plot
-    ax1 = plt.subplot2grid((4,3), (0,0), rowspan=3, colspan=3)
-    ax1.set_ylabel('PhotoZ')
-    # Plot the diagonal
-    ax1.plot([-0.1, z_max], [-0.1, z_max], c='k', alpha=0.2)
-    # Plot the outlier limits
-    x_r = [v/10. for v in range(0,int(z_max*10+1))]
-    y1 = [0.15+1.15*x for x in x_r]
-    y2 = [-0.15+.85*x for x in x_r]
-    ax1.plot(x_r, y1, "r", alpha=.3)
-    ax1.plot(x_r, y2, "r", alpha=.3)
-    # Plot the data
-    ax1.scatter(specz, photz, c='b', marker='o', s=10, edgecolors='none', alpha=0.6, picker=True)
-    ax1.set_xlim([-0.1, z_max])
-    ax1.set_ylim([-0.1, z_max])
-
-    # Create the Dz/(1+z) plot
-    ax2 = plt.subplot2grid((4,3), (3,0), colspan=3)
-    ax2.set_ylabel('$\Delta$z/(1+z)')
-    ax2.set_xlabel('SpecZ')
-    # Plot the zero line
-    ax2.plot ([-0.1, z_max], [0, 0], c='k', alpha=0.2)
-    # Plot the outlier limits
-    ax2.plot ([-0.1, z_max], [0.15, 0.15], c='r', alpha=0.3)
-    ax2.plot ([-0.1, z_max], [-0.15, -0.15], c='r', alpha=0.3)
-    ax2.scatter(specz, data, c='b', marker='o', s=10, edgecolors='none', alpha=0.6, picker=True)
-    ax2.set_xlim([-0.1, z_max])
-    ax2.set_ylim([-data_max, data_max])
-
-    f.tight_layout()
-    f.subplots_adjust(hspace=0)
+    def __init__(self, ids, specz, photz, data):
+        self.ids = ids
+        self.specz = specz
+        self.photz = photz
+        self.data = data
+        
+        self.fig = plt.figure(figsize=(7, 8))
+        self.z_max = max(max(specz), max(photz)) + 0.1
+        self.data_max = max(max(data), abs(min(data))) + 0.1
+        
+        self._createSpeczPhotozPlot()
+        self._createDeltaZPlot()
+        self._createSelected()
+        
+        self._makeTightLayout()
+        self.fig.canvas.mpl_connect('resize_event', lambda x:self._makeTightLayout())
+        self.canvas = self.fig.canvas
+        
+        self.selected_index = None
+        self.anim = animation.FuncAnimation(self.fig, lambda n:self._updatePlots(), interval=100, blit=True, repeat=True)
     
-    id_text = ax1.text(0.05, 0.95, 'selected ID:', transform=ax1.transAxes, va='top')
-    selected1 = ax1.scatter(0, 0, c='none', marker='o', s=60, edgecolors='#00EE00', linewidth='2', visible=False)
-    selected2 = ax2.scatter(0, 0, c='none', marker='o', s=60, edgecolors='#00EE00', linewidth='2', visible=False)
-    def updateSelected(index):
-        id_text.set_text('selected ID: %d' % ids[index])
-        selected1.set_visible(True)
-        selected1.set_offsets([specz[index], photz[index]])
-        selected2.set_visible(True)
-        selected2.set_offsets([specz[index], data[index]])
-        plt.pause(.01)
-        f.canvas.draw()
-    f.updateSelected = lambda x: updateSelected(x)
-    return f
+    def updateSelectedRow(self, index):
+        self.selected_index = index
 
 #
 #-------------------------------------------------------------------------------
@@ -371,14 +249,203 @@ def displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOut
     ax.text(ax.get_xlim()[0], ax.get_ylim()[1], txt, fontsize=10, family='sans-serif', style='italic', ha='left', va='top', alpha=.5)
     
     f.tight_layout()
+    f.canvas.mpl_connect('resize_event', lambda x:f.tight_layout())
     return f
-    
+
 #
 #-------------------------------------------------------------------------------
 #
 
-def main():
+class PdfPlot(object):
+    
+    def _updatePlot(self):
+        if self.selected_index == None:
+            return []
+        
+        row = self.catalog[self.selected_index]
+        self.lines.set_ydata(self.pdf_list[self.selected_index])
+        self.ax.set_ylim(0, max(self.pdf_list[self.selected_index])*1.05)
+        
+        if self.parameter == 'Z':
+            y_lim = self.ax.get_ylim()
+            y_size = y_lim[1]-y_lim[0]
+            specz = self.catalog[self.selected_index]['SPECZ']
+            self.speczLine.set_visible(True)
+            self.speczLine.set_xdata([specz, specz])
+            self.speczLine.set_ydata(y_lim)
+            self.speczText.set_visible(True)
+            self.speczText.set_x(specz)
+            self.speczText.set_y(y_lim[0]+.9*y_size)
+            phz = catalog[self.selected_index][self.phz_col]
+            self.phzLine.set_visible(True)
+            self.phzLine.set_xdata([phz, phz])
+            self.phzLine.set_ydata(y_lim)
+            self.phzText.set_visible(True)
+            self.phzText.set_x(phz)
+            self.phzText.set_y(y_lim[0]+.9*y_size)
+
+        return [self.ax, self.lines, self.speczLine, self.speczText, self.phzLine, self.phzText]
+
+    def _initFigure(self):
+        self.fig, self.ax = plt.subplots(figsize=(6, 3))
+        self.fig.canvas.set_window_title(self.parameter+' 1D PDF')
+        xs = self.bins if self.is_numerical else range(len(self.bins))
+        self.lines, = self.ax.plot(xs, [0]*len(xs))
+        self.ax.set_xlim(0, max(xs))
+        if not self.is_numerical:
+            labels = []
+            for l in self.bins:
+                if '/' in l:
+                    labels.append(l[l.rfind('/')+1:])
+                else:
+                    labels.append(l)
+            self.ax.set_xticks(range(len(self.bins)))
+            self.ax.set_xticklabels(labels, rotation='vertical')
+        self.fig.tight_layout()
+        self.fig.canvas.mpl_connect('resize_event', lambda x:self.fig.tight_layout())
+    
+    def _initZLines(self):
+        self.speczLine, = self.ax.plot([0, 0], [0, 0], c='k', alpha=.5, visible=False)
+        self.speczText = self.ax.text(0, 0, 'SpecZ', color='k', alpha=.5, visible=False)
+        self.phzLine, = self.ax.plot([0, 0], [0, 0], c='r', alpha=.5, visible=False)
+        self.phzText = self.ax.text(0, 0, 'PHZ', color='r', alpha=.5, visible=False)
+    
+    def __init__(self, parameter, bins, pdf_list, catalog, phz_col):
+        self.parameter = parameter
+        self.bins = bins
+        self.pdf_list = pdf_list
+        self.catalog = catalog
+        self.phz_col = phz_col
+        
+        self.is_numerical = isinstance(self.bins[0], numbers.Number)
+        self.pdf_title_map = {'SED':'SED', 'REDDENING-CURVE':'Reddening Curve', 'EBV':'E(B-V)', 'Z':'Z'}
+        self._initFigure()
+        self._initZLines()
+        
+        self.selected_index = None
+        self.anim = animation.FuncAnimation(self.fig, lambda n:self._updatePlot(), interval=100, blit=False, repeat=True)
+       
+    def updateSelectedRow(self, index):
+        self.selected_index = index
+        
+
+#
+#-------------------------------------------------------------------------------
+#
+
+class Selector(object):
+    
+    def __init__(self, obj_list, catalog):
+        for obj in obj_list:
+            if hasattr(obj, 'canvas'):
+                obj.canvas.mpl_connect('pick_event', self.onpick)
+        self.obj_list = obj_list
+        self.catalog = catalog
+    
+    def _print_cols(self, index):
+        row = self.catalog[index]
+        print '\nFull info for source with ID',row['ID'],':'
+        for c in row.colnames:
+            print '   ',c,'=',row[c]
+    
+    def onpick(self, event):
+        if event.mouseevent.button != 1:
+            return
+        
+        index = event.ind[0]
+        
+        for obj in self.obj_list:
+            if hasattr(obj, 'updateSelectedRow'):
+                obj.updateSelectedRow(index)
+                
+        if not event.mouseevent.dblclick:
+            return
+        
+        self._print_cols(index)
+            
+
+#
+#-------------------------------------------------------------------------------
+#
+
+class SampUpdater(object):
+
+    def __init__(self, specz_file, specz_id, phos_out_dir, catalog, update_listeners):
+        self.topcat = None
+        self.update_listeners = update_listeners
+        try:
+            self.client = SAMPIntegratedClient()
+            self.client.connect()
+            for c in self.client.get_registered_clients():
+                meta = self.client.get_metadata(c)
+                if 'samp.name' in meta and meta['samp.name'] == 'topcat':
+                    self.topcat = c
+        except:
+            pass
+        if self.topcat:
+            self.client.bind_receive_notification('table.highlight.row', self.rowNotification)
+            self.table_urls = []
+            self.table_ids = []
+            self.global_ids = catalog['ID']
+            self.global_ids_reverse = {}
+            for i in range(len(self.global_ids)):
+                self.global_ids_reverse[self.global_ids[i]] = i
+            
+            self.id_col = []
+            self.orig_ids = []
+            tablenames = []
+            try:
+                data = table.Table.read(specz_file, format='fits')
+                tablenames.append(specz_file)
+                self.id_col.append(specz_id)
+            except:
+                pass
+            if os.path.exists(phos_out_dir+'/phz_cat.fits'):
+                tablenames.append(phos_out_dir+'/phz_cat.fits')
+                self.id_col.append('ID')
+            
+            for ti, name in enumerate(tablenames):
+                data = table.Table.read(name, format='fits')
+                self.orig_ids.append(data[self.id_col[ti]])
+                id_map = {}
+                for i in range(len(data)):
+                    id_map[data[self.id_col[ti]][i]] = i
+                self.table_ids.append(id_map)
+                url = 'file:' + os.path.abspath(name)
+                table_name = os.path.basename(name)
+                self.table_urls.append(url)
+                message = {'samp.mtype' : 'table.load.fits',
+                           'samp.params' : { 'url' : url,
+                                             'name' : table_name }}
+                self.client.notify(self.topcat, message)
+
+    def updateSelectedRow(self, i):
+        if self.topcat:
+            for url, ids in zip(self.table_urls, self.table_ids):
+                message = {'samp.mtype' : 'table.highlight.row',
+                           'samp.params' : { 'url' : url,
+                                             'row' : str(ids[self.global_ids[i]]) }}
+                self.client.notify_all(message)
+
+    def rowNotification(self, private_key, sender_id, mtype, params, extra):
+        url = params['url']
+        if not url in self.table_urls:
+            return
+        i = self.table_urls.index(url)
+        row = int(params['row'])
+        id = self.orig_ids[i][row]
+        global_row = self.global_ids_reverse[id]
+        for l in self.update_listeners:
+            if getattr(l, 'updateSelectedRow', None) != None:
+                l.updateSelectedRow(global_row)
+
+
+################## MAIN ###########
+
+if __name__ == '__main__':
+
     import argparse
+    
     usage = """
             usage: %prog [options] \n           
             
@@ -388,60 +455,43 @@ def main():
             and the mean, median and displays an histogram of outliers
    
             """ 
-
     parser = argparse.ArgumentParser(usage, version='%prog version 1.0', description=__doc__)
 
-    parser.add_argument("-f", "--files", type=str, nargs='+',
-                        help="Input file(s) to read(catalog)")
-    parser.add_argument("-i", "--id", type=str, nargs='+', default=['ID'],
-                        help="The name(s) of the ID column(s). If a single name is given, "
-                             "it is used for all catalogs. (default: ID)")
-    parser.add_argument("-s", "--specz", type=str, default='ZSPEC',
-                        help="The name of the spectroscopic redshift column (default: ZSPEC)")
-    parser.add_argument("-p", "--phz", type=str, default='Z',
-                        help="The name of the photometric redshift column (default: Z)")
-    parser.add_argument("-d", "--display", action="store_false", default=True,
-                        help="Disables the plot window")
-    parser.add_argument("-pdf", "--pdf", type=str, default='1D-PDF',
-                        help="The FITS file or the table column containings the 1D PDF")
-    parser.add_argument("-samp", "--samp", action="store_true", default=False,
-                        help="Enables communication with other SAMP applications")
+    parser.add_argument('-scat', '--specz-catalog', type=str, required=True, help='Catalog file containing the spec-z')
+    parser.add_argument('-sid', '--specz-cat-id', type=str, default='ID', help='Spec-z catalog ID column')
+    parser.add_argument('-scol', '--specz-column', type=str, default='ZSPEC', help='Spec-z column name')
+    parser.add_argument('-pod', '--phosphoros-output-dir', required=True, type=str, help='Directory to read Phosphoros outputs from')
+    parser.add_argument('-pcol', '--phz-column', type=str, default='Z', help='Photo-z column name')
+    parser.add_argument("-nd", "--no-display", action="store_true", default=False, help="Disables the plot window")
+    parser.add_argument("-samp", "--samp", action="store_true", default=False, help="Enables communication with other SAMP applications")
 
     args = parser.parse_args()
-            
-    return args
-
-
     
-################## MAIN ###########
-if __name__ == '__main__':
-            
-    args = main()  
-
-    ids = args.id
-    if len(ids) == 1:
-        ids = [ids[0]] * len(args.files)
-    if len(ids) != len(args.files):
-        print 'Wrong number of ID column names (must much the number of catalogs or 1)'
+    specz_cat = read_specz_catalog(args.specz_catalog, args.specz_cat_id, args.specz_column)
     
-    # Read input files
-    table, all_cols, orig_ids = create_table(args.files, ids, args.specz, args.phz, args.pdf)
-
-    # Read PDFs if available
-    zs, pdfs = read_pdfs(table, args.pdf, args.files)
-
-    col_number = 2
-    label = "PhotZ"
-   
-    (specZ, colZ, data, mean, median, sigma, mad, outliersPercent,sigmaNoOutliers, meanNoOutliers) = compute_stats(table, col_number)
-        
-    # Plot distribution
-    if args.display:
-            fig1 = displaySpeczPhotz(table['ID'], specZ, colZ, data)
-            fig2 = displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers)
-            samp = None
-            if args.samp:
-                samp = SampUpdater(args.files, ids, table, orig_ids, (fig1, fig2))
-            selector = Selector((fig1, fig2, samp), table, all_cols, zs, pdfs)
-            plt.show()
+    phos_cat = read_phosphoros_catalog(args.phosphoros_output_dir)
     
+    # merge the catalogs
+    print 'Merging the catalogs'
+    catalog = table.join(specz_cat, phos_cat, keys='ID')
+    
+    specz = catalog['SPECZ']
+    phz = catalog[args.phz_column]
+    data, mean, median, sigma, mad, outliersPercent,sigmaNoOutliers, meanNoOutliers = compute_stats(specz, phz)
+    
+    if args.no_display:
+        exit()
+
+    fig1 = SpeczPhotozPlot(catalog['ID'], specz, phz, data)
+    fig2 = displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers)
+    
+    pdfs = read_pdfs(catalog, args.phosphoros_output_dir)
+    pdf_plots = [PdfPlot(param, bins, pdf_list, catalog,args.phz_column) for param, bins, pdf_list in pdfs if len(bins)>1]
+    
+    samp = None
+    if args.samp:
+        samp = SampUpdater(args.specz_catalog, args.specz_cat_id, args.phosphoros_output_dir, catalog, [fig1] + pdf_plots)
+    
+    selector = Selector([fig1, samp] + pdf_plots, catalog)
+    
+    plt.show()
