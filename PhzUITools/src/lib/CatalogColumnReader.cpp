@@ -7,11 +7,11 @@
 
 #include <fstream>
 #include <array>
+#include "AlexandriaKernel/memory_tools.h"
 #include "PhzUITools/CatalogColumnReader.h"
-#include <CCfits/CCfits>
+#include "Table/TableReader.h"
 #include "Table/AsciiReader.h"
 #include "Table/FitsReader.h"
-#include "Table/Table.h"
 
 namespace Euclid {
 namespace PhzUITools {
@@ -32,20 +32,17 @@ std::set<std::string> CatalogColumnReader::getColumnNames() {
     if (first_header_str.compare(0, 9, "SIMPLE  =") == 0) {
       is_fit_file=true;
     }
-
-    std::shared_ptr<Table::ColumnInfo> column_info_ptr;
-
-    if (is_fit_file){
-      CCfits::FITS fits {m_file_name};
-      column_info_ptr = Table::FitsReader().read(fits.extension(1)).getColumnInfo();
-    } else{
-      std::ifstream in {m_file_name};
-      column_info_ptr =Table::AsciiReader().read(in).getColumnInfo();
-
+    
+    std::unique_ptr<Table::TableReader> reader {};
+    if (is_fit_file) {
+      reader = make_unique<Table::FitsReader>(m_file_name, 1);
+    } else {
+      reader = make_unique<Table::AsciiReader>(m_file_name);
     }
+    auto& info = reader->getInfo();
 
-    for(std::size_t i=0; i< column_info_ptr->size();++i){
-      column_names.insert(column_info_ptr->getDescription(i).name);
+    for(std::size_t i=0; i< info.size();++i){
+      column_names.insert(info.getDescription(i).name);
     }
   } catch(...) {} // if the program is not able to read the file return an empty list...
 
