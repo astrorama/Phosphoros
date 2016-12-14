@@ -783,12 +783,15 @@ template<typename ReturnType, int I>
           "It is not possible to save the Grid under the name you have provided. Please enter a new name.",
           QMessageBox::Ok);
     } else {
-
+      QString filter = "Config (*.conf)";
       QString fileName = QFileDialog::getSaveFileName(this,
           tr("Save Configuration File"),
           QString::fromStdString(FileUtils::getRootPath(true))+"config",
-          tr("Config (*.conf)"));
+          filter,&filter);
       if (fileName.length()>0) {
+        if(!fileName.endsWith(".conf", Qt::CaseInsensitive)){
+          fileName=fileName+".conf";
+        }
         auto config_map = getGridConfiguration();
         PhzUITools::ConfigurationWriter::writeConfiguration(config_map,fileName.toStdString());
 
@@ -1086,10 +1089,15 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
 
   void FormAnalysis::on_btn_GetConfigAnalysis_clicked()
   {
+    QString filter = "Config (*.conf)";
+
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save Configuration File"),
         QString::fromStdString(FileUtils::getRootPath(true))+"config",
-        tr("Config (*.conf)"));
+        filter,&filter);
     if (fileName.length()>0) {
+      if(!fileName.endsWith(".conf", Qt::CaseInsensitive)){
+               fileName=fileName+".conf";
+      }
       auto config_map = getRunOptionMap();
       PhzUITools::ConfigurationWriter::writeConfiguration(config_map,fileName.toStdString());
 

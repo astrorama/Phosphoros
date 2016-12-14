@@ -150,7 +150,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Select filter curves and define their mapping to columns names</string>
+      <string>Select filter curves and define their mapping to column names</string>
      </property>
     </widget>
    </item>
