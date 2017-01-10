@@ -495,7 +495,7 @@
           <bool>false</bool>
          </property>
          <property name="title">
-          <string>Override the Maximum Number of Thread</string>
+          <string>Override the Maximum Number of Threads</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
