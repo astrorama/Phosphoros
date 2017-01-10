@@ -7,11 +7,11 @@
 
 #include <fstream>
 #include <array>
+#include "AlexandriaKernel/memory_tools.h"
 #include "PhzUITools/CatalogColumnReader.h"
-#include <CCfits/CCfits>
+#include "Table/TableReader.h"
 #include "Table/AsciiReader.h"
 #include "Table/FitsReader.h"
-#include "Table/Table.h"
 
 namespace Euclid {
 namespace PhzUITools {
@@ -45,6 +45,7 @@ std::set<std::string> CatalogColumnReader::getColumnNames() {
 
     for(std::size_t i=0; i< column_info.size();++i){
       column_names.insert(column_info.getDescription(i).name);
+
     }
   } catch(...) {} // if the program is not able to read the file return an empty list...
 
