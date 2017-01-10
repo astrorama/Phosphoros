@@ -19,6 +19,14 @@ namespace PhzUITools {
 CatalogColumnReader::CatalogColumnReader(std::string file_name) : m_file_name(file_name) {
 }
 
+Table::ColumnInfo GetInfo(std::string file_name,bool is_fit_file){
+  if (is_fit_file){
+        return Table::FitsReader(file_name,1).getInfo();
+      } else{
+        return Table::AsciiReader(file_name).getInfo();
+      }
+}
+
 std::set<std::string> CatalogColumnReader::getColumnNames() {
   std::set<std::string> column_names;
 
@@ -33,19 +41,10 @@ std::set<std::string> CatalogColumnReader::getColumnNames() {
       is_fit_file=true;
     }
 
-    std::shared_ptr<Table::ColumnInfo> column_info_ptr;
+    Table::ColumnInfo column_info = GetInfo(m_file_name, is_fit_file);
 
-    if (is_fit_file){
-      CCfits::FITS fits {m_file_name};
-      column_info_ptr = Table::FitsReader().read(fits.extension(1)).getColumnInfo();
-    } else{
-      std::ifstream in {m_file_name};
-      column_info_ptr =Table::AsciiReader().read(in).getColumnInfo();
-
-    }
-
-    for(std::size_t i=0; i< column_info_ptr->size();++i){
-      column_names.insert(column_info_ptr->getDescription(i).name);
+    for(std::size_t i=0; i< column_info.size();++i){
+      column_names.insert(column_info.getDescription(i).name);
     }
   } catch(...) {} // if the program is not able to read the file return an empty list...
 
