@@ -20,24 +20,7 @@ DialogFilterMapping::DialogFilterMapping(QWidget *parent) :
 
 DialogFilterMapping::~DialogFilterMapping(){}
 
-void DialogFilterMapping::setFilter(const FilterMapping& filter, const set<string>& columns){
-
-  //// Setup the File columns combobox;
-  ui->cb_error->clear();
-  ui->cb_error->addItem("");
-  ui->cb_flux->clear();
-  ui->cb_flux->addItem("");
-
-  // Fill the File columns combo box.
-  for(auto item : columns){
-    ui->cb_error->addItem(QString::fromStdString(item));
-    ui->cb_flux->addItem(QString::fromStdString(item));
-  }
-
-  ui->cb_error->setCurrentIndex(0);
-  ui->cb_flux->setCurrentIndex(0);
-  ui->cb_error->setItemText(0,QString::fromStdString(filter.getErrorColumn()));
-  ui->cb_flux->setItemText(0,QString::fromStdString(filter.getFluxColumn()));
+void DialogFilterMapping::setFilters(const std::vector<std::string>& filters){
 
   //// Load the XYDataSetTreeModel with the filters
   string path_filter = FileUtils::getFilterRootPath(true);
@@ -45,16 +28,12 @@ void DialogFilterMapping::setFilter(const FilterMapping& filter, const set<strin
   treeModel_filter->loadDirectory(path_filter,true,"Filters");
   treeModel_filter->setEnabled(true);
   ui->treeView_filter->setModel(treeModel_filter);
+ // ui->treeView_filter->expand(ui->treeView_filter->model()->index(0,0));
   ui->treeView_filter->expandAll();
 
-  connect( treeModel_filter,
-           SIGNAL(itemChanged(QStandardItem*)),
-           treeModel_filter,
-           SLOT(onItemChangedSingleLeaf(QStandardItem*)));
+  treeModel_filter->setState(filters);
 
-  treeModel_filter->setState(filter.getFilterFile(),vector<string>());
-
-  if (!treeModel_filter->item(0,0)->hasChildren()){
+  if (treeModel_filter->rowCount()==0){
       QMessageBox::warning(this, "No available filter...",
               "There is no filter transmission curve to select. "
               "You can provide and manage filter transmission curves in the \"Configuration/Aux. Data\" page.",
@@ -64,25 +43,7 @@ void DialogFilterMapping::setFilter(const FilterMapping& filter, const set<strin
 
 
 void DialogFilterMapping::on_btn_save_clicked(){
-  auto filter_res = static_cast<XYDataSetTreeModel*>(ui->treeView_filter->model())->getRootSelection();
-  if (!filter_res.first
-            || ui->cb_flux->currentText().trimmed().length()==0
-            || ui->cb_error->currentText().trimmed().length()==0){
-    QMessageBox::warning( this,
-                          "Missing Data...",
-                          "Please provide a name, flux column, error column and a filter transmission.",
-                          QMessageBox::Ok );
-    return;
-  }
-
-  // Create the filter from the input values
-  FilterMapping filter;
-  filter.setFluxColumn(ui->cb_flux->currentText().trimmed().toStdString());
-  filter.setErrorColumn(ui->cb_error->currentText().trimmed().toStdString());
-  filter.setFilterFile(filter_res.second);
-
-  // return the filter to the caller
-  popupClosing(filter);
+  popupClosing(static_cast<XYDataSetTreeModel*>(ui->treeView_filter->model())->getSelectedLeaves());
   accept();
 }
 

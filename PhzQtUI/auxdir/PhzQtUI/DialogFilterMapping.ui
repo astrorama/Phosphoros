@@ -26,7 +26,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Photometric Filter Mapping</string>
+        <string>Select Photometric Filters</string>
        </property>
       </widget>
      </item>
@@ -53,49 +53,9 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>*Flux Column :</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="cb_flux">
-         <property name="editable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>*Error Column :</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="cb_error">
-         <property name="editable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </item>
-   <item>
     <widget class="QLabel" name="label_5">
      <property name="text">
-      <string>*Filter Full Transmission :</string>
+      <string>Filter Transmission Curves:</string>
      </property>
     </widget>
    </item>

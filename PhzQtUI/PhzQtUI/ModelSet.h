@@ -35,14 +35,14 @@ public:
       * @param root_path
       * The folder into which the storing file will be created.
       */
-    ModelSet(std::string root_path);
+    explicit ModelSet(std::string root_path);
 
     /**
      * @brief get Model Number
      * @return the cardinality of numbers which can be build from the ParameterRule(s)
      * of the ModelSet.
      */
-    long long getModelNumber() const;
+    long long getModelNumber(bool recompute = false);
 
     /**
      * @brief get the Name.
@@ -107,7 +107,7 @@ public:
     /**
      * create a xml serialized version of the ModelSet
      */
-    QDomDocument serialize() const;
+    QDomDocument serialize();
 
     /**
      * @brief compute the configuration (as a map<string,variable_values> ) corresponding to

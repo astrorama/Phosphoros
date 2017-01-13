@@ -6,57 +6,152 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1091</width>
-    <height>883</height>
+    <width>1041</width>
+    <height>912</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>16777215</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_13">
+   <property name="margin">
+    <number>0</number>
+   </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_16">
-     <item>
-      <widget class="QPushButton" name="btn_AnalysisToHome">
-       <property name="text">
-        <string>Home</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_17">
-       <property name="font">
-        <font>
-         <pointsize>17</pointsize>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>&gt; Compute Redshifts</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_18">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line_11">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+    <widget class="QFrame" name="frm_nav">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
      </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_17">
+      <item>
+       <widget class="QPushButton" name="btn_ToOption">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Working directory path definition, Auxiliary data management and Cosmological parameters definition.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="text">
+         <string>Configuration </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btn_ToCatalog">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Define the Mapping between the catalog file(s) columns and the filters</string>
+        </property>
+        <property name="text">
+         <string>Catalog Types</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btn_ToModel">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>Specify the parameter space for the creation of model grid.</string>
+        </property>
+        <property name="text">
+         <string>Parameter Spaces</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btn_ToAnalysis">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>11</pointsize>
+         </font>
+        </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Compute the model grid, calculate photometric correction, specify luminosity prior and run template fitting in order to produce photo-z catalog.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(210, 210, 210)</string>
+        </property>
+        <property name="text">
+         <string>Compute Redshifts </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_7">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btn_exit">
+        <property name="text">
+         <string>Quit</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
@@ -69,138 +164,143 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1071</width>
-        <height>774</height>
+        <width>1039</width>
+        <height>814</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_9">
        <item>
-        <widget class="QLabel" name="label_18">
-         <property name="font">
-          <font>
-           <pointsize>14</pointsize>
-          </font>
+        <widget class="QFrame" name="frame">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>180</height>
+          </size>
          </property>
-         <property name="text">
-          <string>1. Catalog, Model Grid Specification and Filter Selection :</string>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>180</height>
+          </size>
          </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="0">
+             <layout class="QVBoxLayout" name="verticalLayout_14">
+              <item>
+               <widget class="QLabel" name="label_19">
+                <property name="text">
+                 <string>Catalog Type :</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="cb_AnalysisSurvey"/>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_20">
+                <property name="text">
+                 <string>Parameter Space :</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="cb_AnalysisModel"/>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_6">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+            <item row="0" column="1">
+             <layout class="QVBoxLayout" name="verticalLayout_15">
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_18">
+                <item>
+                 <widget class="QLabel" name="label_21">
+                  <property name="toolTip">
+                   <string>List of Catalog's Filters. You may exclude some filters of the analysis by unchecking them into the grid.</string>
+                  </property>
+                  <property name="text">
+                   <string>Filter Selection  :</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_19">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QTableView" name="tableView_filter">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>120</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string/>
+                </property>
+                <property name="editTriggers">
+                 <set>QAbstractItemView::NoEditTriggers</set>
+                </property>
+                <property name="showDropIndicator" stdset="0">
+                 <bool>false</bool>
+                </property>
+                <property name="dragDropOverwriteMode">
+                 <bool>false</bool>
+                </property>
+                <attribute name="horizontalHeaderVisible">
+                 <bool>false</bool>
+                </attribute>
+                <attribute name="horizontalHeaderHighlightSections">
+                 <bool>false</bool>
+                </attribute>
+                <attribute name="horizontalHeaderStretchLastSection">
+                 <bool>true</bool>
+                </attribute>
+                <attribute name="verticalHeaderVisible">
+                 <bool>false</bool>
+                </attribute>
+                <attribute name="verticalHeaderHighlightSections">
+                 <bool>false</bool>
+                </attribute>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+         </layout>
         </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_17">
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_14">
-           <item>
-            <widget class="QLabel" name="label_19">
-             <property name="text">
-              <string>Catalog Type :</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="cb_AnalysisSurvey"/>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_20">
-             <property name="text">
-              <string>Parameter Space Specification :</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="cb_AnalysisModel"/>
-           </item>
-           <item>
-            <spacer name="verticalSpacer_6">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_20">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_15">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_18">
-             <item>
-              <widget class="QLabel" name="label_21">
-               <property name="toolTip">
-                <string>List of Catalog's Filters. You may exclude some filters of the analysis by unchecking them into the grid.</string>
-               </property>
-               <property name="text">
-                <string>Filter Selection † :</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_19">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QTableView" name="tableView_filter">
-             <property name="toolTip">
-              <string/>
-             </property>
-             <property name="editTriggers">
-              <set>QAbstractItemView::NoEditTriggers</set>
-             </property>
-             <property name="showDropIndicator" stdset="0">
-              <bool>false</bool>
-             </property>
-             <property name="dragDropOverwriteMode">
-              <bool>false</bool>
-             </property>
-             <attribute name="horizontalHeaderVisible">
-              <bool>false</bool>
-             </attribute>
-             <attribute name="horizontalHeaderHighlightSections">
-              <bool>false</bool>
-             </attribute>
-             <attribute name="horizontalHeaderStretchLastSection">
-              <bool>true</bool>
-             </attribute>
-             <attribute name="verticalHeaderVisible">
-              <bool>false</bool>
-             </attribute>
-             <attribute name="verticalHeaderHighlightSections">
-              <bool>false</bool>
-             </attribute>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
        </item>
        <item>
         <widget class="QToolBox" name="toolBox">
@@ -217,12 +317,12 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>416</width>
-            <height>166</height>
+            <width>1021</width>
+            <height>458</height>
            </rect>
           </property>
           <attribute name="label">
-           <string>2. Model Grid Generation / Selection :</string>
+           <string>1. Model Grid Generation / Selection</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_10">
            <item>
@@ -233,7 +333,7 @@
               </font>
              </property>
              <property name="text">
-              <string>IGM absorption type :</string>
+              <string>IGM Absorption Type :</string>
              </property>
             </widget>
            </item>
@@ -375,12 +475,12 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1053</width>
-            <height>206</height>
+            <width>1021</width>
+            <height>458</height>
            </rect>
           </property>
           <attribute name="label">
-           <string>3. Photometric Zero-Point Corrections :</string>
+           <string>2. Photometric Zero-Point Corrections</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_11">
            <item>
@@ -407,23 +507,35 @@
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_7">
               <item>
-               <widget class="QLabel" name="label_24">
-                <property name="font">
-                 <font>
-                  <pointsize>14</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>3. Photometric Zero-Point Corrections :</string>
-                </property>
-               </widget>
+               <layout class="QHBoxLayout" name="horizontalLayout_3">
+                <item>
+                 <widget class="QPushButton" name="btn_computeCorrections">
+                  <property name="text">
+                   <string>Compute New Corrections </string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_5">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
               </item>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_2">
                 <item>
                  <widget class="QLabel" name="label_28">
                   <property name="text">
-                   <string>Compatible Photometric Zero-Point Corrections :</string>
+                   <string>Select Existing Compatible Corrections :</string>
                   </property>
                  </widget>
                 </item>
@@ -439,13 +551,6 @@
                    </size>
                   </property>
                  </spacer>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="btn_computeCorrections">
-                  <property name="text">
-                   <string>Compute Corrections †</string>
-                  </property>
-                 </widget>
                 </item>
                </layout>
               </item>
@@ -521,12 +626,12 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>673</width>
-            <height>185</height>
+            <width>1021</width>
+            <height>458</height>
            </rect>
           </property>
           <attribute name="label">
-           <string>4. Algorithm Options :</string>
+           <string>3. Algorithm Options</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_6">
            <item>
@@ -649,7 +754,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>Configure Luminosity Prior †</string>
+                <string>Configure Luminosity Prior </string>
                </property>
               </widget>
              </item>
@@ -687,12 +792,12 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1053</width>
-            <height>255</height>
+            <width>1021</width>
+            <height>458</height>
            </rect>
           </property>
           <attribute name="label">
-           <string>5. Input /Output Files :</string>
+           <string>4. Input /Output Files</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_8">
            <item>
@@ -804,7 +909,7 @@
                   </font>
                  </property>
                  <property name="title">
-                  <string>Generate Output Catalog with format :</string>
+                  <string>Generate Output Catalog with Format :</string>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
@@ -814,12 +919,12 @@
                    <widget class="QComboBox" name="cb_cat_output_type">
                     <item>
                      <property name="text">
-                      <string>ASCII</string>
+                      <string>FITS</string>
                      </property>
                     </item>
                     <item>
                      <property name="text">
-                      <string>FITS</string>
+                      <string>ASCII</string>
                      </property>
                     </item>
                    </widget>
@@ -835,7 +940,7 @@
                   </font>
                  </property>
                  <property name="title">
-                  <string>Generate Output PDF file </string>
+                  <string>Generate Output PDF File </string>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
@@ -854,7 +959,7 @@
                   </font>
                  </property>
                  <property name="title">
-                  <string>Generate Likelihood files</string>
+                  <string>Generate Likelihood Files</string>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
@@ -872,7 +977,7 @@
                   </font>
                  </property>
                  <property name="title">
-                  <string>Generate Posterior files </string>
+                  <string>Generate Posterior Files </string>
                  </property>
                  <property name="checkable">
                   <bool>true</bool>
@@ -924,18 +1029,11 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_backHome">
-       <property name="text">
-        <string>Back to Home</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <layout class="QVBoxLayout" name="verticalLayout_24">
        <item>
         <widget class="QPushButton" name="btn_GetConfigAnalysis">
          <property name="text">
-          <string>Get Config. File †</string>
+          <string>Get Config. File </string>
          </property>
         </widget>
        </item>
@@ -946,7 +1044,7 @@
        <item>
         <widget class="QPushButton" name="btn_RunAnalysis">
          <property name="text">
-          <string>Run †</string>
+          <string>Run </string>
          </property>
         </widget>
        </item>
@@ -955,6 +1053,8 @@
     </layout>
    </item>
   </layout>
+  <zorder>scrollArea</zorder>
+  <zorder>frm_nav</zorder>
  </widget>
  <resources/>
  <connections/>

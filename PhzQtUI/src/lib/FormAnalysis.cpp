@@ -20,7 +20,6 @@
 #include "PhzQtUI/PhzGridInfoHandler.h"
 #include "PhzQtUI/DialogGridGeneration.h"
 #include "PhzQtUI/DialogRunAnalysis.h"
-#include "PhzQtUI/DialogOptions.h"
 #include "PhzQtUI/DialogLuminosityPrior.h"
 
 #include "PhzUITools/ConfigurationWriter.h"
@@ -40,28 +39,53 @@ FormAnalysis::~FormAnalysis() {
 ///////////////////////////////////////////////////
 //  Initial data load
 void FormAnalysis::loadAnalysisPage() {
+  auto saved_catalog = PreferencesUtils::getUserPreference("_global_selection_",
+      "catalog");
+  auto saved_parameter_space = PreferencesUtils::getUserPreference("_global_selection_",
+      "parameter_space");
+
+
   m_analysis_survey_list = SurveyFilterMapping::loadCatalogMappings();
+    ui->cb_AnalysisSurvey->clear();
+    for (auto& survey : m_analysis_survey_list) {
+      ui->cb_AnalysisSurvey->addItem(
+          QString::fromStdString(survey.second.getName()));
+    }
 
-  ui->cb_AnalysisSurvey->clear();
-  for (auto& survey : m_analysis_survey_list) {
-    ui->cb_AnalysisSurvey->addItem(
-        QString::fromStdString(survey.second.getName()));
-  }
 
-  m_analysis_model_list = ModelSet::loadModelSetsFromFolder(
-      FileUtils::getModelRootPath(false));
-  ui->cb_AnalysisModel->clear();
-  for (auto& model : m_analysis_model_list) {
-    ui->cb_AnalysisModel->addItem(
-        QString::fromStdString(model.second.getName()));
-  }
 
-  updateGridSelection();
+    m_analysis_model_list = ModelSet::loadModelSetsFromFolder( FileUtils::getModelRootPath(false));
+    ui->cb_AnalysisModel->clear();
+    for (auto& model : m_analysis_model_list) {
+      ui->cb_AnalysisModel->addItem(  QString::fromStdString(model.second.getName()));
+    }
+
+
+
+    for (int i = 0; i < ui->cb_AnalysisSurvey->count(); i++) {
+        if (ui->cb_AnalysisSurvey->itemText(i).toStdString() == saved_catalog) {
+          ui->cb_AnalysisSurvey->setCurrentIndex(i);
+          break;
+        }
+      }
+
+
+    for (int i = 0; i < ui->cb_AnalysisModel->count(); i++) {
+        if (ui->cb_AnalysisModel->itemText(i).toStdString() == saved_parameter_space) {
+          ui->cb_AnalysisModel->setCurrentIndex(i);
+          break;
+        }
+      }
+
+
+    updateGridSelection();
+
 }
 ///////////////////////////////////////////////////
 //  Handle controls enability
 
 void FormAnalysis::updateGridSelection() {
+try{
   ModelSet selected_model;
 
   for (auto&model : m_analysis_model_list) {
@@ -71,6 +95,7 @@ void FormAnalysis::updateGridSelection() {
       break;
     }
   }
+
   auto axis = selected_model.getAxesTuple();
   auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
       ui->cb_AnalysisSurvey->currentText().toStdString(), axis,
@@ -90,6 +115,11 @@ void FormAnalysis::updateGridSelection() {
   }
 
   ui->cb_CompatibleGrid->addItem("<Enter a new name>");
+} catch (Elements::Exception&){
+  if (ui->cb_AnalysisModel->currentIndex()>-1){
+    ui->cb_AnalysisModel->removeItem(ui->cb_AnalysisModel->currentIndex());
+  }
+  }
 }
 
 void FormAnalysis::updateCorrectionSelection() {
@@ -180,22 +210,33 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
       }
     }
 
-    std::vector<std::string> seds { };
     double z_min = 1000000;
     double z_max = 0;
 
     for (auto& rule : selected_model.getParameterRules()) {
-      auto z_range = rule.second.getZRange();
-      if (z_min > z_range.getMin()) {
-        z_min = z_range.getMin();
+      for (auto& z_range : rule.second.getZRanges()) {
+        if (z_min > z_range.getMin()) {
+          z_min = z_range.getMin();
+        }
+
+        if (z_max < z_range.getMax()) {
+          z_max = z_range.getMax();
+        }
       }
 
-      if (z_max < z_range.getMax()) {
-        z_max = z_range.getMax();
+      for (double value : rule.second.getRedshiftValues()) {
+        if (z_min > value) {
+          z_min = value;
+        }
+
+        if (z_max < value) {
+          z_max = value;
+        }
       }
     }
 
     lum_prior_compatible=info.isCompatibleWithParameterSpace(z_min,z_max,selected_model.getSeds());
+
   }
 
   ui->btn_confLuminosityPrior->setEnabled(grid_name_exists);
@@ -435,10 +476,15 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   std::map<std::string, boost::program_options::variable_value> options_map =
       FileUtils::getPathConfiguration(true,false,true,true);
 
-  auto thread_options = PreferencesUtils::getThreadOverrideConfiguration();
-  for(auto& pair : thread_options){
+  auto global_options = PreferencesUtils::getThreadConfigurations();
+  for(auto& pair : global_options){
       options_map[pair.first]=pair.second;
   }
+
+  global_options = PreferencesUtils::getCosmologyConfigurations();
+   for(auto& pair : global_options){
+       options_map[pair.first]=pair.second;
+   }
 
   options_map["catalog-type"].value() = boost::any(survey_name);
 
@@ -534,8 +580,8 @@ std::map < std::string, boost::program_options::variable_value > FormAnalysis::g
 
     auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
 
-    auto thread_options = PreferencesUtils::getThreadOverrideConfiguration();
-    for(auto& pair : thread_options){
+    auto global_options = PreferencesUtils::getThreadConfigurations();
+    for(auto& pair : global_options){
           options_map[pair.first]=pair.second;
     }
 
@@ -551,17 +597,15 @@ std::map < std::string, boost::program_options::variable_value > FormAnalysis::g
 }
 //////////////////////////////////////////////////
 // User interaction
-void FormAnalysis::on_btn_AnalysisToHome_clicked() {
-  navigateToHome();
-}
 
-void FormAnalysis::on_btn_backHome_clicked() {
-  navigateToHome();
-}
 
 //  1. Survey and Model
 void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     const QString &selectedName) {
+
+
+  PreferencesUtils::setUserPreference("_global_selection_",
+            "catalog",selectedName.toStdString());
 
   SurveyFilterMapping selected_survey;
 
@@ -642,7 +686,9 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   }
 }
 
-  void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(const QString &) {
+  void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(const QString &model_name) {
+    PreferencesUtils::setUserPreference("_global_selection_",
+               "parameter_space",model_name.toStdString());
 
     updateGridSelection();
     loadLuminosityPriors();
@@ -793,18 +839,28 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
             }
         }
 
-        std::vector<std::string> seds{};
-        double z_min=1000000;;
-        double z_max=0;;
+        double z_min=1000000;
+        double z_max=0;
 
-        for(auto& rule : selected_model.getParameterRules()){
-          auto z_range = rule.second.getZRange();
-          if (z_min>z_range.getMin()){
-            z_min=z_range.getMin();
+        for (auto& rule : selected_model.getParameterRules()) {
+          for (auto& z_range : rule.second.getZRanges()) {
+            if (z_min > z_range.getMin()) {
+              z_min = z_range.getMin();
+            }
+
+            if (z_max < z_range.getMax()) {
+              z_max = z_range.getMax();
+            }
           }
 
-          if (z_max<z_range.getMax()){
-            z_max=z_range.getMax();
+          for (double value : rule.second.getRedshiftValues()) {
+            if (z_min > value) {
+              z_min = value;
+            }
+
+            if (z_max < value) {
+              z_max = value;
+            }
           }
         }
 
@@ -883,52 +939,37 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
 
 
 // 5. Run
-  void FormAnalysis::setInputCatalogName(std::string name,bool do_test) {
-    bool not_found = false;
-    if (do_test) {
-      auto column_reader = PhzUITools::CatalogColumnReader(name);
-      std::map<std::string, bool> file_columns;
+void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
+  if (do_test) {
+    std::vector<std::string> needed_columns { };
 
-      for (auto& name : column_reader.getColumnNames()) {
-        file_columns[name] = true;
-      }
-
-      if (file_columns.count(getSelectedSurveySourceColumn()) == 1) {
-        file_columns[getSelectedSurveySourceColumn()] = false;
-      } else {
-        not_found = true;
-      }
-
-      for (auto& filter : getSelectedFilterMapping()) {
-        if (file_columns.count(filter.getFluxColumn()) == 1) {
-          file_columns[filter.getFluxColumn()] = false;
-
-        } else {
-          not_found = true;
-        }
-
-        if (file_columns.count(filter.getErrorColumn()) == 1) {
-          file_columns[filter.getErrorColumn()] = false;
-
-        } else {
-          not_found = true;
-        }
-      }
+    needed_columns.push_back(getSelectedSurveySourceColumn());
+    for (auto& filter : getSelectedFilterMapping()) {
+      needed_columns.push_back(filter.getFluxColumn());
+      needed_columns.push_back(filter.getErrorColumn());
     }
 
-    if (not_found) {
+    std::string missing = FileUtils::checkFileColumns(name, needed_columns);
+    if (missing.size() > 0) {
       if (QMessageBox::question(this, "Incompatible Data...",
-              "The catalog file you selected has not the columns described into the Catalog and therefore cannot be used. "
+          "The catalog file you selected has not the columns described into the Catalog and therefore cannot be used. \n"
+              "Missing column(s):" + QString::fromStdString(missing) + "\n"
               "Do you want to create a new Catalog mapping for this file?",
-              QMessageBox::Cancel|QMessageBox::Ok)==QMessageBox::Ok) {
+          QMessageBox::Cancel | QMessageBox::Ok) == QMessageBox::Ok) {
         navigateToNewCatalog(name);
       }
-    } else {
-      ui->txt_inputCatalog->setText(QString::fromStdString(name));
-      QFileInfo info(QString::fromStdString(name));
-      ui->txt_outputFolder->setText(QString::fromStdString(FileUtils::getResultRootPath(false,ui->cb_AnalysisSurvey->currentText().toStdString(), info.baseName().toStdString())));
+      return;
     }
   }
+
+  ui->txt_inputCatalog->setText(QString::fromStdString(name));
+  QFileInfo info(QString::fromStdString(name));
+  ui->txt_outputFolder->setText(
+      QString::fromStdString(
+          FileUtils::getResultRootPath(false,
+              ui->cb_AnalysisSurvey->currentText().toStdString(),
+              info.baseName().toStdString())));
+}
 
   void FormAnalysis::on_btn_BrowseInput_clicked()
   {
@@ -1084,7 +1125,18 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     }
   }
 
-
+  void FormAnalysis::on_btn_ToModel_clicked(){
+    navigateToParameter(false);
+  }
+  void FormAnalysis::on_btn_ToOption_clicked(){
+    navigateToConfig();
+  }
+  void FormAnalysis::on_btn_ToCatalog_clicked(){
+    navigateToCatalog(false);
+  }
+  void FormAnalysis::on_btn_exit_clicked(){
+    quit(true);
+  }
 
 }
 }

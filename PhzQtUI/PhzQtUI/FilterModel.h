@@ -28,7 +28,7 @@ public:
      * @brief Initialise the FilterModel by setting its internal data
      * @param initFilterList list of FilterMapping which provide data to fill the model
      */
-    void setFilters(const std::list<FilterMapping>& initFilterList);
+    void setFilters(const std::vector<FilterMapping>& initFilterList);
 
     /**
      * @brief Replace the representation of the FilterMapping at the row 'row' by
@@ -42,7 +42,7 @@ public:
      * @brief Build a list of FilterMapping out of its internal state
      * @return the list of FilterMapping handled by the model
      */
-    std::list<FilterMapping> getFilters() const;
+    std::vector<FilterMapping> getFilters() const;
 
     /** @brief  Build a FilterMapping out of data at the row 'row'
       * @param row

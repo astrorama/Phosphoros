@@ -252,21 +252,21 @@ LuminosityPriorConfig LuminosityPriorConfig::deserialize(QDomDocument& doc){
    for (auto& function : m_luminosity_function_list) {
      QDomElement funct_node = doc.createElement("LuminosityFunction");
      funct_node.setAttribute("SedGroup",QString::fromStdString(function.sedGroupName));
-     funct_node.setAttribute("MinZ",QString::fromStdString(std::to_string(function.z_min)));
-     funct_node.setAttribute("MaxZ",QString::fromStdString(std::to_string(function.z_max)));
+     funct_node.setAttribute("MinZ",QString::number(function.z_min,'g',15));
+     funct_node.setAttribute("MaxZ",QString::number(function.z_max,'g',15));
      funct_node.setAttribute("Custom",QString::fromStdString(std::to_string(function.is_custom)));
 
      if (function.is_custom){
        funct_node.setAttribute("CurveName",QString::fromStdString(function.curve_name));
      }else {
 
-       funct_node.setAttribute("Alpha",QString::fromStdString(std::to_string(function.alpha)));
-       funct_node.setAttribute("Phi0",QString::fromStdString(std::to_string(function.phi)));
+       funct_node.setAttribute("Alpha",QString::number(function.alpha,'g',15));
+       funct_node.setAttribute("Phi0",QString::number(function.phi,'g',15));
 
        if (m_in_mag){
-         funct_node.setAttribute("M0",QString::fromStdString(std::to_string(function.m)));
+         funct_node.setAttribute("M0",QString::number(function.m,'g',15));
        } else {
-         funct_node.setAttribute("L0",QString::fromStdString(std::to_string(function.l)));
+         funct_node.setAttribute("L0",QString::number(function.l,'g',15));
        }
      }
      functions_node.appendChild(funct_node);

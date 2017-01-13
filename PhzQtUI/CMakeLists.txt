@@ -1,6 +1,7 @@
 elements_subdir(PhzQtUI)
 
 
+elements_depends_on_subdirs(ElementsKernel)
 elements_depends_on_subdirs(XYDataset)
 elements_depends_on_subdirs(PhzConfiguration)
 elements_depends_on_subdirs(PhzPhotometricCorrection)
@@ -9,6 +10,7 @@ elements_depends_on_subdirs(PhzDataModel)
 elements_depends_on_subdirs(PhzUITools)
 elements_depends_on_subdirs(PhzLikelihood)
 elements_depends_on_subdirs(PhzLuminosity)
+elements_depends_on_subdirs(PhysicsUtils)
 
 if(ELEMENTS_HIDE_WARNINGS)
   if(UNIX)

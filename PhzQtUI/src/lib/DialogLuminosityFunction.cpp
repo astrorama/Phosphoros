@@ -8,6 +8,7 @@
 #include "ui_DialogLuminosityFunction.h"
 #include "PhzQtUI/DialogLuminosityFunction.h"
 
+#include "FormUtils.h"
 #include "PhzQtUI/LuminosityFunctionInfo.h"
 #include "PhzQtUI/DialogLuminosityFunctionCurveSelector.h"
 
@@ -20,6 +21,8 @@ DialogLuminosityFunction::DialogLuminosityFunction(QWidget *parent) :
         ui(new Ui::DialogLuminosityFunction)
     {
        ui->setupUi(this);
+       m_x=0;
+       m_y=0;
 }
 
 DialogLuminosityFunction::~DialogLuminosityFunction() {}
@@ -99,10 +102,10 @@ void DialogLuminosityFunction::on_btn_save_clicked(){
   // Build the FunctionInfo from the user input.
   m_FunctionInfo.is_custom=ui->gb_custom->isChecked();
   m_FunctionInfo.curve_name=ui->lb_curve->text().toStdString();
-  m_FunctionInfo.alpha=ui->txt_alpha->text().toDouble();
-  m_FunctionInfo.l=ui->txt_L->text().toDouble();
-  m_FunctionInfo.m=ui->txt_M->text().toDouble();
-  m_FunctionInfo.phi=ui->txt_phi->text().toDouble();
+  m_FunctionInfo.alpha=FormUtils::parseToDouble(ui->txt_alpha->text());
+  m_FunctionInfo.l=FormUtils::parseToDouble(ui->txt_L->text());
+  m_FunctionInfo.m=FormUtils::parseToDouble(ui->txt_M->text());
+  m_FunctionInfo.phi=FormUtils::parseToDouble(ui->txt_phi->text());
 
   // return the info to the caller with the coordinates
   popupClosing(m_FunctionInfo,m_x,m_y);

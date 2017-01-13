@@ -38,7 +38,11 @@ action_list = [
     PhosphorosAction(['plot_posterior', 'PP'], 'PhosphorosPlotPosterior',
                      'Plots views of a multi-dimensional posterior'),
     PhosphorosAction(['order_seds', 'OS'], 'PhosphorosOrderSeds',
-                     'Orders SEDs and put them into the <order.txt> file')
+                     'Orders SEDs and put them into the <order.txt> file'),
+    PhosphorosAction(['create_flat_grid_prior', 'CFGP'], 'CreateFlatGridPrior',
+                     'Creates a generic grid prior FITS file with all cells set to one, based on a model grid'),
+    PhosphorosAction(['add_emission_lines', 'AEL'], 'PhosphorosAddEmissionLines',
+                     'Adds emission lines to a set of SED templates')
 ]
 
 def printHelp():
@@ -74,4 +78,4 @@ else:
     os.environ['ELEMENTS_CONF_PATH'] = phosphoros_conf
 
 cmd = executable + sys.argv[2:]
-call(cmd)
+exit(call(cmd))

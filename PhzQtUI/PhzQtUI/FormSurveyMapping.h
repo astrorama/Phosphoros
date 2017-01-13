@@ -3,6 +3,8 @@
 
 #include <memory>
 #include <set>
+#include <string>
+#include <vector>
 #include <QWidget>
 #include <QModelIndex>
 #include "FilterMapping.h"
@@ -29,23 +31,40 @@ public:
     void loadMappingPage();
     void loadMappingPage(std::string new_path);
 
+    void updateSelection();
+
 signals:
-    void navigateToHome();
+
+void navigateToParameter(bool);
+
+void navigateToConfig();
+
+void navigateToComputeRedshift(bool);
+
+void quit(bool);
+
 
 private slots:
+
+void on_gridEditionStart();
+
+void on_btn_ToAnalysis_clicked();
+void on_btn_ToOption_clicked();
+void on_btn_ToModel_clicked();
+void on_btn_exit_clicked();
+
+
     void filterMappingSelectionChanged(QModelIndex, QModelIndex);
 
-    void filterSelectionChanged(QModelIndex, QModelIndex);
+    void mappingGridDoubleClicked(QModelIndex);
 
-    void filterEditionPopupClosing(FilterMapping);
-
-    void catalogNamePopupClosing(std::string);
+    void filterEditionPopupClosing(std::vector<std::string>);
 
     void on_btn_MapNew_clicked();
 
     void on_btn_MapDuplicate_clicked();
 
-    void on_btn_MapDelete_clicked();
+    void on_btn_map_delete_clicked();
 
     void on_btn_MapEdit_clicked();
 
@@ -55,17 +74,8 @@ private slots:
 
     void on_btn_ImportColumn_clicked();
 
-    void on_btn_AddFilter_clicked();
+    void on_btn_SelectFilters_clicked();
 
-    void on_btn_BtnEditFilter_clicked();
-
-    void on_btn_DeleteFilter_clicked();
-
-    void on_btn_newCat_clicked();
-
-    void on_btn_CatToHome_clicked();
-
-    void on_btn_BackHome_clicked();
 
 
 private:
@@ -79,6 +89,10 @@ private:
     void setFilterMappingInView();
     void loadColumnFromFile(std::string path);
     void fillCbColumns(std::string current_value="");
+
+    std::vector<std::string> getGridFiltersNames() const;
+    std::vector<FilterMapping> getMappingFromGrid() const;
+
 };
 
 }

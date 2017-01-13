@@ -14,6 +14,9 @@
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <property name="margin">
+    <number>0</number>
+   </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_12">
      <item>
@@ -46,6 +49,13 @@
     </layout>
    </item>
    <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Import, organize or remove aux. data files to the local database</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="Line" name="line_10">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -55,7 +65,7 @@
    <item>
     <widget class="QTabWidget" name="tab_Management">
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -80,7 +90,7 @@
          <item>
           <widget class="QPushButton" name="btn_FilterImport">
            <property name="text">
-            <string>Import Additional Curve(s)</string>
+            <string>Import</string>
            </property>
           </widget>
          </item>
@@ -94,7 +104,7 @@
          <item>
           <widget class="QPushButton" name="btn_FilterDelete">
            <property name="text">
-            <string>Delete Selected</string>
+            <string>Delete Selection</string>
            </property>
           </widget>
          </item>
@@ -111,7 +121,7 @@
           <string>The full transmission curves for the filter</string>
          </property>
          <property name="text">
-          <string>List of Available Filter Curves † :</string>
+          <string>List of Available Filter Curves  :</string>
          </property>
         </widget>
        </item>
@@ -156,7 +166,7 @@
          <item>
           <widget class="QPushButton" name="btn_SedImport">
            <property name="text">
-            <string>Import Additional SED(s)</string>
+            <string>Import</string>
            </property>
           </widget>
          </item>
@@ -170,7 +180,7 @@
          <item>
           <widget class="QPushButton" name="btn_SedDelete">
            <property name="text">
-            <string>Delete Selected</string>
+            <string>Delete Selection</string>
            </property>
           </widget>
          </item>
@@ -222,13 +232,8 @@
          </item>
          <item>
           <widget class="QPushButton" name="btn_RedImport">
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-            </font>
-           </property>
            <property name="text">
-            <string>Import Additional Curve(s)</string>
+            <string>Import</string>
            </property>
           </widget>
          </item>
@@ -242,7 +247,7 @@
          <item>
           <widget class="QPushButton" name="btn_RedDelete">
            <property name="text">
-            <string>Delete Selected</string>
+            <string>Delete Selection</string>
            </property>
           </widget>
          </item>
@@ -295,7 +300,7 @@
          <item>
           <widget class="QPushButton" name="btn_LuminosityImport">
            <property name="text">
-            <string>Import Additional Curve(s)</string>
+            <string>Import</string>
            </property>
           </widget>
          </item>
@@ -309,7 +314,7 @@
          <item>
           <widget class="QPushButton" name="btn_LuminosityDelete">
            <property name="text">
-            <string>Delete Selected</string>
+            <string>Delete Selection</string>
            </property>
           </widget>
          </item>
@@ -326,7 +331,7 @@
           <string>The Luminosity Function (of the Magnitude or in Flux)</string>
          </property>
          <property name="text">
-          <string>List of Available Luminosity Function Curves † :</string>
+          <string>List of Available Luminosity Function Curves  :</string>
          </property>
         </widget>
        </item>

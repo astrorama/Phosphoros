@@ -1,0 +1,19 @@
+#
+# Conversion table from metalicity Z (in solar units) to number of ionized
+# photons, normalized for the luminosity at 1500 Angstrom.
+#
+# This table is computed from the Starburst99 Dataset for each metalicity the
+# following way:
+# - The luminosity for the given metalicity value is taken from the continuous
+#   Star Formation tables, assuming IMF=2.35 and age=10^8
+# - The number of photons below 912 Angstrom is taken from the continuous Star
+#   Formation tables, assuming IMF=2.35 and age=10^8
+#
+
+# Z/Z0  log(Qh/L1500)
+
+0.001    13.035
+0.004    12.986
+0.008    12.967
+0.02     12.949
+0.04     12.927

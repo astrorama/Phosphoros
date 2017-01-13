@@ -5,7 +5,7 @@
 #include "FileUtils.h"
 #include "PhzQtUI/MainWindow.h"
 #include "ui_MainWindow.h"
-#include "PhzQtUI/DialogOptions.h"
+#include "XYDataset/AsciiParser.h"
 
 #include "ThisProject.h"             // for the name and version of this very project
 
@@ -21,6 +21,12 @@ MainWindow::MainWindow(QWidget *parent) :
   setWindowTitle(title);
 
   ui->setupUi(this);
+  this->layout()->setSpacing(0);
+  this->layout()->setContentsMargins(0,0,0,0);
+  ui->mainStackedWidget->setContentsMargins(0,0,0,0);
+//  ui->page_layout->setSpacing(0);
+//  ui->page_layout->setContentsMargins(0,0,0,0);
+//  this->setStyleSheet("background-color: green");
 
   QPixmap pixmap( ":/logoPhUI.png" );
   ui->image_label->setTopMargin(20);
@@ -28,11 +34,27 @@ MainWindow::MainWindow(QWidget *parent) :
 
   connect( this, SIGNAL(changeMainStackedWidgetIndex(int)), ui->mainStackedWidget, SLOT(setCurrentIndex(int)) );
 
-  connect(ui->widget_ModelSet,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
 
-  connect(ui->widget_Catalog,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
+  connect(ui->widget_ModelSet,SIGNAL(navigateToConfig()),SLOT(navigateToConfig()));
+  connect(ui->widget_ModelSet,SIGNAL(navigateToCatalog(bool)),SLOT(navigateToCatalog(bool)));
+  connect(ui->widget_ModelSet,SIGNAL(navigateToComputeRedshift(bool)),SLOT(navigateToComputeRedshift(bool)));
+  connect(ui->widget_ModelSet,SIGNAL(quit(bool)),SLOT(quit(bool)));
 
-  connect(ui->widget_Analysis,SIGNAL(navigateToHome()),SLOT(navigateToHome()));
+  connect(ui->widget_Catalog,SIGNAL(navigateToConfig()),SLOT(navigateToConfig()));
+  connect(ui->widget_Catalog,SIGNAL(navigateToParameter(bool)),SLOT(navigateToParameter(bool)));
+  connect(ui->widget_Catalog,SIGNAL(navigateToComputeRedshift(bool)),SLOT(navigateToComputeRedshift(bool)));
+  connect(ui->widget_Catalog,SIGNAL(quit(bool)),SLOT(quit(bool)));
+
+  connect(ui->widget_configuration,SIGNAL(navigateToCatalog(bool)),SLOT(navigateToCatalog(bool)));
+  connect(ui->widget_configuration,SIGNAL(navigateToParameter(bool)),SLOT(navigateToParameter(bool)));
+  connect(ui->widget_configuration,SIGNAL(navigateToComputeRedshift(bool)),SLOT(navigateToComputeRedshift(bool)));
+  connect(ui->widget_configuration,SIGNAL(quit(bool)),SLOT(quit(bool)));
+
+  connect(ui->widget_Analysis,SIGNAL(navigateToCatalog(bool)),SLOT(navigateToCatalog(bool)));
+  connect(ui->widget_Analysis,SIGNAL(navigateToParameter(bool)),SLOT(navigateToParameter(bool)));
+  connect(ui->widget_Analysis,SIGNAL(navigateToConfig()),SLOT(navigateToConfig()));
+  connect(ui->widget_Analysis,SIGNAL(quit(bool)),SLOT(quit(bool)));
+
   connect(ui->widget_Analysis,SIGNAL(navigateToNewCatalog(std::string)),SLOT(navigateToNewCatalog(std::string)));
 
 
@@ -50,6 +72,20 @@ MainWindow::MainWindow(QWidget *parent) :
       exit(0);
     }
   }
+
+  FileUtils::buildDirectories();
+
+
+
+  std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
+  std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(false), std::move(sed_file_parser) });
+  m_seds_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(sed_provider)));
+  m_seds_repository->reload();
+
+  std::unique_ptr <XYDataset::FileParser > reddening_file_parser {new XYDataset::AsciiParser { } };
+  std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(new XYDataset::FileSystemProvider{  FileUtils::getRedCurveRootPath(false), std::move(reddening_file_parser) });
+  m_redenig_curves_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(red_curve_provider)});
+  m_redenig_curves_repository->reload();
 }
 
 MainWindow::~MainWindow()
@@ -62,6 +98,49 @@ MainWindow::~MainWindow()
      changeMainStackedWidgetIndex(0);
  }
 
+ void MainWindow::navigateToHomeWithReset(bool reset){
+     changeMainStackedWidgetIndex(0);
+     if (reset){
+       m_model_loaded=false;
+       m_mapping_loaded=false;
+     }
+ }
+
+void MainWindow::navigateToParameter(bool reset){
+  if (reset){
+        m_model_loaded=false;
+        m_mapping_loaded=false;
+      }
+  on_btn_HomeToModel_clicked();
+}
+
+void MainWindow::navigateToCatalog(bool reset){
+  if (reset){
+        m_model_loaded=false;
+        m_mapping_loaded=false;
+      }
+  on_btn_HomeToCatalog_clicked();
+}
+
+void MainWindow::navigateToComputeRedshift(bool reset){
+  if (reset){
+        m_model_loaded=false;
+        m_mapping_loaded=false;
+      }
+  on_btn_HomeToAnalysis_clicked();
+}
+
+//Todo confirmation
+
+void MainWindow::quit(bool){
+  this->close();
+}
+
+void MainWindow::navigateToConfig(){
+  on_btn_HomeToOption_clicked();
+}
+
+
  void MainWindow::navigateToNewCatalog(std::string new_name){
    changeMainStackedWidgetIndex(2);
    ui->widget_Catalog->loadMappingPage(new_name);
@@ -72,9 +151,8 @@ MainWindow::~MainWindow()
  //  - Slots opening the popup
  void MainWindow::on_btn_HomeToOption_clicked()
  {
-   std::unique_ptr<DialogOptions> popUp(new DialogOptions());
-
-     popUp->exec();
+   changeMainStackedWidgetIndex(4);
+   ui->widget_configuration->loadOptionPage(m_seds_repository, m_redenig_curves_repository);
  }
 
 //------------------------------------------------
@@ -82,13 +160,25 @@ MainWindow::~MainWindow()
 //  - Slots landing on this page
 void MainWindow::on_btn_HomeToModel_clicked(){
     changeMainStackedWidgetIndex(1);
-    ui->widget_ModelSet->loadSetPage();
+
+    if (!m_model_loaded){
+      ui->widget_ModelSet->loadSetPage(m_seds_repository, m_redenig_curves_repository);
+      m_model_loaded=true;
+    }
+
+    ui->widget_ModelSet->updateSelection();
 }
 
 
 void MainWindow::on_btn_HomeToCatalog_clicked(){
   changeMainStackedWidgetIndex(2);
-  ui->widget_Catalog->loadMappingPage("");
+
+  if (!m_mapping_loaded){
+    ui->widget_Catalog->loadMappingPage("");
+    m_mapping_loaded=true;
+  }
+
+  ui->widget_Catalog->updateSelection();
 }
 
 
@@ -98,7 +188,10 @@ void MainWindow::on_btn_HomeToCatalog_clicked(){
 void MainWindow::on_btn_HomeToAnalysis_clicked()
 {
   changeMainStackedWidgetIndex(3);
-  ui->widget_Analysis->loadAnalysisPage();
+
+    ui->widget_Analysis->loadAnalysisPage();
+
+
 }
 
 }

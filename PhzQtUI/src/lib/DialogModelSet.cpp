@@ -1,334 +1,429 @@
 
 #include <QMessageBox>
+#include <QStandardItemModel>
+#include "ElementsKernel/Exception.h"
 #include "FileUtils.h"
+#include "FormUtils.h"
 #include "PhzQtUI/DialogModelSet.h"
 #include "ui_DialogModelSet.h"
-#include "PhzQtUI/XYDataSetTreeModel.h"
+#include "PhzQtUI/DataSetTreeModel.h"
+
+#include "PhzQtUI/GridButton.h"
+#include "PhzQtUI/ParameterRule.h"
+
 
 using namespace std;
 
 namespace Euclid{
 namespace PhzQtUI {
 
-DialogModelSet::DialogModelSet(QWidget *parent) :
+DialogModelSet::DialogModelSet(DatasetRepo seds_repository,
+    DatasetRepo redenig_curves_repository, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::DialogModelSet)
+    ui(new Ui::DialogModelSet),
+    m_seds_repository(seds_repository),
+    m_redenig_curves_repository(redenig_curves_repository)
 {
     ui->setupUi(this);
 
-    ui->txt_ebvMin->setValidator( new QDoubleValidator(0, 100, 2, this) );
-    ui->txt_ebvMax->setValidator( new QDoubleValidator(0, 100, 2, this) );
-    ui->txt_ebvStep->setValidator( new QDoubleValidator(0, 100, 4, this) );
-    // z-range
-    ui->txt_zMin->setValidator( new QDoubleValidator(0, 100, 2, this) );
-    ui->txt_zMax->setValidator( new QDoubleValidator(0, 100, 2, this) );
-    ui->txt_zStep->setValidator( new QDoubleValidator(0, 100, 4, this) );
-
-    XYDataSetTreeModel* treeModel_sed = new XYDataSetTreeModel();
-    treeModel_sed->loadDirectory(FileUtils::getSedRootPath(true),false,"SEDs");
+    DataSetTreeModel* treeModel_sed = new DataSetTreeModel(m_seds_repository);
+    treeModel_sed->load();
     ui->treeView_Sed->setModel(treeModel_sed);
-    ui->treeView_Sed->expandAll();
+    ui->treeView_Sed->collapseAll();
 
     connect(treeModel_sed, SIGNAL(itemChanged(QStandardItem*)), treeModel_sed,
                  SLOT(onItemChanged(QStandardItem*)));
 
-    if (!treeModel_sed->item(0,0)->hasChildren()){
+    if (treeModel_sed->rowCount() == 0){
          QMessageBox::warning(this, "No available SED...",
                  "There is no SED to select. "
                  "You can provide and manage SEDs in the \"Configuration/Aux. Data\" page.",
                  QMessageBox::Ok);
     }
 
-    XYDataSetTreeModel* treeModel_red = new XYDataSetTreeModel();
-    treeModel_red->loadDirectory(FileUtils::getRedCurveRootPath(true),false,"Reddening Curves");
+    DataSetTreeModel* treeModel_red = new DataSetTreeModel(m_redenig_curves_repository);
+    treeModel_red->load();
     ui->treeView_Reddening->setModel(treeModel_red);
-    ui->treeView_Reddening->expandAll();
+    ui->treeView_Reddening->collapseAll();
 
     connect( treeModel_red, SIGNAL(itemChanged(QStandardItem*)), treeModel_red,
                  SLOT(onItemChanged(QStandardItem*)));
 
-    if (!treeModel_red->item(0,0)->hasChildren()){
+    if (treeModel_red->rowCount() == 0){
          QMessageBox::warning(this, "No available Reddening Curve...",
                  "There is no reddening curve to select. "
                  "You can provide and manage reddening curves in the \"Configuration/Aux. Data\" page.",
                  QMessageBox::Ok);
     }
 
+    QRegExp rx("(\\s*(\\d+|\\d+\\.\\d*)\\s*(,|$))*");
+    ui->txt_ebv_values->setValidator(new QRegExpValidator(rx));
+    ui->txt_z_values->setValidator(new QRegExpValidator(rx));
+
+
 }
+
 
 DialogModelSet::~DialogModelSet()
 {
 }
+
 
  void DialogModelSet::setViewMode(){
      m_view_popup=true;
      turnControlsInView();
  }
 
- void DialogModelSet::setSingleLine(){
-     m_singe_line=true;
-     turnControlsInView();
- }
+
+void DialogModelSet::loadData(int ref ,const std::map<int,ParameterRule>& init_parameter_rules){
+  m_rules=init_parameter_rules;
+  m_ref=ref;
+
+  auto selected_rule = m_rules[m_ref];
+
+          ui->txt_name->setText(QString::fromStdString(selected_rule.getName()));
+
+          // SED
+          static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedSelection());
+          // Reddening Curve
+          static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getRedCurveSelection());
 
 
-void DialogModelSet::loadData(const map<int,ParameterRule>& init_parameter_rules){
-    ui->tableView_ParameterRule->loadParameterRules(init_parameter_rules, FileUtils::getSedRootPath(false), FileUtils::getRedCurveRootPath(false));
+          // Redshift & E(B-V)
+          populateZRangesAndValues(selected_rule);
+          populateEbvRangesAndValues(selected_rule);
 
 
-    connect(
-      ui->tableView_ParameterRule->selectionModel(),
-      SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
-      SLOT(selectionChanged(QModelIndex, QModelIndex))
-     );
-
-    if (ui->tableView_ParameterRule->model()->rowCount()>0){
-      ui->tableView_ParameterRule->selectRow(0);
-    }
-
-
-    turnControlsInView();
+  turnControlsInEdition();
 }
 
 
 
 void DialogModelSet::turnControlsInEdition(){
-    ui->buttonBox->setEnabled(false);
+    ui->buttonBox->setEnabled(true);
 
-
-    ui->btn_new->setEnabled(false);
-    ui->btn_duplicate->setEnabled(false);
-    ui->btn_delete->setEnabled(false);
-
-    ui->btn_edit->setEnabled(false);
-    ui->btn_cancel->setEnabled(true);
-    ui->btn_save->setEnabled(true);
-
-    static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setEnabled(true);
-    static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setEnabled(true);
-
-
-    ui->txt_ebvMin->setEnabled(true);
-    ui->txt_ebvMax->setEnabled(true);
-    ui->txt_ebvStep->setEnabled(true);
-
-
-    ui->txt_zMin->setEnabled(true);
-    ui->txt_zMax->setEnabled(true);
-    ui->txt_zStep->setEnabled(true);
+    static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setEnabled(true);
+    static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setEnabled(true);
 
     ui->txt_name->setEnabled(true);
 
-    ui->tableView_ParameterRule->setEnabled(false);
+  // Redshift & E(B-V)
+    ui->txt_ebv_values->setEnabled(true);
+    ui->btn_add_z_range->setEnabled(true);
+    SetRangeControlsEnabled(ui->Layout_ebv_range,true);
+
+    ui->txt_z_values->setEnabled(true);
+    ui->btn_add_ebv_range->setEnabled(true);
+    SetRangeControlsEnabled(ui->Layout_z_range,true);
 }
 
 void DialogModelSet::turnControlsInView(){
 
-    bool accepte_new_line = !m_singe_line || ui->tableView_ParameterRule->model()->rowCount()==0;
-    m_insert=false;
     ui->buttonBox->setEnabled(true);
+    ui->buttonBox->button(QDialogButtonBox::StandardButton::Save)->setEnabled(false);
 
-    bool has_rule=ui->tableView_ParameterRule->hasSelectedPArameterRule();
-
-    ui->btn_new->setEnabled(!m_view_popup && accepte_new_line);
-    ui->btn_duplicate->setEnabled(!m_view_popup && has_rule && accepte_new_line);
-    ui->btn_delete->setEnabled(!m_view_popup && has_rule);
-
-    ui->btn_edit->setEnabled(!m_view_popup && has_rule);
-    ui->btn_cancel->setEnabled(false);
-    ui->btn_save->setEnabled(false);
-
-    static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setEnabled(false);
-    static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setEnabled(false);
-
-    ui->txt_ebvMin->setEnabled(false);
-    ui->txt_ebvMax->setEnabled(false);
-    ui->txt_ebvStep->setEnabled(false);
-
-
-    ui->txt_zMin->setEnabled(false);
-    ui->txt_zMax->setEnabled(false);
-    ui->txt_zStep->setEnabled(false);
+    static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setEnabled(false);
+    static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setEnabled(false);
 
     ui->txt_name->setEnabled(false);
 
-    ui->tableView_ParameterRule->setEnabled(true);
+    // Redshift & E(B-V)
+    ui->txt_ebv_values->setEnabled(false);
+    ui->btn_add_z_range->setEnabled(false);
+    SetRangeControlsEnabled(ui->Layout_ebv_range,false);
+
+    ui->txt_z_values->setEnabled(false);
+    ui->btn_add_ebv_range->setEnabled(false);
+    SetRangeControlsEnabled(ui->Layout_z_range,false);
 }
+
 
 
 void DialogModelSet::on_buttonBox_rejected()
 {
-    this->popupClosing(ui->tableView_ParameterRule->getModel()->getParameterRules());
+  this->popupClosing(m_ref,m_rules[m_ref],false);
 }
 
-void DialogModelSet::on_btn_new_clicked()
-{
-    ui->tableView_ParameterRule->newRule(false);
-    m_insert=true;
-    turnControlsInEdition();
-}
 
-void DialogModelSet::on_btn_delete_clicked()
+void DialogModelSet::on_buttonBox_accepted()
 {
-    if (QMessageBox::question( this, "Confirm deletion...",
-                                  "Do you really want to delete this Parameter Rule?",
-                                  QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
-        ui->tableView_ParameterRule->deletSelectedRule();
-        turnControlsInView();
+
+  auto sed_selection = static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->getState();
+  auto red_curve_selection = static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->getState();
+
+  if (ui->txt_name->text().trimmed().size()==0){
+    QMessageBox::warning( this,
+                             "Missing Data...",
+                             "Please provide a name.",
+                             QMessageBox::Ok );
+       return;
+  }
+  for(auto it = m_rules.begin(); it != m_rules.end(); ++it ) {
+    if (it->second.getName()==ui->txt_name->text().toStdString() &&  it->first!=m_ref){
+      QMessageBox::warning( this,
+                               "Duplicate Name...",
+                               "The name you enter is already used, please provide another name.",
+                               QMessageBox::Ok );
+         return;
     }
-}
+  }
 
-void DialogModelSet::on_btn_duplicate_clicked()
-{
-    ui->tableView_ParameterRule->newRule(true);
-    m_insert=true;
-    turnControlsInEdition();
-}
 
-void DialogModelSet::on_btn_edit_clicked()
-{
-    turnControlsInEdition();
-}
+  if (sed_selection.isEmpty() ){
+    QMessageBox::warning( this,
+                          "Missing Data...",
+                          "Please provide SED(s) selection.",
+                          QMessageBox::Ok );
+    return;
+  }
 
-void DialogModelSet::on_btn_cancel_clicked()
-{
-    if (m_insert){
-        ui->tableView_ParameterRule->deletSelectedRule();
-    }else{
-        auto selected_rule = ui->tableView_ParameterRule->getSelectedRule();
+  if (red_curve_selection.isEmpty()){
+    QMessageBox::warning( this,
+                          "Missing Data...",
+                          "Please provide Reddening Curve(s) selection.",
+                          QMessageBox::Ok );
+    return;
+  }
 
-        ui->txt_name->setText(QString::fromStdString(selected_rule.getName()));
-        // SED
-        static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedRootObject(),selected_rule.getExcludedSeds());
 
-        // Reddening Curve
-        static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getReddeningRootObject(),selected_rule.getExcludedReddenings());
 
-        // E(B-V)-range
-        ui->txt_ebvMin->setText(QString::number(selected_rule.getEbvRange().getMin()));
-        ui->txt_ebvMax->setText(QString::number(selected_rule.getEbvRange().getMax()));
-        ui->txt_ebvStep->setText(QString::number(selected_rule.getEbvRange().getStep()));
-        // z-range
-        ui->txt_zMin->setText(QString::number(selected_rule.getZRange().getMin()));
-        ui->txt_zMax->setText(QString::number(selected_rule.getZRange().getMax()));
-        ui->txt_zStep->setText(QString::number(selected_rule.getZRange().getStep()));
-    }
-    turnControlsInView();
-}
+    // Redshift and E(B-V)
+    auto new_z_ranges = getRanges( ui->Layout_z_range);
+    auto new_ebv_ranges = getRanges( ui->Layout_ebv_range);
 
-void DialogModelSet::on_btn_save_clicked()
-{
-    auto sed_res = static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->getRootSelection();
-    auto red_res =  static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->getRootSelection();
 
-    if(!sed_res.first|| !red_res.first){
-        QMessageBox::warning( this, "Missing Data...",
-                                          "Please provide SED(s) and Reddening Curve(s) selection.",
-                                          QMessageBox::Ok );
+
+    auto old_z_ranges =m_rules[m_ref].getZRanges();
+    auto old_ebv_ranges =m_rules[m_ref].getEbvRanges();
+
+    try {
+      m_rules[m_ref].setZRanges(std::move(new_z_ranges));
+      m_rules[m_ref].getModelNumber(true);
+      m_rules[m_ref].getRedshiftRangeString();
+    } catch (const Elements::Exception& e) {
+        QMessageBox::warning( this, "Error while setting redshift ranges...",
+                                  e.what(),
+                                  QMessageBox::Ok );
+
+        m_rules[m_ref].setZRanges(std::move(old_z_ranges));
         return;
     }
 
-    if (!ui->tableView_ParameterRule->checkNameAlreadyUsed(ui->txt_name->text().toStdString())){
-      QMessageBox::warning( this, "Duplicate Name...",
-                           "The name you enter is already used, please provide another name.",
-                           QMessageBox::Ok );
-      return;
-    }
+    try {
+      m_rules[m_ref].setEbvRanges(std::move(new_ebv_ranges));
+      m_rules[m_ref].getModelNumber(true);
+      m_rules[m_ref].getEbvRangeString();
+      } catch (const Elements::Exception& e) {
+          QMessageBox::warning( this, "Error while setting E(B-V) ranges...",
+                                    e.what(),
+                                    QMessageBox::Ok );
+
+          m_rules[m_ref].setEbvRanges(std::move(old_ebv_ranges));
+          return;
+      }
 
 
-
-  double ebv_min = ui->txt_ebvMin->text().toDouble();
-  double ebv_max = ui->txt_ebvMax->text().toDouble();
-  double ebv_step =ui->txt_ebvStep->text().toDouble();
-
-  if ((ebv_min<0.) || (ebv_min>ebv_max) || (ebv_step<0.) ) {
-    QMessageBox::warning(this, "Not acceptable Range...",
-        "The E(B-V) range you have provided is not well formated, please check it.",
-        QMessageBox::Ok);
-    return;
-  }
-
-  double z_min = ui->txt_zMin->text().toDouble();
-  double z_max = ui->txt_zMax->text().toDouble();
-  double z_step =ui->txt_zStep->text().toDouble();
-  if ((z_min<0.) || (z_min>z_max) || (z_step<0.) ) {
-    QMessageBox::warning(this, "Not acceptable Range...",
-        "The redshift range you have provided is not well formated, please check it.",
-        QMessageBox::Ok);
-    return;
-  }
-
-    ui->tableView_ParameterRule->setNameToSelectedRule(ui->txt_name->text().toStdString());
+      m_rules[m_ref].setName(ui->txt_name->text().toStdString());
 
 
     // SED
-    string sed_root = sed_res.second;
-    vector<string> sed_excl = static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->getExclusions(sed_root);
-    ui->tableView_ParameterRule->setSedsToSelectedRule(std::move(sed_root),std::move(sed_excl));
+      m_rules[m_ref].setSedSelection(std::move(sed_selection));
 
     // Reddeing Curves
-    string red_root =red_res.second;
-    vector<string> red_excl = static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->getExclusions(red_root);
-    ui->tableView_ParameterRule->setRedCurvesToSelectedRule(std::move(red_root),std::move(red_excl));
+      m_rules[m_ref].setRedCurveSelection(std::move(red_curve_selection));
 
-    // E(B-V)-range
-    Range new_ebv{ebv_min, ebv_max, ebv_step};
 
-    // z-range
-    Range new_z{z_min, z_max, z_step};
 
-    ui->tableView_ParameterRule->setRangesToSelectedRule(std::move(new_ebv),std::move(new_z));
+    auto new_z_values = ParameterRule::parseValueList(ui->txt_z_values->text().toStdString());
+    m_rules[m_ref].setRedshiftValues(std::move(new_z_values));
 
-    turnControlsInView();
 
-    auto selected_rule = ui->tableView_ParameterRule->getSelectedRule();
 
-    // SED
-    static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedRootObject(),selected_rule.getExcludedSeds());
+    auto new_ebv_values = ParameterRule::parseValueList(ui->txt_ebv_values->text().toStdString());
+    m_rules[m_ref].setEbvValues(std::move(new_ebv_values));
 
-    // Reddening Curve
-    static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getReddeningRootObject(),selected_rule.getExcludedReddenings());
 
+    m_rules[m_ref].getModelNumber(true);
+
+
+
+
+    this->popupClosing(m_ref,m_rules[m_ref],true);
+    this->close();
 }
 
- void DialogModelSet::selectionChanged(QModelIndex new_index, QModelIndex){
-     if (new_index.isValid()){
-         ParameterRuleModel* model=ui->tableView_ParameterRule->getModel();
 
-         auto selected_rule = model->getRule(new_index.row());
 
-         ui->txt_name->setText(QString::fromStdString(selected_rule.getName()));
 
-         // SED
-         static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedRootObject(),selected_rule.getExcludedSeds());
 
-         // Reddening Curve
-         static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getReddeningRootObject(),selected_rule.getExcludedReddenings());
 
-         // E(B-V)-range
-         ui->txt_ebvMin->setText(QString::number(selected_rule.getEbvRange().getMin()));
-         ui->txt_ebvMax->setText(QString::number(selected_rule.getEbvRange().getMax()));
-         ui->txt_ebvStep->setText(QString::number(selected_rule.getEbvRange().getStep()));
-         // z-range
-         ui->txt_zMin->setText(QString::number(selected_rule.getZRange().getMin()));
-         ui->txt_zMax->setText(QString::number(selected_rule.getZRange().getMax()));
-         ui->txt_zStep->setText(QString::number(selected_rule.getZRange().getStep()));
+ void DialogModelSet::populateZRangesAndValues(ParameterRule selected_rule){
+  ui->txt_z_values->setText(QString::fromStdString(selected_rule.getRedshiftStringValueList()));
+  cleanRangeControl( ui->Layout_z_range);
+  m_current_z_range_id = 0;
+
+  for (auto& range : selected_rule.getZRanges()) {
+    auto del_button = new GridButton(0, m_current_z_range_id, "Delete");
+    connect(del_button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
+        SLOT(onZDeleteClicked(size_t,size_t)));
+    ui->Layout_z_range->addWidget(createRangeControls(del_button, m_current_z_range_id, false, range));
+    ++m_current_z_range_id;
+
+  }
+}
+
+ void DialogModelSet::populateEbvRangesAndValues(ParameterRule selected_rule){
+   ui->txt_ebv_values->setText(QString::fromStdString(selected_rule.getEbvStringValueList()));
+   cleanRangeControl( ui->Layout_ebv_range);
+   m_current_ebv_range_id = 0;
+
+   for (auto& range : selected_rule.getEbvRanges()) {
+       auto del_button = new GridButton(0, m_current_ebv_range_id, "Delete");
+       connect(del_button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
+           SLOT(onEbvDeleteClicked(size_t,size_t)));
+       ui->Layout_ebv_range->addWidget(createRangeControls(del_button, m_current_ebv_range_id, false, range));
+       ++m_current_ebv_range_id;
      }
-     else{
-
-         static_cast<XYDataSetTreeModel*>(ui->treeView_Sed->model())->setState("",{});
-         static_cast<XYDataSetTreeModel*>(ui->treeView_Reddening->model())->setState("",{});
-
-         // E(B-V)-range
-         ui->txt_ebvMin->setText("");
-         ui->txt_ebvMax->setText("");
-         ui->txt_ebvStep->setText("");
-         // z-range
-         ui->txt_zMin->setText("");
-         ui->txt_zMax->setText("");
-         ui->txt_zStep->setText("");
-     }
-     turnControlsInView();
  }
+
+ void DialogModelSet::onZDeleteClicked(size_t,size_t ref){
+   deleteRangeAt(ui->Layout_z_range, ref);
+ }
+
+ void DialogModelSet::onEbvDeleteClicked(size_t,size_t ref){
+   deleteRangeAt(ui->Layout_ebv_range, ref);
+ }
+
+
+
+void DialogModelSet::on_btn_add_z_range_clicked() {
+  auto del_button = new GridButton(0, m_current_z_range_id, "Delete");
+  connect(del_button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
+      SLOT(onZDeleteClicked(size_t,size_t)));
+  ui->Layout_z_range->addWidget(createRangeControls(del_button, m_current_z_range_id, true));
+  ++m_current_z_range_id;
+  turnControlsInEdition();
+}
+
+void DialogModelSet::on_btn_add_ebv_range_clicked() {
+  auto del_button = new GridButton(0, m_current_ebv_range_id, "Delete");
+  connect(del_button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
+      SLOT(onEbvDeleteClicked(size_t,size_t)));
+  ui->Layout_ebv_range->addWidget(createRangeControls(del_button, m_current_ebv_range_id, true));
+  ++m_current_ebv_range_id;
+  turnControlsInEdition();
+}
+
+
+QFrame* DialogModelSet::createRangeControls(GridButton* del_button, int range_id, bool enabled ){
+   return createRangeControls(del_button, range_id, enabled,{-1,-1,-1});
+ }
+
+QFrame* DialogModelSet::createRangeControls(GridButton* del_button, int range_id, bool enabled, const Range& range){
+  bool do_create_void = range.getStep()<0;
+
+  auto range_frame = new QFrame();
+  auto range_layout = new QHBoxLayout();
+  range_frame->setLayout(range_layout);
+  auto lbl_min = new QLabel("Min :");
+  range_layout->addWidget(lbl_min);
+  auto txt_min = new QLineEdit();
+  if (!do_create_void){
+    txt_min->setText(QString::number(range.getMin(),'g',15));
+  }
+  txt_min->setValidator(new QDoubleValidator(0, 10000, 20));
+  txt_min->setEnabled(enabled);
+  range_layout->addWidget(txt_min);
+
+  auto lbl_max = new QLabel("Max :");
+  range_layout->addWidget(lbl_max);
+  auto txt_max = new QLineEdit();
+  if (!do_create_void){
+    txt_max->setText(QString::number(range.getMax(),'g',15));
+  }
+  txt_max->setValidator(new QDoubleValidator(0, 10000, 20));
+  txt_max->setEnabled(enabled);
+  range_layout->addWidget(txt_max);
+
+  auto lbl_step = new QLabel("Step :");
+  range_layout->addWidget(lbl_step);
+  auto txt_step = new QLineEdit();
+  if (!do_create_void){
+    txt_step->setText(QString::number(range.getStep(),'g',15));
+  }
+  txt_step->setValidator(new QDoubleValidator(0, 10000, 20));
+  txt_step->setEnabled(enabled);
+  range_layout->addWidget(txt_step);
+
+
+  del_button->setEnabled(enabled);
+  range_layout->addWidget(del_button);
+
+  auto lbl_id = new QLabel(QString::number(range_id));
+  lbl_id->setVisible(false);
+
+  range_layout->addWidget(lbl_id);
+  return range_frame;
+}
+
+
+
+
+void DialogModelSet::cleanRangeControl(QVBoxLayout* ranges_layout) {
+  for (int i = ranges_layout->count() - 1; i >= 0; --i) {
+    QWidget *widget = ranges_layout->itemAt(i)->widget();
+    if (widget != NULL) {
+      delete widget;
+    }
+  }
+}
+
+
+void DialogModelSet::SetRangeControlsEnabled(QVBoxLayout* ranges_layout, bool is_enabled) {
+  for (int i = 0; i < ranges_layout->count(); ++i) {
+    QWidget *range_frame = ranges_layout->itemAt(i)->widget();
+    if (range_frame != NULL) {
+      auto range_layout = range_frame->layout();
+      range_layout->itemAt(1)->widget()->setEnabled(is_enabled);
+      range_layout->itemAt(3)->widget()->setEnabled(is_enabled);
+      range_layout->itemAt(5)->widget()->setEnabled(is_enabled);
+      range_layout->itemAt(6)->widget()->setEnabled(is_enabled);
+    }
+  }
+}
+
+
+std::vector<Range> DialogModelSet::getRanges(QVBoxLayout* ranges_layout) {
+  std::vector<Range> new_ranges { };
+
+  for (int i = 0; i < ranges_layout->count(); ++i) {
+    QWidget *range_frame = ranges_layout->itemAt(i)->widget();
+    if (range_frame != NULL) {
+      auto range_layout = range_frame->layout();
+      double min = static_cast<QLineEdit*>(range_layout->itemAt(1)->widget())->text().toDouble();
+      double max = static_cast<QLineEdit*>(range_layout->itemAt(3)->widget())->text().toDouble();
+      double step = static_cast<QLineEdit*>(range_layout->itemAt(5)->widget())->text().toDouble();
+      new_ranges.push_back( { min, max, step });
+    }
+  }
+
+  return new_ranges;
+}
+
+void DialogModelSet::deleteRangeAt(QVBoxLayout* ranges_layout, size_t range_id) {
+
+ for (int i = 0; i < ranges_layout->count(); ++i) {
+   QWidget *range_frame = ranges_layout->itemAt(i)->widget();
+   if (range_frame != NULL) {
+     auto range_layout = range_frame->layout();
+     size_t value = static_cast<QLabel*>(range_layout->itemAt(7)->widget())->text().toUInt();
+     if (range_id == value) {
+       delete range_frame;
+       break;
+     }
+   }
+ }
+}
 
 }
 }

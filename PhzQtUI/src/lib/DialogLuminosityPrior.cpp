@@ -45,6 +45,8 @@ DialogLuminosityPrior::DialogLuminosityPrior(QWidget *parent) :
         ui(new Ui::DialogLuminosityPrior){
   ui->setupUi(this);
   ui->frame_Luminosity->setStyleSheet( "background-color: white ");
+  m_z_min = 0.;
+  m_z_max = 3000.;
 }
 
 DialogLuminosityPrior::~DialogLuminosityPrior() {}
@@ -66,6 +68,12 @@ void DialogLuminosityPrior::loadData(ModelSet model,
   // load the main grid
   loadMainGrid();
   manageBtnEnability(false, false);
+
+  disconnect(ui->table_priors,SIGNAL(doubleClicked(QModelIndex)),0,0);
+    connect(ui->table_priors,
+                      SIGNAL(doubleClicked(QModelIndex)),
+                      SLOT(priorGridDoubleClicked(QModelIndex)));
+
 }
 
 void DialogLuminosityPrior::priorSelectionChanged(QModelIndex new_index, QModelIndex){
@@ -216,6 +224,10 @@ void DialogLuminosityPrior::on_btn_delete_clicked(){
 }
 
 void DialogLuminosityPrior::on_btn_edit_clicked(){
+  manageBtnEnability(true, false);
+}
+
+void DialogLuminosityPrior::priorGridDoubleClicked(QModelIndex){
   manageBtnEnability(true, false);
 }
 
@@ -635,7 +647,7 @@ void DialogLuminosityPrior::loadGrid() {
   for (size_t i = 0; i < m_zs.size() - 1; ++i) {
     for (size_t j = 0; j < m_groups.size(); ++j) {
       auto frame = new QFrame();
-      frame->setMinimumHeight(30);
+      frame->setMinimumHeight(70);
       frame->setFrameStyle(QFrame::Box);
       if (!m_luminosityInfos[i][j].isComplete()) {
         frame->setStyleSheet("background-color: red ");
@@ -648,6 +660,7 @@ void DialogLuminosityPrior::loadGrid() {
         text_btn = m_luminosityInfos[i][j].getDescription();
       }
       GridButton * button = new GridButton(i, j, text_btn);
+      button->setMinimumHeight(50);
       button->setStyleSheet("background-color: lightGrey ");
       connect(button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
           SLOT(onGridButtonClicked(size_t,size_t)));

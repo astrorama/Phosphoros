@@ -14,8 +14,8 @@ ParameterRuleTable::ParameterRuleTable(QDialog*&){
 
 }
 
-void ParameterRuleTable::loadParameterRules(std::map<int,ParameterRule> parameter_rules,std::string sedRootPath ,std::string redRootPath){
-    ParameterRuleModel* new_model = new ParameterRuleModel(parameter_rules,sedRootPath,redRootPath);
+void ParameterRuleTable::loadParameterRules(std::map<int,ParameterRule> parameter_rules, DatasetRepo sed_repo, DatasetRepo red_curve_repo){
+    ParameterRuleModel* new_model = new ParameterRuleModel(parameter_rules,sed_repo,red_curve_repo);
     setModel(new_model);
     this->setColumnHidden(6, true);
     this->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -68,22 +68,41 @@ void ParameterRuleTable::setNameToSelectedRule(std::string new_name){
   getModel()->setName(new_name,index[0].row());
 }
 
-void ParameterRuleTable::setRangesToSelectedRule(Range ebvRange, Range zRange){
+void ParameterRuleTable::setRedshiftRangesToSelectedRule(std::vector<Range> ranges){
+  QModelIndexList index = this->selectionModel()->selectedIndexes();
+  getModel()->setRedshiftRanges(std::move(ranges),index[0].row());
+}
+
+void ParameterRuleTable::setEbvRangesToSelectedRule(std::vector<Range> ranges){
+  QModelIndexList index = this->selectionModel()->selectedIndexes();
+  getModel()->setEbvRanges(ranges,index[0].row());
+}
+
+void ParameterRuleTable::setEbvValuesToSelectedRule(std::set<double> values){
+  QModelIndexList index = this->selectionModel()->selectedIndexes();
+  getModel()->setEbvValues(values,index[0].row());
+}
+
+void ParameterRuleTable::setRedshiftValuesToSelectedRule(std::set<double> values){
+  QModelIndexList index = this->selectionModel()->selectedIndexes();
+  getModel()->setRedshiftValues(values,index[0].row());
+}
+
+void ParameterRuleTable::setSedsToSelectedRule(DatasetSelection state_selection){
     QModelIndexList index = this->selectionModel()->selectedIndexes();
-    getModel()->setRanges(std::move(ebvRange),std::move(zRange),index[0].row());
+    getModel()->setSeds(state_selection,index[0].row());
+}
+
+void ParameterRuleTable::setRedCurvesToSelectedRule(DatasetSelection state_selection){
+    QModelIndexList index = this->selectionModel()->selectedIndexes();
+    getModel()->setRedCurves(state_selection,index[0].row());
 }
 
 
-void ParameterRuleTable::setSedsToSelectedRule(std::string root, std::vector<std::string> exceptions){
-    QModelIndexList index = this->selectionModel()->selectedIndexes();
-    getModel()->setSeds(std::move(root),std::move(exceptions),index[0].row());
+int ParameterRuleTable::getSelectedRuleId() const{
+  QModelIndexList index = this->selectionModel()->selectedIndexes();
+  return cGetModel()->getValue(index[0].row(),6).toInt();
 }
-
-void ParameterRuleTable::setRedCurvesToSelectedRule(std::string root, std::vector<std::string> exceptions){
-    QModelIndexList index = this->selectionModel()->selectedIndexes();
-    getModel()->setRedCurves(std::move(root),std::move(exceptions),index[0].row());
-}
-
 
 const ParameterRule& ParameterRuleTable::getSelectedRule() const{
     QModelIndexList index = this->selectionModel()->selectedIndexes();

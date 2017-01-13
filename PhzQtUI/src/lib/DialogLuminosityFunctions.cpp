@@ -5,6 +5,7 @@
 #include "PhzQtUI/DialogLuminosityFunctions.h"
 #include "ui_DialogLuminosityFunctions.h"
 #include "FileUtils.h"
+#include <QLocale>
 #include <QLabel>
 #include <QStandardItemModel>
 
@@ -78,7 +79,6 @@ void DialogLuminosityFunctions::on_btn_cancel_clicked(){
 void DialogLuminosityFunctions::on_btn_save_clicked(){
 
   for (size_t group_id=0; group_id<m_groups.size();++group_id){
-     std::string group_name = m_groups[group_id].first;
      for (size_t range_id=0; range_id<m_zs.size()-1;++range_id){
        auto row_id = group_id*(m_zs.size()-1)+range_id;
 
@@ -88,14 +88,15 @@ void DialogLuminosityFunctions::on_btn_save_clicked(){
        QString phi = ui->table_functions->model()->data(ui->table_functions->model()->index(row_id,3)).toString();
        QString m_l = ui->table_functions->model()->data(ui->table_functions->model()->index(row_id,4)).toString();
 
+       QLocale locale{};
        bool alpha_ok;
-       double d_alpha = alpha.toDouble(&alpha_ok);
+       double d_alpha = locale.toDouble(alpha, &alpha_ok);
 
        bool phi_ok;
-       double d_phi = phi.toDouble(&phi_ok);
+       double d_phi =  locale.toDouble(phi, &phi_ok);
 
        bool m_l_ok;
-       double d_m_l = m_l.toDouble(&m_l_ok);
+       double d_m_l =  locale.toDouble(m_l, &m_l_ok);
 
        if (alpha_ok){
          info.alpha=d_alpha;

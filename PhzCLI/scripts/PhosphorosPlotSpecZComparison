@@ -40,26 +40,27 @@ def read_table(filename):
 #
 
 
-def create_table(files, id, specz, phz):
+def create_table(files, ids, specz, phz):
     tables = [read_table(f) for f in files]
-    for t in tables:
-        if not id in t.colnames:
-            print 'Catalog input without column named ', id
-    ids = set.intersection(*[set(t[id]) for t in tables])
+    for i, t in enumerate(tables):
+        if not ids[i] in t.colnames:
+            print 'Input catalog', files[i], 'does not have column', ids[i]
+            exit()
+    id_inter = set.intersection(*[set(t[ids[i]]) for i,t in enumerate(tables)])
     values_map = {}
     all_cols = {}
     orig_ids = []
-    for i in ids:
+    for i in id_inter:
         values_map[i] = [None, None]
         all_cols[i] = []
-    for t in tables:
+    for i,t in enumerate(tables):
         has_specz = specz in t.colnames
         has_phz = phz in t.colnames
         orig_ids.append([])
         for r in t:
-            r_id = r[id]
+            r_id = r[ids[i]]
             orig_ids[-1].append(r_id)
-            if not r_id in ids:
+            if not r_id in id_inter:
                 continue
             all_cols[r_id].append(r)
             if has_specz:
@@ -73,7 +74,7 @@ def create_table(files, id, specz, phz):
         i.append(k)
         s.append(v[0])
         p.append(v[1])
-    return Table([i,s,p], names=(id,specz,phz)), all_cols, orig_ids
+    return Table([i,s,p], names=('ID',specz,phz)), all_cols, orig_ids
     
     
 def compute_stats(array, col_number):
@@ -189,20 +190,20 @@ class SampUpdater(object):
             self.client.bind_receive_notification('table.highlight.row', self.rowNotification)
             self.table_urls = []
             self.table_ids = []
-            self.global_ids = table[id_col]
+            self.global_ids = table['ID']
             self.global_ids_reverse = {}
             for i in range(len(self.global_ids)):
                 self.global_ids_reverse[self.global_ids[i]] = i
             self.id_col = id_col
             self.orig_ids = orig_ids
-            for name in tablenames:
+            for ti, name in enumerate(tablenames):
                 try:
                     data = Table.read(name, format='fits')
                 except:
                     continue
                 id_map = {}
                 for i in range(len(data)):
-                    id_map[data[id_col][i]] = i
+                    id_map[data[id_col[ti]][i]] = i
                 self.table_ids.append(id_map)
                 url = 'file:' + os.path.abspath(name)
                 table_name = os.path.basename(name)
@@ -283,6 +284,7 @@ def displaySpeczPhotz(ids, specz, photz, data):
         selected1.set_offsets([specz[index], photz[index]])
         selected2.set_visible(True)
         selected2.set_offsets([specz[index], data[index]])
+        plt.pause(.01)
         f.canvas.draw()
     f.updateSelected = lambda x: updateSelected(x)
     return f
@@ -330,8 +332,9 @@ def main():
 
     parser.add_argument("-f", "--files", type=str, nargs='+',
                         help="Input file(s) to read(catalog)")
-    parser.add_argument("-i", "--id", type=str, default='ID',
-                        help="The name of the ID column (default: ID)")
+    parser.add_argument("-i", "--id", type=str, nargs='+', default=['ID'],
+                        help="The name(s) of the ID column(s). If a single name is given, "
+                             "it is used for all catalogs. (default: ID)")
     parser.add_argument("-s", "--specz", type=str, default='ZSPEC',
                         help="The name of the spectroscopic redshift column (default: ZSPEC)")
     parser.add_argument("-p", "--phz", type=str, default='Z',
@@ -353,22 +356,28 @@ def main():
 if __name__ == '__main__':
             
     args = main()  
+
+    ids = args.id
+    if len(ids) == 1:
+        ids = [ids[0]] * len(args.files)
+    if len(ids) != len(args.files):
+        print 'Wrong number of ID column names (must much the number of catalogs or 1)'
     
     # Read input files
-    table, all_cols, orig_ids = create_table(args.files, args.id, args.specz, args.phz)
+    table, all_cols, orig_ids = create_table(args.files, ids, args.specz, args.phz)
 
     col_number = 2
     label = "PhotZ"
    
-    (specZ, colZ, data, mean, median, mad, sigma, outliersPercent,sigmaNoOutliers, meanNoOutliers) = compute_stats(table, col_number)
+    (specZ, colZ, data, mean, median, sigma, mad, outliersPercent,sigmaNoOutliers, meanNoOutliers) = compute_stats(table, col_number)
         
     # Plot distribution
     if args.display:
-            fig1 = displaySpeczPhotz(table[args.id], specZ, colZ, data)
+            fig1 = displaySpeczPhotz(table['ID'], specZ, colZ, data)
             fig2 = displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers)
             samp = None
             if args.samp:
-                samp = SampUpdater(args.files, args.id, table, orig_ids, (fig1, fig2))
+                samp = SampUpdater(args.files, ids, table, orig_ids, (fig1, fig2))
             selector = Selector((fig1, fig2, samp), table, all_cols, args.pdf)
             plt.show()
     

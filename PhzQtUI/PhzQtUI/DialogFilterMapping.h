@@ -2,6 +2,8 @@
 #define DIALOGFILTERMAPPING_H
 
 #include <set>
+#include <string>
+#include <vector>
 #include <memory>
 #include <QDialog>
 #include "FilterMapping.h"
@@ -14,48 +16,54 @@ class DialogFilterMapping;
 }
 
 /**
- * @brief The DialogFilterMapping class
- * This popup allows the user to edit the provided FilterMapping.
+ * @class DialogFilterMapping
+ * @brief This popup allows the user to select the filters to be mapped
+ * in the calling form. It instanciate and access directly the filters provider.
  */
-class DialogFilterMapping : public QDialog
-{
-    Q_OBJECT
+class DialogFilterMapping: public QDialog {
+  Q_OBJECT
 
 public:
-    explicit DialogFilterMapping(QWidget *parent = 0);
-    ~DialogFilterMapping();
+  /**
+   * @brief Constructor
+   */
+  explicit DialogFilterMapping(QWidget *parent = 0);
 
-    /**
-     * @brief Initialise the popup by setting its internal data
-     * @param filter
-     * the FilterMapping to be modified.
-     * @param columns
-     * A (possibly empty) list of columns to be used to prepopulate the column drop downs.
-     */
-    void setFilter(const FilterMapping& filter, const std::set<std::string>& columns);
+  /**
+   * @brief Destructor
+   */
+  ~DialogFilterMapping();
 
-signals:
-    /**
-     * @brief SIGNAL popupClosing: rised when the FilterMapping is saved and the popup close.
-     * The argument is the modifed FilterMapping.
-     */
-    void popupClosing(FilterMapping);
+  /**
+   * @brief Initialise the popup by setting its internal data
+   * @param filters
+   * A vector of string containing the names of the selected filters at the
+   * opening of the popup.
+   */
+  void setFilters(const std::vector<std::string>& filters);
 
+  signals:
+  /**
+   * @brief SIGNAL popupClosing: rised when the FilterMapping is saved and
+   * the popup close.
+   * The argument is the vector of selected filters.
+   */
+  void popupClosing( std::vector<std::string>);
 
 private slots:
-    /**
-     * @brief SLOT on_btn_cancel_clicked: close the popup
-     */
-    void on_btn_cancel_clicked();
+  /**
+   * @brief SLOT on_btn_cancel_clicked: close the popup
+   */
+  void on_btn_cancel_clicked();
 
-    /**
-     * @brief SLOT on_btn_save_clicked: build the updated FilterMapping and pass it to the
-     *  SIGNAL popupClosing and close the popup.
-     */
-    void on_btn_save_clicked();
+  /**
+   * @brief SLOT on_btn_save_clicked: call the SIGNAL popupClosing
+   * and close the popup.
+   */
+  void on_btn_save_clicked();
 
 private:
-   std::unique_ptr<Ui::DialogFilterMapping> ui;
+  std::unique_ptr<Ui::DialogFilterMapping> ui;
 };
 
 }

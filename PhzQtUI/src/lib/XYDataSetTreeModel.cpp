@@ -205,6 +205,58 @@ void XYDataSetTreeModel::onItemChanged(QStandardItem* item) {
   }
 }
 
+
+const std::vector<std::string> XYDataSetTreeModel::getSelectedLeaves() const{
+
+  std::vector<std::string> selected_leaves{};
+  std::list<QStandardItem *> item_to_explore { this->item(0) };
+
+   while (item_to_explore.size() > 0) {
+     auto item = item_to_explore.front();
+
+     for (int i = 0; i < item->rowCount(); ++i) {
+       auto child = item->child(i);
+       if (child->hasChildren()) {
+         item_to_explore.push_back(child);
+       } else {
+         if (child->checkState() == Qt::CheckState::Checked){
+           selected_leaves.push_back( child->text().toStdString());
+         }
+       }
+     }
+
+     item_to_explore.remove(item);
+   }
+
+   return selected_leaves;
+}
+
+void XYDataSetTreeModel::setState(const std::vector<std::string>& selected_leaves){
+  m_bypass_item_changed = true;
+
+  std::list<QStandardItem *> item_to_explore { this->item(0) };
+
+  while (item_to_explore.size() > 0) {
+    auto item = item_to_explore.front();
+
+    for (int i = 0; i < item->rowCount(); ++i) {
+      auto child = item->child(i);
+      if (child->hasChildren()) {
+        item_to_explore.push_back(child);
+      } else {
+        std::string child_text = child->text().toStdString();
+        if (std::find(selected_leaves.begin(), selected_leaves.end(), child_text) != selected_leaves.end()){
+          child->setCheckState(Qt::CheckState::Checked);
+        }
+      }
+    }
+
+    item_to_explore.remove(item);
+  }
+
+  m_bypass_item_changed = false;
+}
+
 void XYDataSetTreeModel::setState(std::string root,
     const std::vector<std::string>& exclusions) {
   m_bypass_item_changed = true;

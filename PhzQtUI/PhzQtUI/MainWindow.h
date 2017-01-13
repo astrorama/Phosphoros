@@ -4,6 +4,8 @@
 #include <memory>
 #include <map>
 #include <QMainWindow>
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -11,6 +13,8 @@ namespace PhzQtUI {
 namespace Ui {
 class MainWindow;
 }
+
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 class MainWindow : public QMainWindow
 {
@@ -37,10 +41,29 @@ private slots:
 
     void navigateToHome();
 
+    void navigateToHomeWithReset(bool);
+
+    void navigateToParameter(bool);
+
+    void navigateToCatalog(bool);
+
+    void navigateToComputeRedshift(bool);
+
+    void navigateToConfig();
+
+    void quit(bool);
+
 
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;
+    bool m_model_loaded = false;
+    bool m_mapping_loaded = false;
+
+
+    DatasetRepo m_seds_repository;
+    DatasetRepo m_redenig_curves_repository;
+
 
 };
 

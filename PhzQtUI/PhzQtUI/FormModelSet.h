@@ -5,6 +5,9 @@
 #include <QWidget>
 #include <QModelIndex>
 #include "ParameterRule.h"
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
+
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -12,6 +15,9 @@ namespace PhzQtUI {
 namespace Ui {
 class FormModelSet;
 }
+
+
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 /**
  * @brief The FormModelSet class
@@ -25,15 +31,40 @@ public:
     explicit FormModelSet(QWidget *parent = 0);
     ~FormModelSet();
 
-     void loadSetPage();
+     void loadSetPage(DatasetRepo seds_repository,
+         DatasetRepo redenig_curves_repository);
+
+
+     void updateSelection();
 
 signals:
-    void navigateToHome();
+
+void navigateToCatalog(bool);
+
+void navigateToConfig();
+
+void navigateToComputeRedshift(bool);
+
+void quit(bool);
+
 
 private slots:
-    void setSelectionChanged(QModelIndex, QModelIndex);
 
-    void setEditionPopupClosing(std::map<int,ParameterRule>);
+void on_btn_ToAnalysis_clicked();
+void on_btn_ToOption_clicked();
+void on_btn_ToCatalog_clicked();
+void on_btn_exit_clicked();
+
+
+
+    void setSelectionChanged(QModelIndex, QModelIndex);
+    void rulesSelectionChanged(QModelIndex, QModelIndex);
+
+    void setGridDoubleClicked(QModelIndex);
+
+    void parameterGridDoubleClicked(QModelIndex);
+
+    void setEditionPopupClosing(int,ParameterRule,bool);
 
     void on_btn_SetEdit_clicked();
 
@@ -41,9 +72,6 @@ private slots:
 
     void on_btn_SetSave_clicked();
 
-    void on_btn_SetToHome_clicked();
-
-    void on_btn_backHome_clicked();
 
     void on_btn_SetNew_clicked();
 
@@ -51,9 +79,13 @@ private slots:
 
     void on_btn_SetDelete_clicked();
 
-    void on_btn_SetToRules_clicked();
-    void on_btn_viewSet_clicked();
+    void on_btn_open_region_clicked();
 
+    void on_btn_new_region_clicked();
+
+    void on_btn_duplicate_region_clicked();
+
+    void on_btn_delete_region_clicked();
 
 
 private:
@@ -62,6 +94,8 @@ private:
     void setModelInView();
 
     bool m_setInsert;
+    DatasetRepo m_seds_repository;
+    DatasetRepo m_redenig_curves_repository;
 };
 
 }
