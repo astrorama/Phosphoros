@@ -133,39 +133,12 @@ DialogRunAnalysis::DialogRunAnalysis(QWidget *parent) :
 
 DialogRunAnalysis::~DialogRunAnalysis() {}
 
-void DialogRunAnalysis::setValues(std::string output_cat_name,
-                                  std::string output_pdf_name,
-                                  std::string output_lik_name,
-                                  std::string output_pos_name,
-    const std::map<std::string, boost::program_options::variable_value>& config,
-    const std::map<std::string, boost::program_options::variable_value>& luminosity_config) {
-  if (output_cat_name.length() > 0) {
-    ui->label_name_cat->setText(QString::fromStdString(output_cat_name));
-  } else {
-    ui->label_name_cat->setVisible(false);
-    ui->label_cat->setVisible(false);
-  }
+void DialogRunAnalysis::setValues(std::string output_dir,
+          const std::map<std::string, boost::program_options::variable_value>& config,
+          const std::map<std::string, boost::program_options::variable_value>& luminosity_config) {
+  
+  ui->label_out_dir->setText(QString::fromStdString(output_dir));
 
-  if (output_pdf_name.length() > 0) {
-    ui->label_name_pdf->setText(QString::fromStdString(output_pdf_name));
-  } else {
-    ui->label_name_pdf->setVisible(false);
-    ui->label_pdf->setVisible(false);
-  }
-
-  if (output_lik_name.length() > 0) {
-    ui->label_name_lik->setText(QString::fromStdString(output_lik_name));
-  } else {
-    ui->label_name_lik->setVisible(false);
-    ui->label_lik->setVisible(false);
-  }
-
-  if (output_pos_name.length() > 0) {
-     ui->label_name_pos->setText(QString::fromStdString(output_pos_name));
-   } else {
-     ui->label_name_pos->setVisible(false);
-     ui->label_pos->setVisible(false);
-   }
   m_config = config;
   m_lum_config=luminosity_config;
 
@@ -184,16 +157,17 @@ std::string DialogRunAnalysis::runFunction(){
 
 
     auto& model_phot_grid = config_manager.getConfiguration<PhotometryGridConfig>().getPhotometryGrid();
-    auto& marginalization_func = config_manager.getConfiguration<MarginalizationConfig>().getMarginalizationFunc();
+    auto& marginalization_func_list = config_manager.getConfiguration<MarginalizationConfig>().getMarginalizationFuncList();
     auto& likelihood_grid_func = config_manager.getConfiguration<LikelihoodGridFuncConfig>().getLikelihoodGridFunction();
     auto& correction_map = config_manager.getConfiguration<PhotometricCorrectionConfig>().getPhotometricCorrectionMap();
     auto& priors = config_manager.getConfiguration<PriorConfig>().getPriors();
 
-    PhzLikelihood::ParallelCatalogHandler handler { correction_map,
+
+    PhzLikelihood::ParallelCatalogHandler handler ( correction_map,
                                                     model_phot_grid,
                                                     likelihood_grid_func,
                                                     priors,
-                                                    marginalization_func };
+                                                    marginalization_func_list );
 
     auto& catalog = config_manager.getConfiguration<Configuration::CatalogConfig>().getCatalog();
     auto out_ptr = config_manager.getConfiguration<ComputeRedshiftsConfig>().getOutputHandler();

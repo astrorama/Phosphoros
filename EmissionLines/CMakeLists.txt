@@ -48,6 +48,13 @@ elements_depends_on_subdirs(ElementsKernel)
 #                       LINK_LIBRARIES ElementsExamples TYPE Boost)
 #===============================================================================
 
+
+#===============================================================================
+# Use the following macro for python modules:
+#  elements_install_python_modules()
+#===============================================================================
+elements_install_python_modules()
+
 #===============================================================================
 # Declare the Python programs here
 # Examples :
@@ -57,12 +64,10 @@ elements_depends_on_subdirs(ElementsKernel)
 elements_add_python_program(PhosphorosAddEmissionLines EmissionLines.PhosphorosAddEmissionLines)
 
 #===============================================================================
-# Use the following macro for python modules, scripts and aux files:
-#  elements_install_python_modules()
+# Use the following macro for scripts and aux files:
 #  elements_install_scripts()
 #===============================================================================
-elements_install_scripts()
-elements_install_python_modules()
+
 
 #===============================================================================
 # Add the elements_install_conf_files macro 

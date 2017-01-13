@@ -31,3 +31,5 @@ elements_install_scripts()
 elements_add_unit_test(LsAuxDirConfig_test tests/src/LsAuxDirConfig_test.cpp 
                      LINK_LIBRARIES PhzCLI
                      TYPE Boost)
+
+elements_add_python_program(PhosphorosPlotPhotometryComparison PhzCLI.PhosphorosPlotPhotometryComparison)

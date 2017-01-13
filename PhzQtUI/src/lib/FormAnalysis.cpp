@@ -25,6 +25,8 @@
 #include "PhzUITools/ConfigurationWriter.h"
 #include "PhzUITools/CatalogColumnReader.h"
 
+#include "PhzDataModel/PhzModel.h"
+
 namespace Euclid {
 namespace PhzQtUI {
 
@@ -44,6 +46,8 @@ void FormAnalysis::loadAnalysisPage() {
   auto saved_parameter_space = PreferencesUtils::getUserPreference("_global_selection_",
       "parameter_space");
 
+  ui->cb_z_col->clear();
+  ui->cb_z_col->addItem("");
 
   m_analysis_survey_list = SurveyFilterMapping::loadCatalogMappings();
     ui->cb_AnalysisSurvey->clear();
@@ -120,6 +124,16 @@ try{
     ui->cb_AnalysisModel->removeItem(ui->cb_AnalysisModel->currentIndex());
   }
   }
+}
+
+void FormAnalysis::fillCbColumns(std::set<std::string> columns){
+   ui->cb_z_col->clear();
+   ui->cb_z_col->addItem("");
+   for(auto item : columns){
+     ui->cb_z_col->addItem(QString::fromStdString(item));
+   }
+
+   ui->cb_z_col->setEnabled(true);
 }
 
 void FormAnalysis::updateCorrectionSelection() {
@@ -514,6 +528,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   }
 
   std::string yes_flag = "YES";
+  std::string no_flag = "NO";
 
   if (ui->gb_corrections->isChecked()) {
     options_map["enable-photometric-correction"].value() = boost::any(yes_flag);
@@ -524,22 +539,25 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   options_map["axes-collapse-type"].value() = boost::any(
       ui->cb_marginalization->currentText().toStdString());
 
-  if (ui->gb_cat->isChecked()) {
 
-    options_map["create-output-catalog"].value() = boost::any(yes_flag);
-    options_map["output-catalog-format"].value() = boost::any(
+  options_map["output-catalog-format"].value() = boost::any(
         ui->cb_cat_output_type->currentText().toStdString());
+
+  if (ui->gb_fix_z->isChecked()) {
+    options_map["fixed-redshift-column"].value() = boost::any(ui->cb_z_col->currentText().toStdString());
   }
 
-  if (ui->gb_pdf->isChecked()) {
-    options_map["create-output-pdf"].value() = boost::any(yes_flag);
-  }
+  if (ui->cb_best_model_cols->isChecked()) {
+     options_map["create-output-best-model"].value() = boost::any(yes_flag);
+   } else {
+     options_map["create-output-best-model"].value() = boost::any(no_flag);
+   }
 
-  if (ui->gb_lhood->isChecked()) {
+  if (ui->cb_gen_likelihood->isChecked()) {
    options_map["create-output-likelihoods"].value() = boost::any(yes_flag);
   }
 
-  if (ui->gb_lik->isChecked()) {
+  if (ui->cb_gen_posterior->isChecked()) {
     options_map["create-output-posteriors"].value() = boost::any(yes_flag);
   }
 
@@ -549,11 +567,40 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     auto& lum_prior_config = m_prior_config.at(lum_prior_name);
     auto lum_prior_option =lum_prior_config.getConfigOptions();
     options_map.insert(lum_prior_option.begin(),lum_prior_option.end());
-
+    options_map["luminosity-prior-effectiveness"].value() = boost::any(ui->dsp_eff_lum->value());
   }
 
   if (ui->cb_volumePrior->isChecked()) {
     options_map["volume-prior"].value() = boost::any(yes_flag);
+    options_map["volume-prior-effectiveness"].value() = boost::any(ui->dsp_eff_vol->value());
+  }
+
+
+  std::string pdf_output_type = "VECTOR-COLUMN";
+  if (ui->cbb_pdf_out->currentIndex()==1){
+    pdf_output_type = "INDIVIDUAL-HDUS";
+  }
+  options_map["output-pdf-format"].value() = boost::any(pdf_output_type);
+
+  std::vector<std::string> pdf_output_axis{};
+  if (ui->cb_pdf_z->isChecked()) {
+    pdf_output_axis.push_back("Z");
+  }
+
+  if (ui->cb_pdf_ebv->isChecked()) {
+    pdf_output_axis.push_back("EBV");
+  }
+
+  if (ui->cb_pdf_red->isChecked()) {
+    pdf_output_axis.push_back("REDDENING-CURVE");
+  }
+
+  if (ui->cb_pdf_sed->isChecked()) {
+      pdf_output_axis.push_back("SED");
+  }
+
+  if (pdf_output_axis.size()>0){
+    options_map["create-output-pdf"].value() = boost::any(pdf_output_axis);
   }
 
   return options_map;
@@ -636,6 +683,9 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   connect(grid_model, SIGNAL(itemChanged(QStandardItem*)),
       SLOT(onFilterSelectionItemChanged(QStandardItem*)));
 
+  //update the column of the default catalog file
+  fillCbColumns(selected_survey.getColumnList());
+
   // push the default catalog
   setInputCatalogName(selected_survey.getDefaultCatalogFile(), false);
 
@@ -686,12 +736,28 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   }
 }
 
+template<typename ReturnType, int I>
+ int countCompleteList(const std::map<std::string, PhzDataModel::ModelAxesTuple>& grid_axis_map) {
+   std::vector<ReturnType> all_item { };
+   for (auto& sub_grid : grid_axis_map) {
+     for (auto& item : std::get<I>(sub_grid.second)) {
+       if (std::find(all_item.begin(), all_item.end(), item) == all_item.end())
+         all_item.push_back(item);
+     }
+   }
+
+   return all_item.size();
+ }
+
+
   void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(const QString &model_name) {
     PreferencesUtils::setUserPreference("_global_selection_",
                "parameter_space",model_name.toStdString());
 
     updateGridSelection();
     loadLuminosityPriors();
+
+
   }
 
   void FormAnalysis::on_cb_igm_currentIndexChanged(const QString &)
@@ -1000,8 +1066,8 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
   }
 
 
-  void FormAnalysis::on_gb_lhood_clicked(){
-    if (ui->gb_lhood->isChecked ()) {
+  void FormAnalysis::on_cb_gen_likelihood_clicked(){
+    if (ui->cb_gen_likelihood->isChecked ()) {
           QMessageBox::warning(this, "Large output volume...",
               "Outputing multi-dimensional likelihood grids (one file per source)"
               " will generate a large output volume.", QMessageBox::Ok );
@@ -1009,8 +1075,8 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
         setRunAnnalysisEnable(true);
   }
 
-  void FormAnalysis::on_gb_lik_clicked() {
-    if (ui->gb_lik->isChecked ()) {
+  void FormAnalysis::on_cb_gen_posterior_clicked() {
+    if (ui->cb_gen_posterior->isChecked ()) {
       QMessageBox::warning(this, "Large output volume...",
           "Outputing multi-dimensional posterior grids (one file per source)"
           " will generate a large output volume.", QMessageBox::Ok );
@@ -1038,55 +1104,13 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
     }
   }
 
-  void FormAnalysis::on_btn_RunAnalysis_clicked()
-  {
+  void FormAnalysis::on_btn_RunAnalysis_clicked(){
 
-    std::string cat="";
-    if (ui->gb_cat->isChecked()) {
-
-      cat=QString(ui->txt_outputFolder->text()+QDir::separator()+"phz_cat").toStdString();
-      if (ui->cb_cat_output_type->currentText()=="ASCII") {
-        cat=cat+".txt";
-      }
-      else {
-        cat=cat+".fits";
-      }
-
-      if (QFileInfo(QString::fromStdString(cat)).exists()) {
-        if (QMessageBox::question(this, "Override existing file...",
-                "A Photometric Redshift Catalog for the same input catalog file already exists. Do you want to replace it?",
-                QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
-          return;
-        }
-      }
-
-    }
-    std::string pdf="";
-    if (ui->gb_pdf->isChecked()) {
-      pdf=QString(ui->txt_outputFolder->text()+QDir::separator()+"pdf.fits").toStdString();
-      if (QFileInfo(QString::fromStdString(pdf)).exists()) {
-        if (QMessageBox::question(this, "Override existing file...",
-                "A PDF file for the same input catalog file already exists. Do you want to replace it?",
-                QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
-          return;
-        }
-      }
-    }
-
-    std::string lik="";
-    if (ui->gb_lhood->isChecked()) {
-      lik=QString(QString(ui->txt_outputFolder->text()+QDir::separator()+"likelihoods"+QDir::separator())).toStdString();
-    }
-
-    std::string pos="";
-       if (ui->gb_lik->isChecked()) {
-         lik=QString(QString(ui->txt_outputFolder->text()+QDir::separator()+"posteriors"+QDir::separator())).toStdString();
-       }
-
+    std::string out_dir = ui->txt_outputFolder->text().toStdString();
     auto config_map = getRunOptionMap();
     auto config_map_luminosity = getLuminosityOptionMap();
     std::unique_ptr<DialogRunAnalysis> dialog(new DialogRunAnalysis());
-    dialog->setValues(cat,pdf,lik,pos,config_map,config_map_luminosity);
+    dialog->setValues(out_dir, config_map, config_map_luminosity);
     if (dialog->exec()) {
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
           "IGM",ui->cb_igm->currentText().toStdString());

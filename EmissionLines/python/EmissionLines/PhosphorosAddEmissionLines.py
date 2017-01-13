@@ -63,6 +63,7 @@ def defineSpecificProgramOptions():
         help='The differnet factors (relative to H lines) of the metallic lines')
     parser.add_argument('--velocity', default=None, type=float,
         help='The velocity (in km/s) to compute the FWHM of the lines from (defaults to dirac)')
+    parser.add_argument('--no-sed', action='store_true', help='Output only the emission lines')
 
     return parser
 
@@ -207,10 +208,12 @@ class EmissionLinesAdder(object):
         sed.extend(middle)
         sed.extend(after)
             
-    def __call__(self, sed, metal, metal_index, hydrogen_factor, metallic_factor):
+    def __call__(self, sed, metal, metal_index, hydrogen_factor, metallic_factor, no_sed):
         lym_cont = sed.func(1500) * self.ionized_photons_func(metal)
         h_beta_flux = lym_cont * 4.757E-13 * hydrogen_factor
         result = sed.data[:]
+        if no_sed:
+            result = [[r[0], 0] for r in result]
         for l in self.hydrogen_lines:
             wavelength = l[1]
             flux = h_beta_flux * l[metal_index]
@@ -240,7 +243,7 @@ def mainMethod(args):
         for metal_i, metal in enumerate(args.metallicities):
             for hf in args.hydrogen_factors:
                 for mf in args.metallic_factors:
-                    out_sed = adder(sed, metal, metal_i+args.first_metal_index, hf, mf)
+                    out_sed = adder(sed, metal, metal_i+args.first_metal_index, hf, mf, args.no_sed)
                     t = table.Table(rows=out_sed, names=('Wave', 'Flux'))
                     t.write(os.path.join(out_dir, sed_file+'_'+str(metal)+'_'+str(hf)+'_'+str(mf)+'.sed'),
                             format='ascii.commented_header')
