@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+
+from subprocess import call
+import sys
+import os
+
+class PhosphorosAction:
+    def __init__(self, names, executable, help=''):
+        self.names = names
+        self.executable = executable
+        self.help = help
+
+action_list = [
+    PhosphorosAction(['help', 'h', '-h', '--help'], 'help',
+                     'Shows this help message'),
+    PhosphorosAction(['GUI'], 'PhosphorosUI',
+                     'Starts the Graphical User Interface'),
+    PhosphorosAction(['build_templates', 'BT'], 'PhosphorosBuildTemplates',
+                     'Builds the template photometry library'),
+    PhosphorosAction(['derive_zero_points', 'DZP'], 'PhosphorosDeriveZeroPoints',
+                     'Calculates the Photometric Zero Point Corrections'),
+    PhosphorosAction(['fit_templates', 'FT'], 'PhosphorosFitTemplates',
+                     'Calculates the PHZ for a given catalog by using template fitting'),
+    PhosphorosAction(['ls_aux', 'LA'], 'PhosphorosLsAux',
+                     'Browses the auxiliary data in a given directory'),
+    PhosphorosAction(['display_templates', 'DT'], 'PhosphorosDisplayTemplates',
+                     'Browses through a template photometry library'),
+    PhosphorosAction(['display_dataset', 'DD'], 'PhosphorosDisplayDataset',
+                     'Displays the SED data a template in the library'),
+    PhosphorosAction(['vs_specz', 'VS'], 'PhosphorosVsSpecZ',
+                     'Shows plots comparing the PHZ result with SPECZ'),
+    PhosphorosAction(['display_likelihood', 'DL'], 'PhosphorosDisplayLikelihood',
+                     'Plots views of a multi-dimensional likelihood')
+]
+
+def printHelp():
+    print ''
+    print 'Usage: Phosphoros <action> <action_parameters>'
+    print ''
+    print 'Available actions:'
+    for action in action_list:
+        message = action.names[0]
+        for alter in action.names[1:]:
+            message += ', ' + alter
+        message += os.linesep + '    ' + action.help
+        print message
+    print ''
+    exit()
+
+if len(sys.argv) < 2:
+    printHelp()
+
+executable = [action.executable for action in action_list if sys.argv[1] in action.names]
+if not executable:
+    print 'Unknown action: ' + sys.argv[1]
+    print 'Try running "Phosphoros help"'
+    exit(1)
+
+if executable[0] == 'help':
+    printHelp()
+
+cmd = executable + sys.argv[2:]
+call(cmd)

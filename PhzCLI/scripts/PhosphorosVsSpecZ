@@ -1,0 +1,210 @@
+#! /usr/bin/env python
+# Author NM
+
+import os
+import sys
+import numpy as np
+import matplotlib.pyplot as plt
+from astropy.table import Table
+
+
+
+def file_exist(file):
+    """
+    """
+    if not os.path.exists(file):  
+       print '--> Error File not found : ', file
+       print '--> Program aborted!'          
+       sys.exit()
+    
+#
+#-------------------------------------------------------------------------------
+#
+
+def read_table(filename, mode='ascii'):
+    """
+    """
+    print '--> Reading file : ', filename
+    file_exist(filename)
+    data = Table.read(filename, format=mode)
+    return data
+             
+          
+#
+#-------------------------------------------------------------------------------
+#
+
+
+def create_table(files, id, specz, phz):
+    tables = [read_table(f) for f in files]
+    for t in tables:
+        if not id in t.colnames:
+            print 'Catalog input without column named ', id
+    ids = set.intersection(*[set(t[id]) for t in tables])
+    values_map = {}
+    for t in tables:
+        if specz in t.colnames:
+            for r in t:
+                if r[id] in ids:
+                    if not r[id] in values_map:
+                        values_map[r[id]] = [None, None]
+                    values_map[r[id]][0] = r[specz]
+        if phz in t.colnames:
+            for r in t:
+                if r[id] in ids:
+                    if not r[id] in values_map:
+                        values_map[r[id]] = [None, None]
+                    values_map[r[id]][1] = r[phz]
+    i = []
+    s = []
+    p = []
+    for k,v in values_map.iteritems():
+        i.append(k)
+        s.append(v[0])
+        p.append(v[1])
+    return Table([i,s,p], names=(id,specz,phz))
+    
+    
+def compute_stats(array, col_number):
+    """
+    Computes mean, median, sigma and outliers 
+    Array contents : sourceIdArr speczArr redshift sedname ebv max
+    
+    Returns outliers array
+    """
+    # 
+    specZ = array.field(1)
+    colZ  = array.field(col_number)
+ 
+
+    diffArr = colZ - specZ
+    plusArr = 1 + specZ  
+    dataArr = diffArr / plusArr
+    
+    mean     = np.average(dataArr)
+    median   = np.median(dataArr)
+    sigma    = np.std(dataArr)
+    
+    # Mean absolute deviation
+    mad = np.median(abs(dataArr - median)) 
+    
+    absDataArr = abs(dataArr)
+    outliers = [i for i in absDataArr if i > 0.15]
+    outliersPercent =  len(outliers)*100. / len(colZ)
+ 
+    # Without outliers
+    noOutliersArr   = [i for i in absDataArr if i <= 0.15]
+    sigmaNoOutliers = np.std(noOutliersArr)
+    meanNoOutliers  = np.average(noOutliersArr)
+    
+                    
+    print '--> Mean                : ', mean     
+    print '--> Median              : ', median     
+    print '--> Sigma               : ', sigma     
+    print '--> Mad                 : ', mad     
+    print '--> Outliers            : ', outliersPercent, '%'
+    print '--> Sigma (no outliers) : ', sigmaNoOutliers     
+   
+    return (specZ, colZ, dataArr, mean, median, sigma, mad, outliersPercent, sigmaNoOutliers, meanNoOutliers)
+
+#
+#-------------------------------------------------------------------------------
+#
+
+def display_data(label, specZ, colZ, data, mean, median, sigma, mad, outliersPercent, sigmaNoOutliers, meanNoOutliers, filename):
+    """
+    """
+    # First plot specZ/colZ
+    styles = [ "b:s", "r--o", "g.",
+               "c-.", "m.", "y-D",
+               "r-^", "rv", "k-1" ]
+
+    fig1 = plt.subplot(2, 1, 1, aspect=1)  # 2 graphs 
+                       
+    plt.xlabel("SpecZ")
+    plt.ylabel(label)
+    plt.plot(np.arange(0, max(colZ)),np.arange(0, max(colZ)),"r")
+    plt.plot(specZ,colZ,styles[2])
+    xmax = 6 #min(plt.xlim()[1], 6)
+    plt.xlim(0, xmax)
+    plt.plot(plt.xlim(), plt.xlim(),"r")
+    x_r = [v/10. for v in range(0,int(xmax*10+1))]
+    y1 = [0.15+1.15*x for x in x_r]
+    y2 = [-0.15+.85*x for x in x_r]
+    plt.plot(x_r, y1, "r")
+    plt.plot(x_r, y2, "r")
+    plt.ylim(0, 6)
+        
+    fig2 = plt.subplot(2, 1, 2)  # 2 graphs 
+   
+    # Second plot (histogram)
+    
+    barValues, bins, patches = plt.hist(data, bins=100) 
+
+    plt.axvline(x=0.15,color='r')
+    plt.axvline(x=-0.15,color='r')
+    plt.suptitle("Outliers >1.5 Histogram for files: %s" % filename)
+    plt.xlabel("Value")
+    plt.ylabel("Frequency")
+    plt.title('Distribution of : ('+label+' - specZ)/(1 + specZ)')
+              
+    # Write information
+    txt = ' Mean : %2.5f\n Median : %2.5f\n Mad : %2.5f\n Sigma : %2.5f\n Outliers : %2.5f%%\n Sigma(no outliers) : %2.5f\n Mean((no outliers) : %2.5f ' \
+        % (mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers)
+    plt.text(max(bins)-1.8, max(barValues), txt, fontsize=15, family='sans-serif', style='italic', ha='left', va='top')
+    
+    plt.show() 
+#
+#-------------------------------------------------------------------------------
+#
+
+def main():
+    import argparse
+    usage = """
+            usage: %prog [options] \n           
+            
+            Computes the standard deviation of [ (photZ - specZ) / 1+specZ ] and
+            the outliers fraction as:
+                outliers =  (photZ - specZ) / 1+specZ > 0.15  
+            and the mean, median and displays an histogram of outliers
+   
+            """ 
+
+    parser = argparse.ArgumentParser(usage, version='%prog version 1.0', description=__doc__)
+
+    parser.add_argument("-f", "--files", type=str, nargs='+',
+                        help="Input file(s) to read(catalog)")
+    parser.add_argument("-i", "--id", type=str, default='ID',
+                        help="The name of the ID column (default: ID)")
+    parser.add_argument("-s", "--specz", type=str, default='ZSPEC',
+                        help="The name of the spectroscopic redshift column (default: ZSPEC)")
+    parser.add_argument("-p", "--phz", type=str, default='Z',
+                        help="The name of the photometric redshift column (default: Z)")
+    parser.add_argument("-d", "--display", action="store_false", default=True,
+                        help="Disables the plot window")
+
+    args = parser.parse_args()
+            
+    return args
+
+
+    
+################## MAIN ###########
+if __name__ == '__main__':
+            
+    args = main()  
+    
+    # Read input files
+    table = create_table(args.files, args.id, args.specz, args.phz)
+    
+    col_number = 2
+    label = "PhotZ"
+   
+    (specZ, colZ, data, mean, median, mad, sigma, outliersPercent,sigmaNoOutliers, meanNoOutliers) = compute_stats(table, col_number)
+        
+    # Plot distribution
+    if args.display:
+            display_data(label, specZ, colZ, data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers, args.files)
+            
+    
+    

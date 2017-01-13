@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>logoPhUI.png</file>
+    </qresource>
+</RCC>
