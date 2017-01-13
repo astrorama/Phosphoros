@@ -1,3 +1,4 @@
+#include <chrono>
 #include <QFuture>
 #include <qtconcurrentrun.h>
 #include <QStandardItem>
@@ -6,19 +7,26 @@
 #include "ui_DialogPhotometricCorrectionComputation.h"
 #include <qfiledialog.h>
 #include <QMessageBox>
+#include <QtCore/qfuturewatcher.h>
 #include "PhzUITools/CatalogColumnReader.h"
 #include "PhzQtUI/PhotometricCorrectionHandler.h"
 #include "FileUtils.h"
 #include "ElementsKernel/Exception.h"
+#include "Configuration/ConfigManager.h"
+#include "Configuration/CatalogConfig.h"
 
 #include "PhzLikelihood/SourcePhzFunctor.h"
-#include "PhzConfiguration/ComputePhotometricCorrectionsConfiguration.h"
+#include "PhzConfiguration/ComputePhotometricCorrectionsConfig.h"
+#include "PhzConfiguration/PhotometryGridConfig.h"
 #include "PhzPhotometricCorrection/PhotometricCorrectionCalculator.h"
 #include "PhzPhotometricCorrection/FindBestFitModels.h"
 #include "PhzPhotometricCorrection/CalculateScaleFactorMap.h"
 #include "PhzPhotometricCorrection/PhotometricCorrectionAlgorithm.h"
+#include "PhzUtils/Multithreading.h"
+#include "Configuration/Utils.h"
 
 using namespace std;
+using namespace Euclid::PhzConfiguration;
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -30,6 +38,10 @@ DialogPhotometricCorrectionComputation::DialogPhotometricCorrectionComputation(
 
   ui->txt_Iteration->setValidator(new QIntValidator(1, 1000, this));
   ui->txt_Tolerence->setValidator(new QDoubleValidator(0, 1, 8, this));
+  
+  connect(this, SIGNAL(signalUpdateCurrentIteration(const QString&)),
+          ui->txt_current_iteration, SLOT(setText(const QString&)));
+  connect(&m_future_watcher, SIGNAL(finished()), this, SLOT(runFinished()));
 }
 
 DialogPhotometricCorrectionComputation::~DialogPhotometricCorrectionComputation() {
@@ -207,7 +219,7 @@ void DialogPhotometricCorrectionComputation::disablePage(){
      ui->cb_SelectionMethod->setEnabled(false);
      ui->txt_FileName->setEnabled(false);
      ui->bt_Run->setEnabled(false);
-     ui->buttonBox->setEnabled(false);
+     ui->bt_Cancel->setEnabled(true);
 }
 std::string DialogPhotometricCorrectionComputation::runFunction(){
   try {
@@ -225,25 +237,35 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
         ui->cb_SpectroColumn->currentText().toStdString(),
         m_excluded_filters);
 
-    PhzConfiguration::ComputePhotometricCorrectionsConfiguration conf {
-        config_map };
-    auto catalog = conf.getCatalog();
-    auto model_phot_grid = conf.getPhotometryGrid();
-    auto output_func = conf.getOutputFunction();
-    auto stop_criteria = conf.getStopCriteria();
+    long config_manager_id = Configuration::getUniqueManagerId();
+    auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+    config_manager.registerConfiguration<ComputePhotometricCorrectionsConfig>();
+    config_manager.closeRegistration();
+    config_manager.initialize(config_map);
+    
+    auto& catalog = config_manager.getConfiguration<Configuration::CatalogConfig>().getCatalog();
+    auto& model_phot_grid = config_manager.getConfiguration<PhotometryGridConfig>().getPhotometryGrid();
+    auto& output_func = config_manager.getConfiguration<ComputePhotometricCorrectionsConfig>().getOutputFunction();
+    auto& stop_criteria = config_manager.getConfiguration<ComputePhotometricCorrectionsConfig>().getStopCriteria();
 
     PhzPhotometricCorrection::FindBestFitModels<PhzLikelihood::SourcePhzFunctor> find_best_fit_models { };
     PhzPhotometricCorrection::CalculateScaleFactorMap calculate_scale_factor_map { };
     PhzPhotometricCorrection::PhotometricCorrectionAlgorithm phot_corr_algorighm { };
-    auto selector = conf.getPhotometricCorrectionSelector();
+    auto selector = config_manager.getConfiguration<ComputePhotometricCorrectionsConfig>().getPhotometricCorrectionSelector();
 
     PhzPhotometricCorrection::PhotometricCorrectionCalculator calculator {
         find_best_fit_models, calculate_scale_factor_map, phot_corr_algorighm };
 
+    emit signalUpdateCurrentIteration(QString::fromStdString("Iteration : 0"));
     auto progress_logger =
         [this,max_iter_number](size_t iter_no, const PhzDataModel::PhotometricCorrectionMap& ) {
-          int value = (iter_no*100.)/max_iter_number;
-          ui->progressBar->setValue(value);
+          // If the user has canceled we do not want to update the progress bar,
+          // because the GUI thread might have already deleted it
+          if (!PhzUtils::getStopThreadsFlag()) {
+            std::stringstream iter_no_message;
+            iter_no_message << "Iteration : " << (iter_no+1);
+            emit signalUpdateCurrentIteration(QString::fromStdString(iter_no_message.str()));
+          }
         };
     auto phot_corr_map = calculator(catalog, model_phot_grid, stop_criteria,
         selector, progress_logger);
@@ -252,11 +274,11 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
     return "";
   }
   catch (const Elements::Exception & e) {
-    return "Sorry, an error occurred during the computation: "
+    return "Sorry, an error occurred during the computation:\n"
         + std::string(e.what());
   }
   catch (const std::exception& e) {
-    return "Sorry, an error occurred during the computation: "
+    return "Sorry, an error occurred during the computation:\n"
         + std::string(e.what());
   }
   catch (...) {
@@ -264,7 +286,29 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
   }
 }
 
+void DialogPhotometricCorrectionComputation::runFinished() {
+  std::string message = m_future_watcher.result();
+  m_computing = false;
+  if (message.length() == 0) {
+    this->accept();
+    return;
+  } else {
+    QMessageBox::warning(this, "Error in the computation...",
+        QString::fromStdString(message), QMessageBox::Close);
+    this->reject();
+  }
+}
+
+void DialogPhotometricCorrectionComputation::on_bt_Cancel_clicked() {
+  if (m_computing) {
+    PhzUtils::getStopThreadsFlag() = true;
+  } else {
+    this->reject();
+  }
+}
+
 void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
+  m_computing = true;
   string output_file_name = FileUtils::addExt(
       ui->txt_FileName->text().toStdString(), ".txt");
   ui->txt_FileName->setText(QString::fromStdString(output_file_name));
@@ -280,17 +324,7 @@ void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
 
   disablePage();
 
-  QFuture<std::string> future = QtConcurrent::run(this,
-      &DialogPhotometricCorrectionComputation::runFunction);
-  std::string message = future.result();
-  if (message.length() == 0) {
-    this->accept();
-    return;
-  } else {
-    QMessageBox::warning(this, "Error in the computation...",
-        QString::fromStdString(message), QMessageBox::Close);
-    this->reject();
-  }
+  m_future_watcher.setFuture(QtConcurrent::run(this, &DialogPhotometricCorrectionComputation::runFunction));
 }
 
 }

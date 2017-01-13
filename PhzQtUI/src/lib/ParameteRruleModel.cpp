@@ -152,7 +152,7 @@ int ParameterRuleModel::newParameterRule(int duplicate_from_row ){
     }
     else{
          m_parameter_rules[max_ref]=ParameterRule();
-         m_parameter_rules[max_ref].setName("New Region "+ std::to_string(max_ref+1));
+         m_parameter_rules[max_ref].setName("New Parameter Set "+ std::to_string(max_ref+1));
     }
 
     auto list = getItemsRepresentation( m_parameter_rules.at(max_ref),max_ref);

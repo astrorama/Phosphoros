@@ -13,13 +13,18 @@
 #include <QDir>
 #include <vector>
 #include <boost/program_options.hpp>
+#include <boost/archive/binary_iarchive.hpp>
 
-#include "PhzConfiguration/PhotometryGridConfiguration.h"
+#include "Configuration/ConfigManager.h"
 #include "PhzQtUI/PhzGridInfoHandler.h"
 #include "PhzQtUI/XYDataSetTreeModel.h"
 #include "XYDataset/QualifiedName.h"
 #include "FileUtils.h"
-
+#include "PreferencesUtils.h"
+#include "DefaultOptionsCompleter.h"
+#include "Configuration/Utils.h"
+#include "PhzDataModel/PhotometryGridInfo.h"
+#include "PhzDataModel/serialization/PhotometryGridInfo.h"
 
 
 namespace po = boost::program_options;
@@ -43,17 +48,17 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
   foreach (const QString &fileName , fileNames) {
     std::map < std::string, boost::program_options::variable_value > options_map;
 
-    // auto file_path = root_qdir.path() +QDir::separator()+ fileName;
     auto file_path = root_qdir.absoluteFilePath(fileName);
-    options_map["model-grid-file"].value() = boost::any(file_path.toStdString());
-
-    options_map["catalog-type"].value() = boost::any(catalog);
-    options_map["intermediate-products-dir"].value() = boost::any(FileUtils::getIntermediaryProductRootPath(false,""));
 
     try { // If a file cannot be opened or is ill formated: just skip it!
-      auto grid_config = PhzConfiguration::PhotometryGridConfiguration(options_map);
-      auto grid_info = grid_config.getPhotometryGridInfo();
-
+      // We directly use the boost iarchive, because we just need the grid info
+      // from the beginning of the file. Reading the full file whould be very
+      // slow
+      PhzDataModel::PhotometryGridInfo grid_info;
+      std::ifstream in {file_path.toStdString()};
+      boost::archive::binary_iarchive bia {in};
+      bia >> grid_info;
+      
       // Check the IGM type compatibility
       if (igm_type!=grid_info.igm_method) {
               continue;
@@ -201,16 +206,24 @@ std::map<std::string, boost::program_options::variable_value> PhzGridInfoHandler
     ModelSet model,
     const std::list<std::string>& selected_filters, std::string igm_type) {
 
-  auto options_map = model.getConfigOptions();
 
-  options_map["phosphoros-root"].value() = boost::any(FileUtils::getRootPath());
-  options_map["aux-data-dir"].value() = boost::any(FileUtils::getAuxRootPath());
-  options_map["intermediate-products-dir"].value() = boost::any(FileUtils::getIntermediaryProductRootPath(false,""));
+  std::map<std::string, boost::program_options::variable_value> options_map =
+         FileUtils::getPathConfiguration(false,true,true,false);
+
+  auto model_option = model.getConfigOptions();
+  for(auto& pair : model_option){
+    options_map[pair.first]=pair.second;
+  }
+
+  auto thread_options = PreferencesUtils::getThreadOverrideConfiguration();
+  for(auto& pair : thread_options){
+      options_map[pair.first]=pair.second;
+  }
+
+
   options_map["catalog-type"].value() = boost::any(catalog);
 
-  auto path_filename = FileUtils::getPhotmetricGridRootPath(true,catalog)
-      + QString(QDir::separator()).toStdString() + output_file;
-  options_map["output-model-grid"].value() = boost::any(path_filename);
+  options_map["output-model-grid"].value() = boost::any(output_file);
 
   std::vector < std::string > filter_add_vector;
   for (auto& filter_item : selected_filters) {

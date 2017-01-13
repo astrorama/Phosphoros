@@ -30,8 +30,7 @@ public:
     void loadMappingPage(std::string new_path);
 
 signals:
-    void startEdition(int i);
-    void endEdition();
+    void navigateToHome();
 
 private slots:
     void filterMappingSelectionChanged(QModelIndex, QModelIndex);
@@ -63,6 +62,10 @@ private slots:
     void on_btn_DeleteFilter_clicked();
 
     void on_btn_newCat_clicked();
+
+    void on_btn_CatToHome_clicked();
+
+    void on_btn_BackHome_clicked();
 
 
 private:

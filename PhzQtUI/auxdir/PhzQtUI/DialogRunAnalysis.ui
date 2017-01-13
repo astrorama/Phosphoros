@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>767</width>
-    <height>235</height>
+    <width>833</width>
+    <height>263</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -161,6 +161,42 @@
     </layout>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="lay_lik_2">
+     <item>
+      <widget class="QLabel" name="label_pos">
+       <property name="text">
+        <string>Output Posterior Folder Name :</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_name_pos">
+       <property name="font">
+        <font>
+         <italic>true</italic>
+        </font>
+       </property>
+       <property name="text">
+        <string>Name</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_6">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="QProgressBar" name="progressBar">
      <property name="value">
       <number>24</number>
@@ -198,7 +234,7 @@
      <item>
       <widget class="QPushButton" name="btn_cancel">
        <property name="enabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="text">
         <string>Cancel</string>
@@ -210,22 +246,5 @@
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>btn_cancel</sender>
-   <signal>clicked()</signal>
-   <receiver>Euclid::PhzQtUI::DialogRunAnalysis</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>907</x>
-     <y>184</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>479</x>
-     <y>104</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

@@ -9,6 +9,7 @@
 #include <string>
 #include "SurveyFilterMapping.h"
 #include "ModelSet.h"
+#include "PhzQtUI/LuminosityPriorConfig.h"
 
 namespace boost{
 namespace program_options{
@@ -22,6 +23,9 @@ namespace PhzQtUI {
 namespace Ui {
 class FormAnalysis;
 }
+
+///// btn_confLuminosityPrior - cb_luminosityPrior
+
 
 /**
  * @brief The FormAnalysis class
@@ -38,6 +42,7 @@ public:
 
 signals:
     void navigateToHome();
+    void navigateToNewCatalog(std::string);
 
 private slots:
     void on_btn_AnalysisToHome_clicked();
@@ -78,6 +83,14 @@ private slots:
 
     void on_gb_lik_clicked();
 
+    void on_gb_lhood_clicked();
+
+    void on_btn_confLuminosityPrior_clicked();
+
+    void on_cb_luminosityPrior_2_currentIndexChanged(const QString &);
+    void on_cb_luminosityPrior_stateChanged(int);
+
+    void on_cb_volumePrior_stateChanged(int);
 
 
 private:
@@ -86,6 +99,8 @@ private:
     std::list<std::string> getSelectedFilters();
     std::list<std::string> getExcludedFilters();
     std::list<FilterMapping> getSelectedFilterMapping();
+
+    void loadLuminosityPriors();
 
     void setInputCatalogName( std::string name,bool do_test=true);
 
@@ -104,8 +119,10 @@ private:
 
     void setRunAnnalysisEnable(bool enabled);
     std::map < std::string, boost::program_options::variable_value > getRunOptionMap();
+    std::map < std::string, boost::program_options::variable_value > getLuminosityOptionMap();
     std::map<int,SurveyFilterMapping>  m_analysis_survey_list;
     std::map<int,ModelSet> m_analysis_model_list;
+    std::map<std::string, LuminosityPriorConfig> m_prior_config;
 
 };
 

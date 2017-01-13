@@ -3,37 +3,39 @@
 #include "PhzQtUI/DialogOptions.h"
 #include "ui_DialogOptions.h"
 #include "FileUtils.h"
+#include "PreferencesUtils.h"
+#include "PhzUtils/Multithreading.h"
 
 using namespace std;
 
 namespace Euclid {
 namespace PhzQtUI{
 
-DialogOptions::DialogOptions(QWidget *parent) :DialogOptions("",parent){
-}
-
-
-
-DialogOptions::DialogOptions(std::string new_catalog_file_path, QWidget *parent):
-  QDialog(parent),
+DialogOptions::DialogOptions(QWidget *parent) : QDialog(parent),
   ui(new Ui::DialogOptions)
 {
      ui->setupUi(this);
 
-     connect(ui->widget_survey_mapping, SIGNAL(startEdition(int)),SLOT(startEdition(int)));
-     connect(ui->widget_survey_mapping, SIGNAL(endEdition()),SLOT(endEdition()));
+
 
      ui->widget_aux_Data->loadManagementPage(0);
 
      auto path_map = FileUtils::readPath();
-     ui->txt_rootDir->setText(QString::fromStdString(FileUtils::getRootPath()));
+     ui->txt_rootDir->setText(QString::fromStdString(FileUtils::getRootPath(false)));
      ui->txt_catDir->setText(QString::fromStdString(path_map["Catalogs"]));
      ui->txt_auxDir->setText(QString::fromStdString(path_map["AuxiliaryData"]));
      ui->txt_interDir->setText(QString::fromStdString(path_map["IntermediateProducts"]));
      ui->txt_resDir->setText(QString::fromStdString(path_map["Results"]));
      checkDirectories();
 
-     ui->widget_survey_mapping->loadMappingPage(new_catalog_file_path);
+
+    int thread_value = PreferencesUtils::getThreadNumberOverride();
+    ui->gb_thread->setChecked(thread_value>0);
+    if (thread_value>0){
+      ui->sb_thread->setValue(thread_value);
+    } else {
+      ui->sb_thread->setValue(PhzUtils::getThreadNumber());
+    }
 }
 
 DialogOptions::~DialogOptions()
@@ -61,18 +63,27 @@ void DialogOptions::on_btn_editGeneral_clicked()
     ui->btn_defAux->setEnabled(true);
     ui->btn_defInter->setEnabled(true);
     ui->btn_defRes->setEnabled(true);
+    ui->gb_thread->setEnabled(true);
 
 }
 
 void DialogOptions::on_btn_cancelGeneral_clicked()
 {
     auto path_map = FileUtils::readPath();
-    ui->txt_rootDir->setText(QString::fromStdString(FileUtils::getRootPath()));
+    ui->txt_rootDir->setText(QString::fromStdString(FileUtils::getRootPath(false)));
     ui->txt_catDir->setText(QString::fromStdString(path_map["Catalogs"]));
     ui->txt_auxDir->setText(QString::fromStdString(path_map["AuxiliaryData"]));
     ui->txt_interDir->setText(QString::fromStdString(path_map["IntermediateProducts"]));
     ui->txt_resDir->setText(QString::fromStdString(path_map["Results"]));
     checkDirectories();
+
+    int thread_value = PreferencesUtils::getThreadNumberOverride();
+    ui->gb_thread->setChecked(thread_value>0);
+    if (thread_value>0){
+      ui->sb_thread->setValue(thread_value);
+    } else {
+      ui->sb_thread->setValue(PhzUtils::getThreadNumber());
+    }
 
     ui->tabWidget->setTabEnabled(1,true);
     ui->tabWidget->setTabEnabled(2,true);
@@ -91,6 +102,8 @@ void DialogOptions::on_btn_cancelGeneral_clicked()
     ui->btn_defAux->setEnabled(false);
     ui->btn_defInter->setEnabled(false);
     ui->btn_defRes->setEnabled(false);
+    ui->gb_thread->setEnabled(false);
+
 
 }
 
@@ -111,6 +124,14 @@ void DialogOptions::on_btn_saveGeneral_clicked()
 
     FileUtils::savePath(map);
 
+    int thread_value=0;
+    if (ui->gb_thread->isChecked()){
+      thread_value=ui->sb_thread->value();
+    }  else {
+      ui->sb_thread->setValue(PhzUtils::getThreadNumber());
+    }
+    PreferencesUtils::setThreadNumberOverride(thread_value);
+
     ui->tabWidget->setTabEnabled(1,true);
     ui->tabWidget->setTabEnabled(2,true);
     ui->buttonBox->setEnabled(true);
@@ -128,6 +149,7 @@ void DialogOptions::on_btn_saveGeneral_clicked()
     ui->btn_defAux->setEnabled(false);
     ui->btn_defInter->setEnabled(false);
     ui->btn_defRes->setEnabled(false);
+    ui->gb_thread->setEnabled(false);
 
 }
 
@@ -190,51 +212,50 @@ void DialogOptions::on_btn_browseRes_clicked(){
 
 
 void DialogOptions::on_btn_defCat_clicked(){
-  auto def = QString::fromStdString(FileUtils::getRootPaths().getCatalogsDir().generic_string());
+  auto def = QString::fromStdString(FileUtils::getDefaultCatalogRootPath());
   ui->txt_catDir->setText(def);
   checkDirectories();
 }
 void DialogOptions::on_btn_defAux_clicked(){
-  auto def = QString::fromStdString(FileUtils::getRootPaths().getAuxDataDir().generic_string());
+  auto def = QString::fromStdString(FileUtils::getDefaultAuxRootPath());
   ui->txt_auxDir->setText(def);
   checkDirectories();
 }
 
 void DialogOptions::on_btn_defInter_clicked(){
-  auto def = QString::fromStdString(FileUtils::getRootPaths().getIntermediateDir().generic_string());
+  auto def = QString::fromStdString(FileUtils::getDefaultIntermediaryProductRootPath());
   ui->txt_interDir->setText(def);
   checkDirectories();
 }
 
 void DialogOptions::on_btn_defRes_clicked(){
-  auto def = QString::fromStdString(FileUtils::getRootPaths().getResultsDir().generic_string());
+  auto def = QString::fromStdString(FileUtils::getDefaultResultsRootPath());
   ui->txt_resDir->setText(def);
   checkDirectories();
 }
 
 
 void DialogOptions::checkDirectories(){
-  auto root_paths= FileUtils::getRootPaths();
 
-  if (ui->txt_catDir->text().toStdString()==root_paths.getCatalogsDir().generic_string()){
+  if (ui->txt_catDir->text().toStdString()==FileUtils::getDefaultCatalogRootPath()){
     ui->txt_catDir->setStyleSheet("QLineEdit { color: grey }");
   } else {
     ui->txt_catDir->setStyleSheet("QLineEdit { color: black }");
   }
 
-  if (ui->txt_auxDir->text().toStdString()==root_paths.getAuxDataDir().generic_string()){
+  if (ui->txt_auxDir->text().toStdString()==FileUtils::getDefaultAuxRootPath()){
       ui->txt_auxDir->setStyleSheet("QLineEdit { color: grey }");
   } else {
       ui->txt_auxDir->setStyleSheet("QLineEdit { color: black }");
   }
 
-  if (ui->txt_interDir->text().toStdString()==root_paths.getIntermediateDir().generic_string()){
+  if (ui->txt_interDir->text().toStdString()==FileUtils::getDefaultIntermediaryProductRootPath()){
       ui->txt_interDir->setStyleSheet("QLineEdit { color: grey }");
   } else {
       ui->txt_interDir->setStyleSheet("QLineEdit { color: black }");
   }
 
-  if (ui->txt_resDir->text().toStdString()==root_paths.getResultsDir().generic_string()){
+  if (ui->txt_resDir->text().toStdString()==FileUtils::getDefaultResultsRootPath()){
       ui->txt_resDir->setStyleSheet("QLineEdit { color: grey }");
   } else {
       ui->txt_resDir->setStyleSheet("QLineEdit { color: black }");

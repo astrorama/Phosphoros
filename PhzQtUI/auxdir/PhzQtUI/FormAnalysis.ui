@@ -217,8 +217,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1053</width>
-            <height>206</height>
+            <width>416</width>
+            <height>166</height>
            </rect>
           </property>
           <attribute name="label">
@@ -423,7 +423,7 @@
                 <item>
                  <widget class="QLabel" name="label_28">
                   <property name="text">
-                   <string>Compatible Photometrc Zero-Point Corrections :</string>
+                   <string>Compatible Photometric Zero-Point Corrections :</string>
                   </property>
                  </widget>
                 </item>
@@ -521,8 +521,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1053</width>
-            <height>199</height>
+            <width>673</width>
+            <height>185</height>
            </rect>
           </property>
           <attribute name="label">
@@ -545,6 +545,12 @@
             <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
               <widget class="QComboBox" name="cb_marginalization">
+               <property name="minimumSize">
+                <size>
+                 <width>300</width>
+                 <height>0</height>
+                </size>
+               </property>
                <property name="font">
                 <font>
                  <pointsize>11</pointsize>
@@ -583,7 +589,86 @@
             </layout>
            </item>
            <item>
-            <spacer name="verticalSpacer_8">
+            <widget class="QLabel" name="label_4">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Priors:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_5">
+             <item>
+              <widget class="QCheckBox" name="cb_luminosityPrior">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Luminosity Prior</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_12">
+               <item>
+                <widget class="QComboBox" name="cb_luminosityPrior_2">
+                 <property name="minimumSize">
+                  <size>
+                   <width>300</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_4">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_confLuminosityPrior">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Configure Luminosity Prior †</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="cb_volumePrior">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Volume Prior</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_3">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
              </property>
@@ -603,7 +688,7 @@
             <x>0</x>
             <y>0</y>
             <width>1053</width>
-            <height>217</height>
+            <height>255</height>
            </rect>
           </property>
           <attribute name="label">
@@ -759,6 +844,24 @@
                   <bool>false</bool>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_4"/>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="gb_lhood">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="title">
+                  <string>Generate Likelihood files</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
                 </widget>
                </item>
                <item>

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 
 #include <QDir>
 
@@ -10,7 +11,13 @@
 
 #include "XYDataset/FileSystemProvider.h"
 #include "XYDataset/AsciiParser.h"
-#include "PhzConfiguration/ParameterSpaceConfiguration.h"
+#include "Configuration/ConfigManager.h"
+#include "PhzConfiguration/ParameterSpaceConfig.h"
+#include "PhzConfiguration/SedConfig.h"
+#include "PhzConfiguration/ReddeningConfig.h"
+#include "PhzConfiguration/RedshiftConfig.h"
+#include "DefaultOptionsCompleter.h"
+#include "Configuration/Utils.h"
 
 namespace po = boost::program_options;
 using namespace std;
@@ -65,7 +72,7 @@ long  ParameterRule::getSedNumber() const{
 }
 
 
-long long ParameterRule::getModelNumber() const{
+long long ParameterRule::getModelNumber() const {
 
   bool is_zero=false;
   map<string, po::variable_value> options;
@@ -109,11 +116,17 @@ long long ParameterRule::getModelNumber() const{
     return 0;
   }
 
-  Euclid::PhzConfiguration::ParameterSpaceConfiguration config(options);
+  completeWithDefaults<PhzConfiguration::ParameterSpaceConfig>(options);
+  long config_manager_id = Configuration::getUniqueManagerId();
+  auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+  config_manager.registerConfiguration<PhzConfiguration::ParameterSpaceConfig>();
+  config_manager.closeRegistration();
+  config_manager.initialize(options);
 
-
-  return config.getSedList().at("").size()*config.getReddeningCurveList().at("").size()*
-      config.getEbvList().at("").size()*config.getZList().at("").size();
+  return config_manager.getConfiguration<PhzConfiguration::SedConfig>().getSedList().at("").size() *
+      config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getReddeningCurveList().at("").size() *
+      config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getEbvList().at("").size() *
+      config_manager.getConfiguration<PhzConfiguration::RedshiftConfig>().getZList().at("").size();
 }
 
 

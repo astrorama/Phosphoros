@@ -57,6 +57,17 @@ void FormAuxDataManagement::loadManagementPage(int index){
     connect( treeModel_Red, SIGNAL(itemChanged(QStandardItem*)), treeModel_Red,
                  SLOT(onItemChangedUniqueSelection(QStandardItem*)));
 
+
+    DirectoryTreeModel* treeModel_Luminosity = new DirectoryTreeModel();
+    treeModel_Luminosity->loadDirectory(FileUtils::getLuminosityFunctionCurveRootPath(true),false, "Luminosity Function Curves");
+    treeModel_Luminosity->selectRoot();
+    treeModel_Luminosity->setEnabled(true);
+      ui->treeView_ManageLuminosity->setModel(treeModel_Luminosity);
+      ui->treeView_ManageLuminosity->collapseAll();
+      ui->treeView_ManageLuminosity->expand(treeModel_Luminosity->item(0,0)->index());
+      connect( treeModel_Luminosity, SIGNAL(itemChanged(QStandardItem*)), treeModel_Luminosity,
+                   SLOT(onItemChangedUniqueSelection(QStandardItem*)));
+
     ui->tab_Management->setCurrentIndex(index);
 }
 
@@ -143,7 +154,7 @@ void FormAuxDataManagement::on_btn_FilterImport_clicked()
     unique_ptr<DialogImportAuxData> popup( new DialogImportAuxData());
     popup->setData(title,group,model->getRelPath(group,"Filters"));
     if (popup->exec()){
-        loadManagementPage();
+        loadManagementPage(0);
     }
 }
 
@@ -154,7 +165,7 @@ void FormAuxDataManagement::on_btn_FilterSubGroup_clicked()
     std::string group =  model->getGroup();
     popup->setParentFolder(group,model->getRelPath(group,"Filters"));
     if ( popup->exec()){
-        loadManagementPage();
+        loadManagementPage(0);
     }
 }
 
@@ -166,7 +177,42 @@ void FormAuxDataManagement::on_btn_FilterDelete_clicked()
                                  QString::fromStdString("Do you really want to delete the Filter Transmission Curve(s) '"+model->getRelPath(selection,"Filters")+"'?"),
                                  QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
        FileUtils::removeDir(QString::fromStdString(selection));
-       loadManagementPage();
+       loadManagementPage(0);
+   }
+}
+
+void FormAuxDataManagement::on_btn_LuminosityImport_clicked()
+{
+    std::string title = "Import Luminosity Function Curve(s)";
+    auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageLuminosity->model());
+    std::string group =  model->getGroup();
+    unique_ptr<DialogImportAuxData> popup( new DialogImportAuxData());
+    popup->setData(title,group,model->getRelPath(group,"Luminosity Function Curve"));
+    if (popup->exec()){
+        loadManagementPage(3);
+    }
+}
+
+void FormAuxDataManagement::on_btn_LuminositySubGroup_clicked()
+{
+  unique_ptr<DialogCreateSubGroup> popup (new DialogCreateSubGroup());
+    auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageLuminosity->model());
+    std::string group =  model->getGroup();
+    popup->setParentFolder(group,model->getRelPath(group,"Luminosity Function Curve"));
+    if ( popup->exec()){
+        loadManagementPage(3);
+    }
+}
+
+void FormAuxDataManagement::on_btn_LuminosityDelete_clicked()
+{
+    auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageLuminosity->model());
+    std::string selection =  model->getRootSelection().second;
+   if (QMessageBox::question( this, "Confirm deletion...",
+                                 QString::fromStdString("Do you really want to delete the Luminosity Function Curve(s) '"+model->getRelPath(selection,"Luminosity Function Curve")+"'?"),
+                                 QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
+       FileUtils::removeDir(QString::fromStdString(selection));
+       loadManagementPage(3);
    }
 }
 

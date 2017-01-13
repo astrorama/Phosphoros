@@ -31,6 +31,9 @@ private slots:
 
     void on_btn_HomeToOption_clicked();
 
+    void on_btn_HomeToCatalog_clicked();
+
+    void navigateToNewCatalog(std::string);
 
     void navigateToHome();
 

@@ -24,7 +24,6 @@ class DialogOptions : public QDialog
 
 public:
     explicit DialogOptions(QWidget *parent = 0);
-    DialogOptions(std::string new_catalog_file_path, QWidget *parent = 0);
     ~DialogOptions();
 
 

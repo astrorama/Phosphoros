@@ -27,7 +27,11 @@ bool ConfigurationWriter::writeConfiguration(
       config_file<<conf_item.first<<"="<< boost::any_cast<double>(conf_item.second.value())<<"\n";
     } else if (conf_item.second.value().type()==typeid(std::string)){
       config_file<<conf_item.first<<"="<< boost::any_cast<std::string>(conf_item.second.value())<<"\n";
-    } else{
+    } else if (conf_item.second.value().type()==typeid(int)){
+      config_file<<conf_item.first<<"="<< boost::any_cast<int>(conf_item.second.value())<<"\n";
+    }
+
+    else{
       for (auto& item : boost::any_cast<std::vector<std::string>>(conf_item.second.value()) ){
             config_file<<conf_item.first<<"="<<item<<"\n";
           }

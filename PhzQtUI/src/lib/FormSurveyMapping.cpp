@@ -64,6 +64,7 @@ void FormSurveyMapping::loadMappingPage(std::string new_path){
        on_btn_MapNew_clicked();
        loadColumnFromFile(new_path);
        m_default_survey=new_path;
+       ui->tb_df->setText(QString::fromStdString(m_default_survey));
        QFileInfo info(QString::fromStdString(new_path));
        ui->cb_mapName->addItem(info.baseName());
        ui->cb_mapName->setCurrentIndex(ui->cb_mapName->count()-1);
@@ -78,7 +79,9 @@ void FormSurveyMapping::loadMappingPage(){
 }
 
 void FormSurveyMapping::setFilterMappingInEdition(){
-    startEdition(2);
+
+    ui->btn_BackHome->setEnabled(false);
+    ui->btn_CatToHome->setEnabled(false);
     ui->table_Map->setEnabled(false);
     ui->btn_MapNew->setEnabled(false);
     ui->btn_MapDuplicate->setEnabled(false);
@@ -103,10 +106,13 @@ void FormSurveyMapping::setFilterMappingInEdition(){
 }
 
 void FormSurveyMapping::setFilterMappingInView(){
-    endEdition();
+
     ui->table_Map->setEnabled(true);
     bool has_mapping_selected = ui->table_Map->selectionModel()->currentIndex().isValid();
 
+
+    ui->btn_BackHome->setEnabled(true);
+    ui->btn_CatToHome->setEnabled(true);
     ui->btn_MapNew->setEnabled(true);
     ui->btn_MapDuplicate->setEnabled(has_mapping_selected);
     ui->btn_MapDelete->setEnabled(has_mapping_selected);
@@ -159,6 +165,14 @@ void FormSurveyMapping::loadColumnFromFile(std::string path){
 
 
 //  - Slots on this page
+
+void FormSurveyMapping::on_btn_CatToHome_clicked(){
+  navigateToHome();
+}
+
+void FormSurveyMapping::on_btn_BackHome_clicked(){
+  navigateToHome();
+}
 
 void FormSurveyMapping::on_btn_MapNew_clicked()
 {
@@ -238,6 +252,7 @@ void FormSurveyMapping::on_btn_MapCancel_clicked()
         FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
         filter_model->setFilters(model->getFilters(row));
         ui->table_Filter->setModel(filter_model);
+        ui->tb_df->setText(QString::fromStdString(m_default_survey));
     }
 
     setFilterMappingInView();
@@ -308,12 +323,14 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
     filter_model->setFilters(model->getFilters(new_index.row()));
 
     ui->txt_nonDetection->setValue(model->getNonDetection(new_index.row()));
+    ui->tb_df->setText(QString::fromStdString(m_default_survey));
 
   } else {
     m_default_survey="";
     ui->cb_SourceId->setCurrentIndex(0);
     ui->cb_SourceId->clearEditText();
     ui->txt_nonDetection->setValue(-99.);
+    ui->tb_df->setText("");
   }
 
   fillCbColumns(cb_text);
@@ -345,7 +362,7 @@ void FormSurveyMapping::on_btn_ImportColumn_clicked()
         loadColumnFromFile(fileNames[0].toStdString());
 
         m_default_survey=fileNames[0].toStdString();
-
+        ui->tb_df->setText(QString::fromStdString(m_default_survey));
     }
 }
 

@@ -117,10 +117,15 @@ public:
      */
     std::map<std::string, boost::program_options::variable_value> getConfigOptions() const;
 
+
+    std::map<std::string, boost::program_options::variable_value> getModelNameConfigOptions() const;
+
     /**
      * @brief compute the ModelAxeTuple corresponding to this ModelSet
      */
     std::map<std::string,PhzDataModel::ModelAxesTuple> getAxesTuple() const;
+
+    std::vector<std::string> getSeds() const;
 
 private:
     std::string m_name;

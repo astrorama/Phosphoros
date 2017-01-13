@@ -6,14 +6,23 @@
 
 #include <iostream>
 #include <set>
+#include <chrono>
 #include "ElementsKernel/ProgramHeaders.h"
-#include "PhzCLI/DisplayModelGridConfiguration.h"
+#include "Configuration/ConfigManager.h"
+#include "XYDataset/QualifiedName.h"
+
+#include "PhzDataModel/PhotometryGridInfo.h"
+#include "PhzConfiguration/PhotometryGridConfig.h"
+#include "PhzCLI/DisplayModelGridConfig.h"
+#include "Configuration/Utils.h"
 
 using namespace std;
 using namespace Euclid;
 namespace po = boost::program_options;
 
 static Elements::Logging logger = Elements::Logging::getLogger("PhosphorosDisplayModelGrid");
+
+static long config_manager_id = Euclid::Configuration::getUniqueManagerId();
 
 ostream& operator<<(ostream& stream, const XYDataset::QualifiedName& name) {
   stream << name.qualifiedName();
@@ -133,13 +142,18 @@ void printPhotometry(const PhzDataModel::PhotometryGrid& grid,
 class DisplayModelGrid : public Elements::Program {
 
   po::options_description defineSpecificProgramOptions() override {
-    return PhzConfiguration::DisplayModelGridConfiguration::getProgramOptions();
+    auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+    config_manager.registerConfiguration<PhzCLI::DisplayModelGridConfig>();
+    return config_manager.closeRegistration();
   }
 
   Elements::ExitCode mainMethod(map<string, po::variable_value>& args) override {
 
-    PhzConfiguration::DisplayModelGridConfiguration conf {args};
-    auto grid_info = conf.getPhotometryGridInfo();
+    auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+    config_manager.initialize(args);
+    
+    auto& conf = config_manager.getConfiguration<PhzCLI::DisplayModelGridConfig>();
+    auto& grid_info = config_manager.getConfiguration<PhzConfiguration::PhotometryGridConfig>().getPhotometryGridInfo();
     
     cout << '\n';
     if (conf.showOverall()) {
@@ -173,9 +187,9 @@ class DisplayModelGrid : public Elements::Program {
         printAxis(std::get<PhzDataModel::ModelParameter::Z>(grid_info.region_axes_map.at(region_name)));
       }
 
-      auto phot_coords = conf.getCellPhotCoords();
+      auto phot_coords = conf.getRequestedCellCoords();
       if (phot_coords) {
-        auto grid_map = conf.getPhotometryGrid();
+        auto& grid_map = config_manager.getConfiguration<PhzConfiguration::PhotometryGridConfig>().getPhotometryGrid();
         printPhotometry(grid_map.at(region_name), *phot_coords);
       }
     }
