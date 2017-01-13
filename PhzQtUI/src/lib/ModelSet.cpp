@@ -2,10 +2,12 @@
 #include <QFile>
 #include <QDir>
 #include <QTextStream>
-#include <QDomDocument>
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 
 #include "PhzQtUI/ModelSet.h"
+#include "PhzQtUI/XYDataSetTreeModel.h"
+#include "PhzConfiguration/ParameterSpaceConfiguration.h"
+namespace po = boost::program_options;
 namespace Euclid {
 namespace PhzQtUI {
 
@@ -45,90 +47,112 @@ long long ModelSet::getModelNumber() const{
     return result;
 }
 
-ModelSet ModelSet::loadModelSetFromFile(std::string fileName,std::string root_path){
 
-    ModelSet model(root_path);
-    model.setName(FileUtils::removeExt(fileName,".xml"));
+std::map<std::string, po::variable_value> ModelSet::getConfigOptions() const{
+  std::map<std::string, po::variable_value> options;
 
+      options["sed-root-path"].value() = boost::any(FileUtils::getSedRootPath(false));
+      options["reddening-curve-root-path"].value() = boost::any(FileUtils::getRedCurveRootPath(false));
 
-    QDomDocument doc("ModelSet");
-    QFile file(QString::fromStdString(root_path)+QDir::separator()+QString::fromStdString(fileName));
-    if (!file.open(QIODevice::ReadOnly))
-         return model;
-    if (!doc.setContent(&file)) {
-        file.close();
-        return model;
-    }
-    file.close();
+      for (auto& param_rule : getParameterRules()){
 
-    QDomElement root_node = doc.documentElement();
-    model.setName(root_node.attribute("Name").toStdString());
+        XYDataSetTreeModel treeModel_sed;
+        treeModel_sed.loadDirectory(FileUtils::getSedRootPath(false), false,"SEDs");
+        treeModel_sed.setState(param_rule.second.getSedRootObject(),param_rule.second.getExcludedSeds());
+        auto seds = treeModel_sed.getSelectedLeaf("");
+        options["sed-name-"+param_rule.second.getName()].value() = boost::any(seds);
 
+        XYDataSetTreeModel treeModel_red;
+        treeModel_red.loadDirectory(FileUtils::getRedCurveRootPath(false), false,"Reddening Curves");
+        treeModel_red.setState(param_rule.second.getReddeningRootObject(),param_rule.second.getExcludedReddenings());
+        auto reds = treeModel_red.getSelectedLeaf("");
+        options["reddening-curve-name-"+param_rule.second.getName()].value() = boost::any(reds);
 
-    auto rules_node = root_node.firstChildElement("ParameterRules");
+        std::vector<std::string> z_range_vector;
+        std::string z_range=param_rule.second.getZRange().getConfigStringRepresentation();
+        z_range_vector.push_back(z_range);
+        options["z-range-"+param_rule.second.getName()].value() = boost::any(z_range_vector);
 
-    auto list =rules_node.childNodes();
+        std::vector<std::string> ebv_range_vector;
+        std::string ebv_range=param_rule.second.getEbvRange().getConfigStringRepresentation();
+        ebv_range_vector.push_back(ebv_range);
+        options["ebv-range-"+param_rule.second.getName()].value() = boost::any(ebv_range_vector);
 
-    for(int i=0;i<list.count();++i ){
-         ParameterRule rule;
+      }
 
-         auto node_rule = list.at(i).toElement();
-         rule.setSedRootObject(node_rule.attribute("SedRootObject").toStdString());
-         rule.setReddeningRootObject(node_rule.attribute("ReddeningCurveRootObject").toStdString());
-
-         auto ebv_node = node_rule.firstChildElement("EbvRange");
-         Range range;
-         range.setMin(ebv_node.attribute("Min").toDouble());
-         range.setMax(ebv_node.attribute("Max").toDouble());
-         range.setStep(ebv_node.attribute("Step").toDouble());
-         rule.setEbvRange(std::move(range));
-
-         Range z_range;
-         auto z_node = node_rule.firstChildElement("ZRange");
-         z_range.setMin(z_node.attribute("Min").toDouble());
-         z_range.setMax(z_node.attribute("Max").toDouble());
-         z_range.setStep(z_node.attribute("Step").toDouble());
-         rule.setZRange(std::move(z_range));
-
-
-         std::vector<std::string> excluded_reddening_list{};
-         auto sub_list = node_rule.firstChildElement("ExcludedReddeningCurves").childNodes();
-         for(int j=0;j<list.count();++j ){
-             auto sub_node = sub_list.at(j).toElement();
-             if (sub_node.hasChildNodes()){
-                 excluded_reddening_list.push_back(sub_node.text().toStdString());
-             }
-         }
-         rule.setExcludedReddenings(std::move(excluded_reddening_list));
-
-         std::vector<std::string> excluded_sed_list{};
-         sub_list = node_rule.firstChildElement("ExcludedSeds").childNodes();
-         for(int j=0;j<list.count();++j ){
-             auto sub_node = sub_list.at(j).toElement();
-             if (sub_node.hasChildNodes()){
-                excluded_sed_list.push_back(sub_node.text().toStdString());
-             }
-         }
-         rule.setExcludedSeds(std::move(excluded_sed_list));
-
-         model.m_parameter_rules[i]=rule;
-    }
-
-    return model;
+      return options;
 }
 
-void ModelSet::deleteModelSet(){
-    QFile(QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(getName()+".xml")).remove();
+std::map<std::string,PhzDataModel::ModelAxesTuple> ModelSet::getAxesTuple() const{
+
+
+   Euclid::PhzConfiguration::ParameterSpaceConfiguration config(getConfigOptions());
+
+   return config.getParameterSpaceRegions();
 }
 
-void ModelSet::saveModelSet(std::string oldName){
-    QFile(QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(oldName+".xml")).remove();
-    QFile file(QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(getName()+".xml"));
-    file.open(QIODevice::WriteOnly );
-    QTextStream stream(&file);
 
-    QDomDocument doc("ModelSet");
-    QDomElement root = doc.createElement("ModelSet");
+ModelSet ModelSet::deserialize(QDomDocument& doc, ModelSet& model){
+      QDomElement root_node = doc.documentElement();
+      model.setName(root_node.attribute("Name").toStdString());
+
+
+      auto rules_node = root_node.firstChildElement("ParameterRules");
+
+      auto list =rules_node.childNodes();
+
+      for(int i=0;i<list.count();++i ){
+           ParameterRule rule;
+
+           auto node_rule = list.at(i).toElement();
+           rule.setName(node_rule.attribute("Name").toStdString());
+           rule.setSedRootObject(node_rule.attribute("SedRootObject").toStdString());
+           rule.setReddeningRootObject(node_rule.attribute("ReddeningCurveRootObject").toStdString());
+
+           auto ebv_node = node_rule.firstChildElement("EbvRange");
+           Range range;
+           range.setMin(ebv_node.attribute("Min").toDouble());
+           range.setMax(ebv_node.attribute("Max").toDouble());
+           range.setStep(ebv_node.attribute("Step").toDouble());
+           rule.setEbvRange(std::move(range));
+
+           Range z_range;
+           auto z_node = node_rule.firstChildElement("ZRange");
+           z_range.setMin(z_node.attribute("Min").toDouble());
+           z_range.setMax(z_node.attribute("Max").toDouble());
+           z_range.setStep(z_node.attribute("Step").toDouble());
+           rule.setZRange(std::move(z_range));
+
+
+           std::vector<std::string> excluded_reddening_list{};
+           auto sub_list = node_rule.firstChildElement("ExcludedReddeningCurves").childNodes();
+           for(int j=0;j<sub_list.count();++j ){
+               auto sub_node = sub_list.at(j).toElement();
+               if (sub_node.hasChildNodes()){
+                   excluded_reddening_list.push_back(sub_node.text().toStdString());
+               }
+           }
+           rule.setExcludedReddenings(std::move(excluded_reddening_list));
+
+           std::vector<std::string> excluded_sed_list{};
+           sub_list = node_rule.firstChildElement("ExcludedSeds").childNodes();
+           for(int j=0;j<sub_list.count();++j ){
+               auto sub_node = sub_list.at(j).toElement();
+               if (sub_node.hasChildNodes()){
+                  excluded_sed_list.push_back(sub_node.text().toStdString());
+               }
+           }
+           rule.setExcludedSeds(std::move(excluded_sed_list));
+
+           model.m_parameter_rules[i]=rule;
+      }
+
+      return model;
+}
+
+QDomDocument ModelSet::serialize() const{
+  QDomDocument doc("ParameterSpace");
+    QDomElement root = doc.createElement("ParameterSpace");
     root.setAttribute("Name",QString::fromStdString(getName()));
     doc.appendChild(root);
 
@@ -138,6 +162,7 @@ void ModelSet::saveModelSet(std::string oldName){
     for(auto& rule_pair : m_parameter_rules){
         auto& rule = rule_pair.second;
         QDomElement rule_node = doc.createElement("ParameterRule");
+        rule_node.setAttribute("Name",QString::fromStdString(rule.getName()));
         rule_node.setAttribute("SedRootObject",QString::fromStdString(rule.getSedRootObject()));
         rule_node.setAttribute("ReddeningCurveRootObject",QString::fromStdString(rule.getReddeningRootObject()));
 
@@ -174,8 +199,40 @@ void ModelSet::saveModelSet(std::string oldName){
         rules_Node.appendChild(rule_node);
     }
 
+    return doc;
+  }
 
-    QString xml = doc.toString();
+
+ModelSet ModelSet::loadModelSetFromFile(std::string fileName,std::string root_path){
+
+    ModelSet model(root_path);
+    model.setName(FileUtils::removeExt(fileName,".xml"));
+
+
+    QDomDocument doc("ParameterSpace");
+    QFile file(QString::fromStdString(root_path)+QDir::separator()+QString::fromStdString(fileName));
+    if (!file.open(QIODevice::ReadOnly))
+         return model;
+    if (!doc.setContent(&file)) {
+        file.close();
+        return model;
+    }
+    file.close();
+
+    return deserialize(doc,model);
+}
+
+void ModelSet::deleteModelSet(){
+    QFile(QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(getName()+".xml")).remove();
+}
+
+void ModelSet::saveModelSet(std::string oldName){
+    QFile(QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(oldName+".xml")).remove();
+    QFile file(QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(getName()+".xml"));
+    file.open(QIODevice::WriteOnly );
+    QTextStream stream(&file);
+
+    QString xml = serialize().toString();
 
     stream<<xml;
     file.close();

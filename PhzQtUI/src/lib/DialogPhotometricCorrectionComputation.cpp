@@ -8,11 +8,11 @@
 #include <QMessageBox>
 #include "PhzUITools/CatalogColumnReader.h"
 #include "PhzQtUI/PhotometricCorrectionHandler.h"
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 #include "ElementsKernel/Exception.h"
 
 #include "PhzLikelihood/SourcePhzFunctor.h"
-#include "PhzConfiguration/DeriveZeroPointsConfiguration.h"
+#include "PhzConfiguration/ComputePhotometricCorrectionsConfiguration.h"
 #include "PhzPhotometricCorrection/PhotometricCorrectionCalculator.h"
 #include "PhzPhotometricCorrection/FindBestFitModels.h"
 #include "PhzPhotometricCorrection/CalculateScaleFactorMap.h"
@@ -37,23 +37,26 @@ DialogPhotometricCorrectionComputation::~DialogPhotometricCorrectionComputation(
 
 void DialogPhotometricCorrectionComputation::setData(string survey,
     string id_column, string model, string grid,
-    list<FilterMapping> selected_filters,
-    std::string default_catalog_path) {
+    std::list<FilterMapping> selected_filters,
+    std::list<std::string> excluded_filters,
+    std::string default_catalog_path,
+    double non_detection) {
   m_id_column = id_column;
   m_selected_filters = selected_filters;
+  m_excluded_filters = excluded_filters;
+  m_non_detection=non_detection;
   ui->txt_survey->setText(QString::fromStdString(survey));
   ui->txt_Model->setText(QString::fromStdString(model));
   ui->txt_grid->setText(QString::fromStdString(grid));
 
   QStandardItemModel* grid_model = new QStandardItemModel();
   grid_model->setColumnCount(1);
-  m_concatenated_filter_names="";
+
   for (auto filter : m_selected_filters) {
-    QList<QStandardItem*> items;
-    items.push_back(new QStandardItem(QString::fromStdString(filter.getName())));
-    grid_model->appendRow(items);
-    m_concatenated_filter_names=m_concatenated_filter_names+filter.getName();
-  }
+     QList<QStandardItem*> items;
+     items.push_back(new QStandardItem(QString::fromStdString(filter.getFilterFile())));
+     grid_model->appendRow(items);
+   }
 
   ui->listView_Filter->setModel(grid_model);
 
@@ -63,7 +66,7 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
    ui->txt_catalog->setText(QString::fromStdString(default_catalog_path));
  }
   //default correction name
-  string default_file_name = survey+"_"+model+"_"+m_concatenated_filter_names
+  string default_file_name = survey+"_"+model
       +"_"+ui->cb_SelectionMethod->currentText().toStdString();
   ui->txt_FileName->setText(QString::fromStdString(default_file_name));
 
@@ -107,7 +110,7 @@ bool DialogPhotometricCorrectionComputation::loadTestCatalog(QString file_name, 
     if (not_found) {
       if (with_warning){
       QMessageBox::warning(this, "Incompatible Data...",
-          "The catalog file you selected has not the columns described into the Survey and therefore cannot be used. Please select anothe catalog file.",
+          "The catalog file you selected has not the columns described into the Catalog and therefore cannot be used. Please select another catalog file.",
           QMessageBox::Ok);
       }
       return false;
@@ -162,9 +165,8 @@ void DialogPhotometricCorrectionComputation::setRunEnability() {
 }
 
 void DialogPhotometricCorrectionComputation::on_cb_SelectionMethod_currentIndexChanged(const QString & method){
-  QString default_file_name = ui->txt_survey->text()+"_"+ui->txt_Model->text()
-      +"_"+QString::fromStdString(m_concatenated_filter_names)+"_"+method;
-   ui->txt_FileName->setText(default_file_name);
+  QString default_file_name = ui->txt_Model->text()+"_"+method;
+  ui->txt_FileName->setText(default_file_name);
 }
 
 void DialogPhotometricCorrectionComputation::on_cb_SpectroColumn_currentIndexChanged(
@@ -187,7 +189,7 @@ void DialogPhotometricCorrectionComputation::on_txt_FileName_textChanged(
     const QString &) {
   setRunEnability();
   string output_file_name=FileUtils::addExt(ui->txt_FileName->text().toStdString(),".txt");
-    auto path_filename = FileUtils::getPhotCorrectionsRootPath(true)
+    auto path_filename = FileUtils::getPhotCorrectionsRootPath(true,ui->txt_survey->text().toStdString())
            + QString(QDir::separator()).toStdString() + output_file_name;
 
     if (QFileInfo(QString::fromStdString(path_filename)).exists()){
@@ -209,24 +211,21 @@ void DialogPhotometricCorrectionComputation::disablePage(){
 }
 std::string DialogPhotometricCorrectionComputation::runFunction(){
   try {
-    vector<string> filter_mapping;
-    for (auto& filter : m_selected_filters) {
-      filter_mapping.push_back(
-          filter.getFilterFile() + " " + filter.getFluxColumn() + " "
-              + filter.getErrorColumn());
-    }
 
     int max_iter_number = ui->txt_Iteration->text().toInt();
 
     auto config_map = PhotometricCorrectionHandler::GetConfigurationMap(
+        ui->txt_survey->text().toStdString(),
         ui->txt_FileName->text().toStdString(), max_iter_number,
         ui->txt_Tolerence->text().toDouble(),
+        m_non_detection,
         ui->cb_SelectionMethod->currentText().toStdString(),
         ui->txt_grid->text().toStdString(),
         ui->txt_catalog->text().toStdString(), m_id_column,
-        ui->cb_SpectroColumn->currentText().toStdString(), filter_mapping);
+        ui->cb_SpectroColumn->currentText().toStdString(),
+        m_excluded_filters);
 
-    PhzConfiguration::DeriveZeroPointsConfiguration conf {
+    PhzConfiguration::ComputePhotometricCorrectionsConfiguration conf {
         config_map };
     auto catalog = conf.getCatalog();
     auto model_phot_grid = conf.getPhotometryGrid();
@@ -249,7 +248,7 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
     auto phot_corr_map = calculator(catalog, model_phot_grid, stop_criteria,
         selector, progress_logger);
     output_func(phot_corr_map);
-    correctionComputed (ui->txt_FileName->text().toStdString());
+    correctionComputed (ui->txt_FileName->text());
     return "";
   }
   catch (const Elements::Exception & e) {
@@ -269,7 +268,7 @@ void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
   string output_file_name = FileUtils::addExt(
       ui->txt_FileName->text().toStdString(), ".txt");
   ui->txt_FileName->setText(QString::fromStdString(output_file_name));
-  auto path_filename = FileUtils::getPhotCorrectionsRootPath(true)
+  auto path_filename = FileUtils::getPhotCorrectionsRootPath(true,ui->txt_survey->text().toStdString())
       + QString(QDir::separator()).toStdString() + output_file_name;
 
   if (QFileInfo(QString::fromStdString(path_filename)).exists()

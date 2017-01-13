@@ -27,6 +27,7 @@ public:
     ~FormSurveyMapping();
 
     void loadMappingPage();
+    void loadMappingPage(std::string new_path);
 
 signals:
     void startEdition(int i);
@@ -38,6 +39,8 @@ private slots:
     void filterSelectionChanged(QModelIndex, QModelIndex);
 
     void filterEditionPopupClosing(FilterMapping);
+
+    void catalogNamePopupClosing(std::string);
 
     void on_btn_MapNew_clicked();
 
@@ -58,6 +61,8 @@ private slots:
     void on_btn_BtnEditFilter_clicked();
 
     void on_btn_DeleteFilter_clicked();
+
+    void on_btn_newCat_clicked();
 
 
 private:

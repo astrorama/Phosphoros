@@ -3,7 +3,8 @@
 #include <QFileInfo>
 #include <QFileInfoList>
 #include <QSettings>
-#include "PhzQtUI/FileUtils.h"
+#include <QTextStream>
+#include "FileUtils.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -114,21 +115,279 @@ std::string FileUtils::removeStart(const std::string& name, const std::string& s
      return name;
 }
 
-
+ PhzConfiguration::PhosphorosPathConfiguration FileUtils::getRootPaths(){
+   std::map<std::string, boost::program_options::variable_value> map{};
+   return PhzConfiguration::PhosphorosPathConfiguration(map);
+ }
 
 std::string FileUtils::getRootPath()  {
-    QSettings settings("SDC-CH", "PhosphorosUI");
-    QString path =settings.value(QString::fromStdString("General/root-path")).toString()+QDir::separator();
-    return path.toStdString();
+    return getRootPaths().getPhosphorosRootDir().generic_string();
 }
 
-void FileUtils::setRootPath(std::string path) {
-    QSettings settings("SDC-CH", "PhosphorosUI");
-    settings.setValue(QString::fromStdString("General/root-path"),QString::fromStdString(path));
+
+std::string FileUtils::getGUIConfigPath(){
+  auto path = QString::fromStdString(getRootPath())+QDir::separator() + "config"+QDir::separator() +"GUI";
+  QFileInfo info(path);
+  if (!info.exists()){
+      QDir().mkpath(path);
+  }
+
+  return path.toStdString();
 }
+
+
+void FileUtils::savePath(const std::map<std::string,std::string>& path_list){
+  QString path = QString::fromStdString(getGUIConfigPath())+QDir::separator() +"path.txt";
+  QFile file(path);
+  file.open(QIODevice::WriteOnly );
+  QTextStream stream(&file);
+
+  for (auto& item : path_list) {
+      stream<< QString::fromStdString(item.first) << " " << QString::fromStdString(item.second) << " \n";
+  }
+
+  file.close();
+}
+
+std::map<std::string,std::string> FileUtils::readPath(){
+  QString path = QString::fromStdString(getGUIConfigPath())+QDir::separator() +"path.txt";
+  QFile file(path);
+
+  auto map = std::map<std::string,std::string>{};
+  if (file.open(QIODevice::ReadOnly)){
+    while (!file.atEnd())
+    {
+       QString line = file.readLine();
+       auto line_split = line.split(" ");
+       if (line_split.length()>1){
+         map.insert(std::make_pair(line_split[0].toStdString(),line_split[1].toStdString()));
+       }
+    }
+  }
+
+ auto default_paths = getRootPaths();
+
+
+
+ if (map.find("Catalogs")== map.end()){
+   map.insert(std::make_pair("Catalogs",default_paths.getCatalogsDir().generic_string()));
+ }
+
+ if (map.find("AuxiliaryData")== map.end()){
+   map.insert(std::make_pair("AuxiliaryData",default_paths.getAuxDataDir().generic_string()));
+ }
+
+ if (map.find("IntermediateProducts")== map.end()){
+   map.insert(std::make_pair("IntermediateProducts",default_paths.getIntermediateDir().generic_string()));
+ }
+
+ if (map.find("Results")== map.end()){
+   map.insert(std::make_pair("Results",default_paths.getResultsDir().generic_string()));
+ }
+
+ if (map.find("LastUsed")== map.end()){
+    map.insert(std::make_pair("LastUsed",default_paths.getPhosphorosRootDir().generic_string()));
+ }
+
+  return map;
+}
+
+
+std::string FileUtils::getLastUsedPath(){
+   return readPath()["LastUsed"];
+}
+
+ void FileUtils::setLastUsedPath(const std::string& path){
+   auto map = readPath();
+
+   QFileInfo info(QString::fromStdString(path));
+   QString stored_path;
+   if (info.isDir()){
+     stored_path=info.absoluteFilePath();
+   } else{
+     stored_path=info.absolutePath();
+   }
+
+   map["LastUsed"] = stored_path.toStdString();
+   savePath(map);
+}
+
+std::map<std::string,std::map<std::string,std::string>> FileUtils::readUserPreferences(){
+  QString path = QString::fromStdString(getGUIConfigPath())+QDir::separator() +"pref.txt";
+  QFile file(path);
+
+  auto map = std::map<std::string,std::map<std::string,std::string>>{};
+  if (file.open(QIODevice::ReadOnly)){
+    while (!file.atEnd())
+    {
+       QString line = file.readLine();
+       auto line_split = line.split(" ");
+       if (line_split.length()>2){
+         auto catalog = line_split[0].toStdString();
+         if (map.find(catalog) == map.end()){
+           auto new_cat_map= std::map<std::string,std::string>{};
+           map.insert(std::make_pair(catalog,new_cat_map));
+         }
+
+         map[catalog].insert(
+             std::make_pair(line_split[1].toStdString(),
+                            line_split[2].toStdString()));
+       }
+    }
+  }
+
+  return map;
+}
+
+void FileUtils::writeUserPreferences(std::map<std::string,std::map<std::string,std::string>> preferences){
+   QString path = QString::fromStdString(getGUIConfigPath())+QDir::separator() +"pref.txt";
+   QFile file(path);
+   file.open(QIODevice::WriteOnly );
+   QTextStream stream(&file);
+
+   for (auto& item : preferences) {
+     for (auto& sub_item :item.second){
+       stream << QString::fromStdString(item.first) << " " ;
+       stream << QString::fromStdString(sub_item.first) <<  " " ;
+       stream << QString::fromStdString(sub_item.second) << " \n";
+     }
+   }
+
+   file.close();
+}
+
+void FileUtils::setUserPreference(const std::string& catalog, const std::string& key, const std::string& value ){
+  auto map = FileUtils::readUserPreferences();
+  if (map.find(catalog) == map.end()){
+    auto new_cat_map= std::map<std::string,std::string>{};
+    map.insert(std::make_pair(catalog,new_cat_map));
+  }
+
+  if (map[catalog].find(key) == map[catalog].end()){
+    map[catalog].insert(std::make_pair(key,value));
+  } else {
+    map[catalog][key] = value;
+  }
+
+  FileUtils::writeUserPreferences(map);
+
+}
+
+std::string FileUtils::getUserPreference(const std::string& catalog, const std::string& key){
+  auto map = FileUtils::readUserPreferences();
+  if (map.find(catalog) != map.end()){
+    if (map[catalog].find(key) != map[catalog].end()){
+      return map[catalog][key];
+    }
+  }
+
+  return "";
+}
+
+void FileUtils::clearUserPreference(const std::string& catalog, const std::string& key){
+  auto map = FileUtils::readUserPreferences();
+   if (map.find(catalog) != map.end() && map[catalog].find(key) != map[catalog].end()){
+     map[catalog].erase(key);
+     FileUtils::writeUserPreferences(map);
+   }
+}
+
+std::string FileUtils::getAuxRootPath(){
+   return readPath()["AuxiliaryData"];
+ }
+
+
+std::string FileUtils::getCatalogRootPath(bool check, const std::string& catalog_type){
+  QString path = QString::fromStdString(readPath()["Catalogs"]);
+
+  if (catalog_type.size()>0){
+      path = path + QDir::separator()+ QString::fromStdString(catalog_type);
+  }
+
+  QFileInfo info(path);
+  if (check){
+     if (!info.exists()){
+        QDir().mkpath(path);
+     }
+  }
+  return info.absoluteFilePath().toStdString();
+}
+
+std::string FileUtils::getIntermediaryProductRootPath(bool check, const std::string& catalog_type){
+  QString path = QString::fromStdString(readPath()["IntermediateProducts"]);
+
+  if (catalog_type.size()>0){
+    path = path + QDir::separator()+ QString::fromStdString(catalog_type);
+  } else {
+    check=false;
+  }
+
+  QFileInfo info(path);
+  if (check){
+     if (!info.exists()){
+        QDir().mkpath(path);
+     }
+  }
+  return info.absoluteFilePath().toStdString();
+}
+
+std::string FileUtils::getResultRootPath(bool check, const std::string& catalog_type, const std::string& cat_file_name){
+  QString path = QString::fromStdString(readPath()["Results"]);
+
+  if (catalog_type.size()>0){
+     path = path + QDir::separator()+ QString::fromStdString(catalog_type);
+   }
+
+  if (catalog_type.size()>0){
+      path = path + QDir::separator()+ QString::fromStdString(cat_file_name);
+  }
+
+  QFileInfo info(path);
+  if (check){
+     if (!info.exists()){
+        QDir().mkpath(path);
+     }
+  }
+  return info.absoluteFilePath().toStdString();
+}
+
+
+std::string FileUtils::getFilterRootPath(bool check)  {
+    QString path = QString::fromStdString(readPath()["AuxiliaryData"])+QDir::separator()+"Filters";
+    QFileInfo info(path);
+    if (check){
+        if (!info.exists()){
+            QDir().mkpath(path);
+        }
+    }
+    return info.absoluteFilePath().toStdString();
+}
+std::string FileUtils::getSedRootPath(bool check)  {
+
+
+    QString path = QString::fromStdString(readPath()["AuxiliaryData"])+QDir::separator()+"SEDs";
+    QFileInfo info(path);
+    if (check){;
+        if (!info.exists()){
+            QDir().mkpath(path);
+        }
+    }
+    return info.absoluteFilePath().toStdString();
+}
+std::string FileUtils::getRedCurveRootPath(bool check)  {
+    QString path = QString::fromStdString(readPath()["AuxiliaryData"])+QDir::separator()+"ReddeningCurves";
+    QFileInfo info(path);
+    if (check){
+        if (!info.exists()){
+            QDir().mkpath(path);
+        }
+    }
+    return info.absoluteFilePath().toStdString();
+}
+
 
 std::string FileUtils::getModelRootPath(bool check)  {
-    QString path = QString::fromStdString(FileUtils::getRootPath())+QDir::separator()+"UI"+QDir::separator()+"ModelSet";
+    QString path = QString::fromStdString(FileUtils::getGUIConfigPath())+QDir::separator()+"ParameterSpace";
     QFileInfo info(path);
          if (check){
 
@@ -139,62 +398,12 @@ std::string FileUtils::getModelRootPath(bool check)  {
     return info.absoluteFilePath().toStdString();
 }
 
-std::string FileUtils::getMappingRootPath(bool check)  {
-    QString path = QString::fromStdString(FileUtils::getRootPath())+QDir::separator()+"UI"+QDir::separator()+"Survey";
-    QFileInfo info(path);
-    if (check){
-        if (!info.exists()){
-            QDir().mkpath(path);
-        }
-    }
-    return info.absoluteFilePath().toStdString();
-}
-std::string FileUtils::getFilterRootPath(bool check)  {
-    QString path = QString::fromStdString(FileUtils::getRootPath())+QDir::separator()+"Filter";
-    QFileInfo info(path);
-    if (check){
-        if (!info.exists()){
-            QDir().mkpath(path);
-        }
-    }
-    return info.absoluteFilePath().toStdString();
-}
-std::string FileUtils::getSedRootPath(bool check)  {
-    QString path = QString::fromStdString(FileUtils::getRootPath())+QDir::separator()+"SED";
-    QFileInfo info(path);
-    if (check){;
-        if (!info.exists()){
-            QDir().mkpath(path);
-        }
-    }
-    return info.absoluteFilePath().toStdString();
-}
-std::string FileUtils::getRedCurveRootPath(bool check)  {
-    QString path = QString::fromStdString(FileUtils::getRootPath())+QDir::separator()+"RedCurve";
-    QFileInfo info(path);
-    if (check){
-        if (!info.exists()){
-            QDir().mkpath(path);
-        }
-    }
-    return info.absoluteFilePath().toStdString();
+std::string FileUtils::getPhotCorrectionsRootPath(bool check, const std::string& catalog_type)  {
+    return FileUtils::getIntermediaryProductRootPath(check,catalog_type);
 }
 
-
-std::string FileUtils::getPhotCorrectionsRootPath(bool check)  {
-    QString path = QString::fromStdString(FileUtils::getRootPath())+QDir::separator()+"PhotometricCorrections";
-    QFileInfo info(path);
-    if (check){
-        if (!info.exists()){
-            QDir().mkpath(path);
-        }
-    }
-    return info.absoluteFilePath().toStdString();
-}
-
-
-std::string FileUtils::getPhotmetricGridRootPath(bool check) {
-  QString path = QString::fromStdString(FileUtils::getRootPath())+QDir::separator()+"PhotometricGrid";
+std::string FileUtils::getPhotmetricGridRootPath(bool check, const std::string& catalog_type) {
+  QString path = QString::fromStdString(FileUtils::getIntermediaryProductRootPath(false,catalog_type))+QDir::separator()+"ModelGrids";
   QFileInfo info(path);
   if (check){
       if (!info.exists()){
@@ -204,28 +413,8 @@ std::string FileUtils::getPhotmetricGridRootPath(bool check) {
   return info.absoluteFilePath().toStdString();
 }
 
- std::string FileUtils::getLastUsedPath(){
-   QSettings settings("SDC-CH", "PhosphorosUI");
 
-   std::string test_value = "default";
-   if (test_value.compare(settings.value(QString::fromStdString("General/last-used-path"), QString::fromStdString(test_value)).toString().toStdString())==0){
-     return getRootPath();
-   }
 
-   return settings.value(QString::fromStdString("General/last-used-path")).toString().toStdString();
-}
-
- void FileUtils::setLastUsedPath(std::string path){
-   QSettings settings("SDC-CH", "PhosphorosUI");
-   QFileInfo info(QString::fromStdString(path));
-   QString stored_path;
-   if (info.isDir()){
-     stored_path=info.absoluteFilePath();
-   } else{
-     stored_path=info.absolutePath();
-   }
-   settings.setValue(QString::fromStdString("General/last-used-path"),stored_path);
-}
 
 }
 }

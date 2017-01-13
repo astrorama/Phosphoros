@@ -17,7 +17,7 @@ ParameterRuleTable::ParameterRuleTable(QDialog*&){
 void ParameterRuleTable::loadParameterRules(std::map<int,ParameterRule> parameter_rules,std::string sedRootPath ,std::string redRootPath){
     ParameterRuleModel* new_model = new ParameterRuleModel(parameter_rules,sedRootPath,redRootPath);
     setModel(new_model);
-    this->setColumnHidden(7, true);
+    this->setColumnHidden(6, true);
     this->setSelectionBehavior(QAbstractItemView::SelectRows);
     this->setSelectionMode(QAbstractItemView::SingleSelection);
     this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
@@ -56,6 +56,17 @@ void ParameterRuleTable::newRule(bool duplicate_selected){
     this->selectRow(row_to_select);
 }
 
+
+bool ParameterRuleTable::checkNameAlreadyUsed(std::string new_name) const{
+  QModelIndexList index = this->selectionModel()->selectedIndexes();
+   return cGetModel()->checkNameAlreadyUsed(new_name,index[0].row());
+}
+
+void ParameterRuleTable::setNameToSelectedRule(std::string new_name){
+
+  QModelIndexList index = this->selectionModel()->selectedIndexes();
+  getModel()->setName(new_name,index[0].row());
+}
 
 void ParameterRuleTable::setRangesToSelectedRule(Range ebvRange, Range zRange){
     QModelIndexList index = this->selectionModel()->selectedIndexes();

@@ -24,7 +24,7 @@ public:
    * @param path is the folder into which the model has to look for persisted
    * SurveyFilterMappings
    */
-  void loadSurvey(std::string path);
+  void loadSurvey();
 
   /**
    * @brief Create a new survey and add it to the model.
@@ -75,6 +75,10 @@ public:
    * @param row the model row number representing the survey.
    */
   std::string getName(int row);
+
+  void setNonDetection(double newNonDetection, int row);
+
+  double getNonDetection(int row);
 
   /**
    * @brief Change the Source column Id of the Survey represented by the given
@@ -142,7 +146,6 @@ public:
 private:
   std::map<int, SurveyFilterMapping> m_survey_filter_mappings;
   const QString getValue(int row, int column) const;
-  std::string m_root_path;
 
 
   std::string getDuplicateName(std::string name) const;

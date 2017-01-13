@@ -26,26 +26,6 @@ public:
 
     /**
       * @brief
-      *  Constructor to be called when one want to persist the object.
-      *
-      * @param root_path
-      * The folder into which the storing file will be created.
-      */
-    SurveyFilterMapping(std::string root_path);
-
-    /**
-      * @brief
-      *  Get a concatenated list of the filters.
-      *
-      * @param separator
-      * String to be inserted between the different filters names.
-      *
-      * @return a string listing the filters.
-      */
-    std::string getFilterNames(std::string separator) const;
-
-    /**
-      * @brief
       *  Returns the number of filter in the SurveyFilterMapping.
       */
     int getFilterNumber() const;
@@ -87,37 +67,6 @@ public:
     const std::list<FilterMapping>& getFilters() const;
 
     /**
-     * @brief Read from the disk all the SurveyFilterMapping stored in a given folder.
-     *
-     * @param root_path
-     * The folder containing the persisted SurveyFilterMapping;
-     *
-     * @return a map of SurveyFilterMapping indexed by a int key.
-     */
-    static std::map<int,SurveyFilterMapping> loadSurveysFromFolder(std::string root_path);
-
-    /**
-     * @brief load a SurveyFilterMapping from a xml file
-     * @param fileName
-     * @param root_path
-     * @return the SurveyFilterMapping.
-     */
-    static SurveyFilterMapping loadSurveyFromFile(std::string fileName,std::string root_path);
-
-    /**
-     * @brief Delete the current survey by erasing the file it was persisted in.
-     */
-    void deleteSurvey();
-
-    /**
-     * @brief Write the SurveyFilterMapping in a xml file which path is <root_path>/<name>.xml.
-     * If the name has change (old_name is different from the current name),
-     * a new file is created and the old one is wiped out.
-     * @param oldName
-     */
-    void saveSurvey(std::string oldName);
-
-    /**
      * @brief get the list of column stored into the Survey.
      */
     const std::set<std::string>& getColumnList() const;
@@ -127,18 +76,56 @@ public:
      */
     void setColumnList(std::set<std::string> new_list);
 
+    void setNonDetection(double non_detection);
+
+    double getNonDetection() const;
+
 
     /**
      * @brief set the default catalog path
      * @param new_default_catalog
      */
-    void setDefaultCatalog(std::string new_default_catalog);
+    void setDefaultCatalogFile(std::string new_default_catalog);
 
     /**
      * @brief get the default catalog path
      * @return the current default catalog path
      */
-    std::string getDefaultCatalog() const;
+    std::string getDefaultCatalogFile() const;
+
+
+
+  /**
+   * @brief get the list of available catalogs
+   */
+  static std::list<std::string> getAvailableCatalogs();
+
+  /**
+   * @brief Read from the disk all the SurveyFilterMapping .
+   *
+   * @return a map of SurveyFilterMapping indexed by a int key.
+   */
+  static std::map<int, SurveyFilterMapping> loadCatalogMappings();
+
+  /**
+   * @brief load a SurveyFilterMapping from a xml file
+   * @param name
+   * @return the SurveyFilterMapping.
+   */
+  static SurveyFilterMapping loadCatalog(std::string name);
+
+  /**
+   * @brief Delete the current survey by erasing the file it was persisted in.
+   */
+  void deleteSurvey();
+
+  /**
+   * @brief Write the SurveyFilterMapping in a xml file which path is <root_path>/<name>.xml.
+   * If the name has change (old_name is different from the current name),
+   * a new file is created and the old one is wiped out.
+   * @param oldName
+   */
+  void saveSurvey(std::string oldName);
 
 
 
@@ -147,9 +134,9 @@ private:
     std::string m_survey_name;
     std::string m_source_id_column;
     std::list<FilterMapping> m_filters;
-    std::string m_root_path;
     std::string m_default_catalog;
     std::set<std::string> m_column_list;
+    double m_non_detection=-99.;
 
 };
 

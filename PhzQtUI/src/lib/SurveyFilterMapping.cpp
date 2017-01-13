@@ -1,6 +1,15 @@
 #include <iostream>
-#include "PhzQtUI/FileUtils.h"
+#include <fstream>
+#include <boost/regex.hpp>
+using boost::regex;
+using boost::regex_match;
+using boost::smatch;
+#include <boost/algorithm/string.hpp>
+#include "ElementsKernel/Exception.h"
+#include "ElementsKernel/Logging.h"
+#include "FileUtils.h"
 #include <QDir>
+#include <QDirIterator>
 #include <QTextStream>
 #include <QDomDocument>
 
@@ -8,17 +17,11 @@
 
 namespace Euclid {
 namespace PhzQtUI {
+
+static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapping");
+
     SurveyFilterMapping::SurveyFilterMapping(){}
 
-    SurveyFilterMapping::SurveyFilterMapping(std::string root_path):m_root_path(root_path){}
-
-    std::string SurveyFilterMapping::getFilterNames(std::string separator) const{
-        std::string result="";
-        for (auto filter : m_filters){
-            result=result + filter.getName() + separator;
-        }
-        return result.substr(0,result.length()-separator.length());
-    }
 
     int SurveyFilterMapping::getFilterNumber() const{
         return m_filters.size();
@@ -56,44 +59,69 @@ namespace PhzQtUI {
         return m_filters;
     }
 
-    void SurveyFilterMapping::setDefaultCatalog(std::string new_default_catalog){
+    void SurveyFilterMapping::setDefaultCatalogFile(std::string new_default_catalog){
       m_default_catalog=new_default_catalog;
     }
 
-    std::string SurveyFilterMapping::getDefaultCatalog() const{
+    std::string SurveyFilterMapping::getDefaultCatalogFile() const{
       return m_default_catalog;
     }
 
+    void SurveyFilterMapping::setNonDetection(double non_detection){
+      m_non_detection=non_detection;
+    }
 
+    double SurveyFilterMapping::getNonDetection() const{
+      return m_non_detection;
+    }
 
-    std::map<int,SurveyFilterMapping> SurveyFilterMapping::loadSurveysFromFolder(std::string root_path){
-        QDir root_dir(QString::fromStdString(root_path));
+    std::list<std::string> SurveyFilterMapping::getAvailableCatalogs(){
+      auto cat_root_path = FileUtils::getCatalogRootPath(true,"");
+      std::list<std::string> all_dirs{};
+      QDirIterator directories(QString::fromStdString(cat_root_path), QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+      while(directories.hasNext()){
+              directories.next();
+              all_dirs.push_back(directories.fileName().toStdString());
+      }
 
-                std::map<int,SurveyFilterMapping> map ;
+      return all_dirs;
 
-        QStringList fileNames = root_dir.entryList(QDir::Files |  QDir::NoDotAndDotDot );
-        int count=0;
-        foreach (const QString &fileName, fileNames) {
-          try{
-            auto survey = SurveyFilterMapping::loadSurveyFromFile(fileName.toStdString(),root_path);
-            map[count]=survey;
-            ++count;
-          } catch (...){} //if a file do not open correctly: just skip it...
-        }
+    }
 
-        return map;
-   }
+std::map<int,SurveyFilterMapping> SurveyFilterMapping::loadCatalogMappings(){
+  auto additional_info_path = QString::fromStdString(FileUtils::getGUIConfigPath())+QDir::separator()+"Catalogs";
+  QFileInfo info(additional_info_path);
+  if (!info.exists()){
+    QDir().mkpath(additional_info_path);
+  }
 
-SurveyFilterMapping SurveyFilterMapping::loadSurveyFromFile(
-    std::string fileName, std::string root_path) {
+  QDir root_dir(additional_info_path);
 
-  SurveyFilterMapping survey(root_path);
-  survey.setName(FileUtils::removeExt(fileName, ".xml"));
+  std::map<int,SurveyFilterMapping> map ;
+  QStringList fileNames = root_dir.entryList(QDir::Files | QDir::NoDotAndDotDot );
 
-  QDomDocument doc("SurveyFilterMapping");
-  QFile file(
-      QString::fromStdString(root_path) + QDir::separator()
-          + QString::fromStdString(fileName));
+  int count=0;
+  foreach (const QString &fileName, fileNames) {
+    try{
+      auto survey = SurveyFilterMapping::loadCatalog(fileName.toStdString());
+      map[count]=survey;
+      ++count;
+    } catch (...){} //if a file do not open correctly: just skip it...
+  }
+
+  return map;
+}
+
+SurveyFilterMapping SurveyFilterMapping::loadCatalog(std::string name) {
+  auto additional_info_path = QString::fromStdString(FileUtils::getGUIConfigPath())
+  +QDir::separator()+"Catalogs"+QDir::separator();
+
+  SurveyFilterMapping survey;
+  survey.setName(FileUtils::removeExt(name, ".xml"));
+
+  // read the xml encoded additional info
+  QDomDocument doc("CatalogInfo");
+  QFile file(additional_info_path + QDir::separator() + QString::fromStdString(name));
   if (!file.open(QIODevice::ReadOnly))
     return survey;
   if (!doc.setContent(&file)) {
@@ -103,9 +131,9 @@ SurveyFilterMapping SurveyFilterMapping::loadSurveyFromFile(
   file.close();
 
   QDomElement root_node = doc.documentElement();
-  survey.setName(root_node.attribute("Name").toStdString());
   survey.setSourceIdColumn(root_node.attribute("SourceColumnId").toStdString());
-  survey.setDefaultCatalog(root_node.attribute("DefaultCatalogPath").toStdString());
+  survey.setDefaultCatalogFile(root_node.attribute("DefaultCatalogPath").toStdString());
+  survey.setNonDetection(root_node.attribute("NonDetection").toDouble());
 
   auto columns_node = root_node.firstChildElement("AvailableColumns");
   auto list = columns_node.childNodes();
@@ -119,76 +147,117 @@ SurveyFilterMapping SurveyFilterMapping::loadSurveyFromFile(
     survey.m_column_list.insert(survey.getSourceIdColumn());
   }
 
-  auto filters_node = root_node.firstChildElement("Filters");
+  // read the filter mapping info
+  std::list<FilterMapping> mappings{};
 
-   list = filters_node.childNodes();
+  auto mapping_path=QString::fromStdString(FileUtils::getIntermediaryProductRootPath(true,FileUtils::removeExt(name, ".xml")))+QDir::separator();
 
-  for (int i = 0; i < list.count(); ++i) {
-    FilterMapping mapping;
 
-    auto node_filter = list.at(i).toElement();
-    mapping.setName(node_filter.attribute("Name").toStdString());
-    mapping.setFluxColumn(node_filter.attribute("FluxColumn").toStdString());
+   std::ifstream in {mapping_path.toStdString()+"filter_mapping.txt"};
+   std::string line;
+   regex expr {"\\s*([^\\s#]+)\\s+([^\\s#]+)\\s+([^\\s#]+)\\s*(#.*)?"};
+   while (std::getline(in, line)) {
+     boost::trim(line);
+     if (line[0] == '#') {
+       continue;
+     }
+     smatch match_res;
+     if (!regex_match(line, match_res, expr)) {
+       logger.error() << "Syntax error in " << mapping_path.toStdString()+"filter_mapping.txt" << ": " << line;
+       throw Elements::Exception() << "Syntax error in " << mapping_path.toStdString()+"filter_mapping.txt" << ": " << line;
+     }
 
-    if (survey.m_column_list.count(mapping.getFluxColumn()) == 0) {
-      survey.m_column_list.insert(mapping.getFluxColumn());
-    }
-    mapping.setErrorColumn(node_filter.attribute("ErrorColumn").toStdString());
+     FilterMapping mapping;
+     mapping.setFilterFile(match_res.str(1));
+     mapping.setFluxColumn(match_res.str(2));
+     mapping.setErrorColumn(match_res.str(3));
+     mappings.push_back(mapping);
 
-    if (survey.m_column_list.count(mapping.getErrorColumn()) == 0) {
-      survey.m_column_list.insert(mapping.getErrorColumn());
-    }
-    mapping.setFilterFile(
-        node_filter.attribute("TransmissionFile").toStdString());
-    survey.m_filters.push_back(mapping);
-  }
+   }
+
+
+
+//  QFile mapping_file(mapping_path+"filter_mapping.txt");
+//  if (mapping_file.open(QIODevice::ReadOnly))
+//  {
+//     QTextStream in(&mapping_file);
+//     while (!in.atEnd())
+//     {
+//        QString line = in.readLine();
+//        auto tokens = line.split(" ");
+//        if (tokens.length()==3){
+//          FilterMapping mapping;
+//          mapping.setFilterFile(tokens[0].toStdString());
+//          mapping.setFluxColumn(tokens[1].toStdString());
+//          mapping.setErrorColumn(tokens[2].toStdString());
+//          mappings.push_back(mapping);
+//        }
+//     }
+//     mapping_file.close();
+//  }
+
+  survey.setFilters(mappings);
 
   return survey;
 }
 
-     void SurveyFilterMapping::deleteSurvey(){
-         QFile(QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(getName()+".xml")).remove();
-     }
+void SurveyFilterMapping::deleteSurvey(){
+  auto additional_info_path = QString::fromStdString(FileUtils::getGUIConfigPath())
+  +QDir::separator()+"Catalogs"+QDir::separator();
+  QFile(additional_info_path+ QString::fromStdString(getName()+".xml")).remove();
+}
 
-     void SurveyFilterMapping::saveSurvey(std::string oldName){
-         QFile(QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(oldName +".xml")).remove();
-         QFile file(QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(getName()+".xml"));
-         file.open(QIODevice::WriteOnly );
-         QTextStream stream(&file);
+void SurveyFilterMapping::saveSurvey(std::string oldName){
+  // ensure the Catalog path
+  auto cat_path = QString::fromStdString(FileUtils::getCatalogRootPath(true,getName()))+QDir::separator();
+  QFileInfo info(cat_path);
+  if (!info.exists()){
+     QDir().mkpath(cat_path);
+  }
 
-          QDomDocument doc("SurveyFilterMapping");
-          QDomElement root = doc.createElement("SurveyFilterMapping");
-          root.setAttribute("Name",QString::fromStdString(m_survey_name));
-          root.setAttribute("SourceColumnId",QString::fromStdString(m_source_id_column));
-          root.setAttribute("DefaultCatalogPath",QString::fromStdString(m_default_catalog));
-          doc.appendChild(root);
+  // save the xml additional info
+  auto additional_info_path = QString::fromStdString(FileUtils::getGUIConfigPath())
+  +QDir::separator()+"Catalogs"+QDir::separator();
+  QFile(additional_info_path+ QString::fromStdString(oldName +".xml")).remove();
+  QFile file(additional_info_path+ QString::fromStdString(getName()+".xml"));
+  file.open(QIODevice::WriteOnly );
+  QTextStream stream(&file);
 
-          QDomElement filters_Node = doc.createElement("Filters");
-          root.appendChild(filters_Node);
+  QDomDocument doc("CatalogInfo");
+  QDomElement root = doc.createElement("CatalogInfo");
+  root.setAttribute("SourceColumnId",QString::fromStdString(m_source_id_column));
+  root.setAttribute("NonDetection",QString::number(m_non_detection));
+  root.setAttribute("DefaultCatalogPath",QString::fromStdString(m_default_catalog));
+  doc.appendChild(root);
 
-          for(auto& filter : m_filters){
-              QDomElement filter_node = doc.createElement("Filter");
-              filter_node.setAttribute("Name",QString::fromStdString(filter.getName()));
-              filter_node.setAttribute("FluxColumn",QString::fromStdString(filter.getFluxColumn()));
-              filter_node.setAttribute("ErrorColumn",QString::fromStdString(filter.getErrorColumn()));
-              filter_node.setAttribute("TransmissionFile",QString::fromStdString(filter.getFilterFile()));
-              filters_Node.appendChild(filter_node);
-          }
+  QDomElement columns_node = doc.createElement("AvailableColumns");
+  for(auto& column : m_column_list){
+     QDomElement text_element = doc.createElement("AvailableColumn");
+     text_element.appendChild(doc.createTextNode(QString::fromStdString(column)));
+     columns_node.appendChild(text_element);
+  }
+  root.appendChild(columns_node);
+  QString xml = doc.toString();
+  stream<<xml;
+  file.close();
+
+  // save the filter mapping info
+  auto mapping_path=QString::fromStdString(FileUtils::getIntermediaryProductRootPath(true,getName()))+QDir::separator();
+  QFile mapping_file(mapping_path+"filter_mapping.txt");
+
+  mapping_file.open(QIODevice::WriteOnly );
+  QTextStream mapping_stream(&mapping_file);
+
+  for (auto& filter : m_filters) {
+    mapping_stream<< QString::fromStdString(filter.getFilterFile()) << " "
+            << QString::fromStdString(filter.getFluxColumn())<< " "
+            << QString::fromStdString(filter.getErrorColumn()) << "\n";
+  }
+
+  mapping_file.close();
 
 
-          QDomElement columns_node = doc.createElement("AvailableColumns");
-                for(auto& column : m_column_list){
-                    QDomElement text_element = doc.createElement("AvailableColumn");
-                    text_element.appendChild(doc.createTextNode(QString::fromStdString(column)));
-                    columns_node.appendChild(text_element);
-                }
-          root.appendChild(columns_node);
-
-          QString xml = doc.toString();
-
-         stream<<xml;
-         file.close();
-     }
+}
 
 }
 }

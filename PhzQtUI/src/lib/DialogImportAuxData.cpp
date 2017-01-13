@@ -4,7 +4,7 @@
 #include <QMessageBox>
 #include "PhzQtUI/DialogImportAuxData.h"
 #include "ui_DialogImportAuxData.h"
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 
 using namespace std;
 

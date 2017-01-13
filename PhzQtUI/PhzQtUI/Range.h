@@ -36,6 +36,12 @@ public:
     std::string getStringRepresentation() const;
 
     /**
+     * @brief Get a String Representation of the Range for the config
+     * @return a string to be used into the config and containing the range information.
+     */
+    std::string getConfigStringRepresentation() const;
+
+    /**
      * @brief Get the range lower bound.
      * @return the range current lower bound.
      */

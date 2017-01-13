@@ -5,7 +5,7 @@
 #include "PhzQtUI/DirectoryTreeModel.h"
 #include "PhzQtUI/DialogImportAuxData.h"
 #include "PhzQtUI/DialogCreatesSubGroup.h"
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
 
 
 namespace Euclid {
@@ -93,7 +93,7 @@ void FormAuxDataManagement::on_btn_RedDelete_clicked()
     std::string selection =  model->getRootSelection().second;
     if (QMessageBox::question( this, "Confirm deletion...",
                                   QString::fromStdString("Do you really want to delete the reddening curve(s) '"+model->getRelPath(selection,"Reddening Curves")+"'?"),
-                                  QMessageBox::Yes|QMessageBox::Cancel )==QMessageBox::Yes){
+                                  QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
         FileUtils::removeDir(QString::fromStdString(selection));
         loadManagementPage(2);
     }
@@ -129,7 +129,7 @@ void FormAuxDataManagement::on_btn_SedDelete_clicked()
     std::string selection =  model->getRootSelection().second;
    if (QMessageBox::question( this, "Confirm deletion...",
                                  QString::fromStdString("Do you really want to delete the SED(s) '"+model->getRelPath(selection,"SEDs")+"'?"),
-                                 QMessageBox::Yes|QMessageBox::Cancel )==QMessageBox::Yes){
+                                 QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
        FileUtils::removeDir(QString::fromStdString(selection));
        loadManagementPage(1);
    }
@@ -164,7 +164,7 @@ void FormAuxDataManagement::on_btn_FilterDelete_clicked()
     std::string selection =  model->getRootSelection().second;
    if (QMessageBox::question( this, "Confirm deletion...",
                                  QString::fromStdString("Do you really want to delete the Filter Transmission Curve(s) '"+model->getRelPath(selection,"Filters")+"'?"),
-                                 QMessageBox::Yes|QMessageBox::Cancel )==QMessageBox::Yes){
+                                 QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
        FileUtils::removeDir(QString::fromStdString(selection));
        loadManagementPage();
    }

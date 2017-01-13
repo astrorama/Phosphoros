@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Astronomical Model Set</string>
+   <string>Parameter Space Specification</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_11">
    <item>
@@ -26,7 +26,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Astronomical Model Set</string>
+        <string>Parameter Space Specification</string>
        </property>
       </widget>
      </item>
@@ -69,7 +69,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Parameter Rules List :</string>
+            <string>Parameters Sets :</string>
            </property>
           </widget>
          </item>
@@ -152,7 +152,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Selected Parameter Rule</string>
+            <string>Selected Parameter Set :</string>
            </property>
           </widget>
          </item>
@@ -198,6 +198,37 @@
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_14">
+         <property name="text">
+          <string>Name :</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_22">
+         <item>
+          <widget class="QLineEdit" name="txt_name">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_20">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
        <item>
         <widget class="QTabWidget" name="tabWidget">

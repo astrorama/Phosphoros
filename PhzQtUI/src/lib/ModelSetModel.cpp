@@ -11,6 +11,12 @@ ModelSetModel::ModelSetModel():QStandardItemModel()
 {
 }
 
+std::map<std::string,PhzDataModel::ModelAxesTuple> ModelSetModel::getAxesTuple(int row) const{
+  int id = getValue(row,2).toInt();
+  const std::map<int,ModelSet>& ref=m_set_list;
+  return ref.at(id).getAxesTuple();
+}
+
 const QString ModelSetModel::getName(int row) const{
     return getValue(row,0);
 }
@@ -60,7 +66,7 @@ void ModelSetModel::loadSets(const std::string& path){
      this->setColumnCount(3);
      this->setRowCount(m_set_list.size());
      QStringList  setHeaders;
-     setHeaders<<"Model Set Name"<<"Number of Models"<<"Hidden_Id";
+     setHeaders<<"Name"<<"Total Size"<<"Hidden_Id";
      this->setHorizontalHeaderLabels(setHeaders);
 
      int i=0;
@@ -89,7 +95,7 @@ int ModelSetModel::newSet(int duplicate_from_row ){
 
     ++max_ref;
 
-    QString text_1 = "New_Model_Set";
+    QString text_1 = "New_Parameter_Space";
     QString text_2 = "0";
 
 

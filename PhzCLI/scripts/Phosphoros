@@ -15,22 +15,28 @@ action_list = [
                      'Shows this help message'),
     PhosphorosAction(['GUI'], 'PhosphorosUI',
                      'Starts the Graphical User Interface'),
-    PhosphorosAction(['build_templates', 'BT'], 'PhosphorosBuildTemplates',
-                     'Builds the template photometry library'),
-    PhosphorosAction(['derive_zero_points', 'DZP'], 'PhosphorosDeriveZeroPoints',
+    PhosphorosAction(['compute_model_grid', 'CMG'], 'PhosphorosComputeModelGrid',
+                     'Computes a grid containing the model photometries'),
+    PhosphorosAction(['compute_photometric_corrections', 'CPC'], 'PhosphorosComputePhotometricCorrections',
                      'Calculates the Photometric Zero Point Corrections'),
-    PhosphorosAction(['fit_templates', 'FT'], 'PhosphorosFitTemplates',
-                     'Calculates the PHZ for a given catalog by using template fitting'),
-    PhosphorosAction(['ls_aux', 'LA'], 'PhosphorosLsAux',
-                     'Browses the auxiliary data in a given directory'),
-    PhosphorosAction(['display_templates', 'DT'], 'PhosphorosDisplayTemplates',
-                     'Browses through a template photometry library'),
-    PhosphorosAction(['display_dataset', 'DD'], 'PhosphorosDisplayDataset',
-                     'Displays the SED data a template in the library'),
-    PhosphorosAction(['vs_specz', 'VS'], 'PhosphorosVsSpecZ',
+    PhosphorosAction(['compute_redshifts', 'CR'], 'PhosphorosComputeRedshifts',
+                     'Calculates the PHZ results for a given catalog'),
+    PhosphorosAction(['display_filters', 'DF'], 'PhosphorosLsAux --type Filters',
+                     'Browses the available filter transmission'),
+    PhosphorosAction(['display_seds', 'DS'], 'PhosphorosLsAux --type SEDs',
+                     'Browses the available SED templates'),
+    PhosphorosAction(['display_reddening_curves', 'DRC'], 'PhosphorosLsAux --type ReddeningCurves',
+                     'Browses the available reddening curves'),
+    PhosphorosAction(['display_model_grid', 'DMG'], 'PhosphorosDisplayModelGrid',
+                     'Browses through a grid containing model photometries'),
+    PhosphorosAction(['compute_model_sed', 'CMS'], 'PhosphorosComputeModelSed',
+                     'Displays the reddened, redshifted SED data'),
+    PhosphorosAction(['plot_specz_comparison', 'PSC'], 'PhosphorosPlotSpecZComparison',
                      'Shows plots comparing the PHZ result with SPECZ'),
-    PhosphorosAction(['display_likelihood', 'DL'], 'PhosphorosDisplayLikelihood',
-                     'Plots views of a multi-dimensional likelihood')
+    PhosphorosAction(['plot_posterior', 'PP'], 'PhosphorosPlotPosterior',
+                     'Plots views of a multi-dimensional posterior'),
+    PhosphorosAction(['order_seds', 'OS'], 'PhosphorosOrderSeds',
+                     'Orders SEDs and put them into the <order.txt> file')
 ]
 
 def printHelp():
@@ -50,7 +56,7 @@ def printHelp():
 if len(sys.argv) < 2:
     printHelp()
 
-executable = [action.executable for action in action_list if sys.argv[1] in action.names]
+executable = [word for action in action_list if sys.argv[1] in action.names for word in action.executable.split()]
 if not executable:
     print 'Unknown action: ' + sys.argv[1]
     print 'Try running "Phosphoros help"'
@@ -58,6 +64,12 @@ if not executable:
 
 if executable[0] == 'help':
     printHelp()
+
+phosphoros_conf = os.getenv('PHOSPHOROS_ROOT', os.path.expanduser('~')+os.sep+'Phosphoros') + os.sep + 'config'
+if os.environ.get('ELEMENTS_CONF_PATH'):
+    os.environ['ELEMENTS_CONF_PATH'] = phosphoros_conf + os.path.pathsep + os.environ['ELEMENTS_CONF_PATH']
+else:
+    os.environ['ELEMENTS_CONF_PATH'] = phosphoros_conf
 
 cmd = executable + sys.argv[2:]
 call(cmd)

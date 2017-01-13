@@ -26,7 +26,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Survey Filter Mapping :</string>
+        <string>Catalog Filter Mapping :</string>
        </property>
       </widget>
      </item>
@@ -69,7 +69,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Survey Filter Mappings List :</string>
+            <string>Catalog Filter Mappings List :</string>
            </property>
           </widget>
          </item>
@@ -152,7 +152,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Selected Survey Filter Mapping :</string>
+            <string>Selected Catalog Filter Mapping :</string>
            </property>
           </widget>
          </item>
@@ -207,81 +207,100 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_16">
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_8">
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="1" column="0">
+          <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
-            <widget class="QLabel" name="label_17">
-             <property name="text">
-              <string>Survey Filter Mapping Name :</string>
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <item>
+              <widget class="QComboBox" name="cb_mapName"/>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btn_newCat">
+             <property name="enabled">
+              <bool>false</bool>
              </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="txt_MapName"/>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_18">
-             <property name="text">
-              <string>Source ID Column :</string>
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
              </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="cb_SourceId">
-             <property name="editable">
-              <bool>true</bool>
+             <property name="text">
+              <string>New</string>
              </property>
             </widget>
            </item>
           </layout>
          </item>
-         <item>
-          <spacer name="horizontalSpacer_18">
+         <item row="3" column="0" alignment="Qt::AlignRight">
+          <widget class="QPushButton" name="btn_ImportColumn">
+           <property name="toolTip">
+            <string>Select a file to be used as default file for this catalog. The columns of the catalog will be used to populate the drop-down for the ID and the Filters columns.</string>
+           </property>
+           <property name="text">
+            <string>Import Columns from File †</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <spacer name="horizontalSpacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>40</width>
-             <height>20</height>
+             <width>20</width>
+             <height>0</height>
             </size>
            </property>
           </spacer>
          </item>
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_11">
-           <item>
-            <spacer name="verticalSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QPushButton" name="btn_ImportColumn">
-             <property name="toolTip">
-              <string>Select a file to be used as default catalog for this survey. The columns of the catalog will be used to populate the drop-down for the ID and the Filters columns.</string>
-             </property>
-             <property name="text">
-              <string>Import Columns from File</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string/>
-             </property>
-            </widget>
-           </item>
-          </layout>
+         <item row="0" column="2">
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Non Detection Flag (Missing Photometry) :</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QDoubleSpinBox" name="txt_nonDetection">
+           <property name="minimum">
+            <double>-10000000.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>10000000.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>-99.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="2">
+          <widget class="QComboBox" name="cb_SourceId">
+           <property name="editable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_17">
+           <property name="text">
+            <string>Catalog Type :</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2">
+          <widget class="QLabel" name="label_18">
+           <property name="text">
+            <string>Source ID Column :</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>

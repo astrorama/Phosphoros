@@ -4,18 +4,18 @@ import argparse
 import PhzCLI.LikelihoodPlot as plt
 
 usage = """
-        PhosphorosDisplayLikelihood -f <LIKELIHOOD_FILE> -p <PLOT_TYPE>      
+        PhosphorosPlotPosterior -f <POSTERIOR_FILE> -p <PLOT_TYPE>
 
-        Plots views of the multi-dimensional likelihood. Note that the
-        marginalization is done as simple addition. For more correct (Bayesian)
-        marginalization, see the 1D PDF output of PhosphorosFitTemplates.
+        Plots views of the multi-dimensional posterior. Note that the
+        axes collapse is done as simple addition. For more correct (Bayesian)
+        axes collapse, see the 1D PDF output of PhosphorosComputeRedshifts.
 
-        """ 
+        """
 
 parser = argparse.ArgumentParser(usage, description=__doc__)
 
 parser.add_argument("-f", "--file", type=str,
-                    help="FITS file containing the likelihood grid")
+                    help="FITS file containing the posterior grid")
 parser.add_argument("-p", "--plot-type", type=str,
                     help="The type of plot to show (one of Ebv, Sed, Z, Sed-Z, Ebv-Z, Sed-Ebv, Sed-Ebv-Z)")
 

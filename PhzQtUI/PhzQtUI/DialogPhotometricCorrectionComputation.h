@@ -50,7 +50,9 @@ public:
     void setData(std::string survey, std::string id_column, std::string model,
         std::string grid,
         std::list<FilterMapping> selected_filters,
-        std::string default_catalog_path);
+        std::list<std::string> excluded_filters,
+        std::string default_catalog_path,
+        double non_detection);
 
 signals:
    /**
@@ -58,7 +60,7 @@ signals:
     * photometric corrections have been computed. The param is the (relative)
     * path of the corrections file.
     */
-    void correctionComputed(const std::string &);
+    void correctionComputed(const QString &);
 
 private slots:
     /**
@@ -107,8 +109,9 @@ private slots:
 private:
     std::unique_ptr<Ui::DialogPhotometricCorrectionComputation> ui;
     std::list<FilterMapping> m_selected_filters;
+    std::list<std::string> m_excluded_filters;
     std::string m_id_column;
-    std::string m_concatenated_filter_names;
+    double m_non_detection;
     void disablePage();
     std::string runFunction();
     void setRunEnability();

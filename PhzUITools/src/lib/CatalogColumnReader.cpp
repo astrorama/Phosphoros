@@ -44,7 +44,7 @@ std::set<std::string> CatalogColumnReader::getColumnNames() {
 
     }
 
-    for(int i=0; i< column_info_ptr->size();++i){
+    for(std::size_t i=0; i< column_info_ptr->size();++i){
       column_names.insert(column_info_ptr->getName(i));
     }
   } catch(...) {} // if the program is not able to read the file return an empty list...

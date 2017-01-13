@@ -21,18 +21,6 @@ public:
     FilterMapping();
 
     /**
-     * @brief Get the Name.
-     * @return the current name.
-     */
-    std::string getName() const;
-
-    /**
-     * @brief Set the Name.
-     * @param name.
-     */
-    void setName(std::string name);
-
-    /**
      * @brief Get the FluxColumn.
      * @return the current FluxColumn.
      */
@@ -68,7 +56,6 @@ public:
     void setFilterFile(std::string filter_trnsmission_file);
 
 private:
-    std::string m_name;
     std::string m_flux_column;
     std::string m_error_column;
     std::string m_filter_trnsmission_file;

@@ -1,6 +1,8 @@
 
+
 #include <QSettings>
 #include <QDir>
+
 
 #include "PhzQtUI/MainWindow.h"
 #include "ui_MainWindow.h"
@@ -14,6 +16,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    QPixmap pixmap( ":/logoPhUI.png" );
+    ui->image_label->setTopMargin(20);
+    ui->image_label->setPixmap(pixmap);
 
     connect( this, SIGNAL(changeMainStackedWidgetIndex(int)), ui->mainStackedWidget, SLOT(setCurrentIndex(int)) );
 
@@ -34,9 +40,6 @@ MainWindow::MainWindow(QWidget *parent) :
     settings.setValue(QString::fromStdString("root-path"), QDir::currentPath());
     settings.endGroup();
 
-    std::unique_ptr<DialogOptions> popUp(new DialogOptions());
-    popUp->EditRootPath();
-    popUp->exec();
   }
 }
 

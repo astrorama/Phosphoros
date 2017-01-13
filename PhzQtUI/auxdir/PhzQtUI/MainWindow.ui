@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1151</width>
-    <height>947</height>
+    <width>812</width>
+    <height>731</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Phosphoros v0.2</string>
+   <string>Phosphoros v0.3</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_11">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <widget class="QStackedWidget" name="mainStackedWidget">
       <property name="currentIndex">
@@ -23,17 +23,101 @@
       <widget class="QWidget" name="page">
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <spacer name="verticalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
+         <widget class="QLabel" name="label">
+          <property name="font">
+           <font>
+            <pointsize>20</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+            <underline>true</underline>
+            <kerning>true</kerning>
+           </font>
           </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
+          <property name="text">
+           <string>Phosphoros</string>
           </property>
-         </spacer>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Photometric Redshift Tool</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Template Fitting</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="Euclid::PhzQtUI::ScalableImageLabel" name="image_label" native="true"/>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="font">
+           <font>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Items displaying a '†' show help when hovered.</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout">
@@ -58,8 +142,11 @@
               <height>30</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>Working directory path definition, Auxiliary data management and Catalog fillter mapping definition.</string>
+            </property>
             <property name="text">
-             <string>Configuration</string>
+             <string>Configuration †</string>
             </property>
            </widget>
           </item>
@@ -71,8 +158,11 @@
               <height>30</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>Specify the parameter space for the creation of model grid.</string>
+            </property>
             <property name="text">
-             <string>Define Astronomical Model Sets</string>
+             <string>Parameter Space Specification †</string>
             </property>
            </widget>
           </item>
@@ -84,8 +174,11 @@
               <height>30</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>Compute the model grid, calculate photometric photometric correction and run template fitting in order to produce photo-z catalog.</string>
+            </property>
             <property name="text">
-             <string>Analysis Parameter Set Up</string>
+             <string>Compute Redshifts †</string>
             </property>
            </widget>
           </item>
@@ -105,20 +198,7 @@
          </layout>
         </item>
         <item>
-         <spacer name="verticalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
            <spacer name="horizontalSpacer">
             <property name="orientation">
@@ -133,42 +213,13 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLabel" name="label_29">
+           <widget class="QPushButton" name="btn_exit">
             <property name="text">
-             <string/>
-            </property>
-            <property name="pixmap">
-             <pixmap resource="PhUIResources.qrc">:/logoPhUI.png</pixmap>
+             <string>Quit</string>
             </property>
            </widget>
           </item>
-          <item>
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
          </layout>
-        </item>
-        <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </widget>
@@ -212,9 +263,32 @@
    <extends>QWidget</extends>
    <header>PhzQtUI/FormAnalysis.h</header>
   </customwidget>
+  <customwidget>
+   <class>Euclid::PhzQtUI::ScalableImageLabel</class>
+   <extends>QWidget</extends>
+   <header>PhzQtUI/ScalableImageLabel.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <resources>
   <include location="PhUIResources.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>btn_exit</sender>
+   <signal>clicked()</signal>
+   <receiver>Euclid::PhzQtUI::MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>759</x>
+     <y>679</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>405</x>
+     <y>365</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

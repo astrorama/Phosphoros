@@ -4,6 +4,7 @@
 #include <memory>
 #include <QWidget>
 #include <QStandardItem>
+#include <QToolBox>
 #include <map>
 #include <string>
 #include "SurveyFilterMapping.h"
@@ -41,6 +42,8 @@ signals:
 private slots:
     void on_btn_AnalysisToHome_clicked();
 
+    void on_btn_backHome_clicked();
+
     void on_btn_editCorrections_clicked();
 
     void on_cb_AnalysisCorrection_currentIndexChanged(const QString &arg1);
@@ -53,6 +56,8 @@ private slots:
 
     void on_cb_AnalysisModel_currentIndexChanged(const QString &);
 
+    void on_cb_igm_currentIndexChanged(const QString &);
+
     void on_cb_CompatibleGrid_textChanged(const QString &);
 
     void on_btn_GetConfigGrid_clicked();
@@ -61,7 +66,7 @@ private slots:
 
     void on_gb_corrections_clicked();
 
-    void onCorrectionComputed(const std::string &);
+    void onCorrectionComputed(const QString &);
 
     void on_btn_BrowseInput_clicked();
 
@@ -71,21 +76,18 @@ private slots:
 
     void on_btn_RunAnalysis_clicked();
 
-    void on_btn_BrowseOutputPdf_clicked();
-
-    void on_gb_cat_clicked();
-
-    void on_gb_pdf_clicked();
-
     void on_gb_lik_clicked();
 
-    void on_btn_BrowseLikelihood_clicked();
 
 
 private:
     std::unique_ptr<Ui::FormAnalysis> ui;
-    std::list<std::string> getSelectedFilters(bool return_path=false);
+    std::list<std::string> getFilters();
+    std::list<std::string> getSelectedFilters();
+    std::list<std::string> getExcludedFilters();
     std::list<FilterMapping> getSelectedFilterMapping();
+
+    void setInputCatalogName( std::string name,bool do_test=true);
 
     std::string getSelectedSurveySourceColumn();
     void adjustPhzGridButtons(bool enabled);
@@ -95,7 +97,7 @@ private:
     std::map<std::string, boost::program_options::variable_value> getGridConfiguration();
 
 
-
+    static void setToolBoxButtonColor(QToolBox* toolBox, int index, QColor color);
 
     void updateCorrectionSelection();
     void setComputeCorrectionEnable();

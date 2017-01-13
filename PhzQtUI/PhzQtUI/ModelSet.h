@@ -1,9 +1,18 @@
 #ifndef MODELSET_H
 #define MODELSET_H
 
-#include <string>
 #include <map>
+#include <string>
+#include <QDomDocument>
+#include "PhzDataModel/PhzModel.h"
 #include "ParameterRule.h"
+
+
+namespace boost{
+namespace program_options{
+ class variable_value;
+}
+}
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -75,6 +84,8 @@ public:
      */
     static ModelSet loadModelSetFromFile(std::string file_name,std::string root_path);
 
+
+
     /**
      * @brief Delete the current ModelSet by erasing the file it was persisted in.
      */
@@ -87,6 +98,29 @@ public:
      * @param oldName
      */
     void saveModelSet(std::string old_name);
+
+    /**
+     * @brief create a ModelSet out of its xml serialized version
+     */
+    static ModelSet deserialize(QDomDocument& doc,ModelSet& model);
+
+    /**
+     * create a xml serialized version of the ModelSet
+     */
+    QDomDocument serialize() const;
+
+    /**
+     * @brief compute the configuration (as a map<string,variable_values> ) corresponding to
+     * this ModelSet
+     *
+     * @return the configuration map
+     */
+    std::map<std::string, boost::program_options::variable_value> getConfigOptions() const;
+
+    /**
+     * @brief compute the ModelAxeTuple corresponding to this ModelSet
+     */
+    std::map<std::string,PhzDataModel::ModelAxesTuple> getAxesTuple() const;
 
 private:
     std::string m_name;

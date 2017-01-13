@@ -13,13 +13,17 @@ elements_add_library(PhzCLI src/lib/*.cpp
                      PUBLIC_HEADERS PhzCLI)
 
 elements_add_executable(PhosphorosLsAux src/program/LsAux.cpp
-                        LINK_LIBRARIES ElementsKernel Boost XYDataset)
+                        LINK_LIBRARIES ElementsKernel Boost XYDataset PhzCLI)
 
-elements_add_executable(PhosphorosDisplayTemplates src/program/DisplayTemplates.cpp
+elements_alias(PhosphorosDisplayFilters PhosphorosLsAux --type Filters)
+elements_alias(PhosphorosDisplaySeds PhosphorosLsAux --type SEDs)
+elements_alias(PhosphorosDisplayReddeningCurves PhosphorosLsAux --type ReddeningCurves)
+
+elements_add_executable(PhosphorosDisplayModelGrid src/program/DisplayModelGrid.cpp
                         LINK_LIBRARIES ElementsKernel Boost PhzCLI)
 
-elements_add_executable(PhosphorosDisplayDataset src/program/DisplayDataset.cpp
-                        LINK_LIBRARIES ElementsKernel Boost PhzConfiguration MathUtils PhzModeling)
+elements_add_executable(PhosphorosComputeModelSed src/program/ComputeModelSed.cpp
+                        LINK_LIBRARIES ElementsKernel Boost MathUtils PhzModeling PhzCLI)
 
 elements_install_conf_files()
 

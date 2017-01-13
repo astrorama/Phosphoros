@@ -40,6 +40,8 @@ public:
      */
     QString getSelectedName();
 
+    std::map<std::string,PhzDataModel::ModelAxesTuple> getSelectedAxesTuple() const;
+
     /**
      * @brief Set the name of the currently selected ModelSet. If the name is already used,
      * the operation is canceled and the call returns false
@@ -86,6 +88,8 @@ public:
 
 
     ModelSetModel* getModel();
+
+    const ModelSetModel* cGetModel() const;
 
 private:
 

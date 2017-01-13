@@ -1,8 +1,14 @@
 #include <QMessageBox>
 #include "PhzQtUI/FormModelSet.h"
+#include "PhzQtUI/XYDataSetTreeModel.h"
+
 #include "ui_FormModelSet.h"
 #include "PhzQtUI/DialogModelSet.h"
-#include "PhzQtUI/FileUtils.h"
+#include "FileUtils.h"
+
+#include "ElementsKernel/Exception.h"
+#include "PhzConfiguration/ParameterSpaceConfiguration.h"
+namespace po = boost::program_options;
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -37,6 +43,7 @@ void FormModelSet::loadSetPage(){
 
 void  FormModelSet::setModelInEdition(){
     ui->btn_SetToHome->setEnabled(false);
+    ui->btn_backHome->setEnabled(false);
     ui->btn_SetNew->setEnabled(false);
     ui->btn_SetDuplicate->setEnabled(false);
     ui->btn_SetDelete->setEnabled(false);
@@ -52,6 +59,7 @@ void  FormModelSet::setModelInEdition(){
 void  FormModelSet::setModelInView(){
     m_setInsert=false;
     ui->btn_SetToHome->setEnabled(true);
+    ui->btn_backHome->setEnabled(true);
     ui->btn_SetNew->setEnabled(true);
     ui->btn_viewSet->setEnabled(ui->tableView_Set->hasSelectedSet());
     ui->btn_SetDuplicate->setEnabled(ui->tableView_Set->hasSelectedSet());
@@ -72,6 +80,12 @@ void FormModelSet::on_btn_SetToHome_clicked()
      navigateToHome();
 }
 
+void FormModelSet::on_btn_backHome_clicked()
+{
+     navigateToHome();
+}
+
+
 void FormModelSet::on_btn_SetNew_clicked()
 {
      ui->tableView_Set->newSet(false);
@@ -90,7 +104,7 @@ void FormModelSet::on_btn_SetDelete_clicked()
 {
     if (QMessageBox::question( this, "Confirm deletion...",
                                   "Do you really want to delete the Model Set '"+ui->tableView_Set->getSelectedName()+"' ?",
-                                  QMessageBox::Yes|QMessageBox::Cancel )==QMessageBox::Yes){
+                                  QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
         ui->tableView_Set->deleteSelectedSet(true);
     }
 }
@@ -116,20 +130,34 @@ void FormModelSet::on_btn_SetCancel_clicked()
 
 void FormModelSet::on_btn_SetSave_clicked()
 {
-    std::string old_name =  ui->tableView_Set->getSelectedName().toStdString();
-   if ( ui->tableView_Set->setSelectedName( ui->txt_SetName->text())){
-      ui->tableView_Set->setSelectedRules(ui->tableView_ParameterRule->getModel()->getParameterRules());
-      ui->tableView_Set->updateModelNumberForSelected();
+   std::string old_name =  ui->tableView_Set->getSelectedName().toStdString();
+   if (! ui->tableView_Set->setSelectedName( ui->txt_SetName->text())){
+     QMessageBox::warning( this,
+        "Duplicate name...",
+       "The name you keyed in is already used. Please enter a new name.",
+       QMessageBox::Ok );
+     return;
+   }
 
-      ui->tableView_Set->saveSelectedSet(old_name);
-      setModelInView();
-   }
-   else{
+   auto rules =  ui->tableView_Set->getSelectedParameterRules();
+   ui->tableView_Set->setSelectedRules(ui->tableView_ParameterRule->getModel()->getParameterRules());
+
+   try{
+       ui->tableView_Set->getSelectedAxesTuple();
+     } catch (Elements::Exception except){
        QMessageBox::warning( this,
-                             "Duplicate name...",
-                             "The name you keyed in is already used. Please enter a new name.",
-                             QMessageBox::Ok );
+                                    "Overlapping Region...",
+                                    except.what(),
+                                    QMessageBox::Ok );
+
+       ui->tableView_Set->setSelectedRules(rules);
+       return;
    }
+
+   ui->tableView_Set->updateModelNumberForSelected();
+   ui->tableView_Set->saveSelectedSet(old_name);
+   setModelInView();
+
 }
 
 void FormModelSet::setSelectionChanged(QModelIndex new_index, QModelIndex)
@@ -151,9 +179,6 @@ void FormModelSet::on_btn_SetToRules_clicked()
 {
   std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet());
     popUp->loadData(ui->tableView_ParameterRule->getModel()->getParameterRules());
-
-    // As PHOSPHOROS do not know how to treat sparse grid for now, block to 1 rule!
-    popUp->setSingleLine();
 
     connect(
       popUp.get(),

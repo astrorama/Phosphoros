@@ -41,6 +41,17 @@ public:
        const ParameterRule& getSelectedRule() const;
 
        /**
+        * @briefcheck if the provided new name is already used for
+        * another ParameterRule than the selected one.
+        * @param new_name
+        */
+       bool checkNameAlreadyUsed(std::string new_name) const;
+       /**
+        * @brief push the name to the selected ParameterRule
+        * @param new_name the new name
+        */
+       void setNameToSelectedRule(std::string new_name);
+       /**
         * @brief Push the E(B-V) and Redshift range to the selected ParameterRule.
         * @param ebvRange
         * @param zRange
