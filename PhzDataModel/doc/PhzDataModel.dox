@@ -1,0 +1,13 @@
+namespace Euclid {
+namespace PhzDataModel {
+
+/** \page phzdatamodel PhzDataModel module
+
+\tableofcontents
+
+The PhzDataModel module ...
+\section 1 
+
+*/
+}
+} // end of namespace Euclid

@@ -1,0 +1,28 @@
+/** 
+ * @file ModelFluxAlgorithm.icpp
+ * @date January 8, 2015
+ * @author Nikolaos Apostolakos
+ */
+
+namespace Euclid {
+namespace PhzModeling {
+
+template<typename FilterIterator, typename FluxIterator>
+void ModelFluxAlgorithm::operator()(const XYDataset::XYDataset& model,
+                                    FilterIterator filter_iterator_begin,
+                                    FilterIterator filter_iterator_end,
+                                    FluxIterator flux_iterator) const {
+  while (filter_iterator_begin != filter_iterator_end) {
+    auto& filter_info = *filter_iterator_begin;
+    auto filtered_model = m_apply_filter_function(model, filter_info.getRange(), filter_info.getFilter());
+
+    flux_iterator->flux = m_integrate_dataset_function(filtered_model, filter_info.getRange()) / filter_info.getNormalization();
+    flux_iterator->error = 0.;
+
+    ++filter_iterator_begin;
+    ++flux_iterator;
+  }
+}
+
+} // end of namespace PhzModeling
+} // end of namespace Euclid

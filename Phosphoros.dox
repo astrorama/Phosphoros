@@ -1,0 +1,10 @@
+/** \mainpage Phosphoros Project
+
+The Phosphoros project is a collection of modules dedicated to the photometric red-shift computation. The contained
+modules are the following:
+
+- \subpage phzConfiguration "PhzConfiguration module" : Module for handling photometric parameter options.
+- \subpage phzdatamodel "PhzDataModel module" : Module for handling photometric red-shift data.
+
+
+*/

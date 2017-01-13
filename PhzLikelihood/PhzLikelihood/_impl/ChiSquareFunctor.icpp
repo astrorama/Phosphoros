@@ -1,0 +1,47 @@
+/**
+ * @file ChiSquareFunctor.icpp
+ * @date December 2, 2014
+ * @author Nikolaos Apostolakos
+ */
+
+#include <cmath>
+
+namespace Euclid {
+namespace PhzLikelihood {
+
+/**
+   * @brief Function Call Operator
+   * @details
+   * Compute the Likelihood for a source with respect to the model using the Chi^2 pathway.
+   *
+   * @param source_begin
+   * An iterator over the Filters of the source exposing an object having "flux" and "error" fields.
+   *
+   * @param source_end
+   * End iterator for the Filters of the source.
+   *
+   * @param model_begin
+   * An iterator over the Filters of the model exposing an object containing the model "flux".
+   *
+   * @param scale
+   * The scale factor, a double.
+   * In order to get a meaningful value for the Likelihood, the scale factor
+   * must be chosen as the value minimizing the Chi^2 (an analytical formula is available).
+   *
+   * @return
+   * The computed Likelihood as a double.
+   */
+template<typename SourceIter, typename ModelIter>
+double ChiSquareFunctor::operator ()(SourceIter source, SourceIter source_end,
+                                     ModelIter model, double scale) const {
+    double chi_square {0.0};
+    for (; source!=source_end; ++source, ++model) {
+      double difference = scale * (*model).flux - (*source).flux;
+      chi_square += difference * difference / ((*source).error * (*source).error);
+    }
+    return exp(-1.0 * chi_square / 2.0);
+}
+
+} // end of namespace PhzLikelihood
+} // end of namespace Euclid
+
