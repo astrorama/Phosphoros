@@ -1,11 +1,10 @@
 #! /usr/bin/env python
-# Author(s) Nikolaos Apostolakos 
-#           Nicolas Morisset 
+# Author(s) Nikolaos Apostolakos
+#           Nicolas Morisset
 
 #
 #-------------------------------------------------------------------------------
 #
-
 import argparse
 import os
 import sys
@@ -13,15 +12,15 @@ import PhzCLI.OrderSeds as osed
 
 def main():
     usage = """
-            usage: %prog [options] \n           
-            
-            This script automatically orders the SEDs and writes the ordered SED 
-            names into an <order.txt> file at the SEDs location provided by the 
-            user. 
-   
-            """ 
+            usage: %prog [options] \n
 
-    parser = argparse.ArgumentParser(usage, version='%prog version 1.0', description=__doc__)
+            This script automatically orders the SEDs and writes the ordered SED
+            names into an <order.txt> file at the SEDs location provided by the
+            user.
+
+            """
+
+    parser = argparse.ArgumentParser(usage, description=__doc__)
 
     # get the home directory
     home_dir=os.path.expanduser("~")
@@ -31,15 +30,15 @@ def main():
                         help="First SED file")
 
     args = parser.parse_args()
-            
+
     return args
 
 
-    
+
 ################## MAIN ###########
 if __name__ == '__main__':
-            
-    args = main()  
+
+    args = main()
     if not args.directory:
         print("Error: directory argument (-d) is mandatory!")
        ## raise args.(args.directory, "Can't be 'xyzzy'")
