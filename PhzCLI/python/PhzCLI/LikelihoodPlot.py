@@ -1,3 +1,5 @@
+
+from __future__ import absolute_import, division, print_function
 import numpy as np
 import collections
 from astropy.io import fits
@@ -20,7 +22,7 @@ class Region:
 def getRegions(file):
     hdulist = fits.open(file)
     regions = []
-    for i in range((len(hdulist)-1)/5):
+    for i in range((len(hdulist)-1)//5):
         regions.append(Region(hdulist[5*i+1].header['EXTNAME'], np.exp(hdulist[5*i+1].data), hdulist[5*i+5].data, hdulist[5*i+4].data, hdulist[5*i+3].data, hdulist[5*i+2].data))
     return regions
 
