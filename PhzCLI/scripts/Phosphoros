@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 from subprocess import call
 import sys
 import os
@@ -48,17 +48,17 @@ action_list = [
 ]
 
 def printHelp():
-    print ''
-    print 'Usage: Phosphoros <action> <action_parameters>'
-    print ''
-    print 'Available actions:'
+    print ('')
+    print ('Usage: Phosphoros <action> <action_parameters>')
+    print ('')
+    print ('Available actions:')
     for action in action_list:
         message = action.names[0]
         for alter in action.names[1:]:
             message += ', ' + alter
         message += os.linesep + '    ' + action.help
-        print message
-    print ''
+        print (message)
+    print ('')
     exit()
 
 if len(sys.argv) < 2:
@@ -66,8 +66,8 @@ if len(sys.argv) < 2:
 
 executable = [word for action in action_list if sys.argv[1] in action.names for word in action.executable.split()]
 if not executable:
-    print 'Unknown action: ' + sys.argv[1]
-    print 'Try running "Phosphoros help"'
+    print ('Unknown action: ' + sys.argv[1])
+    print ('Try running "Phosphoros help"')
     exit(1)
 
 if executable[0] == 'help':
