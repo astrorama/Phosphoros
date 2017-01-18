@@ -37,6 +37,8 @@
 #include "PhzUtils/Multithreading.h"
 #include "Configuration/Utils.h"
 
+#include "PhzExecutables/ComputeRedshifts.h"
+
 // #include <future>
 
 using namespace Euclid::PhzConfiguration;
@@ -154,24 +156,6 @@ std::string DialogRunAnalysis::runFunction(){
     config_manager.closeRegistration();
     config_manager.initialize(m_config);
 
-
-
-    auto& model_phot_grid = config_manager.getConfiguration<PhotometryGridConfig>().getPhotometryGrid();
-    auto& marginalization_func_list = config_manager.getConfiguration<MarginalizationConfig>().getMarginalizationFuncList();
-    auto& likelihood_grid_func = config_manager.getConfiguration<LikelihoodGridFuncConfig>().getLikelihoodGridFunction();
-    auto& correction_map = config_manager.getConfiguration<PhotometricCorrectionConfig>().getPhotometricCorrectionMap();
-    auto& priors = config_manager.getConfiguration<PriorConfig>().getPriors();
-
-
-    PhzLikelihood::ParallelCatalogHandler handler ( correction_map,
-                                                    model_phot_grid,
-                                                    likelihood_grid_func,
-                                                    priors,
-                                                    marginalization_func_list );
-
-    auto catalog = config_manager.getConfiguration<Configuration::CatalogConfig>().readAsCatalog();
-    auto out_ptr = config_manager.getConfiguration<ComputeRedshiftsConfig>().getOutputHandler();
-
     auto monitor_function = [this](size_t step, size_t total) {
       int value = (step * 100) / total;
       // If the user has canceled we do not want to update the progress bar,
@@ -180,9 +164,8 @@ std::string DialogRunAnalysis::runFunction(){
         emit signalUpdateBar(value);
       }
     };
-
-    handler.handleSources(catalog.begin(), catalog.end(), *out_ptr, monitor_function);
-
+    
+    PhzExecutables::ComputeRedshifts{monitor_function}.run(config_manager);
 
     return "";
 
