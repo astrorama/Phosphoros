@@ -11,6 +11,7 @@ elements_depends_on_subdirs(PhzUITools)
 elements_depends_on_subdirs(PhzLikelihood)
 elements_depends_on_subdirs(PhzLuminosity)
 elements_depends_on_subdirs(PhysicsUtils)
+elements_depends_on_subdirs(PhzExecutables)
 
 if(ELEMENTS_HIDE_WARNINGS)
   if(UNIX)
@@ -41,7 +42,7 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 
 
 elements_add_library(PhzQtUI ${PhUI_SRCS} ${PhUI_HEADERS_MOC} ${PhUI_FORMS_HEADERS} ${PhUI_RESOURCES_RCC}
-                     LINK_LIBRARIES ElementsKernel ${QT_LIBRARIES} XYDataset PhzConfiguration PhzPhotometricCorrection PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzUtils
+                     LINK_LIBRARIES ElementsKernel ${QT_LIBRARIES} XYDataset PhzConfiguration PhzPhotometricCorrection PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzUtils PhzExecutables
                      INCLUDE_DIRS ElementsKernel XYDataset PhzConfiguration PhzPhotometricCorrection PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity
                      PUBLIC_HEADERS PhzQtUI)
 
