@@ -169,7 +169,7 @@ std::string DialogRunAnalysis::runFunction(){
                                                     priors,
                                                     marginalization_func_list );
 
-    auto& catalog = config_manager.getConfiguration<Configuration::CatalogConfig>().getCatalog();
+    auto catalog = config_manager.getConfiguration<Configuration::CatalogConfig>().readAsCatalog();
     auto out_ptr = config_manager.getConfiguration<ComputeRedshiftsConfig>().getOutputHandler();
 
     auto monitor_function = [this](size_t step, size_t total) {
