@@ -76,9 +76,19 @@ public:
      */
     void setColumnList(std::set<std::string> new_list);
 
+    void setHasMissingPhotometry(bool has_missing_phot);
+
+    bool getHasMissingPhotometry() const;
+
+
     void setNonDetection(double non_detection);
 
     double getNonDetection() const;
+
+    void setHasUpperLimit(bool has_upper_limit);
+
+    bool getHasUpperLimit() const;
+
 
 
     /**
@@ -136,6 +146,8 @@ private:
     std::vector<FilterMapping> m_filters;
     std::string m_default_catalog;
     std::set<std::string> m_column_list;
+    bool m_has_upper_limit = false;
+    bool m_has_missing_phot = false;
     double m_non_detection=-99.;
 
     void ReadFilters();

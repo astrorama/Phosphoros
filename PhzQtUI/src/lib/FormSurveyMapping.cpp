@@ -99,11 +99,12 @@ void FormSurveyMapping::loadMappingPage(std::string new_path){
 
 void FormSurveyMapping::loadMappingPage(){
   loadMappingPage("");
+  ui->txt_nonDetection->setValidator(new QDoubleValidator(-10000, 10000, 0.1));
 }
 
 void FormSurveyMapping::setFilterMappingInEdition(){
 
-  ui->frm_nav->setEnabled(false);
+    ui->frm_nav->setEnabled(false);
     ui->table_Map->setEnabled(false);
     ui->btn_MapNew->setEnabled(false);
     ui->btn_MapDuplicate->setEnabled(false);
@@ -114,7 +115,12 @@ void FormSurveyMapping::setFilterMappingInEdition(){
     ui->btn_ImportColumn->setEnabled(true);
     ui->cb_SourceId->setEnabled(true);
     ui->btn_SelectFilters->setEnabled(true);
-    ui->txt_nonDetection->setEnabled(true);
+
+
+    ui->cb_missingPhot->setEnabled(true);
+    ui->cb_upperLimit->setEnabled(true);
+    ui->txt_nonDetection->setEnabled(ui->cb_missingPhot->checkState()== Qt::Checked);
+
 
     ui->table_Filter->setEnabled(true);
 
@@ -140,7 +146,10 @@ void FormSurveyMapping::setFilterMappingInView(){
     ui->btn_ImportColumn->setEnabled(false);
     ui->cb_SourceId->setEnabled(false);
     ui->btn_SelectFilters->setEnabled(false);
-    ui->txt_nonDetection->setEnabled(false);
+
+    ui->cb_missingPhot->setEnabled(false);
+     ui->cb_upperLimit->setEnabled(false);
+     ui->txt_nonDetection->setEnabled(false);
 
 
    // ui->table_Filter->setEnabled(false);
@@ -300,6 +309,9 @@ void FormSurveyMapping::mappingGridDoubleClicked(QModelIndex)
 }
 
 
+void FormSurveyMapping::on_cb_missingPhot_stateChanged(int state){
+  ui->txt_nonDetection->setEnabled(state==Qt::Checked);
+}
 
 
 
@@ -313,7 +325,10 @@ void FormSurveyMapping::on_btn_MapCancel_clicked()
 
      } else{
 
-        ui->txt_nonDetection->setValue(model->getNonDetection(row));
+        ui->cb_missingPhot->setCheckState( model->getHasMissingPhot(row)?Qt::Checked:Qt::Unchecked);
+        ui->cb_upperLimit->setCheckState( model->getHasUpperLimit(row)?Qt::Checked:Qt::Unchecked);
+        ui->txt_nonDetection->setText( QString::number(model->getNonDetection(row)));
+
 
         std::string cb_text =model->getSourceIdColumn(row);
         m_column_from_file=model->getColumnList(row);
@@ -358,7 +373,9 @@ void FormSurveyMapping::on_btn_MapSave_clicked()
      std::string old_name=model->getName(row);
      model->setSourceIdColumn(ui->cb_SourceId->currentText().toStdString(),row);
 
-     model->setNonDetection(ui->txt_nonDetection->value(),row);
+     model->setNonDetection(ui->txt_nonDetection->text().toDouble(),row);
+     model->setHasMissingPhot(ui->cb_missingPhot->checkState()==Qt::Checked,row);
+     model->setHasUpperLimit(ui->cb_upperLimit->checkState()==Qt::Checked,row);
 
 
 
@@ -405,7 +422,10 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
 
     filter_model->setFilters(model->getFilters(new_index.row()));
 
-    ui->txt_nonDetection->setValue(model->getNonDetection(new_index.row()));
+    ui->txt_nonDetection->setText(QString::number(model->getNonDetection(new_index.row())));
+    ui->cb_missingPhot->setCheckState( model->getHasMissingPhot(new_index.row())?Qt::Checked:Qt::Unchecked);
+    ui->cb_upperLimit->setCheckState( model->getHasUpperLimit(new_index.row())?Qt::Checked:Qt::Unchecked);
+
     ui->tb_df->setText(QString::fromStdString(m_default_survey));
     ui->lbl_catalog_name->setText(QString::fromStdString(model->getName(new_index.row())));
 
@@ -421,7 +441,10 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
     m_default_survey="";
     ui->cb_SourceId->setCurrentIndex(0);
     ui->cb_SourceId->clearEditText();
-    ui->txt_nonDetection->setValue(-99.);
+    ui->txt_nonDetection->setText(QString::number(-99.));
+    ui->cb_missingPhot->setCheckState( Qt::Unchecked);
+    ui->cb_upperLimit->setCheckState( Qt::Unchecked);
+
     ui->tb_df->setText("");
     ui->lbl_catalog_name->setText("Selected");
     ui->table_Filter->setItemDelegate(new FilterMappingItemDelegate(std::set<std::string>{}));

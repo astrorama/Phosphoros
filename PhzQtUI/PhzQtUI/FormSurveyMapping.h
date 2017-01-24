@@ -54,6 +54,9 @@ void on_btn_ToModel_clicked();
 void on_btn_exit_clicked();
 
 
+void on_cb_missingPhot_stateChanged(int state);
+
+
     void filterMappingSelectionChanged(QModelIndex, QModelIndex);
 
     void mappingGridDoubleClicked(QModelIndex);
