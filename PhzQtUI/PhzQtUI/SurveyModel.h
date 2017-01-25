@@ -80,6 +80,14 @@ public:
 
   double getNonDetection(int row);
 
+  void setHasUpperLimit(bool has_upper_limit, int row);
+
+  bool getHasUpperLimit(int row);
+
+  void setHasMissingPhot(bool has_missing_phot, int row);
+
+  bool getHasMissingPhot(int row);
+
   /**
    * @brief Change the Source column Id of the Survey represented by the given
    * row.
