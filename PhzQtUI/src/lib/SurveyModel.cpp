@@ -154,6 +154,27 @@ void SurveyModel::setNonDetection(double newNonDetection, int row){
    return m_survey_filter_mappings.at(ref).getNonDetection();
  }
 
+
+ void SurveyModel::setHasUpperLimit(bool has_upper_limit, int row){
+   int ref = getValue(row,2).toInt();
+   m_survey_filter_mappings.at(ref).setHasUpperLimit(has_upper_limit);
+  }
+
+  bool SurveyModel::getHasUpperLimit(int row){
+    int ref = getValue(row,2).toInt();
+      return m_survey_filter_mappings.at(ref).getHasUpperLimit();
+  }
+
+  void SurveyModel::setHasMissingPhot(bool has_missing_phot, int row){
+    int ref = getValue(row,2).toInt();
+    m_survey_filter_mappings.at(ref).setHasMissingPhotometry(has_missing_phot);
+  }
+
+  bool SurveyModel::getHasMissingPhot(int row){
+    int ref = getValue(row,2).toInt();
+          return m_survey_filter_mappings.at(ref).getHasMissingPhotometry();
+  }
+
 std::string SurveyModel::getDefaultCatalog(int row) const{
   int ref = getValue(row,2).toInt();
   return m_survey_filter_mappings.at(ref).getDefaultCatalogFile();

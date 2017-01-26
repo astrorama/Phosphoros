@@ -271,7 +271,7 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
     config_manager.closeRegistration();
     config_manager.initialize(config_map);
 
-    auto& catalog = config_manager.getConfiguration<Configuration::CatalogConfig>().getCatalog();
+    auto catalog = config_manager.getConfiguration<Configuration::CatalogConfig>().readAsCatalog();
     auto& model_phot_grid = config_manager.getConfiguration<PhotometryGridConfig>().getPhotometryGrid();
     auto& output_func = config_manager.getConfiguration<ComputePhotometricCorrectionsConfig>().getOutputFunction();
     auto& stop_criteria = config_manager.getConfiguration<ComputePhotometricCorrectionsConfig>().getStopCriteria();

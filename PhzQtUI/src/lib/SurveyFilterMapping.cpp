@@ -61,7 +61,7 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
     }
 
     void SurveyFilterMapping::setDefaultCatalogFile(std::string new_default_catalog){
-      m_default_catalog=new_default_catalog;
+      m_default_catalog = new_default_catalog;
     }
 
     std::string SurveyFilterMapping::getDefaultCatalogFile() const{
@@ -69,12 +69,35 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
     }
 
     void SurveyFilterMapping::setNonDetection(double non_detection){
-      m_non_detection=non_detection;
+      m_non_detection = non_detection;
     }
 
     double SurveyFilterMapping::getNonDetection() const{
       return m_non_detection;
     }
+
+
+    void SurveyFilterMapping::setHasMissingPhotometry(bool has_missing_phot){
+      m_has_missing_phot = has_missing_phot;
+    }
+
+     bool SurveyFilterMapping::getHasMissingPhotometry() const{
+       return m_has_missing_phot;
+     }
+
+
+     void SurveyFilterMapping::setHasUpperLimit(bool has_upper_limit){
+       m_has_upper_limit = has_upper_limit;
+     }
+
+     bool SurveyFilterMapping::getHasUpperLimit() const{
+       return m_has_upper_limit;
+     }
+
+
+
+
+
 
     std::vector<std::string> SurveyFilterMapping::getAvailableCatalogs(){
       auto cat_root_path = FileUtils::getCatalogRootPath(true,"");
@@ -137,7 +160,16 @@ SurveyFilterMapping SurveyFilterMapping::loadCatalog(std::string name) {
   QDomElement root_node = doc.documentElement();
   survey.setSourceIdColumn(root_node.attribute("SourceColumnId").toStdString());
   survey.setDefaultCatalogFile(root_node.attribute("DefaultCatalogPath").toStdString());
-  survey.setNonDetection(root_node.attribute("NonDetection").toDouble());
+
+  if (root_node.hasAttribute("NonDetection")){
+    survey.setNonDetection(root_node.attribute("NonDetection").toDouble());
+  }
+  if (root_node.hasAttribute("HasMissingPhotometry")){
+    survey.setHasMissingPhotometry(root_node.attribute("HasMissingPhotometry").toInt());
+  }
+  if (root_node.hasAttribute("HasUpperLimit")){
+    survey.setHasUpperLimit(root_node.attribute("HasUpperLimit").toInt());
+  }
 
   auto columns_node = root_node.firstChildElement("AvailableColumns");
   auto list = columns_node.childNodes();
@@ -219,6 +251,9 @@ void SurveyFilterMapping::saveSurvey(std::string oldName){
   QDomElement root = doc.createElement("CatalogInfo");
   root.setAttribute("SourceColumnId",QString::fromStdString(m_source_id_column));
   root.setAttribute("NonDetection",QString::number(m_non_detection));
+  root.setAttribute("HasUpperLimit",QString::number(m_has_upper_limit));
+  root.setAttribute("HasMissingPhotometry",QString::number(m_has_missing_phot));
+
   root.setAttribute("DefaultCatalogPath",QString::fromStdString(m_default_catalog));
   doc.appendChild(root);
 

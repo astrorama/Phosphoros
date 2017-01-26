@@ -471,9 +471,13 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
   double non_detection = -99.;
+  bool has_Missing_data = false;
+  bool has_upper_limit = false;
   for (auto& survey_pair : m_analysis_survey_list) {
     if (survey_pair.second.getName().compare(survey_name) == 0) {
       non_detection = survey_pair.second.getNonDetection();
+      has_Missing_data = survey_pair.second.getHasMissingPhotometry();
+      has_upper_limit = survey_pair.second.getHasUpperLimit();
     }
   }
 
@@ -512,10 +516,19 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
       FileUtils::getCatalogRootPath(false,survey_name)+QString(QDir::separator()).toStdString());
   options_map["input-catalog-file"].value() = boost::any(input_catalog_file);
 
-
-
   options_map["source-id-column-name"].value() = boost::any(getSelectedSurveySourceColumn());
-  options_map["missing-photometry-flag"].value() = boost::any(non_detection);
+
+  if (has_Missing_data){
+    options_map["missing-photometry-flag"].value() = boost::any(non_detection);
+  }
+  std::string yes_flag = "YES";
+  std::string no_flag = "NO";
+
+  if (has_upper_limit){
+    options_map["enable-upper-limit"].value() = boost::any(yes_flag);
+  } else {
+    options_map["enable-upper-limit"].value() = boost::any(no_flag);
+  }
 
 
   auto filter_excluded = getExcludedFilters();
@@ -527,8 +540,6 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     options_map["exclude-filter"].value() = boost::any(excluded);
   }
 
-  std::string yes_flag = "YES";
-  std::string no_flag = "NO";
 
   if (ui->gb_corrections->isChecked()) {
     options_map["enable-photometric-correction"].value() = boost::any(yes_flag);
@@ -783,12 +794,15 @@ template<typename ReturnType, int I>
           "It is not possible to save the Grid under the name you have provided. Please enter a new name.",
           QMessageBox::Ok);
     } else {
-
+      QString filter = "Config (*.conf)";
       QString fileName = QFileDialog::getSaveFileName(this,
           tr("Save Configuration File"),
           QString::fromStdString(FileUtils::getRootPath(true))+"config",
-          tr("Config (*.conf)"));
+          filter,&filter);
       if (fileName.length()>0) {
+        if(!fileName.endsWith(".conf", Qt::CaseInsensitive)){
+          fileName=fileName+".conf";
+        }
         auto config_map = getGridConfiguration();
         PhzUITools::ConfigurationWriter::writeConfiguration(config_map,fileName.toStdString());
 
@@ -1086,10 +1100,15 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
 
   void FormAnalysis::on_btn_GetConfigAnalysis_clicked()
   {
+    QString filter = "Config (*.conf)";
+
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save Configuration File"),
         QString::fromStdString(FileUtils::getRootPath(true))+"config",
-        tr("Config (*.conf)"));
+        filter,&filter);
     if (fileName.length()>0) {
+      if(!fileName.endsWith(".conf", Qt::CaseInsensitive)){
+               fileName=fileName+".conf";
+      }
       auto config_map = getRunOptionMap();
       PhzUITools::ConfigurationWriter::writeConfiguration(config_map,fileName.toStdString());
 

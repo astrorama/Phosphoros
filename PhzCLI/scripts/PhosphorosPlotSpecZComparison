@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
-
+from __future__ import absolute_import, division, print_function
 import os
 import numbers
-import urlparse
 import astropy.table as table
 import astropy.io.fits as fits
 from astropy.vo.samp import SAMPIntegratedClient
@@ -14,7 +13,7 @@ import matplotlib.animation as animation
 
 def check_file_exists(filename):
     if not os.path.exists(filename):  
-       print 'ERROR : File', filename, 'not found'       
+       print('ERROR : File', filename, 'not found')       
        exit(-1)
     
 #
@@ -22,7 +21,7 @@ def check_file_exists(filename):
 #
 
 def read_table(filename):
-    print 'Reading file: ', filename
+    print('Reading file: ', filename)
     check_file_exists(filename)
     try :
         data = table.Table.read(filename, format='fits')
@@ -50,12 +49,12 @@ def read_table(filename):
 def read_specz_catalog(filename, id_col, specz_col):
     specz_cat = read_table(filename)
     if not id_col in specz_cat.colnames:
-        print 'ERROR : Spec-z catalog does not have column with name', id_col
+        print('ERROR : Spec-z catalog does not have column with name', id_col)
         exit(-1)
     if not id_col == 'ID':
         specz_cat.rename_column(id_col, 'ID')
     if not specz_col in specz_cat.colnames:
-        print 'ERROR : Spec-z catalog does not have column with name', specz_col
+        print('ERROR : Spec-z catalog does not have column with name', specz_col)
         exit(-1)
     if not specz_col == 'SPECZ':
         specz_cat.rename_column(specz_col, 'SPECZ')
@@ -90,19 +89,19 @@ def get_pdf_bins_from_comment(comment_lines, parameter):
 #
 
 def read_pdfs(catalog, out_dir):
-    print 'Loading the 1D-PDFs...'
+    print('Loading the 1D-PDFs...')
     filename_map = {'SED':'sed', 'REDDENING-CURVE':'red_curve', 'EBV':'ebv', 'Z':'z'}
     
     def read(parameter):
         if parameter+'-1D-PDF' in catalog.colnames:
-            print '    ' + parameter + ': Using catlog column ' + parameter+'-1D-PDF'
+            print('    ' + parameter + ': Using catlog column ' + parameter+'-1D-PDF')
             return parameter, get_pdf_bins_from_comment(catalog.meta['COMMENT'], parameter), catalog[parameter+'-1D-PDF']
         elif os.path.exists(out_dir+'/pdf_'+filename_map[parameter]+'.fits'):
-            print '    ' + parameter + ': Reading file ' + out_dir+'/pdf_'+filename_map[parameter]+'.fits'
+            print('    ' + parameter + ': Reading file ' + out_dir+'/pdf_'+filename_map[parameter]+'.fits')
             hdus = fits.open(out_dir+'/pdf_'+filename_map[parameter]+'.fits')
             return parameter, hdus[1].data[hdus[1].columns[0].name], [hdus[s['Index']+1].data['Probability'] for s in catalog]
         else:
-            print '    ' + parameter + ': No 1D PDF found'
+            print('    ' + parameter + ': No 1D PDF found')
             return None
     
     result = [read(p) for p in ['SED', 'REDDENING-CURVE', 'EBV', 'Z']]
@@ -141,12 +140,12 @@ def compute_stats(specz, phz):
     meanNoOutliers  = np.average(noOutliersArr)
     
                     
-    print '--> Mean                : ', mean     
-    print '--> Median              : ', median     
-    print '--> Sigma               : ', sigma     
-    print '--> Mad                 : ', mad     
-    print '--> Outliers            : ', outliersPercent, '%'
-    print '--> Sigma (no outliers) : ', sigmaNoOutliers     
+    print('--> Mean                : ', mean)     
+    print('--> Median              : ', median)     
+    print('--> Sigma               : ', sigma)     
+    print('--> Mad                 : ', mad)     
+    print('--> Outliers            : ', outliersPercent, '%')
+    print('--> Sigma (no outliers) : ', sigmaNoOutliers)     
    
     return dataArr, mean, median, sigma, mad, outliersPercent, sigmaNoOutliers, meanNoOutliers
 
@@ -344,9 +343,9 @@ class Selector(object):
     
     def _print_cols(self, index):
         row = self.catalog[index]
-        print '\nFull info for source with ID',row['ID'],':'
+        print('\nFull info for source with ID',row['ID'],':')
         for c in row.colnames:
-            print '   ',c,'=',row[c]
+            print('   ',c,'=',row[c])
     
     def onpick(self, event):
         if event.mouseevent.button != 1:
@@ -455,7 +454,7 @@ if __name__ == '__main__':
             and the mean, median and displays an histogram of outliers
    
             """ 
-    parser = argparse.ArgumentParser(usage, version='%prog version 1.0', description=__doc__)
+    parser = argparse.ArgumentParser(usage, description=__doc__)
 
     parser.add_argument('-scat', '--specz-catalog', type=str, required=True, help='Catalog file containing the spec-z')
     parser.add_argument('-sid', '--specz-cat-id', type=str, default='ID', help='Spec-z catalog ID column')
@@ -472,7 +471,7 @@ if __name__ == '__main__':
     phos_cat = read_phosphoros_catalog(args.phosphoros_output_dir)
     
     # merge the catalogs
-    print 'Merging the catalogs'
+    print('Merging the catalogs')
     catalog = table.join(specz_cat, phos_cat, keys='ID')
     
     specz = catalog['SPECZ']

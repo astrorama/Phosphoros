@@ -150,7 +150,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Select filter curves and define their mapping to columns names</string>
+      <string>Select filter curves and define their mapping to column names</string>
      </property>
     </widget>
    </item>
@@ -326,7 +326,7 @@
          <item row="2" column="0">
           <widget class="QLabel" name="label_2">
            <property name="text">
-            <string>Non Detection Flag (Missing Photometry) :</string>
+            <string>Missing Photometry and Upper Limit :</string>
            </property>
           </widget>
          </item>
@@ -384,15 +384,43 @@
          <item row="3" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
-            <widget class="QDoubleSpinBox" name="txt_nonDetection">
-             <property name="minimum">
-              <double>-10000000.000000000000000</double>
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>The catalog has: </string>
              </property>
-             <property name="maximum">
-              <double>10000000.000000000000000</double>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="cb_missingPhot">
+             <property name="text">
+              <string>Missing Photometry flagged as:</string>
              </property>
-             <property name="value">
-              <double>-99.000000000000000</double>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="txt_nonDetection">
+             <property name="text">
+              <string>-99</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="cb_upperLimit">
+             <property name="text">
+              <string>Upper Limit</string>
              </property>
             </widget>
            </item>

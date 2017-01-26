@@ -230,6 +230,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QLabel" name="txt_rootDir">
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer_9">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -245,18 +252,7 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
-         <item>
-          <widget class="QLineEdit" name="txt_rootDir">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The Phosphoros Root Path can be modified with the environment variable $PHOSPHOROS_ROOT.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <layout class="QHBoxLayout" name="horizontalLayout_6"/>
        </item>
        <item>
         <widget class="Line" name="line">
@@ -314,7 +310,7 @@
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Default</string>
+            <string>Use Default</string>
            </property>
           </widget>
          </item>
@@ -369,7 +365,7 @@
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Default</string>
+            <string>Use Default</string>
            </property>
           </widget>
          </item>
@@ -424,7 +420,7 @@
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Default</string>
+            <string>Use Default</string>
            </property>
           </widget>
          </item>
@@ -479,7 +475,7 @@
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Default</string>
+            <string>Use Default</string>
            </property>
           </widget>
          </item>
@@ -498,7 +494,7 @@
           <bool>false</bool>
          </property>
          <property name="title">
-          <string>Override the Maximum Number of Thread</string>
+          <string>Override the Maximum Number of Threads</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -655,7 +651,7 @@
               <string>The Phosphoros Root Path can be modified with the environment variable $PHOSPHOROS_ROOT.</string>
              </property>
              <property name="text">
-              <string>Hubble Constant H  :</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Hubble Constant H&lt;span style=&quot; vertical-align:sub;&quot;&gt;0&lt;/span&gt;  :&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
@@ -683,7 +679,7 @@
            <item row="1" column="0">
             <widget class="QLabel" name="label_10">
              <property name="text">
-              <string>Assuming  Ωm + Ωk +  Ωλ = 1</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Assuming Ω&lt;span style=&quot; vertical-align:sub;&quot;&gt;M&lt;/span&gt; + Ω&lt;span style=&quot; vertical-align:sub;&quot;&gt;k&lt;/span&gt; + Ω&lt;span style=&quot; font-family:'sans-serif'; color:#000000; background-color:#f8f9fa; vertical-align:sub;&quot;&gt;Λ&lt;/span&gt;</string>
              </property>
             </widget>
            </item>
@@ -693,7 +689,7 @@
               <string>The Phosphoros Root Path can be modified with the environment variable $PHOSPHOROS_ROOT.</string>
              </property>
              <property name="text">
-              <string>Matter density parameter Ωm  :</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Matter density parameter Ω&lt;span style=&quot; vertical-align:sub;&quot;&gt;M&lt;/span&gt;  :&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
@@ -703,7 +699,7 @@
               <string>The Phosphoros Root Path can be modified with the environment variable $PHOSPHOROS_ROOT.</string>
              </property>
              <property name="text">
-              <string>Dark energy density parameter Ωλ  :</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Dark energy density parameter Ω&lt;span style=&quot; font-family:'sans-serif'; color:#000000; background-color:#f8f9fa; vertical-align:sub;&quot;&gt;Λ&lt;/span&gt;</string>
              </property>
             </widget>
            </item>

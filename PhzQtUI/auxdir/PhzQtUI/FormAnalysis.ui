@@ -164,8 +164,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1037</width>
-        <height>813</height>
+        <width>1039</width>
+        <height>814</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -317,8 +317,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>448</width>
-            <height>160</height>
+            <width>1021</width>
+            <height>458</height>
            </rect>
           </property>
           <attribute name="label">
@@ -428,7 +428,7 @@
                   <string/>
                  </property>
                  <property name="text">
-                  <string>Get Config. File</string>
+                  <string>Save Config. File</string>
                  </property>
                 </widget>
                </item>
@@ -475,7 +475,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>560</width>
+            <width>543</width>
             <height>160</height>
            </rect>
           </property>
@@ -626,8 +626,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>794</width>
-            <height>262</height>
+            <width>733</width>
+            <height>258</height>
            </rect>
           </property>
           <attribute name="label">
@@ -926,8 +926,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1019</width>
-            <height>465</height>
+            <width>1021</width>
+            <height>458</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1035,7 +1035,7 @@
               </layout>
              </item>
              <item>
-              <widget class="QGroupBox" name="groupBox">
+              <widget class="QGroupBox" name="groupBox_output">
                <property name="font">
                 <font>
                  <pointsize>10</pointsize>
@@ -1120,7 +1120,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QGroupBox" name="groupBox">
+              <widget class="QGroupBox" name="groupBox_input">
                <property name="font">
                 <font>
                  <pointsize>10</pointsize>
@@ -1270,7 +1270,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QGroupBox" name="groupBox">
+              <widget class="QGroupBox" name="groupBox_like">
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -1372,7 +1372,7 @@
        <item>
         <widget class="QPushButton" name="btn_GetConfigAnalysis">
          <property name="text">
-          <string>Get Config. File </string>
+          <string>Save Config. File </string>
          </property>
         </widget>
        </item>
