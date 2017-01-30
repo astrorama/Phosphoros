@@ -836,12 +836,12 @@ template<typename ReturnType, int I>
       if (dialog->exec()) {
         adjustPhzGridButtons(true);
         setComputeCorrectionEnable();
-        setRunAnnalysisEnable(true);
 
         PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
             "IGM",ui->cb_igm->currentText().toStdString());
       }
     }
+    setRunAnnalysisEnable(true);
   }
 
 //  3. Photometric Correction
