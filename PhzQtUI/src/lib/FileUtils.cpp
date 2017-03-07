@@ -260,13 +260,53 @@ std::string FileUtils::getDefaultResultsRootPath(){
   return getRootPath(true)+"Results";
 }
 
+
+std::map<std::string,std::string> removeDefault(const std::string& root_path,
+                                                const std::string& default_path,
+                                                const std::string& key,
+                                                std::map<std::string,std::string> path_list){
+  if (path_list.find(key)!= path_list.end()){
+       std::string path = path_list[key];
+       if (path==default_path){
+             path_list.erase(key);
+       } else if  ( FileUtils::starts_with(path,root_path)){
+         path = FileUtils::removeStart(path,root_path);
+         path_list[key]=path;
+       }
+   }
+
+  return path_list;
+}
+
 void FileUtils::savePath(const std::map<std::string,std::string>& path_list){
+
+  // replace the default paths
+  std::string root_path = getRootPath(true);
+  std::string default_path = getRootPaths().getConfiguration<PhzConfiguration::CatalogDirConfig>().getCatalogDir().generic_string();
+  std::string key = "Catalogs";
+  auto list = removeDefault(root_path,default_path,key,path_list);
+
+  default_path = getRootPaths().getConfiguration<PhzConfiguration::AuxDataDirConfig>().getAuxDataDir().generic_string();
+  key = "AuxiliaryData";
+  list = removeDefault(root_path, default_path, key, list);
+
+  default_path = getRootPaths().getConfiguration<PhzConfiguration::IntermediateDirConfig>().getIntermediateDir().generic_string();
+  key = "IntermediateProducts";
+  list = removeDefault(root_path, default_path, key, list);
+
+  default_path = getRootPaths().getConfiguration<PhzConfiguration::ResultsDirConfig>().getResultsDir().generic_string();
+  key = "Results";
+  list = removeDefault(root_path, default_path, key, list);
+
+  key = "LastUsed";
+  list = removeDefault(root_path, default_path, key, list);
+
   QString path = QString::fromStdString(getGUIConfigPath())+QDir::separator() +"path.txt";
   QFile file(path);
   file.open(QIODevice::WriteOnly );
   QTextStream stream(&file);
+  for (auto& item : list) {
 
-  for (auto& item : path_list) {
       stream<< QString::fromStdString(item.first) << " " << QString::fromStdString(item.second) << " \n";
   }
 
@@ -289,28 +329,33 @@ std::map<std::string,std::string> FileUtils::readPath(){
     }
   }
 
- auto& default_paths = getRootPaths();
-
+  std::string root_path = getRootPath(true);
 
 
  if (map.find("Catalogs")== map.end()){
-   map.insert(std::make_pair("Catalogs",default_paths.getConfiguration<PhzConfiguration::CatalogDirConfig>().getCatalogDir().generic_string()));
+   map.insert(std::make_pair("Catalogs",getRootPaths().getConfiguration<PhzConfiguration::CatalogDirConfig>().getCatalogDir().generic_string()));
  }
 
  if (map.find("AuxiliaryData")== map.end()){
-   map.insert(std::make_pair("AuxiliaryData",default_paths.getConfiguration<PhzConfiguration::AuxDataDirConfig>().getAuxDataDir().generic_string()));
+   map.insert(std::make_pair("AuxiliaryData",getRootPaths().getConfiguration<PhzConfiguration::AuxDataDirConfig>().getAuxDataDir().generic_string()));
  }
 
  if (map.find("IntermediateProducts")== map.end()){
-   map.insert(std::make_pair("IntermediateProducts",default_paths.getConfiguration<PhzConfiguration::IntermediateDirConfig>().getIntermediateDir().generic_string()));
+   map.insert(std::make_pair("IntermediateProducts",getRootPaths().getConfiguration<PhzConfiguration::IntermediateDirConfig>().getIntermediateDir().generic_string()));
  }
 
  if (map.find("Results")== map.end()){
-   map.insert(std::make_pair("Results",default_paths.getConfiguration<PhzConfiguration::ResultsDirConfig>().getResultsDir().generic_string()));
+   map.insert(std::make_pair("Results",getRootPaths().getConfiguration<PhzConfiguration::ResultsDirConfig>().getResultsDir().generic_string()));
  }
 
  if (map.find("LastUsed")== map.end()){
-    map.insert(std::make_pair("LastUsed",default_paths.getConfiguration<PhzConfiguration::PhosphorosRootDirConfig>().getPhosphorosRootDir().generic_string()));
+    map.insert(std::make_pair("LastUsed",root_path));
+ }
+
+ for (auto& item : map) {
+    if (!FileUtils::starts_with(item.second,"/")){
+      item.second = root_path+item.second;
+    }
  }
 
   return map;

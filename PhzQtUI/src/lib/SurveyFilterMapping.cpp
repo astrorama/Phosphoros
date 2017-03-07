@@ -159,7 +159,16 @@ SurveyFilterMapping SurveyFilterMapping::loadCatalog(std::string name) {
 
   QDomElement root_node = doc.documentElement();
   survey.setSourceIdColumn(root_node.attribute("SourceColumnId").toStdString());
-  survey.setDefaultCatalogFile(root_node.attribute("DefaultCatalogPath").toStdString());
+
+
+  std::string path = root_node.attribute("DefaultCatalogPath").toStdString();
+
+  if (!FileUtils::starts_with(path,"/")){
+    std::string root_path = FileUtils::getRootPath(true);
+    path = root_path+path;
+  }
+
+  survey.setDefaultCatalogFile(path);
 
   if (root_node.hasAttribute("NonDetection")){
     survey.setNonDetection(root_node.attribute("NonDetection").toDouble());
@@ -254,7 +263,15 @@ void SurveyFilterMapping::saveSurvey(std::string oldName){
   root.setAttribute("HasUpperLimit",QString::number(m_has_upper_limit));
   root.setAttribute("HasMissingPhotometry",QString::number(m_has_missing_phot));
 
-  root.setAttribute("DefaultCatalogPath",QString::fromStdString(m_default_catalog));
+  std::string path = m_default_catalog;
+  std::string root_path = FileUtils::getRootPath(true);
+  if (FileUtils::starts_with(path,root_path)){
+      path = FileUtils::removeStart(path,root_path);
+  }
+
+  root.setAttribute("DefaultCatalogPath",QString::fromStdString(path));
+
+
   doc.appendChild(root);
 
   QDomElement columns_node = doc.createElement("AvailableColumns");
