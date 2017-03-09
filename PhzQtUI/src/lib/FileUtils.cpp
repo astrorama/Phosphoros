@@ -269,9 +269,6 @@ std::map<std::string,std::string> removeDefault(const std::string& root_path,
        std::string path = path_list[key];
        if (path==default_path){
              path_list.erase(key);
-       } else if  ( FileUtils::starts_with(path,root_path)){
-         path = FileUtils::removeStart(path,root_path);
-         path_list[key]=path;
        }
    }
 
@@ -350,12 +347,6 @@ std::map<std::string,std::string> FileUtils::readPath(){
 
  if (map.find("LastUsed")== map.end()){
     map.insert(std::make_pair("LastUsed",root_path));
- }
-
- for (auto& item : map) {
-    if (!FileUtils::starts_with(item.second,"/")){
-      item.second = root_path+item.second;
-    }
  }
 
   return map;
