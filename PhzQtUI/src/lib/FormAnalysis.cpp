@@ -867,6 +867,24 @@ template<typename ReturnType, int I>
   }
 
   void FormAnalysis::on_btn_computeCorrections_clicked() {
+    
+    // Note to developers:
+    // -------------------
+    // The configuration of the Photometric Correction from PhosphorosCore has
+    // been updated to take as input the same configuration as the ComputeRedshifts
+    // (priors, etc). This change requires a major refactoring of the GUI, because
+    // of the way the DialogPhotometricCorrectionComputation creates the config
+    // map. For this reason, at the moment the GUI functionality of computing the
+    // photometric corrections is disabled. The refactoring should be performed
+    // after the confirmation from the OU of the implemented functionality.
+    //
+    // TODO: Refactor the code to call the DialogPhotometricCorrectionComputation
+    // with the correct configuration
+    QMessageBox::information(this, "Compute Photometric Zero-Point Corrections",
+              "Computation of Photometric Zero-Point Corrections is currently "
+              "available only via the command line. Try to use the command: "
+              "Phosphoros CPP --help", QMessageBox::Ok);
+    return;
 
     auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
 

@@ -15,15 +15,9 @@
 #include "FormUtils.h"
 #include "ElementsKernel/Exception.h"
 #include "Configuration/ConfigManager.h"
-#include "Configuration/CatalogConfig.h"
 
-#include "PhzLikelihood/SourcePhzFunctor.h"
 #include "PhzConfiguration/ComputePhotometricCorrectionsConfig.h"
-#include "PhzConfiguration/PhotometryGridConfig.h"
-#include "PhzPhotometricCorrection/PhotometricCorrectionCalculator.h"
-#include "PhzPhotometricCorrection/FindBestFitModels.h"
-#include "PhzPhotometricCorrection/CalculateScaleFactorMap.h"
-#include "PhzPhotometricCorrection/PhotometricCorrectionAlgorithm.h"
+#include "PhzExecutables/ComputePhotometricCorrections.h"
 #include "PhzUtils/Multithreading.h"
 #include "Configuration/Utils.h"
 
@@ -271,19 +265,6 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
     config_manager.closeRegistration();
     config_manager.initialize(config_map);
 
-    auto catalog = config_manager.getConfiguration<Configuration::CatalogConfig>().readAsCatalog();
-    auto& model_phot_grid = config_manager.getConfiguration<PhotometryGridConfig>().getPhotometryGrid();
-    auto& output_func = config_manager.getConfiguration<ComputePhotometricCorrectionsConfig>().getOutputFunction();
-    auto& stop_criteria = config_manager.getConfiguration<ComputePhotometricCorrectionsConfig>().getStopCriteria();
-
-    PhzPhotometricCorrection::FindBestFitModels<PhzLikelihood::SourcePhzFunctor> find_best_fit_models { };
-    PhzPhotometricCorrection::CalculateScaleFactorMap calculate_scale_factor_map { };
-    PhzPhotometricCorrection::PhotometricCorrectionAlgorithm phot_corr_algorighm { };
-    auto selector = config_manager.getConfiguration<ComputePhotometricCorrectionsConfig>().getPhotometricCorrectionSelector();
-
-    PhzPhotometricCorrection::PhotometricCorrectionCalculator calculator {
-        find_best_fit_models, calculate_scale_factor_map, phot_corr_algorighm };
-
     emit signalUpdateCurrentIteration(QString::fromStdString("Iteration : 0"));
     auto progress_logger =
         [this,max_iter_number](size_t iter_no, const PhzDataModel::PhotometricCorrectionMap& ) {
@@ -295,9 +276,9 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
             emit signalUpdateCurrentIteration(QString::fromStdString(iter_no_message.str()));
           }
         };
-    auto phot_corr_map = calculator(catalog, model_phot_grid, stop_criteria,
-        selector, progress_logger);
-    output_func(phot_corr_map);
+        
+    PhzExecutables::ComputePhotometricCorrections{progress_logger}.run(config_manager);
+        
     correctionComputed (ui->txt_FileName->text());
     return "";
   }
