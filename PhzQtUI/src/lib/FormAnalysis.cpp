@@ -264,7 +264,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   ui->btn_GetConfigAnalysis->setEnabled(
       grid_name_ok && correction_ok && lum_prior_ok && lum_prior_compatible && run_ok && enabled);
   ui->btn_RunAnalysis->setEnabled(
-      grid_name_exists && correction_exists && lum_prior_ok && lum_prior_compatible&& run_ok && enabled);
+      grid_name_exists && correction_ok && correction_exists && lum_prior_ok && lum_prior_compatible&& run_ok && enabled);
 
   QString tool_tip_run = "";
   QString tool_tip_conf = "";
@@ -325,7 +325,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
     tool_tip_conf = "Get the configuration file.";
   }
 
-  if (!(grid_name_exists && correction_exists && lum_prior_ok && lum_prior_compatible && run_ok)) {
+  if (!(grid_name_exists && correction_ok && correction_exists && lum_prior_ok && lum_prior_compatible && run_ok)) {
     tool_tip_run = tool_tip_run + "Before running the analysis.";
   } else {
     tool_tip_run = "Run the analysis.";
@@ -335,15 +335,15 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   ui->btn_RunAnalysis->setToolTip(tool_tip_run);
 
   if (!correction_ok) {
-    setToolBoxButtonColor(ui->toolBox, 1, QColor("orange"));
+    setToolBoxButtonColor(ui->toolBox, 2, QColor("orange"));
   } else {
-    setToolBoxButtonColor(ui->toolBox, 1,Qt::black);
+    setToolBoxButtonColor(ui->toolBox, 2,Qt::black);
   }
 
   if (!lum_prior_ok || !lum_prior_compatible) {
-     setToolBoxButtonColor(ui->toolBox, 2, QColor("orange"));
+     setToolBoxButtonColor(ui->toolBox, 1, QColor("orange"));
    } else {
-     setToolBoxButtonColor(ui->toolBox, 2,Qt::black);
+     setToolBoxButtonColor(ui->toolBox, 1,Qt::black);
    }
 }
 
