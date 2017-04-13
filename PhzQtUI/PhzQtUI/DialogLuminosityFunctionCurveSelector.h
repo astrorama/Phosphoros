@@ -5,9 +5,12 @@
 #include <memory>
 #include <QDialog>
 #include "FilterMapping.h"
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
 
 namespace Euclid {
 namespace PhzQtUI {
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 namespace Ui {
 class DialogLuminosityFunctionCurveSelector;
@@ -24,7 +27,7 @@ public:
   /**
    * @brief Constructor
    */
-  explicit DialogLuminosityFunctionCurveSelector(QWidget *parent = 0);
+  explicit DialogLuminosityFunctionCurveSelector(DatasetRepo luminosity_repository, QWidget *parent = 0);
 
   /**
    * @brief Destructor
@@ -58,6 +61,7 @@ private slots:
 
 private:
   std::unique_ptr<Ui::DialogLuminosityFunctionCurveSelector> ui;
+  DatasetRepo m_luminosity_repository;
 };
 
 }

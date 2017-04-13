@@ -8,9 +8,13 @@
 #include <QWidget>
 #include <QModelIndex>
 #include "FilterMapping.h"
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
 
 namespace Euclid {
 namespace PhzQtUI {
+
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 namespace Ui {
 class FormSurveyMapping;
@@ -25,11 +29,10 @@ class FormSurveyMapping : public QWidget
     Q_OBJECT
 
 public:
-    explicit FormSurveyMapping(QWidget *parent = 0);
+    explicit FormSurveyMapping( QWidget *parent = 0);
     ~FormSurveyMapping();
 
-    void loadMappingPage();
-    void loadMappingPage(std::string new_path);
+    void loadMappingPage(DatasetRepo filter_repository, std::string new_path);
 
     void updateSelection();
 
@@ -83,6 +86,7 @@ void on_cb_missingPhot_stateChanged(int state);
 
 private:
     std::unique_ptr<Ui::FormSurveyMapping> ui;
+    DatasetRepo m_filter_repository;
     bool m_mappingInsert;
     bool m_filterInsert;
     std::set<std::string> m_column_from_file;

@@ -40,11 +40,12 @@ FormAnalysis::~FormAnalysis() {
 
 ///////////////////////////////////////////////////
 //  Initial data load
-void FormAnalysis::loadAnalysisPage() {
-  auto saved_catalog = PreferencesUtils::getUserPreference("_global_selection_",
-      "catalog");
-  auto saved_parameter_space = PreferencesUtils::getUserPreference("_global_selection_",
-      "parameter_space");
+void FormAnalysis::loadAnalysisPage(DatasetRepo filter_repository, DatasetRepo luminosity_repository){
+  m_filter_repository=filter_repository;
+  m_luminosity_repository=luminosity_repository;
+
+  auto saved_catalog = PreferencesUtils::getUserPreference("_global_selection_", "catalog");
+  auto saved_parameter_space = PreferencesUtils::getUserPreference("_global_selection_", "parameter_space");
 
   ui->cb_z_col->clear();
   ui->cb_z_col->addItem("");
@@ -867,7 +868,7 @@ template<typename ReturnType, int I>
   }
 
   void FormAnalysis::on_btn_computeCorrections_clicked() {
-    
+
     // Note to developers:
     // -------------------
     // The configuration of the Photometric Correction from PhosphorosCore has
@@ -921,7 +922,7 @@ template<typename ReturnType, int I>
 
 // 4. algorithm options
   void FormAnalysis::on_btn_confLuminosityPrior_clicked(){
-        std::unique_ptr<DialogLuminosityPrior> dialog(new DialogLuminosityPrior());
+        std::unique_ptr<DialogLuminosityPrior> dialog(new DialogLuminosityPrior(m_filter_repository, m_luminosity_repository));
 
         std::string model_grid = ui->cb_CompatibleGrid->currentText().toStdString();
 

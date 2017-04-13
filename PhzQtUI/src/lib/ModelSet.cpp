@@ -7,7 +7,6 @@
 #include "Configuration/ConfigManager.h"
 #include "PhzConfiguration/ParameterSpaceConfig.h"
 #include "PhzQtUI/ModelSet.h"
-#include "PhzQtUI/XYDataSetTreeModel.h"
 #include "PhzDataModel/PhotometryGrid.h"
 #include "DefaultOptionsCompleter.h"
 #include "Configuration/Utils.h"

@@ -153,7 +153,7 @@ void MainWindow::navigateToConfig(){
 
  void MainWindow::navigateToNewCatalog(std::string new_name){
    changeMainStackedWidgetIndex(2);
-   ui->widget_Catalog->loadMappingPage(new_name);
+   ui->widget_Catalog->loadMappingPage(m_filter_repository, new_name);
  }
 
  //--------------------------------------------------
@@ -184,7 +184,7 @@ void MainWindow::on_btn_HomeToCatalog_clicked(){
   changeMainStackedWidgetIndex(2);
 
   if (!m_mapping_loaded){
-    ui->widget_Catalog->loadMappingPage("");
+    ui->widget_Catalog->loadMappingPage(m_filter_repository,"");
     m_mapping_loaded=true;
   }
 
@@ -199,7 +199,7 @@ void MainWindow::on_btn_HomeToAnalysis_clicked()
 {
   changeMainStackedWidgetIndex(3);
 
-    ui->widget_Analysis->loadAnalysisPage();
+    ui->widget_Analysis->loadAnalysisPage(m_filter_repository, m_luminosity_repository);
 
 
 }

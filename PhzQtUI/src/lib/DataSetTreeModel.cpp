@@ -32,7 +32,7 @@ std::string DataSetTreeModel::getGroupName(XYDataset::QualifiedName qualified_na
 
 
 
-void DataSetTreeModel::load(bool selectable) {
+void DataSetTreeModel::load(bool selectable, bool onlyLeaves) {
   m_map_dir.clear();
   auto& unordered = m_repository->getContent();
 
@@ -68,8 +68,8 @@ void DataSetTreeModel::load(bool selectable) {
 
       QStandardItem* item = new QStandardItem(QString::fromStdString(group_qualifiedName.datasetName()));
       item->setBackground(QBrush(QColor(230, 230, 230)));
-      item->setCheckable(selectable);
-      item->setTristate(selectable);
+      item->setCheckable(selectable && !onlyLeaves);
+      item->setTristate(selectable && !onlyLeaves);
 
 
       if (parent_group.length()>0){
@@ -96,6 +96,10 @@ void DataSetTreeModel::load(bool selectable) {
     }
   }
 }
+
+
+
+
 
 void DataSetTreeModel::setEnabled(bool enable) {
   // root level
@@ -155,6 +159,27 @@ void DataSetTreeModel::onItemChanged(QStandardItem* item) {
       }
     }
   }
+}
+
+
+void DataSetTreeModel::onItemChangedSingleLeaf(QStandardItem* item){
+  if (m_in_edition && !m_bypass) {
+      m_bypass = true;
+      if (item->checkState() == Qt::CheckState::Checked) {
+        if (item->rowCount() ==0 ){
+          clearState();
+        }
+        item->setCheckState(Qt::CheckState::Checked);
+        m_bypass = false;
+
+      } else {
+        clearState();
+        m_bypass = false;
+      }
+
+    } else {
+      onItemChanged(item);
+    }
 }
 
 
@@ -254,6 +279,42 @@ void DataSetTreeModel::setState(const DatasetSelection& selection) {
     }
   }
 
+}
+
+
+
+void DataSetTreeModel::setState(const std::vector<std::string>& selected_leaves){
+  for (const std::string& leaf : selected_leaves){
+    auto group_name =  DataSetTreeModel::getGroupName(leaf);
+    for (int i=0; i<m_map_dir.at(group_name)->rowCount();++i){
+      auto item = m_map_dir.at(group_name)->child(i);
+      std::string name = item->text().toStdString();
+      if (std::equal(name.rbegin(), name.rend(), leaf.rbegin())){
+        if (item->isCheckable()){
+           item->setCheckState(Qt::CheckState::Checked);
+        }
+      }
+    }
+  }
+}
+
+
+
+std::vector<std::string> DataSetTreeModel::getSelectedLeaves() const{
+  std::vector<std::string> leaves{};
+  auto separator = QString(QDir::separator()).toStdString();
+  for (auto& group_tuple : m_map_dir){
+      auto group_item = group_tuple.second;
+      auto base_name = group_tuple.first;
+      for (int i=0; i<group_item->rowCount();++i){
+         auto child_item = group_item->child(i);
+         if (child_item->rowCount()==0 && child_item->checkState()==Qt::CheckState::Checked){
+            leaves.push_back(base_name + separator + child_item->text().toStdString());
+         }
+      }
+  }
+
+  return leaves;
 }
 
 

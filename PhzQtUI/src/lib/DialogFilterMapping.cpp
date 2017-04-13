@@ -3,7 +3,7 @@
 
 #include "PhzQtUI/DialogFilterMapping.h"
 #include "ui_DialogFilterMapping.h"
-#include "PhzQtUI/XYDataSetTreeModel.h"
+#include "PhzQtUI/DataSetTreeModel.h"
 #include "FileUtils.h"
 
 using namespace std;
@@ -12,24 +12,24 @@ namespace Euclid {
 namespace PhzQtUI {
 
 
-DialogFilterMapping::DialogFilterMapping(QWidget *parent) :
+DialogFilterMapping::DialogFilterMapping(DatasetRepo filter_repository, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogFilterMapping){
   ui->setupUi(this);
+  m_filter_repository = filter_repository;
 }
 
 DialogFilterMapping::~DialogFilterMapping(){}
 
 void DialogFilterMapping::setFilters(const std::vector<std::string>& filters){
 
-  //// Load the XYDataSetTreeModel with the filters
-  string path_filter = FileUtils::getFilterRootPath(true);
-  XYDataSetTreeModel* treeModel_filter = new XYDataSetTreeModel();
-  treeModel_filter->loadDirectory(path_filter,true,"Filters");
-  treeModel_filter->setEnabled(true);
-  ui->treeView_filter->setModel(treeModel_filter);
- // ui->treeView_filter->expand(ui->treeView_filter->model()->index(0,0));
-  ui->treeView_filter->expandAll();
+   //// Load the DataSetTreeModel with the filters
+   DataSetTreeModel* treeModel_filter = new DataSetTreeModel(m_filter_repository);
+   treeModel_filter->load(true);
+   treeModel_filter->setEnabled(true);
+   connect(treeModel_filter, SIGNAL(itemChanged(QStandardItem*)), treeModel_filter, SLOT(onItemChanged(QStandardItem*)));
+   ui->treeView_filter->setModel(treeModel_filter);
+   ui->treeView_filter->expandAll();
 
   treeModel_filter->setState(filters);
 
@@ -43,7 +43,7 @@ void DialogFilterMapping::setFilters(const std::vector<std::string>& filters){
 
 
 void DialogFilterMapping::on_btn_save_clicked(){
-  popupClosing(static_cast<XYDataSetTreeModel*>(ui->treeView_filter->model())->getSelectedLeaves());
+  popupClosing(static_cast<DataSetTreeModel*>(ui->treeView_filter->model())->getSelectedLeaves());
   accept();
 }
 

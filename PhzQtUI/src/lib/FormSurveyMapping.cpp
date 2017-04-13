@@ -22,7 +22,8 @@
 namespace Euclid {
 namespace PhzQtUI {
 
-FormSurveyMapping::FormSurveyMapping(QWidget *parent) :
+
+FormSurveyMapping::FormSurveyMapping( QWidget *parent) :
     QWidget(parent),
     ui(new Ui::FormSurveyMapping)
 {
@@ -50,7 +51,10 @@ void FormSurveyMapping::updateSelection(){
 
 
 
-void FormSurveyMapping::loadMappingPage(std::string new_path){
+void FormSurveyMapping::loadMappingPage(DatasetRepo filter_repository, std::string new_path){
+
+     ui->txt_nonDetection->setValidator(new QDoubleValidator(-10000, 10000, 0.1));
+     m_filter_repository = filter_repository;
      SurveyModel* model = new SurveyModel();
      model->loadSurvey();
      ui->table_Map->setModel(model);
@@ -96,11 +100,6 @@ void FormSurveyMapping::loadMappingPage(std::string new_path){
 
 }
 
-
-void FormSurveyMapping::loadMappingPage(){
-  loadMappingPage("");
-  ui->txt_nonDetection->setValidator(new QDoubleValidator(-10000, 10000, 0.1));
-}
 
 void FormSurveyMapping::setFilterMappingInEdition(){
 
@@ -526,7 +525,7 @@ void FormSurveyMapping::on_btn_SelectFilters_clicked()
   }
 
   m_filterInsert=true;
-  std::unique_ptr<DialogFilterMapping> popUp(new DialogFilterMapping());
+  std::unique_ptr<DialogFilterMapping> popUp(new DialogFilterMapping(m_filter_repository));
   popUp->setFilters(filters);
 
   connect(popUp.get(), SIGNAL(popupClosing(std::vector<std::string>)),

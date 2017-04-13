@@ -10,15 +10,23 @@
 #include "SurveyFilterMapping.h"
 #include "ModelSet.h"
 #include "PhzQtUI/LuminosityPriorConfig.h"
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
 
 namespace boost{
 namespace program_options{
+
+
+
  class variable_value;
 }
 }
 
 namespace Euclid {
 namespace PhzQtUI {
+
+
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 namespace Ui {
 class FormAnalysis;
@@ -38,7 +46,7 @@ class FormAnalysis : public QWidget
 public:
     explicit FormAnalysis(QWidget *parent = 0);
     ~FormAnalysis();
-    void loadAnalysisPage();
+    void loadAnalysisPage(DatasetRepo filter_repository, DatasetRepo luminosity_repository);
 
 signals:
 
@@ -138,6 +146,10 @@ private:
     std::map<int,SurveyFilterMapping>  m_analysis_survey_list;
     std::map<int,ModelSet> m_analysis_model_list;
     std::map<std::string, LuminosityPriorConfig> m_prior_config;
+
+
+    DatasetRepo m_filter_repository;
+    DatasetRepo m_luminosity_repository;
 
 };
 

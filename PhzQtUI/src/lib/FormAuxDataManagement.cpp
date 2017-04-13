@@ -2,7 +2,6 @@
 
 #include "PhzQtUI/FormAuxDataManagement.h"
 #include "ui_FormAuxDataManagement.h"
-#include "PhzQtUI/DirectoryTreeModel.h"
 #include "PhzQtUI/DataSetTreeModel.h"
 #include "PhzQtUI/DialogImportAuxData.h"
 #include "PhzQtUI/DialogCreatesSubGroup.h"
