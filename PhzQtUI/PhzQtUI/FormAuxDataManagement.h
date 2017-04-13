@@ -31,43 +31,21 @@ public:
     explicit FormAuxDataManagement(QWidget *parent = 0);
     ~FormAuxDataManagement();
 
-    void setRepositories(DatasetRepo seds_repository,
-        DatasetRepo redenig_curves_repository);
+    void setRepositories(DatasetRepo filter_repository,
+                         DatasetRepo seds_repository,
+                         DatasetRepo redenig_curves_repository,
+                         DatasetRepo luminosity_repository);
     void loadManagementPage(int index=0);
 
 
 
-private slots:
-
-    void on_btn_RedImport_clicked();
-
-    void on_btn_RedSubGroup_clicked();
-
-    void on_btn_RedDelete_clicked();
-
-    void on_btn_SedImport_clicked();
-
-    void on_btn_SedSubGroup_clicked();
-
-    void on_btn_SedDelete_clicked();
-
-    void on_btn_FilterImport_clicked();
-
-    void on_btn_FilterSubGroup_clicked();
-
-    void on_btn_FilterDelete_clicked();
-
-    void on_btn_LuminosityImport_clicked();
-
-    void on_btn_LuminositySubGroup_clicked();
-
-    void on_btn_LuminosityDelete_clicked();
-
 
 private:
     std::unique_ptr<Ui::FormAuxDataManagement> ui;
+    DatasetRepo m_filter_repository;
     DatasetRepo m_seds_repository;
     DatasetRepo m_redenig_curves_repository;
+    DatasetRepo m_luminosity_repository;
 };
 
 }

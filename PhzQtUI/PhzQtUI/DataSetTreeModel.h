@@ -36,7 +36,7 @@ public:
    * @brief Read the provided repository and create the items needed to
    * represent it. To be called once.
    */
-  void load();
+  void load(bool selectable=true);
 
   /**
    * @brief Turn the model Enabled (In edition: the user can check/uncheck

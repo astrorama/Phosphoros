@@ -61,8 +61,10 @@ private:
     bool m_mapping_loaded = false;
 
 
+    DatasetRepo m_filter_repository;
     DatasetRepo m_seds_repository;
     DatasetRepo m_redenig_curves_repository;
+    DatasetRepo m_luminosity_repository;
 
 
 };

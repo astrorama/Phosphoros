@@ -32,7 +32,7 @@ std::string DataSetTreeModel::getGroupName(XYDataset::QualifiedName qualified_na
 
 
 
-void DataSetTreeModel::load() {
+void DataSetTreeModel::load(bool selectable) {
   m_map_dir.clear();
   auto& unordered = m_repository->getContent();
 
@@ -68,8 +68,8 @@ void DataSetTreeModel::load() {
 
       QStandardItem* item = new QStandardItem(QString::fromStdString(group_qualifiedName.datasetName()));
       item->setBackground(QBrush(QColor(230, 230, 230)));
-      item->setCheckable(true);
-      item->setTristate(true);
+      item->setCheckable(selectable);
+      item->setTristate(selectable);
 
 
       if (parent_group.length()>0){
@@ -87,7 +87,7 @@ void DataSetTreeModel::load() {
   for (auto& name : unordered) {
 
     QStandardItem* item = new QStandardItem(QString::fromStdString(name.datasetName()));
-    item->setCheckable(true);
+    item->setCheckable(selectable);
     auto group_name = DataSetTreeModel::getGroupName(name);
     if (group_name.length()>0){
       m_map_dir.at(group_name)->appendRow(item);
@@ -122,7 +122,9 @@ void DataSetTreeModel::onItemChanged(QStandardItem* item) {
     if (item_state!=Qt::CheckState::PartiallyChecked){
       // Check/uncheck the children
       for (int i = 0; i < item->rowCount(); ++i) {
-        item->child(i)->setCheckState(item_state);
+        if (item->child(i)->isCheckable()){
+          item->child(i)->setCheckState(item_state);
+        }
       }
     }
 
@@ -139,14 +141,19 @@ void DataSetTreeModel::onItemChanged(QStandardItem* item) {
       }
 
       if (has_partial | (has_checked && has_unchecked)){
-        item->parent()->setCheckState(Qt::CheckState::PartiallyChecked);
+        if (item->parent()->isCheckable()){
+          item->parent()->setCheckState(Qt::CheckState::PartiallyChecked);
+        }
       } else if (has_checked && !has_partial && !has_unchecked){
-        item->parent()->setCheckState(Qt::CheckState::Checked);
+        if (item->parent()->isCheckable()){
+          item->parent()->setCheckState(Qt::CheckState::Checked);
+        }
       } else if (has_unchecked && !has_partial && !has_checked){
-        item->parent()->setCheckState(Qt::CheckState::Unchecked);
+        if (item->parent()->isCheckable()){
+          item->parent()->setCheckState(Qt::CheckState::Unchecked);
+        }
       }
     }
-
   }
 }
 
@@ -159,16 +166,22 @@ void DataSetTreeModel::setEditionStatus(bool inEdition) {
 
 void DataSetTreeModel::clearState(){
   for (auto & group : m_map_dir){
-    group.second->setCheckState(Qt::CheckState::Unchecked);
+    if (group.second->isCheckable()){
+      group.second->setCheckState(Qt::CheckState::Unchecked);
+    }
     for (int i=0; i<group.second->rowCount();++i){
        auto sub_item = group.second->child(i);
-       sub_item->setCheckState(Qt::CheckState::Unchecked);
-   }
+       if (sub_item->isCheckable()){
+         sub_item->setCheckState(Qt::CheckState::Unchecked);
+       }
+    }
   }
 
   for (int i=0; i<this->rowCount();++i){
         auto root_level_item = this->item(i);
-        root_level_item->setCheckState(Qt::CheckState::Unchecked);
+        if (root_level_item->isCheckable()){
+          root_level_item->setCheckState(Qt::CheckState::Unchecked);
+        }
   }
 }
 
@@ -176,10 +189,14 @@ void DataSetTreeModel::clearState(){
 void DataSetTreeModel::checkGroup(XYDataset::QualifiedName name) {
   for (auto & group : m_map_dir) {
     if (XYDataset::QualifiedName(group.first).belongsInGroup(name) || name.qualifiedName() == group.first) {
-      group.second->setCheckState(Qt::CheckState::Checked);
+      if (group.second->isCheckable()){
+        group.second->setCheckState(Qt::CheckState::Checked);
+      }
       for (int i = 0; i < group.second->rowCount(); ++i) {
         auto sub_item = group.second->child(i);
-        sub_item->setCheckState(Qt::CheckState::Checked);
+        if (sub_item->isCheckable()){
+          sub_item->setCheckState(Qt::CheckState::Checked);
+        }
       }
 
     }
@@ -190,7 +207,9 @@ void DataSetTreeModel::checkGroup(XYDataset::QualifiedName name) {
 void DataSetTreeModel::partialCheckParentGroups(XYDataset::QualifiedName child ){
   for (auto & group : m_map_dir) {
       if (child.belongsInGroup(XYDataset::QualifiedName(group.first))){
-        group.second->setCheckState(Qt::CheckState::PartiallyChecked);
+        if (group.second->isCheckable()){
+          group.second->setCheckState(Qt::CheckState::PartiallyChecked);
+        }
       }
   }
 }
@@ -208,7 +227,9 @@ void DataSetTreeModel::setState(const DatasetSelection& selection) {
     for (int i=0; i<this->rowCount();++i){
        auto root_level_item = this->item(i);
        if (root_level_item->text().toStdString()==lone && root_level_item->rowCount()==0){
-         root_level_item->setCheckState(Qt::CheckState::Checked);
+         if (root_level_item->isCheckable()){
+           root_level_item->setCheckState(Qt::CheckState::Checked);
+         }
 
        }
      }
@@ -224,7 +245,9 @@ void DataSetTreeModel::setState(const DatasetSelection& selection) {
       for (int i=0; i<m_map_dir.at(group_name)->rowCount();++i){
         auto item = m_map_dir.at(group_name)->child(i);
         if (item->text().toStdString()==item_name && item->rowCount()==0){
-          item->setCheckState(Qt::CheckState::Unchecked);
+          if (item->isCheckable()){
+            item->setCheckState(Qt::CheckState::Unchecked);
+          }
 
         }
       }

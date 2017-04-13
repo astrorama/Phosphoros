@@ -44,17 +44,21 @@ void FormConfiguration::on_btn_exit_clicked(){
 }
 
 
-void FormConfiguration::loadOptionPage(DatasetRepo seds_repository,
-    DatasetRepo redenig_curves_repository) {
+void FormConfiguration::loadOptionPage( DatasetRepo filter_repository,
+                                        DatasetRepo seds_repository,
+                                        DatasetRepo redenig_curves_repository,
+                                        DatasetRepo luminosity_repository) {
 
+  m_filter_repository = filter_repository;
   m_seds_repository = seds_repository;
   m_redenig_curves_repository = redenig_curves_repository;
+  m_luminosity_repository = luminosity_repository;
 
   ui->txt_hubble_param->setValidator(new QDoubleValidator(0, 1000, 20));
   ui->txt_omega_matter->setValidator(new QDoubleValidator(-10, 10, 20));
   ui->txt_omega_lambda->setValidator(new QDoubleValidator(-10, 10, 20));
 
-  ui->widget_aux_Data->setRepositories(m_seds_repository, m_redenig_curves_repository);
+  ui->widget_aux_Data->setRepositories(m_filter_repository, m_seds_repository, m_redenig_curves_repository, m_luminosity_repository);
   ui->widget_aux_Data->loadManagementPage(0);
 
   auto path_map = FileUtils::readPath();
@@ -184,14 +188,24 @@ void FormConfiguration::on_btn_saveGeneral_clicked(){
       ui->btn_defRes->setEnabled(false);
       ui->gb_thread->setEnabled(false);
 
+      std::unique_ptr <XYDataset::FileParser > filter_file_parser {new XYDataset::AsciiParser { } };
+      std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true), std::move(filter_file_parser) });
+      m_filter_repository->resetProvider(std::move(filter_provider));
+
       std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
-      std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(false), std::move(sed_file_parser) });
+      std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser) });
       m_seds_repository->resetProvider(std::move(sed_provider));
 
       std::unique_ptr <XYDataset::FileParser > reddening_file_parser {new XYDataset::AsciiParser { } };
-      std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(new XYDataset::FileSystemProvider{  FileUtils::getRedCurveRootPath(false), std::move(reddening_file_parser) });
+      std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(new XYDataset::FileSystemProvider{  FileUtils::getRedCurveRootPath(true), std::move(reddening_file_parser) });
       m_redenig_curves_repository->resetProvider(std::move(red_curve_provider));
 
+      std::unique_ptr <XYDataset::FileParser > luminosity_file_parser {new XYDataset::AsciiParser { } };
+      std::unique_ptr<XYDataset::FileSystemProvider> luminosity_curve_provider(new XYDataset::FileSystemProvider{  FileUtils::getLuminosityFunctionCurveRootPath(true), std::move(luminosity_file_parser) });
+      m_luminosity_repository->resetProvider(std::move(luminosity_curve_provider));
+
+      // reload trees based on the new providers
+      ui->widget_aux_Data->loadManagementPage(-1);
 
       do_need_reset=true;
       endEdition();
