@@ -13,6 +13,8 @@ class PhosphorosAction:
 action_list = [
     PhosphorosAction(['help', 'h', '-h', '--help'], 'help',
                      'Shows this help message'),
+    PhosphorosAction(['version', '-v', '--version'], 'version',
+                     'Shows the version of Phosphoros'),
     PhosphorosAction(['GUI'], 'PhosphorosUI',
                      'Starts the Graphical User Interface'),
     PhosphorosAction(['compute_model_grid', 'CMG'], 'PhosphorosComputeModelGrid',
@@ -61,6 +63,11 @@ def printHelp():
     print ('')
     exit()
 
+def printVersion():
+    import PHOSPHOROS_VERSION
+    print(PHOSPHOROS_VERSION.PHOSPHOROS_VERSION_STRING)
+    exit()
+
 if len(sys.argv) < 2:
     printHelp()
 
@@ -72,6 +79,9 @@ if not executable:
 
 if executable[0] == 'help':
     printHelp()
+
+if executable[0] == 'version':
+    printVersion()
 
 phosphoros_conf = os.getenv('PHOSPHOROS_ROOT', os.path.expanduser('~')+os.sep+'Phosphoros') + os.sep + 'config'
 if os.environ.get('ELEMENTS_CONF_PATH'):
