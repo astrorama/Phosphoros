@@ -7,9 +7,11 @@
 #include <iostream>
 #include <set>
 #include <chrono>
+#include <sstream>
 #include "ElementsKernel/ProgramHeaders.h"
 #include "Configuration/ConfigManager.h"
 #include "XYDataset/QualifiedName.h"
+#include "Table/FitsWriter.h"
 
 #include "PhzDataModel/PhotometryGridInfo.h"
 #include "PhzConfiguration/PhotometryGridConfig.h"
@@ -139,6 +141,90 @@ void printPhotometry(const PhzDataModel::PhotometryGrid& grid,
   cout << '\n';
 }
 
+template <int Axis>
+std::map<PhzDataModel::PhotometryGrid::axis_type<Axis>, int> axisOverallIndices(
+                    const std::map<std::string, PhzDataModel::PhotometryGrid>& grid_map) {
+  std::map<PhzDataModel::PhotometryGrid::axis_type<Axis>, int> result;
+  int i = 0;
+  for (auto& pair : grid_map) {
+    auto& axis = pair.second.getAxis<Axis>();
+    for (auto& key : axis) {
+      if (result.count(key) == 0) {
+        result[key] = i++;
+      }
+    }
+  }
+  
+  return result;
+}
+
+template <typename T>
+std::string axisIndicesToString(const std::map<T, int>& indices) {
+  std::stringstream result {};
+  result << '[';
+  std::vector<T> ordered (indices.size(), {"temp"});
+  for (auto& pair : indices) {
+    ordered[pair.second] = pair.first;
+  }
+  for (auto& key : ordered) {
+    result << key << ',';
+  }
+  result.seekp(-1, std::ios_base::end);
+  result << ']';
+  return result.str();
+}
+
+void exportAsCatalog(const PhzDataModel::PhotometryGridInfo& grid_info,
+                     const std::map<std::string, PhzDataModel::PhotometryGrid>& grid_map,
+                     const std::string& output_name) {
+  
+  // Create the Table writer
+  Table::FitsWriter writer {output_name, true};
+  
+  // Get the overall indices for the non numerical axes
+  auto sed_indices = axisOverallIndices<PhzDataModel::ModelParameter::SED>(grid_map);
+  writer.addComment("SEDs : " + axisIndicesToString(sed_indices));
+  auto redcurve_indices = axisOverallIndices<PhzDataModel::ModelParameter::REDDENING_CURVE>(grid_map);
+  writer.addComment("RedCurves : " + axisIndicesToString(redcurve_indices));
+  
+  // Create the column info of the table
+  std::vector<Table::ColumnInfo::info_type> info_list {
+    {"ID", typeid(int)},
+    {"Model_SED", typeid(int)},
+    {"Model_RedCurve", typeid(int)},
+    {"Model_EBV", typeid(float)},
+    {"Model_Z", typeid(float)}
+  };
+  for (auto& filter : grid_info.filter_names) {
+    info_list.emplace_back(filter.datasetName(), typeid(double));
+  }
+  auto column_info = make_shared<Table::ColumnInfo>(move(info_list));
+  
+  // Now populate the catalog
+  int id = 0;
+  vector<Table::Row> row_list {};
+  for (auto& pair : grid_map) {
+    for (auto it = pair.second.begin(); it != pair.second.end(); ++it) {
+      ++id;
+      int sed = sed_indices.at(it.axisValue<PhzDataModel::ModelParameter::SED>());
+      int redcurve = redcurve_indices.at(it.axisValue<PhzDataModel::ModelParameter::REDDENING_CURVE>());
+      float ebv = it.axisValue<PhzDataModel::ModelParameter::EBV>();
+      float z = it.axisValue<PhzDataModel::ModelParameter::Z>();
+      std::vector<Table::Row::cell_type> cells {id, sed, redcurve, ebv, z};
+      for (auto& filter : grid_info.filter_names) {
+        cells.emplace_back(it->find(filter.qualifiedName())->flux);
+      }
+      row_list.push_back(Table::Row{cells, column_info});
+      if (row_list.size() > 500) {
+        writer.addData(Table::Table{row_list});
+        row_list.clear();
+      }
+    }
+  }
+  
+  logger.info() << "Exported model grid in file " << output_name;
+}
+
 class DisplayModelGrid : public Elements::Program {
 
   po::options_description defineSpecificProgramOptions() override {
@@ -156,7 +242,11 @@ class DisplayModelGrid : public Elements::Program {
     auto& grid_info = config_manager.getConfiguration<PhzConfiguration::PhotometryGridConfig>().getPhotometryGridInfo();
     
     cout << '\n';
-    if (conf.showOverall()) {
+    if (conf.exportAsCatalog()) {
+      auto& grid_map = config_manager.getConfiguration<PhzConfiguration::PhotometryGridConfig>().getPhotometryGrid();
+      auto& filename = config_manager.getConfiguration<PhzCLI::DisplayModelGridConfig>().getOutputFitsName();
+      exportAsCatalog(grid_info, grid_map, filename);
+    } else if (conf.showOverall()) {
       printOverall(grid_info);
     } else if (conf.showAllRegionsInfo()) {
       printAllRegionsInfo(grid_info);

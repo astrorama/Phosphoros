@@ -42,6 +42,8 @@ DisplayModelGridConfig::DisplayModelGridConfig(long manager_id) : Configuration(
 
 auto DisplayModelGridConfig::getProgramOptions() -> std::map<std::string, OptionDescriptionList> {
   return {{"Display Model Grid options", {
+    {"export-as-catalog", po::value<std::string>(),
+        "Export the model grid as a FITS catalog"},
     {"all-regions-info", po::bool_switch()->default_value(false),
         "Show an overview of each parameter space region"},
     {"region", po::value<std::string>(),
@@ -65,6 +67,11 @@ void DisplayModelGridConfig::initialize(const UserValues& args) {
   m_show_red_curve_axis = args.at("redcurve").as<bool>();
   m_show_ebv_axis = args.at("ebv").as<bool>();
   m_show_redshift_axis = args.at("z").as<bool>();
+  
+  if (args.count("export-as-catalog") > 0) {
+    m_export_as_catalog = true;
+    m_output_fits_name = args.at("export-as-catalog").as<std::string>();
+  }
   
   if (args.count("region") > 0) {
     m_region_name = args.at("region").as<std::string>();
@@ -134,6 +141,14 @@ bool DisplayModelGridConfig::showRedshiftAxis() const {
 
 bool DisplayModelGridConfig::showSedAxis() const {
   return m_show_sed_axis;
+}
+
+bool DisplayModelGridConfig::exportAsCatalog() const {
+  return m_export_as_catalog;
+}
+
+const std::string& DisplayModelGridConfig::getOutputFitsName() const {
+  return m_output_fits_name;
 }
 
 } // PhzCLI namespace

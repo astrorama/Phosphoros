@@ -70,9 +70,14 @@ public:
 
   bool showSedAxis() const;
 
+  bool exportAsCatalog() const;
+  
+  const std::string& getOutputFitsName() const;
 
 private:
   
+  bool m_export_as_catalog = false;
+  std::string m_output_fits_name = "";
   bool m_show_overall;
   bool m_show_all_regions_info;
   std::string m_region_name;
