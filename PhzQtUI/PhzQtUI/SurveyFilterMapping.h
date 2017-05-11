@@ -71,6 +71,11 @@ public:
      */
     const std::set<std::string>& getColumnList() const;
 
+
+
+    void setCopiedColumns(std::map<std::string,std::string> copied_columns);
+    const std::map<std::string,std::string>& getCopiedColumns() const;
+
     /**
      * @brief Move the list of column inbto the Survey.
      */
@@ -146,6 +151,7 @@ private:
     std::vector<FilterMapping> m_filters;
     std::string m_default_catalog;
     std::set<std::string> m_column_list;
+    std::map<std::string,std::string> m_copied_columns;
     bool m_has_upper_limit = false;
     bool m_has_missing_phot = false;
     double m_non_detection=-99.;

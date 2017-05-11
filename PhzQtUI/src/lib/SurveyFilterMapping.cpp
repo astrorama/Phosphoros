@@ -94,6 +94,13 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
        return m_has_upper_limit;
      }
 
+     void SurveyFilterMapping::setCopiedColumns(std::map<std::string,std::string> copied_columns){
+       m_copied_columns=copied_columns;
+     }
+
+     const std::map<std::string,std::string>& SurveyFilterMapping::getCopiedColumns() const{
+       return m_copied_columns;
+     }
 
 
 
@@ -188,9 +195,28 @@ SurveyFilterMapping SurveyFilterMapping::loadCatalog(std::string name) {
     survey.m_column_list.insert(node_column.text().toStdString());
   }
 
-  if (survey.m_column_list.count(survey.getSourceIdColumn())==0){
-    survey.m_column_list.insert(survey.getSourceIdColumn());
+
+  auto copy_columns_node = root_node.firstChildElement("CopiedColumns");
+  list = copy_columns_node.childNodes();
+  survey.m_copied_columns.clear();
+  for (int i = 0; i < list.count(); ++i) {
+     auto node_column = list.at(i).toElement();
+     std::string copied_col = node_column.text().toStdString();
+
+     auto col_name = copied_col;
+     std::string col_aliases = "";
+     std::string::size_type  pos = copied_col.find(":");
+     if (pos != std::string::npos) {
+       col_aliases = col_name.substr(pos+1);
+       col_name =  col_name.substr(0, pos);
+     }
+
+     survey.m_copied_columns[col_name]=col_aliases;
   }
+
+   if (survey.m_column_list.count(survey.getSourceIdColumn())==0){
+     survey.m_column_list.insert(survey.getSourceIdColumn());
+   }
 
   survey.ReadFilters();
 
@@ -281,6 +307,22 @@ void SurveyFilterMapping::saveSurvey(std::string oldName){
      columns_node.appendChild(text_element);
   }
   root.appendChild(columns_node);
+
+  QDomElement copied_columns_node = doc.createElement("CopiedColumns");
+   for(auto& column : m_copied_columns){
+      QDomElement text_element = doc.createElement("CopiedColumn");
+
+      QString text = QString::fromStdString(column.first);
+      if (column.second!="" && column.second!=column.first)
+      {
+        text = text + ":"+QString::fromStdString(column.second);
+      }
+
+      text_element.appendChild(doc.createTextNode(text));
+      copied_columns_node.appendChild(text_element);
+   }
+   root.appendChild(copied_columns_node);
+
   QString xml = doc.toString();
   stream<<xml;
   file.close();
