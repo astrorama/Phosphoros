@@ -630,7 +630,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
       }
     }
 
-    options_map["copy_columns"].value() = boost::any(option);
+    options_map["copy-columns"].value() = boost::any(option);
   }
 
   return options_map;
