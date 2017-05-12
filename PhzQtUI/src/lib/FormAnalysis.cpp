@@ -1114,6 +1114,18 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
 
 
   void FormAnalysis::updateCopiedColumns(std::list<std::string> new_columns){
+    //get the columns from the catalog
+
+      for (auto&survey : m_analysis_survey_list) {
+        if (survey.second.getName().compare(ui->cb_AnalysisSurvey->currentText().toStdString()) == 0) {
+          setCopiedColumns(survey.second.getCopiedColumns());
+          break;
+        }
+      }
+
+
+
+    //ensure that they are in the selected file
     std::list<std::string> missing{};
     for (auto& iter : m_copied_columns){
       if (std::find(new_columns.begin(),new_columns.end(), iter.first)==new_columns.end()){
