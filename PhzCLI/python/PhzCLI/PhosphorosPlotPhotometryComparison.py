@@ -27,12 +27,14 @@ Author: nikoapos
 from __future__ import division, print_function
 from future_builtins import *
 
+###import os #zzz
 import argparse
 import matplotlib.pyplot as plt
 import ElementsKernel.Logging as log
 from astropy.table import Table
 
 import PhzCLI.DataInterface as di
+import PhzCLI.TableUtils as tut
 
 def defineSpecificProgramOptions():
     """
@@ -113,7 +115,8 @@ def mainMethod(args):
     try:
         table = Table.read(args.source_catalog)
     except:
-        table = Table.read(args.source_catalog, format='ascii')
+        ##table = Table.read(args.source_catalog, format='ascii')
+        table = tut.read_table(args.source_catalog) #zzz
     row = next(r for r in table if r['ID']==args.source_id)
     for f in filter_info:
         f_c, e_c = filter_mapping[f.name]
