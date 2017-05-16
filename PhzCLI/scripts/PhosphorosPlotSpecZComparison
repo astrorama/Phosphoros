@@ -10,44 +10,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
+import PhzCLI.TableUtils as tut
 
-def check_file_exists(filename):
-    if not os.path.exists(filename):  
-       print('ERROR : File', filename, 'not found')       
-       exit(-1)
-    
-#
-#-------------------------------------------------------------------------------
-#
-
-def read_table(filename):
-    print('Reading file: ', filename)
-    check_file_exists(filename)
-    try :
-        data = table.Table.read(filename, format='fits')
-    except:
-        with open(filename) as f:
-            all_lines = f.readlines()
-        header_lines = [l for l in all_lines if l.strip().startswith('#')]
-        comments = [l.replace('#','').strip() for l in header_lines]
-        data_lines = [l for l in all_lines if l.strip() != '' and not l.strip().startswith('#')]
-        column_no = len(data_lines[0].strip().split())
-        header_lines = [l for l in header_lines if len(l.replace('#','').strip().split()) == column_no]
-        text = ''.join(header_lines + data_lines)
-        data = table.Table.read(text, format='ascii')
-        data.meta = {'COMMENT': comments}
-        for pdf_col in [col for col in data.colnames if col.endswith('-1D-PDF')]:
-            pdf_data = [np.array(col_data.split(',')).astype(np.float) for col_data in data[pdf_col]]
-            data.rename_column(pdf_col, pdf_col+'_str')
-            data.add_column(table.Column(name=pdf_col, data=pdf_data))
-    return data
-    
 #
 #-------------------------------------------------------------------------------
 #
 
 def read_specz_catalog(filename, id_col, specz_col):
-    specz_cat = read_table(filename)
+    specz_cat = tut.read_table(filename)
     if not id_col in specz_cat.colnames:
         print('ERROR : Spec-z catalog does not have column with name', id_col)
         exit(-1)
@@ -68,7 +38,7 @@ def read_phosphoros_catalog(out_dir):
     phos_cat_name = out_dir + '/phz_cat.fits'
     if not os.path.exists(phos_cat_name):
         phos_cat_name = out_dir + '/phz_cat.txt'
-    phos_cat = read_table(phos_cat_name)
+    phos_cat = tut.read_table(phos_cat_name)
     phos_cat.add_column(table.Column(np.arange(len(phos_cat)), name='Index'))
     return phos_cat
     
