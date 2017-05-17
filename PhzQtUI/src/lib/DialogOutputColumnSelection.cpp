@@ -32,7 +32,7 @@ DialogOutputColumnSelection::DialogOutputColumnSelection(
   QStandardItemModel *model = new QStandardItemModel();
   model->setColumnCount(2);
   QStringList  setHeaders;
-     setHeaders<<"Input Catalog Column Name"<<"renaming";
+     setHeaders<<"Input Catalog Column Name"<<"Rename As (optional)";
   model->setHorizontalHeaderLabels (setHeaders );
   for(std::string column :m_all_columns){
     QList<QStandardItem*> items;
