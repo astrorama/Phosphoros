@@ -113,6 +113,9 @@ void on_btn_ToModel_clicked();
 
     void on_cb_volumePrior_stateChanged(int);
 
+    void on_output_column_btn_clicked();
+    void setCopiedColumns(std::map<std::string,std::string> columns);
+
 
 private:
     std::unique_ptr<Ui::FormAnalysis> ui;
@@ -120,6 +123,11 @@ private:
     std::list<std::string> getSelectedFilters();
     std::list<std::string> getExcludedFilters();
     std::list<FilterMapping> getSelectedFilterMapping();
+
+    void updateCopiedColumns(std::list<std::string> new_columns);
+
+    void saveCopiedColumnToCatalog();
+
 
     void fillCbColumns(std::set<std::string> columns);
 
@@ -146,6 +154,7 @@ private:
     std::map<int,SurveyFilterMapping>  m_analysis_survey_list;
     std::map<int,ModelSet> m_analysis_model_list;
     std::map<std::string, LuminosityPriorConfig> m_prior_config;
+    std::map<std::string,std::string> m_copied_columns = {};
 
 
     DatasetRepo m_filter_repository;
