@@ -1,4 +1,7 @@
 #include <QMessageBox>
+#include <QtGui/qdesktopservices.h>
+#include <QtCore/qurl.h>
+#include <boost/filesystem/path.hpp>
 
 #include "PhzQtUI/FormAuxDataManagement.h"
 #include "ui_FormAuxDataManagement.h"
@@ -68,6 +71,32 @@ void FormAuxDataManagement::loadManagementPage(int index){
     }
 }
 
+namespace {
+
+void openAuxFilesDir(const std::string& dir) {
+  auto path_map = FileUtils::readPath();
+  boost::filesystem::path path = path_map["AuxiliaryData"];
+  path = path / dir;
+  QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(path.string())));
+}
+
+}
+
+void FormAuxDataManagement::on_btn_ShowFilesFilter_clicked() {
+  openAuxFilesDir("Filters");
+}
+
+void FormAuxDataManagement::on_btn_ShowFilesSed_clicked() {
+  openAuxFilesDir("SEDs");
+}
+
+void FormAuxDataManagement::on_btn_ShowFilesRedCurve_clicked() {
+  openAuxFilesDir("ReddeningCurves");
+}
+
+void FormAuxDataManagement::on_btn_ShowFilesLumFunc_clicked() {
+  openAuxFilesDir("LuminosityFunctionCurves");
+}
 
 }
 }

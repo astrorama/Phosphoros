@@ -38,6 +38,12 @@ public:
     void loadManagementPage(int index=0);
 
 
+private slots:
+  
+  void on_btn_ShowFilesFilter_clicked();
+  void on_btn_ShowFilesSed_clicked();
+  void on_btn_ShowFilesRedCurve_clicked();
+  void on_btn_ShowFilesLumFunc_clicked();
 
 
 private:
