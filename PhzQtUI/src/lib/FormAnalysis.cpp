@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <boost/program_options.hpp>
 
+
 #include "ElementsKernel/Exception.h"
 
 #include "PhzQtUI/FormAnalysis.h"
@@ -1240,8 +1241,23 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
 
 
     std::string out_dir = ui->txt_outputFolder->text().toStdString();
+
+    QDir dir(QString::fromStdString(out_dir));
+    if (dir.exists()){
+      if (QMessageBox::question(this, "Existing Output Folder...",
+               "The Output Folder you selected already exists.\n"
+                   "In order to avoid confusion, the Output Folder will be cleared. Do you want to proceed?",
+               QMessageBox::Cancel | QMessageBox::Ok) == QMessageBox::Ok) {
+             FileUtils::removeDir(QString::fromStdString(out_dir));
+           }
+      else{
+        return;
+      }
+    }
+
     auto config_map = getRunOptionMap();
     auto config_map_luminosity = getLuminosityOptionMap();
+
     std::unique_ptr<DialogRunAnalysis> dialog(new DialogRunAnalysis());
     dialog->setValues(out_dir, config_map, config_map_luminosity);
     if (dialog->exec()) {
