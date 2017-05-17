@@ -3,7 +3,7 @@
 
 #include "PhzQtUI/DialogLuminosityFunctionCurveSelector.h"
 #include "ui_DialogLuminosityFunctionCurveSelector.h"
-#include "PhzQtUI/XYDataSetTreeModel.h"
+#include "PhzQtUI/DataSetTreeModel.h"
 #include "FileUtils.h"
 
 using namespace std;
@@ -12,10 +12,12 @@ namespace Euclid {
 namespace PhzQtUI {
 
 
-DialogLuminosityFunctionCurveSelector::DialogLuminosityFunctionCurveSelector(QWidget *parent) :
+DialogLuminosityFunctionCurveSelector::DialogLuminosityFunctionCurveSelector(
+    DatasetRepo luminosity_repository, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogLuminosityFunctionCurveSelector){
   ui->setupUi(this);
+  m_luminosity_repository = luminosity_repository;
 }
 
 DialogLuminosityFunctionCurveSelector::~DialogLuminosityFunctionCurveSelector(){}
@@ -24,8 +26,8 @@ DialogLuminosityFunctionCurveSelector::~DialogLuminosityFunctionCurveSelector(){
 void DialogLuminosityFunctionCurveSelector::setCurve(std::string curve_name){
   string path_curve = FileUtils::getLuminosityFunctionCurveRootPath(true);
 
-  XYDataSetTreeModel* treeModel_curve = new XYDataSetTreeModel();
-  treeModel_curve->loadDirectory(path_curve,true,"Functions");
+  DataSetTreeModel* treeModel_curve = new DataSetTreeModel(m_luminosity_repository);
+  treeModel_curve->load(true,true);
   treeModel_curve->setEnabled(true);
   ui->treeView_filter->setModel(treeModel_curve);
   ui->treeView_filter->expandAll();
@@ -36,7 +38,8 @@ void DialogLuminosityFunctionCurveSelector::setCurve(std::string curve_name){
            SLOT(onItemChangedSingleLeaf(QStandardItem*)));
 
   if (curve_name.length()>0){
-    treeModel_curve->setState(curve_name,vector<string>());
+    std::vector<std::string> curveList{curve_name};
+    treeModel_curve->setState(curveList);
   }
 
   if (!treeModel_curve->item(0,0)->hasChildren()){
@@ -49,8 +52,8 @@ void DialogLuminosityFunctionCurveSelector::setCurve(std::string curve_name){
 
 
 void DialogLuminosityFunctionCurveSelector::on_btn_save_clicked(){
-  auto curve_res = static_cast<XYDataSetTreeModel*>(ui->treeView_filter->model())->getRootSelection();
-  if (!curve_res.first){
+  auto curve = static_cast<DataSetTreeModel*>(ui->treeView_filter->model())->getSelectedLeaves();
+  if (curve.size()==0){
     QMessageBox::warning( this,
                           "Missing Data...",
                           "Please select a curve.",
@@ -59,7 +62,7 @@ void DialogLuminosityFunctionCurveSelector::on_btn_save_clicked(){
   }
 
   // return the curve to the caller
-  popupClosing(curve_res.second);
+  popupClosing(curve[0]);
   accept();
 }
 

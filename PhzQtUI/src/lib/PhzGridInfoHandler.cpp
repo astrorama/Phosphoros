@@ -17,7 +17,6 @@
 
 #include "Configuration/ConfigManager.h"
 #include "PhzQtUI/PhzGridInfoHandler.h"
-#include "PhzQtUI/XYDataSetTreeModel.h"
 #include "XYDataset/QualifiedName.h"
 #include "FileUtils.h"
 #include "PreferencesUtils.h"

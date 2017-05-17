@@ -40,9 +40,11 @@ namespace po = boost::program_options;
 
 static Elements::Logging dialog_logger = Elements::Logging::getLogger("DialogLuminosityPrior");
 
-DialogLuminosityPrior::DialogLuminosityPrior(QWidget *parent) :
+DialogLuminosityPrior::DialogLuminosityPrior(DatasetRepo filter_repository,DatasetRepo luminosity_repository,QWidget *parent) :
         QDialog(parent),
         ui(new Ui::DialogLuminosityPrior){
+  m_filter_repository=filter_repository;
+  m_luminosity_repository=luminosity_repository;
   ui->setupUi(this);
   ui->frame_Luminosity->setStyleSheet( "background-color: white ");
   m_z_min = 0.;
@@ -324,7 +326,7 @@ void DialogLuminosityPrior::on_cb_unit_currentIndexChanged(const QString &){
 }
 
 void DialogLuminosityPrior::on_btn_filter_clicked(){
-  std::unique_ptr<DialogFilterSelector> dialog(new DialogFilterSelector());
+  std::unique_ptr<DialogFilterSelector> dialog(new DialogFilterSelector(m_filter_repository));
   dialog->setFilter(ui->lb_filter->text().toStdString());
 
   connect(dialog.get(),
@@ -443,7 +445,7 @@ void DialogLuminosityPrior::zPopupClosing(std::vector<double> zs){
 
 
 void DialogLuminosityPrior::onGridButtonClicked(size_t x,size_t y){
-  std::unique_ptr<DialogLuminosityFunction> dialog(new DialogLuminosityFunction());
+  std::unique_ptr<DialogLuminosityFunction> dialog(new DialogLuminosityFunction(m_luminosity_repository));
   dialog->setInfo(m_luminosityInfos[x][y],x,y);
   connect(dialog.get(),
           SIGNAL(popupClosing(LuminosityFunctionInfo, size_t, size_t)),

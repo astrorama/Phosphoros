@@ -65,17 +65,32 @@
    <item>
     <widget class="QTabWidget" name="tab_Management">
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
        <string>Filter Transmissions</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_12">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_13">
+        <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <spacer name="horizontalSpacer_15">
+          <widget class="QLabel" name="label_14">
+           <property name="font">
+            <font>
+             <pointsize>14</pointsize>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>The full transmission curves for the filter</string>
+           </property>
+           <property name="text">
+            <string>List of Available Filter Curves  :</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -88,42 +103,13 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="btn_FilterImport">
+          <widget class="QPushButton" name="btn_ShowFilesFilter">
            <property name="text">
-            <string>Import</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_FilterSubGroup">
-           <property name="text">
-            <string>Create (Sub)-Group</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_FilterDelete">
-           <property name="text">
-            <string>Delete Selection</string>
+            <string>Show Files</string>
            </property>
           </widget>
          </item>
         </layout>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_14">
-         <property name="font">
-          <font>
-           <pointsize>14</pointsize>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string>The full transmission curves for the filter</string>
-         </property>
-         <property name="text">
-          <string>List of Available Filter Curves  :</string>
-         </property>
-        </widget>
        </item>
        <item>
         <widget class="QTreeView" name="treeView_ManageFilter">
@@ -147,11 +133,23 @@
       <attribute name="title">
        <string>SEDs</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_9">
+      <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_14">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <spacer name="horizontalSpacer_16">
+          <widget class="QLabel" name="label_15">
+           <property name="font">
+            <font>
+             <pointsize>14</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>List of Available SEDs :</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -164,39 +162,13 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="btn_SedImport">
+          <widget class="QPushButton" name="btn_ShowFilesSed">
            <property name="text">
-            <string>Import</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_SedSubGroup">
-           <property name="text">
-            <string>Create (Sub)-Group</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_SedDelete">
-           <property name="text">
-            <string>Delete Selection</string>
+            <string>Show Files</string>
            </property>
           </widget>
          </item>
         </layout>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_15">
-         <property name="font">
-          <font>
-           <pointsize>14</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>List of Available SEDs :</string>
-         </property>
-        </widget>
        </item>
        <item>
         <widget class="QTreeView" name="treeView_ManageSed">
@@ -216,9 +188,21 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_15">
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
-          <spacer name="horizontalSpacer_17">
+          <widget class="QLabel" name="label_16">
+           <property name="font">
+            <font>
+             <pointsize>14</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>List of Available Reddening Curves :</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -231,39 +215,13 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="btn_RedImport">
+          <widget class="QPushButton" name="btn_ShowFilesRedCurve">
            <property name="text">
-            <string>Import</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_RedSubGroup">
-           <property name="text">
-            <string>Create (Sub)-Group</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_RedDelete">
-           <property name="text">
-            <string>Delete Selection</string>
+            <string>Show Files</string>
            </property>
           </widget>
          </item>
         </layout>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_16">
-         <property name="font">
-          <font>
-           <pointsize>14</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>List of Available Reddening Curves :</string>
-         </property>
-        </widget>
        </item>
        <item>
         <widget class="QTreeView" name="treeView_ManageRed">
@@ -283,9 +241,24 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_16">
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
-          <spacer name="horizontalSpacer_18">
+          <widget class="QLabel" name="label_17">
+           <property name="font">
+            <font>
+             <pointsize>14</pointsize>
+            </font>
+           </property>
+           <property name="toolTip">
+            <string>The Luminosity Function (of the Magnitude or in Flux)</string>
+           </property>
+           <property name="text">
+            <string>List of Available Luminosity Function Curves  :</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_4">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -298,42 +271,13 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="btn_LuminosityImport">
+          <widget class="QPushButton" name="btn_ShowFilesLumFunc">
            <property name="text">
-            <string>Import</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_LuminositySubGroup">
-           <property name="text">
-            <string>Create (Sub)-Group</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_LuminosityDelete">
-           <property name="text">
-            <string>Delete Selection</string>
+            <string>Show Files</string>
            </property>
           </widget>
          </item>
         </layout>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_17">
-         <property name="font">
-          <font>
-           <pointsize>14</pointsize>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string>The Luminosity Function (of the Magnitude or in Flux)</string>
-         </property>
-         <property name="text">
-          <string>List of Available Luminosity Function Curves  :</string>
-         </property>
-        </widget>
        </item>
        <item>
         <widget class="QTreeView" name="treeView_ManageLuminosity">

@@ -77,15 +77,25 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
+  std::unique_ptr <XYDataset::FileParser > filter_file_parser {new XYDataset::AsciiParser { } };
+  std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true), std::move(filter_file_parser) });
+  m_filter_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(filter_provider)));
+  m_filter_repository->reload();
+
   std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
-  std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(false), std::move(sed_file_parser) });
+  std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser) });
   m_seds_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(sed_provider)));
   m_seds_repository->reload();
 
   std::unique_ptr <XYDataset::FileParser > reddening_file_parser {new XYDataset::AsciiParser { } };
-  std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(new XYDataset::FileSystemProvider{  FileUtils::getRedCurveRootPath(false), std::move(reddening_file_parser) });
+  std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(new XYDataset::FileSystemProvider{  FileUtils::getRedCurveRootPath(true), std::move(reddening_file_parser) });
   m_redenig_curves_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(red_curve_provider)});
   m_redenig_curves_repository->reload();
+
+  std::unique_ptr <XYDataset::FileParser > luminosity_file_parser {new XYDataset::AsciiParser { } };
+  std::unique_ptr<XYDataset::FileSystemProvider> luminosity_curve_provider(new XYDataset::FileSystemProvider{  FileUtils::getLuminosityFunctionCurveRootPath(true), std::move(luminosity_file_parser) });
+  m_luminosity_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(luminosity_curve_provider)});
+  m_luminosity_repository->reload();
 }
 
 MainWindow::~MainWindow()
@@ -143,7 +153,7 @@ void MainWindow::navigateToConfig(){
 
  void MainWindow::navigateToNewCatalog(std::string new_name){
    changeMainStackedWidgetIndex(2);
-   ui->widget_Catalog->loadMappingPage(new_name);
+   ui->widget_Catalog->loadMappingPage(m_filter_repository, new_name);
  }
 
  //--------------------------------------------------
@@ -152,7 +162,7 @@ void MainWindow::navigateToConfig(){
  void MainWindow::on_btn_HomeToOption_clicked()
  {
    changeMainStackedWidgetIndex(4);
-   ui->widget_configuration->loadOptionPage(m_seds_repository, m_redenig_curves_repository);
+   ui->widget_configuration->loadOptionPage(m_filter_repository, m_seds_repository, m_redenig_curves_repository, m_luminosity_repository);
  }
 
 //------------------------------------------------
@@ -174,7 +184,7 @@ void MainWindow::on_btn_HomeToCatalog_clicked(){
   changeMainStackedWidgetIndex(2);
 
   if (!m_mapping_loaded){
-    ui->widget_Catalog->loadMappingPage("");
+    ui->widget_Catalog->loadMappingPage(m_filter_repository,"");
     m_mapping_loaded=true;
   }
 
@@ -189,7 +199,7 @@ void MainWindow::on_btn_HomeToAnalysis_clicked()
 {
   changeMainStackedWidgetIndex(3);
 
-    ui->widget_Analysis->loadAnalysisPage();
+    ui->widget_Analysis->loadAnalysisPage(m_filter_repository, m_luminosity_repository);
 
 
 }

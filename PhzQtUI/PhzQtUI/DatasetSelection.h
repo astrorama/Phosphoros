@@ -16,6 +16,8 @@ namespace PhzQtUI {
 class DatasetSelection
 {
 public:
+
+
   /**
    * @brief Set the selected groups
    * @param groups A vector of string containing the (full) name of the groups.

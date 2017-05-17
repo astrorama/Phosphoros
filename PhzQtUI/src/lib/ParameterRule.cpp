@@ -8,7 +8,6 @@
 
 #include "PhzQtUI/ParameterRule.h"
 #include "FileUtils.h"
-#include "PhzQtUI/XYDataSetTreeModel.h"
 
 #include "XYDataset/FileSystemProvider.h"
 #include "XYDataset/AsciiParser.h"
