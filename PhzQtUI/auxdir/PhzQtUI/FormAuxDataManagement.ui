@@ -29,7 +29,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Aux. Data Management :</string>
+        <string>Auxiliary Data :</string>
        </property>
       </widget>
      </item>
@@ -51,7 +51,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Import, organize or remove aux. data files to the local database</string>
+      <string>Browse the aux. data files in the local database</string>
      </property>
     </widget>
    </item>
