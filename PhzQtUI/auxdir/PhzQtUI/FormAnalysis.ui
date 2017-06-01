@@ -933,433 +933,221 @@
           <attribute name="label">
            <string>4. Input /Output Files</string>
           </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <layout class="QVBoxLayout" name="verticalLayout_2">
            <item>
-            <layout class="QVBoxLayout" name="verticalLayout_19">
-             <property name="spacing">
-              <number>6</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_9">
+              <layout class="QVBoxLayout" name="verticalLayout_4">
                <item>
-                <layout class="QVBoxLayout" name="verticalLayout_4">
-                 <item>
-                  <widget class="QLabel" name="label_26">
-                   <property name="font">
-                    <font>
-                     <pointsize>11</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Input Catalog File :</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <layout class="QHBoxLayout" name="horizontalLayout_23">
-                   <item>
-                    <widget class="QLineEdit" name="txt_inputCatalog">
-                     <property name="enabled">
-                      <bool>false</bool>
-                     </property>
-                     <property name="font">
-                      <font>
-                       <pointsize>11</pointsize>
-                      </font>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QPushButton" name="btn_BrowseInput">
-                     <property name="font">
-                      <font>
-                       <pointsize>11</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>Browse</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                </layout>
+                <widget class="QLabel" name="label_26">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Input Catalog File :</string>
+                 </property>
+                </widget>
                </item>
                <item>
-                <layout class="QVBoxLayout" name="verticalLayout_12">
+                <layout class="QHBoxLayout" name="horizontalLayout_23">
                  <item>
-                  <widget class="QLabel" name="label_2">
+                  <widget class="QLineEdit" name="txt_inputCatalog">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                    </font>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="btn_BrowseInput">
                    <property name="font">
                     <font>
                      <pointsize>11</pointsize>
                     </font>
                    </property>
                    <property name="text">
-                    <string>Output Folder :</string>
+                    <string>Browse</string>
                    </property>
                   </widget>
-                 </item>
-                 <item>
-                  <layout class="QHBoxLayout" name="horizontalLayout_28">
-                   <item>
-                    <widget class="QLineEdit" name="txt_outputFolder">
-                     <property name="enabled">
-                      <bool>false</bool>
-                     </property>
-                     <property name="font">
-                      <font>
-                       <pointsize>11</pointsize>
-                      </font>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QPushButton" name="btn_BrowseOutput">
-                     <property name="font">
-                      <font>
-                       <pointsize>11</pointsize>
-                      </font>
-                     </property>
-                     <property name="text">
-                      <string>Browse</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="verticalLayout_5">
-                 <item>
-                  <widget class="QLabel" name="label_27">
-                   <property name="font">
-                    <font>
-                     <pointsize>11</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Output Catalog Format :</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <layout class="QHBoxLayout" name="horizontalLayout_24">
-                   <item>
-                    <widget class="QComboBox" name="cb_cat_output_type">
-                     <property name="font">
-                      <font>
-                       <pointsize>11</pointsize>
-                      </font>
-                     </property>
-                     <property name="iconSize">
-                      <size>
-                       <width>16</width>
-                       <height>16</height>
-                      </size>
-                     </property>
-                     <property name="frame">
-                      <bool>false</bool>
-                     </property>
-                     <item>
-                      <property name="text">
-                       <string>FITS</string>
-                      </property>
-                     </item>
-                     <item>
-                      <property name="text">
-                       <string>ASCII</string>
-                      </property>
-                     </item>
-                    </widget>
-                   </item>
-                  </layout>
                  </item>
                 </layout>
                </item>
               </layout>
              </item>
              <item>
-              <widget class="QGroupBox" name="groupBox_output">
-               <property name="font">
-                <font>
-                 <pointsize>10</pointsize>
-                </font>
-               </property>
-               <property name="title">
-                <string>Output catalog content</string>
-               </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_11">
-                <property name="margin">
-                 <number>9</number>
-                </property>
-                <item>
-                 <widget class="QCheckBox" name="cb_best_likelihood">
-                  <property name="text">
-                   <string>Best likelihood model</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="cb_best_model_cols">
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Best posterior model</string>
-                  </property>
-                  <property name="checked">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="output_column_btn">
-                  <property name="toolTip">
-                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose which of the input catalog columns have to be copied in the output catalog&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                  </property>
-                  <property name="text">
-                   <string>Copy columns</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer_12">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-               </layout>
-              </widget>
+              <layout class="QVBoxLayout" name="verticalLayout_12">
+               <item>
+                <widget class="QLabel" name="label_2">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Output Folder :</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_28">
+                 <item>
+                  <widget class="QLineEdit" name="txt_outputFolder">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                    </font>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="btn_BrowseOutput">
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Browse</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_5">
+               <item>
+                <widget class="QLabel" name="label_27">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Output Catalog Format :</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_24">
+                 <item>
+                  <widget class="QComboBox" name="cb_cat_output_type">
+                   <property name="font">
+                    <font>
+                     <pointsize>11</pointsize>
+                    </font>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>16</width>
+                     <height>16</height>
+                    </size>
+                   </property>
+                   <property name="frame">
+                    <bool>false</bool>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>FITS</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>ASCII</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
              </item>
             </layout>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_6">
+            <widget class="QLabel" name="label_5">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Output Catalog Content :</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_12">
              <item>
-              <widget class="QGroupBox" name="groupBox_input">
-               <property name="font">
-                <font>
-                 <pointsize>10</pointsize>
-                </font>
-               </property>
-               <property name="title">
-                <string>1D PDF</string>
-               </property>
-               <layout class="QGridLayout" name="gridLayout_3">
-                <item row="1" column="0">
-                 <widget class="QComboBox" name="cbb_pdf_out">
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                   </font>
-                  </property>
-                  <property name="iconSize">
-                   <size>
-                    <width>16</width>
-                    <height>16</height>
-                   </size>
-                  </property>
-                  <property name="frame">
-                   <bool>false</bool>
-                  </property>
-                  <item>
-                   <property name="text">
-                    <string>catalog column</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text">
-                    <string>separate file</string>
-                   </property>
-                  </item>
-                 </widget>
-                </item>
-                <item row="0" column="0">
-                 <widget class="QLabel" name="label_10">
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                    <weight>50</weight>
-                    <bold>false</bold>
-                    <kerning>true</kerning>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Generate as</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
+              <layout class="QGridLayout" name="gridLayout_4">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_24">
+                 <property name="font">
+                  <font>
+                   <pointsize>10</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QCheckBox" name="cb_best_likelihood">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Best likelihood model</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="2">
+                <widget class="QCheckBox" name="cb_best_model_cols">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Best posterior model</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="3">
+                <widget class="QPushButton" name="output_column_btn">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Choose which of the input catalog columns have to be copied in the output catalog&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Copy columns</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
              <item>
-              <widget class="QGroupBox" name="groupBox_2">
-               <property name="font">
-                <font>
-                 <pointsize>10</pointsize>
-                </font>
-               </property>
-               <property name="title">
-                <string>On Likelihood Grid Axis:</string>
-               </property>
-               <layout class="QGridLayout" name="gridLayout_4">
-                <item row="0" column="0">
-                 <widget class="QCheckBox" name="cb_likelihood_pdf_z">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Redshift</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QCheckBox" name="cb_likelihood_pdf_sed">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>SED</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QCheckBox" name="cb_likelihood_pdf_ebv">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>E(B-V)</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QCheckBox" name="cb_likelihood_pdf_red">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Reddening Curve</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-               <zorder>groupBox_input</zorder>
-               <zorder>cb_likelihood_pdf_z</zorder>
-               <zorder>cb_likelihood_pdf_sed</zorder>
-               <zorder>cb_likelihood_pdf_ebv</zorder>
-               <zorder>cb_likelihood_pdf_red</zorder>
-              </widget>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox">
-               <property name="font">
-                <font>
-                 <pointsize>10</pointsize>
-                </font>
-               </property>
-               <property name="title">
-                <string> On Posterior Grid Axis:</string>
-               </property>
-               <layout class="QGridLayout" name="gridLayout">
-                <item row="0" column="0">
-                 <widget class="QCheckBox" name="cb_pdf_z">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Redshift</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QCheckBox" name="cb_pdf_sed">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>SED</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QCheckBox" name="cb_pdf_ebv">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>E(B-V)</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QCheckBox" name="cb_pdf_red">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="font">
-                   <font>
-                    <pointsize>11</pointsize>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Reddening Curve</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_13">
+              <spacer name="horizontalSpacer_12">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
@@ -1374,63 +1162,329 @@
             </layout>
            </item>
            <item>
-            <widget class="QGroupBox" name="groupBox_like">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
+            <layout class="QHBoxLayout" name="horizontalLayout_13">
+             <item>
+              <widget class="QLabel" name="label_9">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Generate 1D PDF as :</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="cbb_pdf_out">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>16</width>
+                 <height>16</height>
+                </size>
+               </property>
+               <property name="frame">
+                <bool>false</bool>
+               </property>
+               <item>
+                <property name="text">
+                 <string>catalog column</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>separate file</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="cb_normalize_pdf">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Normalize 1D PDF</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_15">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <item>
+              <layout class="QGridLayout" name="gridLayout">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_22">
+                 <property name="font">
+                  <font>
+                   <pointsize>10</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>        </string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLabel" name="label_10">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>On Likelihood Grid Axis :</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="2">
+                <widget class="QCheckBox" name="cb_likelihood_pdf_z">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Redshift</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="3">
+                <widget class="QCheckBox" name="cb_likelihood_pdf_sed">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>SED</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="4">
+                <widget class="QCheckBox" name="cb_likelihood_pdf_ebv">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>E(B-V)</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="5">
+                <widget class="QCheckBox" name="cb_likelihood_pdf_red">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Reddening Curve</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QLabel" name="label_11">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>On Posterior Grid Axis : </string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2">
+                <widget class="QCheckBox" name="cb_pdf_z">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Redshift</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="3">
+                <widget class="QCheckBox" name="cb_pdf_sed">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>SED</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="4">
+                <widget class="QCheckBox" name="cb_pdf_ebv">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>E(B-V)</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="5">
+                <widget class="QCheckBox" name="cb_pdf_red">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Reddening Curve</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_14">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_12">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
              </property>
+             <property name="text">
+              <string>Multi-Dimentional Output : </string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QGridLayout" name="gridLayout_3">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_25">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QCheckBox" name="cb_gen_posterior">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Generate Posterior Files</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QCheckBox" name="cb_gen_likelihood">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Generate Likelihood Files</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <spacer name="horizontalSpacer_11">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_14">
              <property name="font">
               <font>
                <pointsize>10</pointsize>
               </font>
              </property>
-             <property name="title">
-              <string>Multi-Dimensional Output</string>
+             <property name="text">
+              <string/>
              </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_13">
-              <item>
-               <widget class="QCheckBox" name="cb_gen_likelihood">
-                <property name="font">
-                 <font>
-                  <pointsize>11</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Generate Likelihood Files</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="cb_gen_posterior">
-                <property name="font">
-                 <font>
-                  <pointsize>11</pointsize>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Generate Posterior Files</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_11">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
-             <zorder>cb_gen_likelihood</zorder>
-             <zorder>cb_gen_posterior</zorder>
-             <zorder>horizontalSpacer_11</zorder>
             </widget>
            </item>
            <item>
@@ -1446,7 +1500,67 @@
              </property>
             </spacer>
            </item>
+           <item>
+            <widget class="QLabel" name="label_15">
+             <property name="font">
+              <font>
+               <pointsize>10</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
           </layout>
+          <zorder></zorder>
+          <zorder>label_9</zorder>
+          <zorder>label_11</zorder>
+          <zorder>label_9</zorder>
+          <zorder>label_10</zorder>
+          <zorder>cbb_pdf_out</zorder>
+          <zorder>label_10</zorder>
+          <zorder>cb_likelihood_pdf_z</zorder>
+          <zorder>cb_likelihood_pdf_sed</zorder>
+          <zorder>cb_likelihood_pdf_ebv</zorder>
+          <zorder>cb_likelihood_pdf_red</zorder>
+          <zorder>label_11</zorder>
+          <zorder>cb_pdf_z</zorder>
+          <zorder>cb_pdf_sed</zorder>
+          <zorder>cb_pdf_ebv</zorder>
+          <zorder>cb_pdf_red</zorder>
+          <zorder></zorder>
+          <zorder>verticalSpacer_4</zorder>
+          <zorder></zorder>
+          <zorder>verticalSpacer_6</zorder>
+          <zorder></zorder>
+          <zorder>label_13</zorder>
+          <zorder>label_14</zorder>
+          <zorder>label_15</zorder>
+          <zorder></zorder>
+          <zorder>label_14</zorder>
+          <zorder>label_15</zorder>
+          <zorder></zorder>
+          <zorder>label_14</zorder>
+          <zorder>label_15</zorder>
+          <zorder>label_16</zorder>
+          <zorder>label_17</zorder>
+          <zorder></zorder>
+          <zorder></zorder>
+          <zorder>horizontalLayoutWidget_3</zorder>
+          <zorder>cb_gen_likelihood</zorder>
+          <zorder>label_24</zorder>
+          <zorder>cb_gen_posterior</zorder>
+          <zorder>cb_best_likelihood</zorder>
+          <zorder>cb_best_model_cols</zorder>
+          <zorder>output_column_btn</zorder>
+          <zorder>label_24</zorder>
+          <zorder>label_12</zorder>
+          <zorder>label_5</zorder>
+          <zorder>horizontalLayoutWidget</zorder>
+          <zorder></zorder>
+          <zorder>label_12</zorder>
+          <zorder></zorder>
          </widget>
         </widget>
        </item>

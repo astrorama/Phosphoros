@@ -576,6 +576,12 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
      options_map["create-output-best-likelihood-model"].value() = boost::any(no_flag);
    }
 
+  if (ui->cb_normalize_pdf->isChecked()) {
+    options_map["output-pdf-normalized"].value() = boost::any(yes_flag);
+      } else {
+        options_map["output-pdf-normalized"].value() = boost::any(no_flag);
+      }
+
   if (ui->cb_gen_likelihood->isChecked()) {
    options_map["create-output-likelihoods"].value() = boost::any(yes_flag);
   }
