@@ -26,11 +26,6 @@ static Elements::Logging logger = Elements::Logging::getLogger("PhosphorosDispla
 
 static long config_manager_id = Euclid::Configuration::getUniqueManagerId();
 
-ostream& operator<<(ostream& stream, const XYDataset::QualifiedName& name) {
-  stream << name.qualifiedName();
-  return stream;
-}
-
 void printPhotometryInfo(const PhzDataModel::PhotometryGridInfo& grid_info) {
   cout << "Photometry info\n";
   cout << "---------------\n";
