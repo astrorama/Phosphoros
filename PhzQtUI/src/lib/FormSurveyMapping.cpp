@@ -53,7 +53,7 @@ void FormSurveyMapping::updateSelection(){
 
 void FormSurveyMapping::loadMappingPage(DatasetRepo filter_repository, std::string new_path){
 
-     ui->txt_nonDetection->setValidator(new QDoubleValidator(-10000, 10000, 0.1));
+     ui->txt_nonDetection->setValidator(new QDoubleValidator());
      m_filter_repository = filter_repository;
      SurveyModel* model = new SurveyModel();
      model->loadSurvey();
