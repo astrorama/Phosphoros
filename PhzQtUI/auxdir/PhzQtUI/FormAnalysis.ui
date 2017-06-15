@@ -310,15 +310,15 @@
           </font>
          </property>
          <property name="currentIndex">
-          <number>3</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="page">
           <property name="geometry">
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1021</width>
-            <height>460</height>
+            <width>421</width>
+            <height>164</height>
            </rect>
           </property>
           <attribute name="label">
@@ -482,53 +482,103 @@
           <attribute name="label">
            <string>2. Algorithm Options</string>
           </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_6">
+          <layout class="QVBoxLayout" name="verticalLayout_8">
            <item>
-            <widget class="QLabel" name="label">
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Axis Collapse :</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout">
+            <layout class="QHBoxLayout" name="horizontalLayout_11">
              <item>
-              <widget class="QComboBox" name="cb_marginalization">
-               <property name="minimumSize">
-                <size>
-                 <width>300</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>11</pointsize>
-                </font>
-               </property>
+              <layout class="QVBoxLayout" name="verticalLayout_6">
                <item>
-                <property name="text">
-                 <string>BAYESIAN</string>
-                </property>
+                <widget class="QLabel" name="label_13">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Axis Collapse on Likelihood :</string>
+                 </property>
+                </widget>
                </item>
                <item>
-                <property name="text">
-                 <string>MAX</string>
-                </property>
+                <widget class="QComboBox" name="cb_marginalization_likelihood">
+                 <property name="minimumSize">
+                  <size>
+                   <width>300</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>BAYESIAN</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>MAX</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>SUM</string>
+                  </property>
+                 </item>
+                </widget>
                </item>
-               <item>
-                <property name="text">
-                 <string>SUM</string>
-                </property>
-               </item>
-              </widget>
+              </layout>
              </item>
              <item>
-              <spacer name="horizontalSpacer_2">
+              <layout class="QVBoxLayout" name="verticalLayout_3">
+               <item>
+                <widget class="QLabel" name="label">
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Axis Collapse on Posterior :</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="cb_marginalization">
+                 <property name="minimumSize">
+                  <size>
+                   <width>300</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <pointsize>11</pointsize>
+                  </font>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>BAYESIAN</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>MAX</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>SUM</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_10">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
@@ -1245,7 +1295,7 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>        </string>
+                  <string/>
                  </property>
                 </widget>
                </item>
@@ -1514,50 +1564,12 @@
            </item>
           </layout>
           <zorder></zorder>
-          <zorder>label_9</zorder>
-          <zorder>label_11</zorder>
-          <zorder>label_9</zorder>
-          <zorder>label_10</zorder>
-          <zorder>cbb_pdf_out</zorder>
-          <zorder>label_10</zorder>
-          <zorder>cb_likelihood_pdf_z</zorder>
-          <zorder>cb_likelihood_pdf_sed</zorder>
-          <zorder>cb_likelihood_pdf_ebv</zorder>
-          <zorder>cb_likelihood_pdf_red</zorder>
-          <zorder>label_11</zorder>
-          <zorder>cb_pdf_z</zorder>
-          <zorder>cb_pdf_sed</zorder>
-          <zorder>cb_pdf_ebv</zorder>
-          <zorder>cb_pdf_red</zorder>
-          <zorder></zorder>
-          <zorder>verticalSpacer_4</zorder>
-          <zorder></zorder>
-          <zorder>verticalSpacer_6</zorder>
-          <zorder></zorder>
-          <zorder>label_13</zorder>
-          <zorder>label_14</zorder>
-          <zorder>label_15</zorder>
           <zorder></zorder>
           <zorder>label_14</zorder>
           <zorder>label_15</zorder>
           <zorder></zorder>
-          <zorder>label_14</zorder>
-          <zorder>label_15</zorder>
-          <zorder>label_16</zorder>
-          <zorder>label_17</zorder>
-          <zorder></zorder>
-          <zorder></zorder>
-          <zorder>horizontalLayoutWidget_3</zorder>
-          <zorder>cb_gen_likelihood</zorder>
-          <zorder>label_24</zorder>
-          <zorder>cb_gen_posterior</zorder>
-          <zorder>cb_best_likelihood</zorder>
-          <zorder>cb_best_model_cols</zorder>
-          <zorder>output_column_btn</zorder>
-          <zorder>label_24</zorder>
-          <zorder>label_12</zorder>
+          <zorder>verticalSpacer</zorder>
           <zorder>label_5</zorder>
-          <zorder>horizontalLayoutWidget</zorder>
           <zorder></zorder>
           <zorder>label_12</zorder>
           <zorder></zorder>

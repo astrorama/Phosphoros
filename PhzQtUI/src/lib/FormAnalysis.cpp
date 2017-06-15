@@ -554,7 +554,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
       ui->cb_marginalization->currentText().toStdString());
 
   options_map["likelihood-axes-collapse-type"].value() = boost::any(
-        ui->cb_marginalization->currentText().toStdString());
+        ui->cb_marginalization_likelihood->currentText().toStdString());
 
 
   options_map["output-catalog-format"].value() = boost::any(
