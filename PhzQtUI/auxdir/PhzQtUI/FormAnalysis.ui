@@ -317,8 +317,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>421</width>
-            <height>164</height>
+            <width>1021</width>
+            <height>460</height>
            </rect>
           </property>
           <attribute name="label">
@@ -593,6 +593,21 @@
             </layout>
            </item>
            <item>
+            <widget class="QCheckBox" name="cb_normalize_pdf">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Normalize 1D PDF</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QGroupBox" name="gb_fix_z">
              <property name="font">
               <font>
@@ -825,8 +840,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>537</width>
-            <height>158</height>
+            <width>1021</width>
+            <height>460</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1254,21 +1269,6 @@
               </widget>
              </item>
              <item>
-              <widget class="QCheckBox" name="cb_normalize_pdf">
-               <property name="font">
-                <font>
-                 <pointsize>11</pointsize>
-                </font>
-               </property>
-               <property name="text">
-                <string>Normalize 1D PDF</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
               <spacer name="horizontalSpacer_15">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
@@ -1566,7 +1566,6 @@
           <zorder></zorder>
           <zorder>label_14</zorder>
           <zorder>label_15</zorder>
-          <zorder></zorder>
           <zorder>verticalSpacer</zorder>
           <zorder>label_5</zorder>
           <zorder></zorder>
