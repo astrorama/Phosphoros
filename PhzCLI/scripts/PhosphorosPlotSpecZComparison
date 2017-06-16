@@ -47,7 +47,8 @@ def read_phosphoros_catalog(out_dir):
 #
 
 def get_pdf_bins_from_comment(comment_lines, parameter):
-    type_map = {'SED':str, 'REDDENING-CURVE':str, 'EBV':float, 'Z':float}
+    type_map = {'SED':str, 'REDDENING-CURVE':str, 'EBV':float, 'Z':float,
+                'LIKELIHOOD-SED':str, 'LIKELIHOOD-REDDENING-CURVE':str, 'LIKELIHOOD-EBV':float, 'LIKELIHOOD-Z':float}
     bins_str = ''.join(comment_lines)
     bins_str = bins_str[bins_str.index(parameter+'-BINS :'):]
     bins_str = bins_str[bins_str.index('{')+1: bins_str.index('}')]
@@ -60,21 +61,24 @@ def get_pdf_bins_from_comment(comment_lines, parameter):
 
 def read_pdfs(catalog, out_dir):
     print('Loading the 1D-PDFs...')
-    filename_map = {'SED':'sed', 'REDDENING-CURVE':'red_curve', 'EBV':'ebv', 'Z':'z'}
+    filename_map = {'SED':'pdf_sed.fits', 'REDDENING-CURVE':'pdf_red_curve.fits', 'EBV':'pdf_ebv.fits', 'Z':'pdf_z.fits',
+                    'LIKELIHOOD-SED':'likelihood_pdf_sed.fits', 'LIKELIHOOD-REDDENING-CURVE':'likelihood_pdf_red_curve.fits',
+                    'LIKELIHOOD-EBV':'likelihood_pdf_ebv.fits', 'LIKELIHOOD-Z':'likelihood_pdf_z.fits'}
     
     def read(parameter):
         if parameter+'-1D-PDF' in catalog.colnames:
             print('    ' + parameter + ': Using catlog column ' + parameter+'-1D-PDF')
             return parameter, get_pdf_bins_from_comment(catalog.meta['COMMENT'], parameter), catalog[parameter+'-1D-PDF']
-        elif os.path.exists(out_dir+'/pdf_'+filename_map[parameter]+'.fits'):
-            print('    ' + parameter + ': Reading file ' + out_dir+'/pdf_'+filename_map[parameter]+'.fits')
-            hdus = fits.open(out_dir+'/pdf_'+filename_map[parameter]+'.fits')
+        elif os.path.exists(out_dir+'/'+filename_map[parameter]):
+            print('    ' + parameter + ': Reading file ' + out_dir+'/'+filename_map[parameter])
+            hdus = fits.open(out_dir+'/'+filename_map[parameter])
             return parameter, hdus[1].data[hdus[1].columns[0].name], [hdus[s['Index']+1].data['Probability'] for s in catalog]
         else:
             print('    ' + parameter + ': No 1D PDF found')
             return None
     
-    result = [read(p) for p in ['SED', 'REDDENING-CURVE', 'EBV', 'Z']]
+    result = [read(p) for p in ['SED', 'REDDENING-CURVE', 'EBV', 'Z',
+                                'LIKELIHOOD-SED', 'LIKELIHOOD-REDDENING-CURVE', 'LIKELIHOOD-EBV', 'LIKELIHOOD-Z']]
     result = [r for r in result if r != None]
     return result
     

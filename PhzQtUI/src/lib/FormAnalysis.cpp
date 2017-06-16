@@ -553,6 +553,9 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   options_map["axes-collapse-type"].value() = boost::any(
       ui->cb_marginalization->currentText().toStdString());
 
+  options_map["likelihood-axes-collapse-type"].value() = boost::any(
+        ui->cb_marginalization_likelihood->currentText().toStdString());
+
 
   options_map["output-catalog-format"].value() = boost::any(
         ui->cb_cat_output_type->currentText().toStdString());
@@ -566,6 +569,18 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
    } else {
      options_map["create-output-best-model"].value() = boost::any(no_flag);
    }
+
+  if (ui->cb_best_likelihood->isChecked()) {
+     options_map["create-output-best-likelihood-model"].value() = boost::any(yes_flag);
+   } else {
+     options_map["create-output-best-likelihood-model"].value() = boost::any(no_flag);
+   }
+
+  if (ui->cb_normalize_pdf->isChecked()) {
+    options_map["output-pdf-normalized"].value() = boost::any(yes_flag);
+      } else {
+        options_map["output-pdf-normalized"].value() = boost::any(no_flag);
+      }
 
   if (ui->cb_gen_likelihood->isChecked()) {
    options_map["create-output-likelihoods"].value() = boost::any(yes_flag);
@@ -616,6 +631,28 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   if (pdf_output_axis.size()>0){
     options_map["create-output-pdf"].value() = boost::any(pdf_output_axis);
   }
+
+  std::vector<std::string> likelihood_pdf_output_axis{};
+   if (ui->cb_likelihood_pdf_z->isChecked()) {
+     likelihood_pdf_output_axis.push_back("Z");
+   }
+
+   if (ui->cb_likelihood_pdf_ebv->isChecked()) {
+     likelihood_pdf_output_axis.push_back("EBV");
+   }
+
+   if (ui->cb_likelihood_pdf_red->isChecked()) {
+     likelihood_pdf_output_axis.push_back("REDDENING-CURVE");
+   }
+
+   if (ui->cb_likelihood_pdf_sed->isChecked()) {
+     likelihood_pdf_output_axis.push_back("SED");
+   }
+
+   if (likelihood_pdf_output_axis.size()>0){
+     options_map["create-output-likelihood-pdf"].value() = boost::any(likelihood_pdf_output_axis);
+   }
+
 
   if (m_copied_columns.size()>0){
     std::string option ="";
