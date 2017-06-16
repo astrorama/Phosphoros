@@ -310,7 +310,7 @@
           </font>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>3</number>
          </property>
          <widget class="QWidget" name="page">
           <property name="geometry">
@@ -825,8 +825,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1021</width>
-            <height>460</height>
+            <width>537</width>
+            <height>158</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1563,7 +1563,6 @@
             </widget>
            </item>
           </layout>
-          <zorder></zorder>
           <zorder></zorder>
           <zorder>label_14</zorder>
           <zorder>label_15</zorder>
