@@ -40,7 +40,7 @@ void DialogFilterSelector::setFilter(std::string filter_name){
     treeModel_filter->setState(filterList);
   }
 
-  if (!treeModel_filter->item(0,0)->hasChildren()){
+  if (!treeModel_filter->hasLeave()){
       QMessageBox::warning(this, "No available filter...",
               "There is no filter transmission curve to select. "
               "You can provide and manage filter transmission curves in the \"Configuration/Aux. Data\" page.",
