@@ -302,6 +302,7 @@ void DataSetTreeModel::setState(const std::vector<std::string>& selected_leaves)
 
 std::vector<std::string> DataSetTreeModel::getSelectedLeaves() const{
   std::vector<std::string> leaves{};
+  // inside group
   auto separator = QString(QDir::separator()).toStdString();
   for (auto& group_tuple : m_map_dir){
       auto group_item = group_tuple.second;
@@ -311,6 +312,14 @@ std::vector<std::string> DataSetTreeModel::getSelectedLeaves() const{
          if (child_item->rowCount()==0 && child_item->checkState()==Qt::CheckState::Checked){
             leaves.push_back(base_name + separator + child_item->text().toStdString());
          }
+      }
+  }
+
+  // root level
+  for (int i=0; i<this->rowCount();++i){
+      auto root_level_item = this->item(i);
+      if (root_level_item->checkState()==Qt::CheckState::Checked && root_level_item->rowCount()==0){
+        leaves .push_back(root_level_item->text().toStdString());
       }
   }
 
@@ -372,6 +381,10 @@ DatasetSelection DataSetTreeModel::getState() const{
 }
 
 
+
+bool DataSetTreeModel::hasLeave() const{
+  return this->rowCount()>0;
+}
 
 
 }

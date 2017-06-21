@@ -63,6 +63,8 @@ public:
 
   std::vector<std::string> getSelectedLeaves() const;
 
+  bool hasLeave() const;
+
 public slots:
   /**
    * @brief SLOT onItemChanged To be connected to the ItemChanged SIGNAL.

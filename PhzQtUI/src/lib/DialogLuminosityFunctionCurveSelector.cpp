@@ -42,7 +42,7 @@ void DialogLuminosityFunctionCurveSelector::setCurve(std::string curve_name){
     treeModel_curve->setState(curveList);
   }
 
-  if (!treeModel_curve->item(0,0)->hasChildren()){
+  if (!treeModel_curve->hasLeave()){
     QMessageBox::warning(this, "No available function...",
             "There is no luminosity function curve to select. "
             "You can provide and manage luminosity function curves in the \"Configuration/Aux. Data\" page.",
