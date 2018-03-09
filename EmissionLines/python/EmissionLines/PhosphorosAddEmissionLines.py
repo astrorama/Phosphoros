@@ -29,11 +29,8 @@ from __future__ import division, print_function
 
 import argparse
 import os
-import math
 import astropy.table as table
 import numpy as np
-from scipy.interpolate import interp1d
-from scipy.integrate import quad
 import ElementsKernel.Logging as log
 
 
@@ -99,14 +96,15 @@ class Sed(object):
 
     def __init__(self, data, name=''):
         self.data = data
-        self._interp = interp1d([x for x,y in data], [y for x,y in data])
-        self.func = lambda x: self._interp([x])[0]
         self.name = name
 
-
-def loadSed(filename):
-    t = table.Table.read(filename, format='ascii')
-    return Sed(list(zip(t.columns[0], t.columns[1])), os.path.basename(filename))
+    @staticmethod
+    def load(filename):
+        t = table.Table.read(filename, format='ascii')
+        return Sed(
+            np.array([t.columns[0].data, t.columns[1].data]).transpose(),
+            os.path.basename(filename)
+        )
 
 
 class EmissionLinesAdder(object):
@@ -163,41 +161,39 @@ class EmissionLinesAdder(object):
     def _addSingleLine(self, sed, flux, wavelength):
 
         # Compute the range where we add the line flux
-        a,b = self.handler.getRange(wavelength)
+        a, b = self.handler.getRange(wavelength)
 
-        # Split the parts of the sed that are not afffected by the line
-        before = [x for x in sed if x[0] < a]
-        after = [x for x in sed if x[0] > b]
-        middle = [x for x in sed if x[0] >= a and x[0] <= b]
+        # Split the parts of the sed that are not affected by the line
+        before = sed[sed[:,0] < a]
+        after = sed[sed[:,0] > b]
+        middle_filter = np.vectorize(lambda x: b >= x >= a)(sed[:,0])
+        middle = sed[middle_filter]
 
         # Compute all the knots of the part which is affected by the line by
         # combining the ones necessary for the line and the sed middle knots
-        xs = set([x[0] for x in middle])
+        xs = set(middle[:0])
         self.handler.addKnots(xs)
         xs = sorted(xs)
 
         # Compute the interpolated middle part of the sed
-        sed_ys = np.interp(xs, [x for x,y in sed], [y for x,y in sed])
+        sed_ys = np.interp(xs, sed[:,0], sed[:,1])
 
         # Compute the emission line points
         line_ys = self.handler.getValues(xs, flux)
 
         # Create and return the final sed
         ys = [y1+y2 for y1,y2 in zip(sed_ys, line_ys)]
-        middle = list(zip(xs, ys))
-        del sed[:]
-        sed.extend(before)
-        sed.extend(middle)
-        sed.extend(after)
+        middle = np.array([xs, ys]).transpose()
+        return np.concatenate([before, middle, after])
             
     def __call__(self, sed):
-        result = sed.data[:]
-        if self.no_sed:
-            result = [[r[0], 0] for r in result]
-
         uv_range_size = self.uv_range[1] - self.uv_range[0]
         uv_range_midpoint = self.uv_range[0] + (uv_range_size / 2)
-        uv_flux = quad(sed.func, *self.uv_range)[0] / uv_range_size
+
+        selection_filter = np.logical_and(sed.data[:,0] >= self.uv_range[0], sed.data[:,0] <= self.uv_range[1])
+        trunc_sed = sed.data[selection_filter,:]
+        uv_flux = np.trapz(trunc_sed[:,1], trunc_sed[:,0]) / uv_range_size
+
         # ux_flux contains the flux for the wavelength, but the ratios are for the flux for the frequency
         # We convert multiplying by lambda**2/c, where c is in Angstroms/second
         uv_flux_freq = uv_flux * (uv_range_midpoint**2 / 2.99792458e+18)
@@ -208,12 +204,16 @@ class EmissionLinesAdder(object):
         new_oii_factor = (self.oii_factor / self.oii_factor_range_size) * uv_range_size
         oii_flux_freq = new_oii_factor * uv_flux_freq
 
+        result = np.array(sed.data, copy=True)
+        if self.no_sed:
+            result[:, 1] = 0
+
         for l in self.emission_lines:
             wavelength = l[1]
             flux_freq = oii_flux_freq * l[2]
             # We need to convert back to wavelength
             flux = (flux_freq * 2.99792458e+18) / wavelength**2
-            self._addSingleLine(result, flux, wavelength)
+            result = self._addSingleLine(result, flux, wavelength)
         return result
 
 
@@ -244,7 +244,7 @@ def mainMethod(args):
 
     for sed_file in filter(isSedFile, os.listdir(sed_dir)):
         logger.info('Handling SED '+sed_file)
-        sed = loadSed(os.path.join(sed_dir, sed_file))
+        sed = Sed.load(os.path.join(sed_dir, sed_file))
         out_sed = adder(sed)
         t = table.Table(rows=out_sed, names=('Wave', 'Flux'))
         t.write(os.path.join(out_dir, sed_file), format='ascii.commented_header', overwrite=True)
