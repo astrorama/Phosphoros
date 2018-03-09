@@ -43,17 +43,23 @@ aux_dir = next((p+os.path.sep+'EmissionLines' for p in os.environ['ELEMENTS_AUX_
 
 
 def defineSpecificProgramOptions():
+    def wavelengthRange(s):
+        try:
+            start, end = map(int, s.split(','))
+            return start, end
+        except:
+            raise argparse.ArgumentParser('A range must be start,end')
 
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--emission-lines', default=None, type=str, metavar='FILE',
         help='The emission lines file (default: $ELEMENTS_AUX_PATH/EmissionLines/emission_lines.txt)')
-    parser.add_argument('--uv-start', default=1500.0, type=float,
+    parser.add_argument('--uv-range', default=(1500.0, 2800.0), type=wavelengthRange,
         help='The beginning of the UV range to integrate')
-    parser.add_argument('--uv-end', default=2800.0, type=float,
-        help='The end of the UV range to integrate')
     parser.add_argument('--oii-factor', default=0.745e13, type=float,
         help='The luminosity factor between UV and [OII]')
+    parser.add_argument('--oii-factor-range', default=(1500.0, 2800.0), type=wavelengthRange,
+        help='')
     parser.add_argument('--sed-dir', required=True, type=str, metavar='DIR',
         help='The directory containing the SEDs to add the mission lines on')
     parser.add_argument('--velocity', default=None, type=float,
@@ -143,9 +149,10 @@ class EmissionLinesAdder(object):
         def getValues(self, xs, flux):
             return [flux*np.exp(-np.power((x-self.mu), 2.)/(2*np.power(self.sigma, 2.)))/(self.sigma*np.sqrt(2*np.pi)) for x in xs]
     
-    def __init__(self, uv_range, oii_factor, emission_lines, velocity, no_sed):
+    def __init__(self, uv_range, oii_factor, oii_factor_range, emission_lines, velocity, no_sed):
         self.uv_range = uv_range
         self.oii_factor = oii_factor
+        self.oii_factor_range_size = oii_factor_range[1] - oii_factor_range[0]
         self.emission_lines = emission_lines
         self.no_sed = no_sed
         if velocity is None:
@@ -196,7 +203,10 @@ class EmissionLinesAdder(object):
         uv_flux_freq = uv_flux * (uv_range_midpoint**2 / 2.99792458e+18)
 
         # Calculate the [OII] flux density
-        oii_flux_freq = self.oii_factor * uv_flux_freq
+        # We need to divide the [OII] factor by the range for which is was calculated
+        # and then multiply by the range we are considering
+        new_oii_factor = (self.oii_factor / self.oii_factor_range_size) * uv_range_size
+        oii_flux_freq = new_oii_factor * uv_flux_freq
 
         for l in self.emission_lines:
             wavelength = l[1]
@@ -224,8 +234,9 @@ def mainMethod(args):
 
     emission_lines = readEmissionLinesFromFile(args.emission_lines)
     adder = EmissionLinesAdder(
-        (args.uv_start, args.uv_end),
+        args.uv_range,
         args.oii_factor,
+        args.oii_factor_range,
         emission_lines,
         args.velocity,
         args.no_sed
