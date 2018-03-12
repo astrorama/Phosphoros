@@ -29,10 +29,8 @@ from __future__ import division, print_function
 
 import argparse
 import os
-import math
 import astropy.table as table
 import numpy as np
-from scipy.interpolate import interp1d
 import ElementsKernel.Logging as log
 
 
@@ -42,25 +40,25 @@ aux_dir = next((p+os.path.sep+'EmissionLines' for p in os.environ['ELEMENTS_AUX_
 
 
 def defineSpecificProgramOptions():
+    def wavelengthRange(s):
+        try:
+            start, end = map(int, s.split(','))
+            return start, end
+        except:
+            raise argparse.ArgumentParser('A range must be start,end')
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--hydrogen-lines', default=None, type=str, metavar='FILE',
-        help='The hydrogen lines file or OFF (default: $ELEMENTS_AUX_PATH/EmissionLines/hydrogen_lines.txt)')
-    parser.add_argument('--metallic-lines', default=None, type=str, metavar='FILE',
-        help='The metallic lines file or OFF (default: $ELEMENTS_AUX_PATH/EmissionLines/metallic_lines.txt)')
-    parser.add_argument('--metallicities', default=[0.0004, 0.004, 0.01], type=float, nargs='+',
-        metavar='Z', help='The metallicities (in solar units) for each table column (default: 0.0004 0.004 0.01)')
-    parser.add_argument('--first-metal-index', default=2, type=int,
-        help='The sindex of the first metallicity column')
-    parser.add_argument('--ionized-photons', default=None, type=str, metavar='FILE',
-        help='The metallicity to ionized photons table (default: $ELEMENTS_AUX_PATH/EmissionLines/ionized-photons.txt)')
+    parser.add_argument('--emission-lines', default=None, type=str, metavar='FILE',
+        help='The emission lines file (default: $ELEMENTS_AUX_PATH/EmissionLines/emission_lines.txt)')
+    parser.add_argument('--uv-range', default=(1500.0, 2800.0), type=wavelengthRange,
+        help='The beginning of the UV range to integrate')
+    parser.add_argument('--oii-factor', default=0.745e13, type=float,
+        help='The luminosity factor between UV and [OII]')
+    parser.add_argument('--oii-factor-range', default=(1500.0, 2800.0), type=wavelengthRange,
+        help='')
     parser.add_argument('--sed-dir', required=True, type=str, metavar='DIR',
         help='The directory containing the SEDs to add the mission lines on')
-    parser.add_argument('--hydrogen-factors', default=[0.5, 1.], type=float, nargs='+',
-        help='The differnet factors of the hydrogen lines')
-    parser.add_argument('--metallic-factors', default=[0.3, 1., 2.], type=float, nargs='+',
-        help='The differnet factors (relative to H lines) of the metallic lines')
     parser.add_argument('--velocity', default=None, type=float,
         help='The velocity (in km/s) to compute the FWHM of the lines from (defaults to dirac)')
     parser.add_argument('--no-sed', action='store_true', help='Output only the emission lines')
@@ -68,37 +66,12 @@ def defineSpecificProgramOptions():
     return parser
 
 
-def readLinesFromFiles(hydrogen_file, metallic_file):
-    
-    if hydrogen_file == None:
-        hydrogen_file = aux_dir + os.path.sep + 'hydrogen_lines.txt'
-    if metallic_file == None:
-        metallic_file = aux_dir + os.path.sep + 'metallic_lines.txt'
-        
-    if hydrogen_file == 'OFF':
-        hydrogen_lines = []
-    else:
-        hydrogen_lines = table.Table.read(hydrogen_file, format='ascii')
-    if metallic_file == 'OFF':
-        metallic_lines = []
-    else:
-        metallic_lines = table.Table.read(metallic_file, format='ascii')
-    
-    if len(hydrogen_lines) != 0 and len(metallic_lines) != 0 and len(hydrogen_lines.colnames) != len(metallic_lines.colnames):
-        logger.info('Different number of columns in files '+hydrogen_file+' and '+metallic_file)
-    
-    return hydrogen_lines, metallic_lines
+def readEmissionLinesFromFile(emission_lines_file):
+    if emission_lines_file == None:
+        emission_lines_file = os.path.join(aux_dir, 'emission_lines.txt')
 
-
-def readIonizedPhotonsFromFile(ionized_photons_file):
-    if ionized_photons_file == None:
-        ionized_photons_file = aux_dir + os.path.sep + 'ionized-photons.txt'
-    t = table.Table.read(ionized_photons_file, format='ascii')
-    xs = [x for x,y in t]
-    ys = [math.pow(10, y) for x,y in t]
-    xs = [0] + xs + [1]
-    ys = ys[:1] + ys + ys[-1:]
-    return interp1d(xs, ys)
+    logger.info('Reading emission lines from '+emission_lines_file)
+    return table.Table.read(emission_lines_file, format='ascii')
 
 
 def getSedDir(sed_dir):
@@ -115,18 +88,23 @@ def getSedDir(sed_dir):
     exit(1)
 
 
+def isSedFile(filename):
+    return len(filename) > 4 and filename[-4:] == '.sed'
+
+
 class Sed(object):
 
     def __init__(self, data, name=''):
         self.data = data
-        self._interp = interp1d([x for x,y in data], [y for x,y in data])
-        self.func = lambda x: self._interp([x])[0]
         self.name = name
 
-
-def loadSed(filename):
-    t = table.Table.read(filename, format='ascii')
-    return Sed(list(zip(t.columns[0], t.columns[1])), os.path.basename(filename))
+    @staticmethod
+    def load(filename):
+        t = table.Table.read(filename, format='ascii')
+        return Sed(
+            np.array([t.columns[0].data, t.columns[1].data]).transpose(),
+            os.path.basename(filename)
+        )
 
 
 class EmissionLinesAdder(object):
@@ -169,11 +147,13 @@ class EmissionLinesAdder(object):
         def getValues(self, xs, flux):
             return [flux*np.exp(-np.power((x-self.mu), 2.)/(2*np.power(self.sigma, 2.)))/(self.sigma*np.sqrt(2*np.pi)) for x in xs]
     
-    def __init__(self, ionized_photons_func, hydrogen_lines, metallic_lines, velocity):
-        self.ionized_photons_func = ionized_photons_func
-        self.hydrogen_lines = hydrogen_lines
-        self.metallic_lines = metallic_lines
-        if (velocity == None):
+    def __init__(self, uv_range, oii_factor, oii_factor_range, emission_lines, velocity, no_sed):
+        self.uv_range = uv_range
+        self.oii_factor = oii_factor
+        self.oii_factor_range_size = oii_factor_range[1] - oii_factor_range[0]
+        self.emission_lines = emission_lines
+        self.no_sed = no_sed
+        if velocity is None:
             self.handler = EmissionLinesAdder.Dirac()
         else:
             self.handler = EmissionLinesAdder.Gaussian(velocity)
@@ -181,69 +161,91 @@ class EmissionLinesAdder(object):
     def _addSingleLine(self, sed, flux, wavelength):
 
         # Compute the range where we add the line flux
-        a,b = self.handler.getRange(wavelength)
+        a, b = self.handler.getRange(wavelength)
 
-        # Split the parts of the sed that are not afffected by the line
-        before = [x for x in sed if x[0] < a]
-        after = [x for x in sed if x[0] > b]
-        middle = [x for x in sed if x[0] >= a and x[0] <= b]
+        # Split the parts of the sed that are not affected by the line
+        before = sed[sed[:,0] < a]
+        after = sed[sed[:,0] > b]
+        middle_filter = np.vectorize(lambda x: b >= x >= a)(sed[:,0])
+        middle = sed[middle_filter]
 
         # Compute all the knots of the part which is affected by the line by
         # combining the ones necessary for the line and the sed middle knots
-        xs = set([x[0] for x in middle])
+        xs = set(middle[:0])
         self.handler.addKnots(xs)
         xs = sorted(xs)
 
         # Compute the interpolated middle part of the sed
-        sed_ys = np.interp(xs, [x for x,y in sed], [y for x,y in sed])
+        sed_ys = np.interp(xs, sed[:,0], sed[:,1])
 
         # Compute the emission line points
         line_ys = self.handler.getValues(xs, flux)
 
         # Create and return the final sed
         ys = [y1+y2 for y1,y2 in zip(sed_ys, line_ys)]
-        middle = list(zip(xs, ys))
-        del sed[:]
-        sed.extend(before)
-        sed.extend(middle)
-        sed.extend(after)
+        middle = np.array([xs, ys]).transpose()
+        return np.concatenate([before, middle, after])
             
-    def __call__(self, sed, metal, metal_index, hydrogen_factor, metallic_factor, no_sed):
-        lym_cont = sed.func(1500) * self.ionized_photons_func(metal)
-        h_beta_flux = lym_cont * 4.757E-13 * hydrogen_factor
-        result = sed.data[:]
-        if no_sed:
-            result = [[r[0], 0] for r in result]
-        for l in self.hydrogen_lines:
+    def __call__(self, sed):
+        uv_range_size = self.uv_range[1] - self.uv_range[0]
+        uv_range_midpoint = self.uv_range[0] + (uv_range_size / 2)
+
+        selection_filter = np.logical_and(sed.data[:,0] >= self.uv_range[0], sed.data[:,0] <= self.uv_range[1])
+        trunc_sed = sed.data[selection_filter,:]
+        uv_flux = np.trapz(trunc_sed[:,1], trunc_sed[:,0]) / uv_range_size
+
+        # ux_flux contains the flux for the wavelength, but the ratios are for the flux for the frequency
+        # We convert multiplying by lambda**2/c, where c is in Angstroms/second
+        uv_flux_freq = uv_flux * (uv_range_midpoint**2 / 2.99792458e+18)
+
+        # Calculate the [OII] flux density
+        # We need to divide the [OII] factor by the range for which is was calculated
+        # and then multiply by the range we are considering
+        new_oii_factor = (self.oii_factor / self.oii_factor_range_size) * uv_range_size
+        oii_flux_freq = new_oii_factor * uv_flux_freq
+
+        result = np.array(sed.data, copy=True)
+        if self.no_sed:
+            result[:, 1] = 0
+
+        for l in self.emission_lines:
             wavelength = l[1]
-            flux = h_beta_flux * l[metal_index]
-            self._addSingleLine(result, flux, wavelength)
-        for l in self.metallic_lines:
-            wavelength = l[1]
-            flux = h_beta_flux * l[metal_index] * metallic_factor
-            self._addSingleLine(result, flux, wavelength)
+            flux_freq = oii_flux_freq * l[2]
+            # We need to convert back to wavelength
+            flux = (flux_freq * 2.99792458e+18) / wavelength**2
+            result = self._addSingleLine(result, flux, wavelength)
         return result
 
 
 def mainMethod(args):
-
-    hydrogen_lines, metallic_lines = readLinesFromFiles(args.hydrogen_lines, args.metallic_lines)
-    ionized_photons_func = readIonizedPhotonsFromFile(args.ionized_photons)
-    adder = EmissionLinesAdder(ionized_photons_func, hydrogen_lines, metallic_lines, args.velocity)
-    
     sed_dir = getSedDir(args.sed_dir)
-    out_dir = sed_dir + '_el'
+    out_dir = sed_dir.rstrip(os.path.sep) + '_el'
+
+    # TODO: Check disabled for now
     if os.path.exists(out_dir):
         logger.error('Output directory '+out_dir+' already exists')
-        exit(1)
-    os.makedirs(out_dir)
-    for sed_file in os.listdir(sed_dir):
+        #exit(1)
+    else:
+        os.makedirs(out_dir)
+
+    logger.info('SED directory '+sed_dir)
+    logger.info('Output directory '+out_dir)
+    logger.info('Aux directory'+aux_dir)
+
+    emission_lines = readEmissionLinesFromFile(args.emission_lines)
+    adder = EmissionLinesAdder(
+        args.uv_range,
+        args.oii_factor,
+        args.oii_factor_range,
+        emission_lines,
+        args.velocity,
+        args.no_sed
+    )
+
+    for sed_file in filter(isSedFile, os.listdir(sed_dir)):
         logger.info('Handling SED '+sed_file)
-        sed = loadSed(os.path.join(sed_dir, sed_file))
-        for metal_i, metal in enumerate(args.metallicities):
-            for hf in args.hydrogen_factors:
-                for mf in args.metallic_factors:
-                    out_sed = adder(sed, metal, metal_i+args.first_metal_index, hf, mf, args.no_sed)
-                    t = table.Table(rows=out_sed, names=('Wave', 'Flux'))
-                    t.write(os.path.join(out_dir, sed_file+'_'+str(metal)+'_'+str(hf)+'_'+str(mf)+'.sed'),
-                            format='ascii.commented_header')
+        sed = Sed.load(os.path.join(sed_dir, sed_file))
+        out_sed = adder(sed)
+        t = table.Table(rows=out_sed, names=('Wave', 'Flux'))
+        t.write(os.path.join(out_dir, sed_file), format='ascii.commented_header', overwrite=True)
+
