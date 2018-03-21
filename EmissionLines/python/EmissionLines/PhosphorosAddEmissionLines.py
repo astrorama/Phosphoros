@@ -224,7 +224,7 @@ def mainMethod(args):
     # TODO: Check disabled for now
     if os.path.exists(out_dir):
         logger.error('Output directory '+out_dir+' already exists')
-        #exit(1)
+        exit(1)
     else:
         os.makedirs(out_dir)
 
@@ -247,5 +247,5 @@ def mainMethod(args):
         sed = Sed.load(os.path.join(sed_dir, sed_file))
         out_sed = adder(sed)
         t = table.Table(rows=out_sed, names=('Wave', 'Flux'))
-        t.write(os.path.join(out_dir, sed_file), format='ascii.commented_header', overwrite=True)
+        t.write(os.path.join(out_dir, sed_file), format='ascii.commented_header')
 
