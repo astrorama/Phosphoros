@@ -18,8 +18,6 @@ elements_alias(PhosphorosDisplaySeds PhosphorosLsAux --type SEDs)
 elements_alias(PhosphorosDisplayReddeningCurves PhosphorosLsAux --type ReddeningCurves)
 elements_add_executable(PhosphorosDisplayModelGrid src/program/DisplayModelGrid.cpp
                      LINK_LIBRARIES ElementsKernel Boost PhzCLI)
-elements_add_executable(PhosphorosComputeModelSed src/program/ComputeModelSed.cpp
-                     LINK_LIBRARIES ElementsKernel Boost MathUtils PhzModeling PhzCLI)
 elements_add_executable(CreateFlatGridPrior src/program/CreateFlatGridPrior.cpp
                      LINK_LIBRARIES ElementsKernel PhzCLI)
 
