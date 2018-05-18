@@ -33,6 +33,7 @@ import astropy.table as table
 import numpy as np
 import ElementsKernel.Logging as log
 
+C_ANGSTROM = 2.99792458e+18
 
 logger = log.getLogger('PhosphorosAddEmissionLines')
 phos_dir = os.getenv('PHOSPHOROS_ROOT', None)
@@ -187,22 +188,28 @@ class EmissionLinesAdder(object):
         return np.concatenate([before, middle, after])
             
     def __call__(self, sed):
-        uv_range_size = self.uv_range[1] - self.uv_range[0]
-        uv_range_midpoint = self.uv_range[0] + (uv_range_size / 2)
-
+        # Get subset relevant for the integration
         selection_filter = np.logical_and(sed.data[:,0] >= self.uv_range[0], sed.data[:,0] <= self.uv_range[1])
         trunc_sed = sed.data[selection_filter,:]
-        uv_flux = np.trapz(trunc_sed[:,1], trunc_sed[:,0]) / uv_range_size
 
-        # ux_flux contains the flux for the wavelength, but the ratios are for the flux for the frequency
-        # We convert multiplying by lambda**2/c, where c is in Angstroms/second
-        uv_flux_freq = uv_flux * (uv_range_midpoint**2 / 2.99792458e+18)
+        # Create a new one, using frequency for x, and f_nu for y
+        uv_freq_sed = np.ndarray(trunc_sed.shape)
+        uv_freq_sed[:, 0] = C_ANGSTROM / trunc_sed[:, 0]
+        uv_freq_sed[:, 1] = trunc_sed[:, 1] * (trunc_sed[:, 0] ** 2 / C_ANGSTROM)
+
+        # Integrate this segment (reversing because now the x axis is decrementing)
+        uv_flux_nu = np.trapz(np.flipud(uv_freq_sed[:, 1]), np.flipud(uv_freq_sed[:, 0]))
+
+        # Flux density
+        uv_freq_size = uv_freq_sed[0, 0] - uv_freq_sed[-1, 0]
+        uv_flux_nu_density = uv_flux_nu / uv_freq_size
 
         # Calculate the [OII] flux density
         # We need to divide the [OII] factor by the range for which is was calculated
         # and then multiply by the range we are considering
+        uv_range_size = self.uv_range[1] - self.uv_range[0]
         new_oii_factor = (self.oii_factor / self.oii_factor_range_size) * uv_range_size
-        oii_flux_freq = new_oii_factor * uv_flux_freq
+        oii_flux_nu = new_oii_factor * uv_flux_nu_density
 
         result = np.array(sed.data, copy=True)
         if self.no_sed:
@@ -210,7 +217,7 @@ class EmissionLinesAdder(object):
 
         for l in self.emission_lines:
             wavelength = l[1]
-            flux_freq = oii_flux_freq * l[2]
+            flux_freq = oii_flux_nu * l[2]
             # We need to convert back to wavelength
             flux = (flux_freq * 2.99792458e+18) / wavelength**2
             result = self._addSingleLine(result, flux, wavelength)
