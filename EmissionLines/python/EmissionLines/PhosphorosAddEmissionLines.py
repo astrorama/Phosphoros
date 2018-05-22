@@ -218,9 +218,7 @@ class EmissionLinesAdder(object):
         for l in self.emission_lines:
             wavelength = l[1]
             flux_freq = oii_flux_nu * l[2]
-            # We need to convert back to wavelength
-            flux = (flux_freq * 2.99792458e+18) / wavelength**2
-            result = self._addSingleLine(result, flux, wavelength)
+            result = self._addSingleLine(result, flux_freq, wavelength)
         return result
 
 
