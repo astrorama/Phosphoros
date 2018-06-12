@@ -226,7 +226,6 @@ def mainMethod(args):
     sed_dir = getSedDir(args.sed_dir)
     out_dir = sed_dir.rstrip(os.path.sep) + '_el'
 
-    # TODO: Check disabled for now
     if os.path.exists(out_dir):
         logger.error('Output directory '+out_dir+' already exists')
         exit(1)
