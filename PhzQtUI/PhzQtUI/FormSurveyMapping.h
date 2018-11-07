@@ -95,7 +95,7 @@ private:
     void setFilterMappingInEdition();
     void setFilterMappingInView();
     void loadColumnFromFile(std::string path);
-    void fillCbColumns(std::string current_value="");
+    void fillCbColumns(std::string current_id_value="",std::string current_ra_value="",std::string current_dec_value="",std::string current_gebv_value="");
 
     std::vector<std::string> getGridFiltersNames() const;
     std::vector<FilterMapping> getMappingFromGrid() const;

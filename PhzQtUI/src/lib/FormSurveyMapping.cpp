@@ -66,6 +66,12 @@ void FormSurveyMapping::loadMappingPage(DatasetRepo filter_repository, std::stri
 
      ui->cb_SourceId->clear();
      ui->cb_SourceId->addItem("");
+     ui->cb_Ra->clear();
+     ui->cb_Ra->addItem("");
+     ui->cb_Dec->clear();
+     ui->cb_Dec->addItem("");
+     ui->cb_GalEbv->clear();
+     ui->cb_GalEbv->addItem("");
 
      disconnect(ui->table_Map->selectionModel(),SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),0,0);
      connect(
@@ -113,6 +119,9 @@ void FormSurveyMapping::setFilterMappingInEdition(){
     ui->btn_MapSave->setEnabled(true);
     ui->btn_ImportColumn->setEnabled(true);
     ui->cb_SourceId->setEnabled(true);
+    ui->cb_Ra->setEnabled(true);
+    ui->cb_Dec->setEnabled(true);
+    ui->cb_GalEbv->setEnabled(true);
     ui->btn_SelectFilters->setEnabled(true);
 
 
@@ -144,6 +153,9 @@ void FormSurveyMapping::setFilterMappingInView(){
     ui->btn_MapSave->setEnabled(false);
     ui->btn_ImportColumn->setEnabled(false);
     ui->cb_SourceId->setEnabled(false);
+    ui->cb_Ra->setEnabled(false);
+    ui->cb_Dec->setEnabled(false);
+    ui->cb_GalEbv->setEnabled(false);
     ui->btn_SelectFilters->setEnabled(false);
 
     ui->cb_missingPhot->setEnabled(false);
@@ -163,25 +175,60 @@ void FormSurveyMapping::on_gridEditionStart(){
 }
 
 
-
-void FormSurveyMapping::fillCbColumns(std::string current_value){
+void FormSurveyMapping::fillCbColumns(std::string current_id_value,std::string current_ra_value,
+                  std::string current_dec_value,std::string current_gebv_value){
    ui->cb_SourceId->clear();
    ui->cb_SourceId->addItem("");
+   ui->cb_Ra->clear();
+   ui->cb_Ra->addItem("");
+   ui->cb_Dec->clear();
+   ui->cb_Dec->addItem("");
+   ui->cb_GalEbv->clear();
+   ui->cb_GalEbv->addItem("");
    bool found=false;
+   bool found_ra=false;
+   bool found_dec=false;
+   bool found_ebv=false;
    int index=1;
    for(auto item : m_column_from_file){
      ui->cb_SourceId->addItem(QString::fromStdString(item));
-     if (item.compare(current_value)==0){
+     ui->cb_Ra->addItem(QString::fromStdString(item));
+     ui->cb_Dec->addItem(QString::fromStdString(item));
+     ui->cb_GalEbv->addItem(QString::fromStdString(item));
+     if (item.compare(current_id_value)==0){
        found=true;
        ui->cb_SourceId->setCurrentIndex(index);
+     }
+     if (item.compare(current_ra_value)==0){
+       found_ra=true;
+       ui->cb_Ra->setCurrentIndex(index);
+     }
+     if (item.compare(current_dec_value)==0){
+       found_dec=true;
+       ui->cb_Dec->setCurrentIndex(index);
+     }
+     if (item.compare(current_gebv_value)==0){
+       found_ebv=true;
+       ui->cb_GalEbv->setCurrentIndex(index);
      }
 
       ++index;
    }
 
    if (!found){
-     ui->cb_SourceId->setItemText(0,QString::fromStdString(current_value));
+     ui->cb_SourceId->setItemText(0,QString::fromStdString(current_id_value));
    }
+   if (!found_ra){
+     ui->cb_Ra->setItemText(0,QString::fromStdString(current_ra_value));
+   }
+   if (!found_dec){
+     ui->cb_Dec->setItemText(0,QString::fromStdString(current_dec_value));
+   }
+   if (!found_ebv){
+     ui->cb_GalEbv->setItemText(0,QString::fromStdString(current_gebv_value));
+   }
+
+
 }
 
 void FormSurveyMapping::loadColumnFromFile(std::string path){
@@ -189,8 +236,14 @@ void FormSurveyMapping::loadColumnFromFile(std::string path){
   auto column_reader = PhzUITools::CatalogColumnReader(path);
   m_column_from_file=column_reader.getColumnNames();
 
-  auto current_text = ui->cb_SourceId->currentText();
-  fillCbColumns(current_text.toStdString());
+  auto current_id_text = ui->cb_SourceId->currentText();
+  auto current_ra_text = ui->cb_Ra->currentText();
+  auto current_dec_text = ui->cb_Dec->currentText();
+  auto current_gebv_text = ui->cb_GalEbv->currentText();
+  fillCbColumns(current_id_text.toStdString(),
+      current_ra_text.toStdString(),
+      current_dec_text.toStdString(),
+      current_gebv_text.toStdString());
 }
 
 
@@ -330,9 +383,12 @@ void FormSurveyMapping::on_btn_MapCancel_clicked()
 
 
         std::string cb_text =model->getSourceIdColumn(row);
+        std::string cb_ra_text =model->getRaColumn(row);
+        std::string cb_dec_text =model->getDecColumn(row);
+        std::string cb_gebv_text =model->getGalEbvColumn(row);
         m_column_from_file=model->getColumnList(row);
         m_default_survey=model->getDefaultCatalog(row);
-        fillCbColumns(cb_text);
+        fillCbColumns(cb_text, cb_ra_text, cb_dec_text, cb_gebv_text);
 
         FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
         filter_model->setFilters(model->getFilters(row));
@@ -371,6 +427,9 @@ void FormSurveyMapping::on_btn_MapSave_clicked()
 
      std::string old_name=model->getName(row);
      model->setSourceIdColumn(ui->cb_SourceId->currentText().toStdString(),row);
+     model->setRaColumn(ui->cb_Ra->currentText().toStdString(),row);
+     model->setDecColumn(ui->cb_Dec->currentText().toStdString(),row);
+     model->setGalEbvColumn(ui->cb_GalEbv->currentText().toStdString(),row);
 
      model->setNonDetection(ui->txt_nonDetection->text().toDouble(),row);
      model->setHasMissingPhot(ui->cb_missingPhot->checkState()==Qt::Checked,row);
@@ -401,32 +460,45 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
 
   ui->cb_SourceId->clear();
   ui->cb_SourceId->addItem("");
+  ui->cb_Ra->clear();
+  ui->cb_Ra->addItem("");
+  ui->cb_Dec->clear();
+  ui->cb_Dec->addItem("");
+  ui->cb_GalEbv->clear();
+  ui->cb_GalEbv->addItem("");
   m_column_from_file.clear();
   std::string cb_text ="";
+  std::string cb_ra_text="";
+  std::string cb_dec_text="";
+  std::string cb_gebv_text="";
+
   FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
   if (new_index.isValid()) {
 
-
+    auto curr_row = new_index.row();
     SurveyModel* model = static_cast<SurveyModel*>(ui->table_Map->model());
 
 
     PreferencesUtils::setUserPreference("_global_selection_",
-               "catalog",model->getName(new_index.row()));
+               "catalog",model->getName(curr_row));
 
-    m_default_survey=model->getDefaultCatalog(new_index.row());
+    m_default_survey=model->getDefaultCatalog(curr_row);
 
-    cb_text = model->getSourceIdColumn(new_index.row());
+    cb_text = model->getSourceIdColumn(curr_row);
+    cb_ra_text =model->getRaColumn(curr_row);
+    cb_dec_text =model->getDecColumn(curr_row);
+    cb_gebv_text =model->getGalEbvColumn(curr_row);
 
-    m_column_from_file=model->getColumnList(new_index.row());
+    m_column_from_file=model->getColumnList(curr_row);
 
-    filter_model->setFilters(model->getFilters(new_index.row()));
+    filter_model->setFilters(model->getFilters(curr_row));
 
-    ui->txt_nonDetection->setText(QString::number(model->getNonDetection(new_index.row())));
-    ui->cb_missingPhot->setCheckState( model->getHasMissingPhot(new_index.row())?Qt::Checked:Qt::Unchecked);
-    ui->cb_upperLimit->setCheckState( model->getHasUpperLimit(new_index.row())?Qt::Checked:Qt::Unchecked);
+    ui->txt_nonDetection->setText(QString::number(model->getNonDetection(curr_row)));
+    ui->cb_missingPhot->setCheckState( model->getHasMissingPhot(curr_row)?Qt::Checked:Qt::Unchecked);
+    ui->cb_upperLimit->setCheckState( model->getHasUpperLimit(curr_row)?Qt::Checked:Qt::Unchecked);
 
     ui->tb_df->setText(QString::fromStdString(m_default_survey));
-    ui->lbl_catalog_name->setText(QString::fromStdString(model->getName(new_index.row())));
+    ui->lbl_catalog_name->setText(QString::fromStdString(model->getName(curr_row)));
 
     auto delegate_item = new FilterMappingItemDelegate(m_column_from_file);
     ui->table_Filter->setItemDelegate(delegate_item);
@@ -451,7 +523,7 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
 
   }
 
-  fillCbColumns(cb_text);
+  fillCbColumns(cb_text, cb_ra_text, cb_dec_text, cb_gebv_text);
 
   ui->table_Filter->setModel(filter_model);
   ui->table_Filter->setColumnHidden(3, true);

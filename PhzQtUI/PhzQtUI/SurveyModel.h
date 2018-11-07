@@ -107,6 +107,59 @@ public:
   std::string getSourceIdColumn(int row);
 
   /**
+   * @brief Change the RA column of the Survey represented by the given row.
+   *
+   * @param newRaColumn the new RA column name to be assigned to
+   * the survey
+   *
+   * @param row the model row number representing the survey.
+   */
+  void setRaColumn(std::string newRaColumn, int row);
+
+  /**
+   * @brief Get the RA column  of the survey represented by the row 'row'
+   *
+   * @param row the model row number representing the survey.
+   */
+  std::string getRaColumn(int row);
+
+  /**
+   * @brief Change the DEC column  of the Survey represented by the given row.
+   *
+   * @param newDecColumn the new DEC column name to be assigned to
+   * the survey
+   *
+   * @param row the model row number representing the survey.
+   */
+  void setDecColumn(std::string newDecColumn, int row);
+
+  /**
+   * @brief Get the DEC column of the survey represented by the row 'row'
+   *
+   * @param row the model row number representing the survey.
+   */
+  std::string getDecColumn(int row);
+
+  /**
+   * @brief Change the Galactic E(B-V) column of the Survey represented by
+   * the given row.
+   *
+   * @param newGalEbvColumn the new Galactic E(B-V) column name to be assigned to
+   * the survey
+   *
+   * @param row the model row number representing the survey.
+   */
+  void setGalEbvColumn(std::string newGalEbvColumn, int row);
+
+  /**
+   * @brief Get the Galactic E(B-V) column of the survey represented
+   * by the row 'row'
+   *
+   * @param row the model row number representing the survey.
+   */
+  std::string getGalEbvColumn(int row);
+
+  /**
      * @brief get the list of column stored into the Survey represented by the row 'row'.
      * @param row the model row number representing the survey.
      */

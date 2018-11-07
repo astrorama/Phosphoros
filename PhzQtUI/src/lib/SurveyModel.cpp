@@ -104,6 +104,21 @@ void SurveyModel::setSourceIdColumn(std::string newSourceIdColumn, int row){
     m_survey_filter_mappings.at(ref).setSourceIdColumn(newSourceIdColumn);
 }
 
+void SurveyModel::setRaColumn(std::string newRaColumn, int row){
+    int ref = getValue(row,2).toInt();
+    m_survey_filter_mappings.at(ref).setRaColumn(newRaColumn);
+}
+
+void SurveyModel::setDecColumn(std::string newDecColumn, int row){
+    int ref = getValue(row,2).toInt();
+    m_survey_filter_mappings.at(ref).setDecColumn(newDecColumn);
+}
+
+void SurveyModel::setGalEbvColumn(std::string newGalEbvColumn, int row){
+    int ref = getValue(row,2).toInt();
+    m_survey_filter_mappings.at(ref).setGalEbvColumn(newGalEbvColumn);
+}
+
 void SurveyModel::setFilters(std::vector<FilterMapping> newFilters, int row){
     int ref = getValue(row,2).toInt();
     m_survey_filter_mappings.at(ref).setFilters(std::move(newFilters));
@@ -122,6 +137,21 @@ std::string SurveyModel::getName( int row){
 std::string SurveyModel::getSourceIdColumn( int row){
     int ref = getValue(row,2).toInt();
     return m_survey_filter_mappings.at(ref).getSourceIdColumn();
+}
+
+std::string SurveyModel::getRaColumn(int row){
+  int ref = getValue(row,2).toInt();
+  return m_survey_filter_mappings.at(ref).getRaColumn();
+}
+
+std::string SurveyModel::getDecColumn(int row){
+  int ref = getValue(row,2).toInt();
+  return m_survey_filter_mappings.at(ref).getDecColumn();
+}
+
+std::string SurveyModel::getGalEbvColumn(int row){
+  int ref = getValue(row,2).toInt();
+  return m_survey_filter_mappings.at(ref).getGalEbvColumn();
 }
 
 const std::set<std::string>& SurveyModel::getColumnList(int row) const{
