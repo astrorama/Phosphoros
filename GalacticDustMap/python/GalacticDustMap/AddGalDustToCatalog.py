@@ -29,12 +29,16 @@ import sys
 if sys.version_info[0] < 3:
     from future_builtins import *
 
+import os
 import argparse
 from astropy.table import Table
 import ElementsKernel.Logging as log
-import GalacticDustMap
+from GalacticDustMap import GalacticDustMap
 import ElementsKernel.Auxiliary as aux
 import ElementsKernel.Logging as log
+
+
+logger = log.getLogger('AddGalDustToCatalog')
 
 def defineSpecificProgramOptions():
     """
@@ -78,27 +82,41 @@ def mainMethod(args):
     logger.info('#')
     logger.info('# Entering AddGalDustToCatalog mainMethod()')
     logger.info('#')
+    
+    # Read the args
+    out_file = args.output_catalog
 
     # Read the Planck map
-    if arg.planck_dust_map:
-        aux_file = arg.planck_dust_map
+    if args.planck_dust_map:
+        aux_file = args.planck_dust_map
     else:
-        aux_file = aux.getAuxiliaryPath('PlanckEvb.fits')
-    map_data = loadMap(aux_file)
+        aux_file = aux.getAuxiliaryPath(os.path.join('GalacticDustMap','PlanckEbv.fits'))
+    logger.info('Read the Dust Map :%s' % aux_file)
+    map_data = GalacticDustMap.loadMap(aux_file)
 
-    # open catalog
+    # Open catalog
+    logger.info('Open the Input catalog :%s' % args.input_catalog)
     input_cat = Table.read(args.input_catalog)
     if not args.ra in input_cat.colnames:
         raise ValueError("RA column  missing : %s " % args.ra)
     if not args.dec in input_cat.colnames:
         raise ValueError("DEC column  missing : %s " % args.dec)
 
+    # Read the position colums
     ra = input_cat[args.ra]
     dec = input_cat[args.dec]
 
-    ebv = ebv_planck(map_data, ra, dec)
+    # Get the galactic E(B-V) from the map
+    logger.info('Get the galactic E(B-V) from the Map')
+    ebv = GalacticDustMap.ebv_planck(map_data, ra, dec)
     input_cat[args.galatic_ebv_col] = ebv
-    input_catalog.write(args.output_catalog)
+    
+    # Write down the output catalog
+    if os.path.exists(out_file):
+        logger.warning('Output file %s was already present: deleting it.' % out_file)
+        os.remove(out_file)
+    logger.info('Write the output file :%s' % out_file)
+    input_cat.write(out_file)
 
     logger.info('#')
     logger.info('# Exiting AddGalDustToCatalog mainMethod()')

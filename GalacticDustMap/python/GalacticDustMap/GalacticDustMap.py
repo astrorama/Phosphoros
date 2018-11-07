@@ -183,6 +183,7 @@ def raDecToLB(ra,dec):
 def loadMap(dustmap_filename):
     with fits.open(dustmap_filename) as hdul:  # open a FITS file
         data = hdul[0].data
+    return data
     
 def ebv_planck(data,ra,dec):
     (l,b)=raDecToLB(ra,dec)
