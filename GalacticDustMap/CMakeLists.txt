@@ -61,9 +61,11 @@ elements_install_python_modules()
 # elements_add_python_program(PythonProgramExample
 #                             ElementsExamples.PythonProgramExample)
 #===============================================================================
+elements_add_python_program(AddGalDustToCatalog GalacticDustMap.AddGalDustToCatalog)
 
 #===============================================================================
 # Add the elements_install_conf_files macro
 # Examples:
 #          elements_install_conf_files()
 #===============================================================================
+elements_install_conf_files()
