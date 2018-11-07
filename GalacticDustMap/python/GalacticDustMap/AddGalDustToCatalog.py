@@ -55,14 +55,17 @@ def defineSpecificProgramOptions():
 
     #
     # !!! Write your program options here !!!
-    parser.add_argument('--planck-dust-map', type=str, help='Filename of the Planck dust map in HEALPIX format',
+    parser.add_argument('--planck-dust-map', type=str, 
+                        help='Filename of the Planck dust map in HEALPIX format'\
+                             ' (Optional) If not provided the embeded map is used.',
                         default='')
     parser.add_argument('--input-catalog', type=str, help='Input catalog filename')
     parser.add_argument('--output-catalog', type=str, help='Output catalog filename')
     parser.add_argument('--ra', type=str, help='Right Acsension column in the catalog (Degrees)')
     parser.add_argument('--dec', type=str, help='Declination column in the catalog (Degres)')
     parser.add_argument('--galatic-ebv-col', type=str, 
-                        help='Name of the column to be added to the output catalog',
+                        help='Name of the column to be added to the output catalog'\
+                        ' (Optional) by default use "GAL_EBV".',
                         default='GAL_EBV')
 
 
@@ -84,7 +87,11 @@ def mainMethod(args):
     logger.info('#')
     
     # Read the args
+    if not args.input_catalog :
+        raise ValueError("Missing input catalog")
     out_file = args.output_catalog
+    if not out_file :
+        raise ValueError("Missing output catalog")
 
     # Read the Planck map
     if args.planck_dust_map:

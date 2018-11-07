@@ -51,7 +51,9 @@ action_list = [
     PhosphorosAction(['add_emission_lines', 'AEL'], 'PhosphorosAddEmissionLines',
                      'Adds emission lines to a set of SED templates'),
     PhosphorosAction(['build_reference_sample', 'BRS'], 'PhosphorosBuildReferenceSample',
-                     'Builds an NNPZ reference sample from the results of a Phosphoros output catalog')
+                     'Builds an NNPZ reference sample from the results of a Phosphoros output catalog'),
+    PhosphorosAction(['add_galactic_dust_data', 'AGDD'], 'AddGalDustToCatalog',
+                     'Lookup galactical E(B-V) in the Planck dust map and add it as an additional catalog column'),
 ]
 
 def printHelp():
