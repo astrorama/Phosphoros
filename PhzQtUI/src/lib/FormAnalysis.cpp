@@ -20,6 +20,7 @@
 #include "PhzQtUI/SurveyFilterMapping.h"
 #include "PhzQtUI/PhzGridInfoHandler.h"
 #include "PhzQtUI/DialogGridGeneration.h"
+#include "PhzQtUI/DialogGalCorrGridGeneration.h"
 #include "PhzQtUI/DialogRunAnalysis.h"
 #include "PhzQtUI/DialogLuminosityPrior.h"
 #include "PhzQtUI/DialogOutputColumnSelection.h"
@@ -86,6 +87,7 @@ void FormAnalysis::loadAnalysisPage(DatasetRepo filter_repository, DatasetRepo l
 
 
     updateGridSelection();
+    updateGalCorrGridSelection();
 
 }
 ///////////////////////////////////////////////////
@@ -127,6 +129,41 @@ try{
     ui->cb_AnalysisModel->removeItem(ui->cb_AnalysisModel->currentIndex());
   }
   }
+}
+
+void FormAnalysis::updateGalCorrGridSelection() {
+  try{
+    ModelSet selected_model;
+
+    for (auto&model : m_analysis_model_list) {
+      if (model.second.getName().compare(
+          ui->cb_AnalysisModel->currentText().toStdString()) == 0) {
+        selected_model = model.second;
+        break;
+      }
+    }
+
+    auto axis = selected_model.getAxesTuple();
+    auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
+        ui->cb_AnalysisSurvey->currentText().toStdString(), axis,
+        getSelectedFilters(), ui->cb_igm->currentText().toStdString(),
+        false);
+
+    ui->cb_CompatibleGalCorrGrid->clear();
+    bool added = false;
+    for (auto& file : possible_files) {
+      ui->cb_CompatibleGalCorrGrid->addItem(QString::fromStdString(file));
+      added = true;
+    }
+
+    if (!added) {
+      ui->cb_CompatibleGalCorrGrid->addItem(
+          QString::fromStdString("Grid_" + selected_model.getName() + "_")
+              + ui->cb_igm->currentText());
+    }
+
+    ui->cb_CompatibleGalCorrGrid->addItem("<Enter a new name>");
+  } catch (Elements::Exception&){}
 }
 
 void FormAnalysis::fillCbColumns(std::set<std::string> columns){
@@ -177,6 +214,48 @@ void FormAnalysis::adjustPhzGridButtons(bool enabled) {
 
 }
 
+void FormAnalysis::adjustGalCorrGridButtons(bool enabled) {
+  int toolbox_index = 1;
+  bool name_ok = checkGalacticGridSelection(false, true);
+  bool valid_model_grid = checkGridSelection(true, false);
+  bool needed = !ui->rb_gc_off->isChecked();
+  ui->cb_CompatibleGalCorrGrid->setEnabled(needed && enabled);
+  ui->btn_GetGalCorrConfigGrid->setEnabled(needed && enabled && name_ok);
+  ui->btn_RunGalCorrGrid->setEnabled(needed && enabled && valid_model_grid && name_ok);
+  QString tool_tip = "";
+  if (! needed){
+    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet(
+           "QLineEdit { color: black }");
+       setToolBoxButtonColor(ui->toolBox, toolbox_index, Qt::black);
+       tool_tip =
+              "With 'Correction type' set to 'OFF' there is no need to generate this grid.";
+  } else if (!name_ok) {
+    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet(
+        "QLineEdit { color: red }");
+    setToolBoxButtonColor(ui->toolBox, toolbox_index, Qt::red);
+    tool_tip =
+        "Please enter a valid grid name in order to compute the Grid or export the corresponding configuration.";
+  } else if (!valid_model_grid) {
+    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet(
+        "QLineEdit { color: red }");
+    setToolBoxButtonColor(ui->toolBox, toolbox_index, Qt::red);
+    tool_tip =
+        "You should first generate the Model Grid before the Galactic Correction one.";
+  } else if (!checkGalacticGridSelection(true, false)) {
+    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet(
+        "QLineEdit { color: orange }");
+    setToolBoxButtonColor(ui->toolBox, toolbox_index, QColor("orange"));
+
+  } else {
+    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet(
+        "QLineEdit { color: black }");
+    setToolBoxButtonColor(ui->toolBox, toolbox_index, Qt::black);
+  }
+  ui->btn_GetGalCorrConfigGrid->setToolTip(tool_tip);
+  ui->btn_RunGalCorrGrid->setToolTip(tool_tip);
+
+}
+
 void FormAnalysis::setComputeCorrectionEnable() {
   bool name_exists = checkGridSelection(true, false);
   ui->btn_computeCorrections->setEnabled(
@@ -194,6 +273,13 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
 
   bool grid_name_ok = checkGridSelection(false, true);
   bool grid_name_exists = checkGridSelection(true, false);
+
+
+  bool need_gal_correction = !ui->rb_gc_off->isChecked();
+  bool grid_gal_corr_name_ok = checkGalacticGridSelection(false, true);
+  bool grid_gal_corr_name_exists = checkGalacticGridSelection(true, false);
+
+
   bool correction_ok = !ui->gb_corrections->isChecked()
       || ui->cb_AnalysisCorrection->currentText().toStdString().length() > 0;
 
@@ -265,20 +351,34 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
 
 
   ui->btn_GetConfigAnalysis->setEnabled(
-      grid_name_ok && correction_ok && lum_prior_ok && lum_prior_compatible && run_ok && enabled);
+      grid_name_ok && (!need_gal_correction || grid_gal_corr_name_ok) && correction_ok && lum_prior_ok && lum_prior_compatible && run_ok && enabled);
   ui->btn_RunAnalysis->setEnabled(
-      grid_name_exists && correction_ok && correction_exists && lum_prior_ok && lum_prior_compatible&& run_ok && enabled);
+      grid_name_exists && (!need_gal_correction || grid_gal_corr_name_exists) && correction_ok && correction_exists && lum_prior_ok && lum_prior_compatible&& run_ok && enabled);
 
   QString tool_tip_run = "";
   QString tool_tip_conf = "";
   if (!grid_name_ok) {
-    tool_tip_conf = tool_tip_conf + "Please enter a valid grid name. \n";
-    tool_tip_run = tool_tip_run + "Please enter a valid grid name. \n";
-  };
+    tool_tip_conf = tool_tip_conf + "Please enter a valid model grid name. \n";
+    tool_tip_run = tool_tip_run + "Please enter a valid model grid name. \n";
+  }
 
   if (!grid_name_exists) {
     tool_tip_run = tool_tip_run + "Please run the model grid computation. \n";
   }
+
+
+  if (need_gal_correction){
+      if (!grid_gal_corr_name_ok) {
+        tool_tip_conf = tool_tip_conf + "You have enabled the Galactic Absorption Correction Please enter a valid Galactic correction grid name. \n";
+        tool_tip_run = tool_tip_run + "You have enabled the Galactic Absorption Correction Please enter a valid Galactic correction grid name. \n";
+      };
+
+      if (!grid_gal_corr_name_exists) {
+        tool_tip_run = tool_tip_run + "Please run the Galactic Absorption Correction grid computation. \n";
+      }
+  }
+
+
 
   if (!correction_ok) {
     tool_tip_conf =
@@ -322,13 +422,13 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
     ui->txt_inputCatalog->setStyleSheet("QLineEdit { color: grey }");
   }
 
-  if (!(grid_name_ok && correction_ok && lum_prior_ok && lum_prior_compatible && run_ok)) {
+  if (!(grid_name_ok && (!need_gal_correction || grid_gal_corr_name_ok)  && correction_ok && lum_prior_ok && lum_prior_compatible && run_ok)) {
     tool_tip_conf = tool_tip_conf + "Before getting the configuration.";
   } else {
     tool_tip_conf = "Get the configuration file.";
   }
 
-  if (!(grid_name_exists && correction_ok && correction_exists && lum_prior_ok && lum_prior_compatible && run_ok)) {
+  if (!(grid_name_exists && (!need_gal_correction || grid_gal_corr_name_exists)  && correction_ok && correction_exists && lum_prior_ok && lum_prior_compatible && run_ok)) {
     tool_tip_run = tool_tip_run + "Before running the analysis.";
   } else {
     tool_tip_run = "Run the analysis.";
@@ -338,15 +438,15 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   ui->btn_RunAnalysis->setToolTip(tool_tip_run);
 
   if (!correction_ok) {
-    setToolBoxButtonColor(ui->toolBox, 2, QColor("orange"));
+    setToolBoxButtonColor(ui->toolBox, 3, QColor("orange"));
   } else {
-    setToolBoxButtonColor(ui->toolBox, 2,Qt::black);
+    setToolBoxButtonColor(ui->toolBox, 3,Qt::black);
   }
 
   if (!lum_prior_ok || !lum_prior_compatible) {
-     setToolBoxButtonColor(ui->toolBox, 1, QColor("orange"));
+     setToolBoxButtonColor(ui->toolBox, 2, QColor("orange"));
    } else {
-     setToolBoxButtonColor(ui->toolBox, 1,Qt::black);
+     setToolBoxButtonColor(ui->toolBox, 2,Qt::black);
    }
 }
 
@@ -448,6 +548,30 @@ bool FormAnalysis::checkGridSelection(bool addFileCheck, bool acceptNewFile) {
   return acceptNewFile || info.exists();
 }
 
+bool FormAnalysis::checkGalacticGridSelection(bool addFileCheck, bool acceptNewFile) {
+  std::string file_name = ui->cb_CompatibleGalCorrGrid->currentText().toStdString();
+
+  if (file_name.compare("<Enter a new name>") == 0) {
+    return false;
+  }
+
+  if (file_name.compare("") == 0) {
+      return false;
+    }
+
+  if (!addFileCheck) {
+    return true;
+  }
+
+  QFileInfo info(
+      QString::fromStdString(
+          FileUtils::getGalacticCorrectionGridRootPath(true,
+              ui->cb_AnalysisSurvey->currentText().toStdString()))
+          + QDir::separator() + QString::fromStdString(file_name));
+
+  return acceptNewFile || info.exists();
+}
+
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getGridConfiguration() {
   std::string file_name = FileUtils::addExt(
       ui->cb_CompatibleGrid->currentText().toStdString(), ".dat");
@@ -468,6 +592,72 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
   return PhzGridInfoHandler::GetConfigurationMap(
       ui->cb_AnalysisSurvey->currentText().toStdString(), file_name, selected_model,
       getFilters(), ui->cb_igm->currentText().toStdString());
+}
+
+
+
+std::map<std::string, boost::program_options::variable_value> FormAnalysis::getGalacticCorrectionGridConfiguration(){
+  std::string file_name = FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ".dat");
+  ui->cb_CompatibleGalCorrGrid->setItemText(ui->cb_CompatibleGalCorrGrid->currentIndex(),
+        QString::fromStdString(file_name));
+  std::string grid_name = ui->cb_CompatibleGrid->currentText().toStdString();
+  std::string catalog_type = ui->cb_AnalysisSurvey->currentText().toStdString();
+  std::string igm = ui->cb_igm->currentText().toStdString();
+
+  //Lookup the expected default files
+  QFileInfo b_filter_info(
+              QString::fromStdString(FileUtils::getFilterRootPath(false))
+              + QDir::separator() + QString::fromStdString("GCPD_Johnson")
+              + QDir::separator() + QString::fromStdString("GCPD_Johnson.B.dat"));
+  if (!b_filter_info.exists()){
+    QMessageBox::warning(this, "Missing Default Filter...",
+                "The B filter stored by default in <Filters>/GCPD_Johnson/GCPD_Johnson.B.dat is missing. "
+                "This computation need it, please provide it and try again.",
+                QMessageBox::Ok);
+    return {};
+  }
+
+  QFileInfo v_filter_info(
+              QString::fromStdString(FileUtils::getFilterRootPath(false))
+              + QDir::separator() + QString::fromStdString("GCPD_Johnson")
+              + QDir::separator() + QString::fromStdString("GCPD_Johnson.V.dat"));
+  if (!v_filter_info.exists()){
+    QMessageBox::warning(this, "Missing Default Filter...",
+                    "The V filter stored by default in <Filters>/GCPD_Johnson/GCPD_Johnson.V.dat is missing. "
+                    "This computation need it, please provide it and try again.",
+                    QMessageBox::Ok);
+    return {};
+  }
+
+  QFileInfo f99_curve_info(
+                QString::fromStdString(FileUtils::getRedCurveRootPath(false))
+                + QDir::separator() + QString::fromStdString("F99")
+                + QDir::separator() + QString::fromStdString("F99_3.1.dat"));
+    if (!f99_curve_info.exists()){
+      QMessageBox::warning(this, "Missing Reddening curve...",
+                      "The Milky Way reddening curve stored by default in <ReddeningCurves>/F99/F99_3.1.dat is missing. "
+                      "This computation need it, please provide it and try again.",
+                      QMessageBox::Ok);
+      return {};
+    }
+
+
+    std::map<std::string, boost::program_options::variable_value> options_map =
+             FileUtils::getPathConfiguration(false,true,true,false);
+    options_map["catalog-type"].value() = boost::any(catalog_type);
+    options_map["output-galactic-correction-coefficient-grid"].value() = boost::any(file_name);
+    options_map["model-grid-file"].value() = boost::any(grid_name);
+    options_map["igm-absorption-type"].value() = boost::any(igm);
+
+    std::string b_filter = "GCPD_Johnson/GCPD_Johnson.B";
+    std::string v_filter = "GCPD_Johnson/GCPD_Johnson.V";
+    std::string f99 = "F99/F99_3.1";
+    options_map["b-filter-name"].value() = boost::any(b_filter);
+    options_map["v-filter-name"].value() = boost::any(v_filter);
+    options_map["milky-way-reddening-curve-name"].value() = boost::any(f99);
+
+    return options_map;
+
 }
 
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getRunOptionMap() {
@@ -752,6 +942,13 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   connect(grid_model, SIGNAL(itemChanged(QStandardItem*)),
       SLOT(onFilterSelectionItemChanged(QStandardItem*)));
 
+  // Check which of the Galactic correction option  are available
+  ui->rb_gc_off->setChecked(true);
+  ui->rb_gc_col->setChecked(false);
+  ui->rb_gc_col->setEnabled(selected_survey.getGalEbvColumn().length()>0);
+  ui->rb_gc_planck->setChecked(false);
+  ui->rb_gc_planck->setEnabled(selected_survey.getRaColumn().length()>0 && selected_survey.getDecColumn().length()>0);
+
   //update the column of the default catalog file
   fillCbColumns(selected_survey.getColumnList());
 
@@ -783,6 +980,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   }
 
   updateGridSelection();
+  updateGalCorrGridSelection();
   loadLuminosityPriors();
   updateCorrectionSelection();
 
@@ -827,24 +1025,39 @@ template<typename ReturnType, int I>
                "parameter_space",model_name.toStdString());
 
     updateGridSelection();
+    updateGalCorrGridSelection();
     loadLuminosityPriors();
 
 
   }
 
-  void FormAnalysis::on_cb_igm_currentIndexChanged(const QString &)
-  {
+  void FormAnalysis::on_cb_igm_currentIndexChanged(const QString &) {
     updateGridSelection();
+    updateGalCorrGridSelection();
   }
 
   void FormAnalysis::onFilterSelectionItemChanged(QStandardItem*) {
     updateGridSelection();
+    updateGalCorrGridSelection();
     updateCorrectionSelection();
   }
 
 //  2. Photometry Grid
   void FormAnalysis::on_cb_CompatibleGrid_textChanged(const QString &) {
     adjustPhzGridButtons(true);
+    std::string grid_name = ui->cb_CompatibleGrid->currentText().toStdString();
+    size_t index = grid_name.find_last_of("/\\");
+    if (index!=string::npos){
+      grid_name=grid_name.substr(index+1);
+    }
+
+    index = grid_name.find_last_of(".");
+        if (index!=string::npos){
+          grid_name=grid_name.substr(0,index);
+        }
+     ui->cb_CompatibleGalCorrGrid->setItemText(ui->cb_CompatibleGalCorrGrid->currentIndex(),
+                QString::fromStdString(grid_name+"_corr.dat"));
+    adjustGalCorrGridButtons(true);
     setComputeCorrectionEnable();
     setRunAnnalysisEnable(true);
   }
@@ -896,6 +1109,7 @@ template<typename ReturnType, int I>
       dialog->setValues(ui->cb_CompatibleGrid->currentText().toStdString(), config_map);
       if (dialog->exec()) {
         adjustPhzGridButtons(true);
+        adjustGalCorrGridButtons(true);
         setComputeCorrectionEnable();
 
         PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
@@ -905,9 +1119,80 @@ template<typename ReturnType, int I>
     setRunAnnalysisEnable(true);
   }
 
+// Galactic Correction
+
+  void FormAnalysis::on_rb_gc_off_clicked(){
+    adjustGalCorrGridButtons(true);
+    setRunAnnalysisEnable(true);
+  }
+  void FormAnalysis::on_rb_gc_col_clicked(){
+    on_rb_gc_off_clicked();
+  }
+  void FormAnalysis::on_rb_gc_planck_clicked(){
+    on_rb_gc_off_clicked();
+  }
+
+
+  void FormAnalysis::on_cb_CompatibleGalCorrGrid_textChanged(const QString &) {
+    adjustGalCorrGridButtons(true);
+    setComputeCorrectionEnable();
+    setRunAnnalysisEnable(true);
+  }
+
+  void FormAnalysis::on_btn_GetGalCorrConfigGrid_clicked(){
+    if (!checkGalacticGridSelection(true, true)) {
+      QMessageBox::warning(this, "Unavailable name...",
+            "It is not possible to save the Galactic Correction Grid under the name you have provided. Please enter a new name.",
+            QMessageBox::Ok);
+    } else {
+      QString filter = "Config (*.conf)";
+      QString fileName = QFileDialog::getSaveFileName(this,
+          tr("Save Configuration File"),
+          QString::fromStdString(FileUtils::getRootPath(true))+"config",
+          filter,&filter);
+      if (fileName.length()>0) {
+        if(!fileName.endsWith(".conf", Qt::CaseInsensitive)){
+          fileName=fileName+".conf";
+        }
+        auto config_map = getGalacticCorrectionGridConfiguration();
+        if (config_map.size()>0){
+          PhzUITools::ConfigurationWriter::writeConfiguration(config_map,fileName.toStdString());
+        }
+      }
+    }
+  }
+
+  void FormAnalysis::on_btn_RunGalCorrGrid_clicked(){
+    if (!checkGalacticGridSelection(true, true)) {
+        QMessageBox::warning(this, "Unavailable name...",
+              "It is not possible to save the Galactic Correction Grid under the name you have provided. Please enter a new name.",
+              QMessageBox::Ok);
+      } else {
+        if (checkGalacticGridSelection(true, false)) {
+              if (QMessageBox::warning(this, "Override existing file...",
+                      "A Galactic Correction Grid file with the very same name as the one you provided already exist. "
+                      "Do you want to replace it?", QMessageBox::Yes | QMessageBox::No)
+                  == QMessageBox::No) {
+                return;
+              }
+            }
+
+          auto config_map = getGalacticCorrectionGridConfiguration();
+          if (config_map.size()>0){
+            std::unique_ptr<DialogGalCorrGridGeneration> dialog(new DialogGalCorrGridGeneration());
+                 dialog->setValues(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), config_map);
+                 if (dialog->exec()) {
+                   adjustGalCorrGridButtons(true);
+                   setComputeCorrectionEnable();
+
+                 }
+          }
+      }
+      setRunAnnalysisEnable(true);
+  }
+
 //  3. Photometric Correction
-  void FormAnalysis::on_gb_corrections_clicked()
-  {
+  void FormAnalysis::on_gb_corrections_clicked() {
     setRunAnnalysisEnable(true);
     setComputeCorrectionEnable();
   }

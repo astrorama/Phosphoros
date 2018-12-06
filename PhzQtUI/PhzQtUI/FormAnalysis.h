@@ -86,9 +86,19 @@ void on_btn_ToModel_clicked();
 
     void on_cb_CompatibleGrid_textChanged(const QString &);
 
+    void on_cb_CompatibleGalCorrGrid_textChanged(const QString &);
+
     void on_btn_GetConfigGrid_clicked();
 
     void on_btn_RunGrid_clicked();
+
+    void on_btn_GetGalCorrConfigGrid_clicked();
+
+    void on_btn_RunGalCorrGrid_clicked();
+
+    void on_rb_gc_off_clicked();
+    void on_rb_gc_col_clicked();
+    void on_rb_gc_planck_clicked();
 
     void on_gb_corrections_clicked();
 
@@ -137,10 +147,17 @@ private:
 
     std::string getSelectedSurveySourceColumn();
     void adjustPhzGridButtons(bool enabled);
+    void adjustGalCorrGridButtons(bool enabled);
 
     void updateGridSelection();
+    void updateGalCorrGridSelection();
     bool checkGridSelection(bool addFileCheck, bool acceptNewFile);
+    bool checkGalacticGridSelection(bool addFileCheck, bool acceptNewFile);
     std::map<std::string, boost::program_options::variable_value> getGridConfiguration();
+    std::map<std::string, boost::program_options::variable_value> getGalacticCorrectionGridConfiguration();
+
+
+
 
 
     static void setToolBoxButtonColor(QToolBox* toolBox, int index, QColor color);

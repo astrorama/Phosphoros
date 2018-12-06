@@ -17,7 +17,7 @@
 #include "Configuration/ConfigManager.h"
 
 #include "PhzConfiguration/ComputePhotometricCorrectionsConfig.h"
-#include "PhzExecutables/ComputePhotometricCorrections.h"
+//#include "PhzExecutables/ComputePhotometricCorrections.h"
 #include "PhzUtils/Multithreading.h"
 #include "Configuration/Utils.h"
 
@@ -277,7 +277,7 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
           }
         };
         
-    PhzExecutables::ComputePhotometricCorrections{progress_logger}.run(config_manager);
+   // PhzExecutables::ComputePhotometricCorrections{progress_logger}.run(config_manager);
         
     correctionComputed (ui->txt_FileName->text());
     return "";
