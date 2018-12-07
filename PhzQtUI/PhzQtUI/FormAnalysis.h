@@ -134,6 +134,8 @@ private:
     std::list<std::string> getExcludedFilters();
     std::list<FilterMapping> getSelectedFilterMapping();
 
+    SurveyFilterMapping getSelectedSurvey();
+
     void updateCopiedColumns(std::list<std::string> new_columns);
 
     void saveCopiedColumnToCatalog();
