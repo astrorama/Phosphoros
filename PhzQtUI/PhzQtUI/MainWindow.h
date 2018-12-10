@@ -7,6 +7,8 @@
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
 
+#include "PhzQtUI/OptionModel.h"
+
 namespace Euclid {
 namespace PhzQtUI {
 
@@ -60,11 +62,11 @@ private:
     bool m_model_loaded = false;
     bool m_mapping_loaded = false;
 
-
     DatasetRepo m_filter_repository;
     DatasetRepo m_seds_repository;
     DatasetRepo m_redenig_curves_repository;
     DatasetRepo m_luminosity_repository;
+    std::shared_ptr<OptionModel> m_option_model_ptr{ new OptionModel};
 
 
 };

@@ -96,6 +96,8 @@ MainWindow::MainWindow(QWidget *parent) :
   std::unique_ptr<XYDataset::FileSystemProvider> luminosity_curve_provider(new XYDataset::FileSystemProvider{  FileUtils::getLuminosityFunctionCurveRootPath(true), std::move(luminosity_file_parser) });
   m_luminosity_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(luminosity_curve_provider)});
   m_luminosity_repository->reload();
+
+  m_option_model_ptr->loadOption(m_filter_repository, m_seds_repository, m_redenig_curves_repository, m_luminosity_repository);
 }
 
 MainWindow::~MainWindow()
@@ -162,7 +164,7 @@ void MainWindow::navigateToConfig(){
  void MainWindow::on_btn_HomeToOption_clicked()
  {
    changeMainStackedWidgetIndex(4);
-   ui->widget_configuration->loadOptionPage(m_filter_repository, m_seds_repository, m_redenig_curves_repository, m_luminosity_repository);
+   ui->widget_configuration->loadOptionPage(m_option_model_ptr);
  }
 
 //------------------------------------------------
