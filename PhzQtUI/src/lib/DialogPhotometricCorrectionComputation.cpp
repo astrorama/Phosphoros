@@ -17,7 +17,7 @@
 #include "Configuration/ConfigManager.h"
 
 #include "PhzConfiguration/ComputePhotometricCorrectionsConfig.h"
-//#include "PhzExecutables/ComputePhotometricCorrections.h"
+#include "PhzExecutables/ComputePhotometricCorrections.h"
 #include "PhzUtils/Multithreading.h"
 #include "Configuration/Utils.h"
 
@@ -48,11 +48,13 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
     std::list<FilterMapping> selected_filters,
     std::list<std::string> excluded_filters,
     std::string default_catalog_path,
+    std::map<std::string, boost::program_options::variable_value> run_option,
     double non_detection) {
   m_id_column = id_column;
   m_selected_filters = selected_filters;
   m_excluded_filters = excluded_filters;
-  m_non_detection=non_detection;
+  m_run_option = run_option;
+  m_non_detection = non_detection;
   ui->txt_survey->setText(QString::fromStdString(survey));
   ui->txt_Model->setText(QString::fromStdString(model));
   ui->txt_grid->setText(QString::fromStdString(grid));
@@ -248,16 +250,14 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
     int max_iter_number = ui->txt_Iteration->text().toInt();
 
     auto config_map = PhotometricCorrectionHandler::GetConfigurationMap(
+        m_run_option,
         ui->txt_survey->text().toStdString(),
-        ui->txt_FileName->text().toStdString(), max_iter_number,
-
+        ui->txt_FileName->text().toStdString(),
+        max_iter_number,
         FormUtils::parseToDouble(ui->txt_Tolerence->text()),
-        m_non_detection,
         ui->cb_SelectionMethod->currentText().toStdString(),
-        ui->txt_grid->text().toStdString(),
-        ui->txt_catalog->text().toStdString(), m_id_column,
-        ui->cb_SpectroColumn->currentText().toStdString(),
-        m_excluded_filters);
+        ui->txt_catalog->text().toStdString(),
+        ui->cb_SpectroColumn->currentText().toStdString());
 
     long config_manager_id = Configuration::getUniqueManagerId();
     auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
@@ -277,7 +277,7 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
           }
         };
         
-   // PhzExecutables::ComputePhotometricCorrections{progress_logger}.run(config_manager);
+    PhzExecutables::ComputePhotometricCorrections{progress_logger}.run(config_manager);
         
     correctionComputed (ui->txt_FileName->text());
     return "";

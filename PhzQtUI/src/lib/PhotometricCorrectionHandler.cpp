@@ -72,58 +72,28 @@ void PhotometricCorrectionHandler::writeCorrections(std::string catalog,PhzDataM
 }
 
 std::map<std::string, boost::program_options::variable_value> PhotometricCorrectionHandler::GetConfigurationMap(
+    std::map<std::string, boost::program_options::variable_value> run_option,
     std::string catalog,
     std::string output_file_name,
     int iteration_number,
     double tolerance,
-    double non_detection,
     std::string method,
-    std::string photometric_grid_file,
     std::string training_catalog_file,
-    std::string id_column,
-    std::string z_column,
-    std::list<std::string> filter_excluded)
-  {
-
+    std::string z_column ) {
 
     auto path_filename = FileUtils::getPhotCorrectionsRootPath(true,catalog)
         + QString(QDir::separator()).toStdString() + output_file_name;
 
+    run_option["output-phot-corr-file"].value() = boost::any(path_filename);
+    run_option["phot-corr-iter-no"].value() = boost::any(iteration_number);
+    run_option["phot-corr-tolerance"].value() = boost::any(tolerance);
+    run_option["phot-corr-selection-method"].value() = boost::any(method);
+    run_option["input-catalog-file"].value() = boost::any(training_catalog_file);
+    run_option["spec-z-column-name"].value() = boost::any(z_column);
 
-    std::map<std::string, boost::program_options::variable_value> options_map =
-           FileUtils::getPathConfiguration(true,false,true,false);
+    completeWithDefaults<PhzConfiguration::ComputePhotometricCorrectionsConfig>(run_option);
 
-    options_map["catalog-type"].value() = boost::any(catalog);
-    options_map["missing-photometry-flag"].value() = boost::any(non_detection);
-
-
-    options_map["output-phot-corr-file"].value() = boost::any(path_filename);
-    options_map["phot-corr-iter-no"].value() = boost::any(iteration_number);
-    options_map["phot-corr-tolerance"].value() = boost::any(tolerance);
-    options_map["phot-corr-selection-method"].value() = boost::any(method);
-
-
-    auto path_grid_filename = FileUtils::getPhotmetricGridRootPath(false,catalog)
-           + QString(QDir::separator()).toStdString() + photometric_grid_file;
-    options_map["model-grid-file"].value() = boost::any(path_grid_filename);
-
-    options_map["input-catalog-file"].value() = boost::any(training_catalog_file);
-    options_map["source-id-column-name"].value() = boost::any(id_column);
-    options_map["spec-z-column-name"].value() = boost::any(z_column);
-
-
-    if (filter_excluded.size()>0){
-       std::vector < std::string > excluded;
-       for (auto& filter : filter_excluded) {
-         excluded.push_back(filter);
-       }
-       options_map["exclude-filter"].value() = boost::any(excluded);
-    }
-    
-    completeWithDefaults<PhzConfiguration::ComputePhotometricCorrectionsConfig>(options_map);
-
-    return options_map;
-
+    return run_option;
 }
 
 }
