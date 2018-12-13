@@ -8,6 +8,7 @@
 
 
 #include "ElementsKernel/Exception.h"
+#include "ElementsKernel/Logging.h"
 
 #include "PhzQtUI/FormAnalysis.h"
 #include "ui_FormAnalysis.h"
@@ -30,9 +31,12 @@
 #include "PhzUITools/CatalogColumnReader.h"
 
 #include "PhzDataModel/PhzModel.h"
+#include <ctime>
 
 namespace Euclid {
 namespace PhzQtUI {
+
+static Elements::Logging logger = Elements::Logging::getLogger("FormAnalysis");
 
 FormAnalysis::FormAnalysis(QWidget *parent) :
     QWidget(parent), ui(new Ui::FormAnalysis) {
@@ -44,53 +48,60 @@ FormAnalysis::~FormAnalysis() {
 
 ///////////////////////////////////////////////////
 //  Initial data load
-void FormAnalysis::loadAnalysisPage(DatasetRepo filter_repository, DatasetRepo luminosity_repository) {
+void FormAnalysis::loadAnalysisPage(
+    std::shared_ptr<SurveyModel> survey_model_ptr,
+    DatasetRepo filter_repository,
+    DatasetRepo luminosity_repository) {
+  m_survey_model_ptr = survey_model_ptr;
   m_filter_repository = filter_repository;
   m_luminosity_repository = luminosity_repository;
 
-  auto saved_catalog = PreferencesUtils::getUserPreference("_global_selection_", "catalog");
+  // Fill the Parameter Space Combobox and set its index
   auto saved_parameter_space = PreferencesUtils::getUserPreference("_global_selection_", "parameter_space");
+  m_analysis_model_list = ModelSet::loadModelSetsFromFolder(FileUtils::getModelRootPath(false));
 
+  disconnect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString &)), 0, 0);
+  ui->cb_AnalysisModel->clear();
+  for (auto& model : m_analysis_model_list) {
+   ui->cb_AnalysisModel->addItem(QString::fromStdString(model.second.getName()));
+  }
+
+  for (int i = 0; i < ui->cb_AnalysisModel->count(); i++) {
+    if (ui->cb_AnalysisModel->itemText(i).toStdString() == saved_parameter_space) {
+      ui->cb_AnalysisModel->setCurrentIndex(i);
+      break;
+    }
+  }
+
+  connect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString &)),
+         SLOT(on_cb_AnalysisModel_currentIndexChanged(const QString &)));
+
+
+  // Fill the Calalog Combobox and set its index
+  disconnect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString &)), 0, 0);
+
+  auto saved_catalog = m_survey_model_ptr->getSelectedSurvey();
+  ui->cb_AnalysisSurvey->clear();
+  for (auto& survey_name : m_survey_model_ptr->getSurveyList()) {
+     ui->cb_AnalysisSurvey->addItem(survey_name);
+  }
+
+  connect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString &)),
+        SLOT(on_cb_AnalysisSurvey_currentIndexChanged(const QString &)));
+
+
+  for (int i = 0; i < ui->cb_AnalysisSurvey->count(); i++) {
+    if (ui->cb_AnalysisSurvey->itemText(i).toStdString() == saved_catalog.getName()) {
+      ui->cb_AnalysisSurvey->setCurrentIndex(i);
+      break;
+    }
+  }
+
+  //
   ui->cb_z_col->clear();
   ui->cb_z_col->addItem("");
-
-  m_analysis_survey_list = SurveyFilterMapping::loadCatalogMappings();
-    ui->cb_AnalysisSurvey->clear();
-    for (auto& survey : m_analysis_survey_list) {
-      ui->cb_AnalysisSurvey->addItem(
-          QString::fromStdString(survey.second.getName()));
-    }
-
-
-
-    m_analysis_model_list = ModelSet::loadModelSetsFromFolder(FileUtils::getModelRootPath(false));
-    ui->cb_AnalysisModel->clear();
-    for (auto& model : m_analysis_model_list) {
-      ui->cb_AnalysisModel->addItem(QString::fromStdString(model.second.getName()));
-    }
-
-
-
-    for (int i = 0; i < ui->cb_AnalysisSurvey->count(); i++) {
-        if (ui->cb_AnalysisSurvey->itemText(i).toStdString() == saved_catalog) {
-          ui->cb_AnalysisSurvey->setCurrentIndex(i);
-          break;
-        }
-      }
-
-
-    for (int i = 0; i < ui->cb_AnalysisModel->count(); i++) {
-        if (ui->cb_AnalysisModel->itemText(i).toStdString() == saved_parameter_space) {
-          ui->cb_AnalysisModel->setCurrentIndex(i);
-          break;
-        }
-      }
-
-
-    updateGridSelection();
-    updateGalCorrGridSelection();
-
 }
+
 ///////////////////////////////////////////////////
 //  Handle controls enability
 
@@ -108,7 +119,7 @@ try {
 
   auto axis = selected_model.getAxesTuple();
   auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
-      ui->cb_AnalysisSurvey->currentText().toStdString(), axis,
+      m_survey_model_ptr->getSelectedSurvey().getName(), axis,
       getSelectedFilters(), ui->cb_igm->currentText().toStdString());
 
   ui->cb_CompatibleGrid->clear();
@@ -146,7 +157,7 @@ void FormAnalysis::updateGalCorrGridSelection() {
 
     auto axis = selected_model.getAxesTuple();
     auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
-        ui->cb_AnalysisSurvey->currentText().toStdString(), axis,
+        m_survey_model_ptr->getSelectedSurvey().getName(), axis,
         getSelectedFilters(), ui->cb_igm->currentText().toStdString(),
         false);
 
@@ -180,7 +191,7 @@ void FormAnalysis::fillCbColumns(std::set<std::string> columns) {
 void FormAnalysis::updateCorrectionSelection() {
   auto filter_map = getSelectedFilters();
   auto file_list = PhotometricCorrectionHandler::getCompatibleCorrectionFiles(
-      ui->cb_AnalysisSurvey->currentText().toStdString(), filter_map);
+      m_survey_model_ptr->getSelectedSurvey().getName(), filter_map);
   ui->cb_AnalysisCorrection->clear();
 
   for (auto file : file_list) {
@@ -287,7 +298,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   QFileInfo info(
       QString::fromStdString(
           FileUtils::getPhotCorrectionsRootPath(false,
-              ui->cb_AnalysisSurvey->currentText().toStdString()))
+            m_survey_model_ptr->getSelectedSurvey().getName()))
           + QDir::separator() + ui->cb_AnalysisCorrection->currentText());
   bool correction_exists = !ui->gb_corrections->isChecked() || info.exists();
 
@@ -460,19 +471,13 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
 //////////////////////////////////////////////////
 // Build and handle objects for calling the processing
 
-std::string FormAnalysis::getSelectedSurveySourceColumn() {
- return getSelectedSurvey().getSourceIdColumn();
-}
+
 
 std::list<std::string> FormAnalysis::getFilters() {
   std::list<std::string> res;
-  auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
-  for (auto& survey_pair : m_analysis_survey_list) {
-    if (survey_pair.second.getName().compare(survey_name) == 0) {
-      for (auto filter : survey_pair.second.getFilters()) {
-        res.push_back(filter.getFilterFile());
-      }
-    }
+  auto survey = m_survey_model_ptr->getSelectedSurvey();
+  for (auto filter : survey.getFilters()) {
+     res.push_back(filter.getFilterFile());
   }
   return res;
 }
@@ -506,38 +511,14 @@ std::list<std::string> FormAnalysis::getExcludedFilters() {
 
 }
 
-
-
-SurveyFilterMapping FormAnalysis::getSelectedSurvey(){
-
-  auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
-
-   SurveyFilterMapping selected_survey;
-
-   for (auto&survey : m_analysis_survey_list) {
-     if (survey.second.getName().compare(survey_name) == 0) {
-       return survey.second;
-       break;
-     }
-   }
-
-   return selected_survey;
-}
-
 std::list<FilterMapping> FormAnalysis::getSelectedFilterMapping() {
   auto filterNames = getSelectedFilters();
+  auto filter_mappings = m_survey_model_ptr->getSelectedSurvey().getFilters();
   std::list<FilterMapping> list;
-  if (!ui->cb_AnalysisSurvey->currentText().isEmpty()) {
-    for (auto& survey : m_analysis_survey_list) {
-      if (survey.second.getName().compare(
-          ui->cb_AnalysisSurvey->currentText().toStdString()) == 0) {
-        for (auto& name : filterNames) {
-          for (auto& filter : survey.second.getFilters()) {
-            if (filter.getFilterFile().compare(name) == 0) {
-              list.push_back(filter);
-            }
-          }
-        }
+  for (auto name : filterNames) {
+    for (auto& filter : filter_mappings) {
+      if (filter.getFilterFile().compare(name) == 0) {
+        list.push_back(filter);
       }
     }
   }
@@ -684,7 +665,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getRunOptionMap() {
 
   auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
-  SurveyFilterMapping selected_survey = getSelectedSurvey();
+  SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
   double non_detection = selected_survey.getNonDetection();
   bool has_Missing_data = selected_survey.getHasMissingPhotometry();
   bool has_upper_limit = selected_survey.getHasUpperLimit();
@@ -738,7 +719,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
       FileUtils::getCatalogRootPath(false, survey_name) +
       QString(QDir::separator()).toStdString());
   options_map["input-catalog-file"].value() = boost::any(input_catalog_file);
-  options_map["source-id-column-name"].value() = boost::any(getSelectedSurveySourceColumn());
+  options_map["source-id-column-name"].value() = boost::any(m_survey_model_ptr->getSelectedSurvey().getSourceIdColumn());
   if (has_Missing_data) {
     options_map["missing-photometry-flag"].value() = boost::any(non_detection);
   }
@@ -936,14 +917,9 @@ std::map < std::string, boost::program_options::variable_value > FormAnalysis::g
 //  1. Survey and Model
 void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     const QString &selectedName) {
+  m_survey_model_ptr->selectSurvey(selectedName);
 
-
-  PreferencesUtils::setUserPreference(
-      "_global_selection_",
-      "catalog",
-      selectedName.toStdString());
-
-  SurveyFilterMapping selected_survey = getSelectedSurvey();
+  SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
 
   QStandardItemModel* grid_model = new QStandardItemModel();
   grid_model->setColumnCount(1);
@@ -974,9 +950,9 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
 
   auto saved_gal_type = PreferencesUtils::getUserPreference(selected_survey.getName(),
         "GalCorrType");
-  if(saved_gal_type == "COL" && ui->rb_gc_col->isEnabled()){
+  if (saved_gal_type == "COL" && ui->rb_gc_col->isEnabled()) {
     ui->rb_gc_col->setChecked(true);
-  } else if(saved_gal_type == "MAP" && ui->rb_gc_planck->isEnabled()){
+  } else if (saved_gal_type == "MAP" && ui->rb_gc_planck->isEnabled()) {
     ui->rb_gc_planck->setChecked(true);
   }
 
@@ -1252,12 +1228,12 @@ template<typename ReturnType, int I>
 
     auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
 
-    SurveyFilterMapping selected_survey = getSelectedSurvey();
+    SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
 
     auto config_map = getRunOptionMap();
 
     std::unique_ptr<DialogPhotometricCorrectionComputation> popup(new DialogPhotometricCorrectionComputation());
-    popup->setData(survey_name, getSelectedSurveySourceColumn(),
+    popup->setData(survey_name, m_survey_model_ptr->getSelectedSurvey().getSourceIdColumn(),
         ui->cb_AnalysisModel->currentText().toStdString(),
         ui->cb_CompatibleGrid->currentText().toStdString(),
         getSelectedFilterMapping(),
@@ -1411,7 +1387,7 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
   if (do_test) {
     std::vector<std::string> needed_columns { };
 
-    needed_columns.push_back(getSelectedSurveySourceColumn());
+    needed_columns.push_back(m_survey_model_ptr->getSelectedSurvey().getSourceIdColumn());
     for (auto& filter : getSelectedFilterMapping()) {
       needed_columns.push_back(filter.getFluxColumn());
       needed_columns.push_back(filter.getErrorColumn());
@@ -1460,12 +1436,8 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
 
   void FormAnalysis::updateCopiedColumns(std::list<std::string> new_columns) {
     // get the columns from the catalog
-      for (auto&survey : m_analysis_survey_list) {
-        if (survey.second.getName().compare(ui->cb_AnalysisSurvey->currentText().toStdString()) == 0) {
-          setCopiedColumns(survey.second.getCopiedColumns());
-          break;
-        }
-      }
+    setCopiedColumns(m_survey_model_ptr->getSelectedSurvey().getCopiedColumns());
+
     // ensure that they are in the selected file
     std::list<std::string> missing{};
     for (auto& iter : m_copied_columns) {
@@ -1496,7 +1468,7 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
     auto col_set = column_reader.getColumnNames();
 
     std::list<std::string> all_columns(col_set.begin(), col_set.end());
-    std::string id_col = getSelectedSurveySourceColumn();
+    std::string id_col = m_survey_model_ptr->getSelectedSurvey().getSourceIdColumn();
     std::unique_ptr<DialogOutputColumnSelection> popup(new DialogOutputColumnSelection(all_columns, id_col, m_copied_columns));
 
     connect(popup.get(), SIGNAL(selectedColumns(std::map<std::string, std::string>)),
@@ -1507,14 +1479,8 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
 
 
   void FormAnalysis::saveCopiedColumnToCatalog() {
-     auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
-     for (auto& survey_pair : m_analysis_survey_list) {
-       if (survey_pair.second.getName().compare(survey_name) == 0) {
-          survey_pair.second.setCopiedColumns(m_copied_columns);
-          survey_pair.second.saveSurvey(survey_name);
-          break;
-       }
-     }
+    m_survey_model_ptr->setCopiedColumnsToSelected(m_copied_columns);
+    m_survey_model_ptr->saveSelected();
   }
 
   void FormAnalysis::on_btn_BrowseOutput_clicked() {
@@ -1583,7 +1549,7 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
       auto column_from_file = column_reader.getColumnNames();
       if (column_from_file.find("GAL_EBV") == column_from_file.end()) {
         // the E(B-V) has to be looked up in the Planck map
-        SurveyFilterMapping selected_survey = getSelectedSurvey();
+        SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
         std::unique_ptr<DialogAddGalEbv> dialog(new DialogAddGalEbv());
         dialog->setInputs(path, selected_survey.getRaColumn(), selected_survey.getDecColumn());
         if (dialog->exec()) {

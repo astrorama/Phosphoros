@@ -8,6 +8,7 @@
 #include "XYDataset/FileSystemProvider.h"
 
 #include "PhzQtUI/OptionModel.h"
+#include "PhzQtUI/SurveyModel.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -67,6 +68,7 @@ private:
     DatasetRepo m_redenig_curves_repository;
     DatasetRepo m_luminosity_repository;
     std::shared_ptr<OptionModel> m_option_model_ptr{ new OptionModel};
+    std::shared_ptr<SurveyModel> m_survey_model_ptr{ new SurveyModel};
 
 
 };

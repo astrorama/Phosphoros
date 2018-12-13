@@ -37,18 +37,54 @@ FormConfiguration::~FormConfiguration() {
 }
 
 void FormConfiguration::on_btn_ToAnalysis_clicked() {
+  disconnect(ui->txt_catDir, 0, 0, 0);
+  disconnect(ui->txt_auxDir, 0, 0, 0);
+  disconnect(ui->txt_interDir, 0, 0, 0);
+  disconnect(ui->txt_resDir, 0, 0, 0);
+  disconnect(ui->gb_thread, 0, 0, 0);
+  disconnect(ui->sb_thread, 0, 0, 0);
+  disconnect(ui->txt_hubble_param, 0, 0, 0);
+  disconnect(ui->txt_omega_matter, 0, 0, 0);
+  disconnect(ui->txt_omega_lambda, 0, 0, 0);
   navigateToComputeRedshift(do_need_reset);
   do_need_reset=false;
 }
 void FormConfiguration::on_btn_ToCatalog_clicked() {
+  disconnect(ui->txt_catDir, 0, 0, 0);
+  disconnect(ui->txt_auxDir, 0, 0, 0);
+  disconnect(ui->txt_interDir, 0, 0, 0);
+  disconnect(ui->txt_resDir, 0, 0, 0);
+  disconnect(ui->gb_thread, 0, 0, 0);
+  disconnect(ui->sb_thread, 0, 0, 0);
+  disconnect(ui->txt_hubble_param, 0, 0, 0);
+  disconnect(ui->txt_omega_matter, 0, 0, 0);
+  disconnect(ui->txt_omega_lambda, 0, 0, 0);
   navigateToCatalog(do_need_reset);
   do_need_reset=false;
 }
 void FormConfiguration::on_btn_ToModel_clicked() {
+  disconnect(ui->txt_catDir, 0, 0, 0);
+  disconnect(ui->txt_auxDir, 0, 0, 0);
+  disconnect(ui->txt_interDir, 0, 0, 0);
+  disconnect(ui->txt_resDir, 0, 0, 0);
+  disconnect(ui->gb_thread, 0, 0, 0);
+  disconnect(ui->sb_thread, 0, 0, 0);
+  disconnect(ui->txt_hubble_param, 0, 0, 0);
+  disconnect(ui->txt_omega_matter, 0, 0, 0);
+  disconnect(ui->txt_omega_lambda, 0, 0, 0);
   navigateToParameter(do_need_reset);
   do_need_reset=false;
 }
 void FormConfiguration::on_btn_exit_clicked() {
+  disconnect(ui->txt_catDir, 0, 0, 0);
+  disconnect(ui->txt_auxDir, 0, 0, 0);
+  disconnect(ui->txt_interDir, 0, 0, 0);
+  disconnect(ui->txt_resDir, 0, 0, 0);
+  disconnect(ui->gb_thread, 0, 0, 0);
+  disconnect(ui->sb_thread, 0, 0, 0);
+  disconnect(ui->txt_hubble_param, 0, 0, 0);
+  disconnect(ui->txt_omega_matter, 0, 0, 0);
+  disconnect(ui->txt_omega_lambda, 0, 0, 0);
   quit(true);
 }
 

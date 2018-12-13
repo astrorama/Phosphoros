@@ -12,6 +12,7 @@
 #include "PhzQtUI/LuminosityPriorConfig.h"
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
+#include "PhzQtUI/SurveyModel.h"
 
 namespace boost{
 namespace program_options{
@@ -46,7 +47,10 @@ class FormAnalysis : public QWidget
 public:
     explicit FormAnalysis(QWidget *parent = 0);
     ~FormAnalysis();
-    void loadAnalysisPage(DatasetRepo filter_repository, DatasetRepo luminosity_repository);
+    void loadAnalysisPage(
+        std::shared_ptr<SurveyModel> survey_model_ptr,
+        DatasetRepo filter_repository,
+        DatasetRepo luminosity_repository);
 
 signals:
 
@@ -134,7 +138,6 @@ private:
     std::list<std::string> getExcludedFilters();
     std::list<FilterMapping> getSelectedFilterMapping();
 
-    SurveyFilterMapping getSelectedSurvey();
 
     void updateCopiedColumns(std::list<std::string> new_columns);
 
@@ -147,7 +150,6 @@ private:
 
     void setInputCatalogName( std::string name,bool do_test=true);
 
-    std::string getSelectedSurveySourceColumn();
     void adjustPhzGridButtons(bool enabled);
     void adjustGalCorrGridButtons(bool enabled);
 
@@ -170,7 +172,6 @@ private:
     void setRunAnnalysisEnable(bool enabled);
     std::map < std::string, boost::program_options::variable_value > getRunOptionMap();
     std::map < std::string, boost::program_options::variable_value > getLuminosityOptionMap();
-    std::map<int,SurveyFilterMapping>  m_analysis_survey_list;
     std::map<int,ModelSet> m_analysis_model_list;
     std::map<std::string, LuminosityPriorConfig> m_prior_config;
     std::map<std::string,std::string> m_copied_columns = {};
@@ -178,6 +179,7 @@ private:
 
     DatasetRepo m_filter_repository;
     DatasetRepo m_luminosity_repository;
+    std::shared_ptr<SurveyModel> m_survey_model_ptr;
 
 };
 

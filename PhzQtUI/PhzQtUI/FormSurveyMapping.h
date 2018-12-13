@@ -10,6 +10,7 @@
 #include "FilterMapping.h"
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
+#include "PhzQtUI/SurveyModel.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -32,7 +33,7 @@ public:
     explicit FormSurveyMapping( QWidget *parent = 0);
     ~FormSurveyMapping();
 
-    void loadMappingPage(DatasetRepo filter_repository, std::string new_path);
+    void loadMappingPage(std::shared_ptr<SurveyModel> survey_model_ptr, DatasetRepo filter_repository, std::string new_path);
 
     void updateSelection();
 
@@ -49,8 +50,6 @@ void quit(bool);
 
 private slots:
 
-void on_gridEditionStart();
-
 void on_btn_ToAnalysis_clicked();
 void on_btn_ToOption_clicked();
 void on_btn_ToModel_clicked();
@@ -58,9 +57,11 @@ void on_btn_exit_clicked();
 
 
 void on_cb_missingPhot_stateChanged(int state);
+void on_cb_upperLimit_stateChanged(int state);
 
 
     void filterMappingSelectionChanged(QModelIndex, QModelIndex);
+
 
     void mappingGridDoubleClicked(QModelIndex);
 
@@ -82,6 +83,17 @@ void on_cb_missingPhot_stateChanged(int state);
 
     void on_btn_SelectFilters_clicked();
 
+    void on_cb_SourceId_currentIndexChanged(int index);
+
+    void on_cb_Dec_currentIndexChanged(int index);
+
+    void on_cb_Ra_currentIndexChanged(int index);
+
+    void on_cb_GalEbv_currentIndexChanged(int index);
+
+    void on_txt_nonDetection_textEdited(const QString& text);
+
+
 
 
 private:
@@ -91,6 +103,10 @@ private:
     bool m_filterInsert;
     std::set<std::string> m_column_from_file;
     std::string m_default_survey;
+    std::shared_ptr<SurveyModel> m_survey_model_ptr;
+
+    void fillControlsWithSelected();
+    void selectFromGrid();
 
     void setFilterMappingInEdition();
     void setFilterMappingInView();
@@ -99,6 +115,7 @@ private:
 
     std::vector<std::string> getGridFiltersNames() const;
     std::vector<FilterMapping> getMappingFromGrid() const;
+
 
 };
 

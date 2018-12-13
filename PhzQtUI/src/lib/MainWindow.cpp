@@ -98,10 +98,11 @@ MainWindow::MainWindow(QWidget *parent) :
   m_luminosity_repository->reload();
 
   m_option_model_ptr->loadOption(m_filter_repository, m_seds_repository, m_redenig_curves_repository, m_luminosity_repository);
+
+  m_survey_model_ptr->loadSurvey();
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow() {
 }
 
 //- Home Page
@@ -155,7 +156,7 @@ void MainWindow::navigateToConfig(){
 
  void MainWindow::navigateToNewCatalog(std::string new_name){
    changeMainStackedWidgetIndex(2);
-   ui->widget_Catalog->loadMappingPage(m_filter_repository, new_name);
+   ui->widget_Catalog->loadMappingPage(m_survey_model_ptr, m_filter_repository, new_name);
  }
 
  //--------------------------------------------------
@@ -186,7 +187,7 @@ void MainWindow::on_btn_HomeToCatalog_clicked(){
   changeMainStackedWidgetIndex(2);
 
   if (!m_mapping_loaded){
-    ui->widget_Catalog->loadMappingPage(m_filter_repository,"");
+    ui->widget_Catalog->loadMappingPage(m_survey_model_ptr, m_filter_repository, "");
     m_mapping_loaded=true;
   }
 
@@ -197,11 +198,10 @@ void MainWindow::on_btn_HomeToCatalog_clicked(){
 //------------------------------------------------
 // Analysis page  Page
 //  - Slots landing on this page
-void MainWindow::on_btn_HomeToAnalysis_clicked()
-{
+void MainWindow::on_btn_HomeToAnalysis_clicked() {
   changeMainStackedWidgetIndex(3);
 
-    ui->widget_Analysis->loadAnalysisPage(m_filter_repository, m_luminosity_repository);
+    ui->widget_Analysis->loadAnalysisPage(m_survey_model_ptr, m_filter_repository, m_luminosity_repository);
 
 
 }
