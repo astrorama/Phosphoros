@@ -149,18 +149,6 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label_3">
-     <property name="font">
-      <font>
-       <pointsize>11</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Select filter curves and define their mapping to column names</string>
-     </property>
-    </widget>
-   </item>
-   <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_12">
@@ -535,11 +523,25 @@
     </layout>
    </item>
    <item>
+    <widget class="QLabel" name="label_3">
+     <property name="font">
+      <font>
+       <pointsize>13</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Select filter curves and define their mapping to column names</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_15">
      <item>
       <widget class="QLabel" name="label_16">
        <property name="text">
-        <string>Filter Mapping (Click on the column cell to edit it):</string>
+        <string>Filter Mapping (Click on the column cell to edit it) :</string>
        </property>
       </widget>
      </item>
@@ -594,11 +596,6 @@
     </widget>
    </item>
   </layout>
-  <zorder>frm_nav</zorder>
-  <zorder>label_3</zorder>
-  <zorder>line</zorder>
-  <zorder>table_Filter</zorder>
-  <zorder>table_Map</zorder>
  </widget>
  <resources/>
  <connections/>
