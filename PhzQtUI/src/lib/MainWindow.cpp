@@ -100,6 +100,7 @@ MainWindow::MainWindow(QWidget *parent) :
   m_option_model_ptr->loadOption(m_filter_repository, m_seds_repository, m_redenig_curves_repository, m_luminosity_repository);
 
   m_survey_model_ptr->loadSurvey();
+  m_model_set_model_ptr->loadSets();
 }
 
 MainWindow::~MainWindow() {
@@ -175,7 +176,7 @@ void MainWindow::on_btn_HomeToModel_clicked(){
     changeMainStackedWidgetIndex(1);
 
     if (!m_model_loaded){
-      ui->widget_ModelSet->loadSetPage(m_seds_repository, m_redenig_curves_repository);
+      ui->widget_ModelSet->loadSetPage(m_model_set_model_ptr, m_seds_repository, m_redenig_curves_repository);
       m_model_loaded=true;
     }
 

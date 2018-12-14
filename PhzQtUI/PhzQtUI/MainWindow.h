@@ -9,6 +9,7 @@
 
 #include "PhzQtUI/OptionModel.h"
 #include "PhzQtUI/SurveyModel.h"
+#include "PhzQtUI/ModelSetModel.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -69,6 +70,7 @@ private:
     DatasetRepo m_luminosity_repository;
     std::shared_ptr<OptionModel> m_option_model_ptr{ new OptionModel};
     std::shared_ptr<SurveyModel> m_survey_model_ptr{ new SurveyModel};
+    std::shared_ptr<ModelSetModel> m_model_set_model_ptr{ new ModelSetModel};
 
 
 };

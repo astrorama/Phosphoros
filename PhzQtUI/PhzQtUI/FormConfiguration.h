@@ -154,6 +154,7 @@ private:
     std::unique_ptr<Ui::FormConfiguration> ui;
 
     bool do_need_reset = false;
+    void disconnectControls();
     void setGeneralControlEdition(bool edit);
     void setCosmoControlEdition(bool edit);
     void checkDirectories();

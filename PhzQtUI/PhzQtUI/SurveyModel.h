@@ -15,8 +15,8 @@ namespace PhzQtUI {
 
 /**
  * @brief The SurveyModel class
- * This class provide a Model to be used in TableView.
- * It handle the SurveyFilterMappings.
+ * This class provide a Model to be used in TableView. It store a survey on
+ * each of its row and handle the loading, selection and edition of the survey.
  */
 class SurveyModel: public QStandardItemModel {
  Q_OBJECT
@@ -49,15 +49,70 @@ public:
    */
   bool checkUniqueName(QString new_name, int row) const;
 
+  /**
+   * @brief Select the survey located at the row "row", and set the selected
+   * survey as preferred one.
+   * If the previously selected survey was edited, these modification are discarded.
+   * If the provided row is not in the rows range create an empty selection.
+   *
+   * @param row the row number to be selected
+   */
   void selectSurvey(int row);
+
+  /**
+   * @brief Select the survey which name match the provided "name", and set the
+   * selected survey as preferred one.
+   * If the previously selected survey was edited, these modification are discarded.
+   * If the provided name do not match any survey create an empty selection.
+   *
+   *  @param name the name of the survey to select
+   */
   void selectSurvey(QString name);
 
+  /**
+   *  @brief Returns a reference on the selected survey.
+   *  If no survey are selected the reference point to an empty survey.
+   *
+   *  @return a reference on the selected survey
+   */
   const SurveyFilterMapping& getSelectedSurvey();
-  bool isInEdition();
-  bool saveSelected();
-  void cancelSelected();
-  void deletSelected();
+
+  /**
+   * @brief Returns the number of the row the selected survey is associated with
+   */
   int getSelectedRow();
+
+  /**
+   * @brief Return the status of the selected survey. If the survey has been
+   * modified this function return true, otherwise false.
+   *
+   * @return  true if the selected survey is modified
+   */
+  bool isInEdition();
+
+  /**
+   * @brief Saves the modification of the selected survey. If the operation
+   * succeed returns true however if the name of the survey conflict with
+   * another one the saving is canceled and the function returns false.
+   *
+   * @return  true if the selected survey was successfully saved
+   */
+  bool saveSelected();
+
+  /**
+   * @brief Discards the modifications of the selected survey.
+   */
+  void cancelSelected();
+
+  /**
+   * @brief Delete the selected survey. WARNING This operation will also delete
+   * the configurations, intermediary results and results associated with the survey.
+   */
+  void deletSelected();
+
+  /**
+   * @brief Returns the list of survey names contained in this model.
+   */
   const std::vector<QString> getSurveyList() const;
 
 public slots:

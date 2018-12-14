@@ -117,6 +117,7 @@ void SurveyModel::loadSurvey() {
      m_selected_index = -1;
      m_edited_survey = SurveyFilterMapping();
    }
+   m_in_edition = false;
  }
 
  void SurveyModel::selectSurvey(QString name) {
