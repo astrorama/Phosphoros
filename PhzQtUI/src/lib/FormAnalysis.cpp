@@ -1190,6 +1190,36 @@ template<typename ReturnType, int I>
 
     auto config_map = getRunOptionMap();
 
+
+    if (ui->rb_gc_planck->isChecked()) {
+      auto path = ui->txt_inputCatalog->text().toStdString();
+      auto column_reader = PhzUITools::CatalogColumnReader(path);
+      auto column_from_file = column_reader.getColumnNames();
+      if (column_from_file.find("GAL_EBV") == column_from_file.end()) {
+        // the E(B-V) has to be looked up in the Planck map
+        SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
+        std::unique_ptr<DialogAddGalEbv> dialog(new DialogAddGalEbv());
+        dialog->setInputs(path, selected_survey.getRaColumn(), selected_survey.getDecColumn());
+        if (dialog->exec()) {
+         // new catalog contains the GAL_EBV column
+
+         auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+         auto input_catalog_file = FileUtils::removeStart(dialog->getOutputName(),
+                     FileUtils::getCatalogRootPath(false, survey_name) +
+                     QString(QDir::separator()).toStdString());
+
+         config_map["input-catalog-file"].value() = boost::any(input_catalog_file);
+        } else {
+         // user has canceled the operation
+         return;
+        }
+      }
+    }
+
+
+
+
+
     std::unique_ptr<DialogPhotometricCorrectionComputation> popup(new DialogPhotometricCorrectionComputation());
     popup->setData(survey_name, m_survey_model_ptr->getSelectedSurvey().getSourceIdColumn(),
         ui->cb_AnalysisModel->currentText().toStdString(),
