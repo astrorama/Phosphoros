@@ -103,7 +103,11 @@ def mainMethod(args):
 
     # Open catalog
     logger.info('Open the Input catalog :%s' % args.input_catalog)
-    input_cat = Table.read(args.input_catalog)
+    try:
+        input_cat = Table.read(args.input_catalog)
+    except :
+        logger.info(' Faild reading as .FITS try with ASCII')
+        input_cat = Table.read(args.input_catalog,  format='ascii')
     if not args.ra in input_cat.colnames:
         raise ValueError("RA column  missing : %s " % args.ra)
     if not args.dec in input_cat.colnames:
@@ -123,7 +127,11 @@ def mainMethod(args):
         logger.warning('Output file %s was already present: deleting it.' % out_file)
         os.remove(out_file)
     logger.info('Write the output file :%s' % out_file)
-    input_cat.write(out_file)
+    
+    if out_file.endswith(".fits") or out_file.endswith(".FITS"):
+        input_cat.write(out_file)
+    else:
+        input_cat.write(out_file,  format='ascii')
 
     logger.info('#')
     logger.info('# Exiting AddGalDustToCatalog mainMethod()')
