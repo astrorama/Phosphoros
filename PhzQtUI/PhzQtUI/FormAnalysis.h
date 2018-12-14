@@ -13,6 +13,7 @@
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
 #include "PhzQtUI/SurveyModel.h"
+#include "PhzQtUI/ModelSetModel.h"
 
 namespace boost{
 namespace program_options{
@@ -49,6 +50,7 @@ public:
     ~FormAnalysis();
     void loadAnalysisPage(
         std::shared_ptr<SurveyModel> survey_model_ptr,
+        std::shared_ptr<ModelSetModel> model_set_model_ptr,
         DatasetRepo filter_repository,
         DatasetRepo luminosity_repository);
 
@@ -172,7 +174,6 @@ private:
     void setRunAnnalysisEnable(bool enabled);
     std::map < std::string, boost::program_options::variable_value > getRunOptionMap();
     std::map < std::string, boost::program_options::variable_value > getLuminosityOptionMap();
-    std::map<int,ModelSet> m_analysis_model_list;
     std::map<std::string, LuminosityPriorConfig> m_prior_config;
     std::map<std::string,std::string> m_copied_columns = {};
 
@@ -180,6 +181,7 @@ private:
     DatasetRepo m_filter_repository;
     DatasetRepo m_luminosity_repository;
     std::shared_ptr<SurveyModel> m_survey_model_ptr;
+    std::shared_ptr<ModelSetModel> m_model_set_model_ptr;
 
 };
 

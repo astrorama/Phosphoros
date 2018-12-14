@@ -22,7 +22,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Lookup Galactic E(B-V) in Planck map and add it as a &quot;GAL_EBV&quot; column to the input catalog </string>
+      <string>Look-up Galactic E(B-V) in Planck map and add it as a &quot;GAL_EBV&quot; column to the input catalog </string>
      </property>
     </widget>
    </item>

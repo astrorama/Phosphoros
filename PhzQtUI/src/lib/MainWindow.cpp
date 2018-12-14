@@ -14,8 +14,7 @@ namespace PhzQtUI {
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
-{
+    ui(new Ui::MainWindow) {
   QString title = QString::fromStdString(THIS_PROJECT_NAME_STRING+ " " + THIS_PROJECT_VERSION_STRING);
 
   setWindowTitle(title);
@@ -202,7 +201,7 @@ void MainWindow::on_btn_HomeToCatalog_clicked(){
 void MainWindow::on_btn_HomeToAnalysis_clicked() {
   changeMainStackedWidgetIndex(3);
 
-    ui->widget_Analysis->loadAnalysisPage(m_survey_model_ptr, m_filter_repository, m_luminosity_repository);
+    ui->widget_Analysis->loadAnalysisPage(m_survey_model_ptr, m_model_set_model_ptr, m_filter_repository, m_luminosity_repository);
 
 
 }

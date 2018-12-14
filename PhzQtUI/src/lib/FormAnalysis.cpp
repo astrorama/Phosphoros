@@ -50,24 +50,24 @@ FormAnalysis::~FormAnalysis() {
 //  Initial data load
 void FormAnalysis::loadAnalysisPage(
     std::shared_ptr<SurveyModel> survey_model_ptr,
+    std::shared_ptr<ModelSetModel> model_set_model_ptr,
     DatasetRepo filter_repository,
     DatasetRepo luminosity_repository) {
   m_survey_model_ptr = survey_model_ptr;
+  m_model_set_model_ptr = model_set_model_ptr;
   m_filter_repository = filter_repository;
   m_luminosity_repository = luminosity_repository;
 
   // Fill the Parameter Space Combobox and set its index
-  auto saved_parameter_space = PreferencesUtils::getUserPreference("_global_selection_", "parameter_space");
-  m_analysis_model_list = ModelSet::loadModelSetsFromFolder(FileUtils::getModelRootPath(false));
 
   disconnect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString &)), 0, 0);
   ui->cb_AnalysisModel->clear();
-  for (auto& model : m_analysis_model_list) {
-   ui->cb_AnalysisModel->addItem(QString::fromStdString(model.second.getName()));
+  for (auto& model_name : m_model_set_model_ptr->getModelSetList()) {
+   ui->cb_AnalysisModel->addItem(model_name);
   }
 
   for (int i = 0; i < ui->cb_AnalysisModel->count(); i++) {
-    if (ui->cb_AnalysisModel->itemText(i).toStdString() == saved_parameter_space) {
+    if (ui->cb_AnalysisModel->itemText(i).toStdString() == m_model_set_model_ptr->getSelectedModelSet().getName()) {
       ui->cb_AnalysisModel->setCurrentIndex(i);
       break;
     }
@@ -107,15 +107,8 @@ void FormAnalysis::loadAnalysisPage(
 
 void FormAnalysis::updateGridSelection() {
 try {
-  ModelSet selected_model;
+  auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
-  for (auto&model : m_analysis_model_list) {
-    if (model.second.getName().compare(
-        ui->cb_AnalysisModel->currentText().toStdString()) == 0) {
-      selected_model = model.second;
-      break;
-    }
-  }
 
   auto axis = selected_model.getAxesTuple();
   auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
@@ -145,15 +138,8 @@ try {
 
 void FormAnalysis::updateGalCorrGridSelection() {
   try {
-    ModelSet selected_model;
+    auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
-    for (auto&model : m_analysis_model_list) {
-      if (model.second.getName().compare(
-          ui->cb_AnalysisModel->currentText().toStdString()) == 0) {
-        selected_model = model.second;
-        break;
-      }
-    }
 
     auto axis = selected_model.getAxesTuple();
     auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
@@ -316,14 +302,8 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
       }
     }
 
-    ModelSet selected_model;
-    for (auto& model : m_analysis_model_list) {
-      if (model.second.getName().compare(
-          ui->cb_AnalysisModel->currentText().toStdString()) == 0) {
-        selected_model = model.second;
-        break;
-      }
-    }
+    auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
+
 
     double z_min = 1000000;
     double z_max = 0;
@@ -575,17 +555,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
       ui->cb_CompatibleGrid->currentText().toStdString(), ".dat");
   ui->cb_CompatibleGrid->setItemText(ui->cb_CompatibleGrid->currentIndex(),
       QString::fromStdString(file_name));
-  ModelSet selected_model;
-
-  for (auto&model : m_analysis_model_list) {
-    if (model.second.getName().compare(
-        ui->cb_AnalysisModel->currentText().toStdString()) == 0) {
-      selected_model = model.second;
-      break;
-    }
-  }
-
-
+  auto& selected_model =  m_model_set_model_ptr->getSelectedModelSet();
 
   return PhzGridInfoHandler::GetConfigurationMap(
       ui->cb_AnalysisSurvey->currentText().toStdString(), file_name, selected_model,
@@ -669,17 +639,6 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   double non_detection = selected_survey.getNonDetection();
   bool has_Missing_data = selected_survey.getHasMissingPhotometry();
   bool has_upper_limit = selected_survey.getHasUpperLimit();
-
-
-  ModelSet selected_model;
-
-   for (auto&model : m_analysis_model_list) {
-     if (model.second.getName().compare(
-         ui->cb_AnalysisModel->currentText().toStdString()) == 0) {
-       selected_model = model.second;
-       break;
-     }
-   }
 
   std::map<std::string, boost::program_options::variable_value> options_map =
       FileUtils::getPathConfiguration(true, false, true, true);
@@ -1028,8 +987,7 @@ template<typename ReturnType, int I>
 
 
   void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(const QString &model_name) {
-    PreferencesUtils::setUserPreference("_global_selection_",
-               "parameter_space", model_name.toStdString());
+    m_model_set_model_ptr->selectModelSet(model_name);
 
     updateGridSelection();
     updateGalCorrGridSelection();
@@ -1265,15 +1223,7 @@ template<typename ReturnType, int I>
 
         auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
 
-        ModelSet selected_model;
-
-        for (auto&model : m_analysis_model_list) {
-            if (model.second.getName().compare(
-                ui->cb_AnalysisModel->currentText().toStdString()) == 0) {
-              selected_model = model.second;
-              break;
-            }
-        }
+        auto& selected_model =  m_model_set_model_ptr->getSelectedModelSet();
 
         double z_min = 1000000;
         double z_max = 0;
@@ -1309,15 +1259,7 @@ template<typename ReturnType, int I>
   void FormAnalysis::loadLuminosityPriors() {
     auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
 
-    ModelSet selected_model;
-
-         for (auto&model : m_analysis_model_list) {
-             if (model.second.getName().compare(
-                 ui->cb_AnalysisModel->currentText().toStdString()) == 0) {
-               selected_model = model.second;
-               break;
-             }
-         }
+    auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
     auto folder = FileUtils::getGUILuminosityPriorConfig(true, survey_name,
         selected_model.getName());
