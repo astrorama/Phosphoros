@@ -178,7 +178,7 @@ void FormAnalysis::updateGalCorrGridSelection() {
     if (!added) {
       ui->cb_CompatibleGalCorrGrid->addItem(
           QString::fromStdString("Grid_" + selected_model.getName() + "_")
-              + ui->cb_igm->currentText());
+              + ui->cb_igm->currentText() + "_MW_Param.dat");
     }
 
     ui->cb_CompatibleGalCorrGrid->addItem("<Enter a new name>");
@@ -1049,7 +1049,7 @@ template<typename ReturnType, int I>
           grid_name = grid_name.substr(0, index);
         }
      ui->cb_CompatibleGalCorrGrid->setItemText(ui->cb_CompatibleGalCorrGrid->currentIndex(),
-                QString::fromStdString(grid_name+"_corr.dat"));
+                QString::fromStdString(grid_name+"_MW_Param.dat"));
     adjustGalCorrGridButtons(true);
     setComputeCorrectionEnable();
     setRunAnnalysisEnable(true);

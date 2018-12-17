@@ -317,8 +317,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1021</width>
-            <height>422</height>
+            <width>418</width>
+            <height>164</height>
            </rect>
           </property>
           <attribute name="label">
@@ -471,6 +471,14 @@
           </layout>
          </widget>
          <widget class="QWidget" name="page_5">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>1021</width>
+            <height>422</height>
+           </rect>
+          </property>
           <attribute name="label">
            <string>2. Milky Way Absorption Correction</string>
           </attribute>
@@ -586,7 +594,7 @@
               <bool>false</bool>
              </property>
              <property name="text">
-              <string>Lookup Galactic E(B-V) in Planck Dust Map</string>
+              <string>Look-up Galactic E(B-V) in Planck Dust Map</string>
              </property>
             </widget>
            </item>
@@ -610,8 +618,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1021</width>
-            <height>422</height>
+            <width>725</width>
+            <height>297</height>
            </rect>
           </property>
           <attribute name="label">
@@ -975,8 +983,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1021</width>
-            <height>422</height>
+            <width>537</width>
+            <height>158</height>
            </rect>
           </property>
           <attribute name="label">
