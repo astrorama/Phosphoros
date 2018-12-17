@@ -38,9 +38,9 @@ namespace PhzQtUI {
     m_res_path_edited = m_res_path_saved;
 
     size_t thread_value = PreferencesUtils::getThreadNumberOverride();
-    m_override_thread_saved = thread_value > 0;
+    m_override_thread_saved = thread_value < PhzUtils::getThreadNumber();
     m_override_thread_edited = m_override_thread_saved;
-    if (m_override_thread_saved){
+    if (m_override_thread_saved) {
       m_thread_number_saved = thread_value;
     } else {
       m_thread_number_saved = PhzUtils::getThreadNumber();
@@ -155,7 +155,7 @@ namespace PhzQtUI {
       FileUtils::savePath(map);
 
       int thread_value = PhzUtils::getThreadNumber();
-      if (m_override_thread_saved){
+      if (m_override_thread_saved) {
         thread_value = m_thread_number_saved;
       }
       PreferencesUtils::setThreadNumberOverride(thread_value);
@@ -241,13 +241,15 @@ namespace PhzQtUI {
     }
   }
 
-  void OptionModel::setThread(int thread_nb){
+  void OptionModel::setThread(int thread_nb) {
+    m_global_edition = true;
     if (m_override_thread_edited) {
       m_thread_number_edited = thread_nb;
     }
   }
 
-  void OptionModel::setDefaultThread(bool custom){
+  void OptionModel::setDefaultThread(bool custom) {
+    m_global_edition = true;
     m_override_thread_edited = custom;
     if (!m_override_thread_edited) {
       m_thread_number_edited = PhzUtils::getThreadNumber();

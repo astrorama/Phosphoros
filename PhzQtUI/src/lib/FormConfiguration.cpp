@@ -24,40 +24,27 @@ FormConfiguration::FormConfiguration(QWidget *parent) :
     ui->setupUi(this);
 }
 
-
-void FormConfiguration::disconnectControls() {
-    disconnect(ui->txt_catDir, 0, 0, 0);
-    disconnect(ui->txt_auxDir, 0, 0, 0);
-    disconnect(ui->txt_interDir, 0, 0, 0);
-    disconnect(ui->txt_resDir, 0, 0, 0);
-    disconnect(ui->gb_thread, 0, 0, 0);
-    disconnect(ui->sb_thread, 0, 0, 0);
-    disconnect(ui->txt_hubble_param, 0, 0, 0);
-    disconnect(ui->txt_omega_matter, 0, 0, 0);
-    disconnect(ui->txt_omega_lambda, 0, 0, 0);
-}
-
 FormConfiguration::~FormConfiguration() {
-  disconnectControls();
+
 }
 
 void FormConfiguration::on_btn_ToAnalysis_clicked() {
-  disconnectControls();
+
   navigateToComputeRedshift(do_need_reset);
   do_need_reset=false;
 }
 void FormConfiguration::on_btn_ToCatalog_clicked() {
-  disconnectControls();
+
   navigateToCatalog(do_need_reset);
   do_need_reset=false;
 }
 void FormConfiguration::on_btn_ToModel_clicked() {
-  disconnectControls();
+
   navigateToParameter(do_need_reset);
   do_need_reset=false;
 }
 void FormConfiguration::on_btn_exit_clicked() {
-  disconnectControls();
+
   quit(true);
 }
 

@@ -63,6 +63,7 @@ private:
     std::unique_ptr<Ui::MainWindow> ui;
     bool m_model_loaded = false;
     bool m_mapping_loaded = false;
+    void resetRepo();
 
     DatasetRepo m_filter_repository;
     DatasetRepo m_seds_repository;

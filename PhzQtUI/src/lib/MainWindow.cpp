@@ -97,12 +97,23 @@ MainWindow::MainWindow(QWidget *parent) :
   m_luminosity_repository->reload();
 
   m_option_model_ptr->loadOption(m_filter_repository, m_seds_repository, m_redenig_curves_repository, m_luminosity_repository);
+  ui->widget_configuration->loadOptionPage(m_option_model_ptr);
+
 
   m_survey_model_ptr->loadSurvey();
+
   m_model_set_model_ptr->loadSets();
+
+
 }
 
 MainWindow::~MainWindow() {
+}
+
+void MainWindow::resetRepo() {
+  m_survey_model_ptr->loadSurvey();
+  m_model_set_model_ptr->loadSets();
+
 }
 
 //- Home Page
@@ -114,6 +125,7 @@ MainWindow::~MainWindow() {
  void MainWindow::navigateToHomeWithReset(bool reset){
      changeMainStackedWidgetIndex(0);
      if (reset){
+       resetRepo();
        m_model_loaded=false;
        m_mapping_loaded=false;
      }
@@ -121,6 +133,7 @@ MainWindow::~MainWindow() {
 
 void MainWindow::navigateToParameter(bool reset){
   if (reset){
+        resetRepo();
         m_model_loaded=false;
         m_mapping_loaded=false;
       }
@@ -129,6 +142,7 @@ void MainWindow::navigateToParameter(bool reset){
 
 void MainWindow::navigateToCatalog(bool reset){
   if (reset){
+        resetRepo();
         m_model_loaded=false;
         m_mapping_loaded=false;
       }
@@ -137,6 +151,7 @@ void MainWindow::navigateToCatalog(bool reset){
 
 void MainWindow::navigateToComputeRedshift(bool reset){
   if (reset){
+        resetRepo();
         m_model_loaded=false;
         m_mapping_loaded=false;
       }
@@ -165,7 +180,6 @@ void MainWindow::navigateToConfig(){
  void MainWindow::on_btn_HomeToOption_clicked()
  {
    changeMainStackedWidgetIndex(4);
-   ui->widget_configuration->loadOptionPage(m_option_model_ptr);
  }
 
 //------------------------------------------------
