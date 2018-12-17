@@ -102,6 +102,28 @@ void FormAnalysis::loadAnalysisPage(
   ui->cb_z_col->addItem("");
 }
 
+
+void FormAnalysis::updateSelection() {
+  disconnect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString &)), 0, 0);
+
+   for (int i = 0; i < ui->cb_AnalysisModel->count(); i++) {
+     if (ui->cb_AnalysisModel->itemText(i).toStdString() == m_model_set_model_ptr->getSelectedModelSet().getName()) {
+       ui->cb_AnalysisModel->setCurrentIndex(i);
+       break;
+     }
+   }
+
+   connect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString &)),
+          SLOT(on_cb_AnalysisModel_currentIndexChanged(const QString &)));
+
+   for (int i = 0; i < ui->cb_AnalysisSurvey->count(); i++) {
+      if (ui->cb_AnalysisSurvey->itemText(i).toStdString() == m_survey_model_ptr->getSelectedSurvey().getName()) {
+        ui->cb_AnalysisSurvey->setCurrentIndex(i);
+        break;
+      }
+   }
+}
+
 ///////////////////////////////////////////////////
 //  Handle controls enability
 
@@ -624,7 +646,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
     options_map["v-filter-name"].value() = boost::any(v_filter);
     options_map["milky-way-reddening-curve-name"].value() = boost::any(f99);
     auto global_options = PreferencesUtils::getThreadConfigurations();
-     for(auto& pair : global_options) {
+    for (auto& pair : global_options) {
          options_map[pair.first] = pair.second;
     }
 
@@ -764,7 +786,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
 
   std::string pdf_output_type = "VECTOR-COLUMN";
-  if (ui->cbb_pdf_out->currentIndex()==1) {
+  if (ui->cbb_pdf_out->currentIndex() == 1) {
     pdf_output_type = "INDIVIDUAL-HDUS";
   }
   options_map["output-pdf-format"].value() = boost::any(pdf_output_type);
@@ -786,7 +808,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
       pdf_output_axis.push_back("SED");
   }
 
-  if (pdf_output_axis.size()>0) {
+  if (pdf_output_axis.size() > 0) {
     options_map["create-output-pdf"].value() = boost::any(pdf_output_axis);
   }
 

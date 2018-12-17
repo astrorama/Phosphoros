@@ -54,6 +54,8 @@ public:
         DatasetRepo filter_repository,
         DatasetRepo luminosity_repository);
 
+    void updateSelection();
+
 signals:
 
 void navigateToParameter(bool);
