@@ -131,7 +131,6 @@ void FormAnalysis::updateGridSelection() {
 try {
   auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
-
   auto axis = selected_model.getAxesTuple();
   auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
       m_survey_model_ptr->getSelectedSurvey().getName(), axis,
@@ -189,7 +188,7 @@ void FormAnalysis::updateGalCorrGridSelection() {
 void FormAnalysis::fillCbColumns(std::set<std::string> columns) {
    ui->cb_z_col->clear();
    ui->cb_z_col->addItem("");
-   for(auto item : columns) {
+   for (auto item : columns) {
      ui->cb_z_col->addItem(QString::fromStdString(item));
    }
 
@@ -278,14 +277,25 @@ void FormAnalysis::adjustGalCorrGridButtons(bool enabled) {
 
 void FormAnalysis::setComputeCorrectionEnable() {
   bool name_exists = checkGridSelection(true, false);
+  bool gal_corr_needed = !ui->rb_gc_off->isChecked();
+  bool grid_gal_corr_name_exists = checkGalacticGridSelection(true, false);
   ui->btn_computeCorrections->setEnabled(
-      name_exists && ui->gb_corrections->isChecked());
+      name_exists &&
+      (!gal_corr_needed || grid_gal_corr_name_exists) &&
+      ui->gb_corrections->isChecked());
 
   QString tool_tip = "Open the photometric zero-point correction popup.";
-  if (!name_exists) {
-    tool_tip =
-        "Please run the photometric grid computation before computing the photometric corrections.";
+
+  if (gal_corr_needed && !grid_gal_corr_name_exists) {
+      tool_tip =
+          "Please run the Galactic Correction grid computation before computing the photometric corrections.";
   }
+
+  if (!name_exists) {
+      tool_tip =
+          "Please run the photometric grid computation before computing the photometric corrections.";
+  }
+
   ui->btn_computeCorrections->setToolTip(tool_tip);
 }
 
@@ -651,7 +661,6 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
     }
 
     return options_map;
-
 }
 
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getRunOptionMap() {
@@ -991,7 +1000,6 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   }
 
   setCopiedColumns(selected_survey.getCopiedColumns());
-
 }
 
 template<typename ReturnType, int I>
@@ -1014,8 +1022,6 @@ template<typename ReturnType, int I>
     updateGridSelection();
     updateGalCorrGridSelection();
     loadLuminosityPriors();
-
-
   }
 
   void FormAnalysis::on_cb_igm_currentIndexChanged(const QString &) {
@@ -1039,8 +1045,8 @@ template<typename ReturnType, int I>
     }
 
     index = grid_name.find_last_of(".");
-        if (index!=string::npos){
-          grid_name=grid_name.substr(0,index);
+        if (index != string::npos) {
+          grid_name = grid_name.substr(0, index);
         }
      ui->cb_CompatibleGalCorrGrid->setItemText(ui->cb_CompatibleGalCorrGrid->currentIndex(),
                 QString::fromStdString(grid_name+"_corr.dat"));
@@ -1109,17 +1115,17 @@ template<typename ReturnType, int I>
 // Galactic Correction
 
   void FormAnalysis::on_rb_gc_off_clicked() {
-    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),"GalCorrType", "OFF");
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "GalCorrType", "OFF");
     adjustGalCorrGridButtons(true);
     setRunAnnalysisEnable(true);
   }
   void FormAnalysis::on_rb_gc_col_clicked() {
-    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),"GalCorrType", "COL");
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "GalCorrType", "COL");
     adjustGalCorrGridButtons(true);
     setRunAnnalysisEnable(true);
   }
   void FormAnalysis::on_rb_gc_planck_clicked() {
-    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),"GalCorrType", "MAP");
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "GalCorrType", "MAP");
     adjustGalCorrGridButtons(true);
     setRunAnnalysisEnable(true);
   }
