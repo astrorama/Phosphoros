@@ -49,7 +49,9 @@ action_list = [
     PhosphorosAction(['create_flat_grid_prior', 'CFGP'], 'CreateFlatGridPrior',
                      'Creates a generic grid prior FITS file with all cells set to one, based on a model grid'),
     PhosphorosAction(['add_emission_lines', 'AEL'], 'PhosphorosAddEmissionLines',
-                     'Adds emission lines to a set of SED templates')
+                     'Adds emission lines to a set of SED templates'),
+    PhosphorosAction(['build_reference_sample', 'BRS'], 'PhosphorosBuildReferenceSample',
+                     'Builds an NNPZ reference sample from the results of a Phosphoros output catalog')
 ]
 
 def printHelp():
