@@ -103,6 +103,11 @@ void SedTreeModel::load(bool selectable, bool onlyLeaves) {
 bool SedTreeModel::canAddEmissionLineToGroup(QStandardItem* item) const {
   if (item->rowCount()>0){
     QString name = getFullGroupName(item);
+
+    if (name.endsWith("_el")) {
+      return false;
+    }
+
     for (auto & group : m_map_dir) {
       if ((name+"_el") == QString::fromStdString(group.first)){
         return false;

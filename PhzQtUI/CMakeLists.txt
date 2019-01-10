@@ -12,6 +12,7 @@ elements_depends_on_subdirs(PhzLikelihood)
 elements_depends_on_subdirs(PhzLuminosity)
 elements_depends_on_subdirs(PhysicsUtils)
 elements_depends_on_subdirs(PhzExecutables)
+elements_depends_on_subdirs(EmissionLines)
 
 if(ELEMENTS_HIDE_WARNINGS)
   if(UNIX)

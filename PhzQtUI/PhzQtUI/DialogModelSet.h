@@ -4,6 +4,7 @@
 #include <memory>
 #include <map>
 #include <QDialog>
+#include <QProcess>
 #include <QItemSelection>
 #include <QVBoxLayout>
 
@@ -66,6 +67,9 @@ public:
   void popupClosing(int,ParameterRule,bool);
 
 private slots:
+void sedProcessStarted();
+void sedProcessfinished(int, QProcess::ExitStatus);
+
 void addEmissionLineButtonClicked(const QString&);
   /**
    * @brief SLOT on_buttonBox_rejected: The user close the popup
