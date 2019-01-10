@@ -11,6 +11,7 @@
 #include "PhzQtUI/GridButton.h"
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
+#include "PhzQtUI/SedTreeModel.h"
 namespace Euclid {
 namespace PhzQtUI {
 
@@ -65,7 +66,7 @@ public:
   void popupClosing(int,ParameterRule,bool);
 
 private slots:
-
+void addEmissionLineButtonClicked(const QString&);
   /**
    * @brief SLOT on_buttonBox_rejected: The user close the popup
    */
@@ -99,6 +100,8 @@ private slots:
   void on_btn_add_ebv_range_clicked();
 
 private:
+  void addButtonsToSedItem(QStandardItem* item, SedTreeModel* treeModel_sed);
+  void loadSeds();
   void turnControlsInEdition();
   void turnControlsInView();
   void populateZRangesAndValues(ParameterRule selected_rule);

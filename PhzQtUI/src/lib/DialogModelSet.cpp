@@ -7,8 +7,10 @@
 #include "PhzQtUI/DialogModelSet.h"
 #include "ui_DialogModelSet.h"
 #include "PhzQtUI/DataSetTreeModel.h"
+#include "PhzQtUI/SedTreeModel.h"
 
 #include "PhzQtUI/GridButton.h"
+#include "PhzQtUI/MessageButton.h"
 #include "PhzQtUI/ParameterRule.h"
 
 
@@ -17,29 +19,42 @@ using namespace std;
 namespace Euclid{
 namespace PhzQtUI {
 
+
+void DialogModelSet::loadSeds() {
+      SedTreeModel* treeModel_sed = new SedTreeModel(m_seds_repository);
+      treeModel_sed->load();
+      ui->treeView_Sed->setModel(treeModel_sed);
+      ui->treeView_Sed->collapseAll();
+      ui->treeView_Sed->setColumnWidth(0, 500);
+
+      for (int i = 0; i < treeModel_sed->rowCount(); i++) {
+        addButtonsToSedItem(treeModel_sed->item(i), treeModel_sed);
+      }
+
+      connect(treeModel_sed, SIGNAL(itemChanged(QStandardItem*)), treeModel_sed,
+                   SLOT(onItemChanged(QStandardItem*)));
+
+      if (treeModel_sed->rowCount() == 0) {
+              QMessageBox::warning(this, "No available SED...",
+                      "There is no SED to select. "
+                      "You can provide and manage SEDs in the \"Configuration/Aux. Data\" page.",
+                      QMessageBox::Ok);
+         }
+
+}
+
+
 DialogModelSet::DialogModelSet(DatasetRepo seds_repository,
     DatasetRepo redenig_curves_repository, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogModelSet),
     m_seds_repository(seds_repository),
-    m_redenig_curves_repository(redenig_curves_repository)
-{
+    m_redenig_curves_repository(redenig_curves_repository) {
     ui->setupUi(this);
 
-    DataSetTreeModel* treeModel_sed = new DataSetTreeModel(m_seds_repository);
-    treeModel_sed->load();
-    ui->treeView_Sed->setModel(treeModel_sed);
-    ui->treeView_Sed->collapseAll();
 
-    connect(treeModel_sed, SIGNAL(itemChanged(QStandardItem*)), treeModel_sed,
-                 SLOT(onItemChanged(QStandardItem*)));
 
-    if (treeModel_sed->rowCount() == 0){
-         QMessageBox::warning(this, "No available SED...",
-                 "There is no SED to select. "
-                 "You can provide and manage SEDs in the \"Configuration/Aux. Data\" page.",
-                 QMessageBox::Ok);
-    }
+    loadSeds();
 
     DataSetTreeModel* treeModel_red = new DataSetTreeModel(m_redenig_curves_repository);
     treeModel_red->load();
@@ -49,7 +64,7 @@ DialogModelSet::DialogModelSet(DatasetRepo seds_repository,
     connect( treeModel_red, SIGNAL(itemChanged(QStandardItem*)), treeModel_red,
                  SLOT(onItemChanged(QStandardItem*)));
 
-    if (treeModel_red->rowCount() == 0){
+    if (treeModel_red->rowCount() == 0) {
          QMessageBox::warning(this, "No available Reddening Curve...",
                  "There is no reddening curve to select. "
                  "You can provide and manage reddening curves in the \"Configuration/Aux. Data\" page.",
@@ -63,9 +78,40 @@ DialogModelSet::DialogModelSet(DatasetRepo seds_repository,
 
 }
 
+void DialogModelSet::addButtonsToSedItem(QStandardItem* item, SedTreeModel* treeModel_sed){
+  if (treeModel_sed->canAddEmissionLineToGroup(item)) {
+             auto name = treeModel_sed->getFullGroupName(item);
 
-DialogModelSet::~DialogModelSet()
-{
+             MessageButton *cartButton = new MessageButton(name,"Add Emission Line to SED");
+
+             auto index = item->index().sibling(item->index().row(),1);
+
+             ui->treeView_Sed->setIndexWidget(index, cartButton);
+
+             connect(cartButton, SIGNAL(MessageButtonClicked(const QString&)), this,
+                             SLOT(addEmissionLineButtonClicked(const QString&)));
+  }
+
+  for (int i = 0; i < item->rowCount(); i++) {
+    addButtonsToSedItem(item->child(i),treeModel_sed);
+  }
+}
+
+
+DialogModelSet::~DialogModelSet() {
+}
+
+void DialogModelSet::addEmissionLineButtonClicked(const QString& group) {
+  if (QMessageBox::question(this, "Add emission lines to SEDs in a folder...",
+      QString::fromStdString("Do you want to create a new folder named ")+
+      group+QString::fromStdString("_el with SED copied from folder ")+group+ QString::fromStdString(" but with added emission lines?"),QMessageBox::Ok|QMessageBox::Cancel )
+    ==QMessageBox::Ok){
+    // do the procesing
+    // reload the provider and the model
+    m_seds_repository->reload();
+    loadSeds();
+
+  }
 }
 
 
