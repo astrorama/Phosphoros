@@ -147,9 +147,9 @@ void DialogModelSet::sedProcessfinished(int, QProcess::ExitStatus) {
 
 void DialogModelSet::addEmissionLineButtonClicked(const QString& group) {
   if (QMessageBox::question(this, "Add emission lines to SEDs in a folder...",
-      QString::fromStdString("Do you want to create a new folder named ")+
-      group+QString::fromStdString("_el with SED copied from folder ") + group +
-      QString::fromStdString(" but with added emission lines?"), QMessageBox::Ok|QMessageBox::Cancel)
+      QString::fromStdString("This action will create a new folder named ")+
+      group+QString::fromStdString("_el generated from SEDs from folder ") + group +
+      QString::fromStdString(" with added emission lines?"), QMessageBox::Ok|QMessageBox::Cancel)
     == QMessageBox::Ok) {
     // do the procesing
     QProcess *lineAdder = new QProcess();
