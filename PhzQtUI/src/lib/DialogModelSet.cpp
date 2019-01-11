@@ -92,6 +92,7 @@ void DialogModelSet::addButtonsToSedItem(QStandardItem* item, SedTreeModel* tree
              auto name = treeModel_sed->getFullGroupName(item);
 
              MessageButton *cartButton = new MessageButton(name, "Add Emission Line to SEDs");
+             m_message_buttons.push_back(cartButton);
 
              auto index = item->index().sibling(item->index().row(), 1);
 
@@ -114,9 +115,23 @@ DialogModelSet::~DialogModelSet() {
 
 void DialogModelSet::sedProcessStarted() {
     ui->labelMessage->setText("Adding emission Lines to the SEDs...");
+    for (auto button :m_message_buttons){
+      button->setEnabled(false);
+    }
+
 }
 
 void DialogModelSet::sedProcessfinished(int, QProcess::ExitStatus) {
+      // remove the buttons
+      for (auto button :m_message_buttons){
+        delete button;
+      }
+
+      m_message_buttons = std::vector<MessageButton*>();
+
+
+
+
       // reload the provider and the model
       std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
       std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(

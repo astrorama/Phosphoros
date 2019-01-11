@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <map>
+#include <vector>
 #include <QDialog>
 #include <QProcess>
 #include <QItemSelection>
@@ -13,6 +14,7 @@
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
 #include "PhzQtUI/SedTreeModel.h"
+#include "PhzQtUI/MessageButton.h"
 namespace Euclid {
 namespace PhzQtUI {
 
@@ -133,6 +135,7 @@ private:
 
   int m_ref;
   std::map<int, ParameterRule> m_rules;
+  std::vector<MessageButton*> m_message_buttons;
 };
 
 }
