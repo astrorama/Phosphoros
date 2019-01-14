@@ -90,7 +90,24 @@ def getSedDir(sed_dir):
 
 
 def isSedFile(filename):
-    return len(filename) > 4 and filename[-4:] == '.sed'
+    
+    logger.info('Testing if file '+filename+ ' contains a SED')
+    try:
+       t = table.Table.read(filename, format='ascii') 
+       if len(t.colnames)!=2:
+           logger.info('Not a SED: Wrong column number')
+           return False
+       if (  np.issubdtype(t[t.colnames[0]].dtype, np.number) and np.issubdtype(t[t.colnames[1]].dtype, np.number)):
+           return True
+       else:
+           logger.info('Not a SED: wrong column type')
+           return False
+           
+    except:
+        logger.info('Not a SED: unable to open the table')
+        return False
+        
+    
 
 
 class Sed(object):
@@ -246,10 +263,11 @@ def mainMethod(args):
         args.no_sed
     )
 
-    for sed_file in filter(isSedFile, os.listdir(sed_dir)):
-        logger.info('Handling SED '+sed_file)
-        sed = Sed.load(os.path.join(sed_dir, sed_file))
-        out_sed = adder(sed)
-        t = table.Table(rows=out_sed, names=('Wave', 'Flux'))
-        t.write(os.path.join(out_dir, sed_file), format='ascii.commented_header')
+    for sed_file in  os.listdir(sed_dir):
+        if isSedFile(os.path.join(sed_dir,sed_file)):
+            logger.info('Handling SED '+sed_file)
+            sed = Sed.load(os.path.join(sed_dir, sed_file))
+            out_sed = adder(sed)
+            t = table.Table(rows=out_sed, names=('Wave', 'Flux'))
+            t.write(os.path.join(out_dir, sed_file), format='ascii.commented_header')
 
