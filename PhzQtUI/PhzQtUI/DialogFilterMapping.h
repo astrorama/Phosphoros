@@ -7,9 +7,14 @@
 #include <memory>
 #include <QDialog>
 #include "FilterMapping.h"
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
 
 namespace Euclid {
 namespace PhzQtUI {
+
+
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 namespace Ui {
 class DialogFilterMapping;
@@ -27,7 +32,7 @@ public:
   /**
    * @brief Constructor
    */
-  explicit DialogFilterMapping(QWidget *parent = 0);
+  explicit DialogFilterMapping(DatasetRepo filter_repository, QWidget *parent = 0);
 
   /**
    * @brief Destructor
@@ -64,6 +69,7 @@ private slots:
 
 private:
   std::unique_ptr<Ui::DialogFilterMapping> ui;
+  DatasetRepo m_filter_repository;
 };
 
 }

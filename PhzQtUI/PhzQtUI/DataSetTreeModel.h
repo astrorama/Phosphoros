@@ -32,11 +32,12 @@ public:
    */
   explicit DataSetTreeModel(DatasetRepo repository, QObject *parent = 0);
 
+
   /**
    * @brief Read the provided repository and create the items needed to
    * represent it. To be called once.
    */
-  void load();
+  void load(bool selectable=true, bool onlyLeaves=false);
 
   /**
    * @brief Turn the model Enabled (In edition: the user can check/uncheck
@@ -51,17 +52,25 @@ public:
    */
   void setState(const DatasetSelection& selection);
 
+
+  void setState(const std::vector<std::string>& selected_leaves);
+
   /**
    * @brief Get the selection state
    * @return A DatasetSelection object encoding the selection state.
    */
   DatasetSelection getState() const;
 
+  std::vector<std::string> getSelectedLeaves() const;
+
+  bool hasLeave() const;
+
 public slots:
   /**
    * @brief SLOT onItemChanged To be connected to the ItemChanged SIGNAL.
    */
   void onItemChanged(QStandardItem*);
+  void onItemChangedSingleLeaf(QStandardItem*);
 
 private:
 
@@ -96,6 +105,7 @@ private:
   void setEditionStatus(bool inEdition);
 
   bool m_in_edition = false;
+  bool m_bypass = false;
   std::map<std::string, QStandardItem*> m_map_dir;
   DatasetRepo m_repository;
 

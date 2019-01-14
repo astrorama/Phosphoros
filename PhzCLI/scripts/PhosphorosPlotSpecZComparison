@@ -10,44 +10,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
+import PhzCLI.TableUtils as tut
 
-def check_file_exists(filename):
-    if not os.path.exists(filename):  
-       print('ERROR : File', filename, 'not found')       
-       exit(-1)
-    
-#
-#-------------------------------------------------------------------------------
-#
-
-def read_table(filename):
-    print('Reading file: ', filename)
-    check_file_exists(filename)
-    try :
-        data = table.Table.read(filename, format='fits')
-    except:
-        with open(filename) as f:
-            all_lines = f.readlines()
-        header_lines = [l for l in all_lines if l.strip().startswith('#')]
-        comments = [l.replace('#','').strip() for l in header_lines]
-        data_lines = [l for l in all_lines if l.strip() != '' and not l.strip().startswith('#')]
-        column_no = len(data_lines[0].strip().split())
-        header_lines = [l for l in header_lines if len(l.replace('#','').strip().split()) == column_no]
-        text = ''.join(header_lines + data_lines)
-        data = table.Table.read(text, format='ascii')
-        data.meta = {'COMMENT': comments}
-        for pdf_col in [col for col in data.colnames if col.endswith('-1D-PDF')]:
-            pdf_data = [np.array(col_data.split(',')).astype(np.float) for col_data in data[pdf_col]]
-            data.rename_column(pdf_col, pdf_col+'_str')
-            data.add_column(table.Column(name=pdf_col, data=pdf_data))
-    return data
-    
 #
 #-------------------------------------------------------------------------------
 #
 
 def read_specz_catalog(filename, id_col, specz_col):
-    specz_cat = read_table(filename)
+    specz_cat = tut.read_table(filename)
     if not id_col in specz_cat.colnames:
         print('ERROR : Spec-z catalog does not have column with name', id_col)
         exit(-1)
@@ -68,7 +38,7 @@ def read_phosphoros_catalog(out_dir):
     phos_cat_name = out_dir + '/phz_cat.fits'
     if not os.path.exists(phos_cat_name):
         phos_cat_name = out_dir + '/phz_cat.txt'
-    phos_cat = read_table(phos_cat_name)
+    phos_cat = tut.read_table(phos_cat_name)
     phos_cat.add_column(table.Column(np.arange(len(phos_cat)), name='Index'))
     return phos_cat
     
@@ -77,7 +47,8 @@ def read_phosphoros_catalog(out_dir):
 #
 
 def get_pdf_bins_from_comment(comment_lines, parameter):
-    type_map = {'SED':str, 'REDDENING-CURVE':str, 'EBV':float, 'Z':float}
+    type_map = {'SED':str, 'REDDENING-CURVE':str, 'EBV':float, 'Z':float,
+                'LIKELIHOOD-SED':str, 'LIKELIHOOD-REDDENING-CURVE':str, 'LIKELIHOOD-EBV':float, 'LIKELIHOOD-Z':float}
     bins_str = ''.join(comment_lines)
     bins_str = bins_str[bins_str.index(parameter+'-BINS :'):]
     bins_str = bins_str[bins_str.index('{')+1: bins_str.index('}')]
@@ -90,21 +61,24 @@ def get_pdf_bins_from_comment(comment_lines, parameter):
 
 def read_pdfs(catalog, out_dir):
     print('Loading the 1D-PDFs...')
-    filename_map = {'SED':'sed', 'REDDENING-CURVE':'red_curve', 'EBV':'ebv', 'Z':'z'}
+    filename_map = {'SED':'pdf_sed.fits', 'REDDENING-CURVE':'pdf_red_curve.fits', 'EBV':'pdf_ebv.fits', 'Z':'pdf_z.fits',
+                    'LIKELIHOOD-SED':'likelihood_pdf_sed.fits', 'LIKELIHOOD-REDDENING-CURVE':'likelihood_pdf_red_curve.fits',
+                    'LIKELIHOOD-EBV':'likelihood_pdf_ebv.fits', 'LIKELIHOOD-Z':'likelihood_pdf_z.fits'}
     
     def read(parameter):
         if parameter+'-1D-PDF' in catalog.colnames:
             print('    ' + parameter + ': Using catlog column ' + parameter+'-1D-PDF')
             return parameter, get_pdf_bins_from_comment(catalog.meta['COMMENT'], parameter), catalog[parameter+'-1D-PDF']
-        elif os.path.exists(out_dir+'/pdf_'+filename_map[parameter]+'.fits'):
-            print('    ' + parameter + ': Reading file ' + out_dir+'/pdf_'+filename_map[parameter]+'.fits')
-            hdus = fits.open(out_dir+'/pdf_'+filename_map[parameter]+'.fits')
+        elif os.path.exists(out_dir+'/'+filename_map[parameter]):
+            print('    ' + parameter + ': Reading file ' + out_dir+'/'+filename_map[parameter])
+            hdus = fits.open(out_dir+'/'+filename_map[parameter])
             return parameter, hdus[1].data[hdus[1].columns[0].name], [hdus[s['Index']+1].data['Probability'] for s in catalog]
         else:
             print('    ' + parameter + ': No 1D PDF found')
             return None
     
-    result = [read(p) for p in ['SED', 'REDDENING-CURVE', 'EBV', 'Z']]
+    result = [read(p) for p in ['SED', 'REDDENING-CURVE', 'EBV', 'Z',
+                                'LIKELIHOOD-SED', 'LIKELIHOOD-REDDENING-CURVE', 'LIKELIHOOD-EBV', 'LIKELIHOOD-Z']]
     result = [r for r in result if r != None]
     return result
     

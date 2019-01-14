@@ -14,6 +14,9 @@
 #include <map>
 #include "ElementsKernel/Exception.h"
 #include "PhzQtUI/LuminosityFunctionInfo.h"
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
+
 
 namespace boost {
 namespace program_options {
@@ -23,6 +26,8 @@ class variable_value;
 
 namespace Euclid {
 namespace PhzQtUI {
+
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 namespace Ui {
 class DialogLuminosityFunction;
@@ -40,7 +45,7 @@ public:
   /**
    * @brief Constructor
    */
-  explicit DialogLuminosityFunction(QWidget *parent = 0);
+  explicit DialogLuminosityFunction(DatasetRepo luminosity_repository, QWidget *parent = 0);
 
   /**
    * @brief Destructor
@@ -113,6 +118,7 @@ private:
   LuminosityFunctionInfo m_FunctionInfo;
   size_t m_x;
   size_t m_y;
+  DatasetRepo m_luminosity_repository;
 
 };
 

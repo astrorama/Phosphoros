@@ -16,10 +16,11 @@
 namespace Euclid {
 namespace PhzQtUI {
 
-DialogLuminosityFunction::DialogLuminosityFunction(QWidget *parent) :
+DialogLuminosityFunction::DialogLuminosityFunction(DatasetRepo luminosity_repository, QWidget *parent) :
         QDialog(parent),
         ui(new Ui::DialogLuminosityFunction)
     {
+       m_luminosity_repository = luminosity_repository;
        ui->setupUi(this);
        m_x=0;
        m_y=0;
@@ -80,7 +81,7 @@ void DialogLuminosityFunction::on_gb_custom_clicked(){
 }
 
 void DialogLuminosityFunction::on_btn_curve_clicked(){
-  std::unique_ptr<DialogLuminosityFunctionCurveSelector> dialog(new DialogLuminosityFunctionCurveSelector());
+  std::unique_ptr<DialogLuminosityFunctionCurveSelector> dialog(new DialogLuminosityFunctionCurveSelector(m_luminosity_repository));
   dialog->setCurve(ui->lb_curve->text().toStdString());
 
   connect(dialog.get(),

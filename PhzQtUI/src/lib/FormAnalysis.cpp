@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <boost/program_options.hpp>
 
+
 #include "ElementsKernel/Exception.h"
 
 #include "PhzQtUI/FormAnalysis.h"
@@ -21,6 +22,7 @@
 #include "PhzQtUI/DialogGridGeneration.h"
 #include "PhzQtUI/DialogRunAnalysis.h"
 #include "PhzQtUI/DialogLuminosityPrior.h"
+#include "PhzQtUI/DialogOutputColumnSelection.h"
 
 #include "PhzUITools/ConfigurationWriter.h"
 #include "PhzUITools/CatalogColumnReader.h"
@@ -40,11 +42,12 @@ FormAnalysis::~FormAnalysis() {
 
 ///////////////////////////////////////////////////
 //  Initial data load
-void FormAnalysis::loadAnalysisPage() {
-  auto saved_catalog = PreferencesUtils::getUserPreference("_global_selection_",
-      "catalog");
-  auto saved_parameter_space = PreferencesUtils::getUserPreference("_global_selection_",
-      "parameter_space");
+void FormAnalysis::loadAnalysisPage(DatasetRepo filter_repository, DatasetRepo luminosity_repository){
+  m_filter_repository=filter_repository;
+  m_luminosity_repository=luminosity_repository;
+
+  auto saved_catalog = PreferencesUtils::getUserPreference("_global_selection_", "catalog");
+  auto saved_parameter_space = PreferencesUtils::getUserPreference("_global_selection_", "parameter_space");
 
   ui->cb_z_col->clear();
   ui->cb_z_col->addItem("");
@@ -264,7 +267,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   ui->btn_GetConfigAnalysis->setEnabled(
       grid_name_ok && correction_ok && lum_prior_ok && lum_prior_compatible && run_ok && enabled);
   ui->btn_RunAnalysis->setEnabled(
-      grid_name_exists && correction_exists && lum_prior_ok && lum_prior_compatible&& run_ok && enabled);
+      grid_name_exists && correction_ok && correction_exists && lum_prior_ok && lum_prior_compatible&& run_ok && enabled);
 
   QString tool_tip_run = "";
   QString tool_tip_conf = "";
@@ -325,7 +328,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
     tool_tip_conf = "Get the configuration file.";
   }
 
-  if (!(grid_name_exists && correction_exists && lum_prior_ok && lum_prior_compatible && run_ok)) {
+  if (!(grid_name_exists && correction_ok && correction_exists && lum_prior_ok && lum_prior_compatible && run_ok)) {
     tool_tip_run = tool_tip_run + "Before running the analysis.";
   } else {
     tool_tip_run = "Run the analysis.";
@@ -335,15 +338,15 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   ui->btn_RunAnalysis->setToolTip(tool_tip_run);
 
   if (!correction_ok) {
-    setToolBoxButtonColor(ui->toolBox, 1, QColor("orange"));
+    setToolBoxButtonColor(ui->toolBox, 2, QColor("orange"));
   } else {
-    setToolBoxButtonColor(ui->toolBox, 1,Qt::black);
+    setToolBoxButtonColor(ui->toolBox, 2,Qt::black);
   }
 
   if (!lum_prior_ok || !lum_prior_compatible) {
-     setToolBoxButtonColor(ui->toolBox, 2, QColor("orange"));
+     setToolBoxButtonColor(ui->toolBox, 1, QColor("orange"));
    } else {
-     setToolBoxButtonColor(ui->toolBox, 2,Qt::black);
+     setToolBoxButtonColor(ui->toolBox, 1,Qt::black);
    }
 }
 
@@ -550,6 +553,9 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   options_map["axes-collapse-type"].value() = boost::any(
       ui->cb_marginalization->currentText().toStdString());
 
+  options_map["likelihood-axes-collapse-type"].value() = boost::any(
+        ui->cb_marginalization_likelihood->currentText().toStdString());
+
 
   options_map["output-catalog-format"].value() = boost::any(
         ui->cb_cat_output_type->currentText().toStdString());
@@ -563,6 +569,18 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
    } else {
      options_map["create-output-best-model"].value() = boost::any(no_flag);
    }
+
+  if (ui->cb_best_likelihood->isChecked()) {
+     options_map["create-output-best-likelihood-model"].value() = boost::any(yes_flag);
+   } else {
+     options_map["create-output-best-likelihood-model"].value() = boost::any(no_flag);
+   }
+
+  if (ui->cb_normalize_pdf->isChecked()) {
+    options_map["output-pdf-normalized"].value() = boost::any(yes_flag);
+      } else {
+        options_map["output-pdf-normalized"].value() = boost::any(no_flag);
+      }
 
   if (ui->cb_gen_likelihood->isChecked()) {
    options_map["create-output-likelihoods"].value() = boost::any(yes_flag);
@@ -612,6 +630,46 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   if (pdf_output_axis.size()>0){
     options_map["create-output-pdf"].value() = boost::any(pdf_output_axis);
+  }
+
+  std::vector<std::string> likelihood_pdf_output_axis{};
+   if (ui->cb_likelihood_pdf_z->isChecked()) {
+     likelihood_pdf_output_axis.push_back("Z");
+   }
+
+   if (ui->cb_likelihood_pdf_ebv->isChecked()) {
+     likelihood_pdf_output_axis.push_back("EBV");
+   }
+
+   if (ui->cb_likelihood_pdf_red->isChecked()) {
+     likelihood_pdf_output_axis.push_back("REDDENING-CURVE");
+   }
+
+   if (ui->cb_likelihood_pdf_sed->isChecked()) {
+     likelihood_pdf_output_axis.push_back("SED");
+   }
+
+   if (likelihood_pdf_output_axis.size()>0){
+     options_map["create-output-likelihood-pdf"].value() = boost::any(likelihood_pdf_output_axis);
+   }
+
+
+  if (m_copied_columns.size()>0){
+    std::string option ="";
+    bool first=true;
+    for (auto& copied_column: m_copied_columns){
+      if (!first){
+        option = option+",";
+      } else {
+        first=false;
+      }
+      option = option+copied_column.first;
+      if (copied_column.second!=""){
+        option = option+":"+copied_column.second;
+      }
+    }
+
+    options_map["copy-columns"].value() = boost::any(option);
   }
 
   return options_map;
@@ -745,6 +803,9 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
 
     }
   }
+
+  setCopiedColumns(selected_survey.getCopiedColumns());
+
 }
 
 template<typename ReturnType, int I>
@@ -836,12 +897,12 @@ template<typename ReturnType, int I>
       if (dialog->exec()) {
         adjustPhzGridButtons(true);
         setComputeCorrectionEnable();
-        setRunAnnalysisEnable(true);
 
         PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
             "IGM",ui->cb_igm->currentText().toStdString());
       }
     }
+    setRunAnnalysisEnable(true);
   }
 
 //  3. Photometric Correction
@@ -867,6 +928,24 @@ template<typename ReturnType, int I>
   }
 
   void FormAnalysis::on_btn_computeCorrections_clicked() {
+
+    // Note to developers:
+    // -------------------
+    // The configuration of the Photometric Correction from PhosphorosCore has
+    // been updated to take as input the same configuration as the ComputeRedshifts
+    // (priors, etc). This change requires a major refactoring of the GUI, because
+    // of the way the DialogPhotometricCorrectionComputation creates the config
+    // map. For this reason, at the moment the GUI functionality of computing the
+    // photometric corrections is disabled. The refactoring should be performed
+    // after the confirmation from the OU of the implemented functionality.
+    //
+    // TODO: Refactor the code to call the DialogPhotometricCorrectionComputation
+    // with the correct configuration
+    QMessageBox::information(this, "Compute Photometric Zero-Point Corrections",
+              "Computation of Photometric Zero-Point Corrections is currently "
+              "available only via the command line. Try to use the command: "
+              "Phosphoros CPP --help", QMessageBox::Ok);
+    return;
 
     auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
 
@@ -903,7 +982,7 @@ template<typename ReturnType, int I>
 
 // 4. algorithm options
   void FormAnalysis::on_btn_confLuminosityPrior_clicked(){
-        std::unique_ptr<DialogLuminosityPrior> dialog(new DialogLuminosityPrior());
+        std::unique_ptr<DialogLuminosityPrior> dialog(new DialogLuminosityPrior(m_filter_repository, m_luminosity_repository));
 
         std::string model_grid = ui->cb_CompatibleGrid->currentText().toStdString();
 
@@ -1020,6 +1099,7 @@ template<typename ReturnType, int I>
 
 // 5. Run
 void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
+  //todo update column selection button + all_column_list
   if (do_test) {
     std::vector<std::string> needed_columns { };
 
@@ -1043,6 +1123,12 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
   }
 
   ui->txt_inputCatalog->setText(QString::fromStdString(name));
+
+  auto column_reader = PhzUITools::CatalogColumnReader( ui->txt_inputCatalog->text().toStdString());
+  auto col_set = column_reader.getColumnNames();
+  std::list<std::string> all_columns(col_set.begin(),col_set.end());
+  updateCopiedColumns(all_columns);
+
   QFileInfo info(QString::fromStdString(name));
   ui->txt_outputFolder->setText(
       QString::fromStdString(
@@ -1064,6 +1150,71 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
     }
 
   }
+
+
+  void FormAnalysis::updateCopiedColumns(std::list<std::string> new_columns){
+    //get the columns from the catalog
+
+      for (auto&survey : m_analysis_survey_list) {
+        if (survey.second.getName().compare(ui->cb_AnalysisSurvey->currentText().toStdString()) == 0) {
+          setCopiedColumns(survey.second.getCopiedColumns());
+          break;
+        }
+      }
+
+
+
+    //ensure that they are in the selected file
+    std::list<std::string> missing{};
+    for (auto& iter : m_copied_columns){
+      if (std::find(new_columns.begin(),new_columns.end(), iter.first)==new_columns.end()){
+        missing.push_back(iter.first);
+      }
+    }
+
+    for (auto& iter : missing){
+      auto it=m_copied_columns.find(iter);
+      m_copied_columns.erase (it);
+    }
+  }
+
+
+  void FormAnalysis::setCopiedColumns(std::map<std::string,std::string> columns){
+    m_copied_columns=columns;
+    std::string copy = "Copy Columns (";
+    std::string copy_2 = ")";
+
+    ui->output_column_btn->setText(QString::fromStdString(copy)+QString::number(m_copied_columns.size())+QString::fromStdString(copy_2));
+  }
+
+  void FormAnalysis::on_output_column_btn_clicked(){
+    auto column_reader = PhzUITools::CatalogColumnReader( ui->txt_inputCatalog->text().toStdString());
+    auto col_set = column_reader.getColumnNames();
+
+    std::list<std::string> all_columns(col_set.begin(),col_set.end());
+    std::string id_col =getSelectedSurveySourceColumn();
+    std::unique_ptr<DialogOutputColumnSelection> popup(new DialogOutputColumnSelection(all_columns,id_col,m_copied_columns));
+
+    connect( popup.get(), SIGNAL(selectedColumns(std::map<std::string,std::string>)),
+          SLOT(setCopiedColumns(std::map<std::string,std::string>)));
+
+    popup->exec();
+  }
+
+
+  void FormAnalysis::saveCopiedColumnToCatalog(){
+     auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+     for (auto& survey_pair : m_analysis_survey_list) {
+       if (survey_pair.second.getName().compare(survey_name) == 0) {
+          survey_pair.second.setCopiedColumns(m_copied_columns);
+          survey_pair.second.saveSurvey(survey_name);
+          break;
+       }
+     }
+
+
+  }
+
 
   void FormAnalysis::on_btn_BrowseOutput_clicked()
   {
@@ -1111,7 +1262,7 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
       }
       auto config_map = getRunOptionMap();
       PhzUITools::ConfigurationWriter::writeConfiguration(config_map,fileName.toStdString());
-
+      saveCopiedColumnToCatalog();
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
           "IGM",ui->cb_igm->currentText().toStdString());
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
@@ -1125,12 +1276,29 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
 
   void FormAnalysis::on_btn_RunAnalysis_clicked(){
 
+
     std::string out_dir = ui->txt_outputFolder->text().toStdString();
+
+    QDir dir(QString::fromStdString(out_dir));
+    if (dir.exists()){
+      if (QMessageBox::question(this, "Existing Output Folder...",
+               "The Output Folder you selected already exists.\n"
+                   "In order to avoid confusion, the Output Folder will be cleared. Do you want to proceed?",
+               QMessageBox::Cancel | QMessageBox::Ok) == QMessageBox::Ok) {
+             FileUtils::removeDir(QString::fromStdString(out_dir));
+           }
+      else{
+        return;
+      }
+    }
+
     auto config_map = getRunOptionMap();
     auto config_map_luminosity = getLuminosityOptionMap();
+
     std::unique_ptr<DialogRunAnalysis> dialog(new DialogRunAnalysis());
     dialog->setValues(out_dir, config_map, config_map_luminosity);
     if (dialog->exec()) {
+      saveCopiedColumnToCatalog();
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
           "IGM",ui->cb_igm->currentText().toStdString());
 

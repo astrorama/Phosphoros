@@ -33,6 +33,7 @@ import ElementsKernel.Logging as log
 from astropy.table import Table
 
 import PhzCLI.DataInterface as di
+import PhzCLI.TableUtils as tut
 
 def defineSpecificProgramOptions():
     """
@@ -57,11 +58,6 @@ def defineSpecificProgramOptions():
                 help='The file containing the grid with the model photometries')
     parser.add_argument('--source-catalog', type=str,
                 help='The file containing the catalog with the source photometries')
-
-    #
-    # !!! Write your program options here !!!
-    # e.g. parser.add_argument('--string-value', type=str, help='A string option')
-    #
 
     return parser
 
@@ -113,7 +109,7 @@ def mainMethod(args):
     try:
         table = Table.read(args.source_catalog)
     except:
-        table = Table.read(args.source_catalog, format='ascii')
+        table = tut.read_table(args.source_catalog)
     row = next(r for r in table if r['ID']==args.source_id)
     for f in filter_info:
         f_c, e_c = filter_mapping[f.name]

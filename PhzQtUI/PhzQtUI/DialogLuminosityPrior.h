@@ -20,6 +20,8 @@
 #include "PhzQtUI/LuminosityPriorConfig.h"
 #include "PhzQtUI/GridButton.h"
 #include "ModelSet.h"
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
 
 namespace boost{
 namespace program_options{
@@ -29,6 +31,8 @@ namespace program_options{
 
 namespace Euclid {
 namespace PhzQtUI {
+
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 namespace Ui {
 class DialogLuminosityPrior;
@@ -45,7 +49,7 @@ public:
   /**
    * @brief Constructor
    */
-  explicit DialogLuminosityPrior(QWidget *parent = 0);
+  explicit DialogLuminosityPrior(DatasetRepo filter_repository,DatasetRepo luminosity_repository, QWidget *parent = 0);
   /**
    * @brief Destructor
    */
@@ -197,7 +201,8 @@ private:
   void updatePriorRow(QModelIndex& index,const size_t& row, const LuminosityPriorConfig& info );
 
   std::unique_ptr<Ui::DialogLuminosityPrior> ui;
-
+  DatasetRepo m_filter_repository;
+  DatasetRepo m_luminosity_repository;
   QString m_config_folder;
 
   QString m_grid_folder;

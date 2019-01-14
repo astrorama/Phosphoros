@@ -3,6 +3,7 @@ from __future__ import print_function
 from subprocess import call
 import sys
 import os
+import ElementsKernel.Configuration as el_conf
 
 class PhosphorosAction:
     def __init__(self, names, executable, help=''):
@@ -13,6 +14,10 @@ class PhosphorosAction:
 action_list = [
     PhosphorosAction(['help', 'h', '-h', '--help'], 'help',
                      'Shows this help message'),
+    PhosphorosAction(['version', '-v', '--version'], 'version',
+                     'Shows the version of Phosphoros'),
+    PhosphorosAction(['dump_config', 'DC'], 'dump_config',
+                     'Print an example configuration file for the given command'),
     PhosphorosAction(['GUI'], 'PhosphorosUI',
                      'Starts the Graphical User Interface'),
     PhosphorosAction(['compute_model_grid', 'CMG'], 'PhosphorosComputeModelGrid',
@@ -44,7 +49,9 @@ action_list = [
     PhosphorosAction(['create_flat_grid_prior', 'CFGP'], 'CreateFlatGridPrior',
                      'Creates a generic grid prior FITS file with all cells set to one, based on a model grid'),
     PhosphorosAction(['add_emission_lines', 'AEL'], 'PhosphorosAddEmissionLines',
-                     'Adds emission lines to a set of SED templates')
+                     'Adds emission lines to a set of SED templates'),
+    PhosphorosAction(['build_reference_sample', 'BRS'], 'PhosphorosBuildReferenceSample',
+                     'Builds an NNPZ reference sample from the results of a Phosphoros output catalog')
 ]
 
 def printHelp():
@@ -61,6 +68,36 @@ def printHelp():
     print ('')
     exit()
 
+def printVersion():
+    import PHOSPHOROS_VERSION
+    print(PHOSPHOROS_VERSION.PHOSPHOROS_VERSION_STRING)
+    exit()
+
+def dumpConfig():
+    if len(sys.argv) != 3 or sys.argv[2] in ('help', '--help', '-h'):
+        print ('Usage: Phosphoros dump_config <COMMAND>')
+        exit(1)
+
+    # Get the action from the action_list
+    cmd = sys.argv[2]
+    action = [a for a in action_list if cmd in a.names]
+    if len(action) == 0:
+        print ('Unknown Phosphoros action:', cmd)
+        exit(1)
+    
+    # Get the config file name from the executable name
+    name = action[0].executable.split()[0] + '.conf'
+
+    # Find the configuration file
+    conf_file = [os.path.join(r,f) for conf_dir in reversed(el_conf.getConfigurationLocations()) for r,d,fs in os.walk(conf_dir) for f in fs if f == name]
+    if len(conf_file) == 0:
+        print ('Command', cmd, 'does not accept a configuration file')
+        exit()
+
+    with open(conf_file[0]) as f:
+        print(f.read())
+    exit()
+
 if len(sys.argv) < 2:
     printHelp()
 
@@ -72,6 +109,12 @@ if not executable:
 
 if executable[0] == 'help':
     printHelp()
+
+if executable[0] == 'version':
+    printVersion()
+
+if executable[0] == 'dump_config':
+    dumpConfig()
 
 phosphoros_conf = os.getenv('PHOSPHOROS_ROOT', os.path.expanduser('~')+os.sep+'Phosphoros') + os.sep + 'config'
 if os.environ.get('ELEMENTS_CONF_PATH'):

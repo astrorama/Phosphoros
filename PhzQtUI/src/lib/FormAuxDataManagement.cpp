@@ -1,8 +1,11 @@
 #include <QMessageBox>
+#include <QtGui/qdesktopservices.h>
+#include <QtCore/qurl.h>
+#include <boost/filesystem/path.hpp>
 
 #include "PhzQtUI/FormAuxDataManagement.h"
 #include "ui_FormAuxDataManagement.h"
-#include "PhzQtUI/DirectoryTreeModel.h"
+#include "PhzQtUI/DataSetTreeModel.h"
 #include "PhzQtUI/DialogImportAuxData.h"
 #include "PhzQtUI/DialogCreatesSubGroup.h"
 #include "FileUtils.h"
@@ -24,221 +27,75 @@ FormAuxDataManagement::~FormAuxDataManagement()
 {
 }
 
-void FormAuxDataManagement::setRepositories(DatasetRepo seds_repository,
-        DatasetRepo redenig_curves_repository){
+void FormAuxDataManagement::setRepositories(DatasetRepo filter_repository,
+                                            DatasetRepo seds_repository,
+                                            DatasetRepo redenig_curves_repository,
+                                            DatasetRepo luminosity_repository){
+  m_filter_repository = filter_repository;
   m_seds_repository=seds_repository;
   m_redenig_curves_repository=redenig_curves_repository;
+  m_luminosity_repository = luminosity_repository;
 }
 
-void FormAuxDataManagement::loadManagementPage(int index){
-    DirectoryTreeModel* treeModel_filter = new DirectoryTreeModel();
-    treeModel_filter->loadDirectory(FileUtils::getFilterRootPath(true),false, "Filters");
-    treeModel_filter->selectRoot();
-    treeModel_filter->setEnabled(true);
 
+void FormAuxDataManagement::loadManagementPage(int index){
+
+    DataSetTreeModel* treeModel_filter = new DataSetTreeModel(m_filter_repository);
+    treeModel_filter->load(false);
+    treeModel_filter->setEnabled(true);
     ui->treeView_ManageFilter->setModel(treeModel_filter);
     ui->treeView_ManageFilter->collapseAll();
-    ui->treeView_ManageFilter->expand( treeModel_filter->item(0,0)->index());
-    connect( treeModel_filter, SIGNAL(itemChanged(QStandardItem*)), treeModel_filter,
-                 SLOT(onItemChangedUniqueSelection(QStandardItem*)));
 
-    DirectoryTreeModel* treeModel_Sed = new DirectoryTreeModel();
-    treeModel_Sed->loadDirectory(FileUtils::getSedRootPath(true),false, "SEDs");
-    treeModel_Sed->selectRoot();
+    DataSetTreeModel* treeModel_Sed = new DataSetTreeModel(m_seds_repository);
+    treeModel_Sed->load(false);
     treeModel_Sed->setEnabled(true);
     ui->treeView_ManageSed->setModel(treeModel_Sed);
     ui->treeView_ManageSed->collapseAll();
-    ui->treeView_ManageSed->expand(treeModel_Sed->item(0,0)->index());
-    connect( treeModel_Sed, SIGNAL(itemChanged(QStandardItem*)), treeModel_Sed,
-                 SLOT(onItemChangedUniqueSelection(QStandardItem*)));
 
-    DirectoryTreeModel* treeModel_Red = new DirectoryTreeModel();
-    treeModel_Red->loadDirectory(FileUtils::getRedCurveRootPath(true),false, "Reddening Curves");
-    treeModel_Red->selectRoot();
+    DataSetTreeModel* treeModel_Red = new DataSetTreeModel(m_redenig_curves_repository);
+    treeModel_Red->load(false);
     treeModel_Red->setEnabled(true);
     ui->treeView_ManageRed->setModel(treeModel_Red);
     ui->treeView_ManageRed->collapseAll();
-    ui->treeView_ManageRed->expand(treeModel_Red->item(0,0)->index());
-    connect( treeModel_Red, SIGNAL(itemChanged(QStandardItem*)), treeModel_Red,
-                 SLOT(onItemChangedUniqueSelection(QStandardItem*)));
 
 
-    DirectoryTreeModel* treeModel_Luminosity = new DirectoryTreeModel();
-    treeModel_Luminosity->loadDirectory(FileUtils::getLuminosityFunctionCurveRootPath(true),false, "Luminosity Function Curves");
-    treeModel_Luminosity->selectRoot();
+    DataSetTreeModel* treeModel_Luminosity = new DataSetTreeModel(m_luminosity_repository);
+    treeModel_Luminosity->load(false);
     treeModel_Luminosity->setEnabled(true);
-      ui->treeView_ManageLuminosity->setModel(treeModel_Luminosity);
-      ui->treeView_ManageLuminosity->collapseAll();
-      ui->treeView_ManageLuminosity->expand(treeModel_Luminosity->item(0,0)->index());
-      connect( treeModel_Luminosity, SIGNAL(itemChanged(QStandardItem*)), treeModel_Luminosity,
-                   SLOT(onItemChangedUniqueSelection(QStandardItem*)));
-
-    ui->tab_Management->setCurrentIndex(index);
-}
+    ui->treeView_ManageLuminosity->setModel(treeModel_Luminosity);
+    ui->treeView_ManageLuminosity->collapseAll();
 
 
-
-//  - Slot on this page
-
-void FormAuxDataManagement::on_btn_RedImport_clicked()
-{
-    std::string title = "Import Reddening Curves";
-    auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageRed->model());
-    std::string group =  model->getGroup();
-    DialogImportAuxData* popup= new DialogImportAuxData();
-    popup->setData(title,group,model->getRelPath(group,"Reddening Curves"));
-    if (popup->exec()){
-        loadManagementPage(2);
-
-
-        std::unique_ptr <XYDataset::FileParser > reddening_file_parser {new XYDataset::AsciiParser { } };
-         std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(new XYDataset::FileSystemProvider{  FileUtils::getRedCurveRootPath(false), std::move(reddening_file_parser) });
-         m_redenig_curves_repository->resetProvider(std::move(red_curve_provider));
-
+    if (index>=0){
+      ui->tab_Management->setCurrentIndex(index);
     }
 }
 
-void FormAuxDataManagement::on_btn_RedSubGroup_clicked()
-{
-  unique_ptr<DialogCreateSubGroup> popup (new DialogCreateSubGroup());
-  auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageRed->model());
-  std::string group =  model->getGroup();
-  popup->setParentFolder(group,model->getRelPath(group,"Reddening Curves"));
-  if ( popup->exec()){
-      loadManagementPage(2);
-  }
+namespace {
+
+void openAuxFilesDir(const std::string& dir) {
+  auto path_map = FileUtils::readPath();
+  boost::filesystem::path path = path_map["AuxiliaryData"];
+  path = path / dir;
+  QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(path.string())));
 }
 
-void FormAuxDataManagement::on_btn_RedDelete_clicked()
-{
-    auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageRed->model());
-    std::string selection =  model->getRootSelection().second;
-    if (QMessageBox::question( this, "Confirm deletion...",
-                                  QString::fromStdString("Do you really want to delete the reddening curve(s) '"+model->getRelPath(selection,"Reddening Curves")+"'?"),
-                                  QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
-        FileUtils::removeDir(QString::fromStdString(selection));
-        loadManagementPage(2);
-        std::unique_ptr <XYDataset::FileParser > reddening_file_parser {new XYDataset::AsciiParser { } };
-         std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(new XYDataset::FileSystemProvider{  FileUtils::getRedCurveRootPath(false), std::move(reddening_file_parser) });
-         m_redenig_curves_repository->resetProvider(std::move(red_curve_provider));
-
-    }
 }
 
-void FormAuxDataManagement::on_btn_SedImport_clicked()
-{
-    std::string title = "Import SED(s)";
-
-    auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageSed->model());
-    std::string group =  model->getGroup();
-    unique_ptr<DialogImportAuxData> popup(new DialogImportAuxData());
-    popup->setData(title,group,model->getRelPath(group,"SEDs"));
-    if (popup->exec()){
-        loadManagementPage(1);
-
-        std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
-                std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(false), std::move(sed_file_parser) });
-                m_seds_repository->resetProvider(std::move(sed_provider));
-
-
-    }
+void FormAuxDataManagement::on_btn_ShowFilesFilter_clicked() {
+  openAuxFilesDir("Filters");
 }
 
-void FormAuxDataManagement::on_btn_SedSubGroup_clicked()
-{
-    unique_ptr<DialogCreateSubGroup> popup (new DialogCreateSubGroup());
-    auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageSed->model());
-    std::string group =  model->getGroup();
-    popup->setParentFolder(group,model->getRelPath(group,"SEDs"));
-    if ( popup->exec()){
-        loadManagementPage(1);
-    }
+void FormAuxDataManagement::on_btn_ShowFilesSed_clicked() {
+  openAuxFilesDir("SEDs");
 }
 
-void FormAuxDataManagement::on_btn_SedDelete_clicked()
-{
-    auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageSed->model());
-    std::string selection =  model->getRootSelection().second;
-   if (QMessageBox::question( this, "Confirm deletion...",
-                                 QString::fromStdString("Do you really want to delete the SED(s) '"+model->getRelPath(selection,"SEDs")+"'?"),
-                                 QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
-       FileUtils::removeDir(QString::fromStdString(selection));
-       loadManagementPage(1);
-       std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
-                    std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(false), std::move(sed_file_parser) });
-                    m_seds_repository->resetProvider(std::move(sed_provider));
-
-   }
+void FormAuxDataManagement::on_btn_ShowFilesRedCurve_clicked() {
+  openAuxFilesDir("ReddeningCurves");
 }
 
-void FormAuxDataManagement::on_btn_FilterImport_clicked()
-{
-    std::string title = "Import Filter Transmission Curve(s)";
-    auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageFilter->model());
-    std::string group =  model->getGroup();
-    unique_ptr<DialogImportAuxData> popup( new DialogImportAuxData());
-    popup->setData(title,group,model->getRelPath(group,"Filters"));
-    if (popup->exec()){
-        loadManagementPage(0);
-    }
-}
-
-void FormAuxDataManagement::on_btn_FilterSubGroup_clicked()
-{
-  unique_ptr<DialogCreateSubGroup> popup (new DialogCreateSubGroup());
-    auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageFilter->model());
-    std::string group =  model->getGroup();
-    popup->setParentFolder(group,model->getRelPath(group,"Filters"));
-    if ( popup->exec()){
-        loadManagementPage(0);
-    }
-}
-
-void FormAuxDataManagement::on_btn_FilterDelete_clicked()
-{
-    auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageFilter->model());
-    std::string selection =  model->getRootSelection().second;
-   if (QMessageBox::question( this, "Confirm deletion...",
-                                 QString::fromStdString("Do you really want to delete the Filter Transmission Curve(s) '"+model->getRelPath(selection,"Filters")+"'?"),
-                                 QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
-       FileUtils::removeDir(QString::fromStdString(selection));
-       loadManagementPage(0);
-   }
-}
-
-void FormAuxDataManagement::on_btn_LuminosityImport_clicked()
-{
-    std::string title = "Import Luminosity Function Curve(s)";
-    auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageLuminosity->model());
-    std::string group =  model->getGroup();
-    unique_ptr<DialogImportAuxData> popup( new DialogImportAuxData());
-    popup->setData(title,group,model->getRelPath(group,"Luminosity Function Curve"));
-    if (popup->exec()){
-        loadManagementPage(3);
-    }
-}
-
-void FormAuxDataManagement::on_btn_LuminositySubGroup_clicked()
-{
-  unique_ptr<DialogCreateSubGroup> popup (new DialogCreateSubGroup());
-    auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageLuminosity->model());
-    std::string group =  model->getGroup();
-    popup->setParentFolder(group,model->getRelPath(group,"Luminosity Function Curve"));
-    if ( popup->exec()){
-        loadManagementPage(3);
-    }
-}
-
-void FormAuxDataManagement::on_btn_LuminosityDelete_clicked()
-{
-    auto model = static_cast<DirectoryTreeModel*>(ui->treeView_ManageLuminosity->model());
-    std::string selection =  model->getRootSelection().second;
-   if (QMessageBox::question( this, "Confirm deletion...",
-                                 QString::fromStdString("Do you really want to delete the Luminosity Function Curve(s) '"+model->getRelPath(selection,"Luminosity Function Curve")+"'?"),
-                                 QMessageBox::Yes|QMessageBox::No )==QMessageBox::Yes){
-       FileUtils::removeDir(QString::fromStdString(selection));
-       loadManagementPage(3);
-   }
+void FormAuxDataManagement::on_btn_ShowFilesLumFunc_clicked() {
+  openAuxFilesDir("LuminosityFunctionCurves");
 }
 
 }

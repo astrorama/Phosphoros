@@ -41,8 +41,10 @@ public:
      * @brief give the references to the repositories to be updated when
      * change are performed.
      */
-     void loadOptionPage(DatasetRepo seds_repository,
-         DatasetRepo redenig_curves_repository);
+     void loadOptionPage(DatasetRepo filter_repository,
+                         DatasetRepo seds_repository,
+                         DatasetRepo redenig_curves_repository,
+                         DatasetRepo luminosity_repository );
 
 signals:
 /**
@@ -156,8 +158,10 @@ private:
 
     bool do_need_reset = false;
     void checkDirectories();
+    DatasetRepo m_filter_repository;
     DatasetRepo m_seds_repository;
     DatasetRepo m_redenig_curves_repository;
+    DatasetRepo m_luminosity_repository;
 };
 
 }
