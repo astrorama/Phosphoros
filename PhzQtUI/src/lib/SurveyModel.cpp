@@ -100,6 +100,7 @@ void SurveyModel::loadSurvey() {
         ++i;
     }
     auto saved_catalog = PreferencesUtils::getUserPreference("_global_selection_", "catalog");
+    logger.info()<< "use the saved catalog "<<saved_catalog<<".";
     selectSurvey(QString::fromStdString(saved_catalog));
 }
 

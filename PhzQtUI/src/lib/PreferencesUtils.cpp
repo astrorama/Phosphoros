@@ -41,9 +41,19 @@ std::map<std::string,std::map<std::string,std::string>> PreferencesUtils::readUs
            map.insert(std::make_pair(catalog,new_cat_map));
          }
 
+         QString val ="";
+         for (int i=2;i<line_split.length();++i){
+           if (val.length()>0){
+             val=val+" ";
+           }
+           val = val + line_split[i];
+         }
+
+         val = val.trimmed();
+
+
          map[catalog].insert(
-             std::make_pair(line_split[1].toStdString(),
-                            line_split[2].toStdString()));
+             std::make_pair(line_split[1].toStdString(), val.toStdString()));
        }
     }
   }
