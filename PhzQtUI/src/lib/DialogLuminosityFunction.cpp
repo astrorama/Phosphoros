@@ -50,9 +50,9 @@ void DialogLuminosityFunction::setInfo(LuminosityFunctionInfo info, size_t x, si
 
   if (m_FunctionInfo.is_custom){
     ui->gb_schechter->setChecked(false);
+    ui->lb_curve->setText(QString::fromStdString(m_FunctionInfo.curve_name));
   } else {
     ui->gb_custom->setChecked(false);
-    ui->lb_curve->setText(QString::fromStdString(m_FunctionInfo.curve_name));
   }
 
   ui->txt_alpha->setValidator(new QDoubleValidator(this));

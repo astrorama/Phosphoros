@@ -37,16 +37,16 @@ void DialogLuminosityFunctionCurveSelector::setCurve(std::string curve_name){
            treeModel_curve,
            SLOT(onItemChangedSingleLeaf(QStandardItem*)));
 
-  if (curve_name.length()>0){
-    std::vector<std::string> curveList{curve_name};
-    treeModel_curve->setState(curveList);
-  }
+
 
   if (!treeModel_curve->hasLeave()){
     QMessageBox::warning(this, "No available function...",
             "There is no luminosity function curve to select. "
             "You can provide and manage luminosity function curves in the \"Configuration/Aux. Data\" page.",
             QMessageBox::Ok);
+  } else if (curve_name.length()>0){
+    std::vector<std::string> curveList{curve_name};
+    treeModel_curve->setState(curveList);
   }
 }
 
