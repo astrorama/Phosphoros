@@ -57,21 +57,35 @@ void FormAnalysis::loadAnalysisPage(
   m_model_set_model_ptr = model_set_model_ptr;
   m_filter_repository = filter_repository;
   m_luminosity_repository = luminosity_repository;
+  logger.info()<< "Load the Analysis Page";
 
   // Fill the Parameter Space Combobox and set its index
 
   disconnect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString &)), 0, 0);
   ui->cb_AnalysisModel->clear();
+
+  logger.info()<< "Found "<<m_model_set_model_ptr->getModelSetList().size() <<" Parameter Space in the provider";
+
   for (auto& model_name : m_model_set_model_ptr->getModelSetList()) {
    ui->cb_AnalysisModel->addItem(model_name);
   }
 
+  bool found = false;
   for (int i = 0; i < ui->cb_AnalysisModel->count(); i++) {
     if (ui->cb_AnalysisModel->itemText(i).toStdString() == m_model_set_model_ptr->getSelectedModelSet().getName()) {
       ui->cb_AnalysisModel->setCurrentIndex(i);
+      on_cb_AnalysisModel_currentIndexChanged(ui->cb_AnalysisModel->itemText(i));
+      found=true;
       break;
     }
   }
+
+  if (!found && ui->cb_AnalysisModel->count()>0){
+     ui->cb_AnalysisModel->setCurrentIndex(0);
+     on_cb_AnalysisModel_currentIndexChanged(ui->cb_AnalysisModel->itemText(0));
+  }
+
+
 
   connect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString &)),
          SLOT(on_cb_AnalysisModel_currentIndexChanged(const QString &)));
@@ -80,22 +94,34 @@ void FormAnalysis::loadAnalysisPage(
   // Fill the Calalog Combobox and set its index
   disconnect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString &)), 0, 0);
 
+
+  logger.info()<< "Found "<<m_survey_model_ptr->getSurveyList().size() <<" Catalogs types in the provider";
+
   auto saved_catalog = m_survey_model_ptr->getSelectedSurvey();
   ui->cb_AnalysisSurvey->clear();
   for (auto& survey_name : m_survey_model_ptr->getSurveyList()) {
      ui->cb_AnalysisSurvey->addItem(survey_name);
   }
 
-  connect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString &)),
-        SLOT(on_cb_AnalysisSurvey_currentIndexChanged(const QString &)));
-
-
+  found = false;
   for (int i = 0; i < ui->cb_AnalysisSurvey->count(); i++) {
     if (ui->cb_AnalysisSurvey->itemText(i).toStdString() == saved_catalog.getName()) {
       ui->cb_AnalysisSurvey->setCurrentIndex(i);
+      on_cb_AnalysisSurvey_currentIndexChanged(ui->cb_AnalysisSurvey->itemText(i));
+      found=true;
       break;
     }
   }
+
+  if (!found && ui->cb_AnalysisSurvey->count()>0){
+    ui->cb_AnalysisSurvey->setCurrentIndex(0);
+    on_cb_AnalysisSurvey_currentIndexChanged(ui->cb_AnalysisSurvey->itemText(0));
+  }
+
+
+  connect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString &)),
+        SLOT(on_cb_AnalysisSurvey_currentIndexChanged(const QString &)));
+
 
   //
   ui->cb_z_col->clear();
@@ -907,6 +933,8 @@ std::map < std::string, boost::program_options::variable_value > FormAnalysis::g
 //  1. Survey and Model
 void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     const QString &selectedName) {
+
+  logger.info()<< "The selected index of the Catalog ComboBox has changed. New selected item:"<<selectedName.toStdString();
   m_survey_model_ptr->selectSurvey(selectedName);
 
   SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
@@ -926,6 +954,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     grid_model->appendRow(items);
 
   }
+
 
   ui->tableView_filter->setModel(grid_model);
   connect(grid_model, SIGNAL(itemChanged(QStandardItem*)),
@@ -1017,6 +1046,7 @@ template<typename ReturnType, int I>
 
 
   void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(const QString &model_name) {
+    logger.info()<< "The selected index of the Parameter Space ComboBox has changed. New selected item:"<<model_name.toStdString();
     m_model_set_model_ptr->selectModelSet(model_name);
 
     updateGridSelection();

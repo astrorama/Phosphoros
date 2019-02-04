@@ -18,10 +18,12 @@
 #include "PreferencesUtils.h"
 
 #include "PhzQtUI/FilterMappingItemDelegate.h"
+#include "ElementsKernel/Logging.h"
 
 
 namespace Euclid {
 namespace PhzQtUI {
+static Elements::Logging logger = Elements::Logging::getLogger("FormSurveyMapping");
 
 
 FormSurveyMapping::FormSurveyMapping( QWidget *parent) :
@@ -49,6 +51,8 @@ void FormSurveyMapping::loadMappingPage(
     std::shared_ptr<SurveyModel> survey_model_ptr,
     DatasetRepo filter_repository,
     std::string new_path) {
+
+    logger.info()<< "Load the Catalog Page";
      m_survey_model_ptr = survey_model_ptr;
      ui->txt_nonDetection->setValidator(new QDoubleValidator());
      m_filter_repository = filter_repository;

@@ -7,12 +7,14 @@
 
 #include "ElementsKernel/Exception.h"
 #include "PreferencesUtils.h"
+#include "ElementsKernel/Logging.h"
 
 
 namespace po = boost::program_options;
 
 namespace Euclid {
 namespace PhzQtUI {
+static Elements::Logging logger = Elements::Logging::getLogger("FormModelSet");
 
 FormModelSet::FormModelSet(QWidget *parent) :
     QWidget(parent),
@@ -35,6 +37,7 @@ void FormModelSet::loadSetPage(
     DatasetRepo seds_repository,
     DatasetRepo redenig_curves_repository) {
 
+    logger.info()<< "Load the Parameter Space Page";
     m_model_set_model_ptr = model_set_model_ptr;
     m_seds_repository = seds_repository;
     m_redenig_curves_repository = redenig_curves_repository;
