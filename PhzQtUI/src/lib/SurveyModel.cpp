@@ -156,6 +156,7 @@ void SurveyModel::loadSurvey() {
      this->setItem(m_selected_row, 0, new QStandardItem(QString::fromStdString(m_edited_survey.getName())));
      this->setItem(m_selected_row, 1, new QStandardItem(QString::number(m_edited_survey.getFilterNumber())));
      m_in_edition = false;
+     m_need_reload = true;
      return true;
    } else {
      return false;
@@ -170,6 +171,7 @@ void SurveyModel::loadSurvey() {
      this->removeRow(m_selected_row);
      selectSurvey(-1);
      m_in_edition = false;
+     m_need_reload = true;
    }
  }
 
@@ -248,6 +250,14 @@ void SurveyModel::loadSurvey() {
      result.push_back(QString::fromStdString(it->second.getName()));
      }
    return result;
+ }
+
+ bool SurveyModel::doNeedReload() const{
+   return m_need_reload;
+ }
+
+ void SurveyModel::reloaded(){
+   m_need_reload = false;
  }
 
 

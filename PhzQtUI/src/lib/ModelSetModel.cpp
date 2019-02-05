@@ -152,6 +152,7 @@ void ModelSetModel::deleteSelected() {
     this->removeRow(m_selected_row);
     selectModelSet(-1);
     m_in_edition = false;
+    m_need_reload = true;
   }
 }
 
@@ -169,6 +170,7 @@ bool ModelSetModel::saveSelected() {
     this->setItem(m_selected_row, 0, new QStandardItem(QString::fromStdString(m_edited_modelSet.getName())));
     this->setItem(m_selected_row, 1, new QStandardItem(QString::number(m_edited_modelSet.getModelNumber(true))));
     m_in_edition = false;
+    m_need_reload = true;
     return true;
   } else {
     return false;
@@ -199,6 +201,13 @@ void ModelSetModel::setParameterRulesToSelected(const std::map<int, ParameterRul
   m_in_edition = true;
 }
 
+bool ModelSetModel::doNeedReload() const{
+  return m_need_reload;
+}
+
+void ModelSetModel::reloaded(){
+  m_need_reload = false;
+}
 
 
 }

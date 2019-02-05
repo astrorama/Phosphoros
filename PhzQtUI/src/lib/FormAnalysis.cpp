@@ -59,17 +59,29 @@ void FormAnalysis::loadAnalysisPage(
   m_luminosity_repository = luminosity_repository;
   logger.info()<< "Load the Analysis Page";
 
-  // Fill the Parameter Space Combobox and set its index
+  updateSelection();
 
+  //
+  ui->cb_z_col->clear();
+  ui->cb_z_col->addItem("");
+}
+
+
+void FormAnalysis::updateSelection() {
+  // Disconnect the combobox event
   disconnect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString &)), 0, 0);
-  ui->cb_AnalysisModel->clear();
 
-  logger.info()<< "Found "<<m_model_set_model_ptr->getModelSetList().size() <<" Parameter Space in the provider";
-
-  for (auto& model_name : m_model_set_model_ptr->getModelSetList()) {
-   ui->cb_AnalysisModel->addItem(model_name);
+  // if needed: Fill the Parameter Space Combobox and set its index
+  if (m_model_set_model_ptr->doNeedReload()){
+    ui->cb_AnalysisModel->clear();
+    logger.info()<< "Found "<<m_model_set_model_ptr->getModelSetList().size() <<" Parameter Space in the provider";
+    for (auto& model_name : m_model_set_model_ptr->getModelSetList()) {
+        ui->cb_AnalysisModel->addItem(model_name);
+    }
+    m_model_set_model_ptr->reloaded();
   }
 
+  // select the right item
   bool found = false;
   for (int i = 0; i < ui->cb_AnalysisModel->count(); i++) {
     if (ui->cb_AnalysisModel->itemText(i).toStdString() == m_model_set_model_ptr->getSelectedModelSet().getName()) {
@@ -85,24 +97,25 @@ void FormAnalysis::loadAnalysisPage(
      on_cb_AnalysisModel_currentIndexChanged(ui->cb_AnalysisModel->itemText(0));
   }
 
-
-
+  // reconnect the combobox event
   connect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString &)),
          SLOT(on_cb_AnalysisModel_currentIndexChanged(const QString &)));
 
 
-  // Fill the Calalog Combobox and set its index
+  // Disconnect the combobox event
+
   disconnect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString &)), 0, 0);
-
-
-  logger.info()<< "Found "<<m_survey_model_ptr->getSurveyList().size() <<" Catalogs types in the provider";
-
-  auto saved_catalog = m_survey_model_ptr->getSelectedSurvey();
-  ui->cb_AnalysisSurvey->clear();
-  for (auto& survey_name : m_survey_model_ptr->getSurveyList()) {
-     ui->cb_AnalysisSurvey->addItem(survey_name);
+  // if needed: Fill the Parameter Space Combobox and set its index
+  if (m_survey_model_ptr->doNeedReload()){
+    ui->cb_AnalysisSurvey->clear();
+    logger.info()<< "Found "<<m_survey_model_ptr->getSurveyList().size() <<" Catalogs types in the provider";
+    for (auto& survey_name : m_survey_model_ptr->getSurveyList()) {
+       ui->cb_AnalysisSurvey->addItem(survey_name);
+    }
   }
 
+  // select the right item
+  auto saved_catalog = m_survey_model_ptr->getSelectedSurvey();
   found = false;
   for (int i = 0; i < ui->cb_AnalysisSurvey->count(); i++) {
     if (ui->cb_AnalysisSurvey->itemText(i).toStdString() == saved_catalog.getName()) {
@@ -118,36 +131,9 @@ void FormAnalysis::loadAnalysisPage(
     on_cb_AnalysisSurvey_currentIndexChanged(ui->cb_AnalysisSurvey->itemText(0));
   }
 
-
+  // reconnect the combobox event
   connect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString &)),
         SLOT(on_cb_AnalysisSurvey_currentIndexChanged(const QString &)));
-
-
-  //
-  ui->cb_z_col->clear();
-  ui->cb_z_col->addItem("");
-}
-
-
-void FormAnalysis::updateSelection() {
-  disconnect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString &)), 0, 0);
-
-   for (int i = 0; i < ui->cb_AnalysisModel->count(); i++) {
-     if (ui->cb_AnalysisModel->itemText(i).toStdString() == m_model_set_model_ptr->getSelectedModelSet().getName()) {
-       ui->cb_AnalysisModel->setCurrentIndex(i);
-       break;
-     }
-   }
-
-   connect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString &)),
-          SLOT(on_cb_AnalysisModel_currentIndexChanged(const QString &)));
-
-   for (int i = 0; i < ui->cb_AnalysisSurvey->count(); i++) {
-      if (ui->cb_AnalysisSurvey->itemText(i).toStdString() == m_survey_model_ptr->getSelectedSurvey().getName()) {
-        ui->cb_AnalysisSurvey->setCurrentIndex(i);
-        break;
-      }
-   }
 }
 
 ///////////////////////////////////////////////////

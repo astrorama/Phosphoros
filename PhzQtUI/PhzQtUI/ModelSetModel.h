@@ -55,12 +55,17 @@ public:
    /// Listing ///
    const std::vector<QString> getModelSetList() const;
 
+   bool doNeedReload() const;
+
+   void reloaded();
+
 public slots:
   void setNameToSelected(const QString& value);
   void setParameterRulesToSelected(const std::map<int, ParameterRule>& value);
 
 private:
    bool m_in_edition = false;
+   bool m_need_reload = true;
    int m_selected_row = -1;
    int m_selected_index = -1;
    ModelSet m_edited_modelSet;

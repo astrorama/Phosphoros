@@ -115,6 +115,10 @@ public:
    */
   const std::vector<QString> getSurveyList() const;
 
+  bool doNeedReload() const;
+
+  void reloaded();
+
 public slots:
   void setNameToSelected(QString new_name);
   void setIdColumnToSelected(QString new_name);
@@ -131,6 +135,7 @@ public slots:
 
 private:
   bool m_in_edition = false;
+  bool m_need_reload = true;
   int m_selected_row = -1;
   int m_selected_index = -1;
   SurveyFilterMapping m_edited_survey;
