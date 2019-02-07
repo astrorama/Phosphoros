@@ -81,20 +81,25 @@ void FormAnalysis::updateSelection() {
     m_model_set_model_ptr->reloaded();
   }
 
-  // select the right item
-  bool found = false;
-  for (int i = 0; i < ui->cb_AnalysisModel->count(); i++) {
-    if (ui->cb_AnalysisModel->itemText(i).toStdString() == m_model_set_model_ptr->getSelectedModelSet().getName()) {
-      ui->cb_AnalysisModel->setCurrentIndex(i);
-      on_cb_AnalysisModel_currentIndexChanged(ui->cb_AnalysisModel->itemText(i));
-      found=true;
-      break;
-    }
-  }
 
-  if (!found && ui->cb_AnalysisModel->count()>0){
-     ui->cb_AnalysisModel->setCurrentIndex(0);
-     on_cb_AnalysisModel_currentIndexChanged(ui->cb_AnalysisModel->itemText(0));
+
+  // select the right item
+
+  if(ui->cb_AnalysisModel->currentText().toStdString() != m_model_set_model_ptr->getSelectedModelSet().getName()){
+    bool found = false;
+    for (int i = 0; i < ui->cb_AnalysisModel->count(); i++) {
+      if (ui->cb_AnalysisModel->itemText(i).toStdString() == m_model_set_model_ptr->getSelectedModelSet().getName()) {
+        ui->cb_AnalysisModel->setCurrentIndex(i);
+        on_cb_AnalysisModel_currentIndexChanged(ui->cb_AnalysisModel->itemText(i));
+        found=true;
+        break;
+      }
+    }
+
+    if (!found && ui->cb_AnalysisModel->count()>0){
+       ui->cb_AnalysisModel->setCurrentIndex(0);
+       on_cb_AnalysisModel_currentIndexChanged(ui->cb_AnalysisModel->itemText(0));
+    }
   }
 
   // reconnect the combobox event
@@ -112,23 +117,27 @@ void FormAnalysis::updateSelection() {
     for (auto& survey_name : m_survey_model_ptr->getSurveyList()) {
        ui->cb_AnalysisSurvey->addItem(survey_name);
     }
+
+    m_survey_model_ptr->reloaded();
   }
 
-  // select the right item
   auto saved_catalog = m_survey_model_ptr->getSelectedSurvey();
-  found = false;
-  for (int i = 0; i < ui->cb_AnalysisSurvey->count(); i++) {
-    if (ui->cb_AnalysisSurvey->itemText(i).toStdString() == saved_catalog.getName()) {
-      ui->cb_AnalysisSurvey->setCurrentIndex(i);
-      on_cb_AnalysisSurvey_currentIndexChanged(ui->cb_AnalysisSurvey->itemText(i));
-      found=true;
-      break;
+  if(ui->cb_AnalysisSurvey->currentText().toStdString() != saved_catalog.getName()){
+    // select the right item
+    bool found = false;
+    for (int i = 0; i < ui->cb_AnalysisSurvey->count(); i++) {
+      if (ui->cb_AnalysisSurvey->itemText(i).toStdString() == saved_catalog.getName()) {
+        ui->cb_AnalysisSurvey->setCurrentIndex(i);
+        on_cb_AnalysisSurvey_currentIndexChanged(ui->cb_AnalysisSurvey->itemText(i));
+        found=true;
+        break;
+      }
     }
-  }
 
-  if (!found && ui->cb_AnalysisSurvey->count()>0){
-    ui->cb_AnalysisSurvey->setCurrentIndex(0);
-    on_cb_AnalysisSurvey_currentIndexChanged(ui->cb_AnalysisSurvey->itemText(0));
+    if (!found && ui->cb_AnalysisSurvey->count()>0){
+      ui->cb_AnalysisSurvey->setCurrentIndex(0);
+      on_cb_AnalysisSurvey_currentIndexChanged(ui->cb_AnalysisSurvey->itemText(0));
+    }
   }
 
   // reconnect the combobox event
