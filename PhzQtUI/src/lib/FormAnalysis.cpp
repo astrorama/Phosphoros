@@ -1596,7 +1596,7 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
     std::string out_dir = ui->txt_outputFolder->text().toStdString();
 
     QDir dir(QString::fromStdString(out_dir));
-    if (dir.exists()) {
+    if (dir.exists() && dir.entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() > 0) {
       if (QMessageBox::question(this, "Existing Output Folder...",
                "The Output Folder you selected already exists.\n"
                    "In order to avoid confusion, the Output Folder will be cleared. Do you want to proceed?",

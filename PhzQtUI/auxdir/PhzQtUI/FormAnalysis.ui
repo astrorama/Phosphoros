@@ -79,7 +79,7 @@
          <string>Define the Mapping between the catalog file(s) columns and the filters</string>
         </property>
         <property name="text">
-         <string>Catalog Types</string>
+         <string>Catalog Type</string>
         </property>
        </widget>
       </item>
@@ -100,7 +100,7 @@
          <string>Specify the parameter space for the creation of model grid.</string>
         </property>
         <property name="text">
-         <string>Parameter Spaces</string>
+         <string>Parameter Space</string>
         </property>
        </widget>
       </item>
@@ -475,8 +475,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1021</width>
-            <height>422</height>
+            <width>418</width>
+            <height>215</height>
            </rect>
           </property>
           <attribute name="label">
@@ -983,8 +983,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>537</width>
-            <height>158</height>
+            <width>1021</width>
+            <height>422</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1242,7 +1242,7 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>Output Catalog Format :</string>
+                  <string>Output Format :</string>
                  </property>
                 </widget>
                </item>
@@ -1290,7 +1290,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Output Catalog Content :</string>
+              <string>Output Content :</string>
              </property>
             </widget>
            </item>
@@ -1337,7 +1337,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="0" column="3">
+               <item row="1" column="1">
                 <widget class="QPushButton" name="output_column_btn">
                  <property name="font">
                   <font>
@@ -1604,28 +1604,16 @@
             </layout>
            </item>
            <item>
-            <widget class="QLabel" name="label_12">
-             <property name="font">
-              <font>
-               <pointsize>11</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Multi-Dimentional Output : </string>
-             </property>
-            </widget>
-           </item>
-           <item>
             <layout class="QGridLayout" name="gridLayout_3">
              <item row="0" column="0">
-              <widget class="QLabel" name="label_25">
+              <widget class="QLabel" name="label_12">
                <property name="font">
                 <font>
-                 <pointsize>10</pointsize>
+                 <pointsize>11</pointsize>
                 </font>
                </property>
                <property name="text">
-                <string/>
+                <string>Multi-Dimentional Output : </string>
                </property>
               </widget>
              </item>
@@ -1641,19 +1629,19 @@
                </property>
               </widget>
              </item>
-             <item row="0" column="2">
-              <widget class="QCheckBox" name="cb_gen_likelihood">
+             <item row="0" column="3">
+              <widget class="QLabel" name="label_25">
                <property name="font">
                 <font>
-                 <pointsize>11</pointsize>
+                 <pointsize>10</pointsize>
                 </font>
                </property>
                <property name="text">
-                <string>Generate Likelihood Files</string>
+                <string/>
                </property>
               </widget>
              </item>
-             <item row="0" column="3">
+             <item row="0" column="8">
               <spacer name="horizontalSpacer_11">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
@@ -1665,6 +1653,18 @@
                 </size>
                </property>
               </spacer>
+             </item>
+             <item row="0" column="2">
+              <widget class="QCheckBox" name="cb_gen_likelihood">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Generate Likelihood Files</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
@@ -1712,7 +1712,6 @@
           <zorder>verticalSpacer</zorder>
           <zorder>label_5</zorder>
           <zorder></zorder>
-          <zorder>label_12</zorder>
           <zorder></zorder>
          </widget>
         </widget>

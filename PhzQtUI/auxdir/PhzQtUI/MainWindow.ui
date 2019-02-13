@@ -74,7 +74,7 @@
                 <string>Define the Mapping between the catalog file(s) columns and the filters</string>
                </property>
                <property name="text">
-                <string>Catalog Types</string>
+                <string>Catalog Type</string>
                </property>
               </widget>
              </item>
@@ -95,7 +95,7 @@
                 <string>Specify the parameter space for the creation of model grid.</string>
                </property>
                <property name="text">
-                <string>Parameter Spaces</string>
+                <string>Parameter Space</string>
                </property>
               </widget>
              </item>
@@ -170,7 +170,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Photometric Redshift Tool</string>
+             <string>Template Fitting Tool</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -185,7 +185,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Template Fitting</string>
+             <string>For Photometric Redshift</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -208,7 +208,20 @@
              </spacer>
             </item>
             <item>
-             <widget class="Euclid::PhzQtUI::ScalableImageLabel" name="image_label" native="true"/>
+             <widget class="Euclid::PhzQtUI::ScalableImageLabel" name="image_label" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>400</width>
+                <height>400</height>
+               </size>
+              </property>
+             </widget>
             </item>
             <item>
              <spacer name="verticalSpacer_2">

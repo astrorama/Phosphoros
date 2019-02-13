@@ -78,6 +78,12 @@ void addEmissionLineButtonClicked(const QString&);
    */
   void on_buttonBox_rejected();
 
+  void on_rb_ebv_val_clicked();
+  void on_rb_ebv_range_clicked();
+  void on_rb_z_val_clicked();
+  void on_rb_z_range_clicked();
+
+
   /**
    * @brief SLOT on_buttonBox_accepted: The user close the popup,
    * and rise the SIGNAL popupClosing

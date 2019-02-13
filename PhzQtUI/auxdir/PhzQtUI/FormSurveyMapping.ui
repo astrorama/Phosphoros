@@ -79,7 +79,7 @@
          <string notr="true">background-color: rgb(210, 210, 210)</string>
         </property>
         <property name="text">
-         <string>Catalog Types</string>
+         <string>Catalog Type</string>
         </property>
        </widget>
       </item>
@@ -100,7 +100,7 @@
          <string>Specify the parameter space for the creation of model grid.</string>
         </property>
         <property name="text">
-         <string>Parameter Spaces</string>
+         <string>Parameter Space</string>
         </property>
        </widget>
       </item>
@@ -160,7 +160,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Catalog Types :</string>
+          <string>Catalog Type :</string>
          </property>
         </widget>
        </item>
@@ -232,6 +232,13 @@
     </layout>
    </item>
    <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_14">
      <item>
       <widget class="QLabel" name="lbl_catalog_name">
@@ -254,7 +261,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Catalog Type :</string>
+        <string>:</string>
        </property>
       </widget>
      </item>
@@ -298,6 +305,30 @@
         <string>Save</string>
        </property>
       </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Model Catalog File : </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
@@ -466,37 +497,6 @@
     </layout>
    </item>
    <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Model Catalog File : </string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QLabel" name="label_2">
@@ -525,7 +525,7 @@
      <item>
       <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>The catalog has: </string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -579,16 +579,9 @@
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="label_3">
-     <property name="font">
-      <font>
-       <pointsize>13</pointsize>
-       <weight>50</weight>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Select filter curves and define their mapping to column names</string>
+    <widget class="Line" name="line_3">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -597,7 +590,7 @@
      <item>
       <widget class="QLabel" name="label_16">
        <property name="text">
-        <string>Filter Mapping (Click on the column cell to edit it) :</string>
+        <string>Filter Mapping (Click on the cell to edit it) :</string>
        </property>
       </widget>
      </item>
