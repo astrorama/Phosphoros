@@ -28,6 +28,7 @@ from future_builtins import *
 
 import os
 import astropy.table as table
+import numpy as np
 
 def check_file_exists(filename):
     if not os.path.exists(filename):  

@@ -1,15 +1,26 @@
 
 #include <QMessageBox>
+#include <QProcess>
 #include <QStandardItemModel>
+#include <QDir>
 #include "ElementsKernel/Exception.h"
 #include "FileUtils.h"
 #include "FormUtils.h"
 #include "PhzQtUI/DialogModelSet.h"
 #include "ui_DialogModelSet.h"
 #include "PhzQtUI/DataSetTreeModel.h"
+#include "PhzQtUI/SedTreeModel.h"
 
 #include "PhzQtUI/GridButton.h"
+#include "PhzQtUI/MessageButton.h"
 #include "PhzQtUI/ParameterRule.h"
+
+#include "XYDataset/AsciiParser.h"
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
+
+#include <QProgressDialog>
+
 
 
 using namespace std;
@@ -17,29 +28,42 @@ using namespace std;
 namespace Euclid{
 namespace PhzQtUI {
 
+
+void DialogModelSet::loadSeds() {
+      SedTreeModel* treeModel_sed = new SedTreeModel(m_seds_repository);
+      treeModel_sed->load();
+      ui->treeView_Sed->setModel(treeModel_sed);
+      ui->treeView_Sed->collapseAll();
+      ui->treeView_Sed->setColumnWidth(0, 500);
+
+      for (int i = 0; i < treeModel_sed->rowCount(); i++) {
+        addButtonsToSedItem(treeModel_sed->item(i), treeModel_sed);
+      }
+
+      connect(treeModel_sed, SIGNAL(itemChanged(QStandardItem*)), treeModel_sed,
+                   SLOT(onItemChanged(QStandardItem*)));
+
+      if (treeModel_sed->rowCount() == 0) {
+              QMessageBox::warning(this, "No available SED...",
+                      "There is no SED to select. "
+                      "You can provide and manage SEDs in the \"Configuration/Aux. Data\" page.",
+                      QMessageBox::Ok);
+         }
+
+}
+
+
 DialogModelSet::DialogModelSet(DatasetRepo seds_repository,
     DatasetRepo redenig_curves_repository, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogModelSet),
     m_seds_repository(seds_repository),
-    m_redenig_curves_repository(redenig_curves_repository)
-{
+    m_redenig_curves_repository(redenig_curves_repository) {
     ui->setupUi(this);
 
-    DataSetTreeModel* treeModel_sed = new DataSetTreeModel(m_seds_repository);
-    treeModel_sed->load();
-    ui->treeView_Sed->setModel(treeModel_sed);
-    ui->treeView_Sed->collapseAll();
 
-    connect(treeModel_sed, SIGNAL(itemChanged(QStandardItem*)), treeModel_sed,
-                 SLOT(onItemChanged(QStandardItem*)));
 
-    if (treeModel_sed->rowCount() == 0){
-         QMessageBox::warning(this, "No available SED...",
-                 "There is no SED to select. "
-                 "You can provide and manage SEDs in the \"Configuration/Aux. Data\" page.",
-                 QMessageBox::Ok);
-    }
+    loadSeds();
 
     DataSetTreeModel* treeModel_red = new DataSetTreeModel(m_redenig_curves_repository);
     treeModel_red->load();
@@ -49,7 +73,7 @@ DialogModelSet::DialogModelSet(DatasetRepo seds_repository,
     connect( treeModel_red, SIGNAL(itemChanged(QStandardItem*)), treeModel_red,
                  SLOT(onItemChanged(QStandardItem*)));
 
-    if (treeModel_red->rowCount() == 0){
+    if (treeModel_red->rowCount() == 0) {
          QMessageBox::warning(this, "No available Reddening Curve...",
                  "There is no reddening curve to select. "
                  "You can provide and manage reddening curves in the \"Configuration/Aux. Data\" page.",
@@ -63,13 +87,94 @@ DialogModelSet::DialogModelSet(DatasetRepo seds_repository,
 
 }
 
+void DialogModelSet::addButtonsToSedItem(QStandardItem* item, SedTreeModel* treeModel_sed){
+  if (treeModel_sed->canAddEmissionLineToGroup(item)) {
+             auto name = treeModel_sed->getFullGroupName(item);
 
-DialogModelSet::~DialogModelSet()
-{
+             MessageButton *cartButton = new MessageButton(name, "Add Emission Line to SEDs");
+             m_message_buttons.push_back(cartButton);
+
+             auto index = item->index().sibling(item->index().row(), 1);
+
+             ui->treeView_Sed->setIndexWidget(index, cartButton);
+
+             connect(cartButton, SIGNAL(MessageButtonClicked(const QString&)), this,
+                             SLOT(addEmissionLineButtonClicked(const QString&)));
+  }
+
+  for (int i = 0; i < item->rowCount(); i++) {
+    addButtonsToSedItem(item->child(i),treeModel_sed);
+  }
 }
 
 
- void DialogModelSet::setViewMode(){
+DialogModelSet::~DialogModelSet() {
+
+}
+
+
+void DialogModelSet::sedProcessStarted() {
+    ui->labelMessage->setText("Adding emission Lines to the SEDs...");
+    for (auto button :m_message_buttons){
+      button->setEnabled(false);
+    }
+
+}
+
+void DialogModelSet::sedProcessfinished(int, QProcess::ExitStatus) {
+      // remove the buttons
+      for (auto button :m_message_buttons){
+        delete button;
+      }
+
+      m_message_buttons = std::vector<MessageButton*>();
+
+
+
+
+      // reload the provider and the model
+      std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
+      std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(
+          new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser) });
+      m_seds_repository->resetProvider(std::move(sed_provider));
+
+      loadSeds();
+      if (m_view_popup) {
+        static_cast<SedTreeModel*>(ui->treeView_Sed->model())->setEnabled(false);
+      }
+      ui->labelMessage->setText("Processing of SEDs completed.");
+}
+
+void DialogModelSet::addEmissionLineButtonClicked(const QString& group) {
+  if (QMessageBox::question(this, "Add emission lines to SEDs in a folder...",
+      QString::fromStdString("This action will create a new folder named ")+
+      group+QString::fromStdString("_el generated from SEDs from folder ") + group +
+      QString::fromStdString(" with added emission lines?"), QMessageBox::Ok|QMessageBox::Cancel)
+    == QMessageBox::Ok) {
+    // do the procesing
+    QProcess *lineAdder = new QProcess();
+    lineAdder->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
+
+    auto aux_path = FileUtils::getAuxRootPath();
+    QString command = QString::fromStdString("PhosphorosAddEmissionLines --sed-dir " + aux_path)
+                      + QDir::separator() + QString::fromStdString("SEDs")
+                      + QDir::separator() + group;
+
+
+
+
+    connect(lineAdder, SIGNAL(finished(int, QProcess::ExitStatus)), this,
+                                SLOT(sedProcessfinished(int, QProcess::ExitStatus)));
+    connect(lineAdder, SIGNAL(started()), this, SLOT(sedProcessStarted()));
+
+    lineAdder->start(command);
+  } else {
+    ui->labelMessage->setText("");
+  }
+}
+
+
+ void DialogModelSet::setViewMode() {
      m_view_popup=true;
      turnControlsInView();
  }
@@ -84,7 +189,7 @@ void DialogModelSet::loadData(int ref ,const std::map<int,ParameterRule>& init_p
           ui->txt_name->setText(QString::fromStdString(selected_rule.getName()));
 
           // SED
-          static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedSelection());
+          static_cast<SedTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedSelection());
           // Reddening Curve
           static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getRedCurveSelection());
 
@@ -102,7 +207,7 @@ void DialogModelSet::loadData(int ref ,const std::map<int,ParameterRule>& init_p
 void DialogModelSet::turnControlsInEdition(){
     ui->buttonBox->setEnabled(true);
 
-    static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setEnabled(true);
+    static_cast<SedTreeModel*>(ui->treeView_Sed->model())->setEnabled(true);
     static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setEnabled(true);
 
     ui->txt_name->setEnabled(true);
@@ -117,12 +222,12 @@ void DialogModelSet::turnControlsInEdition(){
     SetRangeControlsEnabled(ui->Layout_z_range,true);
 }
 
-void DialogModelSet::turnControlsInView(){
+void DialogModelSet::turnControlsInView() {
 
     ui->buttonBox->setEnabled(true);
     ui->buttonBox->button(QDialogButtonBox::StandardButton::Save)->setEnabled(false);
 
-    static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->setEnabled(false);
+    static_cast<SedTreeModel*>(ui->treeView_Sed->model())->setEnabled(false);
     static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setEnabled(false);
 
     ui->txt_name->setEnabled(false);
@@ -139,8 +244,7 @@ void DialogModelSet::turnControlsInView(){
 
 
 
-void DialogModelSet::on_buttonBox_rejected()
-{
+void DialogModelSet::on_buttonBox_rejected() {
   this->popupClosing(m_ref,m_rules[m_ref],false);
 }
 
@@ -148,7 +252,7 @@ void DialogModelSet::on_buttonBox_rejected()
 void DialogModelSet::on_buttonBox_accepted()
 {
 
-  auto sed_selection = static_cast<DataSetTreeModel*>(ui->treeView_Sed->model())->getState();
+  auto sed_selection = static_cast<SedTreeModel*>(ui->treeView_Sed->model())->getState();
   auto red_curve_selection = static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->getState();
 
   if (ui->txt_name->text().trimmed().size()==0){
