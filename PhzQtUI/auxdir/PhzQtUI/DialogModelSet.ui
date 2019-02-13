@@ -292,7 +292,7 @@
                 <x>0</x>
                 <y>0</y>
                 <width>831</width>
-                <height>388</height>
+                <height>366</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -378,7 +378,7 @@
                 <x>0</x>
                 <y>0</y>
                 <width>831</width>
-                <height>388</height>
+                <height>366</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -408,6 +408,22 @@
        </item>
       </layout>
      </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="labelMessage">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
     </widget>
    </item>
    <item>
