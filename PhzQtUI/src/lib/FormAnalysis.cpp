@@ -78,14 +78,11 @@ void FormAnalysis::updateSelection() {
     for (auto& model_name : m_model_set_model_ptr->getModelSetList()) {
         ui->cb_AnalysisModel->addItem(model_name);
     }
-    m_model_set_model_ptr->reloaded();
   }
-
-
 
   // select the right item
 
-  if(ui->cb_AnalysisModel->currentText().toStdString() != m_model_set_model_ptr->getSelectedModelSet().getName()){
+  if(m_model_set_model_ptr->doNeedReload() || ui->cb_AnalysisModel->currentText().toStdString() != m_model_set_model_ptr->getSelectedModelSet().getName()){
     bool found = false;
     for (int i = 0; i < ui->cb_AnalysisModel->count(); i++) {
       if (ui->cb_AnalysisModel->itemText(i).toStdString() == m_model_set_model_ptr->getSelectedModelSet().getName()) {
@@ -102,6 +99,8 @@ void FormAnalysis::updateSelection() {
     }
   }
 
+  m_model_set_model_ptr->reloaded();
+
   // reconnect the combobox event
   connect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString &)),
          SLOT(on_cb_AnalysisModel_currentIndexChanged(const QString &)));
@@ -117,12 +116,10 @@ void FormAnalysis::updateSelection() {
     for (auto& survey_name : m_survey_model_ptr->getSurveyList()) {
        ui->cb_AnalysisSurvey->addItem(survey_name);
     }
-
-    m_survey_model_ptr->reloaded();
   }
 
   auto saved_catalog = m_survey_model_ptr->getSelectedSurvey();
-  if(ui->cb_AnalysisSurvey->currentText().toStdString() != saved_catalog.getName()){
+  if(m_survey_model_ptr->doNeedReload() || ui->cb_AnalysisSurvey->currentText().toStdString() != saved_catalog.getName()){
     // select the right item
     bool found = false;
     for (int i = 0; i < ui->cb_AnalysisSurvey->count(); i++) {
@@ -140,6 +137,7 @@ void FormAnalysis::updateSelection() {
     }
   }
 
+  m_survey_model_ptr->reloaded();
   // reconnect the combobox event
   connect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString &)),
         SLOT(on_cb_AnalysisSurvey_currentIndexChanged(const QString &)));
