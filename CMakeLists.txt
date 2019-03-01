@@ -11,4 +11,4 @@ set(CXX_SUGGEST_OVERRIDE ON
     FORCE)
 
 # Declare project name and version
-elements_project(Phosphoros 0.11 USE PhosphorosCore 0.11)
+elements_project(Phosphoros 0.11 USE PhosphorosCore 0.11 PHZ_PdfHandling 0.3)
