@@ -695,9 +695,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
          options_map[pair.first] = pair.second;
     }
 
-    if (ui->rb_gc_col->isChecked()) {
-      options_map["dust-map-sed-bpc"].value() = boost::any(1.0);
-    }
+
 
     return options_map;
 }
@@ -736,6 +734,9 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
         boost::any(ui->cb_CompatibleGalCorrGrid->currentText().toStdString());
     options_map["dust-column-density-column-name"].value() =
         boost::any(selected_survey.getGalEbvColumn());
+
+    options_map["dust-map-sed-bpc"].value() = boost::any(1.0);
+
   } else if (ui->rb_gc_planck->isChecked()) {
     options_map["galactic-correction-coefficient-grid-file"].value() =
             boost::any(ui->cb_CompatibleGalCorrGrid->currentText().toStdString());
