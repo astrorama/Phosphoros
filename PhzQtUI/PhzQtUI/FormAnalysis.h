@@ -90,6 +90,11 @@ void on_btn_ToModel_clicked();
 
     void on_cb_AnalysisModel_currentIndexChanged(const QString &);
 
+    void on_cbb_pdf_out_currentIndexChanged(const QString &);
+
+    void on_cb_pdf_z_stateChanged(int);
+    void on_cb_likelihood_pdf_z_stateChanged(int);
+
     void on_cb_igm_currentIndexChanged(const QString &);
 
     void on_cb_CompatibleGrid_textChanged(const QString &);
@@ -161,6 +166,7 @@ private:
     void updateGalCorrGridSelection();
     bool checkGridSelection(bool addFileCheck, bool acceptNewFile);
     bool checkGalacticGridSelection(bool addFileCheck, bool acceptNewFile);
+    void updatePostProcessingControls();
     std::map<std::string, boost::program_options::variable_value> getGridConfiguration();
     std::map<std::string, boost::program_options::variable_value> getGalacticCorrectionGridConfiguration();
 

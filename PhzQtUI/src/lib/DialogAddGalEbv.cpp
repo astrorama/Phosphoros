@@ -78,7 +78,7 @@ void DialogAddGalEbv::on_btn_create_clicked() {
       ui->btn_create->setEnabled(false);
 
       // Call the python code
-        std::string program = "AddGalDustToCatalog --input-catalog \""+m_input_name+"\" --output-catalog \""+m_name+"\" --ra "+m_ra_col+" --dec " + m_dec_col;
+        std::string program = "AddGalDustToCatalog --galatic-ebv-col PLANK_GAL_EBV --input-catalog \""+m_input_name+"\" --output-catalog \""+m_name+"\" --ra "+m_ra_col+" --dec " + m_dec_col;
         std::string command = "";
 
 

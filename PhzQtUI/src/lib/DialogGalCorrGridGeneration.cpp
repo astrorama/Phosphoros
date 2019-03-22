@@ -28,7 +28,6 @@
 #include "PhzGalacticCorrection/GalacticCorrectionFactorSingleGridCreator.h"
 #include "PhzConfiguration/ComputeModelGalacticCorrectionCoefficientConfig.h"
 #include "PhzConfiguration/PhotometryGridConfig.h"
-#include "PhzConfiguration/BVFilterConfig.h"
 #include "PhzConfiguration/MilkyWayReddeningConfig.h"
 #include "PhzConfiguration/CorrectionCoefficientGridOutputConfig.h"
 #include "PhzConfiguration/SedProviderConfig.h"
@@ -108,10 +107,7 @@ std::string DialogGalCorrGridGeneration::runFunction() {
      auto& reddening_provider = config_manager.template getConfiguration<ReddeningProviderConfig>().getReddeningDatasetProvider();
      const auto& filter_provider = config_manager.template getConfiguration<FilterProviderConfig>().getFilterDatasetProvider();
      auto& igm_abs_func = config_manager.template getConfiguration<IgmConfig>().getIgmAbsorptionFunction();
-     auto b_filter = config_manager.template getConfiguration<BVFilterConfig>().getBFilter();
-     auto v_filter = config_manager.template getConfiguration<BVFilterConfig>().getVFilter();
      auto miky_way_reddening_curve = config_manager.template getConfiguration<MilkyWayReddeningConfig>().getMilkyWayReddeningCurve();
-     double dust_map_sed_bpc = config_manager.template getConfiguration<ComputeModelGalacticCorrectionCoefficientConfig>().getDustMapSedBpc();
      auto output_function = config_manager.template getConfiguration<CorrectionCoefficientGridOutputConfig>().getOutputFunction();
 
      std::map<std::string, PhzDataModel::PhotometryGrid> result_map{};
@@ -137,10 +133,7 @@ std::string DialogGalCorrGridGeneration::runFunction() {
        reddening_provider,
        filter_provider,
        igm_abs_func,
-       b_filter,
-       v_filter,
-       miky_way_reddening_curve,
-       dust_map_sed_bpc
+       miky_way_reddening_curve
      };
      size_t already_done = 0;
 

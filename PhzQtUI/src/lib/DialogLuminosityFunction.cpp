@@ -106,7 +106,6 @@ void DialogLuminosityFunction::on_btn_tophat_clicked(){
   std::string command = "CreateSquareLuminosityCurve --step-begin "+std::to_string(m_min)+
                         " --step-stop "+std::to_string(m_max)+
                         " --output-file \""+path+"/"+name+".txt"+"\"";
-
   system(command.c_str());
   // refresh the provider
   m_luminosity_repository->reload();

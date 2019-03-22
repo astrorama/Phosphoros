@@ -141,6 +141,8 @@ void FormAnalysis::updateSelection() {
   // reconnect the combobox event
   connect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString &)),
         SLOT(on_cb_AnalysisSurvey_currentIndexChanged(const QString &)));
+
+  updatePostProcessingControls();
 }
 
 ///////////////////////////////////////////////////
@@ -499,6 +501,49 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
    }
 }
 
+
+void FormAnalysis::updatePostProcessingControls() {
+  bool can_pp_l = true;
+  std::string message_l = "";
+  bool can_pp_p = true;
+  std::string message_p = "";
+
+  // condition 0 regular Z sampling: toDO
+  // Condition 1 PDF must be in catalog
+
+  if (ui->cbb_pdf_out->currentIndex() != 0) {
+    message_l += "PDZ post processing is only available for PDF stored as a catalog column.\n";
+    message_p += "PDZ post processing is only available for PDF stored as a catalog column.\n";
+    can_pp_l = false;
+    can_pp_p = false;
+  }
+
+  // condition 2 PDZ must be selected
+  if (!ui->cb_likelihood_pdf_z->isChecked()) {
+     message_l += "Post processing of the PDZ is possible only if the redshift PDF is generated.";
+     can_pp_l = false;
+  }
+
+  if (!ui->cb_pdf_z->isChecked()) {
+    message_p += "Post processing of the PDZ is possible only if the redshift PDF is generated.";
+     can_pp_p = false;
+  }
+
+  ui->cb_pp_l->setChecked(ui->cb_pp_l->isChecked() && can_pp_l);
+  ui->cb_pp_l->setEnabled(can_pp_l);
+  ui->btn_pp_l->setEnabled(can_pp_l);
+  message_l = can_pp_l?"Select to activate the post-processing on the PDZ. Use the button to configure it.":message_l;
+  ui->cb_pp_l->setToolTip(QString::fromStdString(message_l));
+  ui->btn_pp_l->setToolTip(QString::fromStdString(message_l));
+
+  ui->cb_pp_p->setChecked(ui->cb_pp_p->isChecked() && can_pp_p);
+  ui->cb_pp_p->setEnabled(can_pp_p);
+  ui->btn_pp_p->setEnabled(can_pp_p);
+  message_p = can_pp_p?"Select to activate the post-processing on the PDZ. Use the button to configure it.":message_p;
+  ui->cb_pp_p->setToolTip(QString::fromStdString(message_p));
+  ui->btn_pp_p->setToolTip(QString::fromStdString(message_p));
+}
+
 //////////////////////////////////////////////////
 // Build and handle objects for calling the processing
 
@@ -623,31 +668,6 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
   std::string catalog_type = ui->cb_AnalysisSurvey->currentText().toStdString();
   std::string igm = ui->cb_igm->currentText().toStdString();
 
-  // Lookup the expected default files
-  QFileInfo b_filter_info(
-              QString::fromStdString(FileUtils::getFilterRootPath(false))
-              + QDir::separator() + QString::fromStdString("GCPD_Johnson")
-              + QDir::separator() + QString::fromStdString("GCPD_Johnson.B.dat"));
-  if (!b_filter_info.exists()) {
-    QMessageBox::warning(this, "Missing Default Filter...",
-                "The B filter stored by default in <Filters>/GCPD_Johnson/GCPD_Johnson.B.dat is missing. "
-                "This computation need it, please provide it and try again.",
-                QMessageBox::Ok);
-    return {};
-  }
-
-  QFileInfo v_filter_info(
-              QString::fromStdString(FileUtils::getFilterRootPath(false))
-              + QDir::separator() + QString::fromStdString("GCPD_Johnson")
-              + QDir::separator() + QString::fromStdString("GCPD_Johnson.V.dat"));
-  if (!v_filter_info.exists()) {
-    QMessageBox::warning(this, "Missing Default Filter...",
-                    "The V filter stored by default in <Filters>/GCPD_Johnson/GCPD_Johnson.V.dat is missing. "
-                    "This computation need it, please provide it and try again.",
-                    QMessageBox::Ok);
-    return {};
-  }
-
   QFileInfo f99_curve_info(
                 QString::fromStdString(FileUtils::getRedCurveRootPath(false))
                 + QDir::separator() + QString::fromStdString("F99")
@@ -660,7 +680,6 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
       return {};
     }
 
-
     std::map<std::string, boost::program_options::variable_value> options_map =
              FileUtils::getPathConfiguration(false, true, true, false);
     options_map["catalog-type"].value() = boost::any(catalog_type);
@@ -668,15 +687,16 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
     options_map["model-grid-file"].value() = boost::any(grid_name);
     options_map["igm-absorption-type"].value() = boost::any(igm);
 
-    std::string b_filter = "GCPD_Johnson/GCPD_Johnson.B";
-    std::string v_filter = "GCPD_Johnson/GCPD_Johnson.V";
+
     std::string f99 = "F99/F99_3.1";
-    options_map["b-filter-name"].value() = boost::any(b_filter);
-    options_map["v-filter-name"].value() = boost::any(v_filter);
     options_map["milky-way-reddening-curve-name"].value() = boost::any(f99);
     auto global_options = PreferencesUtils::getThreadConfigurations();
     for (auto& pair : global_options) {
          options_map[pair.first] = pair.second;
+    }
+
+    if (ui->rb_gc_col->isChecked()) {
+      options_map["dust-map-sed-bpc"].value() = boost::any(1.0);
     }
 
     return options_map;
@@ -719,7 +739,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   } else if (ui->rb_gc_planck->isChecked()) {
     options_map["galactic-correction-coefficient-grid-file"].value() =
             boost::any(ui->cb_CompatibleGalCorrGrid->currentText().toStdString());
-    std::string gal_ebv_default_column = "GAL_EBV";
+    std::string gal_ebv_default_column = "PLANK_GAL_EBV";
     options_map["dust-column-density-column-name"].value() = boost::any(gal_ebv_default_column);
   }
 
@@ -882,6 +902,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   return options_map;
 }
+
 
 
 std::map < std::string, boost::program_options::variable_value > FormAnalysis::getLuminosityOptionMap() {
@@ -1246,13 +1267,13 @@ template<typename ReturnType, int I>
       auto path = ui->txt_inputCatalog->text().toStdString();
       auto column_reader = PhzUITools::CatalogColumnReader(path);
       auto column_from_file = column_reader.getColumnNames();
-      if (column_from_file.find("GAL_EBV") == column_from_file.end()) {
+      if (column_from_file.find("PLANK_GAL_EBV") == column_from_file.end()) {
         // the E(B-V) has to be looked up in the Planck map
         SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
         std::unique_ptr<DialogAddGalEbv> dialog(new DialogAddGalEbv());
         dialog->setInputs(path, selected_survey.getRaColumn(), selected_survey.getDecColumn());
         if (dialog->exec()) {
-         // new catalog contains the GAL_EBV column
+         // new catalog contains the PLANK_GAL_EBV column
 
          auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
          auto input_catalog_file = FileUtils::removeStart(dialog->getOutputName(),
@@ -1518,6 +1539,20 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
       setRunAnnalysisEnable(true);
     }
   }
+
+
+  void FormAnalysis::on_cbb_pdf_out_currentIndexChanged(const QString &) {
+    updatePostProcessingControls();
+  }
+
+  void FormAnalysis::on_cb_pdf_z_stateChanged(int) {
+    updatePostProcessingControls();
+  }
+
+  void FormAnalysis::on_cb_likelihood_pdf_z_stateChanged(int) {
+    updatePostProcessingControls();
+  }
+
 
   void FormAnalysis::on_cb_gen_likelihood_clicked() {
     if (ui->cb_gen_likelihood->isChecked()) {
