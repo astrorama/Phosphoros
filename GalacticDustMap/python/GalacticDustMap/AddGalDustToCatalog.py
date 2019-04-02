@@ -33,7 +33,7 @@ import os
 import argparse
 from astropy.table import Table
 import ElementsKernel.Logging as log
-from GalacticDustMap import GalacticDustMap
+import GalacticDustMap
 import ElementsKernel.Auxiliary as aux
 import ElementsKernel.Logging as log
 
