@@ -33,7 +33,7 @@ import os
 import argparse
 from astropy.table import Table
 import ElementsKernel.Logging as log
-import GalacticDustMap
+import GalacticDustMap.GalacticDustMap
 import ElementsKernel.Auxiliary as aux
 import ElementsKernel.Logging as log
 
@@ -99,7 +99,8 @@ def mainMethod(args):
     else:
         aux_file = aux.getAuxiliaryPath(os.path.join('GalacticDustMap','PlanckEbv.fits'))
     logger.info('Read the Dust Map :%s' % aux_file)
-    map_data = GalacticDustMap.loadMap(aux_file)
+    
+    map_data = GalacticDustMap.GalacticDustMap.loadMap(aux_file)
 
     # Open catalog
     logger.info('Open the Input catalog :%s' % args.input_catalog)
@@ -119,7 +120,7 @@ def mainMethod(args):
 
     # Get the galactic E(B-V) from the map
     logger.info('Get the galactic E(B-V) from the Map')
-    ebv = GalacticDustMap.ebv_planck(map_data, ra, dec)
+    ebv = GalacticDustMap.GalacticDustMap.ebv_planck(map_data, ra, dec)
     input_cat[args.galatic_ebv_col] = ebv
     
     # Write down the output catalog
