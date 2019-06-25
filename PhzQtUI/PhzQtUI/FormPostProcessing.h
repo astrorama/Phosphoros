@@ -2,7 +2,6 @@
 #define FORMPOSTPROCESSING_H
 
 #include <memory>
-#include "PhzQtUI/ModelSetModel.h"
 #include <QWidget>
 #include <QModelIndex>
 #include "ParameterRule.h"
@@ -44,6 +43,10 @@ void navigateToParameter(bool);
 
 void quit(bool);
 
+
+
+public slots:
+void on_btn_refresh_clicked();
 
 private slots:
 

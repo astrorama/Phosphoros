@@ -181,7 +181,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton">
+         <widget class="QPushButton" name="btn_refresh">
           <property name="text">
            <string>Refresh</string>
           </property>

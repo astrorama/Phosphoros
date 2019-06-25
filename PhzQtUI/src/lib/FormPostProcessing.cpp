@@ -1,6 +1,7 @@
 #include <QMessageBox>
 #include "PhzQtUI/FormPostProcessing.h"
 
+#include "PhzQtUI/ResultModel.h"
 #include "ui_FormPostProcessing.h"
 #include "FileUtils.h"
 
@@ -19,6 +20,10 @@ FormPostProcessing::FormPostProcessing(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::FormPostProcessing) {
     ui->setupUi(this);
+    ResultModel* result_model = new ResultModel();
+    ui->table_res_cat->setModel(result_model);
+
+
 }
 
 FormPostProcessing::~FormPostProcessing() {}
@@ -42,6 +47,18 @@ void FormPostProcessing::on_btn_ToModel_clicked(){
 void FormPostProcessing::on_btn_exit_clicked() {
   quit(true);
 }
+
+
+
+void FormPostProcessing::on_btn_refresh_clicked(){
+  (static_cast < ResultModel* >(ui->table_res_cat->model()))->load();
+  ui->table_res_cat->setColumnHidden(2, true);
+  ui->table_res_cat->setSelectionBehavior(QAbstractItemView::SelectRows);
+  ui->table_res_cat->setSelectionMode(QAbstractItemView::SingleSelection);
+  ui->table_res_cat->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+
+}
+
 
 }
 }

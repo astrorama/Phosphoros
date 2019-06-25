@@ -227,6 +227,7 @@ void MainWindow::on_btn_HomeToAnalysis_clicked() {
 
 void MainWindow::on_btn_HomeToPP_clicked(){
   changeMainStackedWidgetIndex(5);
+  ui->widget_postprocessing->on_btn_refresh_clicked();
 }
 
 }
