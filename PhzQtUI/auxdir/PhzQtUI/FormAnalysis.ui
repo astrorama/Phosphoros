@@ -317,8 +317,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>625</width>
-            <height>408</height>
+            <width>418</width>
+            <height>164</height>
            </rect>
           </property>
           <attribute name="label">
@@ -476,7 +476,7 @@
             <x>0</x>
             <y>0</y>
             <width>627</width>
-            <height>395</height>
+            <height>215</height>
            </rect>
           </property>
           <attribute name="label">
@@ -619,7 +619,7 @@
             <x>0</x>
             <y>0</y>
             <width>725</width>
-            <height>408</height>
+            <height>297</height>
            </rect>
           </property>
           <attribute name="label">
@@ -983,8 +983,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>625</width>
-            <height>408</height>
+            <width>537</width>
+            <height>158</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1135,7 +1135,7 @@
             <x>0</x>
             <y>0</y>
             <width>607</width>
-            <height>382</height>
+            <height>379</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1456,39 +1456,6 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLabel" name="label_14">
-                   <property name="text">
-                    <string>(</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QCheckBox" name="cb_pp_l">
-                   <property name="text">
-                    <string/>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QPushButton" name="btn_pp_l">
-                   <property name="font">
-                    <font>
-                     <pointsize>11</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string> Post-Processing</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="label_18">
-                   <property name="text">
-                    <string>)</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
                   <spacer name="horizontalSpacer_11">
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
@@ -1595,44 +1562,6 @@
                    </property>
                    <property name="text">
                     <string>Redshift</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="label_22">
-                   <property name="font">
-                    <font>
-                     <pointsize>14</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>(</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QCheckBox" name="cb_pp_p">
-                   <property name="text">
-                    <string/>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QPushButton" name="btn_pp_p">
-                   <property name="font">
-                    <font>
-                     <pointsize>11</pointsize>
-                    </font>
-                   </property>
-                   <property name="text">
-                    <string>Post-Processing</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="label_24">
-                   <property name="text">
-                    <string>)</string>
                    </property>
                   </widget>
                  </item>
