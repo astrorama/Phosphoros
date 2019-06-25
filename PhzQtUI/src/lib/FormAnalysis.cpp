@@ -142,7 +142,6 @@ void FormAnalysis::updateSelection() {
   connect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString &)),
         SLOT(on_cb_AnalysisSurvey_currentIndexChanged(const QString &)));
 
-  updatePostProcessingControls();
 }
 
 ///////////////////////////////////////////////////
@@ -502,47 +501,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
 }
 
 
-void FormAnalysis::updatePostProcessingControls() {
-  bool can_pp_l = true;
-  std::string message_l = "";
-  bool can_pp_p = true;
-  std::string message_p = "";
 
-  // condition 0 regular Z sampling: toDO
-  // Condition 1 PDF must be in catalog
-
-  if (ui->cbb_pdf_out->currentIndex() != 0) {
-    message_l += "PDZ post processing is only available for PDF stored as a catalog column.\n";
-    message_p += "PDZ post processing is only available for PDF stored as a catalog column.\n";
-    can_pp_l = false;
-    can_pp_p = false;
-  }
-
-  // condition 2 PDZ must be selected
-  if (!ui->cb_likelihood_pdf_z->isChecked()) {
-     message_l += "Post processing of the PDZ is possible only if the redshift PDF is generated.";
-     can_pp_l = false;
-  }
-
-  if (!ui->cb_pdf_z->isChecked()) {
-    message_p += "Post processing of the PDZ is possible only if the redshift PDF is generated.";
-     can_pp_p = false;
-  }
-
-  ui->cb_pp_l->setChecked(ui->cb_pp_l->isChecked() && can_pp_l);
-  ui->cb_pp_l->setEnabled(can_pp_l);
-  ui->btn_pp_l->setEnabled(can_pp_l);
-  message_l = can_pp_l?"Select to activate the post-processing on the PDZ. Use the button to configure it.":message_l;
-  ui->cb_pp_l->setToolTip(QString::fromStdString(message_l));
-  ui->btn_pp_l->setToolTip(QString::fromStdString(message_l));
-
-  ui->cb_pp_p->setChecked(ui->cb_pp_p->isChecked() && can_pp_p);
-  ui->cb_pp_p->setEnabled(can_pp_p);
-  ui->btn_pp_p->setEnabled(can_pp_p);
-  message_p = can_pp_p?"Select to activate the post-processing on the PDZ. Use the button to configure it.":message_p;
-  ui->cb_pp_p->setToolTip(QString::fromStdString(message_p));
-  ui->btn_pp_p->setToolTip(QString::fromStdString(message_p));
-}
 
 //////////////////////////////////////////////////
 // Build and handle objects for calling the processing
@@ -1543,15 +1502,15 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
 
 
   void FormAnalysis::on_cbb_pdf_out_currentIndexChanged(const QString &) {
-    updatePostProcessingControls();
+
   }
 
   void FormAnalysis::on_cb_pdf_z_stateChanged(int) {
-    updatePostProcessingControls();
+
   }
 
   void FormAnalysis::on_cb_likelihood_pdf_z_stateChanged(int) {
-    updatePostProcessingControls();
+
   }
 
 
