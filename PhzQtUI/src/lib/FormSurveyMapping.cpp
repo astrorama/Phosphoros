@@ -268,6 +268,11 @@ void FormSurveyMapping::on_btn_ToOption_clicked() {
 void FormSurveyMapping::on_btn_ToModel_clicked() {
   navigateToParameter(false);
 }
+
+void FormSurveyMapping::on_btn_ToPP_clicked(){
+  navigateToPostProcessing(false);
+}
+
 void FormSurveyMapping::on_btn_exit_clicked() {
   quit(true);
 }

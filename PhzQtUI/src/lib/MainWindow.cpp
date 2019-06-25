@@ -37,22 +37,32 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(ui->widget_ModelSet, SIGNAL(navigateToConfig()), SLOT(navigateToConfig()));
   connect(ui->widget_ModelSet, SIGNAL(navigateToCatalog(bool)), SLOT(navigateToCatalog(bool)));
   connect(ui->widget_ModelSet, SIGNAL(navigateToComputeRedshift(bool)), SLOT(navigateToComputeRedshift(bool)));
+  connect(ui->widget_ModelSet, SIGNAL(navigateToPostProcessing(bool)), SLOT(navigateToPostProcessing(bool)));
   connect(ui->widget_ModelSet, SIGNAL(quit(bool)), SLOT(quit(bool)));
 
   connect(ui->widget_Catalog, SIGNAL(navigateToConfig()), SLOT(navigateToConfig()));
   connect(ui->widget_Catalog, SIGNAL(navigateToParameter(bool)), SLOT(navigateToParameter(bool)));
   connect(ui->widget_Catalog, SIGNAL(navigateToComputeRedshift(bool)), SLOT(navigateToComputeRedshift(bool)));
+  connect(ui->widget_Catalog, SIGNAL(navigateToPostProcessing(bool)), SLOT(navigateToPostProcessing(bool)));
   connect(ui->widget_Catalog, SIGNAL(quit(bool)), SLOT(quit(bool)));
 
   connect(ui->widget_configuration, SIGNAL(navigateToCatalog(bool)), SLOT(navigateToCatalog(bool)));
   connect(ui->widget_configuration, SIGNAL(navigateToParameter(bool)), SLOT(navigateToParameter(bool)));
   connect(ui->widget_configuration, SIGNAL(navigateToComputeRedshift(bool)), SLOT(navigateToComputeRedshift(bool)));
+  connect(ui->widget_configuration, SIGNAL(navigateToPostProcessing(bool)), SLOT(navigateToPostProcessing(bool)));
   connect(ui->widget_configuration, SIGNAL(quit(bool)), SLOT(quit(bool)));
 
   connect(ui->widget_Analysis, SIGNAL(navigateToCatalog(bool)), SLOT(navigateToCatalog(bool)));
   connect(ui->widget_Analysis, SIGNAL(navigateToParameter(bool)), SLOT(navigateToParameter(bool)));
   connect(ui->widget_Analysis, SIGNAL(navigateToConfig()), SLOT(navigateToConfig()));
+  connect(ui->widget_Analysis, SIGNAL(navigateToPostProcessing(bool)), SLOT(navigateToPostProcessing(bool)));
   connect(ui->widget_Analysis, SIGNAL(quit(bool)), SLOT(quit(bool)));
+
+  connect(ui->widget_postprocessing, SIGNAL(navigateToCatalog(bool)), SLOT(navigateToCatalog(bool)));
+  connect(ui->widget_postprocessing, SIGNAL(navigateToParameter(bool)), SLOT(navigateToParameter(bool)));
+  connect(ui->widget_postprocessing, SIGNAL(navigateToConfig()), SLOT(navigateToConfig()));
+  connect(ui->widget_postprocessing, SIGNAL(navigateToComputeRedshift(bool)), SLOT(navigateToComputeRedshift(bool)));
+  connect(ui->widget_postprocessing, SIGNAL(quit(bool)), SLOT(quit(bool)));
 
   connect(ui->widget_Analysis, SIGNAL(navigateToNewCatalog(std::string)), SLOT(navigateToNewCatalog(std::string)));
 
@@ -160,6 +170,15 @@ void MainWindow::navigateToComputeRedshift(bool reset) {
   on_btn_HomeToAnalysis_clicked();
 }
 
+
+void MainWindow::navigateToPostProcessing(bool reset) {
+  if (reset) {
+        resetRepo();
+  }
+
+  on_btn_HomeToPP_clicked();
+}
+
 //Todo (?) confirmation on quit
 void MainWindow::quit(bool) {
   this->close();
@@ -203,6 +222,11 @@ void MainWindow::on_btn_HomeToCatalog_clicked() {
 void MainWindow::on_btn_HomeToAnalysis_clicked() {
   changeMainStackedWidgetIndex(3);
   ui->widget_Analysis->updateSelection();
+}
+
+
+void MainWindow::on_btn_HomeToPP_clicked(){
+  changeMainStackedWidgetIndex(5);
 }
 
 }

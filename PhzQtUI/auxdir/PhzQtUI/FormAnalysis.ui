@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
+    <width>932</width>
     <height>848</height>
    </rect>
   </property>
@@ -132,6 +132,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="btn_ToPP">
+        <property name="text">
+         <string>Post Processing</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_7">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -164,7 +171,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>638</width>
+        <width>930</width>
         <height>752</height>
        </rect>
       </property>
@@ -1134,7 +1141,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>607</width>
+            <width>899</width>
             <height>379</height>
            </rect>
           </property>

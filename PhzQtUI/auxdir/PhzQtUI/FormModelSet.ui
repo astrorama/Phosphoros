@@ -123,6 +123,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="btn_ToPP">
+        <property name="text">
+         <string>Post Processing</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_9">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>

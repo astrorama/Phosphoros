@@ -64,6 +64,8 @@ void navigateToConfig();
 
 void navigateToCatalog(bool);
 
+void navigateToPostProcessing(bool);
+
 void quit(bool);
 
 
@@ -76,6 +78,7 @@ void on_btn_ToOption_clicked();
 void on_btn_ToCatalog_clicked();
 void on_btn_exit_clicked();
 void on_btn_ToModel_clicked();
+void on_btn_ToPP_clicked();
 
 
     void on_btn_editCorrections_clicked();

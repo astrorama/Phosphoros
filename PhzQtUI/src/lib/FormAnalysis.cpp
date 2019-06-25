@@ -1649,6 +1649,11 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
   void FormAnalysis::on_btn_ToCatalog_clicked() {
     navigateToCatalog(false);
   }
+
+  void FormAnalysis::on_btn_ToPP_clicked(){
+    navigateToPostProcessing(false);
+  }
+
   void FormAnalysis::on_btn_exit_clicked() {
     quit(true);
   }

@@ -114,6 +114,11 @@ void FormModelSet::on_btn_ToOption_clicked() {
 void FormModelSet::on_btn_ToCatalog_clicked() {
   navigateToCatalog(false);
 }
+
+void FormModelSet::on_btn_ToPP_clicked(){
+  navigateToPostProcessing(false);
+}
+
 void FormModelSet::on_btn_exit_clicked() {
   quit(true);
 }
@@ -150,6 +155,7 @@ void FormModelSet::setGridDoubleClicked(QModelIndex) {
 void FormModelSet::on_btn_SetEdit_clicked() {
     setModelInEdition();
 }
+
 
 void FormModelSet::selectFromGrid() {
   QItemSelectionModel *current_selection = ui->tableView_Set->selectionModel();

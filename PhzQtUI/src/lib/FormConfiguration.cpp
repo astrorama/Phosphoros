@@ -43,6 +43,13 @@ void FormConfiguration::on_btn_ToModel_clicked() {
   navigateToParameter(do_need_reset);
   do_need_reset=false;
 }
+
+
+void FormConfiguration::on_btn_ToPP_clicked(){
+  navigateToPostProcessing(do_need_reset);
+  do_need_reset=false;
+}
+
 void FormConfiguration::on_btn_exit_clicked() {
 
   quit(true);
