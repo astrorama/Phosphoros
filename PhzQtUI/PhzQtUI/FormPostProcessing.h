@@ -56,6 +56,9 @@ void on_btn_ToCatalog_clicked();
 void on_btn_ToModel_clicked();
 void on_btn_exit_clicked();
 
+void catalogSelectionChanged(QModelIndex, QModelIndex);
+void computePdfStat(int);
+void plotZVsZref(int);
 
 
 private:
