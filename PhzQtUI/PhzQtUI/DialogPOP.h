@@ -5,6 +5,8 @@
 #include <QDialog>
 #include <string>
 #include <vector>
+#include <QProcess>
+#include <QTimer>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -31,7 +33,6 @@ public:
 
   void setFolder(std::string output_folder);
 
-
 private slots:
 
   /**
@@ -43,10 +44,18 @@ private slots:
    * @brief SLOT on_btn_cancel_clicked
    */
   void on_btn_cancel_clicked();
+  void on_btn_close_clicked();
+
+  void processingFinished(int, QProcess::ExitStatus);
+
+  void updateOutCons();
 
 private:
   std::unique_ptr<Ui::DialogPOP> ui;
   std::string m_folder;
+  QProcess *m_P;
+  QTimer *m_timer;
+  bool m_processing=false;
 
 };
 

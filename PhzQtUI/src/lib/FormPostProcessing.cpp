@@ -85,6 +85,7 @@ void FormPostProcessing::catalogSelectionChanged(QModelIndex new_index, QModelIn
       (static_cast < ResultRunModel* >(ui->table_res_file->model()))->load("");
     }
   ui->table_res_file->setColumnHidden(2, true);
+  ui->table_res_file->setColumnHidden(3, true);
   ui->table_res_file->setSelectionBehavior(QAbstractItemView::SelectRows);
   ui->table_res_file->setSelectionMode(QAbstractItemView::SingleSelection);
   ui->table_res_file->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
