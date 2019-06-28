@@ -6,6 +6,7 @@
 
 #include "PhzQtUI/ResultModel.h"
 #include "PhzQtUI/ResultRunModel.h"
+#include "PhzQtUI/DialogPOP.h"
 #include "ui_FormPostProcessing.h"
 #include "FileUtils.h"
 
@@ -84,7 +85,6 @@ void FormPostProcessing::catalogSelectionChanged(QModelIndex new_index, QModelIn
       (static_cast < ResultRunModel* >(ui->table_res_file->model()))->load("");
     }
   ui->table_res_file->setColumnHidden(2, true);
-  ui->table_res_file->setColumnHidden(3, true);
   ui->table_res_file->setSelectionBehavior(QAbstractItemView::SelectRows);
   ui->table_res_file->setSelectionMode(QAbstractItemView::SingleSelection);
   ui->table_res_file->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
@@ -126,8 +126,13 @@ void FormPostProcessing::catalogSelectionChanged(QModelIndex new_index, QModelIn
 
 }
 
-void FormPostProcessing::computePdfStat(int){
+void FormPostProcessing::computePdfStat(int row){
+  auto folder = ui->table_res_file->model()->data(ui->table_res_file->model()->index(row,2)).toString().toStdString();
+  std::unique_ptr<DialogPOP> dialog(new DialogPOP());
+  dialog->setFolder(folder);
+  if (dialog->exec()) {
 
+  }
 }
 
 void FormPostProcessing::plotZVsZref(int){

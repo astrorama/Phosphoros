@@ -35,7 +35,7 @@ void ResultRunModel::load(std::string catalog_result_folder){
 
 
 
-  auto cat_vector = std::vector<std::tuple<std::string, int, std::string>>{};
+  auto cat_vector = std::vector<std::pair<std::string, std::string>>{};
 
   if (catalog_result_folder !="") {
     QDirIterator run_dir(QString::fromStdString(catalog_result_folder), QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
@@ -43,9 +43,8 @@ void ResultRunModel::load(std::string catalog_result_folder){
         run_dir.next();
         auto basepath =  boost::filesystem::path(run_dir.filePath().toStdString());
         if (boost::filesystem::exists(basepath/"phz_cat.fits") || boost::filesystem::exists(basepath/"phz_cat.txt")) {
-            cat_vector.push_back(std::make_tuple<std::string, int, std::string> (
+            cat_vector.push_back(std::make_pair<std::string, std::string> (
                 run_dir.fileName().toStdString(),
-                0,
                 run_dir.filePath().toStdString()
             ));
         }
@@ -56,9 +55,8 @@ void ResultRunModel::load(std::string catalog_result_folder){
   this->setRowCount(cat_vector.size());
   int i = 0;
   for (auto& it : cat_vector) {
-      this->setItem(i, 0, new QStandardItem(QString::fromStdString(std::get<0>(it))));
-      this->setItem(i, 2, new QStandardItem(QString::number(std::get<1>(it))));
-      this->setItem(i, 3, new QStandardItem(QString::fromStdString(std::get<2>(it))));
+      this->setItem(i, 0, new QStandardItem(QString::fromStdString(it.first)));
+      this->setItem(i, 2, new QStandardItem(QString::fromStdString(it.second)));
       ++i;
   }
 
