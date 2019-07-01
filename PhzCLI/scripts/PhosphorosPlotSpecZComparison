@@ -68,7 +68,13 @@ def read_pdfs(catalog, out_dir):
     def read(parameter):
         if parameter+'-1D-PDF' in catalog.colnames:
             print('    ' + parameter + ': Using catlog column ' + parameter+'-1D-PDF')
-            return parameter, get_pdf_bins_from_comment(catalog.meta['COMMENT'], parameter), catalog[parameter+'-1D-PDF']
+            
+            key_comment = 'COMMENT'
+            if key_comment not in catalog.meta.keys():
+                key_comment = 'comments'
+
+            
+            return parameter, get_pdf_bins_from_comment(catalog.meta[key_comment], parameter), catalog[parameter+'-1D-PDF']
         elif os.path.exists(out_dir+'/'+filename_map[parameter]):
             print('    ' + parameter + ': Reading file ' + out_dir+'/'+filename_map[parameter])
             hdus = fits.open(out_dir+'/'+filename_map[parameter])
