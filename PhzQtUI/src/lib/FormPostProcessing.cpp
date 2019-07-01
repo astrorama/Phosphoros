@@ -7,6 +7,7 @@
 #include "PhzQtUI/ResultModel.h"
 #include "PhzQtUI/ResultRunModel.h"
 #include "PhzQtUI/DialogPOP.h"
+#include "PhzQtUI/DialogPSC.h"
 #include "ui_FormPostProcessing.h"
 #include "FileUtils.h"
 
@@ -136,8 +137,13 @@ void FormPostProcessing::computePdfStat(int row){
   }
 }
 
-void FormPostProcessing::plotZVsZref(int){
+void FormPostProcessing::plotZVsZref(int row){
+    auto folder = ui->table_res_file->model()->data(ui->table_res_file->model()->index(row,2)).toString().toStdString();
+    std::unique_ptr<DialogPSC> dialog(new DialogPSC());
+    dialog->setFolder(folder);
+    if (dialog->exec()) {
 
+    }
 }
 
 
