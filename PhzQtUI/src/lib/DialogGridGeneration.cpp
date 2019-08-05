@@ -5,7 +5,7 @@
  *      Author: fdubath
  */
 #include <QFuture>
-#include <qtconcurrentrun.h>
+#include <QtConcurrent>
 #include <QDir>
 #include <QMessageBox>
 #include "PhzQtUI/DialogGridGeneration.h"

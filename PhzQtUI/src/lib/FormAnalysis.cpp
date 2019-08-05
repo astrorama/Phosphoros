@@ -843,7 +843,7 @@ template<typename ReturnType, int I>
   }
 
 //  2. Photometry Grid
-  void FormAnalysis::on_cb_CompatibleGrid_textChanged(const QString &) {
+  void FormAnalysis::on_cb_CompatibleGrid_currentTextChanged(const QString &) {
     adjustPhzGridButtons(true);
     setComputeCorrectionEnable();
     setRunAnnalysisEnable(true);

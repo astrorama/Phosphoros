@@ -20,7 +20,7 @@ void ParameterRuleTable::loadParameterRules(std::map<int,ParameterRule> paramete
     this->setColumnHidden(6, true);
     this->setSelectionBehavior(QAbstractItemView::SelectRows);
     this->setSelectionMode(QAbstractItemView::SingleSelection);
-    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     this->update(QModelIndex());
 
 }
