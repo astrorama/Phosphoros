@@ -23,29 +23,33 @@ if(ELEMENTS_HIDE_WARNINGS)
 endif()
 
 
-
-include(FixPortQt4Location)
-
-find_package(Qt4 REQUIRED QtCore QtGui QtXml)
+find_package(Qt5 COMPONENTS Core Concurrent Gui Widgets Xml REQUIRED)
 
 elements_expand_sources(PhUI_SRCS src/lib/*.cpp)
 elements_expand_sources(PhUI_HEADERS PhzQtUI/*.h)
 elements_expand_sources(PhUI_FORMS auxdir/PhzQtUI/*.ui)
 elements_expand_sources(PhUI_RESOURCES auxdir/PhzQtUI/*.qrc)
 
+qt5_wrap_cpp(PhUI_HEADERS_MOC ${PhUI_HEADERS} OPTIONS -nn)
+qt5_wrap_ui(PhUI_FORMS_HEADERS ${PhUI_FORMS})
+qt5_add_resources(PhUI_RESOURCES_RCC ${PhUI_RESOURCES})
 
-QT4_WRAP_CPP(PhUI_HEADERS_MOC ${PhUI_HEADERS} OPTIONS -nn)
-QT4_WRAP_UI(PhUI_FORMS_HEADERS ${PhUI_FORMS})
-QT4_ADD_RESOURCES(PhUI_RESOURCES_RCC ${PhUI_RESOURCES})
-
-include(${QT_USE_FILE})
-ADD_DEFINITIONS(${QT_DEFINITIONS})
-
-
+add_definitions(
+        ${Qt5Core_DEFINITIONS} ${Qt5Concurrent_DEFINITIONS}
+        ${Qt5Gui_DEFINITIONS} ${Qt5Widgets_DEFINITIONS}
+        ${Qt5Xml_DEFINITIONS})
 
 elements_add_library(PhzQtUI ${PhUI_SRCS} ${PhUI_HEADERS_MOC} ${PhUI_FORMS_HEADERS} ${PhUI_RESOURCES_RCC}
-                     LINK_LIBRARIES ElementsKernel ${QT_LIBRARIES} XYDataset PhzConfiguration PhzPhotometricCorrection PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzUtils PhzGalacticCorrection PhzExecutables
-                     INCLUDE_DIRS ElementsKernel XYDataset PhzConfiguration PhzPhotometricCorrection PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzGalacticCorrection
+                     LINK_LIBRARIES
+                        ElementsKernel XYDataset PhzConfiguration PhzPhotometricCorrection
+                        PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzUtils PhzGalacticCorrection PhzExecutables
+                        Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Xml
+                     INCLUDE_DIRS
+                        ElementsKernel XYDataset PhzConfiguration PhzPhotometricCorrection PhzModeling
+                        PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzGalacticCorrection
+                        "${Qt5Core_INCLUDE_DIRS}" "${Qt5Concurrent_INCLUDE_DIRS}"
+                        "${Qt5Gui_INCLUDE_DIRS}" "${Qt5Widgets_INCLUDE_DIRS}"
+                        "${Qt5Xml_INCLUDE_DIRS}"
                      PUBLIC_HEADERS PhzQtUI)
 
 elements_add_executable(PhosphorosUI src/program/Main.cpp

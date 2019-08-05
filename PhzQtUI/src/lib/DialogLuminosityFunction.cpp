@@ -5,6 +5,7 @@
  *      Author: fdubath
  */
 
+#include <QDoubleValidator>
 #include "ui_DialogLuminosityFunction.h"
 #include "PhzQtUI/DialogLuminosityFunction.h"
 

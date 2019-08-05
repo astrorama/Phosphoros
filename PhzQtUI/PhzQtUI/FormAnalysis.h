@@ -100,7 +100,7 @@ void on_btn_ToPP_clicked();
 
     void on_cb_igm_currentIndexChanged(const QString &);
 
-    void on_cb_CompatibleGrid_textChanged(const QString &);
+    void on_cb_CompatibleGrid_currentTextChanged(const QString &);
 
     void on_cb_CompatibleGalCorrGrid_textChanged(const QString &);
 
