@@ -20,7 +20,7 @@ void ModelSetTable::loadFromPath(std::string path){
     this->setColumnHidden(2, true);
     this->setSelectionBehavior(QAbstractItemView::SelectRows);
     this->setSelectionMode(QAbstractItemView::SingleSelection);
-    this->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     this->update(QModelIndex());
 
 }
