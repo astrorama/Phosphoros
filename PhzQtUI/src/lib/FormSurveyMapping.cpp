@@ -61,7 +61,7 @@ void FormSurveyMapping::loadMappingPage(
      ui->table_Map->setColumnHidden(2, true);
      ui->table_Map->setSelectionBehavior(QAbstractItemView::SelectRows);
      ui->table_Map->setSelectionMode(QAbstractItemView::SingleSelection);
-     ui->table_Map->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+     ui->table_Map->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
      ui->table_Map->update(QModelIndex());
 
 
@@ -380,7 +380,7 @@ void FormSurveyMapping::fillControlsWithSelected() {
       ui->table_Filter->setColumnHidden(3, true);
       ui->table_Filter->setSelectionBehavior(QAbstractItemView::SelectRows);
       ui->table_Filter->setSelectionMode(QAbstractItemView::SingleSelection);
-      ui->table_Filter->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+      ui->table_Filter->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
       ui->table_Filter->update(QModelIndex());
 
 }
@@ -449,6 +449,7 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
   }
 
   fillControlsWithSelected();
+
   setFilterMappingInView();
 }
 
@@ -540,7 +541,7 @@ void FormSurveyMapping::filterEditionPopupClosing(std::vector<std::string> filte
    ui->table_Filter->setColumnHidden(3, true);
    ui->table_Filter->setSelectionBehavior(QAbstractItemView::SelectRows);
    ui->table_Filter->setSelectionMode(QAbstractItemView::SingleSelection);
-   ui->table_Filter->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+   ui->table_Filter->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
    ui->table_Filter->update(QModelIndex());
 
    m_survey_model_ptr->setFiltersToSelected(new_filters);

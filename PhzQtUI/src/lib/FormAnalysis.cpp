@@ -1040,7 +1040,7 @@ template<typename ReturnType, int I>
   }
 
 //  2. Photometry Grid
-  void FormAnalysis::on_cb_CompatibleGrid_textChanged(const QString &) {
+  void FormAnalysis::on_cb_CompatibleGrid_currentTextChanged(const QString &) {
     adjustPhzGridButtons(true);
     std::string grid_name = ui->cb_CompatibleGrid->currentText().toStdString();
     size_t index = grid_name.find_last_of("/\\");

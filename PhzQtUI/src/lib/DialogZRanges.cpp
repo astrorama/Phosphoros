@@ -12,6 +12,7 @@
 #include "XYDataset/QualifiedName.h"
 #include <QLabel>
 #include <QLineEdit>
+#include <QDoubleValidator>
 
 #include "PhzQtUI/GridButton.h"
 

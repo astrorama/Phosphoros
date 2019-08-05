@@ -2,6 +2,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QRegExpValidator>
 #include "PhzQtUI/DialogCatalogName.h"
 #include "ui_DialogCatalogName.h"
 #include "FileUtils.h"

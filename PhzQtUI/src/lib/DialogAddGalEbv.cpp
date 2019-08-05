@@ -9,6 +9,7 @@
 #include "ui_DialogAddGalEbv.h"
 #include "FileUtils.h"
 #include "ElementsKernel/Logging.h"
+#include <QRegExpValidator>
 
 using namespace std;
 
