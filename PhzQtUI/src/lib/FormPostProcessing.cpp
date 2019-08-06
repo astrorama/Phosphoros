@@ -67,7 +67,7 @@ void FormPostProcessing::on_btn_refresh_clicked(){
   ui->table_res_cat->setColumnHidden(2, true);
   ui->table_res_cat->setSelectionBehavior(QAbstractItemView::SelectRows);
   ui->table_res_cat->setSelectionMode(QAbstractItemView::SingleSelection);
-  ui->table_res_cat->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+  ui->table_res_cat->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
   connect(
         ui->table_res_cat->selectionModel(),
@@ -89,9 +89,9 @@ void FormPostProcessing::catalogSelectionChanged(QModelIndex new_index, QModelIn
   ui->table_res_file->setColumnHidden(3, true);
   ui->table_res_file->setSelectionBehavior(QAbstractItemView::SelectRows);
   ui->table_res_file->setSelectionMode(QAbstractItemView::SingleSelection);
-  ui->table_res_file->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+  ui->table_res_file->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
   QHeaderView *verticalHeader =  ui->table_res_file->verticalHeader();
-  verticalHeader->setResizeMode(QHeaderView::Fixed);
+  verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
   verticalHeader->setDefaultSectionSize(45);
 
 
