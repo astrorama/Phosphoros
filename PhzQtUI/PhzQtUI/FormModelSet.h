@@ -2,6 +2,7 @@
 #define FORMMODELSET_H
 
 #include <memory>
+#include "PhzQtUI/ModelSetModel.h"
 #include <QWidget>
 #include <QModelIndex>
 #include "ParameterRule.h"
@@ -23,15 +24,16 @@ typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::Fi
  * @brief The FormModelSet class
  * This widget allows the user to create and manage the Astronomical Model Sets.
  */
-class FormModelSet : public QWidget
-{
+class FormModelSet : public QWidget {
     Q_OBJECT
 
 public:
     explicit FormModelSet(QWidget *parent = 0);
     ~FormModelSet();
 
-     void loadSetPage(DatasetRepo seds_repository,
+     void loadSetPage(
+         std::shared_ptr<ModelSetModel> model_set_model_ptr,
+         DatasetRepo seds_repository,
          DatasetRepo redenig_curves_repository);
 
 
@@ -87,12 +89,16 @@ void on_btn_exit_clicked();
 
     void on_btn_delete_region_clicked();
 
+    void on_txt_SetName_textEdited(const QString& text);
+
 
 private:
     std::unique_ptr<Ui::FormModelSet> ui;
     void setModelInEdition();
     void setModelInView();
+    void selectFromGrid();
 
+    std::shared_ptr<ModelSetModel> m_model_set_model_ptr;
     bool m_setInsert;
     DatasetRepo m_seds_repository;
     DatasetRepo m_redenig_curves_repository;

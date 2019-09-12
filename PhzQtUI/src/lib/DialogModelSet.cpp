@@ -213,13 +213,19 @@ void DialogModelSet::turnControlsInEdition(){
     ui->txt_name->setEnabled(true);
 
   // Redshift & E(B-V)
-    ui->txt_ebv_values->setEnabled(true);
-    ui->btn_add_z_range->setEnabled(true);
-    SetRangeControlsEnabled(ui->Layout_ebv_range,true);
+     ui->rb_ebv_val->setEnabled(true);
+     ui->rb_ebv_range->setEnabled(true);
 
-    ui->txt_z_values->setEnabled(true);
-    ui->btn_add_ebv_range->setEnabled(true);
-    SetRangeControlsEnabled(ui->Layout_z_range,true);
+     ui->txt_ebv_values->setEnabled( ui->rb_ebv_val->isChecked());
+     ui->btn_add_ebv_range->setEnabled(!ui->rb_ebv_val->isChecked());
+     SetRangeControlsEnabled(ui->Layout_ebv_range,!ui->rb_ebv_val->isChecked());
+
+     ui->rb_z_val->setEnabled(true);
+     ui->rb_z_range->setEnabled(true);
+     ui->txt_z_values->setEnabled(ui->rb_z_val->isChecked());
+     ui->btn_add_z_range->setEnabled(!ui->rb_z_val->isChecked());
+     SetRangeControlsEnabled(ui->Layout_z_range,!ui->rb_z_val->isChecked());
+
 }
 
 void DialogModelSet::turnControlsInView() {
@@ -233,14 +239,79 @@ void DialogModelSet::turnControlsInView() {
     ui->txt_name->setEnabled(false);
 
     // Redshift & E(B-V)
+    ui->rb_ebv_val->setEnabled(false);
+    ui->rb_ebv_range->setEnabled(false);
     ui->txt_ebv_values->setEnabled(false);
     ui->btn_add_z_range->setEnabled(false);
     SetRangeControlsEnabled(ui->Layout_ebv_range,false);
 
+    ui->rb_z_val->setEnabled(false);
+    ui->rb_z_range->setEnabled(false);
     ui->txt_z_values->setEnabled(false);
     ui->btn_add_ebv_range->setEnabled(false);
     SetRangeControlsEnabled(ui->Layout_z_range,false);
+
 }
+
+void DialogModelSet::on_rb_ebv_val_clicked() {
+  ui->rb_ebv_range->setChecked(!ui->rb_ebv_val->isChecked());
+  ui->txt_ebv_values->setEnabled( ui->rb_ebv_val->isChecked());
+  ui->btn_add_ebv_range->setEnabled(!ui->rb_ebv_val->isChecked());
+  SetRangeControlsEnabled(ui->Layout_ebv_range,!ui->rb_ebv_val->isChecked());
+  if (ui->rb_ebv_val->isChecked()) {
+     for (int i = ui->Layout_ebv_range->count()-1; i >=0; --i) {
+       QWidget *range_frame =  ui->Layout_ebv_range->itemAt(i)->widget();
+       if (range_frame != NULL) {
+         delete range_frame;
+       }
+     }
+     cleanRangeControl( ui->Layout_ebv_range);
+  }
+}
+
+void DialogModelSet::on_rb_ebv_range_clicked() {
+  ui->rb_ebv_val->setChecked(!ui->rb_ebv_range->isChecked());
+  ui->txt_ebv_values->setEnabled( ui->rb_ebv_val->isChecked());
+  ui->btn_add_ebv_range->setEnabled(!ui->rb_ebv_val->isChecked());
+  SetRangeControlsEnabled(ui->Layout_ebv_range,!ui->rb_ebv_val->isChecked());
+  if (ui->rb_ebv_range->isChecked()) {
+     ui->txt_ebv_values->setText("");
+  }
+}
+
+
+void DialogModelSet::on_rb_z_val_clicked() {
+  ui->rb_z_range->setChecked(!ui->rb_z_val->isChecked());
+  ui->txt_z_values->setEnabled( ui->rb_z_val->isChecked());
+  ui->btn_add_z_range->setEnabled(!ui->rb_z_val->isChecked());
+  SetRangeControlsEnabled(ui->Layout_z_range,!ui->rb_z_val->isChecked());
+  if (ui->rb_z_val->isChecked()) {
+     for (int i = ui->Layout_z_range->count()-1; i >=0; --i) {
+       QWidget *range_frame =  ui->Layout_z_range->itemAt(i)->widget();
+       if (range_frame != NULL) {
+         delete range_frame;
+       }
+     }
+     cleanRangeControl( ui->Layout_z_range);
+  }
+}
+
+void DialogModelSet::on_rb_z_range_clicked() {
+  ui->rb_z_val->setChecked(!ui->rb_z_range->isChecked());
+  ui->txt_z_values->setEnabled( ui->rb_z_val->isChecked());
+  ui->btn_add_z_range->setEnabled(!ui->rb_z_val->isChecked());
+  SetRangeControlsEnabled(ui->Layout_z_range,!ui->rb_z_val->isChecked());
+  if (ui->rb_z_range->isChecked()) {
+     ui->txt_z_values->setText("");
+  }
+}
+
+
+
+
+
+
+
 
 
 
@@ -334,61 +405,60 @@ void DialogModelSet::on_buttonBox_accepted()
       m_rules[m_ref].setSedSelection(std::move(sed_selection));
 
     // Reddeing Curves
-      m_rules[m_ref].setRedCurveSelection(std::move(red_curve_selection));
-
-
+    m_rules[m_ref].setRedCurveSelection(std::move(red_curve_selection));
 
     auto new_z_values = ParameterRule::parseValueList(ui->txt_z_values->text().toStdString());
     m_rules[m_ref].setRedshiftValues(std::move(new_z_values));
-
-
-
     auto new_ebv_values = ParameterRule::parseValueList(ui->txt_ebv_values->text().toStdString());
     m_rules[m_ref].setEbvValues(std::move(new_ebv_values));
-
-
     m_rules[m_ref].getModelNumber(true);
-
-
-
-
     this->popupClosing(m_ref,m_rules[m_ref],true);
     this->close();
 }
 
-
-
-
-
-
  void DialogModelSet::populateZRangesAndValues(ParameterRule selected_rule){
-  ui->txt_z_values->setText(QString::fromStdString(selected_rule.getRedshiftStringValueList()));
-  cleanRangeControl( ui->Layout_z_range);
-  m_current_z_range_id = 0;
-
-  for (auto& range : selected_rule.getZRanges()) {
-    auto del_button = new GridButton(0, m_current_z_range_id, "Delete");
-    connect(del_button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
+    cleanRangeControl( ui->Layout_z_range);
+    m_current_z_range_id = 0;
+    if ( selected_rule.getZRanges().size()>0){
+      for (auto& range : selected_rule.getZRanges()) {
+        auto del_button = new GridButton(0, m_current_z_range_id, "Delete");
+        connect(del_button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
         SLOT(onZDeleteClicked(size_t,size_t)));
-    ui->Layout_z_range->addWidget(createRangeControls(del_button, m_current_z_range_id, false, range));
-    ++m_current_z_range_id;
-
-  }
+        ui->Layout_z_range->addWidget(createRangeControls(del_button, m_current_z_range_id, false, range));
+        ++m_current_z_range_id;
+      }
+      ui->txt_z_values->setText(QString::fromStdString(selected_rule.getRedshiftStringValueList()));
+      selected_rule.setRedshiftValues({});
+      ui->rb_z_range->setChecked(true);
+      ui->rb_z_val->setChecked(false);
+    } else {
+      ui->txt_z_values->setText(QString::fromStdString(selected_rule.getRedshiftStringValueList()));
+      ui->rb_z_range->setChecked(false);
+      ui->rb_z_val->setChecked(true);
+    }
 }
 
  void DialogModelSet::populateEbvRangesAndValues(ParameterRule selected_rule){
-   ui->txt_ebv_values->setText(QString::fromStdString(selected_rule.getEbvStringValueList()));
-   cleanRangeControl( ui->Layout_ebv_range);
-   m_current_ebv_range_id = 0;
-
-   for (auto& range : selected_rule.getEbvRanges()) {
-       auto del_button = new GridButton(0, m_current_ebv_range_id, "Delete");
-       connect(del_button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
-           SLOT(onEbvDeleteClicked(size_t,size_t)));
-       ui->Layout_ebv_range->addWidget(createRangeControls(del_button, m_current_ebv_range_id, false, range));
-       ++m_current_ebv_range_id;
-     }
- }
+    cleanRangeControl( ui->Layout_ebv_range);
+    m_current_ebv_range_id = 0;
+    if ( selected_rule.getEbvRanges().size()>0){
+      for (auto& range : selected_rule.getEbvRanges()) {
+        auto del_button = new GridButton(0, m_current_ebv_range_id, "Delete");
+        connect(del_button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
+        SLOT(onEbvDeleteClicked(size_t,size_t)));
+        ui->Layout_ebv_range->addWidget(createRangeControls(del_button, m_current_ebv_range_id, false, range));
+        ++m_current_ebv_range_id;
+      }
+      ui->txt_ebv_values->setText(QString::fromStdString(""));
+      selected_rule.setEbvValues({});
+      ui->rb_ebv_range->setChecked(true);
+      ui->rb_ebv_val->setChecked(false);
+    } else {
+      ui->txt_ebv_values->setText(QString::fromStdString(selected_rule.getEbvStringValueList()));
+      ui->rb_ebv_range->setChecked(false);
+      ui->rb_ebv_val->setChecked(true);
+    }
+}
 
  void DialogModelSet::onZDeleteClicked(size_t,size_t ref){
    deleteRangeAt(ui->Layout_z_range, ref);

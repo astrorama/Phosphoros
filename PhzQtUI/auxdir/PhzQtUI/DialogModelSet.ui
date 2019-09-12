@@ -26,7 +26,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Sub-Spaces of the Parameter Space</string>
+        <string>Sub-spaces of the parameter space</string>
        </property>
       </widget>
      </item>
@@ -238,9 +238,12 @@
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_5">
            <item>
-            <widget class="QLabel" name="label_18">
+            <widget class="QRadioButton" name="rb_ebv_val">
              <property name="text">
               <string>Values (coma separated) :</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -250,7 +253,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_4">
              <item>
-              <widget class="QLabel" name="label_17">
+              <widget class="QRadioButton" name="rb_ebv_range">
                <property name="text">
                 <string>Ranges :</string>
                </property>
@@ -275,7 +278,7 @@
                 <bool>false</bool>
                </property>
                <property name="text">
-                <string>Add</string>
+                <string>Add Range</string>
                </property>
               </widget>
              </item>
@@ -292,7 +295,7 @@
                 <x>0</x>
                 <y>0</y>
                 <width>831</width>
-                <height>366</height>
+                <height>363</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -324,9 +327,12 @@
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout">
            <item>
-            <widget class="QLabel" name="label_19">
+            <widget class="QRadioButton" name="rb_z_val">
              <property name="text">
               <string>Values (coma separated) :</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -336,7 +342,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <item>
-              <widget class="QLabel" name="label_4">
+              <widget class="QRadioButton" name="rb_z_range">
                <property name="text">
                 <string>Ranges :</string>
                </property>
@@ -361,7 +367,7 @@
                 <bool>false</bool>
                </property>
                <property name="text">
-                <string>Add</string>
+                <string>Add Range</string>
                </property>
               </widget>
              </item>
@@ -378,7 +384,7 @@
                 <x>0</x>
                 <y>0</y>
                 <width>831</width>
-                <height>366</height>
+                <height>363</height>
                </rect>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_2">

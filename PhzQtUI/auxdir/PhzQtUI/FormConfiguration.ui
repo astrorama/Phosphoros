@@ -73,7 +73,7 @@
          <string>Define the Mapping between the catalog file(s) columns and the filters</string>
         </property>
         <property name="text">
-         <string>Catalog Types</string>
+         <string>Catalog Type</string>
         </property>
        </widget>
       </item>
@@ -94,7 +94,7 @@
          <string>Specify the parameter space for the creation of model grid.</string>
         </property>
         <property name="text">
-         <string>Parameter Spaces</string>
+         <string>Parameter Space</string>
         </property>
        </widget>
       </item>
@@ -575,7 +575,7 @@
       <attribute name="title">
        <string>Cosmology</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_6">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
@@ -642,9 +642,16 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
           <layout class="QGridLayout" name="gridLayout">
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="txt_hubble_param">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="0">
             <widget class="QLabel" name="label_12">
              <property name="toolTip">
@@ -655,35 +662,14 @@
              </property>
             </widget>
            </item>
-           <item row="2" column="1">
-            <widget class="QLineEdit" name="txt_omega_matter">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QLineEdit" name="txt_omega_lambda">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="txt_hubble_param">
-             <property name="enabled">
-              <bool>false</bool>
+           <item row="0" column="2">
+            <widget class="QLabel" name="label_14">
+             <property name="text">
+              <string> km/s/Mpc</string>
              </property>
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="label_10">
-             <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Assuming Ω&lt;span style=&quot; vertical-align:sub;&quot;&gt;M&lt;/span&gt; + Ω&lt;span style=&quot; vertical-align:sub;&quot;&gt;k&lt;/span&gt; + Ω&lt;span style=&quot; font-family:'sans-serif'; color:#000000; background-color:#f8f9fa; vertical-align:sub;&quot;&gt;Λ&lt;/span&gt;</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
             <widget class="QLabel" name="label_11">
              <property name="toolTip">
               <string>The Phosphoros Root Path can be modified with the environment variable $PHOSPHOROS_ROOT.</string>
@@ -693,7 +679,7 @@
              </property>
             </widget>
            </item>
-           <item row="3" column="0">
+           <item row="2" column="0">
             <widget class="QLabel" name="label_13">
              <property name="toolTip">
               <string>The Phosphoros Root Path can be modified with the environment variable $PHOSPHOROS_ROOT.</string>
@@ -703,17 +689,24 @@
              </property>
             </widget>
            </item>
-           <item row="0" column="2">
-            <widget class="QLabel" name="label_14">
-             <property name="text">
-              <string> km/s/Mpc</string>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="txt_omega_matter">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLineEdit" name="txt_omega_lambda">
+             <property name="enabled">
+              <bool>false</bool>
              </property>
             </widget>
            </item>
           </layout>
          </item>
          <item>
-          <spacer name="horizontalSpacer_3">
+          <spacer name="horizontalSpacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -725,19 +718,32 @@
            </property>
           </spacer>
          </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_18">
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout_2">
-           <item>
-            <widget class="QPushButton" name="btn_default_cosmo">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="text">
-              <string>Reset to default</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
+          <widget class="QPushButton" name="btn_default_cosmo">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Reset to default</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_8">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </item>

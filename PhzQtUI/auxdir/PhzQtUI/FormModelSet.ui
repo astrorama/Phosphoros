@@ -70,7 +70,7 @@
          <string>Define the Mapping between the catalog file(s) columns and the filters</string>
         </property>
         <property name="text">
-         <string>Catalog Types</string>
+         <string>Catalog Type</string>
         </property>
        </widget>
       </item>
@@ -97,7 +97,7 @@
          <string notr="true">background-color: rgb(210, 210, 210)</string>
         </property>
         <property name="text">
-         <string>Parameter Spaces</string>
+         <string>Parameter Space</string>
         </property>
        </widget>
       </item>
@@ -157,7 +157,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Parameter Spaces :</string>
+          <string>Parameter Space :</string>
          </property>
         </widget>
        </item>
@@ -235,6 +235,13 @@
     </layout>
    </item>
    <item>
+    <widget class="Line" name="line_5">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
       <widget class="QLabel" name="label_4">
@@ -285,13 +292,6 @@
     </layout>
    </item>
    <item>
-    <widget class="Line" name="line_5">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_6">
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -321,6 +321,13 @@
       </spacer>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_5">

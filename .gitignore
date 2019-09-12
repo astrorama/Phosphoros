@@ -388,3 +388,6 @@
 /cmake/*.log
 /cmake/.pydevproject
 /cmake/*.pyc
+
+# GalacticDustMap
+/GalacticDustMap/python/GalacticDustMap/__pycache__

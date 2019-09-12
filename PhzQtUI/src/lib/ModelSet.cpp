@@ -373,8 +373,11 @@ ModelSet ModelSet::loadModelSetFromFile(std::string fileName,std::string root_pa
     return deserialize(doc,model);
 }
 
-void ModelSet::deleteModelSet(){
-    QFile(QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(getName()+".xml")).remove();
+void ModelSet::deleteModelSet() {
+  QString file_name = QString::fromStdString(m_root_path) + QDir::separator()+ QString::fromStdString(getName()+".xml");
+  if (QFile::exists(file_name)) {
+    QFile(file_name).remove();
+  }
 }
 
 void ModelSet::saveModelSet(std::string oldName){

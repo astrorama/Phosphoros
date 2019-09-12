@@ -89,6 +89,9 @@ private slots:
    */
   void on_btn_save_clicked();
 
+
+  void on_btn_tophat_clicked();
+
   /**
    * @brief SLOT Called when the select curve button is clicked, open the
    * Curve selection popup.

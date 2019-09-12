@@ -4,6 +4,7 @@
 #include <memory>
 #include <QWidget>
 #include <QModelIndex>
+#include "PhzQtUI/OptionModel.h"
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
 
@@ -41,16 +42,12 @@ public:
      * @brief give the references to the repositories to be updated when
      * change are performed.
      */
-     void loadOptionPage(DatasetRepo filter_repository,
-                         DatasetRepo seds_repository,
-                         DatasetRepo redenig_curves_repository,
-                         DatasetRepo luminosity_repository );
+     void loadOptionPage(std::shared_ptr<OptionModel> option_model_ptr);
 
 signals:
 /**
  * @brief SIGNAL Called when the user want to go back to the home page.
  */
-
 
     void navigateToParameter(bool);
 
@@ -157,11 +154,12 @@ private:
     std::unique_ptr<Ui::FormConfiguration> ui;
 
     bool do_need_reset = false;
+    void setGeneralControlEdition(bool edit);
+    void setCosmoControlEdition(bool edit);
     void checkDirectories();
-    DatasetRepo m_filter_repository;
-    DatasetRepo m_seds_repository;
-    DatasetRepo m_redenig_curves_repository;
-    DatasetRepo m_luminosity_repository;
+    void loadGeneralValues();
+    void loadCosmoValues();
+    std::shared_ptr<OptionModel> m_option_model_ptr;
 };
 
 }

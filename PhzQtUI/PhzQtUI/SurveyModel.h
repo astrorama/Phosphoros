@@ -1,9 +1,13 @@
 #ifndef SURVEYMODEL_H
 #define SURVEYMODEL_H
 
+#include <QString>
 #include <QStandardItemModel>
 #include "SurveyFilterMapping.h"
 #include <map>
+#include <vector>
+#include <set>
+#include <string>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -11,10 +15,11 @@ namespace PhzQtUI {
 
 /**
  * @brief The SurveyModel class
- * This class provide a Model to be used in TableView.
- * It handle the SurveyFilterMappings.
+ * This class provide a Model to be used in TableView. It store a survey on
+ * each of its row and handle the loading, selection and edition of the survey.
  */
 class SurveyModel: public QStandardItemModel {
+ Q_OBJECT
 public:
 
   SurveyModel();
@@ -32,23 +37,7 @@ public:
    * @param duplicate_from_row if >0 pre-fill the new survey with the values
    * found into the row with the provided number.
    */
-  int newSurvey(int duplicate_from_row);
-
-  /**
-   * @brief Write the survey represented by the row 'row' of the Model to a xml file.
-   * If the name has changed, also delete the old file
-   * @oldName previous name of the survey, giving the name of the file to be
-   * removed if the survey name has changed.
-   */
-  void saveSurvey(int row, std::string oldName);
-
-  /**
-   * @brief Remove the row of the model and delete the corresponding survey and its
-   * persistence file.
-   *
-   * @param row the row to be removed.
-   */
-  void deleteSurvey(int row);
+  void newSurvey(bool duplicate_from_selected = false);
 
   /**
    * @brief Check that no other survey have the same name as the one provided. This
@@ -61,97 +50,95 @@ public:
   bool checkUniqueName(QString new_name, int row) const;
 
   /**
-   * @brief Change the name of the Survey represented by the given row
+   * @brief Select the survey located at the row "row", and set the selected
+   * survey as preferred one.
+   * If the previously selected survey was edited, these modification are discarded.
+   * If the provided row is not in the rows range create an empty selection.
    *
-   * @param newName the new name to be assigned to the survey
-   *
-   * @param row the model row number representing the survey
+   * @param row the row number to be selected
    */
-  void setName(std::string newName, int row);
+  void selectSurvey(int row);
 
   /**
-   * @brief Get the name of the survey represented by the row 'row'
+   * @brief Select the survey which name match the provided "name", and set the
+   * selected survey as preferred one.
+   * If the previously selected survey was edited, these modification are discarded.
+   * If the provided name do not match any survey create an empty selection.
    *
-   * @param row the model row number representing the survey.
+   *  @param name the name of the survey to select
    */
-  std::string getName(int row);
-
-  void setNonDetection(double newNonDetection, int row);
-
-  double getNonDetection(int row);
-
-  void setHasUpperLimit(bool has_upper_limit, int row);
-
-  bool getHasUpperLimit(int row);
-
-  void setHasMissingPhot(bool has_missing_phot, int row);
-
-  bool getHasMissingPhot(int row);
+  void selectSurvey(QString name);
 
   /**
-   * @brief Change the Source column Id of the Survey represented by the given
-   * row.
+   *  @brief Returns a reference on the selected survey.
+   *  If no survey are selected the reference point to an empty survey.
    *
-   * @param newSourceIdColumn the new Source column Id name to be assigned to
-   * the survey
-   *
-   * @param row the model row number representing the survey.
+   *  @return a reference on the selected survey
    */
-  void setSourceIdColumn(std::string newSourceIdColumn, int row);
+  const SurveyFilterMapping& getSelectedSurvey();
 
   /**
-   * @brief Get the Source column Id of the survey represented by the row 'row'
+   * @brief Returns the number of the row the selected survey is associated with
+   */
+  int getSelectedRow();
+
+  /**
+   * @brief Return the status of the selected survey. If the survey has been
+   * modified this function return true, otherwise false.
    *
-   * @param row the model row number representing the survey.
+   * @return  true if the selected survey is modified
    */
-  std::string getSourceIdColumn(int row);
+  bool isInEdition();
 
   /**
-     * @brief get the list of column stored into the Survey represented by the row 'row'.
-     * @param row the model row number representing the survey.
-     */
-  const std::set<std::string>& getColumnList(int row) const;
-
-    /**
-     * @brief Move the list of column into the survey represented by the row 'row'.
-     * @param row the model row number representing the survey.
-     */
-  void setColumnList(std::set<std::string> new_list, int row);
-
-
-  /**
-   * @brief set the default catalog path into the survey represented by the row 'row'.
-   * @param row the model row number representing the survey.
-   * @param new_default_catalog
-   */
-  void setDefaultCatalog(std::string new_default_catalog, int row);
-
-  /**
-   * @brief get the default catalog path from the survey represented by the row 'row'
-   * @return the current default catalog path
-   */
-  std::string getDefaultCatalog(int row) const;
-
-  /**
-   * @brief Change the Filters Mappings the Survey represented by the given
-   * row.
+   * @brief Saves the modification of the selected survey. If the operation
+   * succeed returns true however if the name of the survey conflict with
+   * another one the saving is canceled and the function returns false.
    *
-   * @param newFilters the list of FilterMApping to be assigned to
-   * the survey
-   *
-   * @param row the model row number representing the survey.
+   * @return  true if the selected survey was successfully saved
    */
-  void setFilters(std::vector<FilterMapping> newFilters,
-      int row);
+  bool saveSelected();
 
   /**
-   * @brief Get the Filters Mappings of the survey represented by the row 'row'
-   *
-   * @param row the model row number representing the survey.
+   * @brief Discards the modifications of the selected survey.
    */
-  const std::vector<FilterMapping>& getFilters(int row);
+  void cancelSelected();
+
+  /**
+   * @brief Delete the selected survey. WARNING This operation will also delete
+   * the configurations, intermediary results and results associated with the survey.
+   */
+  void deletSelected();
+
+  /**
+   * @brief Returns the list of survey names contained in this model.
+   */
+  const std::vector<QString> getSurveyList() const;
+
+  bool doNeedReload() const;
+
+  void reloaded();
+
+public slots:
+  void setNameToSelected(QString new_name);
+  void setIdColumnToSelected(QString new_name);
+  void setRaColumnToSelected(QString new_name);
+  void setDecColumnToSelected(QString new_name);
+  void setGalEbvColumnToSelected(QString new_name);
+  void setFiltersToSelected(std::vector<FilterMapping> new_filters);
+  void setColumnListToSelected(std::set<std::string> new_list);
+  void setDefaultCatalogToSelected(QString new_name);
+  void setNonDetectionToSelected(QString new_name);
+  void setHasUpperLimitToSelected(bool has_upper_limit);
+  void setHasMissingPhotToSelected(bool has_missing_phot);
+  void setCopiedColumnsToSelected(std::map<std::string, std::string> copied_columns);
 
 private:
+  bool m_in_edition = false;
+  bool m_need_reload = true;
+  int m_selected_row = -1;
+  int m_selected_index = -1;
+  SurveyFilterMapping m_edited_survey;
   std::map<int, SurveyFilterMapping> m_survey_filter_mappings;
   const QString getValue(int row, int column) const;
 
@@ -162,4 +149,4 @@ private:
 }
 }
 
-#endif // SURVEYMODEL_H
+#endif //  SURVEYMODEL_H

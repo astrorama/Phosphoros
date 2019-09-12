@@ -39,7 +39,8 @@ public:
       std::string catalog,
       const std::map<std::string,PhzDataModel::ModelAxesTuple>& axes,
       const std::list<std::string> & selected_filters,
-      std::string igm_type);
+      std::string igm_type,
+      bool model_grid = true);
 
   /**
    * @breif Build a boost configuration map out of the selected parameters.

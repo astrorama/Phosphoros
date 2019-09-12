@@ -29,7 +29,7 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
     }
 
     void SurveyFilterMapping::setName(std::string newSurveyName){
-        m_survey_name=newSurveyName;
+        m_survey_name = newSurveyName;
     }
 
     std::string SurveyFilterMapping::getName() const{
@@ -37,15 +37,38 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
     }
 
     void SurveyFilterMapping::setSourceIdColumn(std::string newSourceIdColumn){
-        m_source_id_column=newSourceIdColumn;
+        m_source_id_column = newSourceIdColumn;
     }
 
     std::string SurveyFilterMapping::getSourceIdColumn() const{
         return m_source_id_column;
     }
 
+    void SurveyFilterMapping::setRaColumn(std::string newRaColumn){
+        m_ra_column = newRaColumn;
+    }
+
+    std::string SurveyFilterMapping::getRaColumn() const{
+       return m_ra_column;
+    }
+
+    void SurveyFilterMapping::setDecColumn(std::string newDecColumn){
+       m_dec_column = newDecColumn;
+    }
+
+    std::string SurveyFilterMapping::getDecColumn() const{
+       return m_dec_column;
+    }
+
+    void SurveyFilterMapping::setGalEbvColumn(std::string newGalEbvolumn){
+      m_gal_ebv_column = newGalEbvolumn;
+    }
+    std::string SurveyFilterMapping::getGalEbvColumn() const{
+       return m_gal_ebv_column;
+    }
+
     void SurveyFilterMapping::setFilters(std::vector<FilterMapping> filters){
-        m_filters=std::move(filters);
+        m_filters = std::move(filters);
     }
 
     const std::set<std::string>& SurveyFilterMapping::getColumnList() const{
@@ -53,7 +76,7 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
     }
 
     void SurveyFilterMapping::setColumnList(std::set<std::string> new_list){
-      m_column_list=std::move(new_list);
+      m_column_list = std::move(new_list);
     }
 
     const std::vector<FilterMapping>& SurveyFilterMapping::getFilters() const{
@@ -95,7 +118,7 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
      }
 
      void SurveyFilterMapping::setCopiedColumns(std::map<std::string,std::string> copied_columns){
-       m_copied_columns=copied_columns;
+       m_copied_columns = copied_columns;
      }
 
      const std::map<std::string,std::string>& SurveyFilterMapping::getCopiedColumns() const{
@@ -166,6 +189,9 @@ SurveyFilterMapping SurveyFilterMapping::loadCatalog(std::string name) {
 
   QDomElement root_node = doc.documentElement();
   survey.setSourceIdColumn(root_node.attribute("SourceColumnId").toStdString());
+  survey.setRaColumn(root_node.attribute("RaColumn").toStdString());
+  survey.setDecColumn(root_node.attribute("DecColumn").toStdString());
+  survey.setGalEbvColumn(root_node.attribute("GalEbvColumn").toStdString());
 
 
   std::string path = root_node.attribute("DefaultCatalogPath").toStdString();
@@ -285,6 +311,9 @@ void SurveyFilterMapping::saveSurvey(std::string oldName){
   QDomDocument doc("CatalogInfo");
   QDomElement root = doc.createElement("CatalogInfo");
   root.setAttribute("SourceColumnId",QString::fromStdString(m_source_id_column));
+  root.setAttribute("RaColumn",QString::fromStdString(m_ra_column));
+  root.setAttribute("DecColumn",QString::fromStdString(m_dec_column));
+  root.setAttribute("GalEbvColumn",QString::fromStdString(m_gal_ebv_column));
   root.setAttribute("NonDetection",QString::number(m_non_detection));
   root.setAttribute("HasUpperLimit",QString::number(m_has_upper_limit));
   root.setAttribute("HasMissingPhotometry",QString::number(m_has_missing_phot));
