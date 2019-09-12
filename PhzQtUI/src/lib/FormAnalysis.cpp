@@ -344,9 +344,9 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   bool run_ok = info_input.exists();
 
 
-  bool lum_prior_ok = !ui->cb_luminosityPrior->isChecked() || ui->cb_luminosityPrior_2->currentText().length() > 0;
+  bool lum_prior_ok = !ui->rb_luminosityPrior->isChecked() || ui->cb_luminosityPrior_2->currentText().length() > 0;
   bool lum_prior_compatible = true;
-  if (lum_prior_ok && ui->cb_luminosityPrior->isChecked()) {
+  if (lum_prior_ok && ui->rb_luminosityPrior->isChecked()) {
     LuminosityPriorConfig info;
     for (auto prior_pair : m_prior_config) {
       if (ui->cb_luminosityPrior_2->currentText().toStdString() == prior_pair.first) {
@@ -779,15 +779,18 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   }
 
 
-  if (ui->cb_luminosityPrior->isChecked()) {
+  if (ui->rb_luminosityPrior->isChecked()) {
     std::string lum_prior_name = ui->cb_luminosityPrior_2->currentText().toStdString();
     auto& lum_prior_config = m_prior_config.at(lum_prior_name);
     auto lum_prior_option = lum_prior_config.getConfigOptions();
     options_map.insert(lum_prior_option.begin(), lum_prior_option.end());
     options_map["luminosity-prior-effectiveness"].value() = boost::any(ui->dsp_eff_lum->value());
+
+    options_map["volume-prior"].value() = boost::any(yes_flag);
+    options_map["volume-prior-effectiveness"].value() = boost::any(ui->dsp_eff_lum->value());
   }
 
-  if (ui->cb_volumePrior->isChecked()) {
+  if (ui->rb_volumePrior->isChecked()) {
     options_map["volume-prior"].value() = boost::any(yes_flag);
     options_map["volume-prior-effectiveness"].value() = boost::any(ui->dsp_eff_vol->value());
   }
@@ -869,7 +872,7 @@ std::map < std::string, boost::program_options::variable_value > FormAnalysis::g
   std::map<std::string, boost::program_options::variable_value> options_map =
       FileUtils::getPathConfiguration(false, true, true, true);
 
-  if (ui->cb_luminosityPrior->isChecked()) {
+  if (ui->rb_luminosityPrior->isChecked()) {
 
     LuminosityPriorConfig info;
     for (auto prior_pair : m_prior_config) {
@@ -1353,13 +1356,17 @@ template<typename ReturnType, int I>
            ui->cb_AnalysisSurvey->currentText().toStdString(),
            ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPriorEnabled");
 
-    ui->cb_luminosityPrior->setChecked(luminosity_prior_enabled == "1");
-
     auto volume_prior_enabled = PreferencesUtils::getUserPreference(
            ui->cb_AnalysisSurvey->currentText().toStdString(),
            ui->cb_AnalysisModel->currentText().toStdString() + "_VolumePriorEnabled");
 
-    ui->cb_volumePrior->setChecked(volume_prior_enabled == "1");
+    if (luminosity_prior_enabled == "1") {
+      ui->rb_luminosityPrior->setChecked(true);
+    } else if (volume_prior_enabled == "1") {
+      ui->rb_volumePrior->setChecked(true);
+    } else {
+      ui->rb_noPrior->setChecked(true);
+    }
   }
 
 
@@ -1372,17 +1379,61 @@ template<typename ReturnType, int I>
     setRunAnnalysisEnable(true);
   }
 
-  void FormAnalysis::on_cb_luminosityPrior_stateChanged(int) {
-    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
-                    ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPriorEnabled",
-                    QString::number(ui->cb_luminosityPrior->isChecked()).toStdString());
-    setRunAnnalysisEnable(true);
+  void FormAnalysis::on_rb_luminosityPrior_toggled(bool on ) {
+    if (on){
+
+      ui->rb_volumePrior->setChecked(false);
+
+      ui->rb_noPrior->setChecked(false);
+
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPriorEnabled",
+                      QString::number(ui->rb_luminosityPrior->isChecked()).toStdString());
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_VolumePriorEnabled",
+                      QString::number(ui->rb_volumePrior->isChecked()).toStdString());
+      setRunAnnalysisEnable(true);
+    }
   }
 
-  void FormAnalysis::on_cb_volumePrior_stateChanged(int) {
-    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
-                    ui->cb_AnalysisModel->currentText().toStdString() + "_VolumePriorEnabled",
-                    QString::number(ui->cb_volumePrior->isChecked()).toStdString());
+  void FormAnalysis::on_rb_volumePrior_toggled(bool on) {
+    if (on){
+
+      ui->rb_luminosityPrior->setChecked(false);
+
+
+      ui->rb_noPrior->setChecked(false);
+
+
+
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPriorEnabled",
+                      QString::number(ui->rb_luminosityPrior->isChecked()).toStdString());
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_VolumePriorEnabled",
+                      QString::number(ui->rb_volumePrior->isChecked()).toStdString());
+      setRunAnnalysisEnable(true);
+    }
+  }
+
+  void FormAnalysis::on_rb_noPrior_toggled(bool on) {
+    if (on){
+
+          ui->rb_luminosityPrior->setChecked(false);
+
+          ui->rb_volumePrior->setChecked(false);
+
+
+
+
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPriorEnabled",
+                      QString::number(ui->rb_luminosityPrior->isChecked()).toStdString());
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_VolumePriorEnabled",
+                      QString::number(ui->rb_volumePrior->isChecked()).toStdString());
+      setRunAnnalysisEnable(true);
+    }
   }
 
 

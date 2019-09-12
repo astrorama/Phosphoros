@@ -135,9 +135,10 @@ void on_btn_ToPP_clicked();
     void on_btn_confLuminosityPrior_clicked();
 
     void on_cb_luminosityPrior_2_currentIndexChanged(const QString &);
-    void on_cb_luminosityPrior_stateChanged(int);
 
-    void on_cb_volumePrior_stateChanged(int);
+    void on_rb_luminosityPrior_toggled(bool);
+    void on_rb_volumePrior_toggled(bool);
+    void on_rb_noPrior_toggled(bool);
 
     void on_output_column_btn_clicked();
     void setCopiedColumns(std::map<std::string,std::string> columns);
