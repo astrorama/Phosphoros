@@ -26,6 +26,7 @@
 #include "PhzQtUI/DialogAddGalEbv.h"
 #include "PhzQtUI/DialogLuminosityPrior.h"
 #include "PhzQtUI/DialogOutputColumnSelection.h"
+#include "PhzQtUI/DialogNz.h"
 
 #include "PhzUITools/ConfigurationWriter.h"
 #include "PhzUITools/CatalogColumnReader.h"
@@ -795,6 +796,11 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     options_map["volume-prior-effectiveness"].value() = boost::any(ui->dsp_eff_vol->value());
   }
 
+  if (ui->rb_nzPrior->isChecked()) {
+    options_map["Nz-prior"].value() = boost::any(yes_flag);
+    // missing filter B I
+  }
+
 
   std::string pdf_output_type = "VECTOR-COLUMN";
   if (ui->cbb_pdf_out->currentIndex() == 1) {
@@ -1360,10 +1366,16 @@ template<typename ReturnType, int I>
            ui->cb_AnalysisSurvey->currentText().toStdString(),
            ui->cb_AnalysisModel->currentText().toStdString() + "_VolumePriorEnabled");
 
+    auto nz_prior_enabled = PreferencesUtils::getUserPreference(
+             ui->cb_AnalysisSurvey->currentText().toStdString(),
+             ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorEnabled");
+
     if (luminosity_prior_enabled == "1") {
       ui->rb_luminosityPrior->setChecked(true);
     } else if (volume_prior_enabled == "1") {
       ui->rb_volumePrior->setChecked(true);
+    } if (nz_prior_enabled == "1") {
+      ui->rb_nzPrior->setChecked(true);
     } else {
       ui->rb_noPrior->setChecked(true);
     }
@@ -1380,60 +1392,86 @@ template<typename ReturnType, int I>
   }
 
   void FormAnalysis::on_rb_luminosityPrior_toggled(bool on ) {
-    if (on){
-
+    if (on) {
       ui->rb_volumePrior->setChecked(false);
-
       ui->rb_noPrior->setChecked(false);
-
+      ui->rb_nzPrior->setChecked(false);
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                       ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPriorEnabled",
                       QString::number(ui->rb_luminosityPrior->isChecked()).toStdString());
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                       ui->cb_AnalysisModel->currentText().toStdString() + "_VolumePriorEnabled",
                       QString::number(ui->rb_volumePrior->isChecked()).toStdString());
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorEnabled",
+                      QString::number(ui->rb_nzPrior->isChecked()).toStdString());
       setRunAnnalysisEnable(true);
     }
   }
 
   void FormAnalysis::on_rb_volumePrior_toggled(bool on) {
-    if (on){
-
+    if (on) {
       ui->rb_luminosityPrior->setChecked(false);
-
-
       ui->rb_noPrior->setChecked(false);
-
-
-
+      ui->rb_nzPrior->setChecked(false);
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                       ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPriorEnabled",
                       QString::number(ui->rb_luminosityPrior->isChecked()).toStdString());
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                       ui->cb_AnalysisModel->currentText().toStdString() + "_VolumePriorEnabled",
                       QString::number(ui->rb_volumePrior->isChecked()).toStdString());
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorEnabled",
+                      QString::number(ui->rb_nzPrior->isChecked()).toStdString());
       setRunAnnalysisEnable(true);
     }
   }
 
   void FormAnalysis::on_rb_noPrior_toggled(bool on) {
-    if (on){
-
-          ui->rb_luminosityPrior->setChecked(false);
-
-          ui->rb_volumePrior->setChecked(false);
-
-
-
-
+    if (on) {
+      ui->rb_luminosityPrior->setChecked(false);
+      ui->rb_volumePrior->setChecked(false);
+      ui->rb_nzPrior->setChecked(false);
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
-                      ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPriorEnabled",
-                      QString::number(ui->rb_luminosityPrior->isChecked()).toStdString());
+                  ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPriorEnabled",
+                  QString::number(ui->rb_luminosityPrior->isChecked()).toStdString());
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
-                      ui->cb_AnalysisModel->currentText().toStdString() + "_VolumePriorEnabled",
-                      QString::number(ui->rb_volumePrior->isChecked()).toStdString());
+                  ui->cb_AnalysisModel->currentText().toStdString() + "_VolumePriorEnabled",
+                  QString::number(ui->rb_volumePrior->isChecked()).toStdString());
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                  ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorEnabled",
+                  QString::number(ui->rb_nzPrior->isChecked()).toStdString());
       setRunAnnalysisEnable(true);
     }
+  }
+
+  void FormAnalysis::on_rb_nzPrior_toggled(bool on) {
+    if (on) {
+      ui->rb_luminosityPrior->setChecked(false);
+      ui->rb_volumePrior->setChecked(false);
+      ui->rb_noPrior->setChecked(false);
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                  ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPriorEnabled",
+                  QString::number(ui->rb_luminosityPrior->isChecked()).toStdString());
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                  ui->cb_AnalysisModel->currentText().toStdString() + "_VolumePriorEnabled",
+                  QString::number(ui->rb_volumePrior->isChecked()).toStdString());
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                  ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorEnabled",
+                  QString::number(ui->rb_nzPrior->isChecked()).toStdString());
+      setRunAnnalysisEnable(true);
+    }
+  }
+
+  void FormAnalysis::on_btn_conf_Nz_clicked(){
+
+
+      std::unique_ptr<DialogNz> popup(new DialogNz(m_survey_model_ptr->getSelectedSurvey().getFilters()));
+
+     /* connect(popup.get(), SIGNAL(selectedColumns(std::map<std::string, std::string>)),
+            SLOT(setCopiedColumns(std::map<std::string, std::string>)));*/
+
+      popup->exec();
   }
 
 

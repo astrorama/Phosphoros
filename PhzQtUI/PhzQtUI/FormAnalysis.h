@@ -135,7 +135,11 @@ void on_btn_ToModel_clicked();
 
     void on_rb_luminosityPrior_toggled(bool);
     void on_rb_volumePrior_toggled(bool);
+    void on_rb_nzPrior_toggled(bool);
     void on_rb_noPrior_toggled(bool);
+
+
+    void on_btn_conf_Nz_clicked();
 
     void on_output_column_btn_clicked();
     void setCopiedColumns(std::map<std::string,std::string> columns);
