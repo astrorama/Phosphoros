@@ -24,7 +24,6 @@ Author: morisset
 """
 
 from __future__ import division, print_function
-from future_builtins import *
 
 import os
 import astropy.table as table
