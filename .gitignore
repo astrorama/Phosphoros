@@ -1,3 +1,5 @@
+# All
+__pycache__
 
 # /
 /.project
@@ -389,5 +391,3 @@
 /cmake/.pydevproject
 /cmake/*.pyc
 
-# GalacticDustMap
-/GalacticDustMap/python/GalacticDustMap/__pycache__
