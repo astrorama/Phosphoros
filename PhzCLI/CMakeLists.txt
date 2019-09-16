@@ -31,3 +31,4 @@ elements_add_unit_test(LsAuxDirConfig_test tests/src/LsAuxDirConfig_test.cpp
                      TYPE Boost)
 
 elements_add_python_program(PhosphorosPlotPhotometryComparison PhzCLI.PhosphorosPlotPhotometryComparison)
+elements_add_python_program(PhosphorosOrderSeds PhzCLI.OrderSeds)
