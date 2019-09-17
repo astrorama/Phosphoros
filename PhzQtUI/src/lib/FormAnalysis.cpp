@@ -394,13 +394,37 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
     ui->btn_confLuminosityPrior->setToolTip("You need to Generate the Model Grid before to configure the Luminosity Prior");
   }
 
+  bool nzPrior_ok = true;
+  if (ui->rb_nzPrior->isChecked()){
+
+      std::string nz_prior_b_filter = PreferencesUtils::getUserPreference(
+            ui->cb_AnalysisSurvey->currentText().toStdString(),
+            ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorBFilter");
+
+      std::string nz_prior_i_filter = PreferencesUtils::getUserPreference(
+          ui->cb_AnalysisSurvey->currentText().toStdString(),
+          ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorIFilter");
+
+      nzPrior_ok = nz_prior_b_filter != "" && nz_prior_i_filter != "";
+  }
+
+  ui->btn_confLuminosityPrior->setEnabled(grid_name_exists);
+  if (nzPrior_ok) {
+    ui->btn_conf_Nz->setToolTip("Configure the N(z) Prior");
+  } else {
+    ui->btn_conf_Nz->setToolTip("You need to Generate the N(z) Prior");
+  }
+
+  bool nz_prior_ok = !ui->rb_nzPrior->isChecked() || nzPrior_ok;
+
+
 
   ui->btn_GetConfigAnalysis->setEnabled(
       grid_name_ok && (!need_gal_correction || grid_gal_corr_name_ok) &&
-      correction_ok && lum_prior_ok && lum_prior_compatible && run_ok && enabled);
+      correction_ok && lum_prior_ok && lum_prior_compatible && nz_prior_ok && run_ok && enabled);
   ui->btn_RunAnalysis->setEnabled(
       grid_name_exists && (!need_gal_correction || grid_gal_corr_name_exists) &&
-      correction_ok && correction_exists && lum_prior_ok && lum_prior_compatible&& run_ok && enabled);
+      correction_ok && correction_exists && lum_prior_ok && lum_prior_compatible && nz_prior_ok && run_ok && enabled);
 
   QString tool_tip_run = "";
   QString tool_tip_conf = "";
@@ -447,12 +471,21 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
                 + "When the luminosity prior is enabled , you must provide a luminosity prior configuration. \n";
   }
 
+
+
   if (!lum_prior_compatible) {
     tool_tip_conf = tool_tip_conf
-                   + "The Prior is no longer compatible with the Parameter Space, please update it. \n";
+                   + "The Luminosity Prior is no longer compatible with the Parameter Space, please update it. \n";
     tool_tip_run = tool_tip_run
-                   + "The Prior is no longer compatible with the Parameter Space, please update it. \n";
+                   + "The Luminosity Prior is no longer compatible with the Parameter Space, please update it. \n";
   }
+
+  if (!nz_prior_ok) {
+      tool_tip_conf = tool_tip_conf
+                  + "When the N(z) prior is enabled , you must configure it by selecting B and I filters. \n";
+      tool_tip_run = tool_tip_run
+                  + "When the N(z) prior is enabled , you must configure it by selecting B and I filters. \n";
+    }
 
 
   if (!info_input.exists()) {
@@ -470,7 +503,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
 
   if (!(grid_name_ok &&
         (!need_gal_correction || grid_gal_corr_name_ok) &&
-        correction_ok && lum_prior_ok && lum_prior_compatible && run_ok)) {
+        correction_ok && lum_prior_ok && lum_prior_compatible && nz_prior_ok && run_ok)) {
     tool_tip_conf = tool_tip_conf + "Before getting the configuration.";
   } else {
     tool_tip_conf = "Get the configuration file.";
@@ -479,7 +512,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   if (!(grid_name_exists &&
         (!need_gal_correction || grid_gal_corr_name_exists)  &&
         correction_ok && correction_exists &&
-        lum_prior_ok && lum_prior_compatible && run_ok)) {
+        lum_prior_ok && lum_prior_compatible && nz_prior_ok && run_ok)) {
     tool_tip_run = tool_tip_run + "Before running the analysis.";
   } else {
     tool_tip_run = "Run the analysis.";
@@ -494,7 +527,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
     setToolBoxButtonColor(ui->toolBox, 3, Qt::black);
   }
 
-  if (!lum_prior_ok || !lum_prior_compatible) {
+  if (!lum_prior_ok || !lum_prior_compatible || !nz_prior_ok) {
      setToolBoxButtonColor(ui->toolBox, 2, QColor("orange"));
    } else {
      setToolBoxButtonColor(ui->toolBox, 2, Qt::black);
@@ -798,7 +831,15 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   if (ui->rb_nzPrior->isChecked()) {
     options_map["Nz-prior"].value() = boost::any(yes_flag);
-    // missing filter B I
+    std::string nz_prior_b_filter = PreferencesUtils::getUserPreference(
+               ui->cb_AnalysisSurvey->currentText().toStdString(),
+               ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorBFilter");
+    options_map["Nz-prior_B_Filter"].value() = boost::any(nz_prior_b_filter);
+
+    std::string nz_prior_i_filter = PreferencesUtils::getUserPreference(
+             ui->cb_AnalysisSurvey->currentText().toStdString(),
+             ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorIFilter");
+    options_map["Nz-prior_I_Filter"].value() = boost::any(nz_prior_i_filter);
   }
 
 
@@ -1374,7 +1415,7 @@ template<typename ReturnType, int I>
       ui->rb_luminosityPrior->setChecked(true);
     } else if (volume_prior_enabled == "1") {
       ui->rb_volumePrior->setChecked(true);
-    } if (nz_prior_enabled == "1") {
+    } else if (nz_prior_enabled == "1") {
       ui->rb_nzPrior->setChecked(true);
     } else {
       ui->rb_noPrior->setChecked(true);
@@ -1466,12 +1507,36 @@ template<typename ReturnType, int I>
   void FormAnalysis::on_btn_conf_Nz_clicked(){
 
 
-      std::unique_ptr<DialogNz> popup(new DialogNz(m_survey_model_ptr->getSelectedSurvey().getFilters()));
 
-     /* connect(popup.get(), SIGNAL(selectedColumns(std::map<std::string, std::string>)),
-            SLOT(setCopiedColumns(std::map<std::string, std::string>)));*/
+    std::string nz_prior_b_filter = PreferencesUtils::getUserPreference(
+             ui->cb_AnalysisSurvey->currentText().toStdString(),
+             ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorBFilter");
+
+
+    std::string nz_prior_i_filter = PreferencesUtils::getUserPreference(
+             ui->cb_AnalysisSurvey->currentText().toStdString(),
+             ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorIFilter");
+
+
+      std::unique_ptr<DialogNz> popup(new DialogNz(m_survey_model_ptr->getSelectedSurvey().getFilters(),
+                                                   m_filter_repository,
+                                                   nz_prior_b_filter,
+                                                   nz_prior_i_filter));
+
+      connect(popup.get(), SIGNAL(popupClosing(std::string, std::string)),
+            SLOT(setNzFilters(std::string, std::string)));
 
       popup->exec();
+  }
+
+  void FormAnalysis::setNzFilters(std::string b_filter, std::string i_filter){
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorBFilter",
+                      b_filter);
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorIFilter",
+                      i_filter);
+    setRunAnnalysisEnable(true);
   }
 
 

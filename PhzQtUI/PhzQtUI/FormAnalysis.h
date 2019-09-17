@@ -142,7 +142,9 @@ void on_btn_ToModel_clicked();
     void on_btn_conf_Nz_clicked();
 
     void on_output_column_btn_clicked();
-    void setCopiedColumns(std::map<std::string,std::string> columns);
+    void setCopiedColumns(std::map<std::string, std::string> columns);
+
+    void setNzFilters(std::string b_filter, std::string i_filter);
 
 
 private:

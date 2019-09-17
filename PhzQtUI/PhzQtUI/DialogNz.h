@@ -2,14 +2,20 @@
 #define DIALOGNZ_H
 
 #include <memory>
+#include <string>
 #include <map>
 #include <vector>
 #include <QDialog>
 #include "FilterMapping.h"
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
 
 
 namespace Euclid {
 namespace PhzQtUI {
+
+
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 namespace Ui {
 class DialogNz;
@@ -32,7 +38,7 @@ public:
    * storing the available Reddening Curves
    *
    */
-  explicit DialogNz(std::vector<FilterMapping> filters, QWidget *parent = 0);
+  explicit DialogNz(std::vector<FilterMapping> filters, DatasetRepo filter_repository, std::string b_filter, std::string i_filter, QWidget *parent = 0);
 
   /**
    * @brief Destructor
@@ -49,13 +55,18 @@ public:
   void popupClosing(std::string, std::string);
 
 private slots:
-
+  void filterPopupClosing(std::string filter);
+  void on_btn_select_filter_clicked();
   void on_btn_save_clicked();
   void on_btn_cancel_clicked();
 
+
 private:
   std::unique_ptr<Ui::DialogNz> ui;
+  DatasetRepo m_filter_repository;
   std::vector<FilterMapping>& m_filters;
+  std::string m_b_filter;
+  std::string m_i_filter;
 
 };
 
