@@ -840,6 +840,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
              ui->cb_AnalysisSurvey->currentText().toStdString(),
              ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorIFilter");
     options_map["Nz-prior_I_Filter"].value() = boost::any(nz_prior_i_filter);
+    options_map["Nz-prior-effectiveness"].value() = boost::any(ui->dsp_eff_nz->value());
   }
 
 
