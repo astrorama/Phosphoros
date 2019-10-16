@@ -1,16 +1,41 @@
-#!/usr/bin/env python
+#
+# Copyright (C) 2012-2020 Euclid Science Ground Segment
+#
+# This library is free software; you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation; either version 3.0 of the License, or (at your option)
+# any later version.
+#
+# This library is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this library; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+#
 
 from __future__ import absolute_import, division, print_function
 import os
 import numbers
+
+import argparse
 import astropy.table as table
 import astropy.io.fits as fits
-from astropy.vo.samp import SAMPIntegratedClient
+from ElementsKernel import Logging
+
+try:
+    from astropy.vo.samp import SAMPIntegratedClient
+except ImportError:
+    from pyvo.samp import SAMPIntegratedClient
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 import PhzCLI.TableUtils as tut
+
+logger = Logging.getLogger('PhosphorosPlotSpecZComparison')
 
 #
 #-------------------------------------------------------------------------------
@@ -19,13 +44,11 @@ import PhzCLI.TableUtils as tut
 def read_specz_catalog(filename, id_col, specz_col):
     specz_cat = tut.read_table(filename)
     if not id_col in specz_cat.colnames:
-        print('ERROR : Spec-z catalog does not have column with name', id_col)
-        exit(-1)
+        raise ValueError('ERROR : Spec-z catalog does not have column with name {}'.format(id_col))
     if not id_col == 'ID':
         specz_cat.rename_column(id_col, 'ID')
     if not specz_col in specz_cat.colnames:
-        print('ERROR : Spec-z catalog does not have column with name', specz_col)
-        exit(-1)
+        raise ValueError('ERROR : Spec-z catalog does not have column with name {}'.format(specz_col))
     if not specz_col == 'SPECZ':
         specz_cat.rename_column(specz_col, 'SPECZ')
     return specz_cat
@@ -60,7 +83,7 @@ def get_pdf_bins_from_comment(comment_lines, parameter):
 #
 
 def read_pdfs(catalog, out_dir):
-    print('Loading the 1D-PDFs...')
+    logger.info('Loading the 1D-PDFs...')
     filename_map = {'SED':'pdf_sed.fits', 'REDDENING-CURVE':'pdf_red_curve.fits', 'EBV':'pdf_ebv.fits', 'Z':'pdf_z.fits',
                     'LIKELIHOOD-SED':'likelihood_pdf_sed.fits', 'LIKELIHOOD-REDDENING-CURVE':'likelihood_pdf_red_curve.fits',
                     'LIKELIHOOD-EBV':'likelihood_pdf_ebv.fits', 'LIKELIHOOD-Z':'likelihood_pdf_z.fits'}
@@ -72,15 +95,14 @@ def read_pdfs(catalog, out_dir):
             key_comment = 'COMMENT'
             if key_comment not in catalog.meta.keys():
                 key_comment = 'comments'
-
-            
             return parameter, get_pdf_bins_from_comment(catalog.meta[key_comment], parameter), catalog[parameter+'-1D-PDF']
+
         elif os.path.exists(out_dir+'/'+filename_map[parameter]):
-            print('    ' + parameter + ': Reading file ' + out_dir+'/'+filename_map[parameter])
+            logger.info('    ' + parameter + ': Reading file ' + out_dir+'/'+filename_map[parameter])
             hdus = fits.open(out_dir+'/'+filename_map[parameter])
             return parameter, hdus[1].data[hdus[1].columns[0].name], [hdus[s['Index']+1].data['Probability'] for s in catalog]
         else:
-            print('    ' + parameter + ': No 1D PDF found')
+            logger.error('    ' + parameter + ': No 1D PDF found')
             return None
     
     result = [read(p) for p in ['SED', 'REDDENING-CURVE', 'EBV', 'Z',
@@ -421,20 +443,23 @@ class SampUpdater(object):
 
 ################## MAIN ###########
 
-if __name__ == '__main__':
+def defineSpecificProgramOptions():
+    """
+    @brief Allows to define the (command line and configuration file) options
+    specific to this program
 
-    import argparse
-    
-    usage = """
-            usage: %prog [options] \n           
-            
+    @details
+        See the Elements documentation for more details.
+    @return
+        An  ArgumentParser.
+    """
+    description = """
             Computes the standard deviation of [ (photZ - specZ) / 1+specZ ] and
             the outliers fraction as:
                 outliers =  (photZ - specZ) / 1+specZ > 0.15  
             and the mean, median and displays an histogram of outliers
-   
-            """ 
-    parser = argparse.ArgumentParser(usage, description=__doc__)
+            """
+    parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument('-scat', '--specz-catalog', type=str, required=True, help='Catalog file containing the spec-z')
     parser.add_argument('-sid', '--specz-cat-id', type=str, default='ID', help='Spec-z catalog ID column')
@@ -444,14 +469,22 @@ if __name__ == '__main__':
     parser.add_argument("-nd", "--no-display", action="store_true", default=False, help="Disables the plot window")
     parser.add_argument("-samp", "--samp", action="store_true", default=False, help="Enables communication with other SAMP applications")
 
-    args = parser.parse_args()
-    
+    return parser
+
+
+def mainMethod(args):
+    """
+    @brief The "main" method.
+    @details
+        This method is the entry point to the program. In this sense, it is
+        similar to a main (and it is why it is called mainMethod()).
+    """
     specz_cat = read_specz_catalog(args.specz_catalog, args.specz_cat_id, args.specz_column)
     
     phos_cat = read_phosphoros_catalog(args.phosphoros_output_dir)
     
     # merge the catalogs
-    print('Merging the catalogs')
+    logger.info('Merging the catalogs')
     catalog = table.join(specz_cat, phos_cat, keys='ID')
     
     specz = catalog['SPECZ']
