@@ -3,6 +3,7 @@
 #include "PhzQtUI/FormConfiguration.h"
 #include "ui_FormConfiguration.h"
 #include "PhzQtUI/OptionModel.h"
+#include "PhzUtils/Multithreading.h"
 
 
 #include "FileUtils.h"
@@ -31,17 +32,17 @@ FormConfiguration::~FormConfiguration() {
 void FormConfiguration::on_btn_ToAnalysis_clicked() {
 
   navigateToComputeRedshift(do_need_reset);
-  do_need_reset=false;
+  do_need_reset = false;
 }
 void FormConfiguration::on_btn_ToCatalog_clicked() {
 
   navigateToCatalog(do_need_reset);
-  do_need_reset=false;
+  do_need_reset = false;
 }
 void FormConfiguration::on_btn_ToModel_clicked() {
 
   navigateToParameter(do_need_reset);
-  do_need_reset=false;
+  do_need_reset = false;
 }
 
 
@@ -106,20 +107,8 @@ void FormConfiguration::loadOptionPage(std::shared_ptr<OptionModel> option_model
 }
 
 void FormConfiguration::setGeneralControlEdition(bool edit) {
-    ui->btn_editGeneral->setEnabled(!edit);
     ui->btn_cancelGeneral->setEnabled(edit);
     ui->btn_saveGeneral->setEnabled(edit);
-
-    ui->btn_browseCat->setEnabled(edit);
-    ui->btn_browseAux->setEnabled(edit);
-    ui->btn_browseInter->setEnabled(edit);
-    ui->btn_browseRes->setEnabled(edit);
-
-    ui->btn_defCat->setEnabled(edit);
-    ui->btn_defAux->setEnabled(edit);
-    ui->btn_defInter->setEnabled(edit);
-    ui->btn_defRes->setEnabled(edit);
-    ui->gb_thread->setEnabled(edit);
 }
 
 void FormConfiguration::setCosmoControlEdition(bool edit) {
@@ -132,10 +121,7 @@ void FormConfiguration::setCosmoControlEdition(bool edit) {
   ui->btn_default_cosmo->setEnabled(edit);
 }
 
-void FormConfiguration::on_btn_editGeneral_clicked() {
-  startEdition(0);
-  setGeneralControlEdition(true);
-}
+
 
 
 void FormConfiguration::on_btn_cancelGeneral_clicked() {
@@ -161,6 +147,9 @@ void FormConfiguration::on_btn_browseCat_clicked() {
   dialog.selectFile(m_option_model_ptr->getCatPath());
   dialog.setFileMode(QFileDialog::DirectoryOnly);
   if (dialog.exec()) {
+      startEdition(0);
+      setGeneralControlEdition(true);
+
       QStringList fileNames = dialog.selectedFiles();
       ui->txt_catDir->setText(fileNames[0]);
       m_option_model_ptr->setCatalog(fileNames[0]);
@@ -173,6 +162,9 @@ void FormConfiguration::on_btn_browseAux_clicked() {
    dialog.selectFile(m_option_model_ptr->getAuxPath());
    dialog.setFileMode(QFileDialog::DirectoryOnly);
    if (dialog.exec()) {
+      startEdition(0);
+      setGeneralControlEdition(true);
+
       QStringList fileNames = dialog.selectedFiles();
       ui->txt_auxDir->setText(fileNames[0]);
       m_option_model_ptr->setAuxiliary(fileNames[0]);
@@ -185,6 +177,9 @@ void FormConfiguration::on_btn_browseInter_clicked() {
    dialog.selectFile(m_option_model_ptr->getInterPath());
    dialog.setFileMode(QFileDialog::DirectoryOnly);
    if (dialog.exec()) {
+       startEdition(0);
+       setGeneralControlEdition(true);
+
        QStringList fileNames = dialog.selectedFiles();
        ui->txt_interDir->setText(fileNames[0]);
        m_option_model_ptr->setIntermediary(fileNames[0]);
@@ -197,6 +192,9 @@ void FormConfiguration::on_btn_browseRes_clicked() {
    dialog.selectFile(m_option_model_ptr->getResPath());
    dialog.setFileMode(QFileDialog::DirectoryOnly);
    if (dialog.exec()) {
+       startEdition(0);
+       setGeneralControlEdition(true);
+
        QStringList fileNames = dialog.selectedFiles();
        ui->txt_resDir->setText(fileNames[0]);
        m_option_model_ptr->setResult(fileNames[0]);
@@ -204,29 +202,43 @@ void FormConfiguration::on_btn_browseRes_clicked() {
    }
 }
 
-void FormConfiguration::on_btn_defCat_clicked() {
+void FormConfiguration::on_gb_thread_clicked() {
+   startEdition(0);
+   setGeneralControlEdition(true);
+}
+
+void FormConfiguration::on_sb_thread_valueChanged(int) {
+   startEdition(0);
+   setGeneralControlEdition(true);
+}
+
+
+void FormConfiguration::on_btn_default_clicked(){
+  startEdition(0);
+  setGeneralControlEdition(true);
+
   m_option_model_ptr->setCatalog("");
   ui->txt_catDir->setText(m_option_model_ptr->getCatPath());
-  checkDirectories();
-}
-
-void FormConfiguration::on_btn_defAux_clicked() {
   m_option_model_ptr->setAuxiliary("");
   ui->txt_auxDir->setText(m_option_model_ptr->getAuxPath());
-  checkDirectories();
-}
-
-void FormConfiguration::on_btn_defInter_clicked() {
   m_option_model_ptr->setIntermediary("");
   ui->txt_interDir->setText(m_option_model_ptr->getInterPath());
+  m_option_model_ptr->setResult("");
+  ui->txt_resDir->setText(m_option_model_ptr->getResPath());
+
+  ui->gb_thread->setChecked(false);
+  ui->sb_thread->setValue(PhzUtils::getThreadNumber());
   checkDirectories();
 }
 
-void FormConfiguration::on_btn_defRes_clicked() {
-  m_option_model_ptr->setResult("");
-  ui->txt_resDir->setText(m_option_model_ptr->getResPath());
-  checkDirectories();
-}
+
+
+
+
+
+
+
+
 
 void FormConfiguration::on_btn_edit_cosmo_clicked() {
   startEdition(2);

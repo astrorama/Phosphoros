@@ -67,10 +67,7 @@ void on_btn_ToModel_clicked();
 void on_btn_ToPP_clicked();
 void on_btn_exit_clicked();
 
-/**
- * @brief SLOT on_btn_editGeneral_clicked: turn the root path section in edition.
- */
-void on_btn_editGeneral_clicked();
+
 
 /**
  * @brief SLOT on_btn_cancelGeneral_clicked: cancel the root path section edition.
@@ -104,24 +101,20 @@ void on_btn_browseInter_clicked();
 void on_btn_browseRes_clicked();
 
 /**
- * @brief SLOT Raised when the user click the Default Catalog button
+ * @brief SLOT Raised when the user click on the Reset to Default button
  */
-void on_btn_defCat_clicked();
+void on_btn_default_clicked();
 
 /**
- * @brief SLOT Raised when the user click the Default Aux Data button
+ * @brief SLOT Raised when the user check/uncheck the group box for the threads
  */
-void on_btn_defAux_clicked();
+void on_gb_thread_clicked();
 
 /**
- * @brief SLOT Raised when the user click the Default Intermediate button
+ * @brief SLOT Raised when the user change the number of threads value
  */
-void on_btn_defInter_clicked();
+void on_sb_thread_valueChanged(int);
 
-/**
- * @brief SLOT Raised when the user click the Default Result button
- */
-void on_btn_defRes_clicked();
 
 /**
  * @brief SLOT Raised when the user start Cosmology edition

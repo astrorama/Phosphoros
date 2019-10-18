@@ -189,9 +189,9 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="btn_editGeneral">
+          <widget class="QPushButton" name="btn_default">
            <property name="text">
-            <string>Edit</string>
+            <string>Reset to default</string>
            </property>
           </widget>
          </item>
@@ -304,20 +304,10 @@
          <item>
           <widget class="QPushButton" name="btn_browseCat">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_defCat">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Use Default</string>
            </property>
           </widget>
          </item>
@@ -359,20 +349,10 @@
          <item>
           <widget class="QPushButton" name="btn_browseAux">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_defAux">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Use Default</string>
            </property>
           </widget>
          </item>
@@ -414,20 +394,10 @@
          <item>
           <widget class="QPushButton" name="btn_browseInter">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_defInter">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Use Default</string>
            </property>
           </widget>
          </item>
@@ -469,20 +439,10 @@
          <item>
           <widget class="QPushButton" name="btn_browseRes">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_defRes">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Use Default</string>
            </property>
           </widget>
          </item>
@@ -498,7 +458,7 @@
        <item>
         <widget class="QGroupBox" name="gb_thread">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="title">
           <string>Override the Maximum Number of Threads</string>
