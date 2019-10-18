@@ -28,8 +28,46 @@ FormModelSet::~FormModelSet() {}
 
 void FormModelSet::updateSelection(){
 
-  ui->tableView_Set->selectRow(m_model_set_model_ptr->getSelectedRow());
+
+  logger.info()<< "Update page for parameter space "<<m_model_set_model_ptr->getSelectedModelSet().getName();
+
+  if (m_model_set_model_ptr->getSelectedRow()>=0){
+    // valid selection
+    const ModelSet& selected_model = m_model_set_model_ptr->getSelectedModelSet();
+    ui->txt_SetName->setText(QString::fromStdString(selected_model.getName()));
+
+    disconnect(ui->tableView_ParameterRule->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)), 0, 0);
+     ui->tableView_ParameterRule->loadParameterRules(
+             selected_model.getParameterRules(),
+             m_seds_repository,
+             m_redenig_curves_repository);
+
+     connect(ui->tableView_ParameterRule->selectionModel(),
+                                SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
+                                SLOT(rulesSelectionChanged(QModelIndex, QModelIndex)));
+
+
+     if (m_model_set_model_ptr->getSelectedModelSet().getParameterRules().size() > 0) {
+           ui->tableView_ParameterRule->selectRow(0);
+     }
+
+  } else {
+    // Not a valid selection
+
+    ui->txt_SetName->clear();
+    disconnect(ui->tableView_ParameterRule->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)), 0, 0);
+         ui->tableView_ParameterRule->loadParameterRules(std::map<int,ParameterRule>{},
+                 m_seds_repository,
+                 m_redenig_curves_repository);
+
+    connect(ui->tableView_ParameterRule->selectionModel(),
+                              SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
+                              SLOT(rulesSelectionChanged(QModelIndex, QModelIndex)));
+  }
+
 }
+
+
 
 
 void FormModelSet::loadSetPage(
@@ -42,47 +80,43 @@ void FormModelSet::loadSetPage(
     m_seds_repository = seds_repository;
     m_redenig_curves_repository = redenig_curves_repository;
 
-    disconnect(ui->tableView_Set->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)), 0, 0);
-    disconnect(ui->tableView_Set, SIGNAL(doubleClicked(QModelIndex)), 0, 0);
 
-    ui->tableView_Set->load(m_model_set_model_ptr);
-
-    connect(
-      ui->tableView_Set->selectionModel(),
-      SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
-      SLOT(setSelectionChanged(QModelIndex, QModelIndex)));
-    connect(
-      ui->tableView_Set,
-      SIGNAL(doubleClicked(QModelIndex)),
-      SLOT(setGridDoubleClicked(QModelIndex)));
-
-    ui->txt_SetName->clear();
-    ui->tableView_Set->clearSelection();
-
-    disconnect(ui->tableView_ParameterRule, SIGNAL(doubleClicked(QModelIndex)), 0, 0);
-    ui->tableView_ParameterRule->loadParameterRules(std::map<int, ParameterRule>{}, m_seds_repository, m_redenig_curves_repository);
-    connect(ui->tableView_ParameterRule,
-                    SIGNAL(doubleClicked(QModelIndex)),
-                    SLOT(parameterGridDoubleClicked(QModelIndex)));
+    ui->cb_selSpace->clear();
+    auto current_selection = m_model_set_model_ptr->getSelectedModelSet().getName();
+    int index = 0;
+    for (auto& model_name : m_model_set_model_ptr->getModelSetList()) {
+            ui->cb_selSpace->addItem(model_name);
+            if (current_selection == model_name.toStdString()) {
+                ui->cb_selSpace->setCurrentIndex(index);
+            }
+            ++index;
+   }
 
     updateSelection();
     setModelInView();
 }
 
+
+
+void FormModelSet::on_cb_selSpace_currentIndexChanged(const QString &) {
+  if (!m_diconnect_cb){
+    m_model_set_model_ptr->selectModelSet(ui->cb_selSpace->currentText());
+    updateSelection();
+  }
+}
+
 void  FormModelSet::setModelInEdition() {
-  ui->frm_nav->setEnabled(false);
+    ui->frm_nav->setEnabled(false);
     ui->btn_SetNew->setEnabled(false);
     ui->btn_SetDuplicate->setEnabled(false);
     ui->btn_SetDelete->setEnabled(false);
-    ui->btn_SetEdit->setEnabled(false);
     ui->btn_SetCancel->setEnabled(true);
     ui->btn_SetSave->setEnabled(true);
-    ui->btn_new_region->setEnabled(true);
     ui->btn_open_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
     ui->btn_duplicate_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
     ui->btn_delete_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
-    ui->txt_SetName->setEnabled(true);
-    ui->tableView_Set->setEnabled(false);
+
+
 }
 
 void  FormModelSet::setModelInView() {
@@ -92,14 +126,12 @@ void  FormModelSet::setModelInView() {
     ui->btn_open_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
     ui->btn_SetDuplicate->setEnabled(m_model_set_model_ptr->getSelectedRow() >= 0);
     ui->btn_SetDelete->setEnabled(m_model_set_model_ptr->getSelectedRow() >= 0);
-    ui->btn_SetEdit->setEnabled(m_model_set_model_ptr->getSelectedRow() >= 0);
     ui->btn_SetCancel->setEnabled(false);
     ui->btn_SetSave->setEnabled(false);
-    ui->btn_new_region->setEnabled(false);
-    ui->btn_duplicate_region->setEnabled(false);
-    ui->btn_delete_region->setEnabled(false);
-    ui->txt_SetName->setEnabled(false);
-    ui->tableView_Set->setEnabled(true);
+    ui->btn_open_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
+    ui->btn_duplicate_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
+    ui->btn_delete_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
+
 }
 
 
@@ -124,16 +156,35 @@ void FormModelSet::on_btn_exit_clicked() {
 }
 
 
+void FormModelSet::reload_cb(){
+  auto current_selection = m_model_set_model_ptr->getSelectedModelSet().getName();
+    m_diconnect_cb=true;
+    ui->cb_selSpace->clear();
+    m_diconnect_cb=false;
+    int index = 0;
+    for (auto& model_name : m_model_set_model_ptr->getModelSetList()) {
+           ui->cb_selSpace->addItem(model_name);
+           if (current_selection == model_name.toStdString()) {
+               ui->cb_selSpace->setCurrentIndex(index);
+           }
+           ++index;
+    }
+    updateSelection();
+}
+
+
+
 void FormModelSet::on_btn_SetNew_clicked() {
   m_model_set_model_ptr->newModelSet(false);
-  updateSelection();
+  reload_cb();
+
   m_setInsert = true;
   setModelInEdition();
 }
 
 void FormModelSet::on_btn_SetDuplicate_clicked() {
   m_model_set_model_ptr->newModelSet(true);
-  updateSelection();
+  reload_cb();
   m_setInsert = true;
   setModelInEdition();
 }
@@ -144,12 +195,12 @@ void FormModelSet::on_btn_SetDelete_clicked() {
                                 QString::fromStdString(m_model_set_model_ptr->getSelectedModelSet().getName()) +"' ?",
                                 QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes) {
     m_model_set_model_ptr->deleteSelected();
-    selectFromGrid();
+    reload_cb();
   }
 }
 
 void FormModelSet::setGridDoubleClicked(QModelIndex) {
-  on_btn_SetEdit_clicked();
+
 }
 
 void FormModelSet::on_btn_SetEdit_clicked() {
@@ -158,14 +209,7 @@ void FormModelSet::on_btn_SetEdit_clicked() {
 
 
 void FormModelSet::selectFromGrid() {
-  QItemSelectionModel *current_selection = ui->tableView_Set->selectionModel();
-  if (current_selection->hasSelection()) {
-    int row = current_selection->selectedRows().at(0).row();
-    m_model_set_model_ptr->selectModelSet(row);
-  } else {
-    m_model_set_model_ptr->selectModelSet(-1);
-  }
-  updateSelection();
+
 }
 
 
@@ -173,26 +217,22 @@ void FormModelSet::on_btn_SetCancel_clicked() {
     if (m_setInsert) {
       m_model_set_model_ptr->deleteSelected();
       m_setInsert = false;
+
     } else {
       m_model_set_model_ptr->cancelSelected();
-      ui->txt_SetName->setText(QString::fromStdString(m_model_set_model_ptr->getSelectedModelSet().getName()));
-      ui->tableView_ParameterRule->loadParameterRules(m_model_set_model_ptr->getSelectedModelSet().getParameterRules(),
-                            m_seds_repository,
-                            m_redenig_curves_repository);
-     disconnect(ui->tableView_ParameterRule->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)), 0, 0);
-     connect(ui->tableView_ParameterRule->selectionModel(),
-                                    SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
-                                    SLOT(rulesSelectionChanged(QModelIndex, QModelIndex)));
-  }
 
-  selectFromGrid();
-  setModelInView();
+   }
+
+   reload_cb();
+   setModelInView();
 }
 
 
 
 void FormModelSet::on_txt_SetName_textEdited(const QString& text) {
   m_model_set_model_ptr->setNameToSelected(text);
+
+  setModelInEdition();
 }
 
 
@@ -218,8 +258,8 @@ void FormModelSet::on_btn_SetSave_clicked() {
    }
 
    m_model_set_model_ptr->saveSelected();
+   reload_cb();
    setModelInView();
-   updateSelection();
 }
 
 
@@ -268,10 +308,6 @@ void FormModelSet::on_btn_open_region_clicked() {
   int refid = ui->tableView_ParameterRule->getSelectedRuleId();
   popUp->loadData(refid, ui->tableView_ParameterRule->getModel()->getParameterRules());
 
-  if (!ui->btn_SetSave->isEnabled()) {
-      popUp->setViewMode();
-  }
-
   connect(popUp.get(),
       SIGNAL(popupClosing(int, ParameterRule, bool)),
       SLOT(setEditionPopupClosing(int, ParameterRule, bool)));
@@ -317,6 +353,8 @@ void FormModelSet::on_btn_delete_region_clicked() {
                                    "Do you really want to delete the Sub-space '"+rule_name+"' ?",
                                    QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
          ui->tableView_ParameterRule->deletSelectedRule();
+         m_model_set_model_ptr->setParameterRulesToSelected(ui->tableView_ParameterRule->getModel()->getParameterRules());
+         setModelInEdition();
      }
 }
 
@@ -353,12 +391,11 @@ void FormModelSet::setEditionPopupClosing(int ref, ParameterRule rule, bool vali
       }
     }
 
-    if (!ui->btn_SetSave->isEnabled()) {
-       setModelInView();
-     } else {
-       setModelInEdition();
-       m_model_set_model_ptr->setParameterRulesToSelected(ui->tableView_ParameterRule->getModel()->getParameterRules());
-     }
+    m_model_set_model_ptr->setParameterRulesToSelected(ui->tableView_ParameterRule->getModel()->getParameterRules());
+
+
+
+    setModelInEdition();
  }
 }
 
