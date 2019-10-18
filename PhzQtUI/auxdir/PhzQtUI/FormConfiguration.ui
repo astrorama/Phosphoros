@@ -573,9 +573,12 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="btn_edit_cosmo">
+          <widget class="QPushButton" name="btn_default_cosmo">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
            <property name="text">
-            <string>Edit</string>
+            <string>Reset to default</string>
            </property>
           </widget>
          </item>
@@ -615,7 +618,7 @@
            <item row="0" column="1">
             <widget class="QLineEdit" name="txt_hubble_param">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -659,14 +662,14 @@
            <item row="1" column="1">
             <widget class="QLineEdit" name="txt_omega_matter">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
             </widget>
            </item>
            <item row="2" column="1">
             <widget class="QLineEdit" name="txt_omega_lambda">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -689,16 +692,6 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_18">
-         <item>
-          <widget class="QPushButton" name="btn_default_cosmo">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Reset to default</string>
-           </property>
-          </widget>
-         </item>
          <item>
           <spacer name="horizontalSpacer_8">
            <property name="orientation">

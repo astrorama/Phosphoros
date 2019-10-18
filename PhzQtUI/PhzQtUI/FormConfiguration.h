@@ -113,13 +113,9 @@ void on_gb_thread_clicked();
 /**
  * @brief SLOT Raised when the user change the number of threads value
  */
-void on_sb_thread_valueChanged(int);
+void on_sb_thread_valueChanged(int i);
 
 
-/**
- * @brief SLOT Raised when the user start Cosmology edition
- */
-void on_btn_edit_cosmo_clicked();
 
 /**
  * @brief SLOT Raised when the user cancel the cosmology edition
@@ -135,6 +131,21 @@ void on_btn_save_cosmo_clicked();
  * @brief SLOT Raised when the user click the default cosmology button
  */
 void on_btn_default_cosmo_clicked();
+
+/**
+ * @brief SLOT Raised when the user change the value of the hubble parameter
+ */
+void on_txt_hubble_param_textEdited(const QString &);
+
+/**
+ * @brief SLOT Raised when the user change the value of Omega matter parameter
+ */
+void on_txt_omega_matter_textEdited(const QString &);
+
+/**
+ * @brief SLOT Raised when the user change the value of the Omega Lambda parameter
+ */
+void on_txt_omega_lambda_textEdited(const QString &);
 
 /**
  * @brief SLOT Lock the user to the current tab.

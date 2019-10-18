@@ -112,13 +112,8 @@ void FormConfiguration::setGeneralControlEdition(bool edit) {
 }
 
 void FormConfiguration::setCosmoControlEdition(bool edit) {
-  ui->txt_hubble_param->setEnabled(edit);
-  ui->txt_omega_matter->setEnabled(edit);
-  ui->txt_omega_lambda->setEnabled(edit);
-  ui->btn_edit_cosmo->setEnabled(!edit);
   ui->btn_cancel_cosmo->setEnabled(edit);
   ui->btn_save_cosmo->setEnabled(edit);
-  ui->btn_default_cosmo->setEnabled(edit);
 }
 
 
@@ -207,9 +202,11 @@ void FormConfiguration::on_gb_thread_clicked() {
    setGeneralControlEdition(true);
 }
 
-void FormConfiguration::on_sb_thread_valueChanged(int) {
-   startEdition(0);
-   setGeneralControlEdition(true);
+void FormConfiguration::on_sb_thread_valueChanged(int i) {
+  if (i!= m_option_model_ptr->getThreadNb()) {
+     startEdition(0);
+     setGeneralControlEdition(true);
+  }
 }
 
 
@@ -234,17 +231,6 @@ void FormConfiguration::on_btn_default_clicked(){
 
 
 
-
-
-
-
-
-
-void FormConfiguration::on_btn_edit_cosmo_clicked() {
-  startEdition(2);
-  setCosmoControlEdition(true);
-}
-
 void FormConfiguration::on_btn_cancel_cosmo_clicked() {
   m_option_model_ptr->cancel();
   loadCosmoValues();
@@ -260,11 +246,33 @@ void FormConfiguration::on_btn_save_cosmo_clicked() {
 }
 
 void FormConfiguration::on_btn_default_cosmo_clicked() {
+  startEdition(2);
+  setCosmoControlEdition(true);
   m_option_model_ptr->setHubble("-1");
   m_option_model_ptr->setOmegaM("-1");
   m_option_model_ptr->setOmegaLambda("-1");
   loadCosmoValues();
 }
+
+
+void FormConfiguration::on_txt_hubble_param_textEdited(const QString &){
+  startEdition(2);
+  setCosmoControlEdition(true);
+}
+
+void FormConfiguration::on_txt_omega_matter_textEdited(const QString &){
+  startEdition(2);
+  setCosmoControlEdition(true);
+}
+
+void FormConfiguration::on_txt_omega_lambda_textEdited(const QString &){
+  startEdition(2);
+  setCosmoControlEdition(true);
+}
+
+
+
+
 
 void FormConfiguration::startEdition(int i) {
   for (int j=0; j < 3; ++j) {
