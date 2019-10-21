@@ -199,18 +199,6 @@ void FormModelSet::on_btn_SetDelete_clicked() {
   }
 }
 
-void FormModelSet::setGridDoubleClicked(QModelIndex) {
-
-}
-
-void FormModelSet::on_btn_SetEdit_clicked() {
-    setModelInEdition();
-}
-
-
-void FormModelSet::selectFromGrid() {
-
-}
 
 
 void FormModelSet::on_btn_SetCancel_clicked() {
@@ -260,32 +248,6 @@ void FormModelSet::on_btn_SetSave_clicked() {
    m_model_set_model_ptr->saveSelected();
    reload_cb();
    setModelInView();
-}
-
-
-void FormModelSet::setSelectionChanged(QModelIndex new_index, QModelIndex) {
-    if (new_index.isValid()) {
-      m_model_set_model_ptr->selectModelSet(new_index.row());
-    } else {
-      m_model_set_model_ptr->selectModelSet(-1);
-    }
-
-    ui->txt_SetName->setText(QString::fromStdString(m_model_set_model_ptr->getSelectedModelSet().getName()));
-    disconnect(ui->tableView_ParameterRule->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)), 0, 0);
-    ui->tableView_ParameterRule->loadParameterRules(
-            m_model_set_model_ptr->getSelectedModelSet().getParameterRules(),
-            m_seds_repository,
-            m_redenig_curves_repository);
-
-    connect(ui->tableView_ParameterRule->selectionModel(),
-                               SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
-                               SLOT(rulesSelectionChanged(QModelIndex, QModelIndex)));
-
-    if (m_model_set_model_ptr->getSelectedModelSet().getParameterRules().size() > 0) {
-          ui->tableView_ParameterRule->selectRow(0);
-    }
-
-    setModelInView();
 }
 
 

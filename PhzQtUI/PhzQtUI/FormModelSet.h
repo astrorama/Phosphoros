@@ -63,16 +63,13 @@ void on_btn_exit_clicked();
 
     void on_cb_selSpace_currentIndexChanged(const QString &);
 
-    void setSelectionChanged(QModelIndex, QModelIndex);
     void rulesSelectionChanged(QModelIndex, QModelIndex);
 
-    void setGridDoubleClicked(QModelIndex);
 
     void parameterGridDoubleClicked(QModelIndex);
 
     void setEditionPopupClosing(int,ParameterRule,bool);
 
-    void on_btn_SetEdit_clicked();
 
     void on_btn_SetCancel_clicked();
 
