@@ -100,3 +100,26 @@ void FormAuxDataManagement::on_btn_ShowFilesLumFunc_clicked() {
 
 }
 }
+
+
+
+/* Copied from Dialog configuration: to be used as template here
+void DialogModelSet::addButtonsToSedItem(QStandardItem* item, SedTreeModel* treeModel_sed){
+  if (treeModel_sed->canAddEmissionLineToGroup(item)) {
+             auto name = treeModel_sed->getFullGroupName(item);
+
+             MessageButton *cartButton = new MessageButton(name, "Add Emission Line to SEDs");
+             m_message_buttons.push_back(cartButton);
+
+             auto index = item->index().sibling(item->index().row(), 1);
+
+             ui->treeView_Sed->setIndexWidget(index, cartButton);
+
+             connect(cartButton, SIGNAL(MessageButtonClicked(const QString&)), this,
+                             SLOT(addEmissionLineButtonClicked(const QString&)));
+  }
+
+  for (int i = 0; i < item->rowCount(); i++) {
+    addButtonsToSedItem(item->child(i),treeModel_sed);
+  }
+}*/
