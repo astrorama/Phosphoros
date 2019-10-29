@@ -25,15 +25,17 @@ import astropy.table as table
 import astropy.io.fits as fits
 from ElementsKernel import Logging
 
-try:
-    from astropy.vo.samp import SAMPIntegratedClient
-except ImportError:
-    from pyvo.samp import SAMPIntegratedClient
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 import PhzCLI.TableUtils as tut
+
+# Astropy >= 2.0rc1
+try:
+    from astropy.samp import SAMPIntegratedClient
+except ImportError:
+    from astropy.vo.samp import SAMPIntegratedClient
 
 logger = Logging.getLogger('PhosphorosPlotSpecZComparison')
 
