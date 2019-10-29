@@ -376,7 +376,7 @@ class SampUpdater(object):
         self.topcat = None
         self.update_listeners = update_listeners
         try:
-            self.client = SAMPIntegratedClient()
+            self.client = SAMPIntegratedClient(name='PhosphorosPlotSpecZComparison')
             self.client.connect()
             for c in self.client.get_registered_clients():
                 meta = self.client.get_metadata(c)
@@ -431,14 +431,14 @@ class SampUpdater(object):
 
     def rowNotification(self, private_key, sender_id, mtype, params, extra):
         url = params['url']
-        if not url in self.table_urls:
+        if url not in self.table_urls:
             return
         i = self.table_urls.index(url)
         row = int(params['row'])
         id = self.orig_ids[i][row]
         global_row = self.global_ids_reverse[id]
         for l in self.update_listeners:
-            if getattr(l, 'updateSelectedRow', None) != None:
+            if getattr(l, 'updateSelectedRow', None) is not None:
                 l.updateSelectedRow(global_row)
 
 
@@ -506,5 +506,9 @@ def mainMethod(args):
         samp = SampUpdater(args.specz_catalog, args.specz_cat_id, args.phosphoros_output_dir, catalog, [fig1] + pdf_plots)
     
     selector = Selector([fig1, samp] + pdf_plots, catalog)
-    
-    plt.show()
+
+    try:
+        plt.show()
+    finally:
+        if samp:
+            samp.client.disconnect()
