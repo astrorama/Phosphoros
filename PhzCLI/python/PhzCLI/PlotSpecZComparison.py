@@ -190,11 +190,11 @@ class SpeczPhotozPlot(object):
         
     def _createSelected(self):
         self.id_text = self.spzPhzAx.text(0.05, 0.95, 'selected ID:', transform=self.spzPhzAx.transAxes, va='top')
-        self.selected1 = self.spzPhzAx.scatter(0, 0, c='none', marker='o', s=60, edgecolors='#00EE00', linewidth='2', visible=False)
-        self.selected2 = self.deltaZAx.scatter(0, 0, c='none', marker='o', s=60, edgecolors='#00EE00', linewidth='2', visible=False)
+        self.selected1 = self.spzPhzAx.scatter(0., 0., c='none', marker='o', s=60., edgecolors='#00EE00', linewidth=2., visible=False)
+        self.selected2 = self.deltaZAx.scatter(0., 0., c='none', marker='o', s=60., edgecolors='#00EE00', linewidth=2., visible=False)
     
     def _updatePlots(self):
-        if self.selected_index == None:
+        if self.selected_index is None:
             return []
         self.id_text.set_text('selected ID: %d' % self.ids[self.selected_index])
         self.selected1.set_visible(True)
@@ -262,10 +262,9 @@ def displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOut
 class PdfPlot(object):
     
     def _updatePlot(self):
-        if self.selected_index == None:
+        if self.selected_index is None:
             return []
         
-        row = self.catalog[self.selected_index]
         self.lines.set_ydata(self.pdf_list[self.selected_index])
         self.ax.set_ylim(0, max(self.pdf_list[self.selected_index])*1.05)
         
@@ -279,7 +278,7 @@ class PdfPlot(object):
             self.speczText.set_visible(True)
             self.speczText.set_x(specz)
             self.speczText.set_y(y_lim[0]+.9*y_size)
-            phz = catalog[self.selected_index][self.phz_col]
+            phz = self.catalog[self.selected_index][self.phz_col]
             self.phzLine.set_visible(True)
             self.phzLine.set_xdata([phz, phz])
             self.phzLine.set_ydata(y_lim)
