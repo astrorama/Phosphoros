@@ -79,7 +79,7 @@
          <string>Define the Mapping between the catalog file(s) columns and the filters</string>
         </property>
         <property name="text">
-         <string>Catalog Type</string>
+         <string>Catalog Setup</string>
         </property>
        </widget>
       </item>
@@ -324,8 +324,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>620</width>
-            <height>358</height>
+            <width>418</width>
+            <height>164</height>
            </rect>
           </property>
           <attribute name="label">
@@ -483,7 +483,7 @@
             <x>0</x>
             <y>0</y>
             <width>627</width>
-            <height>345</height>
+            <height>215</height>
            </rect>
           </property>
           <attribute name="label">
@@ -624,7 +624,7 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>-23</y>
+            <y>0</y>
             <width>725</width>
             <height>368</height>
            </rect>
@@ -1073,8 +1073,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>620</width>
-            <height>358</height>
+            <width>537</width>
+            <height>158</height>
            </rect>
           </property>
           <attribute name="label">

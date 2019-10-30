@@ -125,6 +125,7 @@ public slots:
   void setRaColumnToSelected(QString new_name);
   void setDecColumnToSelected(QString new_name);
   void setGalEbvColumnToSelected(QString new_name);
+  void setRefZColumnToSelected(QString new_name);
   void setFiltersToSelected(std::vector<FilterMapping> new_filters);
   void setColumnListToSelected(std::set<std::string> new_list);
   void setDefaultCatalogToSelected(QString new_name);

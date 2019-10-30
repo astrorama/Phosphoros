@@ -28,10 +28,8 @@ FormModelSet::~FormModelSet() {}
 
 void FormModelSet::updateSelection(){
 
-
-  logger.info()<< "Update page for parameter space "<<m_model_set_model_ptr->getSelectedModelSet().getName();
-
   if (m_model_set_model_ptr->getSelectedRow()>=0){
+    logger.info()<< "Update page for parameter space "<<m_model_set_model_ptr->getSelectedModelSet().getName();
     // valid selection
     const ModelSet& selected_model = m_model_set_model_ptr->getSelectedModelSet();
     ui->txt_SetName->setText(QString::fromStdString(selected_model.getName()));
@@ -106,12 +104,14 @@ void FormModelSet::on_cb_selSpace_currentIndexChanged(const QString &) {
 }
 
 void  FormModelSet::setModelInEdition() {
+    ui->cb_selSpace->setEnabled(false);
     ui->frm_nav->setEnabled(false);
     ui->btn_SetNew->setEnabled(false);
     ui->btn_SetDuplicate->setEnabled(false);
     ui->btn_SetDelete->setEnabled(false);
     ui->btn_SetCancel->setEnabled(true);
     ui->btn_SetSave->setEnabled(true);
+    ui->btn_new_region->setEnabled(m_model_set_model_ptr->getSelectedRow() >= 0);
     ui->btn_open_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
     ui->btn_duplicate_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
     ui->btn_delete_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
@@ -121,6 +121,8 @@ void  FormModelSet::setModelInEdition() {
 
 void  FormModelSet::setModelInView() {
     m_setInsert = false;
+
+    ui->cb_selSpace->setEnabled(true);
     ui->frm_nav->setEnabled(true);
     ui->btn_SetNew->setEnabled(true);
     ui->btn_open_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
@@ -128,6 +130,8 @@ void  FormModelSet::setModelInView() {
     ui->btn_SetDelete->setEnabled(m_model_set_model_ptr->getSelectedRow() >= 0);
     ui->btn_SetCancel->setEnabled(false);
     ui->btn_SetSave->setEnabled(false);
+    ui->txt_SetName->setEnabled(m_model_set_model_ptr->getSelectedRow() >= 0);
+    ui->btn_new_region->setEnabled(m_model_set_model_ptr->getSelectedRow() >= 0);
     ui->btn_open_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
     ui->btn_duplicate_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
     ui->btn_delete_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());

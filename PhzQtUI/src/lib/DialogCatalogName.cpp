@@ -33,9 +33,43 @@ void DialogCatalogName::setExistingNames( std::vector<std::string> existing_name
   m_existing_names = std::move(existing_names);
 }
 
+
+void DialogCatalogName::setDefaultCopiedFile(std::string default_file){
+   m_file = default_file;
+   ui->txt_file_name->setText(QString::fromStdString(m_file));
+}
+
+
+std::string DialogCatalogName::getFilePath() const{
+  return m_file;
+}
+
+
+void DialogCatalogName::on_btn_empty_clicked(){
+  m_file = "";
+  ui->txt_file_name->setText(QString::fromStdString(m_file));
+}
+
+
+void DialogCatalogName::on_btn_import_clicked(){
+  QFileDialog dialog(this);
+   dialog.selectFile(
+         QString::fromStdString(FileUtils::getCatalogRootPath(true, "")));
+
+   dialog.setFileMode(QFileDialog::ExistingFile);
+   if (dialog.exec()) {
+         QStringList fileNames = dialog.selectedFiles();
+         m_file = fileNames[0].toStdString();
+         ui->txt_file_name->setText(QString::fromStdString(m_file));
+     }
+}
+
+
+
 void DialogCatalogName::on_btn_cancel_clicked(){
   reject();
 }
+
 
 void DialogCatalogName::on_btn_create_clicked(){
   m_name = ui->txt_name->text().trimmed().toStdString();
