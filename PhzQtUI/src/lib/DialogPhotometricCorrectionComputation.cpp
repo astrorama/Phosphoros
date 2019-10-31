@@ -47,10 +47,11 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
     string id_column, string model, string grid,
     std::list<FilterMapping> selected_filters,
     std::list<std::string> excluded_filters,
-    std::string default_catalog_path,
+    std::string default_z_column,
     std::map<std::string, boost::program_options::variable_value> run_option,
     double non_detection) {
   m_id_column = id_column;
+  m_refZ_column = default_z_column;
   m_selected_filters = selected_filters;
   m_excluded_filters = excluded_filters;
   m_run_option = run_option;
@@ -70,11 +71,7 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
 
   ui->listView_Filter->setModel(grid_model);
 
-  // default catalog
 
- if (loadTestCatalog(QString::fromStdString(default_catalog_path),false)){
-   ui->txt_catalog->setText(QString::fromStdString(default_catalog_path));
- }
   //default correction name
   string default_file_name = survey+"_"+model
       +"_"+ui->cb_SelectionMethod->currentText().toStdString();
@@ -138,11 +135,22 @@ bool DialogPhotometricCorrectionComputation::loadTestCatalog(QString file_name, 
     } else {
       ui->txt_catalog->setText(file_name);
       ui->cb_SpectroColumn->clear();
+
+      int index = 0;
+      int selected_index = -1;
+
       for (auto& column_pair : file_columns) {
         if (column_pair.second) {
-          ui->cb_SpectroColumn->addItem(
-              QString::fromStdString(column_pair.first));
+          ui->cb_SpectroColumn->addItem(QString::fromStdString(column_pair.first));
+          if (m_refZ_column == column_pair.first) {
+            selected_index = index;
+          }
+          index++;
         }
+      }
+
+      if (selected_index >= 0) {
+        ui->cb_SpectroColumn->setCurrentIndex(selected_index);
       }
 
       return true;
@@ -311,6 +319,7 @@ void DialogPhotometricCorrectionComputation::runFinished() {
 void DialogPhotometricCorrectionComputation::on_bt_Cancel_clicked() {
   if (m_computing) {
     PhzUtils::getStopThreadsFlag() = true;
+    m_computing = false;
   } else {
     this->reject();
   }

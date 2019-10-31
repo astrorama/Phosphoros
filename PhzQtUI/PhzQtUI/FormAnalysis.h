@@ -163,7 +163,7 @@ private:
     void saveCopiedColumnToCatalog();
 
 
-    void fillCbColumns(std::set<std::string> columns);
+    void fillCbColumns(std::set<std::string> columns, std::string default_col);
 
     void loadLuminosityPriors();
 

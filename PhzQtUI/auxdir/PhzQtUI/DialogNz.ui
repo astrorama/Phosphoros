@@ -14,7 +14,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>N(z) Prior Coonfiguration</string>
+   <string>N(z) Prior Configuration</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -96,7 +96,7 @@
           </font>
          </property>
          <property name="text">
-          <string>B filter</string>
+          <string>B filter :</string>
          </property>
         </widget>
        </item>
@@ -122,7 +122,7 @@
           </font>
          </property>
          <property name="text">
-          <string>I filter</string>
+          <string>I filter :</string>
          </property>
         </widget>
        </item>

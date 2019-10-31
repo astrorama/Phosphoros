@@ -1,10 +1,15 @@
 #include <QStandardItemModel>
 #include <QMessageBox>
 #include <QFileInfo>
+#include <QFile>
+#include <QTextStream>
 #include <QDir>
 #include <functional>
 #include <QFileDialog>
 #include <boost/program_options.hpp>
+
+#include <fstream>
+#include <iostream>
 
 
 #include "ElementsKernel/Exception.h"
@@ -27,6 +32,7 @@
 #include "PhzQtUI/DialogLuminosityPrior.h"
 #include "PhzQtUI/DialogOutputColumnSelection.h"
 #include "PhzQtUI/DialogNz.h"
+#include "PhzQtUI/DialogZeroPointName.h"
 
 #include "PhzUITools/ConfigurationWriter.h"
 #include "PhzUITools/CatalogColumnReader.h"
@@ -62,9 +68,7 @@ void FormAnalysis::loadAnalysisPage(
 
   updateSelection();
 
-  //
-  ui->cb_z_col->clear();
-  ui->cb_z_col->addItem("");
+
 }
 
 
@@ -206,14 +210,24 @@ void FormAnalysis::updateGalCorrGridSelection() {
   } catch (Elements::Exception&) {}
 }
 
-void FormAnalysis::fillCbColumns(std::set<std::string> columns) {
+void FormAnalysis::fillCbColumns(std::set<std::string> columns, std::string default_col) {
    ui->cb_z_col->clear();
    ui->cb_z_col->addItem("");
+   int index = 1;
+   int selected_index = -1;
    for (auto item : columns) {
      ui->cb_z_col->addItem(QString::fromStdString(item));
+     if (item == default_col) {
+       selected_index = index;
+     }
+     index++;
    }
 
-   ui->cb_z_col->setEnabled(true);
+   if (selected_index > 0) {
+     ui->cb_z_col->setCurrentIndex(selected_index);
+   }
+
+   ui->cb_z_col->setEnabled(ui->gb_fix_z->isChecked());
 }
 
 void FormAnalysis::updateCorrectionSelection() {
@@ -228,72 +242,64 @@ void FormAnalysis::updateCorrectionSelection() {
 }
 
 void FormAnalysis::adjustPhzGridButtons(bool enabled) {
-  bool name_ok = checkGridSelection(false, true);
-  ui->btn_GetConfigGrid->setEnabled(enabled && name_ok);
-  ui->btn_RunGrid->setEnabled(enabled && name_ok);
-  QString tool_tip = "";
-
-  if (!name_ok) {
-    ui->cb_CompatibleGrid->lineEdit()->setStyleSheet(
-        "QLineEdit { color: red }");
-    setToolBoxButtonColor(ui->toolBox, 0, Qt::red);
-    tool_tip =
-        "Please enter a valid grid name in order to compute the Grid or export the corresponding configuration.";
-  } else if (!checkGridSelection(true, false)) {
-    ui->cb_CompatibleGrid->lineEdit()->setStyleSheet(
-        "QLineEdit { color: orange }");
-    setToolBoxButtonColor(ui->toolBox, 0, QColor("orange"));
-
-  } else {
-    ui->cb_CompatibleGrid->lineEdit()->setStyleSheet(
-        "QLineEdit { color: black }");
-    setToolBoxButtonColor(ui->toolBox, 0, Qt::black);
-  }
-  ui->btn_GetConfigGrid->setToolTip(tool_tip);
-  ui->btn_RunGrid->setToolTip(tool_tip);
+  adjustGalCorrGridButtons(enabled);
 
 }
 
 void FormAnalysis::adjustGalCorrGridButtons(bool enabled) {
   int toolbox_index = 1;
-  bool name_ok = checkGalacticGridSelection(false, true);
+
+  bool name_ok = checkGridSelection(false, true);
+  ui->btn_GetConfigGrid->setEnabled(enabled && name_ok);
+  ui->btn_RunGrid->setEnabled(enabled && name_ok);
+  QString tool_tip = "";
+
+  QColor tab_color = Qt::black;
+
+  if (!name_ok) {
+    ui->cb_CompatibleGrid->lineEdit()->setStyleSheet("QLineEdit { color: red }");
+    tab_color = Qt::red;
+    tool_tip = "Please enter a valid grid name in order to compute the Grid or export the corresponding configuration.";
+  } else if (!checkGridSelection(true, false)) {
+    ui->cb_CompatibleGrid->lineEdit()->setStyleSheet("QLineEdit { color: orange }");
+    tab_color = QColor("orange");
+  } else {
+    ui->cb_CompatibleGrid->lineEdit()->setStyleSheet("QLineEdit { color: black }");
+  }
+  ui->btn_GetConfigGrid->setToolTip(tool_tip);
+  ui->btn_RunGrid->setToolTip(tool_tip);
+
+
+  name_ok = checkGalacticGridSelection(false, true);
   bool valid_model_grid = checkGridSelection(true, false);
   bool needed = !ui->rb_gc_off->isChecked();
   ui->cb_CompatibleGalCorrGrid->setEnabled(needed && enabled);
   ui->btn_GetGalCorrConfigGrid->setEnabled(needed && enabled && name_ok);
   ui->btn_RunGalCorrGrid->setEnabled(needed && enabled && valid_model_grid && name_ok);
-  QString tool_tip = "";
+  QString tool_tip_mw = "";
   if (!needed) {
-    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet(
-           "QLineEdit { color: black }");
-       setToolBoxButtonColor(ui->toolBox, toolbox_index, Qt::black);
-       tool_tip =
-              "With 'Correction type' set to 'OFF' there is no need to generate this grid.";
+    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet("QLineEdit { color: black }");
+    tool_tip_mw = "With 'Correction type' set to 'OFF' there is no need to generate this grid.";
   } else if (!name_ok) {
-    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet(
-        "QLineEdit { color: red }");
-    setToolBoxButtonColor(ui->toolBox, toolbox_index, Qt::red);
-    tool_tip =
-        "Please enter a valid grid name in order to compute the Grid or export the corresponding configuration.";
+    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet("QLineEdit { color: red }");
+    tab_color = Qt::red;
+    tool_tip_mw = "Please enter a valid grid name in order to compute the Grid or export the corresponding configuration.";
   } else if (!valid_model_grid) {
-    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet(
-        "QLineEdit { color: red }");
-    setToolBoxButtonColor(ui->toolBox, toolbox_index, Qt::red);
-    tool_tip =
-        "You should first generate the Model Grid before the Galactic Correction one.";
+    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet("QLineEdit { color: red }");
+    tab_color = Qt::red;
+    tool_tip_mw = "You should first generate the Model Grid before the Galactic Correction one.";
   } else if (!checkGalacticGridSelection(true, false)) {
-    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet(
-        "QLineEdit { color: orange }");
-    setToolBoxButtonColor(ui->toolBox, toolbox_index, QColor("orange"));
-
+    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet("QLineEdit { color: orange }");
+    if (tab_color == Qt::black) {
+      tab_color = QColor("orange");
+    }
   } else {
-    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet(
-        "QLineEdit { color: black }");
-    setToolBoxButtonColor(ui->toolBox, toolbox_index, Qt::black);
+    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet("QLineEdit { color: black }");
   }
-  ui->btn_GetGalCorrConfigGrid->setToolTip(tool_tip);
-  ui->btn_RunGalCorrGrid->setToolTip(tool_tip);
+  ui->btn_GetGalCorrConfigGrid->setToolTip(tool_tip_mw);
+  ui->btn_RunGalCorrGrid->setToolTip(tool_tip_mw);
 
+  setToolBoxButtonColor(ui->toolBox, toolbox_index, tab_color);
 }
 
 void FormAnalysis::setComputeCorrectionEnable() {
@@ -694,6 +700,11 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 }
 
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getRunOptionMap() {
+  std::string yes_flag = "YES";
+  std::string no_flag = "NO";
+  std::string max_flag = "MAX";
+  std::string bayesian_flag = "BAYESIAN";
+  double one = 1.0;
 
   auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
   SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
@@ -728,7 +739,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     options_map["dust-column-density-column-name"].value() =
         boost::any(selected_survey.getGalEbvColumn());
 
-    options_map["dust-map-sed-bpc"].value() = boost::any(1.0);
+    options_map["dust-map-sed-bpc"].value() = boost::any(one);
 
   } else if (ui->rb_gc_planck->isChecked()) {
     options_map["galactic-correction-coefficient-grid-file"].value() =
@@ -746,8 +757,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   if (has_Missing_data) {
     options_map["missing-photometry-flag"].value() = boost::any(non_detection);
   }
-  std::string yes_flag = "YES";
-  std::string no_flag = "NO";
+
 
   if (has_upper_limit) {
     options_map["enable-upper-limit"].value() = boost::any(yes_flag);
@@ -772,11 +782,9 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
         ui->cb_AnalysisCorrection->currentText().toStdString());
   }
 
-  options_map["axes-collapse-type"].value() = boost::any(
-      ui->cb_marginalization->currentText().toStdString());
+  options_map["axes-collapse-type"].value() = boost::any(bayesian_flag);
 
-  options_map["likelihood-axes-collapse-type"].value() = boost::any(
-        ui->cb_marginalization_likelihood->currentText().toStdString());
+  options_map["likelihood-axes-collapse-type"].value() = boost::any(max_flag);
 
 
   options_map["output-catalog-format"].value() = boost::any(
@@ -798,11 +806,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
      options_map["create-output-best-likelihood-model"].value() = boost::any(no_flag);
    }
 
-  if (ui->cb_normalize_pdf->isChecked()) {
-    options_map["output-pdf-normalized"].value() = boost::any(yes_flag);
-      } else {
-        options_map["output-pdf-normalized"].value() = boost::any(no_flag);
-      }
+  options_map["output-pdf-normalized"].value() = boost::any(yes_flag);
+
 
   if (ui->cb_gen_likelihood->isChecked()) {
    options_map["create-output-likelihoods"].value() = boost::any(yes_flag);
@@ -818,15 +823,15 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     auto& lum_prior_config = m_prior_config.at(lum_prior_name);
     auto lum_prior_option = lum_prior_config.getConfigOptions();
     options_map.insert(lum_prior_option.begin(), lum_prior_option.end());
-    options_map["luminosity-prior-effectiveness"].value() = boost::any(ui->dsp_eff_lum->value());
+    options_map["luminosity-prior-effectiveness"].value() = boost::any(one);
 
     options_map["volume-prior"].value() = boost::any(yes_flag);
-    options_map["volume-prior-effectiveness"].value() = boost::any(ui->dsp_eff_lum->value());
+    options_map["volume-prior-effectiveness"].value() = boost::any(one);
   }
 
   if (ui->rb_volumePrior->isChecked()) {
     options_map["volume-prior"].value() = boost::any(yes_flag);
-    options_map["volume-prior-effectiveness"].value() = boost::any(ui->dsp_eff_vol->value());
+    options_map["volume-prior-effectiveness"].value() = boost::any(one);
   }
 
   if (ui->rb_nzPrior->isChecked()) {
@@ -840,7 +845,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
              ui->cb_AnalysisSurvey->currentText().toStdString(),
              ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorIFilter");
     options_map["Nz-prior_I_Filter"].value() = boost::any(nz_prior_i_filter);
-    options_map["Nz-prior-effectiveness"].value() = boost::any(ui->dsp_eff_nz->value());
+    options_map["Nz-prior-effectiveness"].value() = boost::any(one);
   }
 
 
@@ -1001,10 +1006,14 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   }
 
   // update the column of the default catalog file
-  fillCbColumns(selected_survey.getColumnList());
+  fillCbColumns(selected_survey.getColumnList(), selected_survey.getRefZColumn());
 
-  // push the default catalog
-  setInputCatalogName(selected_survey.getDefaultCatalogFile(), false);
+  // push the last used / default catalog
+  auto saved_cat = PreferencesUtils::getUserPreference(selected_survey.getName(),"LAST_USED_CAT");
+  if (saved_cat.length() == 0) {
+    saved_cat = selected_survey.getDefaultCatalogFile();
+  }
+  setInputCatalogName(saved_cat, false);
 
   // set the stored IGM
   auto saved_igm = PreferencesUtils::getUserPreference(selected_survey.getName(),
@@ -1018,17 +1027,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     }
   }
 
-  // set the stored Collapse
-  auto saved_collapse = PreferencesUtils::getUserPreference(selected_survey.getName(),
-      "Collapse");
-  if (saved_collapse.length() > 0) {
-    for (int i = 0; i < ui->cb_marginalization->count(); i++) {
-      if (ui->cb_marginalization->itemText(i).toStdString() == saved_collapse) {
-        ui->cb_marginalization->setCurrentIndex(i);
-        break;
-      }
-    }
-  }
+
 
   updateGridSelection();
   updateGalCorrGridSelection();
@@ -1162,6 +1161,7 @@ template<typename ReturnType, int I>
 
         PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
             "IGM", ui->cb_igm->currentText().toStdString());
+
       }
     }
     setRunAnnalysisEnable(true);
@@ -1251,18 +1251,50 @@ template<typename ReturnType, int I>
   }
 
   void FormAnalysis::on_cb_AnalysisCorrection_currentIndexChanged(
-      const QString &selectedText) {
-    ui->btn_editCorrections->setEnabled(selectedText.length() > 0);
+      const QString &) {
     setRunAnnalysisEnable(true);
   }
 
   void FormAnalysis::on_btn_editCorrections_clicked() {
-    std::unique_ptr<DialogPhotCorrectionEdition> popup(new DialogPhotCorrectionEdition());
-    popup->setCorrectionsFile(
-        ui->cb_AnalysisSurvey->currentText().toStdString(),
-        ui->cb_AnalysisCorrection->currentText().toStdString(),
-        getSelectedFilterMapping());
-    popup->exec();
+    bool open = true;
+    if (ui->cb_AnalysisCorrection->currentText().toStdString().length()==0) {
+      open = false;
+      std::unique_ptr<DialogZeroPointName> popupname(new DialogZeroPointName());
+
+      auto catalog = ui->cb_AnalysisSurvey->currentText().toStdString();
+      auto root_folder = FileUtils::getPhotCorrectionsRootPath(true, catalog);
+      popupname->setFolder(root_folder);
+      // prompt for new name
+      if (popupname->exec() == QDialog::Accepted) {
+          // create file with correction to 1
+          std::string path = root_folder + "/" + popupname->getName();
+          logger.info() << "Creating Zero-Point correction file " << path;
+          QFile file(QString::fromStdString(path));
+          if (file.open(QIODevice::WriteOnly | QIODevice::Text)){
+            QTextStream out(&file);
+            out << "# Column: Filter string\n"
+                << "# Column: Correction double\n\n"
+                << "#  Filter Correction\n\n";
+
+
+            for (auto& filter : getSelectedFilterMapping()) {
+              out << QString::fromStdString(filter.getFilterFile() ) << "     1.0\n";
+            }
+            file.close();
+            onCorrectionComputed(QString::fromStdString(popupname->getName()));
+            open = true;
+          }
+      }
+    }
+
+    if (open) {
+      std::unique_ptr<DialogPhotCorrectionEdition> popup(new DialogPhotCorrectionEdition());
+      popup->setCorrectionsFile(
+          ui->cb_AnalysisSurvey->currentText().toStdString(),
+          ui->cb_AnalysisCorrection->currentText().toStdString(),
+          getSelectedFilterMapping());
+      popup->exec();
+    }
   }
 
   void FormAnalysis::on_btn_computeCorrections_clicked() {
@@ -1309,7 +1341,7 @@ template<typename ReturnType, int I>
         ui->cb_CompatibleGrid->currentText().toStdString(),
         getSelectedFilterMapping(),
         getExcludedFilters(),
-        selected_survey.getDefaultCatalogFile(),
+        selected_survey.getRefZColumn(),
         config_map,
         selected_survey.getNonDetection());
 
@@ -1566,6 +1598,8 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
   }
 
   ui->txt_inputCatalog->setText(QString::fromStdString(name));
+  PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+             "LAST_USED_CAT", name);
 
   auto column_reader = PhzUITools::CatalogColumnReader(ui->txt_inputCatalog->text().toStdString());
   auto col_set = column_reader.getColumnNames();
@@ -1702,8 +1736,6 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
       saveCopiedColumnToCatalog();
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
           "IGM", ui->cb_igm->currentText().toStdString());
-      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
-          "Collapse", ui->cb_marginalization->currentText().toStdString());
       if (ui->gb_corrections->isChecked()) {
         PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
             "Correction", ui->cb_AnalysisCorrection->currentText().toStdString());
@@ -1765,8 +1797,7 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
           "IGM", ui->cb_igm->currentText().toStdString());
 
-      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
-          "Collapse", ui->cb_marginalization->currentText().toStdString());
+
 
       if (ui->gb_corrections->isChecked()) {
         PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
