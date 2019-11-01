@@ -4,6 +4,7 @@
  *  Created on: Mar 6, 2015
  *      Author: fdubath
  */
+#include "ElementsKernel/Logging.h"
 #include <QFuture>
 #include <qtconcurrentrun.h>
 #include <QDir>
@@ -38,6 +39,7 @@
 #include "Configuration/Utils.h"
 
 #include "PhzExecutables/ComputeRedshifts.h"
+#include "PhzUITools/ConfigurationWriter.h"
 
 // #include <future>
 
@@ -45,6 +47,10 @@ using namespace Euclid::PhzConfiguration;
 
 namespace Euclid {
 namespace PhzQtUI {
+
+
+static Elements::Logging loggerDialog = Elements::Logging::getLogger("DialogRunAnalysis");
+
 
 bool DialogRunAnalysis::checkLuminosityGrid(){
   if (m_config.count("luminosity-prior")==1 && m_config.at("luminosity-prior").as<std::string>()=="YES"){
@@ -142,11 +148,18 @@ void DialogRunAnalysis::setValues(std::string output_dir,
   ui->label_out_dir->setText(QString::fromStdString(output_dir));
 
   m_config = config;
+
+  //copy the config
+  for (auto& pair : m_config) {
+    m_original_config.emplace(pair);
+  }
+
   m_lum_config=luminosity_config;
 
 }
 
 std::string DialogRunAnalysis::runFunction(){
+
   try {
     completeWithDefaults<ComputeRedshiftsConfig>(m_config);
 
@@ -186,6 +199,12 @@ std::string DialogRunAnalysis::runFunction(){
 void DialogRunAnalysis::runFinished() {
   auto message = m_future_watcher.result();
   if (message.length() == 0) {
+    // Store the Run configuration in the output folder
+
+    std::string config_path =  boost::any_cast<std::string>(m_original_config["phz-output-dir"].value()) + "/run_config.config";
+    PhzUITools::ConfigurationWriter::writeConfiguration(m_original_config, config_path);
+
+
     this->accept();
     QMessageBox::information(this, "", "Requested computation completed successfully", QMessageBox::Close);
     return;
