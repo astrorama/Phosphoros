@@ -111,6 +111,7 @@ void  FormModelSet::setModelInEdition() {
     ui->btn_SetDelete->setEnabled(false);
     ui->btn_SetCancel->setEnabled(true);
     ui->btn_SetSave->setEnabled(true);
+    ui->txt_SetName->setEnabled(m_model_set_model_ptr->getSelectedRow() >= 0);
     ui->btn_new_region->setEnabled(m_model_set_model_ptr->getSelectedRow() >= 0);
     ui->btn_open_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
     ui->btn_duplicate_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
@@ -130,7 +131,7 @@ void  FormModelSet::setModelInView() {
     ui->btn_SetDelete->setEnabled(m_model_set_model_ptr->getSelectedRow() >= 0);
     ui->btn_SetCancel->setEnabled(false);
     ui->btn_SetSave->setEnabled(false);
-    ui->txt_SetName->setEnabled(m_model_set_model_ptr->getSelectedRow() >= 0);
+    ui->txt_SetName->setEnabled(m_model_set_model_ptr->getSelectedRow() >= 0 );
     ui->btn_new_region->setEnabled(m_model_set_model_ptr->getSelectedRow() >= 0);
     ui->btn_open_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
     ui->btn_duplicate_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
@@ -200,6 +201,7 @@ void FormModelSet::on_btn_SetDelete_clicked() {
                                 QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes) {
     m_model_set_model_ptr->deleteSelected();
     reload_cb();
+    setModelInView();
   }
 }
 
