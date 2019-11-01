@@ -7,6 +7,7 @@
 #include <vector>
 #include <QProcess>
 #include <QTimer>
+#include <QString>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -32,6 +33,7 @@ public:
 
 
   void setFolder(std::string output_folder);
+  void setDefaultColumn(std::string id_column, std::string zref_column);
 
 private slots:
 
@@ -57,9 +59,14 @@ private:
   std::unique_ptr<Ui::DialogPSC> ui;
   std::string m_folder;
   std::string m_catalog;
+  std::string m_id_column;
+  std::string m_z_ref_column;
+
   QProcess *m_P;
   QTimer *m_timer;
   bool m_processing=false;
+  void setCatalogFile(QString path);
+
 
 };
 

@@ -1,5 +1,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QFile>
+#include <QTextStream>
 #include <QProcess>
 #include <QThread>
 #include <QStringList>
@@ -31,6 +33,12 @@ DialogPSC::DialogPSC(QWidget *parent) :
 
 DialogPSC::~DialogPSC(){}
 
+
+void DialogPSC::setDefaultColumn(std::string id_column, std::string zref_column){
+  m_id_column = id_column;
+  m_z_ref_column = zref_column;
+}
+
 void DialogPSC::setFolder(std::string output_folder) {
   m_folder = output_folder;
   ui->out_cons->hide();
@@ -55,10 +63,75 @@ void DialogPSC::setFolder(std::string output_folder) {
     }
     checkComputePossible();
 
+    // check if the config file exist
+    if (boost::filesystem::exists(basepath/"run_config.config")) {
+        // if so get the input file
+        QString input_line = "";
+        QFile inputFile(QString::fromStdString((basepath/"run_config.config").generic_string()));
+        if (inputFile.open(QIODevice::ReadOnly)) {
+           QTextStream in(&inputFile);
+           while (!in.atEnd()) {
+              QString line = in.readLine();
+              if (line.startsWith("input-catalog-file")) {
+                input_line = line;
+                break;
+              }
+           }
+           inputFile.close();
+        }
+
+        if (input_line != "") {
+           auto fragments = input_line.split("=");
+           QString inputfileName = fragments[1];
+           if (!inputfileName.startsWith("/")) {
+             inputfileName = QString::fromStdString(FileUtils::getCatalogRootPath(false, m_catalog)) + "/" + inputfileName;
+           }
+
+           setCatalogFile(inputfileName);
+        }
+
+
+    }
+
+
+
   } else {
     ui->lbl_warning->setText("File 'phz_cat' not found or not in .fits format");
     ui->btn_compute->setEnabled(false);
   }
+}
+
+
+void DialogPSC::setCatalogFile(QString path){
+  ui->le_path->setText(path);
+       auto column_reader = PhzUITools::CatalogColumnReader(path.toStdString());
+
+       ui->cdd_ref_id_col->clear();
+       ui->cbb_ref_z_col->clear();
+       size_t index_id = 0;
+       size_t index_z = 0;
+       size_t current = 0;
+       for (auto& name : column_reader.getColumnNames()) {
+         ui->cdd_ref_id_col->insertItem(10000, QString::fromStdString(name));
+         ui->cbb_ref_z_col->insertItem(10000, QString::fromStdString(name));
+
+         if (name.find(m_z_ref_column) != std::string::npos) {
+           index_z = current;
+         }
+
+         if (name.find(m_id_column) != std::string::npos) {
+           index_id = current;
+         }
+
+         ++current;
+       }
+
+       if (current > 0) {
+         ui->cdd_ref_id_col->setCurrentIndex(index_id);
+         ui->cbb_ref_z_col->setCurrentIndex(index_z);
+       }
+
+       checkComputePossible();
 }
 
 void DialogPSC::on_btn_browse_clicked() {
@@ -72,35 +145,7 @@ void DialogPSC::on_btn_browse_clicked() {
    dialog.selectFile(QString::fromStdString(path));
    dialog.setFileMode(QFileDialog::ExistingFile);
    if (dialog.exec()) {
-     ui->le_path->setText(dialog.selectedFiles()[0]);
-     auto column_reader = PhzUITools::CatalogColumnReader(dialog.selectedFiles()[0].toStdString());
-
-     ui->cdd_ref_id_col->clear();
-     ui->cbb_ref_z_col->clear();
-     size_t index_id = 0;
-     size_t index_z = 0;
-     size_t current = 0;
-     for (auto& name : column_reader.getColumnNames()) {
-       ui->cdd_ref_id_col->insertItem(10000, QString::fromStdString(name));
-       ui->cbb_ref_z_col->insertItem(10000, QString::fromStdString(name));
-
-       if (name.find("Z") != std::string::npos) {
-         index_z = current;
-       }
-
-       if (name.find("ID") != std::string::npos) {
-         index_id = current;
-       }
-
-       ++current;
-     }
-
-     if (current > 0) {
-       ui->cdd_ref_id_col->setCurrentIndex(index_id);
-       ui->cbb_ref_z_col->setCurrentIndex(index_z);
-     }
-
-     checkComputePossible();
+     setCatalogFile(dialog.selectedFiles()[0]);
    }
  }
 

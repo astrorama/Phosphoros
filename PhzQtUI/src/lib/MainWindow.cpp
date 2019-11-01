@@ -126,13 +126,17 @@ MainWindow::~MainWindow() {
 
 void MainWindow::resetRepo() {
   m_survey_model_ptr->loadSurvey();
+
+
+
+
   ui->widget_Catalog->loadMappingPage(m_survey_model_ptr, m_filter_repository, "");
 
   m_model_set_model_ptr->loadSets();
   ui->widget_ModelSet->loadSetPage(m_model_set_model_ptr, m_seds_repository, m_redenig_curves_repository);
 
   ui->widget_Analysis->loadAnalysisPage(m_survey_model_ptr, m_model_set_model_ptr, m_filter_repository, m_luminosity_repository);
-
+  ui->widget_postprocessing->loadPostProcessingPage(m_survey_model_ptr);
 
 }
 
@@ -227,7 +231,7 @@ void MainWindow::on_btn_HomeToAnalysis_clicked() {
 
 void MainWindow::on_btn_HomeToPP_clicked(){
   changeMainStackedWidgetIndex(5);
-  ui->widget_postprocessing->on_btn_refresh_clicked();
+  ui->widget_postprocessing->updateSelection(true);
 }
 
 }
