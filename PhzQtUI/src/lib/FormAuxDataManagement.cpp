@@ -1,4 +1,6 @@
 #include <QMessageBox>
+#include <QProcess>
+#include <QDir>
 #include <QtGui/qdesktopservices.h>
 #include <QtCore/qurl.h>
 #include <boost/filesystem/path.hpp>
@@ -46,11 +48,17 @@ void FormAuxDataManagement::loadManagementPage(int index){
     ui->treeView_ManageFilter->setModel(treeModel_filter);
     ui->treeView_ManageFilter->collapseAll();
 
-    DataSetTreeModel* treeModel_Sed = new DataSetTreeModel(m_seds_repository);
+    SedTreeModel* treeModel_Sed = new SedTreeModel(m_seds_repository);
     treeModel_Sed->load(false);
     treeModel_Sed->setEnabled(true);
     ui->treeView_ManageSed->setModel(treeModel_Sed);
     ui->treeView_ManageSed->collapseAll();
+    ui->treeView_ManageSed->setColumnWidth(0, 500);
+
+    for (int i = 0; i < treeModel_Sed->rowCount(); i++) {
+      addButtonsToSedItem(treeModel_Sed->item(i), treeModel_Sed);
+    }
+
 
     DataSetTreeModel* treeModel_Red = new DataSetTreeModel(m_redenig_curves_repository);
     treeModel_Red->load(false);
@@ -71,40 +79,37 @@ void FormAuxDataManagement::loadManagementPage(int index){
     }
 }
 
-namespace {
+void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
+  if (QMessageBox::question(this, "Add emission lines to SEDs in a folder...",
+      QString::fromStdString("This action will create a new folder named ")+
+      group+QString::fromStdString("_el generated from SEDs from folder ") + group +
+      QString::fromStdString(" with added emission lines?"), QMessageBox::Ok|QMessageBox::Cancel)
+    == QMessageBox::Ok) {
+    // do the procesing
+    QProcess *lineAdder = new QProcess();
+    lineAdder->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
 
-void openAuxFilesDir(const std::string& dir) {
-  auto path_map = FileUtils::readPath();
-  boost::filesystem::path path = path_map["AuxiliaryData"];
-  path = path / dir;
-  QDesktopServices::openUrl(QUrl::fromLocalFile(QString::fromStdString(path.string())));
+    auto aux_path = FileUtils::getAuxRootPath();
+    QString command = QString::fromStdString("PhosphorosAddEmissionLines --sed-dir " + aux_path)
+                      + QDir::separator() + QString::fromStdString("SEDs")
+                      + QDir::separator() + group;
+
+
+
+
+    connect(lineAdder, SIGNAL(finished(int, QProcess::ExitStatus)), this,
+                                SLOT(sedProcessfinished(int, QProcess::ExitStatus)));
+    connect(lineAdder, SIGNAL(started()), this, SLOT(sedProcessStarted()));
+
+    lineAdder->start(command);
+  } else {
+    ui->labelMessage->setText("");
+  }
 }
 
-}
-
-void FormAuxDataManagement::on_btn_ShowFilesFilter_clicked() {
-  openAuxFilesDir("Filters");
-}
-
-void FormAuxDataManagement::on_btn_ShowFilesSed_clicked() {
-  openAuxFilesDir("SEDs");
-}
-
-void FormAuxDataManagement::on_btn_ShowFilesRedCurve_clicked() {
-  openAuxFilesDir("ReddeningCurves");
-}
-
-void FormAuxDataManagement::on_btn_ShowFilesLumFunc_clicked() {
-  openAuxFilesDir("LuminosityFunctionCurves");
-}
-
-}
-}
 
 
-
-/* Copied from Dialog configuration: to be used as template here
-void DialogModelSet::addButtonsToSedItem(QStandardItem* item, SedTreeModel* treeModel_sed){
+void FormAuxDataManagement::addButtonsToSedItem(QStandardItem* item, SedTreeModel* treeModel_sed){
   if (treeModel_sed->canAddEmissionLineToGroup(item)) {
              auto name = treeModel_sed->getFullGroupName(item);
 
@@ -113,7 +118,7 @@ void DialogModelSet::addButtonsToSedItem(QStandardItem* item, SedTreeModel* tree
 
              auto index = item->index().sibling(item->index().row(), 1);
 
-             ui->treeView_Sed->setIndexWidget(index, cartButton);
+             ui->treeView_ManageSed->setIndexWidget(index, cartButton);
 
              connect(cartButton, SIGNAL(MessageButtonClicked(const QString&)), this,
                              SLOT(addEmissionLineButtonClicked(const QString&)));
@@ -122,4 +127,55 @@ void DialogModelSet::addButtonsToSedItem(QStandardItem* item, SedTreeModel* tree
   for (int i = 0; i < item->rowCount(); i++) {
     addButtonsToSedItem(item->child(i),treeModel_sed);
   }
-}*/
+}
+
+
+
+void FormAuxDataManagement::sedProcessStarted() {
+    ui->labelMessage->setText("Adding emission Lines to the SEDs...");
+    for (auto button :m_message_buttons){
+      button->setEnabled(false);
+    }
+
+}
+
+void FormAuxDataManagement::sedProcessfinished(int, QProcess::ExitStatus) {
+      // remove the buttons
+      for (auto button :m_message_buttons){
+        delete button;
+      }
+
+      m_message_buttons = std::vector<MessageButton*>();
+
+
+
+
+      // reload the provider and the model
+      std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
+      std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(
+          new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser) });
+      m_seds_repository->resetProvider(std::move(sed_provider));
+
+
+      SedTreeModel* treeModel_Sed = new SedTreeModel(m_seds_repository);
+        treeModel_Sed->load(false);
+        treeModel_Sed->setEnabled(true);
+        ui->treeView_ManageSed->setModel(treeModel_Sed);
+        ui->treeView_ManageSed->collapseAll();
+        ui->treeView_ManageSed->setColumnWidth(0, 500);
+
+        for (int i = 0; i < treeModel_Sed->rowCount(); i++) {
+          addButtonsToSedItem(treeModel_Sed->item(i), treeModel_Sed);
+        }
+
+      ui->labelMessage->setText("Processing of SEDs completed.");
+}
+
+
+
+}
+}
+
+
+
+
