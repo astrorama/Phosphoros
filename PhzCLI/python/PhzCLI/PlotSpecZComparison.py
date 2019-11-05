@@ -95,7 +95,7 @@ def read_pdfs(catalog, out_dir):
     
     def read(parameter):
         if parameter+'-1D-PDF' in catalog.colnames:
-            print('    ' + parameter + ': Using catlog column ' + parameter+'-1D-PDF')
+            print('    ' + parameter + ': Using catalog column ' + parameter+'-1D-PDF')
             
             key_comment = 'COMMENT'
             if key_comment not in catalog.meta.keys():
