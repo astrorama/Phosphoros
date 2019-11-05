@@ -211,7 +211,9 @@ void DialogPOP::on_btn_compute_clicked(){
      << QString::fromStdString("--pdf-column") << ui->cbb_columns->currentText();
 
   m_P->setReadChannelMode(QProcess::MergedChannels);
-  m_P->start( QString("Phosphoros POP ")+s3.join(" ") );
+  const QString& command = QString("Phosphoros POP ") + s3.join(" ");
+  logger.info(command.toStdString());
+  m_P->start(command);
 
   m_timer = new QTimer(this);
   connect(m_timer, SIGNAL(timeout()), this, SLOT(updateOutCons()));
