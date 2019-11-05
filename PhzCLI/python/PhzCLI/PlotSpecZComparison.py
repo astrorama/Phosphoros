@@ -482,8 +482,14 @@ def mainMethod(args):
         similar to a main (and it is why it is called mainMethod()).
     """
     specz_cat = read_specz_catalog(args.specz_catalog, args.specz_cat_id, args.specz_column)
-    
     phos_cat = read_phosphoros_catalog(args.phosphoros_output_dir)
+
+    # Make sure the comments metadata are only picked from phos_cat, as the
+    # bins are stored there. Otherwise, specz_cat may have COMMENT, and phos_cat comments, we end with both,
+    # and later methods pick the first over the second
+    for k in ['COMMENT', 'comments']:
+        if k in specz_cat.meta:
+            del specz_cat.meta[k]
     
     # merge the catalogs
     logger.info('Merging the catalogs')
