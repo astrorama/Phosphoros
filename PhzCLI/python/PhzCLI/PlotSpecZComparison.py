@@ -494,6 +494,11 @@ def mainMethod(args):
     # merge the catalogs
     logger.info('Merging the catalogs')
     catalog = table.join(specz_cat, phos_cat, keys='ID')
+
+    if len(catalog) == 0:
+        logger.critical('No matching objects found between the SpecZ and the PhotoZ catalogs')
+        logger.critical('Was the proper ID column chosen?')
+        exit(1)
     
     specz = catalog['SPECZ']
     phz = catalog[args.phz_column]
