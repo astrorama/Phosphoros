@@ -198,7 +198,7 @@ class SpeczPhotozPlot(object):
     def _updatePlots(self):
         if self.selected_index is None:
             return []
-        self.id_text.set_text('selected ID: %d' % self.ids[self.selected_index])
+        self.id_text.set_text('selected ID: {}'.format(self.ids[self.selected_index]))
         self.selected1.set_visible(True)
         self.selected1.set_offsets([self.specz[self.selected_index], self.photz[self.selected_index]])
         self.selected2.set_visible(True)
