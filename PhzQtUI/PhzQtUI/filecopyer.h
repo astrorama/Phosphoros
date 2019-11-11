@@ -31,14 +31,21 @@
 #include <QtCore/qfileinfo.h>
 #include <QtCore/qvector.h>
 #include <QtCore/qthread.h>
+#include <QtCore/qmetatype.h>
+#include <vector>
+#include <string>
+
+
+
 namespace Euclid {
 namespace PhzQtUI {
 
 class FileCopyer : public QObject {
     Q_OBJECT
-        Q_PROPERTY(qint64 chunksize READ chunkSize WRITE setChunkSize)
-        Q_PROPERTY(QString sourcePaths READ sourcePaths WRITE setSourcePaths)
-        Q_PROPERTY(QString destinationPaths READ destinationPaths WRITE setDestinationPaths)
+
+    Q_PROPERTY(qint64 chunksize READ chunkSize WRITE setChunkSize)
+    Q_PROPERTY(QVector<QString> sourcePaths READ sourcePaths WRITE setSourcePaths)
+    Q_PROPERTY(QVector<QString> destinationPaths READ destinationPaths WRITE setDestinationPaths)
 
 public:
     static const int DEFAULT_CHUNK_SIZE = 1024 * 1024 * 1;
@@ -53,17 +60,17 @@ public:
         _chunk = ch;
     }
 
-    QString sourcePaths() const {
+    QVector<QString> sourcePaths() const {
         return src;
     }
-    void setSourcePaths(const QString& _src) {
+    void setSourcePaths(const QVector<QString>& _src) {
         src = _src;
     }
 
-    QString destinationPaths() const {
+    QVector<QString> destinationPaths() const {
         return dst;
     }
-    void setDestinationPaths(const QString& _dst) {
+    void setDestinationPaths(const QVector<QString>& _dst) {
         dst = _dst;
     }
 
@@ -73,12 +80,13 @@ public:
 
 signals:
     void copyProgress(qint64 bytesCopied, qint64 bytesTotal);
-    void finished(bool success, QString path);
+    void finished(bool success, QVector<QString> path);
 
 
     private:
-        QString src, dst;
-        qint64 _chunk;
+
+    QVector<QString> src, dst;
+    qint64 _chunk;
 };
 
 

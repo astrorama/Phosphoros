@@ -1,9 +1,12 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QDir>
+#include <QFileDialog>
+#include <QListView>
 #include <QtGui/qdesktopservices.h>
 #include <QtCore/qurl.h>
 #include <boost/filesystem/path.hpp>
+#include "ElementsKernel/Logging.h"
 
 #include "PhzQtUI/FormAuxDataManagement.h"
 #include "ui_FormAuxDataManagement.h"
@@ -12,10 +15,12 @@
 #include "PhzQtUI/DialogCreatesSubGroup.h"
 #include "FileUtils.h"
 #include "XYDataset/AsciiParser.h"
+#include "PhzQtUI/filecopyer.h"
 
 
 namespace Euclid {
 namespace PhzQtUI {
+static Elements::Logging logger = Elements::Logging::getLogger("FormAuxDataManagement");
 
 
 FormAuxDataManagement::FormAuxDataManagement(QWidget *parent) :
@@ -25,9 +30,7 @@ FormAuxDataManagement::FormAuxDataManagement(QWidget *parent) :
     ui->setupUi(this);
 }
 
-FormAuxDataManagement::~FormAuxDataManagement()
-{
-}
+FormAuxDataManagement::~FormAuxDataManagement() {}
 
 void FormAuxDataManagement::setRepositories(DatasetRepo filter_repository,
                                             DatasetRepo seds_repository,
@@ -141,14 +144,11 @@ void FormAuxDataManagement::sedProcessStarted() {
 
 void FormAuxDataManagement::sedProcessfinished(int, QProcess::ExitStatus) {
       // remove the buttons
-      for (auto button :m_message_buttons){
+      for (auto button : m_message_buttons) {
         delete button;
       }
 
       m_message_buttons = std::vector<MessageButton*>();
-
-
-
 
       // reload the provider and the model
       std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
@@ -172,6 +172,264 @@ void FormAuxDataManagement::sedProcessfinished(int, QProcess::ExitStatus) {
 }
 
 
+void FormAuxDataManagement::copyingFilterFinished(bool success, QVector<QString> ){
+ if (success){
+    logger.info() << "files imported ";
+    // reset repo
+    std::unique_ptr <XYDataset::FileParser > filter_file_parser {new XYDataset::AsciiParser { } };
+    std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(
+       new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true), std::move(filter_file_parser) });
+    m_filter_repository->resetProvider(std::move(filter_provider));
+    DataSetTreeModel* treeModel_filter = new DataSetTreeModel(m_filter_repository);
+    treeModel_filter->load(false);
+    treeModel_filter->setEnabled(true);
+    ui->treeView_ManageFilter->setModel(treeModel_filter);
+    ui->treeView_ManageFilter->collapseAll();
+ } else {
+   logger.warn() << "Copy of the files failed";
+ }
+}
+
+void FormAuxDataManagement::copyingSEDFinished(bool success, QVector<QString> ){
+ if (success){
+    logger.info() << "files imported ";
+    // reload the provider and the model
+    std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
+    std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(
+       new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser) });
+    m_seds_repository->resetProvider(std::move(sed_provider));
+    SedTreeModel* treeModel_Sed = new SedTreeModel(m_seds_repository);
+    treeModel_Sed->load(false);
+    treeModel_Sed->setEnabled(true);
+    ui->treeView_ManageSed->setModel(treeModel_Sed);
+    ui->treeView_ManageSed->collapseAll();
+    ui->treeView_ManageSed->setColumnWidth(0, 500);
+    for (int i = 0; i < treeModel_Sed->rowCount(); i++) {
+      addButtonsToSedItem(treeModel_Sed->item(i), treeModel_Sed);
+    }
+ } else {
+   logger.warn() << "Copy of the files failed";
+ }
+}
+
+void FormAuxDataManagement::copyingRedFinished(bool success, QVector<QString> ){
+ if (success){
+    logger.info() << "files imported ";
+    // reload the provider and the model
+    std::unique_ptr <XYDataset::FileParser > red_file_parser {new XYDataset::AsciiParser { } };
+    std::unique_ptr<XYDataset::FileSystemProvider> red_provider(
+       new XYDataset::FileSystemProvider{FileUtils::getRedCurveRootPath(true), std::move(red_file_parser) });
+    m_redenig_curves_repository->resetProvider(std::move(red_provider));
+    DataSetTreeModel* treeModel_red = new DataSetTreeModel(m_redenig_curves_repository);
+    treeModel_red->load(false);
+    treeModel_red->setEnabled(true);
+    ui->treeView_ManageRed->setModel(treeModel_red);
+    ui->treeView_ManageRed->collapseAll();
+ } else {
+   logger.warn() << "Copy of the files failed";
+ }
+}
+
+void FormAuxDataManagement::copyingLumFinished(bool success, QVector<QString> ){
+   if (success){
+      logger.info() << "files imported ";
+      // reload the provider and the model
+      std::unique_ptr <XYDataset::FileParser > lum_file_parser {new XYDataset::AsciiParser { } };
+      std::unique_ptr<XYDataset::FileSystemProvider> lum_provider(
+         new XYDataset::FileSystemProvider{FileUtils::getLuminosityFunctionCurveRootPath(true), std::move(lum_file_parser) });
+      m_luminosity_repository->resetProvider(std::move(lum_provider));
+      DataSetTreeModel* treeModel_lum = new DataSetTreeModel(m_luminosity_repository);
+      treeModel_lum->load(false);
+      treeModel_lum->setEnabled(true);
+      ui->treeView_ManageLuminosity->setModel(treeModel_lum);
+      ui->treeView_ManageLuminosity->collapseAll();
+   } else {
+     logger.warn() << "Copy of the files failed";
+   }
+}
+
+void FormAuxDataManagement::copyProgress(qint64 copy,qint64 total){
+  logger.info() << "File copy progress => " << QString::number((qreal(copy) / qreal(total)) * 100.0).toStdString() << "%";
+}
+
+void FormAuxDataManagement::on_btn_import_filter_clicked() {
+     QFileDialog dialog(this);
+     dialog.setFileMode(QFileDialog::Directory);
+     if (dialog.exec()) {
+       // Proces
+       QString folder_input = dialog.selectedFiles()[0];
+       QDir filters_folder = QDir(QString::fromStdString(FileUtils::getAuxRootPath() + "/Filters/"));
+
+       // create the folder
+       QString new_folder = "";
+       if (folder_input.contains("/")) {
+         auto chunks = folder_input.split("/");
+         new_folder = chunks[chunks.length()-1];
+       } else {
+         new_folder = folder_input;
+       }
+
+       filters_folder.mkdir(new_folder);
+       filters_folder.cd(new_folder);
+       QString dest_folder = filters_folder.absolutePath();
+
+       // list the content
+       QDir copy_folder(folder_input);
+       auto file_list = copy_folder.entryInfoList(QDir::Files);
+
+       QVector<QString> input{};
+       QVector<QString> output{};
+       for (auto& file : file_list) {
+         input.push_back(file.absoluteFilePath());
+         QString dest = dest_folder + "/" + file.fileName();
+         output.push_back(dest);
+       }
+
+       // launch the copy
+       auto local = new QThread;
+       auto worker = new FileCopyer(local);
+       QObject::connect(worker, SIGNAL(finished(bool, QVector<QString>)), SLOT(copyingFilterFinished(bool, QVector<QString>)));
+       QObject::connect(worker, SIGNAL(copyProgress(qint64, qint64)), SLOT(copyProgress(qint64, qint64)));
+       worker->setSourcePaths(input);
+       worker->setDestinationPaths(output);
+       local->start();
+     }
+}
+
+void FormAuxDataManagement::on_btn_import_sed_clicked() {
+     QFileDialog dialog(this);
+     dialog.setFileMode(QFileDialog::Directory);
+     if (dialog.exec()) {
+       // Proces
+       QString folder_input = dialog.selectedFiles()[0];
+
+       QDir filters_folder = QDir(QString::fromStdString(FileUtils::getAuxRootPath() + "/SEDs/"));
+
+       // create the folder
+       QString new_folder = "";
+       if (folder_input.contains("/")) {
+         auto chunks = folder_input.split("/");
+         new_folder = chunks[chunks.length()-1];
+       } else {
+         new_folder = folder_input;
+       }
+
+       filters_folder.mkdir(new_folder);
+       filters_folder.cd(new_folder);
+       QString dest_folder = filters_folder.absolutePath();
+
+       // list the content
+       QDir copy_folder(folder_input);
+       auto file_list = copy_folder.entryInfoList(QDir::Files);
+
+       QVector<QString> input{};
+       QVector<QString> output{};
+       for (auto& file : file_list) {
+         input.push_back(file.absoluteFilePath());
+         QString dest = dest_folder + "/" + file.fileName();
+         output.push_back(dest);
+       }
+
+       // launch the copy
+       auto local = new QThread;
+       auto worker = new FileCopyer(local);
+       QObject::connect(worker, SIGNAL(finished(bool, QVector<QString>)), SLOT(copyingSEDFinished(bool, QVector<QString>)));
+       QObject::connect(worker, SIGNAL(copyProgress(qint64, qint64)), SLOT(copyProgress(qint64, qint64)));
+       worker->setSourcePaths(input);
+       worker->setDestinationPaths(output);
+       local->start();
+     }
+}
+
+void FormAuxDataManagement::on_btn_import_reddening_clicked() {
+     QFileDialog dialog(this);
+     dialog.setFileMode(QFileDialog::Directory);
+     if (dialog.exec()) {
+       // Proces
+       QString folder_input = dialog.selectedFiles()[0];
+
+       QDir filters_folder = QDir(QString::fromStdString(FileUtils::getAuxRootPath() + "/ReddeningCurves/"));
+
+       // create the folder
+       QString new_folder = "";
+       if (folder_input.contains("/")) {
+         auto chunks = folder_input.split("/");
+         new_folder = chunks[chunks.length()-1];
+       } else {
+         new_folder = folder_input;
+       }
+
+       filters_folder.mkdir(new_folder);
+       filters_folder.cd(new_folder);
+       QString dest_folder = filters_folder.absolutePath();
+
+       // list the content
+       QDir copy_folder(folder_input);
+       auto file_list = copy_folder.entryInfoList(QDir::Files);
+
+       QVector<QString> input{};
+       QVector<QString> output{};
+       for (auto& file : file_list) {
+         input.push_back(file.absoluteFilePath());
+         QString dest = dest_folder + "/" + file.fileName();
+         output.push_back(dest);
+       }
+
+       // launch the copy
+       auto local = new QThread;
+       auto worker = new FileCopyer(local);
+       QObject::connect(worker, SIGNAL(finished(bool, QVector<QString>)), SLOT(copyingRedFinished(bool, QVector<QString>)));
+       QObject::connect(worker, SIGNAL(copyProgress(qint64, qint64)), SLOT(copyProgress(qint64, qint64)));
+       worker->setSourcePaths(input);
+       worker->setDestinationPaths(output);
+       local->start();
+     }
+}
+
+void FormAuxDataManagement::on_btn_import_luminosity_clicked() {
+     QFileDialog dialog(this);
+     dialog.setFileMode(QFileDialog::Directory);
+     if (dialog.exec()) {
+       // Proces
+       QString folder_input = dialog.selectedFiles()[0];
+
+       QDir filters_folder = QDir(QString::fromStdString(FileUtils::getAuxRootPath() + "/LuminosityFunctionCurves/"));
+
+       // create the folder
+       QString new_folder = "";
+       if (folder_input.contains("/")) {
+         auto chunks = folder_input.split("/");
+         new_folder = chunks[chunks.length()-1];
+       } else {
+         new_folder = folder_input;
+       }
+
+       filters_folder.mkdir(new_folder);
+       filters_folder.cd(new_folder);
+       QString dest_folder = filters_folder.absolutePath();
+
+       // list the content
+       QDir copy_folder(folder_input);
+       auto file_list = copy_folder.entryInfoList(QDir::Files);
+
+       QVector<QString> input{};
+       QVector<QString> output{};
+       for (auto& file : file_list) {
+         input.push_back(file.absoluteFilePath());
+         QString dest = dest_folder + "/" + file.fileName();
+         output.push_back(dest);
+       }
+
+       // launch the copy
+       auto local = new QThread;
+       auto worker = new FileCopyer(local);
+       QObject::connect(worker, SIGNAL(finished(bool, QVector<QString>)), SLOT(copyingLumFinished(bool, QVector<QString>)));
+       QObject::connect(worker, SIGNAL(copyProgress(qint64, qint64)), SLOT(copyProgress(qint64, qint64)));
+       worker->setSourcePaths(input);
+       worker->setDestinationPaths(output);
+       local->start();
+     }
+}
 
 }
 }

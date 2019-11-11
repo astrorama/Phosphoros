@@ -49,6 +49,17 @@ void sedProcessfinished(int, QProcess::ExitStatus);
 void addEmissionLineButtonClicked(const QString& group);
 
 
+void on_btn_import_filter_clicked();
+void on_btn_import_sed_clicked();
+void on_btn_import_reddening_clicked();
+void on_btn_import_luminosity_clicked();
+
+void copyingFilterFinished(bool, QVector<QString>);
+void copyingSEDFinished(bool, QVector<QString>);
+void copyingRedFinished(bool, QVector<QString>);
+void copyingLumFinished(bool, QVector<QString>);
+void copyProgress(qint64, qint64);
+
 
 
 private:

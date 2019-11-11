@@ -363,12 +363,12 @@ void FormSurveyMapping::on_btn_exit_clicked() {
 }
 
 
-void FormSurveyMapping::copyingFinished(bool s, QString path){
+void FormSurveyMapping::copyingFinished(bool s, QVector<QString> path){
  if (s){
-    logger.info() << "file copied to "<< path.toStdString();
-    loadColumnFromFile(path.toStdString());
+    logger.info() << "file copied to "<< path[0].toStdString();
+    loadColumnFromFile(path[0].toStdString());
     ui->table_Filter->setItemDelegate(new FilterMappingItemDelegate(m_column_from_file));
-    m_default_survey = path.toStdString();
+    m_default_survey = path[0].toStdString();
     m_survey_model_ptr->setDefaultCatalogToSelected(QString::fromStdString(m_default_survey));
     m_survey_model_ptr->setColumnListToSelected(m_column_from_file);
     updateSelection();
@@ -378,8 +378,8 @@ void FormSurveyMapping::copyingFinished(bool s, QString path){
 }
 
 
-void FormSurveyMapping::copyProgress(qint64 copy,qint64 total){
-  qDebug() << QStringLiteral("PROGRESS => %1").arg(qreal(copy) / qreal(total) * 100.0);
+void FormSurveyMapping::copyProgress(qint64 copy,qint64 total) {
+  logger.info() << "File copy progress => " << QString::number((qreal(copy) / qreal(total)) * 100.0).toStdString() << "%";
 }
 
 void FormSurveyMapping::on_btn_MapNew_clicked() {
@@ -398,7 +398,7 @@ void FormSurveyMapping::on_btn_MapNew_clicked() {
 
           auto local = new QThread;
           auto worker = new FileCopyer(local);
-          QObject::connect(worker, SIGNAL(finished(bool, QString)), SLOT(copyingFinished(bool, QString)));
+          QObject::connect(worker, SIGNAL(finished(bool, QVector<QString>)), SLOT(copyingFinished(bool, QVector<QString>)));
           QObject::connect(worker, SIGNAL(copyProgress(qint64, qint64)), SLOT(copyProgress(qint64, qint64)));
           worker->setSourcePaths({QString::fromStdString(file_to_copy)});
           worker->setDestinationPaths({full});
@@ -434,7 +434,7 @@ void FormSurveyMapping::on_btn_MapDuplicate_clicked() {
 
            auto local = new QThread;
            auto worker = new FileCopyer(local);
-           QObject::connect(worker, SIGNAL(finished(bool, QString)), SLOT(copyingFinished(bool, QString)));
+           QObject::connect(worker, SIGNAL(finished(bool, QVector<QString>)), SLOT(copyingFinished(bool, QVector<QString>)));
            QObject::connect(worker, SIGNAL(copyProgress(qint64, qint64)), SLOT(copyProgress(qint64, qint64)));
            worker->setSourcePaths({QString::fromStdString(file_to_copy)});
            worker->setDestinationPaths({full});

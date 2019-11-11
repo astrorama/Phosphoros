@@ -102,6 +102,13 @@
            </property>
           </spacer>
          </item>
+         <item>
+          <widget class="QPushButton" name="btn_import_filter">
+           <property name="text">
+            <string>Import Folder</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>
@@ -161,6 +168,13 @@
            </property>
           </spacer>
          </item>
+         <item>
+          <widget class="QPushButton" name="btn_import_sed">
+           <property name="text">
+            <string>Import Folder</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>
@@ -206,6 +220,13 @@
             </size>
            </property>
           </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_import_reddening">
+           <property name="text">
+            <string>Import Folder</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -255,6 +276,13 @@
             </size>
            </property>
           </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_import_luminosity">
+           <property name="text">
+            <string>Import Folder</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>

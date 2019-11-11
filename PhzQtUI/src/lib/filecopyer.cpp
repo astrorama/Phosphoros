@@ -45,57 +45,77 @@ FileCopyer::FileCopyer(QThread* _thread) {
 
 
 void FileCopyer::copy() {
-    if (src.length()==0 || dst.length()==0) {
-      logger.info() << "source or destination paths are empty!";
-        emit finished(false,{""});
+    if (src.size() == 0 || dst.size() == 0) {
+      logger.info() << "source or destination paths list are empty!";
+        emit finished(false, {""});
+        return;
+    }
+
+    if (src.size() != dst.size()) {
+      logger.info() << "source and destination paths lists have not the same number of elements";
+        emit finished(false, {""});
         return;
     }
 
     qint64 total = 0, written = 0;
-    total += QFileInfo(src).size();
+    for (QString& file_path : src) {
+      total += QFileInfo(file_path).size();
+    }
     logger.info() << total <<" bytes should be write in total";
 
     logger.info() << "writing with chunk size of " << chunkSize() << " byte";
-    QFile srcFile(src);
-    QFile dstFile(dst);
-    if (QFile::exists(dst)) {
-      logger.info() << "file "<< dst.toStdString() << " already exists, overwriting...";
-        QFile::remove(dst);
+
+
+    for (size_t index = 0; index < dst.size(); ++index) {
+      QFile srcFile(src[index]);
+      QFile dstFile(dst[index]);
+
+      // test for existing dest
+      if (QFile::exists(dst[index])) {
+        logger.info() << "file "<< dst[index].toStdString() << " already exists, overwriting...";
+          QFile::remove(dst[index]);
+      }
+
+      // opens files
+      if (!srcFile.open(QFileDevice::ReadOnly)) {
+        logger.warn() << "failed to open " << src[index].toStdString()<< " (error:" << srcFile.errorString().toStdString() << ")";
+      } else if (!dstFile.open(QFileDevice::WriteOnly)) {
+        logger.warn() << "failed to open " << dst[index].toStdString() << " (error:" << dstFile.errorString().toStdString() << ")";
+
+      }
+
+
+      /* copy the content in portion of chunk size */
+      qint64 fSize = srcFile.size();
+      while (fSize) {
+          const auto data = srcFile.read(chunkSize());
+          const auto _written = dstFile.write(data);
+          if (data.size() == _written) {
+              written += _written;
+              fSize -= data.size();
+              emit copyProgress(written, total);
+          } else {
+            logger.warn()  << "failed to write to  " << dst[index].toStdString()<<
+                " (error:" << dstFile.errorString().toStdString() << ")";
+              fSize = 0;
+              break; // skip this operation
+          }
+      }
+
+      srcFile.close();
+      dstFile.close();
+
+
+      if (index == dst.size()-1) {
+        logger.info()  << "progress finished, " << written << " bytes of " << total << " has been written";
+          emit finished(true, dst);
+      }
+
     }
 
-    if (!srcFile.open(QFileDevice::ReadOnly)) {
-      logger.warn() << "failed to open " << src.toStdString() << " (error:" << srcFile.errorString().toStdString() << ")";
-    } else if (!dstFile.open(QFileDevice::WriteOnly)) {
-      logger.warn() << "failed to open " << dst.toStdString() << " (error:" << dstFile.errorString().toStdString() << ")";
-
-    }
-
-    /* copy the content in portion of chunk size */
-    qint64 fSize = srcFile.size();
-    while (fSize) {
-        const auto data = srcFile.read(chunkSize());
-        const auto _written = dstFile.write(data);
-        if (data.size() == _written) {
-            written += _written;
-            fSize -= data.size();
-            emit copyProgress(written, total);
-        } else {
-          logger.warn()  << "failed to write to  " << dst.toStdString() << " (error:" << dstFile.errorString().toStdString() << ")";
-            fSize = 0;
-            break; // skip this operation
-        }
-    }
-
-    srcFile.close();
-    dstFile.close();
 
 
-    if (total == written) {
-      logger.info()  << "progress finished, " << written << " bytes of " << total << " has been written";
-        emit finished(true, dst);
-    } else {
-        emit finished(false, {""});
-    }
+
 }
 
 }

@@ -4,6 +4,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <list>
 #include <vector>
 #include <QWidget>
 #include <QModelIndex>
@@ -58,7 +59,7 @@ void on_btn_ToOption_clicked();
 void on_btn_ToModel_clicked();
 void on_btn_ToPP_clicked();
 void on_btn_exit_clicked();
-void copyingFinished(bool, QString);
+void copyingFinished(bool, QVector<QString>);
 void copyProgress(qint64, qint64);
 void filter_model_changed(QStandardItem *);
 
