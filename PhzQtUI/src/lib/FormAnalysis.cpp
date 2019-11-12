@@ -39,6 +39,7 @@
 
 #include "PhzDataModel/PhzModel.h"
 #include <ctime>
+#include "PhzUtils/Multithreading.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -1348,6 +1349,8 @@ template<typename ReturnType, int I>
     connect(popup.get(), SIGNAL(correctionComputed(const QString &)),
         SLOT(onCorrectionComputed(const QString &)));
     popup->exec();
+
+    PhzUtils::getStopThreadsFlag() = false;
 
   }
 

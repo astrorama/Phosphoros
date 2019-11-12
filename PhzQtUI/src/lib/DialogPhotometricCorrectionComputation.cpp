@@ -326,6 +326,7 @@ void DialogPhotometricCorrectionComputation::on_bt_Cancel_clicked() {
 }
 
 void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
+  PhzUtils::getStopThreadsFlag() = false;
   m_computing = true;
   string output_file_name = FileUtils::addExt(
       ui->txt_FileName->text().toStdString(), ".txt");
