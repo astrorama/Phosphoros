@@ -168,7 +168,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="cb_catalog"/>
+      <widget class="QComboBox" name="cb_catalog">
+       <property name="minimumSize">
+        <size>
+         <width>300</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer_14">

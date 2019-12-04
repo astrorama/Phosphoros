@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1070</width>
+    <width>1071</width>
     <height>968</height>
    </rect>
   </property>
@@ -163,7 +163,20 @@
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="cb_catalog_type"/>
+        <widget class="QComboBox" name="cb_catalog_type">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>300</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
        </item>
        <item>
         <spacer name="horizontalSpacer_14">
@@ -277,6 +290,12 @@
        </item>
        <item>
         <widget class="QComboBox" name="cb_Ra">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="editable">
           <bool>true</bool>
          </property>
@@ -334,6 +353,12 @@
        </item>
        <item>
         <widget class="QComboBox" name="cb_Dec">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="editable">
           <bool>true</bool>
          </property>
@@ -365,6 +390,12 @@
        </item>
        <item>
         <widget class="QComboBox" name="cb_SourceId">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="editable">
           <bool>true</bool>
          </property>
@@ -401,6 +432,12 @@
        </item>
        <item>
         <widget class="QComboBox" name="cb_GalEbv">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="editable">
           <bool>true</bool>
          </property>
@@ -437,6 +474,12 @@
        </item>
        <item>
         <widget class="QComboBox" name="cb_RefZ">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="editable">
           <bool>true</bool>
          </property>
@@ -512,7 +555,7 @@
      <item>
       <widget class="QCheckBox" name="cb_upperLimit">
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If set, the algorithm will interpret negative error as indicating that the flux is not an actual value but an upper limit. The absolute value of the error will be used as incertitude on the measurement. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If set, the algorithm will interpret negative error as indicating that the flux is not an actual value but an upper limit. The absolute value of the error will be used as error on the measurement. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
         <string>Upper Limit</string>

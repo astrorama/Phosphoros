@@ -1280,10 +1280,11 @@ template<typename ReturnType, int I>
 
             for (auto& filter : getSelectedFilterMapping()) {
               out << QString::fromStdString(filter.getFilterFile() ) << "     1.0\n";
+              open = true;
             }
             file.close();
             onCorrectionComputed(QString::fromStdString(popupname->getName()));
-            open = true;
+
           }
       }
     }
