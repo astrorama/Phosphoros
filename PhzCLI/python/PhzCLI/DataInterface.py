@@ -24,13 +24,22 @@ Author: nikoapos
 """
 
 from __future__ import division, print_function
-from future_builtins import *
 
+import logging
 import subprocess
 import os
 import numpy as np
 from astropy.table import Table
 
+logger = logging.getLogger(__name__)
+
+
+def _runCmdHelper(cmd):
+    logger.debug(cmd)
+    output = subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
+    if isinstance(output, bytes):
+        output = output.decode('utf8')
+    return output
 
 
 def getFilterInfo(name):
@@ -42,16 +51,14 @@ def getFilterInfo(name):
     
     # If the filter does not exist return None
     cmd = 'Phosphoros DF'.split()
-    with open(os.devnull, 'w') as devnull:
-        available_filters = subprocess.check_output(cmd, stderr=devnull).split()
-    if not name in available_filters:
+    available_filters = _runCmdHelper(cmd).split()
+    if name not in available_filters:
         return None
     
     # Build the filter data from the CLI output
     cmd = 'Phosphoros DF --data'.split()
     cmd.append(name)
-    with open(os.devnull, 'w') as devnull:
-        data_str = subprocess.check_output(cmd, stderr=devnull).splitlines()
+    data_str = _runCmdHelper(cmd).splitlines()
     filter_info.data = np.zeros([2, len(data_str)])
     for i, row in enumerate(data_str):
         row_d = row.split()
@@ -93,17 +100,14 @@ def getModelPhotometry(grid, sed, red_curve, ebv, z):
     class Photometry(object):
         pass
     phot = Photometry()
-    
+
     # Get all the regions names
     cmd = 'Phosphoros DMG --model-grid-file'.split()
     cmd.append(grid)
-    with open(os.devnull, 'w') as devnull:
-        lines = subprocess.check_output(cmd, stderr=devnull).splitlines()
+    lines = _runCmdHelper(cmd).splitlines()
     reg_line = next(line for line in lines if 'Regions names' in line)
-#    regions = reg_line[reg_line.index(':')+1:].strip().split()
-    regions = [r.strip() for r in reg_line[reg_line.index(':')+1:].strip().split('"') if len(r.strip())!=0]
-#    regions = [r.replace('"', '') for r in regions]
-    
+    regions = [r.strip() for r in reg_line[reg_line.index(':') + 1:].strip().split('"') if len(r.strip()) != 0]
+
     # Get the IGM absorption method
     igm_line = next(line for line in lines if 'IGM absorption method' in line)
     phot.igm_type = igm_line[igm_line.index(':')+1:].strip()
@@ -120,8 +124,8 @@ def getModelPhotometry(grid, sed, red_curve, ebv, z):
         cmd.append('--region')
         cmd.append(r)
         
-        with open(os.devnull, 'w') as devnull:
-            lines = subprocess.check_output(cmd + ['--sed'], stderr=devnull).splitlines()
+        lines = _runCmdHelper(cmd + ['--sed']).splitlines()
+
         in_values = False
         for l in lines:
             if in_values:
@@ -131,8 +135,7 @@ def getModelPhotometry(grid, sed, red_curve, ebv, z):
             if l == 'Index\tValue':
                 in_values = True
         
-        with open(os.devnull, 'w') as devnull:
-            lines = subprocess.check_output(cmd + ['--redcurve'], stderr=devnull).splitlines()
+        lines = _runCmdHelper(cmd + ['--redcurve']).splitlines()
         in_values = False
         for l in lines:
             if in_values:
@@ -142,28 +145,25 @@ def getModelPhotometry(grid, sed, red_curve, ebv, z):
             if l == 'Index\tValue':
                 in_values = True
         
-        with open(os.devnull, 'w') as devnull:
-            lines = subprocess.check_output(cmd + ['--ebv'], stderr=devnull).splitlines()
+        lines = _runCmdHelper(cmd + ['--ebv']).splitlines()
         in_values = False
         for l in lines:
             if in_values:
                 l_data = l.split()
-                if len(l_data) == 2 and (float(l_data[1]) == ebv or l_data[1] == str(ebv)):
+                if len(l_data) == 2 and (np.isclose(float(l_data[1]), ebv) or l_data[1] == str(ebv)):
                     ebv_i = l_data[0]
             if l == 'Index\tValue':
                 in_values = True
         
-        with open(os.devnull, 'w') as devnull:
-            lines = subprocess.check_output(cmd + ['--z'], stderr=devnull).splitlines()
+        lines = _runCmdHelper(cmd + ['--z']).splitlines()
         in_values = False
         for l in lines:
             if in_values:
                 l_data = l.split()
-                if len(l_data) == 2 and (float(l_data[1]) == z or l_data[1] == str(z)):
+                if len(l_data) == 2 and (np.isclose(float(l_data[1]), z) or l_data[1] == str(z)):
                     z_i = l_data[0]
             if l == 'Index\tValue':
                 in_values = True
-        
         
         if sed_i != -1 and red_curve_i != -1 and ebv_i != -1 and z_i != -1:
             region = r
@@ -176,8 +176,7 @@ def getModelPhotometry(grid, sed, red_curve, ebv, z):
     cmd.append(region)
     cmd.append('--phot')
     cmd.append(str(sed_i) + ',' + str(red_curve_i) + ',' + str(ebv_i) + ',' + str(z_i))
-    with open(os.devnull, 'w') as devnull:
-        lines = subprocess.check_output(cmd, stderr=devnull).splitlines()
+    lines = _runCmdHelper(cmd).splitlines()
     phot.photometry = {}
     in_values = False
     for l in lines:
@@ -229,8 +228,7 @@ def getBestFittedModelInfo(source_id, catalog, grid):
     cmd.append(str(model.ebv))
     cmd.append('--z-value')
     cmd.append(str(model.z))
-    with open(os.devnull, 'w') as devnull:
-        lines = subprocess.check_output(cmd, stderr=devnull).splitlines()
+    lines = _runCmdHelper(cmd).splitlines()
     i = next(i for i,l in enumerate(lines) if l == 'Data:')
     lines = lines[i+1:-1]
     model.sed = np.zeros([2, len(lines)])
