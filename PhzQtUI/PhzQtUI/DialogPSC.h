@@ -42,6 +42,9 @@ private slots:
    */
   void on_btn_compute_clicked();
 
+  void on_gb_scater_clicked(bool);
+  void on_gb_stacked_clicked(bool);
+
   /**
    * @brief SLOT on_btn_cancel_clicked
    */

@@ -108,7 +108,7 @@ void FormPostProcessing::updateSelection(bool force_reload_cb){
       QHBoxLayout *layout = new QHBoxLayout;
       QPushButton *button1 = new QPushButton("PDF stat");
 
-      QPushButton *button2 = new QPushButton("Plot Z against Zref");
+      QPushButton *button2 = new QPushButton("Plots");
       layout->addWidget(button1);
       layout->addWidget(button2);
 

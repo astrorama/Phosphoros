@@ -58,9 +58,16 @@ void DialogPSC::setFolder(std::string output_folder) {
     // fill the CBB
     for (auto& name : column_reader.getColumnNames()) {
       if (name.find("Z-1D-PDF") == std::string::npos && name.find("Z") != std::string::npos) {
-        ui->cbb_z_col->insertItem(10000, QString::fromStdString(name));
+        ui->cbb_z_col->insertItem(-1, QString::fromStdString(name));
+      }
+
+      if (name.find("Z-1D-PDF") != std::string::npos) {
+         ui->cbb_pdf_col->insertItem(-1, QString::fromStdString(name));
       }
     }
+
+    ui->cbb_z_col->setCurrentIndex(0);
+    ui->cbb_pdf_col->setCurrentIndex(0);
     checkComputePossible();
 
     // check if the config file exist
@@ -159,11 +166,15 @@ void DialogPSC::on_btn_cancel_clicked(){
   reject();
 }
 
+void DialogPSC::on_gb_scater_clicked(bool checked){
+  ui->gb_stacked->setChecked(ui->cbb_pdf_col->count()>0 && !checked);
+  ui->gb_scater->setChecked(ui->cbb_pdf_col->count()==0 || checked);
 
+}
 
-
-
-
+void DialogPSC::on_gb_stacked_clicked(bool checked){
+  ui->gb_scater->setChecked(!checked);
+}
 
 
 void DialogPSC::on_btn_compute_clicked(){
@@ -190,20 +201,53 @@ void DialogPSC::on_btn_compute_clicked(){
 
   connect(m_P, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processingFinished(int, QProcess::ExitStatus)));
 
-  QStringList s3;
-  s3 << QString::fromStdString("--phosphoros-output-dir") <<  QString::fromStdString(m_folder)
-     << QString::fromStdString("--phz-column") << ui->cbb_z_col->currentText()
-     << QString::fromStdString("--specz-catalog") << ui->le_path->text()
-     << QString::fromStdString("--specz-cat-id") << ui->cdd_ref_id_col->currentText()
-     << QString::fromStdString("--specz-column") << ui->cbb_ref_z_col->currentText()
-     << QString::fromStdString("--samp");
+  QString cmd = "";
+  if (ui->gb_scater->isChecked()) {
+      QStringList s3;
+      s3 << QString::fromStdString("--phosphoros-output-dir") <<  QString::fromStdString(m_folder)
+         << QString::fromStdString("--phz-column") << ui->cbb_z_col->currentText()
+         << QString::fromStdString("--specz-catalog") << ui->le_path->text()
+         << QString::fromStdString("--specz-cat-id") << ui->cdd_ref_id_col->currentText()
+         << QString::fromStdString("--specz-column") << ui->cbb_ref_z_col->currentText()
+         << QString::fromStdString("--samp");
 
-  if (ui->cb_no_plot->checkState() != Qt::Unchecked) {
-    s3 << QString::fromStdString("--no-display");
+      if (ui->cb_no_plot->checkState() != Qt::Unchecked) {
+        s3 << QString::fromStdString("--no-display");
+      }
+
+      cmd =  QString("Phosphoros PSC ")+s3.join(" ");
+
+  } else {
+      QStringList s3;
+         s3 << QString::fromStdString("--pdz-catalog-file") <<  QString::fromStdString(m_folder + "/phz_cat.fits")
+            << QString::fromStdString("--refz-catalog-file") << ui->le_path->text()
+            << QString::fromStdString("--pdz-col-pe") << ui->cbb_z_col->currentText()
+            << QString::fromStdString("--pdz-col-pdf") << ui->cbb_pdf_col->currentText()
+
+            << QString::fromStdString("--refz-col-id") << ui->cdd_ref_id_col->currentText()
+            << QString::fromStdString("--refz-col-ref") << ui->cbb_ref_z_col->currentText()
+            << QString::fromStdString("--stack-bins") << QString::number(ui->sb_st_bins->value())
+            << QString::fromStdString("--hist-bins") << QString::number(ui->sb_hist_bin->value());
+
+         if (ui->cb_st_ref->checkState() != Qt::Checked) {
+           s3 << QString::fromStdString("--ref-plot") << QString::fromStdString("False");
+         }
+
+         if (ui->cb_st_shift->checkState() != Qt::Checked) {
+           s3 << QString::fromStdString("--shift-plot")<< QString::fromStdString("False");
+         }
+
+         if (ui->cb_pit->checkState() != Qt::Checked) {
+                s3 << QString::fromStdString("--pit-plot")<< QString::fromStdString("False");
+         }
+
+         if (ui->cb_crps->checkState() != Qt::Checked) {
+                s3 << QString::fromStdString("--crps-plot")<< QString::fromStdString("False");
+         }
+
+
+         cmd =  QString("Phosphoros PSP ")+s3.join(" ");
   }
-
-
-  auto cmd =  QString("Phosphoros PSC ")+s3.join(" ");
   logger.info()<< "Processing cmd:" << cmd.toStdString();
 
   m_P->setReadChannelMode(QProcess::MergedChannels);
@@ -237,6 +281,10 @@ void DialogPSC::checkComputePossible() {
   } else {
        ui->lbl_warning->setText("File 'phz_cat.fits' contains no redshift column");
        ui->btn_compute->setEnabled(false);
+  }
+
+  if (ui->cbb_pdf_col->count()==0) {
+    ui->gb_stacked->setEnabled(false);
   }
 }
 

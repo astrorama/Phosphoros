@@ -145,5 +145,5 @@ def mainMethod(args):
         f = plt.figure(4)   
         PHZ_PdfHandling.PdfPlot.plotCRPS(crps, histo_bins=args.hist_bins)
         f.show()
-    input()
+    plt.show()
     return Exit.Code["OK"]
