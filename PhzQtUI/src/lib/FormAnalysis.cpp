@@ -1051,9 +1051,12 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
       }
 
     }
+  } else {
+    ui->gb_corrections->setChecked(false);
   }
 
   setCopiedColumns(selected_survey.getCopiedColumns());
+  setRunAnnalysisEnable(true);
 }
 
 template<typename ReturnType, int I>
