@@ -745,7 +745,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   } else if (ui->rb_gc_planck->isChecked()) {
     options_map["galactic-correction-coefficient-grid-file"].value() =
             boost::any(ui->cb_CompatibleGalCorrGrid->currentText().toStdString());
-    std::string gal_ebv_default_column = "PLANK_GAL_EBV";
+    std::string gal_ebv_default_column = "PLANCK_GAL_EBV";
     options_map["dust-column-density-column-name"].value() = boost::any(gal_ebv_default_column);
   }
 
@@ -1312,13 +1312,13 @@ template<typename ReturnType, int I>
       auto path = ui->txt_inputCatalog->text().toStdString();
       auto column_reader = PhzUITools::CatalogColumnReader(path);
       auto column_from_file = column_reader.getColumnNames();
-      if (column_from_file.find("PLANK_GAL_EBV") == column_from_file.end()) {
+      if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
         // the E(B-V) has to be looked up in the Planck map
         SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
         std::unique_ptr<DialogAddGalEbv> dialog(new DialogAddGalEbv());
         dialog->setInputs(path, selected_survey.getRaColumn(), selected_survey.getDecColumn());
         if (dialog->exec()) {
-         // new catalog contains the PLANK_GAL_EBV column
+         // new catalog contains the PLANCK_GAL_EBV column
 
          auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
          auto input_catalog_file = FileUtils::removeStart(dialog->getOutputName(),
