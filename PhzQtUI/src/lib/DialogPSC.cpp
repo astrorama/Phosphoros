@@ -42,9 +42,9 @@ void DialogPSC::setDefaultColumn(std::string id_column, std::string zref_column)
 void DialogPSC::setFolder(std::string output_folder) {
   m_folder = output_folder;
   ui->out_cons->hide();
-  ui->btn_close->hide();
+  ui->btn_close->show();
   ui->btn_compute->show();
-  ui->btn_cancel->setDisabled(false);
+  ui->btn_cancel->hide();
   ui->gb_ref_cat->setDisabled(true);
   ui->gb_option->setDisabled(true);
   ui->le_path->setReadOnly(true);
@@ -163,7 +163,8 @@ void DialogPSC::on_btn_cancel_clicked(){
      m_P->kill();
      logger.info()<< "Processing stop by the user";
    }
-  reject();
+  ui->btn_cancel->hide();
+  ui->btn_close->show();
 }
 
 void DialogPSC::on_gb_scater_clicked(bool checked){
@@ -178,23 +179,18 @@ void DialogPSC::on_gb_stacked_clicked(bool checked){
 
 
 void DialogPSC::on_btn_compute_clicked(){
+  if (m_processing) {
+        m_P->kill();
+        logger.info()<< "Processing stop by the user";
+  }
 
-  ui->btn_close->show();
-  ui->btn_compute->hide();
+  ui->btn_cancel->show();
+  ui->btn_close->hide();
   ui->out_cons->show();
-  ui->btn_close->setDisabled(true);
   ui->out_cons->setReadOnly(true);
   m_processing = true;
   qApp->processEvents();
 
-  // input-cat    m_folder
-  // phz-column  ui->cbb_z_col->currentText().toStdString()
-
-  // --specz-catalog ui->le_path->text().toStdString()
-  // --specz-cat-id  ui->cdd_ref_id_col->currentText().toStdString()
-  // --specz-column  ui->cbb_ref_z_col->currentText().toStdString()
-
-  // --no-display  ui->cb_no_plot
 
 
   m_P =new QProcess;
@@ -227,15 +223,37 @@ void DialogPSC::on_btn_compute_clicked(){
             << QString::fromStdString("--refz-col-id") << ui->cdd_ref_id_col->currentText()
             << QString::fromStdString("--refz-col-ref") << ui->cbb_ref_z_col->currentText()
             << QString::fromStdString("--stack-bins") << QString::number(ui->sb_st_bins->value())
-            << QString::fromStdString("--hist-bins") << QString::number(ui->sb_hist_bin->value());
+            << QString::fromStdString("--hist-bins") << QString::number(ui->sb_hist_bin->value())
+            << QString::fromStdString("--stacked-point-estimate") <<ui->cb_pe_type->currentText();
+
 
          if (ui->cb_st_ref->checkState() != Qt::Checked) {
            s3 << QString::fromStdString("--ref-plot") << QString::fromStdString("False");
          }
+         if (ui->cb_ref_nb_plot->checkState() != Qt::Checked) {
+           s3 << QString::fromStdString("--ref-bin-plot") << QString::fromStdString("False");
+         }
+         if (ui->cb_ref_bias_plot->checkState() != Qt::Checked) {
+           s3 << QString::fromStdString("--ref-bias-plot") << QString::fromStdString("False");
+         }
+         if (ui->cb_ref_frac_plot->checkState() != Qt::Checked) {
+           s3 << QString::fromStdString("--ref-frac-plot") << QString::fromStdString("False");
+         }
+
 
          if (ui->cb_st_shift->checkState() != Qt::Checked) {
            s3 << QString::fromStdString("--shift-plot")<< QString::fromStdString("False");
          }
+         if (ui->cb_shift_nb_plot->checkState() != Qt::Checked) {
+           s3 << QString::fromStdString("--shift-bin-plot")<< QString::fromStdString("False");
+         }
+         if (ui->cb_bias_nb_plot->checkState() != Qt::Checked) {
+           s3 << QString::fromStdString("--shift-bias-plot")<< QString::fromStdString("False");
+         }
+         if (ui->cb_frac_nb_plot->checkState() != Qt::Checked) {
+           s3 << QString::fromStdString("--shift-frac-plot")<< QString::fromStdString("False");
+         }
+
 
          if (ui->cb_pit->checkState() != Qt::Checked) {
                 s3 << QString::fromStdString("--pit-plot")<< QString::fromStdString("False");
@@ -297,8 +315,8 @@ void DialogPSC::processingFinished(int, QProcess::ExitStatus) {
    m_timer->stop();
    m_processing = false;
    updateOutCons();
-   ui->btn_close->setDisabled(false);
-   ui->btn_cancel->setDisabled(true);
+   ui->btn_cancel->hide();
+   ui->btn_close->show();
    logger.info() << ui->out_cons->toPlainText().toStdString();
 }
 

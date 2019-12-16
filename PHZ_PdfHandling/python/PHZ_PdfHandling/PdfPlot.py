@@ -27,7 +27,7 @@ def getMaxSamplingPointEstimate(pdf_bins, pdf_data):
     array: list of value of the sampling for wich the object's 1D-PDF has the higgest value
     
     """
-    return [pdf_bins[np.argmax(pdf)] for pdf in pdf_data]
+    return np.array([pdf_bins[np.argmax(pdf)] for pdf in pdf_data])
     
 def getMeanPointEstimate(pdf_bins, pdf_data):
     """For each  object, return the mean value of the 1D-PDF
@@ -43,6 +43,23 @@ def getMeanPointEstimate(pdf_bins, pdf_data):
     
     """
     return integrate.simps(np.multiply(pdf_bins,pdf_data), pdf_bins)/integrate.simps(pdf_data,  pdf_bins)
+    
+def getMedianPointEstimate(pdf_bins, pdf_data):
+    """For each  object, return the median value of the 1D-PDF
+    
+    Parameters:
+    
+    pdf_bins (array): Sampling of the 1D-PDF
+    pdf_data (array(array)): an array (1 element by object) of 1-PDF values (evaluated at the 'pdf-bins' point)
+    
+    Returns:
+    
+    array: list of median value (in the sampling axis) of the object's 1D-PDF
+    
+    """
+    cumul = np.cumsum(pdf_data, axis=1)
+    half = np.sum(pdf_data, axis=1)*0.5
+    return np.array([np.interp(half[index],cumul[index,:],pdf_bins) for index in range(len(pdf_data))])  
     
 def quad(x, a, b, c):
     return a*x**2 + b*x + c
@@ -72,12 +89,12 @@ def getFitModeEstimate(pdf_bins, pdf_data, threshold = 0.7):
         while id_max<len(pdf_bins)-1 and pdf_data[index][id_max]>treshold_value:
             id_max = id_max + 1
 
-        if id_max - id_min > 1:
+        if id_max - id_min > 2:
             fit = curve_fit(quad, pdf_bins[id_min:id_max], pdf_data[index][id_min:id_max])
             if (fit[0][0]<0):
                 values[index] = -fit[0][1]/(2*fit[0][0])   
 
-    return values
+    return np.array(values)
         
 # Stacked PDF 
 
@@ -210,9 +227,78 @@ def computePitAndCrps(pdf_data, pdf_bins, reference_values, progress_callback=No
         if progress_callback is not None:
             progress_callback(index,total)
     return pits, crps    
+    
+# Nuber of sources per bin
+def getSourcesPerBin(data_map):
+    return np.sum(data_map, axis=0)  
+
+# Bias per bin 
+def flat(x):
+    return 1.0
+
+def onePlusX(x):
+    return 1.0 + x
+
+def lin(pe,x):
+    return pe
+
+def aff(pe, x):
+    return pe - x
+
+def getBiasPerBin(data_map, pdf_map_bins, stack_bins, numerator=lin, denominator=flat, estimator="mean"):
+    est_funct = getMeanPointEstimate
+    if estimator =="max":
+        est_funct = getMaxSamplingPointEstimate
+    elif estimator == "med":
+        est_funct = getMedianPointEstimate
+    elif estimator == "fit":
+        est_funct = getFitModeEstimate
+        
+    bias = np.zeros(len(stack_bins)-1)
+    for bin_id in range(len(stack_bins)-1):
+        pdf_data = np.array([data_map[:,bin_id]])
+        bin_center = (stack_bins[bin_id+1]+ stack_bins[bin_id])/2.0
+        pe = est_funct(pdf_map_bins, pdf_data)
+        bias[bin_id] = numerator(pe, bin_center)/denominator(bin_center)
+        
+    return bias  
+
+# Fraction
+def getFraction(data_map, pdf_map_bins, stack_bins, ratio, estimator="mean"):
+    est_funct = getMeanPointEstimate
+    if estimator =="max":
+        est_funct = getMaxSamplingPointEstimate
+    elif estimator == "med":
+        est_funct = getMedianPointEstimate
+    elif estimator == "fit":
+        est_funct = getFitModeEstimate
+        
+    cumul = np.cumsum(data_map, axis=0)
+    totals = np.sum(data_map, axis=0)
+    
+    
+    bin_centers = [(stack_bins[bin_id+1]+ stack_bins[bin_id])/2.0 for bin_id in range(len(stack_bins) -1)]
+    
+    frac = np.zeros(len(stack_bins)-1)
+    for bin_id, x in enumerate(bin_centers):
+        x_min = -ratio*(1+x)
+        x_max = ratio*(1+x)
+        if totals[bin_id] == 0 :
+            continue
+            
+        pdf_data = np.array([data_map[:,bin_id]])
+        pe = est_funct(pdf_map_bins, pdf_data)     
+            
+            
+        cumVal = np.interp([x_min, x_max], pdf_map_bins-pe, cumul[:,bin_id])
+        frac[bin_id] = np.abs(cumVal[1]-cumVal[0])/totals[bin_id]
+              
+    return frac
+
+   
         
 # Ploting tools
-def plotPdfMap(data_map, pdf_map_bins, stack_bins, fractions, colors = ['r','darkorange','orange','yellow','lightgrey'], **kwargs):
+def plotPdfMap(data_map, pdf_map_bins, stack_bins, fractions, colors = ['r','darkorange','orange','yellow','lightgrey'], title="", **kwargs):
     """Plot stacked PDF with confidence intervals 
     
     Parameters:
@@ -224,6 +310,9 @@ def plotPdfMap(data_map, pdf_map_bins, stack_bins, fractions, colors = ['r','dar
     colors (list of color): a list of color to be used for the confidence interval plots. If the 'fraction' list is longer than 'colors' the last colors is used multiple-time  
 
     """
+    if len(title)>0:
+        plt.title(title)
+    
     cs = plt.imshow(data_map,origin='lower',
                     extent=(0,stack_bins[-1], pdf_map_bins[0],pdf_map_bins[-1]),
                     aspect='auto',**kwargs)
@@ -264,4 +353,61 @@ def plotCRPS( crps, histo_bins=20,**kwargs):
     """
     plt.title("PDF's CRPS")
     plt.hist(crps,bins=histo_bins,range=(0,crps.max()),density=True,**kwargs)
+
+def plotSourcesPerBin(data_map, stack_bins, title = "Number of sources per bin"):
+    """Plot the number of source in each stcak bin of the map
+    
+    Parameters:
+    
+    data_map (2D-array): stacked 1D-PDF for a set of bins
+    stack_bins(array): The bin into which the objects are sorted.
+    
+    """
+    data = getSourcesPerBin(data_map)
+    av = np.sum(data)/(len(stack_bins)-1)
+    plt.title(title)
+    plt.fill_between(stack_bins,np.append(data,data[-1]), step="post", alpha=0.9)
+    plt.plot(stack_bins,np.append(data,data[-1]) ,linewidth=1,drawstyle='steps-post')
+    
+    plt.plot([stack_bins[0],stack_bins[-1]],[av,av] ,linewidth=1)
+
+def plotBiasForRefStacked(data_map, pdf_bins, stack_bins, estimator="mean",**kwargs):
+    """Plot the bias in each stack bin of the reference stacked PDF map 
+    
+    Parameters:
+    
+    data_map (2D-array): stacked 1D-PDF for a set of bins
+    pdf_bins (array): sampling of the stacked PDF axis
+    stack_bins(array): The bin into which the objects are sorted
+    estimator(string): the point estimate method: one of {"max", "fit", "med", "mean"}
+    
+    """
+    plt.title("Bias per bin for stacked PDF with respect to Ref. value")
+    bias = getBiasPerBin(data_map, pdf_bins, stack_bins, numerator=aff, denominator=onePlusX, estimator=estimator)
+    bin_centers = [(stack_bins[bin_id+1]+ stack_bins[bin_id])/2.0 for bin_id in range(len(stack_bins) -1)]
+    plt.plot(bin_centers, bias, linewidth=1,label=estimator,**kwargs)
+    plt.legend()
+    
+def plotBiasForShiftedStack(data_map, pdf_bins, stack_bins, estimator="mean",**kwargs):
+    """Plot the bias in each stack bin of the shifted stacked PDF map 
+    
+    Parameters:
+    
+    data_map (2D-array): stacked 1D-PDF for a set of bins
+    pdf_bins (array): sampling of the stacked PDF axis
+    stack_bins(array): The bin into which the objects are sorted
+    estimator(string): the point estimate method: one of {"max", "fit", "med", "mean"}
+    
+    """
+    plt.title("Bias per bin for shifted and stacked PDF")
+    bias = getBiasPerBin(data_map, pdf_bins, stack_bins, numerator=lin, denominator=onePlusX, estimator=estimator)
+    bin_centers = [(stack_bins[bin_id+1]+ stack_bins[bin_id])/2.0 for bin_id in range(len(stack_bins) -1)]
+    plt.plot(bin_centers, bias, linewidth=1,label=estimator,**kwargs)
+    plt.legend()
             
+def plotFraction(data_map, pdf_map_bins, stack_bins, ratio, estimator="mean", title="Fraction Plot",**kwargs):
+    plt.title(title)
+    frac = getFraction(data_map, pdf_map_bins, stack_bins, ratio, estimator=estimator)
+    bin_centers = [(stack_bins[bin_id+1]+ stack_bins[bin_id])/2.0 for bin_id in range(len(stack_bins) -1)]
+    plt.plot(bin_centers, frac, linewidth=1,label=estimator+" F{:03d}".format(int(100*ratio)),**kwargs)
+    plt.legend()

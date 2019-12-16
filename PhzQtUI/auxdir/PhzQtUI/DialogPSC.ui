@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>825</width>
-    <height>667</height>
+    <width>884</width>
+    <height>822</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -705,13 +705,75 @@
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_10">
             <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_12">
+              <item>
+               <widget class="QLabel" name="label_5">
+                <property name="text">
+                 <string>Number of stacked bins:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="sb_st_bins">
+                <property name="minimum">
+                 <number>1</number>
+                </property>
+                <property name="maximum">
+                 <number>300</number>
+                </property>
+                <property name="value">
+                 <number>20</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_7">
+                <property name="text">
+                 <string>Stacked PDZ P.E. method</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="cb_pe_type">
+                <item>
+                 <property name="text">
+                  <string>MEAN</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>MED</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>MAX</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>FIT</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
              <layout class="QHBoxLayout" name="horizontalLayout_9">
               <item>
                <layout class="QVBoxLayout" name="verticalLayout_6">
                 <item>
+                 <widget class="QLabel" name="label_8">
+                  <property name="text">
+                   <string>Stacked PDZ in Ref. Z bins</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
                  <widget class="QCheckBox" name="cb_st_ref">
                   <property name="text">
-                   <string>Stacked PDF versus ref. value plot</string>
+                   <string>Stacked PDZ plot</string>
                   </property>
                   <property name="checked">
                    <bool>true</bool>
@@ -719,9 +781,29 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QCheckBox" name="cb_st_shift">
+                 <widget class="QCheckBox" name="cb_ref_nb_plot">
                   <property name="text">
-                   <string>Stacked shifted PDF plot</string>
+                   <string>Source number per bin</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cb_ref_bias_plot">
+                  <property name="text">
+                   <string>Bias per bin</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cb_ref_frac_plot">
+                  <property name="text">
+                   <string>Fraction per bin</string>
                   </property>
                   <property name="checked">
                    <bool>true</bool>
@@ -731,39 +813,60 @@
                </layout>
               </item>
               <item>
+               <widget class="Line" name="line_2">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
                <layout class="QVBoxLayout" name="verticalLayout_7">
                 <item>
-                 <widget class="QLabel" name="label_5">
+                 <widget class="QLabel" name="label_9">
                   <property name="text">
-                   <string>Number of stacked bins:</string>
+                   <string>Stacked Shifted PDZ in P.E. bins</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QSpinBox" name="sb_st_bins">
-                  <property name="minimum">
-                   <number>1</number>
+                 <widget class="QCheckBox" name="cb_st_shift">
+                  <property name="text">
+                   <string>Stacked shifted PDZ plot</string>
                   </property>
-                  <property name="maximum">
-                   <number>300</number>
-                  </property>
-                  <property name="value">
-                   <number>20</number>
+                  <property name="checked">
+                   <bool>true</bool>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <spacer name="verticalSpacer_5">
-                  <property name="orientation">
-                   <enum>Qt::Vertical</enum>
+                 <widget class="QCheckBox" name="cb_shift_nb_plot">
+                  <property name="text">
+                   <string>Source number per bin</string>
                   </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>20</width>
-                    <height>40</height>
-                   </size>
+                  <property name="checked">
+                   <bool>true</bool>
                   </property>
-                 </spacer>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cb_bias_nb_plot">
+                  <property name="text">
+                   <string>Bias per bin</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="cb_frac_nb_plot">
+                  <property name="text">
+                   <string>Fraction per bin</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </item>
@@ -850,6 +953,19 @@
                <size>
                 <width>20</width>
                 <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_8">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
                </size>
               </property>
              </spacer>
@@ -1327,16 +1443,16 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_compute">
+      <widget class="QPushButton" name="btn_close">
        <property name="text">
-        <string>Compute</string>
+        <string>Close</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_close">
+      <widget class="QPushButton" name="btn_compute">
        <property name="text">
-        <string>Close</string>
+        <string>Compute</string>
        </property>
       </widget>
      </item>
