@@ -68,6 +68,7 @@ public:
 
 
   bool canAddEmissionLineToGroup(QStandardItem* item) const;
+  bool canAddLpEmissionLineToGroup(QStandardItem* item) const;
   QString getFullGroupName(QStandardItem* item) const;
 
 public slots:

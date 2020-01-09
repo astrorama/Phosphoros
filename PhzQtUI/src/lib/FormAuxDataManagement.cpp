@@ -83,37 +83,76 @@ void FormAuxDataManagement::loadManagementPage(int index){
 }
 
 void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
-  if (QMessageBox::question(this, "Add emission lines to SEDs in a folder...",
-      QString::fromStdString("This action will create a new folder named ")+
-      group+QString::fromStdString("_el generated from SEDs from folder ") + group +
-      QString::fromStdString(" with added emission lines?"), QMessageBox::Ok|QMessageBox::Cancel)
-    == QMessageBox::Ok) {
-    // do the procesing
-    QProcess *lineAdder = new QProcess();
-    lineAdder->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
 
-    auto aux_path = FileUtils::getAuxRootPath();
-    QString command = QString::fromStdString("PhosphorosAddEmissionLines --sed-dir " + aux_path)
-                      + QDir::separator() + QString::fromStdString("SEDs")
-                      + QDir::separator() + group;
+  QMessageBox msgBox;
+  msgBox.setText("Add Emission Lines to SEDs in a folder..");
+  msgBox.setInformativeText(QString::fromStdString("This action will create a new folder named ")+
+        group+QString::fromStdString("_el/_lpel generated from SEDs from folder ") + group +
+        QString::fromStdString(" with added emission lines. Which reciept do you want to use?"));
 
+  auto model = static_cast<SedTreeModel*>(ui->treeView_ManageSed->model());
+  auto selectedIndex =  ui->treeView_ManageSed->currentIndex();
+  auto item = model->item(selectedIndex.row());
 
+  msgBox.addButton(QMessageBox::Cancel);
 
-
-    connect(lineAdder, SIGNAL(finished(int, QProcess::ExitStatus)), this,
-                                SLOT(sedProcessfinished(int, QProcess::ExitStatus)));
-    connect(lineAdder, SIGNAL(started()), this, SLOT(sedProcessStarted()));
-
-    lineAdder->start(command);
-  } else {
-    ui->labelMessage->setText("");
+  QPushButton *lePhareButton{ 0 };
+  if (model->canAddLpEmissionLineToGroup(item)) {
+    lePhareButton= msgBox.addButton(tr("Le Phare-like"), QMessageBox::ActionRole);
   }
+
+  QPushButton *phosButton{ 0 };
+  if (model->canAddEmissionLineToGroup(item)) {
+    phosButton= msgBox.addButton(tr("Phosphoros"), QMessageBox::ActionRole);
+  }
+
+
+    msgBox.exec();
+
+    if (msgBox.clickedButton() == phosButton) {
+         QProcess *lineAdder = new QProcess();
+         lineAdder->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
+
+         auto aux_path = FileUtils::getAuxRootPath();
+         QString command = QString::fromStdString("PhosphorosAddEmissionLines --sed-dir " + aux_path)
+                           + QDir::separator() + QString::fromStdString("SEDs")
+                           + QDir::separator() + group;
+
+
+
+
+         connect(lineAdder, SIGNAL(finished(int, QProcess::ExitStatus)), this,
+                                     SLOT(sedProcessfinished(int, QProcess::ExitStatus)));
+         connect(lineAdder, SIGNAL(started()), this, SLOT(sedProcessStarted()));
+
+         lineAdder->start(command);
+    } else if  (msgBox.clickedButton() == lePhareButton) {
+      QProcess *lineAdder = new QProcess();
+          lineAdder->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
+
+          auto aux_path = FileUtils::getAuxRootPath();
+          QString command = QString::fromStdString("PhosphorosAddEmissionLines --suffix _lpel --oii-factor 1.0e13 --uv-range 2100,2500 --oii-factor-range 2100,2500 --emission-lines LePhare_lines.txt --sed-dir " + aux_path)
+                            + QDir::separator() + QString::fromStdString("SEDs")
+                            + QDir::separator() + group;
+
+
+
+
+          connect(lineAdder, SIGNAL(finished(int, QProcess::ExitStatus)), this,
+                                      SLOT(sedProcessfinished(int, QProcess::ExitStatus)));
+          connect(lineAdder, SIGNAL(started()), this, SLOT(sedProcessStarted()));
+
+          lineAdder->start(command);
+    } else {
+      ui->labelMessage->setText("");
+    }
+
 }
 
 
 
 void FormAuxDataManagement::addButtonsToSedItem(QStandardItem* item, SedTreeModel* treeModel_sed){
-  if (treeModel_sed->canAddEmissionLineToGroup(item)) {
+  if (treeModel_sed->canAddEmissionLineToGroup(item) || treeModel_sed->canAddLpEmissionLineToGroup(item)) {
              auto name = treeModel_sed->getFullGroupName(item);
 
              MessageButton *cartButton = new MessageButton(name, "Add Emission Line to SEDs");
@@ -126,6 +165,7 @@ void FormAuxDataManagement::addButtonsToSedItem(QStandardItem* item, SedTreeMode
              connect(cartButton, SIGNAL(MessageButtonClicked(const QString&)), this,
                              SLOT(addEmissionLineButtonClicked(const QString&)));
   }
+
 
   for (int i = 0; i < item->rowCount(); i++) {
     addButtonsToSedItem(item->child(i),treeModel_sed);
