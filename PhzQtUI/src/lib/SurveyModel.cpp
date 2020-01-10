@@ -207,6 +207,11 @@ void SurveyModel::loadSurvey() {
    m_in_edition = true;
  }
 
+ void SurveyModel::setRefZColumnToSelected(QString new_name) {
+   m_edited_survey.setRefZColumn(new_name.toStdString());
+   m_in_edition = true;
+ }
+
  void SurveyModel::setFiltersToSelected(std::vector<FilterMapping> new_filters) {
    m_edited_survey.setFilters(new_filters);
    m_in_edition = true;

@@ -55,6 +55,8 @@ signals:
 
     void navigateToComputeRedshift(bool);
 
+    void navigateToPostProcessing(bool);
+
     void quit(bool);
 
 private slots:
@@ -62,12 +64,10 @@ private slots:
 void on_btn_ToAnalysis_clicked();
 void on_btn_ToCatalog_clicked();
 void on_btn_ToModel_clicked();
+void on_btn_ToPP_clicked();
 void on_btn_exit_clicked();
 
-/**
- * @brief SLOT on_btn_editGeneral_clicked: turn the root path section in edition.
- */
-void on_btn_editGeneral_clicked();
+
 
 /**
  * @brief SLOT on_btn_cancelGeneral_clicked: cancel the root path section edition.
@@ -101,29 +101,21 @@ void on_btn_browseInter_clicked();
 void on_btn_browseRes_clicked();
 
 /**
- * @brief SLOT Raised when the user click the Default Catalog button
+ * @brief SLOT Raised when the user click on the Reset to Default button
  */
-void on_btn_defCat_clicked();
+void on_btn_default_clicked();
 
 /**
- * @brief SLOT Raised when the user click the Default Aux Data button
+ * @brief SLOT Raised when the user check/uncheck the group box for the threads
  */
-void on_btn_defAux_clicked();
+void on_gb_thread_clicked();
 
 /**
- * @brief SLOT Raised when the user click the Default Intermediate button
+ * @brief SLOT Raised when the user change the number of threads value
  */
-void on_btn_defInter_clicked();
+void on_sb_thread_valueChanged(int i);
 
-/**
- * @brief SLOT Raised when the user click the Default Result button
- */
-void on_btn_defRes_clicked();
 
-/**
- * @brief SLOT Raised when the user start Cosmology edition
- */
-void on_btn_edit_cosmo_clicked();
 
 /**
  * @brief SLOT Raised when the user cancel the cosmology edition
@@ -139,6 +131,21 @@ void on_btn_save_cosmo_clicked();
  * @brief SLOT Raised when the user click the default cosmology button
  */
 void on_btn_default_cosmo_clicked();
+
+/**
+ * @brief SLOT Raised when the user change the value of the hubble parameter
+ */
+void on_txt_hubble_param_textEdited(const QString &);
+
+/**
+ * @brief SLOT Raised when the user change the value of Omega matter parameter
+ */
+void on_txt_omega_matter_textEdited(const QString &);
+
+/**
+ * @brief SLOT Raised when the user change the value of the Omega Lambda parameter
+ */
+void on_txt_omega_lambda_textEdited(const QString &);
 
 /**
  * @brief SLOT Lock the user to the current tab.

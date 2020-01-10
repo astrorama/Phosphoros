@@ -112,7 +112,6 @@ void addEmissionLineButtonClicked(const QString&);
   void on_btn_add_ebv_range_clicked();
 
 private:
-  void addButtonsToSedItem(QStandardItem* item, SedTreeModel* treeModel_sed);
   void loadSeds();
   void turnControlsInEdition();
   void turnControlsInView();

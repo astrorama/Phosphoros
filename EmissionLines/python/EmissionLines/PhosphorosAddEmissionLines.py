@@ -63,6 +63,9 @@ def defineSpecificProgramOptions():
     parser.add_argument('--velocity', default=None, type=float,
         help='The velocity (in km/s) to compute the FWHM of the lines from (defaults to dirac)')
     parser.add_argument('--no-sed', action='store_true', help='Output only the emission lines')
+    
+    parser.add_argument('--suffix', default="_el", type=str, 
+        help='Suffix to be added to the directory name to form the output directory')
 
     return parser
 
@@ -70,6 +73,8 @@ def defineSpecificProgramOptions():
 def readEmissionLinesFromFile(emission_lines_file):
     if emission_lines_file == None:
         emission_lines_file = os.path.join(aux_dir, 'emission_lines.txt')
+    elif not "/" in emission_lines_file:
+        emission_lines_file = os.path.join(aux_dir, emission_lines_file)
 
     logger.info('Reading emission lines from '+emission_lines_file)
     return table.Table.read(emission_lines_file, format='ascii')
@@ -241,7 +246,7 @@ class EmissionLinesAdder(object):
 
 def mainMethod(args):
     sed_dir = getSedDir(args.sed_dir)
-    out_dir = sed_dir.rstrip(os.path.sep) + '_el'
+    out_dir = sed_dir.rstrip(os.path.sep) + args.suffix
 
     if os.path.exists(out_dir):
         logger.error('Output directory '+out_dir+' already exists')

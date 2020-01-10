@@ -104,7 +104,7 @@ bool SedTreeModel::canAddEmissionLineToGroup(QStandardItem* item) const {
   if (item->rowCount()>0){
     QString name = getFullGroupName(item);
 
-    if (name.endsWith("_el")) {
+    if (name.endsWith("_el") || name.endsWith("_lpel")) {
       return false;
     }
 
@@ -116,7 +116,34 @@ bool SedTreeModel::canAddEmissionLineToGroup(QStandardItem* item) const {
 
     for (int i = 0; i < item->rowCount(); ++i) {
      auto sub_item = item->child(i);
-     if (sub_item->text().endsWith("_el")) {
+     if (sub_item->text().endsWith("_el") || sub_item->text().endsWith("_lpel")) {
+       return false;
+     }
+   }
+
+    return true;
+  }
+
+  return false;
+}
+
+bool SedTreeModel::canAddLpEmissionLineToGroup(QStandardItem* item) const {
+  if (item->rowCount()>0){
+    QString name = getFullGroupName(item);
+
+    if (name.endsWith("_el") || name.endsWith("_lpel")) {
+      return false;
+    }
+
+    for (auto & group : m_map_dir) {
+      if ((name+"_lpel") == QString::fromStdString(group.first)){
+        return false;
+      }
+    }
+
+    for (int i = 0; i < item->rowCount(); ++i) {
+     auto sub_item = item->child(i);
+     if (sub_item->text().endsWith("_el") || sub_item->text().endsWith("_lpel")) {
        return false;
      }
    }

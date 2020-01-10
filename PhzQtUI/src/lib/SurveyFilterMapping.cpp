@@ -67,6 +67,14 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
        return m_gal_ebv_column;
     }
 
+    void SurveyFilterMapping::setRefZColumn(std::string newRefZColumn){
+      m_ref_z_column = newRefZColumn;
+    }
+    std::string SurveyFilterMapping::getRefZColumn() const{
+       return m_ref_z_column;
+    }
+
+
     void SurveyFilterMapping::setFilters(std::vector<FilterMapping> filters){
         m_filters = std::move(filters);
     }
@@ -193,6 +201,12 @@ SurveyFilterMapping SurveyFilterMapping::loadCatalog(std::string name) {
   survey.setDecColumn(root_node.attribute("DecColumn").toStdString());
   survey.setGalEbvColumn(root_node.attribute("GalEbvColumn").toStdString());
 
+  std::string ref_col = "";
+  if (root_node.hasAttribute("RefZColumn")) {
+    ref_col = root_node.attribute("RefZColumn").toStdString();
+  }
+  survey.setRefZColumn(ref_col);
+
 
   std::string path = root_node.attribute("DefaultCatalogPath").toStdString();
 
@@ -314,6 +328,7 @@ void SurveyFilterMapping::saveSurvey(std::string oldName){
   root.setAttribute("RaColumn",QString::fromStdString(m_ra_column));
   root.setAttribute("DecColumn",QString::fromStdString(m_dec_column));
   root.setAttribute("GalEbvColumn",QString::fromStdString(m_gal_ebv_column));
+  root.setAttribute("RefZColumn",QString::fromStdString(m_ref_z_column));
   root.setAttribute("NonDetection",QString::number(m_non_detection));
   root.setAttribute("HasUpperLimit",QString::number(m_has_upper_limit));
   root.setAttribute("HasMissingPhotometry",QString::number(m_has_missing_phot));

@@ -47,6 +47,8 @@ void navigateToConfig();
 
 void navigateToComputeRedshift(bool);
 
+void navigateToPostProcessing(bool);
+
 void quit(bool);
 
 
@@ -55,20 +57,19 @@ private slots:
 void on_btn_ToAnalysis_clicked();
 void on_btn_ToOption_clicked();
 void on_btn_ToCatalog_clicked();
+void on_btn_ToPP_clicked();
 void on_btn_exit_clicked();
 
 
+    void on_cb_selSpace_currentIndexChanged(const QString &);
 
-    void setSelectionChanged(QModelIndex, QModelIndex);
     void rulesSelectionChanged(QModelIndex, QModelIndex);
 
-    void setGridDoubleClicked(QModelIndex);
 
     void parameterGridDoubleClicked(QModelIndex);
 
     void setEditionPopupClosing(int,ParameterRule,bool);
 
-    void on_btn_SetEdit_clicked();
 
     void on_btn_SetCancel_clicked();
 
@@ -97,11 +98,13 @@ private:
     void setModelInEdition();
     void setModelInView();
     void selectFromGrid();
+    void reload_cb();
 
     std::shared_ptr<ModelSetModel> m_model_set_model_ptr;
     bool m_setInsert;
     DatasetRepo m_seds_repository;
     DatasetRepo m_redenig_curves_repository;
+    bool m_diconnect_cb=false;
 };
 
 }

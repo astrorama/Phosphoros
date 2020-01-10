@@ -45,11 +45,6 @@ public:
 
 private slots:
     /**
-     * SLOT Switch the popup in edition.
-     */
-    void on_btn_Edit_clicked();
-
-    /**
      * SLOT switch back the popup in view and revert changes
      */
     void on_btn_Cancel_clicked();

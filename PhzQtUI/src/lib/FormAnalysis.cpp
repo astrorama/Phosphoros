@@ -1,10 +1,15 @@
 #include <QStandardItemModel>
 #include <QMessageBox>
 #include <QFileInfo>
+#include <QFile>
+#include <QTextStream>
 #include <QDir>
 #include <functional>
 #include <QFileDialog>
 #include <boost/program_options.hpp>
+
+#include <fstream>
+#include <iostream>
 
 
 #include "ElementsKernel/Exception.h"
@@ -26,12 +31,15 @@
 #include "PhzQtUI/DialogAddGalEbv.h"
 #include "PhzQtUI/DialogLuminosityPrior.h"
 #include "PhzQtUI/DialogOutputColumnSelection.h"
+#include "PhzQtUI/DialogNz.h"
+#include "PhzQtUI/DialogZeroPointName.h"
 
 #include "PhzUITools/ConfigurationWriter.h"
 #include "PhzUITools/CatalogColumnReader.h"
 
 #include "PhzDataModel/PhzModel.h"
 #include <ctime>
+#include "PhzUtils/Multithreading.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -61,9 +69,7 @@ void FormAnalysis::loadAnalysisPage(
 
   updateSelection();
 
-  //
-  ui->cb_z_col->clear();
-  ui->cb_z_col->addItem("");
+
 }
 
 
@@ -205,14 +211,24 @@ void FormAnalysis::updateGalCorrGridSelection() {
   } catch (Elements::Exception&) {}
 }
 
-void FormAnalysis::fillCbColumns(std::set<std::string> columns) {
+void FormAnalysis::fillCbColumns(std::set<std::string> columns, std::string default_col) {
    ui->cb_z_col->clear();
    ui->cb_z_col->addItem("");
+   int index = 1;
+   int selected_index = -1;
    for (auto item : columns) {
      ui->cb_z_col->addItem(QString::fromStdString(item));
+     if (item == default_col) {
+       selected_index = index;
+     }
+     index++;
    }
 
-   ui->cb_z_col->setEnabled(true);
+   if (selected_index > 0) {
+     ui->cb_z_col->setCurrentIndex(selected_index);
+   }
+
+   ui->cb_z_col->setEnabled(ui->gb_fix_z->isChecked());
 }
 
 void FormAnalysis::updateCorrectionSelection() {
@@ -227,72 +243,64 @@ void FormAnalysis::updateCorrectionSelection() {
 }
 
 void FormAnalysis::adjustPhzGridButtons(bool enabled) {
-  bool name_ok = checkGridSelection(false, true);
-  ui->btn_GetConfigGrid->setEnabled(enabled && name_ok);
-  ui->btn_RunGrid->setEnabled(enabled && name_ok);
-  QString tool_tip = "";
-
-  if (!name_ok) {
-    ui->cb_CompatibleGrid->lineEdit()->setStyleSheet(
-        "QLineEdit { color: red }");
-    setToolBoxButtonColor(ui->toolBox, 0, Qt::red);
-    tool_tip =
-        "Please enter a valid grid name in order to compute the Grid or export the corresponding configuration.";
-  } else if (!checkGridSelection(true, false)) {
-    ui->cb_CompatibleGrid->lineEdit()->setStyleSheet(
-        "QLineEdit { color: orange }");
-    setToolBoxButtonColor(ui->toolBox, 0, QColor("orange"));
-
-  } else {
-    ui->cb_CompatibleGrid->lineEdit()->setStyleSheet(
-        "QLineEdit { color: black }");
-    setToolBoxButtonColor(ui->toolBox, 0, Qt::black);
-  }
-  ui->btn_GetConfigGrid->setToolTip(tool_tip);
-  ui->btn_RunGrid->setToolTip(tool_tip);
+  adjustGalCorrGridButtons(enabled);
 
 }
 
 void FormAnalysis::adjustGalCorrGridButtons(bool enabled) {
   int toolbox_index = 1;
-  bool name_ok = checkGalacticGridSelection(false, true);
+
+  bool name_ok = checkGridSelection(false, true);
+  ui->btn_GetConfigGrid->setEnabled(enabled && name_ok);
+  ui->btn_RunGrid->setEnabled(enabled && name_ok);
+  QString tool_tip = "";
+
+  QColor tab_color = Qt::black;
+
+  if (!name_ok) {
+    ui->cb_CompatibleGrid->lineEdit()->setStyleSheet("QLineEdit { color: red }");
+    tab_color = Qt::red;
+    tool_tip = "Please enter a valid grid name in order to compute the Grid or export the corresponding configuration.";
+  } else if (!checkGridSelection(true, false)) {
+    ui->cb_CompatibleGrid->lineEdit()->setStyleSheet("QLineEdit { color: orange }");
+    tab_color = QColor("orange");
+  } else {
+    ui->cb_CompatibleGrid->lineEdit()->setStyleSheet("QLineEdit { color: black }");
+  }
+  ui->btn_GetConfigGrid->setToolTip(tool_tip);
+  ui->btn_RunGrid->setToolTip(tool_tip);
+
+
+  name_ok = checkGalacticGridSelection(false, true);
   bool valid_model_grid = checkGridSelection(true, false);
   bool needed = !ui->rb_gc_off->isChecked();
   ui->cb_CompatibleGalCorrGrid->setEnabled(needed && enabled);
   ui->btn_GetGalCorrConfigGrid->setEnabled(needed && enabled && name_ok);
   ui->btn_RunGalCorrGrid->setEnabled(needed && enabled && valid_model_grid && name_ok);
-  QString tool_tip = "";
+  QString tool_tip_mw = "";
   if (!needed) {
-    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet(
-           "QLineEdit { color: black }");
-       setToolBoxButtonColor(ui->toolBox, toolbox_index, Qt::black);
-       tool_tip =
-              "With 'Correction type' set to 'OFF' there is no need to generate this grid.";
+    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet("QLineEdit { color: black }");
+    tool_tip_mw = "With 'Correction type' set to 'OFF' there is no need to generate this grid.";
   } else if (!name_ok) {
-    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet(
-        "QLineEdit { color: red }");
-    setToolBoxButtonColor(ui->toolBox, toolbox_index, Qt::red);
-    tool_tip =
-        "Please enter a valid grid name in order to compute the Grid or export the corresponding configuration.";
+    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet("QLineEdit { color: red }");
+    tab_color = Qt::red;
+    tool_tip_mw = "Please enter a valid grid name in order to compute the Grid or export the corresponding configuration.";
   } else if (!valid_model_grid) {
-    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet(
-        "QLineEdit { color: red }");
-    setToolBoxButtonColor(ui->toolBox, toolbox_index, Qt::red);
-    tool_tip =
-        "You should first generate the Model Grid before the Galactic Correction one.";
+    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet("QLineEdit { color: red }");
+    tab_color = Qt::red;
+    tool_tip_mw = "You should first generate the Model Grid before the Galactic Correction one.";
   } else if (!checkGalacticGridSelection(true, false)) {
-    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet(
-        "QLineEdit { color: orange }");
-    setToolBoxButtonColor(ui->toolBox, toolbox_index, QColor("orange"));
-
+    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet("QLineEdit { color: orange }");
+    if (tab_color == Qt::black) {
+      tab_color = QColor("orange");
+    }
   } else {
-    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet(
-        "QLineEdit { color: black }");
-    setToolBoxButtonColor(ui->toolBox, toolbox_index, Qt::black);
+    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet("QLineEdit { color: black }");
   }
-  ui->btn_GetGalCorrConfigGrid->setToolTip(tool_tip);
-  ui->btn_RunGalCorrGrid->setToolTip(tool_tip);
+  ui->btn_GetGalCorrConfigGrid->setToolTip(tool_tip_mw);
+  ui->btn_RunGalCorrGrid->setToolTip(tool_tip_mw);
 
+  setToolBoxButtonColor(ui->toolBox, toolbox_index, tab_color);
 }
 
 void FormAnalysis::setComputeCorrectionEnable() {
@@ -393,13 +401,37 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
     ui->btn_confLuminosityPrior->setToolTip("You need to Generate the Model Grid before to configure the Luminosity Prior");
   }
 
+  bool nzPrior_ok = true;
+  if (ui->rb_nzPrior->isChecked()){
+
+      std::string nz_prior_b_filter = PreferencesUtils::getUserPreference(
+            ui->cb_AnalysisSurvey->currentText().toStdString(),
+            ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorBFilter");
+
+      std::string nz_prior_i_filter = PreferencesUtils::getUserPreference(
+          ui->cb_AnalysisSurvey->currentText().toStdString(),
+          ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorIFilter");
+
+      nzPrior_ok = nz_prior_b_filter != "" && nz_prior_i_filter != "";
+  }
+
+  ui->btn_confLuminosityPrior->setEnabled(grid_name_exists);
+  if (nzPrior_ok) {
+    ui->btn_conf_Nz->setToolTip("Configure the N(z) Prior");
+  } else {
+    ui->btn_conf_Nz->setToolTip("You need to Generate the N(z) Prior");
+  }
+
+  bool nz_prior_ok = !ui->rb_nzPrior->isChecked() || nzPrior_ok;
+
+
 
   ui->btn_GetConfigAnalysis->setEnabled(
       grid_name_ok && (!need_gal_correction || grid_gal_corr_name_ok) &&
-      correction_ok && lum_prior_ok && lum_prior_compatible && run_ok && enabled);
+      correction_ok && lum_prior_ok && lum_prior_compatible && nz_prior_ok && run_ok && enabled);
   ui->btn_RunAnalysis->setEnabled(
       grid_name_exists && (!need_gal_correction || grid_gal_corr_name_exists) &&
-      correction_ok && correction_exists && lum_prior_ok && lum_prior_compatible&& run_ok && enabled);
+      correction_ok && correction_exists && lum_prior_ok && lum_prior_compatible && nz_prior_ok && run_ok && enabled);
 
   QString tool_tip_run = "";
   QString tool_tip_conf = "";
@@ -446,12 +478,21 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
                 + "When the luminosity prior is enabled , you must provide a luminosity prior configuration. \n";
   }
 
+
+
   if (!lum_prior_compatible) {
     tool_tip_conf = tool_tip_conf
-                   + "The Prior is no longer compatible with the Parameter Space, please update it. \n";
+                   + "The Luminosity Prior is no longer compatible with the Parameter Space, please update it. \n";
     tool_tip_run = tool_tip_run
-                   + "The Prior is no longer compatible with the Parameter Space, please update it. \n";
+                   + "The Luminosity Prior is no longer compatible with the Parameter Space, please update it. \n";
   }
+
+  if (!nz_prior_ok) {
+      tool_tip_conf = tool_tip_conf
+                  + "When the N(z) prior is enabled , you must configure it by selecting B and I filters. \n";
+      tool_tip_run = tool_tip_run
+                  + "When the N(z) prior is enabled , you must configure it by selecting B and I filters. \n";
+    }
 
 
   if (!info_input.exists()) {
@@ -469,7 +510,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
 
   if (!(grid_name_ok &&
         (!need_gal_correction || grid_gal_corr_name_ok) &&
-        correction_ok && lum_prior_ok && lum_prior_compatible && run_ok)) {
+        correction_ok && lum_prior_ok && lum_prior_compatible && nz_prior_ok && run_ok)) {
     tool_tip_conf = tool_tip_conf + "Before getting the configuration.";
   } else {
     tool_tip_conf = "Get the configuration file.";
@@ -478,7 +519,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   if (!(grid_name_exists &&
         (!need_gal_correction || grid_gal_corr_name_exists)  &&
         correction_ok && correction_exists &&
-        lum_prior_ok && lum_prior_compatible && run_ok)) {
+        lum_prior_ok && lum_prior_compatible && nz_prior_ok && run_ok)) {
     tool_tip_run = tool_tip_run + "Before running the analysis.";
   } else {
     tool_tip_run = "Run the analysis.";
@@ -493,7 +534,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
     setToolBoxButtonColor(ui->toolBox, 3, Qt::black);
   }
 
-  if (!lum_prior_ok || !lum_prior_compatible) {
+  if (!lum_prior_ok || !lum_prior_compatible || !nz_prior_ok) {
      setToolBoxButtonColor(ui->toolBox, 2, QColor("orange"));
    } else {
      setToolBoxButtonColor(ui->toolBox, 2, Qt::black);
@@ -660,6 +701,11 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 }
 
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getRunOptionMap() {
+  std::string yes_flag = "YES";
+  std::string no_flag = "NO";
+  std::string max_flag = "MAX";
+  std::string bayesian_flag = "BAYESIAN";
+  double one = 1.0;
 
   auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
   SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
@@ -694,12 +740,12 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     options_map["dust-column-density-column-name"].value() =
         boost::any(selected_survey.getGalEbvColumn());
 
-    options_map["dust-map-sed-bpc"].value() = boost::any(1.0);
+    options_map["dust-map-sed-bpc"].value() = boost::any(one);
 
   } else if (ui->rb_gc_planck->isChecked()) {
     options_map["galactic-correction-coefficient-grid-file"].value() =
             boost::any(ui->cb_CompatibleGalCorrGrid->currentText().toStdString());
-    std::string gal_ebv_default_column = "PLANK_GAL_EBV";
+    std::string gal_ebv_default_column = "PLANCK_GAL_EBV";
     options_map["dust-column-density-column-name"].value() = boost::any(gal_ebv_default_column);
   }
 
@@ -712,8 +758,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   if (has_Missing_data) {
     options_map["missing-photometry-flag"].value() = boost::any(non_detection);
   }
-  std::string yes_flag = "YES";
-  std::string no_flag = "NO";
+
 
   if (has_upper_limit) {
     options_map["enable-upper-limit"].value() = boost::any(yes_flag);
@@ -738,11 +783,9 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
         ui->cb_AnalysisCorrection->currentText().toStdString());
   }
 
-  options_map["axes-collapse-type"].value() = boost::any(
-      ui->cb_marginalization->currentText().toStdString());
+  options_map["axes-collapse-type"].value() = boost::any(bayesian_flag);
 
-  options_map["likelihood-axes-collapse-type"].value() = boost::any(
-        ui->cb_marginalization_likelihood->currentText().toStdString());
+  options_map["likelihood-axes-collapse-type"].value() = boost::any(max_flag);
 
 
   options_map["output-catalog-format"].value() = boost::any(
@@ -764,11 +807,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
      options_map["create-output-best-likelihood-model"].value() = boost::any(no_flag);
    }
 
-  if (ui->cb_normalize_pdf->isChecked()) {
-    options_map["output-pdf-normalized"].value() = boost::any(yes_flag);
-      } else {
-        options_map["output-pdf-normalized"].value() = boost::any(no_flag);
-      }
+  options_map["output-pdf-normalized"].value() = boost::any(yes_flag);
+
 
   if (ui->cb_gen_likelihood->isChecked()) {
    options_map["create-output-likelihoods"].value() = boost::any(yes_flag);
@@ -784,15 +824,29 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     auto& lum_prior_config = m_prior_config.at(lum_prior_name);
     auto lum_prior_option = lum_prior_config.getConfigOptions();
     options_map.insert(lum_prior_option.begin(), lum_prior_option.end());
-    options_map["luminosity-prior-effectiveness"].value() = boost::any(ui->dsp_eff_lum->value());
+    options_map["luminosity-prior-effectiveness"].value() = boost::any(one);
 
     options_map["volume-prior"].value() = boost::any(yes_flag);
-    options_map["volume-prior-effectiveness"].value() = boost::any(ui->dsp_eff_lum->value());
+    options_map["volume-prior-effectiveness"].value() = boost::any(one);
   }
 
   if (ui->rb_volumePrior->isChecked()) {
     options_map["volume-prior"].value() = boost::any(yes_flag);
-    options_map["volume-prior-effectiveness"].value() = boost::any(ui->dsp_eff_vol->value());
+    options_map["volume-prior-effectiveness"].value() = boost::any(one);
+  }
+
+  if (ui->rb_nzPrior->isChecked()) {
+    options_map["Nz-prior"].value() = boost::any(yes_flag);
+    std::string nz_prior_b_filter = PreferencesUtils::getUserPreference(
+               ui->cb_AnalysisSurvey->currentText().toStdString(),
+               ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorBFilter");
+    options_map["Nz-prior_B_Filter"].value() = boost::any(nz_prior_b_filter);
+
+    std::string nz_prior_i_filter = PreferencesUtils::getUserPreference(
+             ui->cb_AnalysisSurvey->currentText().toStdString(),
+             ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorIFilter");
+    options_map["Nz-prior_I_Filter"].value() = boost::any(nz_prior_i_filter);
+    options_map["Nz-prior-effectiveness"].value() = boost::any(one);
   }
 
 
@@ -953,10 +1007,14 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   }
 
   // update the column of the default catalog file
-  fillCbColumns(selected_survey.getColumnList());
+  fillCbColumns(selected_survey.getColumnList(), selected_survey.getRefZColumn());
 
-  // push the default catalog
-  setInputCatalogName(selected_survey.getDefaultCatalogFile(), false);
+  // push the last used / default catalog
+  auto saved_cat = PreferencesUtils::getUserPreference(selected_survey.getName(),"LAST_USED_CAT");
+  if (saved_cat.length() == 0) {
+    saved_cat = selected_survey.getDefaultCatalogFile();
+  }
+  setInputCatalogName(saved_cat, false);
 
   // set the stored IGM
   auto saved_igm = PreferencesUtils::getUserPreference(selected_survey.getName(),
@@ -970,17 +1028,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
     }
   }
 
-  // set the stored Collapse
-  auto saved_collapse = PreferencesUtils::getUserPreference(selected_survey.getName(),
-      "Collapse");
-  if (saved_collapse.length() > 0) {
-    for (int i = 0; i < ui->cb_marginalization->count(); i++) {
-      if (ui->cb_marginalization->itemText(i).toStdString() == saved_collapse) {
-        ui->cb_marginalization->setCurrentIndex(i);
-        break;
-      }
-    }
-  }
+
 
   updateGridSelection();
   updateGalCorrGridSelection();
@@ -1003,9 +1051,12 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
       }
 
     }
+  } else {
+    ui->gb_corrections->setChecked(false);
   }
 
   setCopiedColumns(selected_survey.getCopiedColumns());
+  setRunAnnalysisEnable(true);
 }
 
 template<typename ReturnType, int I>
@@ -1114,6 +1165,7 @@ template<typename ReturnType, int I>
 
         PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
             "IGM", ui->cb_igm->currentText().toStdString());
+
       }
     }
     setRunAnnalysisEnable(true);
@@ -1203,18 +1255,51 @@ template<typename ReturnType, int I>
   }
 
   void FormAnalysis::on_cb_AnalysisCorrection_currentIndexChanged(
-      const QString &selectedText) {
-    ui->btn_editCorrections->setEnabled(selectedText.length() > 0);
+      const QString &) {
     setRunAnnalysisEnable(true);
   }
 
   void FormAnalysis::on_btn_editCorrections_clicked() {
-    std::unique_ptr<DialogPhotCorrectionEdition> popup(new DialogPhotCorrectionEdition());
-    popup->setCorrectionsFile(
-        ui->cb_AnalysisSurvey->currentText().toStdString(),
-        ui->cb_AnalysisCorrection->currentText().toStdString(),
-        getSelectedFilterMapping());
-    popup->exec();
+    bool open = true;
+    if (ui->cb_AnalysisCorrection->currentText().toStdString().length()==0) {
+      open = false;
+      std::unique_ptr<DialogZeroPointName> popupname(new DialogZeroPointName());
+
+      auto catalog = ui->cb_AnalysisSurvey->currentText().toStdString();
+      auto root_folder = FileUtils::getPhotCorrectionsRootPath(true, catalog);
+      popupname->setFolder(root_folder);
+      // prompt for new name
+      if (popupname->exec() == QDialog::Accepted) {
+          // create file with correction to 1
+          std::string path = root_folder + "/" + popupname->getName();
+          logger.info() << "Creating Zero-Point correction file " << path;
+          QFile file(QString::fromStdString(path));
+          if (file.open(QIODevice::WriteOnly | QIODevice::Text)){
+            QTextStream out(&file);
+            out << "# Column: Filter string\n"
+                << "# Column: Correction double\n\n"
+                << "#  Filter Correction\n\n";
+
+
+            for (auto& filter : getSelectedFilterMapping()) {
+              out << QString::fromStdString(filter.getFilterFile() ) << "     1.0\n";
+              open = true;
+            }
+            file.close();
+            onCorrectionComputed(QString::fromStdString(popupname->getName()));
+
+          }
+      }
+    }
+
+    if (open) {
+      std::unique_ptr<DialogPhotCorrectionEdition> popup(new DialogPhotCorrectionEdition());
+      popup->setCorrectionsFile(
+          ui->cb_AnalysisSurvey->currentText().toStdString(),
+          ui->cb_AnalysisCorrection->currentText().toStdString(),
+          getSelectedFilterMapping());
+      popup->exec();
+    }
   }
 
   void FormAnalysis::on_btn_computeCorrections_clicked() {
@@ -1230,13 +1315,13 @@ template<typename ReturnType, int I>
       auto path = ui->txt_inputCatalog->text().toStdString();
       auto column_reader = PhzUITools::CatalogColumnReader(path);
       auto column_from_file = column_reader.getColumnNames();
-      if (column_from_file.find("PLANK_GAL_EBV") == column_from_file.end()) {
+      if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
         // the E(B-V) has to be looked up in the Planck map
         SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
         std::unique_ptr<DialogAddGalEbv> dialog(new DialogAddGalEbv());
         dialog->setInputs(path, selected_survey.getRaColumn(), selected_survey.getDecColumn());
         if (dialog->exec()) {
-         // new catalog contains the PLANK_GAL_EBV column
+         // new catalog contains the PLANCK_GAL_EBV column
 
          auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
          auto input_catalog_file = FileUtils::removeStart(dialog->getOutputName(),
@@ -1261,13 +1346,15 @@ template<typename ReturnType, int I>
         ui->cb_CompatibleGrid->currentText().toStdString(),
         getSelectedFilterMapping(),
         getExcludedFilters(),
-        selected_survey.getDefaultCatalogFile(),
+        selected_survey.getRefZColumn(),
         config_map,
         selected_survey.getNonDetection());
 
     connect(popup.get(), SIGNAL(correctionComputed(const QString &)),
         SLOT(onCorrectionComputed(const QString &)));
     popup->exec();
+
+    PhzUtils::getStopThreadsFlag() = false;
 
   }
 
@@ -1360,10 +1447,16 @@ template<typename ReturnType, int I>
            ui->cb_AnalysisSurvey->currentText().toStdString(),
            ui->cb_AnalysisModel->currentText().toStdString() + "_VolumePriorEnabled");
 
+    auto nz_prior_enabled = PreferencesUtils::getUserPreference(
+             ui->cb_AnalysisSurvey->currentText().toStdString(),
+             ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorEnabled");
+
     if (luminosity_prior_enabled == "1") {
       ui->rb_luminosityPrior->setChecked(true);
     } else if (volume_prior_enabled == "1") {
       ui->rb_volumePrior->setChecked(true);
+    } else if (nz_prior_enabled == "1") {
+      ui->rb_nzPrior->setChecked(true);
     } else {
       ui->rb_noPrior->setChecked(true);
     }
@@ -1380,60 +1473,110 @@ template<typename ReturnType, int I>
   }
 
   void FormAnalysis::on_rb_luminosityPrior_toggled(bool on ) {
-    if (on){
-
+    if (on) {
       ui->rb_volumePrior->setChecked(false);
-
       ui->rb_noPrior->setChecked(false);
-
+      ui->rb_nzPrior->setChecked(false);
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                       ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPriorEnabled",
                       QString::number(ui->rb_luminosityPrior->isChecked()).toStdString());
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                       ui->cb_AnalysisModel->currentText().toStdString() + "_VolumePriorEnabled",
                       QString::number(ui->rb_volumePrior->isChecked()).toStdString());
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorEnabled",
+                      QString::number(ui->rb_nzPrior->isChecked()).toStdString());
       setRunAnnalysisEnable(true);
     }
   }
 
   void FormAnalysis::on_rb_volumePrior_toggled(bool on) {
-    if (on){
-
+    if (on) {
       ui->rb_luminosityPrior->setChecked(false);
-
-
       ui->rb_noPrior->setChecked(false);
-
-
-
+      ui->rb_nzPrior->setChecked(false);
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                       ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPriorEnabled",
                       QString::number(ui->rb_luminosityPrior->isChecked()).toStdString());
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                       ui->cb_AnalysisModel->currentText().toStdString() + "_VolumePriorEnabled",
                       QString::number(ui->rb_volumePrior->isChecked()).toStdString());
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorEnabled",
+                      QString::number(ui->rb_nzPrior->isChecked()).toStdString());
       setRunAnnalysisEnable(true);
     }
   }
 
   void FormAnalysis::on_rb_noPrior_toggled(bool on) {
-    if (on){
-
-          ui->rb_luminosityPrior->setChecked(false);
-
-          ui->rb_volumePrior->setChecked(false);
-
-
-
-
+    if (on) {
+      ui->rb_luminosityPrior->setChecked(false);
+      ui->rb_volumePrior->setChecked(false);
+      ui->rb_nzPrior->setChecked(false);
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
-                      ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPriorEnabled",
-                      QString::number(ui->rb_luminosityPrior->isChecked()).toStdString());
+                  ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPriorEnabled",
+                  QString::number(ui->rb_luminosityPrior->isChecked()).toStdString());
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
-                      ui->cb_AnalysisModel->currentText().toStdString() + "_VolumePriorEnabled",
-                      QString::number(ui->rb_volumePrior->isChecked()).toStdString());
+                  ui->cb_AnalysisModel->currentText().toStdString() + "_VolumePriorEnabled",
+                  QString::number(ui->rb_volumePrior->isChecked()).toStdString());
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                  ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorEnabled",
+                  QString::number(ui->rb_nzPrior->isChecked()).toStdString());
       setRunAnnalysisEnable(true);
     }
+  }
+
+  void FormAnalysis::on_rb_nzPrior_toggled(bool on) {
+    if (on) {
+      ui->rb_luminosityPrior->setChecked(false);
+      ui->rb_volumePrior->setChecked(false);
+      ui->rb_noPrior->setChecked(false);
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                  ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPriorEnabled",
+                  QString::number(ui->rb_luminosityPrior->isChecked()).toStdString());
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                  ui->cb_AnalysisModel->currentText().toStdString() + "_VolumePriorEnabled",
+                  QString::number(ui->rb_volumePrior->isChecked()).toStdString());
+      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                  ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorEnabled",
+                  QString::number(ui->rb_nzPrior->isChecked()).toStdString());
+      setRunAnnalysisEnable(true);
+    }
+  }
+
+  void FormAnalysis::on_btn_conf_Nz_clicked(){
+
+
+
+    std::string nz_prior_b_filter = PreferencesUtils::getUserPreference(
+             ui->cb_AnalysisSurvey->currentText().toStdString(),
+             ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorBFilter");
+
+
+    std::string nz_prior_i_filter = PreferencesUtils::getUserPreference(
+             ui->cb_AnalysisSurvey->currentText().toStdString(),
+             ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorIFilter");
+
+
+      std::unique_ptr<DialogNz> popup(new DialogNz(m_survey_model_ptr->getSelectedSurvey().getFilters(),
+                                                   m_filter_repository,
+                                                   nz_prior_b_filter,
+                                                   nz_prior_i_filter));
+
+      connect(popup.get(), SIGNAL(popupClosing(std::string, std::string)),
+            SLOT(setNzFilters(std::string, std::string)));
+
+      popup->exec();
+  }
+
+  void FormAnalysis::setNzFilters(std::string b_filter, std::string i_filter){
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorBFilter",
+                      b_filter);
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_NzPriorIFilter",
+                      i_filter);
+    setRunAnnalysisEnable(true);
   }
 
 
@@ -1462,6 +1605,8 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
   }
 
   ui->txt_inputCatalog->setText(QString::fromStdString(name));
+  PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+             "LAST_USED_CAT", name);
 
   auto column_reader = PhzUITools::CatalogColumnReader(ui->txt_inputCatalog->text().toStdString());
   auto col_set = column_reader.getColumnNames();
@@ -1598,8 +1743,6 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
       saveCopiedColumnToCatalog();
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
           "IGM", ui->cb_igm->currentText().toStdString());
-      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
-          "Collapse", ui->cb_marginalization->currentText().toStdString());
       if (ui->gb_corrections->isChecked()) {
         PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
             "Correction", ui->cb_AnalysisCorrection->currentText().toStdString());
@@ -1661,8 +1804,7 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
           "IGM", ui->cb_igm->currentText().toStdString());
 
-      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
-          "Collapse", ui->cb_marginalization->currentText().toStdString());
+
 
       if (ui->gb_corrections->isChecked()) {
         PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
@@ -1700,6 +1842,11 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
   void FormAnalysis::on_btn_ToCatalog_clicked() {
     navigateToCatalog(false);
   }
+
+  void FormAnalysis::on_btn_ToPP_clicked(){
+    navigateToPostProcessing(false);
+  }
+
   void FormAnalysis::on_btn_exit_clicked() {
     quit(true);
   }

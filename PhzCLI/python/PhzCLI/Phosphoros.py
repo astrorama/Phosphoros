@@ -41,6 +41,8 @@ action_list = [
                      'Displays the reddened, redshifted SED data'),
     PhosphorosAction(['plot_specz_comparison', 'PSC'], 'PhosphorosPlotSpecZComparison',
                      'Shows plots comparing the PHZ result with SPECZ'),
+    PhosphorosAction(['plot_stacked_pdz', 'PSP'], 'PlotStackedPdfPitAndCrps',
+                     'Shows plots comparing the PHZ result with SPECZ'),
     PhosphorosAction(['plot_posterior', 'PP'], 'PhosphorosPlotPosterior',
                      'Plots views of a multi-dimensional posterior'),
     PhosphorosAction(['plot_photometry_comparison', 'PPC'], 'PhosphorosPlotPhotometryComparison',

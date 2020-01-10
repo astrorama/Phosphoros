@@ -41,6 +41,8 @@ private slots:
 
     void on_btn_HomeToCatalog_clicked();
 
+    void on_btn_HomeToPP_clicked();
+
     void navigateToNewCatalog(std::string);
 
     void navigateToHome();
@@ -54,6 +56,8 @@ private slots:
     void navigateToComputeRedshift(bool);
 
     void navigateToConfig();
+
+    void navigateToPostProcessing(bool);
 
     void quit(bool);
 

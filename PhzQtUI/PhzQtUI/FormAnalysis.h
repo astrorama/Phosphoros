@@ -64,6 +64,8 @@ void navigateToConfig();
 
 void navigateToCatalog(bool);
 
+void navigateToPostProcessing(bool);
+
 void quit(bool);
 
 
@@ -76,6 +78,7 @@ void on_btn_ToOption_clicked();
 void on_btn_ToCatalog_clicked();
 void on_btn_exit_clicked();
 void on_btn_ToModel_clicked();
+void on_btn_ToPP_clicked();
 
 
     void on_btn_editCorrections_clicked();
@@ -135,10 +138,16 @@ void on_btn_ToModel_clicked();
 
     void on_rb_luminosityPrior_toggled(bool);
     void on_rb_volumePrior_toggled(bool);
+    void on_rb_nzPrior_toggled(bool);
     void on_rb_noPrior_toggled(bool);
 
+
+    void on_btn_conf_Nz_clicked();
+
     void on_output_column_btn_clicked();
-    void setCopiedColumns(std::map<std::string,std::string> columns);
+    void setCopiedColumns(std::map<std::string, std::string> columns);
+
+    void setNzFilters(std::string b_filter, std::string i_filter);
 
 
 private:
@@ -154,7 +163,7 @@ private:
     void saveCopiedColumnToCatalog();
 
 
-    void fillCbColumns(std::set<std::string> columns);
+    void fillCbColumns(std::set<std::string> columns, std::string default_col);
 
     void loadLuminosityPriors();
 

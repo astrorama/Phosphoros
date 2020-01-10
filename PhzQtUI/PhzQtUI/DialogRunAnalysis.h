@@ -72,6 +72,7 @@ private:
 
   QFutureWatcher<std::string> m_future_watcher {};
   std::map<std::string, boost::program_options::variable_value> m_config;
+  std::map<std::string, boost::program_options::variable_value> m_original_config;
   std::map<std::string, boost::program_options::variable_value> m_lum_config;
   std::unique_ptr<Ui::DialogRunAnalysis> ui;
   std::unique_ptr<QTimer> m_timer;

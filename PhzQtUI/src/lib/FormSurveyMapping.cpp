@@ -2,7 +2,9 @@
 #include <QFileDialog>
 #include <QDir>
 #include <QFileInfo>
+#include <QFile>
 
+#include <QtCore/qdebug.h>
 #include "ui_FormSurveyMapping.h"
 
 #include "PhzUITools/CatalogColumnReader.h"
@@ -19,6 +21,9 @@
 
 #include "PhzQtUI/FilterMappingItemDelegate.h"
 #include "ElementsKernel/Logging.h"
+#include "PhzQtUI/filecopyer.h"
+
+#include <QtCore/qthread.h>
 
 
 namespace Euclid {
@@ -37,12 +42,85 @@ FormSurveyMapping::FormSurveyMapping( QWidget *parent) :
 FormSurveyMapping::~FormSurveyMapping() {
 }
 
-void FormSurveyMapping::updateSelection() {
-  int selected_row = m_survey_model_ptr->getSelectedRow();
-  if (selected_row >= 0) {
-    ui->table_Map->selectRow(selected_row);
+
+
+void FormSurveyMapping::on_cb_catalog_type_currentIndexChanged(const QString &) {
+  if (!m_diconnect_cb) {
+          logger.info()<< "Selected Catalog changed to:" << ui->cb_catalog_type->currentText().toStdString();
+          m_survey_model_ptr->selectSurvey(ui->cb_catalog_type->currentText());
+          updateSelection();
+
   }
-  fillControlsWithSelected();
+}
+
+void  FormSurveyMapping::loadCatalogCB(std::string selected){
+       m_diconnect_cb=true;
+       ui->cb_catalog_type->clear();
+       int index = 0;
+       for (auto& catalog_name : m_survey_model_ptr->getSurveyList()) {
+              ui->cb_catalog_type->addItem(catalog_name);
+              if (selected == catalog_name.toStdString()) {
+                  ui->cb_catalog_type->setCurrentIndex(index);
+              }
+              ++index;
+       }
+       m_diconnect_cb=false;
+}
+
+void FormSurveyMapping::updateSelection(bool force_reload_cb) {
+    if (force_reload_cb ||
+        (m_survey_model_ptr->getSelectedRow()>=0 &&
+        ui->cb_catalog_type->currentText().toStdString() != m_survey_model_ptr->getSelectedSurvey().getName())) {
+      loadCatalogCB(m_survey_model_ptr->getSelectedSurvey().getName());
+    }
+    fillControlsWithSelected();
+    setFilterMappingInView();
+}
+
+std::set<std::string> FormSurveyMapping::getFilteredColumns(){
+  const SurveyFilterMapping& selected_survey = m_survey_model_ptr->getSelectedSurvey();
+  auto full_list = std::set<std::string>{selected_survey.getColumnList()};
+  full_list.erase(selected_survey.getSourceIdColumn());
+  full_list.erase(selected_survey.getRaColumn());
+  full_list.erase(selected_survey.getDecColumn());
+  full_list.erase(selected_survey.getGalEbvColumn());
+  full_list.erase(selected_survey.getRefZColumn());
+
+  return full_list;
+}
+
+void FormSurveyMapping::fillControlsWithSelected() {
+      const SurveyFilterMapping& selected_survey = m_survey_model_ptr->getSelectedSurvey();
+
+      m_default_survey = selected_survey.getDefaultCatalogFile();
+      ui->tb_df->setText(QString::fromStdString(m_default_survey));
+
+      std::string cb_id_text = selected_survey.getSourceIdColumn();
+      std::string cb_ra_text = selected_survey.getRaColumn();
+      std::string cb_dec_text = selected_survey.getDecColumn();
+      std::string cb_gebv_text = selected_survey.getGalEbvColumn();
+      std::string cb_refz_text = selected_survey.getRefZColumn();
+      m_column_from_file = selected_survey.getColumnList();
+      fillCbColumns(cb_id_text, cb_ra_text, cb_dec_text, cb_gebv_text, cb_refz_text);
+
+      ui->cb_missingPhot->setCheckState(selected_survey.getHasMissingPhotometry() ? Qt::Checked : Qt::Unchecked);
+      ui->txt_nonDetection->setText(QString::number(selected_survey.getNonDetection()));
+      ui->cb_upperLimit->setCheckState(selected_survey.getHasUpperLimit() ? Qt::Checked : Qt::Unchecked);
+
+
+      disconnect(ui->table_Filter->model(), SIGNAL(itemChanged(QStandardItem * )),0,0);
+      FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
+      filter_model->setFilters(selected_survey.getFilters());
+      ui->table_Filter->setItemDelegate(new FilterMappingItemDelegate(getFilteredColumns()));
+      ui->table_Filter->setModel(filter_model);
+      ui->table_Filter->setColumnHidden(3, true);
+      ui->table_Filter->setSelectionBehavior(QAbstractItemView::SelectRows);
+      ui->table_Filter->setSelectionMode(QAbstractItemView::SingleSelection);
+      ui->table_Filter->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+      ui->table_Filter->update(QModelIndex());
+
+      connect(ui->table_Filter->model(), SIGNAL(itemChanged(QStandardItem * )), SLOT(filter_model_changed(QStandardItem *)));
+
 }
 
 
@@ -53,109 +131,83 @@ void FormSurveyMapping::loadMappingPage(
     std::string new_path) {
 
     logger.info()<< "Load the Catalog Page";
-     m_survey_model_ptr = survey_model_ptr;
-     ui->txt_nonDetection->setValidator(new QDoubleValidator());
-     m_filter_repository = filter_repository;
+    m_survey_model_ptr = survey_model_ptr;
+    ui->txt_nonDetection->setValidator(new QDoubleValidator());
+    m_filter_repository = filter_repository;
 
-     ui->table_Map->setModel(m_survey_model_ptr.get());
-     ui->table_Map->setColumnHidden(2, true);
-     ui->table_Map->setSelectionBehavior(QAbstractItemView::SelectRows);
-     ui->table_Map->setSelectionMode(QAbstractItemView::SingleSelection);
-     ui->table_Map->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-     ui->table_Map->update(QModelIndex());
+    loadCatalogCB(m_survey_model_ptr->getSelectedSurvey().getName());
 
-
-     disconnect(ui->table_Map->selectionModel(),
-                SIGNAL(currentRowChanged(QModelIndex, QModelIndex)), 0, 0);
-     connect(
-       ui->table_Map->selectionModel(),
-       SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
-       SLOT(filterMappingSelectionChanged(QModelIndex, QModelIndex)));
-
-     disconnect(ui->table_Map, SIGNAL(doubleClicked(QModelIndex)), 0, 0);
-     connect(
-            ui->table_Map,
-            SIGNAL(doubleClicked(QModelIndex)),
-            SLOT(mappingGridDoubleClicked(QModelIndex)));
-
-     setFilterMappingInView();
-
-     if (new_path.length() > 0) {
+    if (new_path.length() > 0) {
        on_btn_MapNew_clicked();
-       loadColumnFromFile(new_path);
+       m_survey_model_ptr->setDefaultCatalogToSelected(QString::fromStdString(m_default_survey));
        m_default_survey = new_path;
        ui->tb_df->setText(QString::fromStdString(m_default_survey));
-       m_survey_model_ptr->setDefaultCatalogToSelected(QString::fromStdString(m_default_survey));
-       m_survey_model_ptr->setColumnListToSelected(m_column_from_file);
-     }
 
-     updateSelection();
+       loadColumnFromFile(new_path);
+       m_survey_model_ptr->setColumnListToSelected(m_column_from_file);
+     } else {
+       updateSelection();
+     }
 }
 
 
 void FormSurveyMapping::setFilterMappingInEdition(){
 
     ui->frm_nav->setEnabled(false);
-    ui->table_Map->setEnabled(false);
+    ui->cb_catalog_type->setEnabled(false);
     ui->btn_MapNew->setEnabled(false);
     ui->btn_MapDuplicate->setEnabled(false);
     ui->btn_map_delete->setEnabled(false);
-    ui->btn_MapEdit->setEnabled(false);
     ui->btn_MapCancel->setEnabled(true);
     ui->btn_MapSave->setEnabled(true);
-    ui->btn_ImportColumn->setEnabled(true);
-    ui->cb_SourceId->setEnabled(true);
-    ui->cb_Ra->setEnabled(true);
-    ui->cb_Dec->setEnabled(true);
-    ui->cb_GalEbv->setEnabled(true);
-    ui->btn_SelectFilters->setEnabled(true);
 
-    ui->cb_missingPhot->setEnabled(true);
-    ui->cb_upperLimit->setEnabled(true);
-    ui->txt_nonDetection->setEnabled(ui->cb_missingPhot->checkState()== Qt::Checked);
+    bool has_mapping_selected = m_survey_model_ptr->getSelectedRow() >= 0;
+    ui->cb_SourceId->setEnabled(has_mapping_selected);
+    ui->cb_Ra->setEnabled(has_mapping_selected);
+    ui->cb_Dec->setEnabled(has_mapping_selected);
+    ui->cb_GalEbv->setEnabled(has_mapping_selected);
+    ui->cb_RefZ->setEnabled(has_mapping_selected);
 
-    ui->table_Filter->setEnabled(true);
+    ui->cb_missingPhot->setEnabled(has_mapping_selected);
+    ui->txt_nonDetection->setEnabled(has_mapping_selected && ui->cb_missingPhot->checkState()== Qt::Checked);
+    ui->cb_upperLimit->setEnabled(has_mapping_selected);
+    ui->btn_SelectFilters->setEnabled(has_mapping_selected);
+
 
     m_filterInsert = false;
 }
 
-void FormSurveyMapping::setFilterMappingInView(){
-
-    ui->table_Map->setEnabled(true);
-    bool has_mapping_selected = ui->table_Map->selectionModel()->currentIndex().isValid();
-
+void FormSurveyMapping::setFilterMappingInView() {
+    bool has_mapping_selected = m_survey_model_ptr->getSelectedRow() >= 0;
     ui->frm_nav->setEnabled(true);
-
+    ui->cb_catalog_type->setEnabled(true);
     ui->btn_MapNew->setEnabled(true);
     ui->btn_MapDuplicate->setEnabled(has_mapping_selected);
     ui->btn_map_delete->setEnabled(has_mapping_selected);
-    ui->btn_MapEdit->setEnabled(has_mapping_selected);
     ui->btn_MapCancel->setEnabled(false);
     ui->btn_MapSave->setEnabled(false);
-    ui->btn_ImportColumn->setEnabled(false);
-    ui->cb_SourceId->setEnabled(false);
-    ui->cb_Ra->setEnabled(false);
-    ui->cb_Dec->setEnabled(false);
-    ui->cb_GalEbv->setEnabled(false);
-    ui->btn_SelectFilters->setEnabled(false);
 
-    ui->cb_missingPhot->setEnabled(false);
-    ui->cb_upperLimit->setEnabled(false);
-    ui->txt_nonDetection->setEnabled(false);
+    ui->btn_ImportColumn->setEnabled(has_mapping_selected);
+    ui->cb_SourceId->setEnabled(has_mapping_selected);
+    ui->cb_Ra->setEnabled(has_mapping_selected);
+    ui->cb_Dec->setEnabled(has_mapping_selected);
+    ui->cb_GalEbv->setEnabled(has_mapping_selected);
+    ui->cb_RefZ->setEnabled(has_mapping_selected);
 
-    ui->table_Filter->setEnabled(false);
+    ui->cb_missingPhot->setEnabled(has_mapping_selected);
+    ui->txt_nonDetection->setEnabled(has_mapping_selected && ui->cb_missingPhot->checkState()== Qt::Checked);
+    ui->cb_upperLimit->setEnabled(has_mapping_selected);
+    ui->btn_SelectFilters->setEnabled(has_mapping_selected);
 
     m_mappingInsert = false;
 }
 
 
-
-
-
 void FormSurveyMapping::fillCbColumns(std::string current_id_value,
                                       std::string current_ra_value,
                                       std::string current_dec_value,
-                                      std::string current_gebv_value) {
+                                      std::string current_gebv_value,
+                                      std::string current_refz_value) {
    ui->cb_SourceId->clear();
    ui->cb_SourceId->addItem("");
    ui->cb_Ra->clear();
@@ -164,11 +216,14 @@ void FormSurveyMapping::fillCbColumns(std::string current_id_value,
    ui->cb_Dec->addItem("");
    ui->cb_GalEbv->clear();
    ui->cb_GalEbv->addItem("");
+   ui->cb_RefZ->clear();
+   ui->cb_RefZ->addItem("");
 
    bool found_id = false;
    bool found_ra = false;
    bool found_dec = false;
    bool found_ebv = false;
+   bool found_refz = false;
    int index = 1;
 
    for (auto item : m_column_from_file) {
@@ -176,6 +231,7 @@ void FormSurveyMapping::fillCbColumns(std::string current_id_value,
      ui->cb_Ra->addItem(QString::fromStdString(item));
      ui->cb_Dec->addItem(QString::fromStdString(item));
      ui->cb_GalEbv->addItem(QString::fromStdString(item));
+     ui->cb_RefZ->addItem(QString::fromStdString(item));
      if (item.compare(current_id_value) == 0) {
        found_id = true;
        ui->cb_SourceId->setCurrentIndex(index);
@@ -192,7 +248,10 @@ void FormSurveyMapping::fillCbColumns(std::string current_id_value,
        found_ebv = true;
        ui->cb_GalEbv->setCurrentIndex(index);
      }
-
+     if (item.compare(current_refz_value) == 0) {
+       found_refz = true;
+        ui->cb_RefZ->setCurrentIndex(index);
+      }
       ++index;
    }
 
@@ -208,6 +267,9 @@ void FormSurveyMapping::fillCbColumns(std::string current_id_value,
    if (!found_ebv) {
      ui->cb_GalEbv->setItemText(0, QString::fromStdString(current_gebv_value));
    }
+   if (!found_refz) {
+     ui->cb_RefZ->setItemText(0, QString::fromStdString(current_refz_value));
+   }
 }
 
 void FormSurveyMapping::loadColumnFromFile(std::string path) {
@@ -220,42 +282,63 @@ void FormSurveyMapping::loadColumnFromFile(std::string path) {
   auto current_ra_text = ui->cb_Ra->currentText();
   auto current_dec_text = ui->cb_Dec->currentText();
   auto current_gebv_text = ui->cb_GalEbv->currentText();
+  auto current_refz_text = ui->cb_RefZ->currentText();
   fillCbColumns(current_id_text.toStdString(),
       current_ra_text.toStdString(),
       current_dec_text.toStdString(),
-      current_gebv_text.toStdString());
+      current_gebv_text.toStdString(),
+      current_refz_text.toStdString());
 }
 
 void FormSurveyMapping::on_cb_SourceId_currentIndexChanged(int) {
   m_survey_model_ptr->setIdColumnToSelected(ui->cb_SourceId->currentText());
+  setFilterMappingInEdition();
 }
 
 void FormSurveyMapping::on_cb_Dec_currentIndexChanged(int) {
   m_survey_model_ptr->setDecColumnToSelected(ui->cb_Dec->currentText());
+  setFilterMappingInEdition();
 }
 
 void FormSurveyMapping::on_cb_Ra_currentIndexChanged(int) {
   m_survey_model_ptr->setRaColumnToSelected(ui->cb_Ra->currentText());
+  setFilterMappingInEdition();
 }
 
 void FormSurveyMapping::on_cb_GalEbv_currentIndexChanged(int) {
   m_survey_model_ptr->setGalEbvColumnToSelected(ui->cb_GalEbv->currentText());
+  setFilterMappingInEdition();
 }
+
+
+void FormSurveyMapping::on_cb_RefZ_currentIndexChanged(int) {
+  m_survey_model_ptr->setRefZColumnToSelected(ui->cb_RefZ->currentText());
+  setFilterMappingInEdition();
+}
+
 
 void FormSurveyMapping::on_cb_missingPhot_stateChanged(int state) {
   ui->txt_nonDetection->setEnabled(state == Qt::Checked);
   m_survey_model_ptr->setHasMissingPhotToSelected(state == Qt::Checked);
+  setFilterMappingInEdition();
 }
 
 void FormSurveyMapping::on_txt_nonDetection_textEdited(const QString& text) {
   m_survey_model_ptr->setNonDetectionToSelected(text);
+  setFilterMappingInEdition();
 }
 
 void FormSurveyMapping::on_cb_upperLimit_stateChanged(int state) {
   m_survey_model_ptr->setHasUpperLimitToSelected(state == Qt::Checked);
+  setFilterMappingInEdition();
 }
 
 
+
+void FormSurveyMapping::filter_model_changed(QStandardItem *) {
+  logger.info() << "Table filter model changed";
+  setFilterMappingInEdition();
+}
 
 //  - Slots on this page
 
@@ -268,38 +351,104 @@ void FormSurveyMapping::on_btn_ToOption_clicked() {
 void FormSurveyMapping::on_btn_ToModel_clicked() {
   navigateToParameter(false);
 }
+
+void FormSurveyMapping::on_btn_ToPP_clicked(){
+  navigateToPostProcessing(false);
+}
+
+
+
 void FormSurveyMapping::on_btn_exit_clicked() {
   quit(true);
 }
 
+
+void FormSurveyMapping::copyingFinished(bool s, QVector<QString> path){
+ if (s){
+    logger.info() << "file copied to "<< path[0].toStdString();
+    loadColumnFromFile(path[0].toStdString());
+    ui->table_Filter->setItemDelegate(new FilterMappingItemDelegate(m_column_from_file));
+    m_default_survey = path[0].toStdString();
+    m_survey_model_ptr->setDefaultCatalogToSelected(QString::fromStdString(m_default_survey));
+    m_survey_model_ptr->setColumnListToSelected(m_column_from_file);
+    updateSelection();
+ } else {
+   logger.warn() << "Copy of the catalog file failed";
+ }
+}
+
+
+void FormSurveyMapping::copyProgress(qint64 copy,qint64 total) {
+  logger.info() << "File copy progress => " << QString::number((qreal(copy) / qreal(total)) * 100.0).toStdString() << "%";
+}
+
 void FormSurveyMapping::on_btn_MapNew_clicked() {
-   m_survey_model_ptr->newSurvey(false);
-   updateSelection();
-   setFilterMappingInEdition();
-   m_mappingInsert = true;
    std::unique_ptr<DialogCatalogName> popUp(new DialogCatalogName());
    popUp->setExistingNames(SurveyFilterMapping::getAvailableCatalogs());
    if (popUp->exec() == QDialog::Accepted) {
+     m_survey_model_ptr->newSurvey(false);
      m_survey_model_ptr->setNameToSelected(QString::fromStdString(popUp->getName()));
-     ui->lbl_catalog_name->setText(QString::fromStdString(popUp->getName()));
-   } else {
-     on_btn_MapCancel_clicked();
+     m_survey_model_ptr->saveSelected();
+
+     auto file_to_copy = popUp->getFilePath();
+     QFileInfo info(QString::fromStdString(file_to_copy));
+     if (info.exists()) {
+          auto base_path = FileUtils::getCatalogRootPath(true, popUp->getName());
+          auto full = QString::fromStdString(base_path + "/")+info.fileName();
+
+          auto local = new QThread;
+          auto worker = new FileCopyer(local);
+          QObject::connect(worker, SIGNAL(finished(bool, QVector<QString>)), SLOT(copyingFinished(bool, QVector<QString>)));
+          QObject::connect(worker, SIGNAL(copyProgress(qint64, qint64)), SLOT(copyProgress(qint64, qint64)));
+          worker->setSourcePaths({QString::fromStdString(file_to_copy)});
+          worker->setDestinationPaths({full});
+          local->start();
+
+          logger.info() << "copy of "<< file_to_copy << " launched";
+
+     } else {
+       logger.info() << file_to_copy << " not found";
+     }
+
+     loadCatalogCB(popUp->getName());
+     setFilterMappingInEdition();
+     m_mappingInsert = true;
    }
 }
 
 void FormSurveyMapping::on_btn_MapDuplicate_clicked() {
-    m_survey_model_ptr->newSurvey(true);
-    updateSelection();
-    setFilterMappingInEdition();
-    m_mappingInsert = true;
     std::unique_ptr<DialogCatalogName> popUp(new DialogCatalogName());
     popUp->setExistingNames(SurveyFilterMapping::getAvailableCatalogs());
-    popUp->setDefaultName(m_survey_model_ptr->getSelectedSurvey().getName());
+    popUp->setDefaultName(m_survey_model_ptr->getSelectedSurvey().getName()+"_COPY");
+    popUp->setDefaultCopiedFile(m_survey_model_ptr->getSelectedSurvey().getDefaultCatalogFile());
     if (popUp->exec() == QDialog::Accepted) {
+      m_survey_model_ptr->newSurvey(true);
       m_survey_model_ptr->setNameToSelected(QString::fromStdString(popUp->getName()));
-      ui->lbl_catalog_name->setText(QString::fromStdString(popUp->getName()));
-    } else {
-      on_btn_MapCancel_clicked();
+      m_survey_model_ptr->saveSelected();
+
+      auto file_to_copy = popUp->getFilePath();
+      QFileInfo info(QString::fromStdString(file_to_copy));
+      if (info.exists()) {
+           auto base_path = FileUtils::getCatalogRootPath(true, popUp->getName());
+           auto full = QString::fromStdString(base_path + "/")+info.fileName();
+
+           auto local = new QThread;
+           auto worker = new FileCopyer(local);
+           QObject::connect(worker, SIGNAL(finished(bool, QVector<QString>)), SLOT(copyingFinished(bool, QVector<QString>)));
+           QObject::connect(worker, SIGNAL(copyProgress(qint64, qint64)), SLOT(copyProgress(qint64, qint64)));
+           worker->setSourcePaths({QString::fromStdString(file_to_copy)});
+           worker->setDestinationPaths({full});
+           local->start();
+
+           logger.info() << "copy of "<< file_to_copy << " launched";
+
+      } else {
+        logger.info() << file_to_copy << " not found";
+      }
+
+      loadCatalogCB(popUp->getName());
+      setFilterMappingInEdition();
+      m_mappingInsert = true;
     }
 }
 
@@ -340,73 +489,32 @@ void FormSurveyMapping::on_btn_map_delete_clicked() {
       if (success) {
         // The xml file
         m_survey_model_ptr->deletSelected();
-        selectFromGrid();
+        updateSelection(true);
+        on_cb_catalog_type_currentIndexChanged(QString::fromStdString(m_survey_model_ptr->getSelectedSurvey().getName()));
+        fillControlsWithSelected();
+        setFilterMappingInView();
       }
     }
-  }
-}
-
-void FormSurveyMapping::on_btn_MapEdit_clicked() {
-    setFilterMappingInEdition();
-}
-
-void FormSurveyMapping::mappingGridDoubleClicked(QModelIndex) {
-   setFilterMappingInEdition();
-}
-
-void FormSurveyMapping::fillControlsWithSelected() {
-      const SurveyFilterMapping& selected_survey = m_survey_model_ptr->getSelectedSurvey();
-
-      ui->lbl_catalog_name->setText(QString::fromStdString(selected_survey.getName()));
-
-      m_default_survey = selected_survey.getDefaultCatalogFile();
-      ui->tb_df->setText(QString::fromStdString(m_default_survey));
-
-      std::string cb_id_text = selected_survey.getSourceIdColumn();
-      std::string cb_ra_text = selected_survey.getRaColumn();
-      std::string cb_dec_text = selected_survey.getDecColumn();
-      std::string cb_gebv_text = selected_survey.getGalEbvColumn();
-      m_column_from_file = selected_survey.getColumnList();
-      fillCbColumns(cb_id_text, cb_ra_text, cb_dec_text, cb_gebv_text);
-
-      ui->cb_missingPhot->setCheckState(selected_survey.getHasMissingPhotometry() ? Qt::Checked : Qt::Unchecked);
-      ui->txt_nonDetection->setText(QString::number(selected_survey.getNonDetection()));
-      ui->cb_upperLimit->setCheckState(selected_survey.getHasUpperLimit() ? Qt::Checked : Qt::Unchecked);
-
-      FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
-      filter_model->setFilters(selected_survey.getFilters());
-      ui->table_Filter->setItemDelegate(new FilterMappingItemDelegate(m_survey_model_ptr->getSelectedSurvey().getColumnList()));
-      ui->table_Filter->setModel(filter_model);
-      ui->table_Filter->setColumnHidden(3, true);
-      ui->table_Filter->setSelectionBehavior(QAbstractItemView::SelectRows);
-      ui->table_Filter->setSelectionMode(QAbstractItemView::SingleSelection);
-      ui->table_Filter->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-      ui->table_Filter->update(QModelIndex());
-
-}
-
-void FormSurveyMapping::selectFromGrid() {
-  QItemSelectionModel *current_selection = ui->table_Map->selectionModel();
-  if (current_selection->hasSelection()) {
-    int row = current_selection->selectedRows().at(0).row();
-    m_survey_model_ptr->selectSurvey(row);
-  } else {
-    m_survey_model_ptr->selectSurvey(-1);
   }
 }
 
 
 void FormSurveyMapping::on_btn_MapCancel_clicked() {
     if (m_mappingInsert) {
+      std::string catalog_name = m_survey_model_ptr->getSelectedSurvey().getName();
+      std::string catalog_path = FileUtils::getCatalogRootPath(false, catalog_name);
+      std::string intermediate_path = FileUtils::getIntermediaryProductRootPath(false, catalog_name);
+      FileUtils::removeDir(QString::fromStdString(intermediate_path));
+      FileUtils::removeDir(QString::fromStdString(catalog_path));
       m_survey_model_ptr->deletSelected();
-      selectFromGrid();
+      loadCatalogCB(m_survey_model_ptr->getSelectedSurvey().getName());
+      on_cb_catalog_type_currentIndexChanged(QString::fromStdString(m_survey_model_ptr->getSelectedSurvey().getName()));
 
     } else {
       m_survey_model_ptr->cancelSelected();
+      updateSelection(false);
     }
 
-    fillControlsWithSelected();
-    setFilterMappingInView();
 }
 
 
@@ -432,7 +540,6 @@ void FormSurveyMapping::on_btn_MapSave_clicked() {
   m_survey_model_ptr->setFiltersToSelected(filters);
   if (m_survey_model_ptr->saveSelected()) {
     m_filterInsert = false;
-    setFilterMappingInView();
     updateSelection();
 
   } else {
@@ -449,7 +556,6 @@ void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QMo
   }
 
   fillControlsWithSelected();
-
   setFilterMappingInView();
 }
 
@@ -545,6 +651,8 @@ void FormSurveyMapping::filterEditionPopupClosing(std::vector<std::string> filte
    ui->table_Filter->update(QModelIndex());
 
    m_survey_model_ptr->setFiltersToSelected(new_filters);
+
+   setFilterMappingInEdition();
 }
 
 

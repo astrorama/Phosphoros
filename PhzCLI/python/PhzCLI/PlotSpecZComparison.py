@@ -25,15 +25,17 @@ import astropy.table as table
 import astropy.io.fits as fits
 from ElementsKernel import Logging
 
-try:
-    from astropy.vo.samp import SAMPIntegratedClient
-except ImportError:
-    from pyvo.samp import SAMPIntegratedClient
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 import PhzCLI.TableUtils as tut
+
+# Astropy >= 2.0rc1
+try:
+    from astropy.samp import SAMPIntegratedClient
+except ImportError:
+    from astropy.vo.samp import SAMPIntegratedClient
 
 logger = Logging.getLogger('PhosphorosPlotSpecZComparison')
 
@@ -43,35 +45,43 @@ logger = Logging.getLogger('PhosphorosPlotSpecZComparison')
 
 def read_specz_catalog(filename, id_col, specz_col):
     specz_cat = tut.read_table(filename)
-    if not id_col in specz_cat.colnames:
+    if id_col not in specz_cat.colnames:
         raise ValueError('ERROR : Spec-z catalog does not have column with name {}'.format(id_col))
     if not id_col == 'ID':
         specz_cat.rename_column(id_col, 'ID')
-    if not specz_col in specz_cat.colnames:
+    if specz_col not in specz_cat.colnames:
         raise ValueError('ERROR : Spec-z catalog does not have column with name {}'.format(specz_col))
     if not specz_col == 'SPECZ':
         specz_cat.rename_column(specz_col, 'SPECZ')
-    return specz_cat
+    return specz_cat[['ID', 'SPECZ']]
     
 #
 #-------------------------------------------------------------------------------
 #
 
-def read_phosphoros_catalog(out_dir):
-    phos_cat_name = out_dir + '/phz_cat.fits'
-    if not os.path.exists(phos_cat_name):
-        phos_cat_name = out_dir + '/phz_cat.txt'
-    phos_cat = tut.read_table(phos_cat_name)
+def read_phosphoros_catalog(out_dir, out_cat, phz_col):
+    if not out_cat:
+        out_cat = os.path.join(out_dir, 'phz_cat.fits')
+        if not os.path.exists(out_cat):
+            out_cat = os.path.join(out_dir, 'phz_cat.txt')
+    if out_dir and out_cat[0] != '/':
+        out_cat = os.path.join(out_dir, out_cat)
+
+    phos_cat = tut.read_table(out_cat)
     phos_cat.add_column(table.Column(np.arange(len(phos_cat)), name='Index'))
-    return phos_cat
+    if phz_col not in phos_cat.colnames:
+        raise ValueError('ERROR : Photo-z catalog does not have column with name {}'.format(phz_col))
+    phos_cat.rename_column(phz_col, 'PHZ')
+    return phos_cat[['ID', 'PHZ']]
     
 #
 #-------------------------------------------------------------------------------
 #
 
 def get_pdf_bins_from_comment(comment_lines, parameter):
-    type_map = {'SED':str, 'REDDENING-CURVE':str, 'EBV':float, 'Z':float,
-                'LIKELIHOOD-SED':str, 'LIKELIHOOD-REDDENING-CURVE':str, 'LIKELIHOOD-EBV':float, 'LIKELIHOOD-Z':float}
+    type_map = {'SED': str, 'REDDENING-CURVE': str, 'EBV': float, 'Z': float,
+                'LIKELIHOOD-SED': str, 'LIKELIHOOD-REDDENING-CURVE': str, 'LIKELIHOOD-EBV': float,
+                'LIKELIHOOD-Z': float}
     bins_str = ''.join(comment_lines)
     bins_str = bins_str[bins_str.index(parameter+'-BINS :'):]
     bins_str = bins_str[bins_str.index('{')+1: bins_str.index('}')]
@@ -84,15 +94,22 @@ def get_pdf_bins_from_comment(comment_lines, parameter):
 
 def read_pdfs(catalog, out_dir):
     logger.info('Loading the 1D-PDFs...')
-    filename_map = {'SED':'pdf_sed.fits', 'REDDENING-CURVE':'pdf_red_curve.fits', 'EBV':'pdf_ebv.fits', 'Z':'pdf_z.fits',
-                    'LIKELIHOOD-SED':'likelihood_pdf_sed.fits', 'LIKELIHOOD-REDDENING-CURVE':'likelihood_pdf_red_curve.fits',
-                    'LIKELIHOOD-EBV':'likelihood_pdf_ebv.fits', 'LIKELIHOOD-Z':'likelihood_pdf_z.fits'}
+    filename_map = {'SED': 'pdf_sed.fits', 'REDDENING-CURVE': 'pdf_red_curve.fits', 'EBV': 'pdf_ebv.fits',
+                    'Z': 'pdf_z.fits',
+                    'LIKELIHOOD-SED': 'likelihood_pdf_sed.fits',
+                    'LIKELIHOOD-REDDENING-CURVE': 'likelihood_pdf_red_curve.fits',
+                    'LIKELIHOOD-EBV': 'likelihood_pdf_ebv.fits', 'LIKELIHOOD-Z': 'likelihood_pdf_z.fits'}
     
     def read(parameter):
         if parameter+'-1D-PDF' in catalog.colnames:
-            logger.info('    ' + parameter + ': Using catlog column ' + parameter+'-1D-PDF')
-            return parameter, get_pdf_bins_from_comment(catalog.meta['comments'], parameter), catalog[parameter+'-1D-PDF']
-        elif os.path.exists(out_dir+'/'+filename_map[parameter]):
+            print('    ' + parameter + ': Using catlog column ' + parameter+'-1D-PDF')
+            
+            key_comment = 'COMMENT'
+            if key_comment not in catalog.meta.keys():
+                key_comment = 'comments'
+            return parameter, get_pdf_bins_from_comment(catalog.meta[key_comment], parameter), catalog[parameter+'-1D-PDF']
+
+        elif out_dir and os.path.exists(out_dir+'/'+filename_map[parameter]):
             logger.info('    ' + parameter + ': Reading file ' + out_dir+'/'+filename_map[parameter])
             hdus = fits.open(out_dir+'/'+filename_map[parameter])
             return parameter, hdus[1].data[hdus[1].columns[0].name], [hdus[s['Index']+1].data['Probability'] for s in catalog]
@@ -102,7 +119,7 @@ def read_pdfs(catalog, out_dir):
     
     result = [read(p) for p in ['SED', 'REDDENING-CURVE', 'EBV', 'Z',
                                 'LIKELIHOOD-SED', 'LIKELIHOOD-REDDENING-CURVE', 'LIKELIHOOD-EBV', 'LIKELIHOOD-Z']]
-    result = [r for r in result if r != None]
+    result = [r for r in result if r is not None]
     return result
     
 #
@@ -135,8 +152,7 @@ def compute_stats(specz, phz):
     noOutliersArr   = [i for i in absDataArr if i <= 0.15]
     sigmaNoOutliers = np.std(noOutliersArr)
     meanNoOutliers  = np.average(noOutliersArr)
-    
-                    
+
     print('--> Mean                : ', mean)     
     print('--> Median              : ', median)     
     print('--> Sigma               : ', sigma)     
@@ -170,7 +186,7 @@ class SpeczPhotozPlot(object):
     
     def _createDeltaZPlot(self):
         self.deltaZAx = plt.subplot2grid((4,3), (3,0), colspan=3)
-        self.deltaZAx.set_ylabel('$\Delta$z/(1+z)')
+        self.deltaZAx.set_ylabel('$\\Delta$z/(1+z)')
         self.deltaZAx.set_xlabel('SpecZ')
         # Plot the zero line
         self.deltaZAx.plot ([-0.1, self.z_max], [0, 0], c='k', alpha=0.2)
@@ -183,11 +199,11 @@ class SpeczPhotozPlot(object):
         
     def _createSelected(self):
         self.id_text = self.spzPhzAx.text(0.05, 0.95, 'selected ID:', transform=self.spzPhzAx.transAxes, va='top')
-        self.selected1 = self.spzPhzAx.scatter(0, 0, c='none', marker='o', s=60, edgecolors='#00EE00', linewidth='2', visible=False)
-        self.selected2 = self.deltaZAx.scatter(0, 0, c='none', marker='o', s=60, edgecolors='#00EE00', linewidth='2', visible=False)
+        self.selected1 = self.spzPhzAx.scatter(0., 0., c='none', marker='o', s=60., edgecolors='#00EE00', linewidth=2., visible=False)
+        self.selected2 = self.deltaZAx.scatter(0., 0., c='none', marker='o', s=60., edgecolors='#00EE00', linewidth=2., visible=False)
     
     def _updatePlots(self):
-        if self.selected_index == None:
+        if self.selected_index is None:
             return []
         self.id_text.set_text('selected ID: %d' % self.ids[self.selected_index])
         self.selected1.set_visible(True)
@@ -232,7 +248,7 @@ def displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOut
 
     f, ax = plt.subplots(figsize=(10, 4)) 
 
-    barValues, bins, patches = plt.hist(data, bins=100)
+    plt.hist(data, bins=100)
     ax.axvline(x=0.15, c='r', alpha=.3)
     ax.axvline(x=-0.15, c='r', alpha = .3)
     ax.set_xlabel("Value")
@@ -245,7 +261,7 @@ def displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOut
     ax.text(ax.get_xlim()[0], ax.get_ylim()[1], txt, fontsize=10, family='sans-serif', style='italic', ha='left', va='top', alpha=.5)
     
     f.tight_layout()
-    f.canvas.mpl_connect('resize_event', lambda x:f.tight_layout())
+    f.canvas.mpl_connect('resize_event', lambda x: f.tight_layout())
     return f
 
 #
@@ -255,10 +271,9 @@ def displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOut
 class PdfPlot(object):
     
     def _updatePlot(self):
-        if self.selected_index == None:
+        if self.selected_index is None:
             return []
         
-        row = self.catalog[self.selected_index]
         self.lines.set_ydata(self.pdf_list[self.selected_index])
         self.ax.set_ylim(0, max(self.pdf_list[self.selected_index])*1.05)
         
@@ -272,7 +287,7 @@ class PdfPlot(object):
             self.speczText.set_visible(True)
             self.speczText.set_x(specz)
             self.speczText.set_y(y_lim[0]+.9*y_size)
-            phz = catalog[self.selected_index][self.phz_col]
+            phz = self.catalog[self.selected_index][self.phz_col]
             self.phzLine.set_visible(True)
             self.phzLine.set_xdata([phz, phz])
             self.phzLine.set_ydata(y_lim)
@@ -342,7 +357,7 @@ class Selector(object):
         row = self.catalog[index]
         print('\nFull info for source with ID',row['ID'],':')
         for c in row.colnames:
-            print('   ',c,'=',row[c])
+            print('   ', c, '=', row[c])
     
     def onpick(self, event):
         if event.mouseevent.button != 1:
@@ -370,7 +385,7 @@ class SampUpdater(object):
         self.topcat = None
         self.update_listeners = update_listeners
         try:
-            self.client = SAMPIntegratedClient()
+            self.client = SAMPIntegratedClient(name='PhosphorosPlotSpecZComparison')
             self.client.connect()
             for c in self.client.get_registered_clients():
                 meta = self.client.get_metadata(c)
@@ -391,7 +406,6 @@ class SampUpdater(object):
             self.orig_ids = []
             tablenames = []
             try:
-                data = table.Table.read(specz_file, format='fits')
                 tablenames.append(specz_file)
                 self.id_col.append(specz_id)
             except:
@@ -418,21 +432,21 @@ class SampUpdater(object):
     def updateSelectedRow(self, i):
         if self.topcat:
             for url, ids in zip(self.table_urls, self.table_ids):
-                message = {'samp.mtype' : 'table.highlight.row',
-                           'samp.params' : { 'url' : url,
-                                             'row' : str(ids[self.global_ids[i]]) }}
+                message = {'samp.mtype': 'table.highlight.row',
+                           'samp.params': {'url': url,
+                                           'row': str(ids[self.global_ids[i]])}}
                 self.client.notify_all(message)
 
     def rowNotification(self, private_key, sender_id, mtype, params, extra):
         url = params['url']
-        if not url in self.table_urls:
+        if url not in self.table_urls:
             return
         i = self.table_urls.index(url)
         row = int(params['row'])
         id = self.orig_ids[i][row]
         global_row = self.global_ids_reverse[id]
         for l in self.update_listeners:
-            if getattr(l, 'updateSelectedRow', None) != None:
+            if getattr(l, 'updateSelectedRow', None) is not None:
                 l.updateSelectedRow(global_row)
 
 
@@ -459,8 +473,9 @@ def defineSpecificProgramOptions():
     parser.add_argument('-scat', '--specz-catalog', type=str, required=True, help='Catalog file containing the spec-z')
     parser.add_argument('-sid', '--specz-cat-id', type=str, default='ID', help='Spec-z catalog ID column')
     parser.add_argument('-scol', '--specz-column', type=str, default='ZSPEC', help='Spec-z column name')
-    parser.add_argument('-pod', '--phosphoros-output-dir', required=True, type=str, help='Directory to read Phosphoros outputs from')
+    parser.add_argument('-pod', '--phosphoros-output-dir', required=False, type=str, help='Directory to read Phosphoros outputs from')
     parser.add_argument('-pcol', '--phz-column', type=str, default='Z', help='Photo-z column name')
+    parser.add_argument('-pcat', '--phz-catalog', type=str, default=None, help='Photo-z catalog')
     parser.add_argument("-nd", "--no-display", action="store_true", default=False, help="Disables the plot window")
     parser.add_argument("-samp", "--samp", action="store_true", default=False, help="Enables communication with other SAMP applications")
 
@@ -474,16 +489,18 @@ def mainMethod(args):
         This method is the entry point to the program. In this sense, it is
         similar to a main (and it is why it is called mainMethod()).
     """
+    if not args.phosphoros_output_dir and not args.phz_catalog:
+        raise ValueError('At least one of --phz-catalog or --phosphoros-output-dir must be specified')
+
     specz_cat = read_specz_catalog(args.specz_catalog, args.specz_cat_id, args.specz_column)
-    
-    phos_cat = read_phosphoros_catalog(args.phosphoros_output_dir)
-    
+    phos_cat = read_phosphoros_catalog(args.phosphoros_output_dir, args.phz_catalog, args.phz_column)
+
     # merge the catalogs
     logger.info('Merging the catalogs')
     catalog = table.join(specz_cat, phos_cat, keys='ID')
-    
+
     specz = catalog['SPECZ']
-    phz = catalog[args.phz_column]
+    phz = catalog['PHZ']
     data, mean, median, sigma, mad, outliersPercent,sigmaNoOutliers, meanNoOutliers = compute_stats(specz, phz)
     
     if args.no_display:
@@ -493,12 +510,18 @@ def mainMethod(args):
     fig2 = displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers)
     
     pdfs = read_pdfs(catalog, args.phosphoros_output_dir)
-    pdf_plots = [PdfPlot(param, bins, pdf_list, catalog,args.phz_column) for param, bins, pdf_list in pdfs if len(bins)>1]
+    pdf_plots = [
+        PdfPlot(param, bins, pdf_list, catalog, 'PHZ') for param, bins, pdf_list in pdfs if len(bins) > 1
+    ]
     
     samp = None
     if args.samp:
         samp = SampUpdater(args.specz_catalog, args.specz_cat_id, args.phosphoros_output_dir, catalog, [fig1] + pdf_plots)
     
     selector = Selector([fig1, samp] + pdf_plots, catalog)
-    
-    plt.show()
+
+    try:
+        plt.show()
+    finally:
+        if samp:
+            samp.client.disconnect()
