@@ -116,16 +116,6 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_Edit">
-       <property name="toolTip">
-        <string>Edit the corrections directly into the grid.</string>
-       </property>
-       <property name="text">
-        <string>Edit </string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPushButton" name="btn_Cancel">
        <property name="enabled">
         <bool>false</bool>

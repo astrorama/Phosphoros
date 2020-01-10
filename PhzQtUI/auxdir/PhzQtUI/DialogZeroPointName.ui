@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Euclid::PhzQtUI::DialogAddGalEbv</class>
- <widget class="QDialog" name="Euclid::PhzQtUI::DialogAddGalEbv">
+ <class>Euclid::PhzQtUI::DialogZeroPointName</class>
+ <widget class="QDialog" name="Euclid::PhzQtUI::DialogZeroPointName">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>796</width>
-    <height>154</height>
+    <width>399</width>
+    <height>171</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Add Galactic E(B-V) to the catalog</string>
+   <string>New Correction File</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -22,19 +25,32 @@
       </font>
      </property>
      <property name="text">
-      <string>Look-up Galactic E(B-V) in Planck map and add it as a &quot;PLANCK_GAL_EBV&quot; column to the input catalog </string>
+      <string>New Zero-Point Corrections File</string>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Select the name of the new input catalog file:</string>
+      <string>File Name :</string>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QLineEdit" name="txt_name"/>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>23</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -52,13 +68,6 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="label_process">
-       <property name="text">
-        <string>TextLabel</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPushButton" name="btn_cancel">
        <property name="text">
         <string>Cancel</string>
@@ -68,7 +77,13 @@
      <item>
       <widget class="QPushButton" name="btn_create">
        <property name="text">
-        <string>Add the E(B-V)</string>
+        <string>Create</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+       <property name="default">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

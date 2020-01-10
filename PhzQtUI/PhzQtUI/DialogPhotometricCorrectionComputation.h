@@ -70,7 +70,7 @@ public:
         std::string grid,
         std::list<FilterMapping> selected_filters,
         std::list<std::string> excluded_filters,
-        std::string default_catalog_path,
+        std::string default_z_column,
         std::map<std::string, boost::program_options::variable_value> run_option,
         double non_detection);
 
@@ -138,6 +138,7 @@ private:
     std::list<FilterMapping> m_selected_filters;
     std::list<std::string> m_excluded_filters;
     std::string m_id_column;
+    std::string m_refZ_column;
     std::map<std::string, boost::program_options::variable_value> m_run_option;
     double m_non_detection;
     bool m_computing = false;

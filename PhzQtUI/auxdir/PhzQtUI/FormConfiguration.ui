@@ -73,7 +73,7 @@
          <string>Define the Mapping between the catalog file(s) columns and the filters</string>
         </property>
         <property name="text">
-         <string>Catalog Type</string>
+         <string>Catalog Setup</string>
         </property>
        </widget>
       </item>
@@ -189,9 +189,9 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="btn_editGeneral">
+          <widget class="QPushButton" name="btn_default">
            <property name="text">
-            <string>Edit</string>
+            <string>Reset to default</string>
            </property>
           </widget>
          </item>
@@ -304,20 +304,10 @@
          <item>
           <widget class="QPushButton" name="btn_browseCat">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_defCat">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Use Default</string>
            </property>
           </widget>
          </item>
@@ -359,20 +349,10 @@
          <item>
           <widget class="QPushButton" name="btn_browseAux">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_defAux">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Use Default</string>
            </property>
           </widget>
          </item>
@@ -414,20 +394,10 @@
          <item>
           <widget class="QPushButton" name="btn_browseInter">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_defInter">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Use Default</string>
            </property>
           </widget>
          </item>
@@ -469,20 +439,10 @@
          <item>
           <widget class="QPushButton" name="btn_browseRes">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>Browse</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btn_defRes">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Use Default</string>
            </property>
           </widget>
          </item>
@@ -498,7 +458,7 @@
        <item>
         <widget class="QGroupBox" name="gb_thread">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="title">
           <string>Override the Maximum Number of Threads</string>
@@ -613,9 +573,12 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="btn_edit_cosmo">
+          <widget class="QPushButton" name="btn_default_cosmo">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
            <property name="text">
-            <string>Edit</string>
+            <string>Reset to default</string>
            </property>
           </widget>
          </item>
@@ -655,7 +618,7 @@
            <item row="0" column="1">
             <widget class="QLineEdit" name="txt_hubble_param">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -699,14 +662,14 @@
            <item row="1" column="1">
             <widget class="QLineEdit" name="txt_omega_matter">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
             </widget>
            </item>
            <item row="2" column="1">
             <widget class="QLineEdit" name="txt_omega_lambda">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -729,16 +692,6 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_18">
-         <item>
-          <widget class="QPushButton" name="btn_default_cosmo">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Reset to default</string>
-           </property>
-          </widget>
-         </item>
          <item>
           <spacer name="horizontalSpacer_8">
            <property name="orientation">

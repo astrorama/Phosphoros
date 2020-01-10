@@ -74,7 +74,7 @@
                 <string>Define the Mapping between the catalog file(s) columns and the filters</string>
                </property>
                <property name="text">
-                <string>Catalog Type</string>
+                <string>Catalog Setup</string>
                </property>
               </widget>
              </item>

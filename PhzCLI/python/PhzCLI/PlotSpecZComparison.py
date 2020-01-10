@@ -53,19 +53,26 @@ def read_specz_catalog(filename, id_col, specz_col):
         raise ValueError('ERROR : Spec-z catalog does not have column with name {}'.format(specz_col))
     if not specz_col == 'SPECZ':
         specz_cat.rename_column(specz_col, 'SPECZ')
-    return specz_cat
+    return specz_cat[['ID', 'SPECZ']]
     
 #
 #-------------------------------------------------------------------------------
 #
 
-def read_phosphoros_catalog(out_dir):
-    phos_cat_name = out_dir + '/phz_cat.fits'
-    if not os.path.exists(phos_cat_name):
-        phos_cat_name = out_dir + '/phz_cat.txt'
-    phos_cat = tut.read_table(phos_cat_name)
+def read_phosphoros_catalog(out_dir, out_cat, phz_col):
+    if not out_cat:
+        out_cat = os.path.join(out_dir, 'phz_cat.fits')
+        if not os.path.exists(out_cat):
+            out_cat = os.path.join(out_dir, 'phz_cat.txt')
+    if out_dir and out_cat[0] != '/':
+        out_cat = os.path.join(out_dir, out_cat)
+
+    phos_cat = tut.read_table(out_cat)
     phos_cat.add_column(table.Column(np.arange(len(phos_cat)), name='Index'))
-    return phos_cat
+    if phz_col not in phos_cat.colnames:
+        raise ValueError('ERROR : Photo-z catalog does not have column with name {}'.format(phz_col))
+    phos_cat.rename_column(phz_col, 'PHZ')
+    return phos_cat[['ID', 'PHZ']]
     
 #
 #-------------------------------------------------------------------------------
@@ -102,7 +109,7 @@ def read_pdfs(catalog, out_dir):
                 key_comment = 'comments'
             return parameter, get_pdf_bins_from_comment(catalog.meta[key_comment], parameter), catalog[parameter+'-1D-PDF']
 
-        elif os.path.exists(out_dir+'/'+filename_map[parameter]):
+        elif out_dir and os.path.exists(out_dir+'/'+filename_map[parameter]):
             logger.info('    ' + parameter + ': Reading file ' + out_dir+'/'+filename_map[parameter])
             hdus = fits.open(out_dir+'/'+filename_map[parameter])
             return parameter, hdus[1].data[hdus[1].columns[0].name], [hdus[s['Index']+1].data['Probability'] for s in catalog]
@@ -466,8 +473,9 @@ def defineSpecificProgramOptions():
     parser.add_argument('-scat', '--specz-catalog', type=str, required=True, help='Catalog file containing the spec-z')
     parser.add_argument('-sid', '--specz-cat-id', type=str, default='ID', help='Spec-z catalog ID column')
     parser.add_argument('-scol', '--specz-column', type=str, default='ZSPEC', help='Spec-z column name')
-    parser.add_argument('-pod', '--phosphoros-output-dir', required=True, type=str, help='Directory to read Phosphoros outputs from')
+    parser.add_argument('-pod', '--phosphoros-output-dir', required=False, type=str, help='Directory to read Phosphoros outputs from')
     parser.add_argument('-pcol', '--phz-column', type=str, default='Z', help='Photo-z column name')
+    parser.add_argument('-pcat', '--phz-catalog', type=str, default=None, help='Photo-z catalog')
     parser.add_argument("-nd", "--no-display", action="store_true", default=False, help="Disables the plot window")
     parser.add_argument("-samp", "--samp", action="store_true", default=False, help="Enables communication with other SAMP applications")
 
@@ -481,8 +489,12 @@ def mainMethod(args):
         This method is the entry point to the program. In this sense, it is
         similar to a main (and it is why it is called mainMethod()).
     """
+    if not args.phosphoros_output_dir and not args.phz_catalog:
+        raise ValueError('At least one of --phz-catalog or --phosphoros-output-dir must be specified')
+
     specz_cat = read_specz_catalog(args.specz_catalog, args.specz_cat_id, args.specz_column)
-    phos_cat = read_phosphoros_catalog(args.phosphoros_output_dir)
+
+    phos_cat = read_phosphoros_catalog(args.phosphoros_output_dir, args.phz_catalog, args.phz_column)
 
     # Make sure the comments metadata are only picked from phos_cat, as the
     # bins are stored there. Otherwise, specz_cat may have COMMENT, and phos_cat comments, we end with both,
@@ -491,6 +503,7 @@ def mainMethod(args):
         if k in specz_cat.meta:
             del specz_cat.meta[k]
     
+
     # merge the catalogs
     logger.info('Merging the catalogs')
     catalog = table.join(specz_cat, phos_cat, keys='ID')
@@ -500,8 +513,9 @@ def mainMethod(args):
         logger.critical('Was the proper ID column chosen?')
         exit(1)
     
+
     specz = catalog['SPECZ']
-    phz = catalog[args.phz_column]
+    phz = catalog['PHZ']
     data, mean, median, sigma, mad, outliersPercent,sigmaNoOutliers, meanNoOutliers = compute_stats(specz, phz)
     
     if args.no_display:
@@ -512,7 +526,7 @@ def mainMethod(args):
     
     pdfs = read_pdfs(catalog, args.phosphoros_output_dir)
     pdf_plots = [
-        PdfPlot(param, bins, pdf_list, catalog, args.phz_column) for param, bins, pdf_list in pdfs if len(bins) > 1
+        PdfPlot(param, bins, pdf_list, catalog, 'PHZ') for param, bins, pdf_list in pdfs if len(bins) > 1
     ]
     
     samp = None

@@ -90,6 +90,19 @@ public:
        */
       std::string getGalEbvColumn() const;
 
+      /**
+        * @brief set the ref_z column
+        * @param newRefZColumn
+        */
+       void setRefZColumn(std::string newRefZColumn);
+
+       /**
+        * @brief get the RefZColumn
+        * @return the current RefZColumn
+        */
+       std::string getRefZColumn() const;
+
+
     /**
      * @brief set the Filters by moving the provided object into the SurveyFilterMapping
      * @param filters
@@ -187,6 +200,7 @@ private:
     std::string m_ra_column;
     std::string m_dec_column;
     std::string m_gal_ebv_column;
+    std::string m_ref_z_column;
     std::vector<FilterMapping> m_filters;
     std::string m_default_catalog;
     std::set<std::string> m_column_list;

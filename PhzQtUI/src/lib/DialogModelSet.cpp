@@ -30,15 +30,11 @@ namespace PhzQtUI {
 
 
 void DialogModelSet::loadSeds() {
-      SedTreeModel* treeModel_sed = new SedTreeModel(m_seds_repository);
+      DataSetTreeModel* treeModel_sed = new DataSetTreeModel(m_seds_repository);
       treeModel_sed->load();
       ui->treeView_Sed->setModel(treeModel_sed);
       ui->treeView_Sed->collapseAll();
-      ui->treeView_Sed->setColumnWidth(0, 500);
-
-      for (int i = 0; i < treeModel_sed->rowCount(); i++) {
-        addButtonsToSedItem(treeModel_sed->item(i), treeModel_sed);
-      }
+      //ui->treeView_Sed->setColumnWidth(0, 500);
 
       connect(treeModel_sed, SIGNAL(itemChanged(QStandardItem*)), treeModel_sed,
                    SLOT(onItemChanged(QStandardItem*)));
@@ -87,25 +83,6 @@ DialogModelSet::DialogModelSet(DatasetRepo seds_repository,
 
 }
 
-void DialogModelSet::addButtonsToSedItem(QStandardItem* item, SedTreeModel* treeModel_sed){
-  if (treeModel_sed->canAddEmissionLineToGroup(item)) {
-             auto name = treeModel_sed->getFullGroupName(item);
-
-             MessageButton *cartButton = new MessageButton(name, "Add Emission Line to SEDs");
-             m_message_buttons.push_back(cartButton);
-
-             auto index = item->index().sibling(item->index().row(), 1);
-
-             ui->treeView_Sed->setIndexWidget(index, cartButton);
-
-             connect(cartButton, SIGNAL(MessageButtonClicked(const QString&)), this,
-                             SLOT(addEmissionLineButtonClicked(const QString&)));
-  }
-
-  for (int i = 0; i < item->rowCount(); i++) {
-    addButtonsToSedItem(item->child(i),treeModel_sed);
-  }
-}
 
 
 DialogModelSet::~DialogModelSet() {

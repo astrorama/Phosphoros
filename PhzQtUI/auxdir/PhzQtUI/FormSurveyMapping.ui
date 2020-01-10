@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1070</width>
+    <width>1071</width>
     <height>968</height>
    </rect>
   </property>
@@ -14,15 +14,6 @@
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
    <item>
     <widget class="QFrame" name="frm_nav">
      <property name="frameShape">
@@ -79,7 +70,7 @@
          <string notr="true">background-color: rgb(210, 210, 210)</string>
         </property>
         <property name="text">
-         <string>Catalog Type</string>
+         <string>Catalog Setup</string>
         </property>
        </widget>
       </item>
@@ -167,7 +158,23 @@
           </font>
          </property>
          <property name="text">
-          <string>Catalog Type :</string>
+          <string>Catalog :</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="cb_catalog_type">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>300</width>
+           <height>0</height>
+          </size>
          </property>
         </widget>
        </item>
@@ -205,160 +212,52 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QPushButton" name="btn_MapCancel">
+         <property name="text">
+          <string>Cancel</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_MapSave">
+         <property name="text">
+          <string>Save</string>
+         </property>
+        </widget>
+       </item>
       </layout>
-     </item>
-     <item>
-      <widget class="QTableView" name="table_Map">
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
-       </property>
-       <property name="showDropIndicator" stdset="0">
-        <bool>false</bool>
-       </property>
-       <property name="dragDropOverwriteMode">
-        <bool>false</bool>
-       </property>
-       <property name="sortingEnabled">
-        <bool>true</bool>
-       </property>
-       <attribute name="verticalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
-       <attribute name="verticalHeaderHighlightSections">
-        <bool>false</bool>
-       </attribute>
-      </widget>
-     </item>
-     <item>
-      <widget class="Line" name="line_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_14">
-     <item>
-      <widget class="QLabel" name="lbl_catalog_name">
-       <property name="font">
-        <font>
-         <pointsize>14</pointsize>
-         <italic>true</italic>
-        </font>
-       </property>
-       <property name="text">
-        <string>Selected</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_15">
-       <property name="font">
-        <font>
-         <pointsize>14</pointsize>
-        </font>
-       </property>
-       <property name="text">
-        <string>:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_16">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="Line" name="line_8">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_MapEdit">
-       <property name="text">
-        <string>Edit</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_MapCancel">
-       <property name="text">
-        <string>Cancel</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_MapSave">
-       <property name="text">
-        <string>Save</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Model Catalog File : </string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
      </item>
     </layout>
    </item>
    <item>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0" rowspan="2">
-      <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item row="0" column="0">
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
-        <widget class="QLineEdit" name="tb_df">
-         <property name="enabled">
-          <bool>false</bool>
+        <widget class="QLabel" name="label">
+         <property name="font">
+          <font>
+           <pointsize>14</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Model Catalog File : </string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="btn_ImportColumn">
-         <property name="toolTip">
-          <string>Select a file to be used as default file for this catalog. The columns of the catalog will be used to populate the drop-down for the ID and the Filters columns.</string>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
-         <property name="text">
-          <string>Select File and Import Columns </string>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
          </property>
-        </widget>
+        </spacer>
        </item>
       </layout>
      </item>
@@ -391,6 +290,12 @@
        </item>
        <item>
         <widget class="QComboBox" name="cb_Ra">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="editable">
           <bool>true</bool>
          </property>
@@ -398,7 +303,28 @@
        </item>
       </layout>
      </item>
-     <item row="2" column="1">
+     <item row="1" column="0">
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QLineEdit" name="tb_df">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_ImportColumn">
+         <property name="toolTip">
+          <string>Select a file to be used as default file for this catalog. The columns of the catalog will be used to populate the drop-down for the ID and the Filters columns.</string>
+         </property>
+         <property name="text">
+          <string>Select File and Import Columns </string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="1" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_10">
        <item>
         <spacer name="horizontalSpacer_8">
@@ -427,6 +353,12 @@
        </item>
        <item>
         <widget class="QComboBox" name="cb_Dec">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="editable">
           <bool>true</bool>
          </property>
@@ -458,6 +390,12 @@
        </item>
        <item>
         <widget class="QComboBox" name="cb_SourceId">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="editable">
           <bool>true</bool>
          </property>
@@ -465,7 +403,7 @@
        </item>
       </layout>
      </item>
-     <item row="3" column="1">
+     <item row="2" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_13">
        <item>
         <spacer name="horizontalSpacer_9">
@@ -494,6 +432,54 @@
        </item>
        <item>
         <widget class="QComboBox" name="cb_GalEbv">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="editable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="3" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_14">
+       <item>
+        <spacer name="horizontalSpacer_10">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_23">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Reference Z (optional)</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="cb_RefZ">
+         <property name="minimumSize">
+          <size>
+           <width>150</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="editable">
           <bool>true</bool>
          </property>
@@ -538,6 +524,9 @@
      </item>
      <item>
       <widget class="QCheckBox" name="cb_missingPhot">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The provided value is identified in the catalog as a missing photometric value&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
         <string>Missing Photometry flagged as:</string>
        </property>
@@ -565,6 +554,9 @@
      </item>
      <item>
       <widget class="QCheckBox" name="cb_upperLimit">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If set, the algorithm will interpret negative error as indicating that the flux is not an actual value but an upper limit. The absolute value of the error will be used as error on the measurement. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
         <string>Upper Limit</string>
        </property>

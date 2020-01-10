@@ -39,6 +39,9 @@ public:
    */
   void setDefaultName(std::string default_name);
 
+
+  void setDefaultCopiedFile(std::string default_file);
+
   /**
    * @brief Set the existing names the new name has to be different from.
    * @param existing_names A vector of string containing the name of
@@ -52,7 +55,12 @@ public:
    */
   std::string getName() const;
 
+  std::string getFilePath() const;
+
 private slots:
+
+  void on_btn_import_clicked();
+  void on_btn_empty_clicked();
 
   /**
    * @brief SLOT on_btn_create_clicked
@@ -68,6 +76,7 @@ private:
   std::unique_ptr<Ui::DialogCatalogName> ui;
   std::string m_name;
   std::vector<std::string> m_existing_names;
+  std::string m_file = "";
 
 };
 

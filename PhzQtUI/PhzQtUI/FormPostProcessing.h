@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QModelIndex>
 #include "ParameterRule.h"
+#include "PhzQtUI/SurveyModel.h"
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
 
@@ -27,9 +28,10 @@ class FormPostProcessing : public QWidget {
 public:
     explicit FormPostProcessing(QWidget *parent = 0);
     ~FormPostProcessing();
+    void loadPostProcessingPage(std::shared_ptr<SurveyModel> survey_model_ptr);
 
 
-
+    void updateSelection(bool force_reload_cb=false);
 
 signals:
 
@@ -45,8 +47,6 @@ void quit(bool);
 
 
 
-public slots:
-void on_btn_refresh_clicked();
 
 private slots:
 
@@ -56,13 +56,20 @@ void on_btn_ToCatalog_clicked();
 void on_btn_ToModel_clicked();
 void on_btn_exit_clicked();
 
-void catalogSelectionChanged(QModelIndex, QModelIndex);
+
+
+void on_cb_catalog_currentIndexChanged(const QString &);
+
 void computePdfStat(int);
 void plotZVsZref(int);
 
 
 private:
     std::unique_ptr<Ui::FormPostProcessing> ui;
+    std::shared_ptr<SurveyModel> m_survey_model_ptr;
+    bool m_disconnect_cb = false;
+
+    void loadCbCatalog(std::string selected);
 };
 
 }

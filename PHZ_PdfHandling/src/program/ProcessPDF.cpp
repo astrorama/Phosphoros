@@ -96,11 +96,12 @@ public:
 
     } else {
       // Posterior case
-      range_regex = std::regex("[^-]*Z-BINS : \\{[0-9., \\r\\n]+\\}");
+      range_regex = std::regex("(^Z|[^-]Z)-BINS : \\{[0-9., \\r\\n]+\\}");
     }
 
     std::smatch range_match;
     std::vector<double> pdf_sampling{};
+
     if (std::regex_search(comments, range_match, range_regex)) {
         std::string ranges = range_match[0];
         ranges.erase(std::remove(ranges.begin(), ranges.end(), '\n'), ranges.end());
@@ -199,6 +200,7 @@ public:
          try {
            std::vector<double> pdf=boost::get<std::vector<double>>(row[pdf_col_name]);
 
+
            auto cumul = MathUtils::Cumulative::fromPdf(pdf_sampling, pdf);
            double med = cumul.findValue(0.5);
            if (isnan(med)){
@@ -251,7 +253,9 @@ public:
            row_list.push_back(row0);
 
          } catch (Elements::Exception e){
+
            logger.warn("The processing of the PDF of the source with ID " + id_str + " has failed :" + e.what());
+
          }
 
        }

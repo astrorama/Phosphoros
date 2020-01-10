@@ -210,7 +210,7 @@
             <item>
              <widget class="QLabel" name="label_2">
               <property name="text">
-               <string>Unit Type : </string>
+               <string>Prior Type :</string>
               </property>
              </widget>
             </item>
@@ -224,12 +224,12 @@
               </property>
               <item>
                <property name="text">
-                <string>MAGNITUDE</string>
+                <string>Absolute Magnitude (mag)</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>FLUX</string>
+                <string>Luminosity (flux)</string>
                </property>
               </item>
              </widget>
@@ -373,7 +373,7 @@
                <x>0</x>
                <y>0</y>
                <width>920</width>
-               <height>326</height>
+               <height>257</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -388,7 +388,7 @@
                    <x>0</x>
                    <y>0</y>
                    <width>900</width>
-                   <height>306</height>
+                   <height>237</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_8">
