@@ -102,7 +102,7 @@ def read_pdfs(catalog, out_dir):
     
     def read(parameter):
         if parameter+'-1D-PDF' in catalog.colnames:
-            print('    ' + parameter + ': Using catlog column ' + parameter+'-1D-PDF')
+            print('    ' + parameter + ': Using catalog column ' + parameter+'-1D-PDF')
             
             key_comment = 'COMMENT'
             if key_comment not in catalog.meta.keys():
@@ -205,7 +205,7 @@ class SpeczPhotozPlot(object):
     def _updatePlots(self):
         if self.selected_index is None:
             return []
-        self.id_text.set_text('selected ID: %d' % self.ids[self.selected_index])
+        self.id_text.set_text('selected ID: {}'.format(self.ids[self.selected_index]))
         self.selected1.set_visible(True)
         self.selected1.set_offsets([self.specz[self.selected_index], self.photz[self.selected_index]])
         self.selected2.set_visible(True)
@@ -493,11 +493,26 @@ def mainMethod(args):
         raise ValueError('At least one of --phz-catalog or --phosphoros-output-dir must be specified')
 
     specz_cat = read_specz_catalog(args.specz_catalog, args.specz_cat_id, args.specz_column)
+
     phos_cat = read_phosphoros_catalog(args.phosphoros_output_dir, args.phz_catalog, args.phz_column)
+
+    # Make sure the comments metadata are only picked from phos_cat, as the
+    # bins are stored there. Otherwise, specz_cat may have COMMENT, and phos_cat comments, we end with both,
+    # and later methods pick the first over the second
+    for k in ['COMMENT', 'comments']:
+        if k in specz_cat.meta:
+            del specz_cat.meta[k]
+    
 
     # merge the catalogs
     logger.info('Merging the catalogs')
     catalog = table.join(specz_cat, phos_cat, keys='ID')
+
+    if len(catalog) == 0:
+        logger.critical('No matching objects found between the SpecZ and the PhotoZ catalogs')
+        logger.critical('Was the proper ID column chosen?')
+        exit(1)
+    
 
     specz = catalog['SPECZ']
     phz = catalog['PHZ']

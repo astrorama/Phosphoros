@@ -43,6 +43,7 @@
 
 #include <CCfits/CCfits>
 #include <regex>
+#include <SourceCatalog/Source.h>
 
 using namespace Euclid;
 using namespace Euclid::Configuration;
@@ -190,8 +191,12 @@ public:
        auto rows = reader.read(chunk_size);
        std::vector<Row> row_list {};
 
+       Euclid::SourceCatalog::CastSourceIdVisitor castIdVisitor;
+
        for(auto& row : rows ){
-         long id = boost::get<int64_t>(row[id_col_name]);
+         auto id = boost::apply_visitor(castIdVisitor, row[id_col_name]);
+         const string& id_str = boost::lexical_cast<std::string>(id);
+
          try {
            std::vector<double> pdf=boost::get<std::vector<double>>(row[pdf_col_name]);
 
@@ -199,7 +204,7 @@ public:
            auto cumul = MathUtils::Cumulative::fromPdf(pdf_sampling, pdf);
            double med = cumul.findValue(0.5);
            if (isnan(med)){
-             throw  Elements::Exception("Source with ID" +std::to_string(id) + "has undefined MEDIAN");
+             throw  Elements::Exception("Source with ID" + id_str + "has undefined MEDIAN");
            }
 
            std::pair<double,double> range_70 = cumul.findMinInterval(0.7);
@@ -220,21 +225,21 @@ public:
              modes = MathUtils::extractNHighestModes(full_pdf, config_manager.getConfiguration<PdfHandlingConfiguration>().getMergeRatio(), 2);
            }
 
-           std::vector<Row::cell_type> full_values0 {std::to_string(id), med,
-                                                range_70.first, range_70.second,
-                                                range_90.first,range_90.second,
-                                                range_95.first,range_95.second,
-                                                med_c_range_70.first, med_c_range_70.second,
-                                                med_c_range_90.first,med_c_range_90.second,
-                                                med_c_range_95.first,med_c_range_95.second,
-                                                modes[0].getHighestSamplePosition(),
-                                                modes[0].getMeanPosition(),
-                                                modes[0].getInterpolatedMaxPosition(),
-                                                modes[0].getModeArea(),
-                                                modes[1].getHighestSamplePosition(),
-                                                modes[1].getMeanPosition(),
-                                                modes[1].getInterpolatedMaxPosition(),
-                                                modes[1].getModeArea()
+           std::vector<Row::cell_type> full_values0 {id_str, med,
+                                                     range_70.first, range_70.second,
+                                                     range_90.first, range_90.second,
+                                                     range_95.first, range_95.second,
+                                                     med_c_range_70.first, med_c_range_70.second,
+                                                     med_c_range_90.first, med_c_range_90.second,
+                                                     med_c_range_95.first, med_c_range_95.second,
+                                                     modes[0].getHighestSamplePosition(),
+                                                     modes[0].getMeanPosition(),
+                                                     modes[0].getInterpolatedMaxPosition(),
+                                                     modes[0].getModeArea(),
+                                                     modes[1].getHighestSamplePosition(),
+                                                     modes[1].getMeanPosition(),
+                                                     modes[1].getInterpolatedMaxPosition(),
+                                                     modes[1].getModeArea()
            };
 
            std::vector<Row::cell_type> values0{};
@@ -248,7 +253,8 @@ public:
            row_list.push_back(row0);
 
          } catch (Elements::Exception e){
-           logger.warn("The processing of the PDF of the source with ID "  +std::to_string(id) + " has failed :"+e.what());
+
+           logger.warn("The processing of the PDF of the source with ID " + id_str + " has failed :" + e.what());
 
          }
 
