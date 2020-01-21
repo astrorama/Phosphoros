@@ -306,6 +306,7 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
 void DialogPhotometricCorrectionComputation::runFinished() {
   std::string message = m_future_watcher.result();
   m_computing = false;
+  this->ui->bt_Cancel->setEnabled(true);
   if (message.length() == 0) {
     this->accept();
     return;
@@ -319,9 +320,20 @@ void DialogPhotometricCorrectionComputation::runFinished() {
 void DialogPhotometricCorrectionComputation::on_bt_Cancel_clicked() {
   if (m_computing) {
     PhzUtils::getStopThreadsFlag() = true;
-    m_computing = false;
+    this->ui->bt_Cancel->setEnabled(false);
   } else {
     this->reject();
+  }
+}
+
+void DialogPhotometricCorrectionComputation::reject() {
+  // Make sure the dialog does not close until the computation is done running/canceling
+  if (m_computing) {
+    QMessageBox::warning(this, "Running...",
+      "Please, cancel the computation and wait for it to stop before closing the dialog", QMessageBox::Close);
+  }
+  else {
+    QDialog::reject();
   }
 }
 

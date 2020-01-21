@@ -130,8 +130,6 @@ private slots:
 
     void on_bt_Cancel_clicked();
 
-
-
 private:
     QFutureWatcher<std::string> m_future_watcher {};
     std::unique_ptr<Ui::DialogPhotometricCorrectionComputation> ui;
@@ -147,6 +145,8 @@ private:
     std::string runFunction();
     void setRunEnability();
     bool loadTestCatalog(QString file_name, bool with_warning);
+
+    void reject() override;
 };
 
 }
