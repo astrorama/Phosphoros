@@ -72,7 +72,13 @@ def read_phosphoros_catalog(out_dir, out_cat, phz_col):
     if phz_col not in phos_cat.colnames:
         raise ValueError('ERROR : Photo-z catalog does not have column with name {}'.format(phz_col))
     phos_cat.rename_column(phz_col, 'PHZ')
-    return phos_cat[['ID', 'PHZ']]
+    
+    cols = ['ID', 'PHZ']
+    for col in phos_cat.colnames:
+        if col.endswith('-1D-PDF'):
+            cols.append(col)
+    
+    return phos_cat[cols]
     
 #
 #-------------------------------------------------------------------------------
@@ -94,6 +100,7 @@ def get_pdf_bins_from_comment(comment_lines, parameter):
 
 def read_pdfs(catalog, out_dir):
     logger.info('Loading the 1D-PDFs...')
+    logger.info(catalog.colnames)
     filename_map = {'SED': 'pdf_sed.fits', 'REDDENING-CURVE': 'pdf_red_curve.fits', 'EBV': 'pdf_ebv.fits',
                     'Z': 'pdf_z.fits',
                     'LIKELIHOOD-SED': 'likelihood_pdf_sed.fits',
