@@ -122,11 +122,11 @@ void DialogPSC::setCatalogFile(QString path){
          ui->cdd_ref_id_col->insertItem(10000, QString::fromStdString(name));
          ui->cbb_ref_z_col->insertItem(10000, QString::fromStdString(name));
 
-         if (name.find(m_z_ref_column) != std::string::npos) {
+         if (name.compare(m_z_ref_column) == 0) {
            index_z = current;
          }
 
-         if (name.find(m_id_column) != std::string::npos) {
+         if (name.compare(m_id_column) == 0) {
            index_id = current;
          }
 
