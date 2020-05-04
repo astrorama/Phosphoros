@@ -555,10 +555,13 @@
      <item>
       <widget class="QCheckBox" name="cb_upperLimit">
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If set, the algorithm will interpret negative error as indicating that the flux is not an actual value but an upper limit. The absolute value of the error will be used as error on the measurement. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If set, the algorithm will interpret negative error as indicating that the flux is not an actual value but an upper limit. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
         <string>Upper Limit</string>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
