@@ -232,13 +232,8 @@ void SurveyModel::loadSurvey() {
    m_in_edition = true;
  }
 
- void SurveyModel::setHasUpperLimitToSelected(bool has_upper_limit) {
-   m_edited_survey.setHasUpperLimit(has_upper_limit);
-   m_in_edition = true;
- }
-
- void SurveyModel::setHasMissingPhotToSelected(bool has_missing_phot) {
-   m_edited_survey.setHasMissingPhotometry(has_missing_phot);
+ void SurveyModel::setHasUpperLimitToSelected(QString new_value) {
+   m_edited_survey.setUpperLimit(new_value.toDouble());
    m_in_edition = true;
  }
 

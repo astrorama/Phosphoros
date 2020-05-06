@@ -130,8 +130,7 @@ public slots:
   void setColumnListToSelected(std::set<std::string> new_list);
   void setDefaultCatalogToSelected(QString new_name);
   void setNonDetectionToSelected(QString new_name);
-  void setHasUpperLimitToSelected(bool has_upper_limit);
-  void setHasMissingPhotToSelected(bool has_missing_phot);
+  void setHasUpperLimitToSelected(QString new_name);
   void setCopiedColumnsToSelected(std::map<std::string, std::string> copied_columns);
 
 private:

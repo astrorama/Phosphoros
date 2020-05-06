@@ -11,10 +11,11 @@ FilterModel::FilterModel(std::string basePath):m_base_path(basePath)
 
 void FilterModel::setFilters(const std::vector<FilterMapping>& initFilterList){
 
-    this->setColumnCount(4);
+    this->setColumnCount(5);
     this->setRowCount(initFilterList.size());
     QStringList  setHeaders;
-    setHeaders<<"Filter Transmission Curve"<<"Flux Column Name"<<"Flux Error Column Name"<<"Filter Transmission File Full";
+    setHeaders<<"Filter Transmission Curve"<<"Flux Column Name"<<"Flux Error Column Name"
+              <<"Filter Transmission File Full"<<"Upper limit over error ratio";
     this->setHorizontalHeaderLabels(setHeaders);
 
     int i=0;
@@ -28,6 +29,7 @@ void FilterModel::setFilters(const std::vector<FilterMapping>& initFilterList){
         this->setItem(i,1,new QStandardItem(QString::fromStdString(filter.getFluxColumn())));
         this->setItem(i,2,new QStandardItem(QString::fromStdString(filter.getErrorColumn())));
         this->setItem(i,3,new QStandardItem(QString::fromStdString(filter.getFilterFile())));
+        this->setItem(i,4,new QStandardItem(QString::number(filter.getN())));
         ++i;
     }
 }
@@ -41,6 +43,7 @@ void FilterModel::setFilter(const FilterMapping& filter, int row){
     item(row,1)->setText(QString::fromStdString(filter.getFluxColumn()));
     item(row,2)->setText(QString::fromStdString(filter.getErrorColumn()));
     item(row,3)->setText(QString::fromStdString(filter.getFilterFile()));
+    item(row,4)->setText(QString::number(filter.getN()));
 }
 
 std::vector<FilterMapping> FilterModel::getFilters() const{
@@ -57,6 +60,7 @@ FilterMapping FilterModel::getFilter(int row) const{
     filter.setFluxColumn(item(row,1)->text().toStdString());
     filter.setErrorColumn(item(row,2)->text().toStdString());
     filter.setFilterFile(item(row,3)->text().toStdString());
+    filter.setN(item(row,4)->text().toDouble());
     return filter;
 
 }

@@ -64,9 +64,6 @@ void copyProgress(qint64, qint64);
 void filter_model_changed(QStandardItem *);
 
 
-void on_cb_missingPhot_stateChanged(int state);
-void on_cb_upperLimit_stateChanged(int state);
-
 
     void filterMappingSelectionChanged(QModelIndex, QModelIndex);
 
@@ -97,6 +94,8 @@ void on_cb_upperLimit_stateChanged(int state);
     void on_cb_RefZ_currentIndexChanged(int index);
 
     void on_txt_nonDetection_textEdited(const QString& text);
+
+    void on_txt_UpperLimit_textEdited(const QString& text);
 
     void on_cb_catalog_type_currentIndexChanged(const QString &);
 
