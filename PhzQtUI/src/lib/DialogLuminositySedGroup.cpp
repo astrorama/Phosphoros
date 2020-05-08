@@ -9,12 +9,11 @@
 #include "ui_DialogLuminositySedGroup.h"
 #include <QLabel>
 #include <QLineEdit>
-#include <QScrollArea>
 
 #include <QTreeView>
+#include <QHeaderView>
 
 #include <QStandardItemModel>
-#include <QStandardItem>
 #include "PhzQtUI/GridButton.h"
 #include "XYDataset/QualifiedName.h"
 

@@ -25,7 +25,6 @@ Author: nikoapos
 """
 
 from __future__ import division, print_function
-from future_builtins import *
 
 import argparse
 import matplotlib.pyplot as plt
@@ -48,15 +47,15 @@ def defineSpecificProgramOptions():
 
     parser = argparse.ArgumentParser()
     
-    parser.add_argument('--source-id', type=int,
+    parser.add_argument('--source-id', type=int, required=True,
                 help='The ID of the source to create the plot for')
-    parser.add_argument('--filter-mapping-file', type=str,
+    parser.add_argument('--filter-mapping-file', type=str, required=True,
                 help='The file containing the photometry mapping of the catalog columns')
-    parser.add_argument('--best-model-catalog', type=str,
+    parser.add_argument('--best-model-catalog', type=str, required=True,
                 help='The file containing the best fitted model catalog')
-    parser.add_argument('--model-grid-file', type=str,
+    parser.add_argument('--model-grid-file', type=str, required=True,
                 help='The file containing the grid with the model photometries')
-    parser.add_argument('--source-catalog', type=str,
+    parser.add_argument('--source-catalog', type=str, required=True,
                 help='The file containing the catalog with the source photometries')
 
     return parser

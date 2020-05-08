@@ -16,6 +16,10 @@ using namespace std;
 namespace Euclid {
 namespace PhzQtUI {
 
+
+
+static Elements::Logging logger = Elements::Logging::getLogger("DataSetTreeModel");
+
 DataSetTreeModel::DataSetTreeModel(DatasetRepo repository, QObject *parent) :
     QStandardItemModel(parent) ,
     m_repository(repository){
@@ -286,12 +290,29 @@ void DataSetTreeModel::setState(const DatasetSelection& selection) {
 void DataSetTreeModel::setState(const std::vector<std::string>& selected_leaves){
   for (const std::string& leaf : selected_leaves){
     auto group_name =  DataSetTreeModel::getGroupName(leaf);
-    for (int i=0; i<m_map_dir.at(group_name)->rowCount();++i){
-      auto item = m_map_dir.at(group_name)->child(i);
-      std::string name = item->text().toStdString();
-      if (std::equal(name.rbegin(), name.rend(), leaf.rbegin())){
-        if (item->isCheckable()){
-           item->setCheckState(Qt::CheckState::Checked);
+    // root level
+
+    logger.info()<<"Set state: select '"<<leaf<<"' in group '"<<group_name;
+    if (group_name.empty()){
+
+      for (int i=0; i<this->rowCount();++i){
+
+           auto root_level_item = this->item(i);
+           std::string name = root_level_item->text().toStdString();
+           if (std::equal(name.rbegin(), name.rend(), leaf.rbegin())){
+             if (root_level_item->isCheckable()){
+               root_level_item->setCheckState(Qt::CheckState::Checked);
+             }
+           }
+       }
+    } else {
+      for (int i=0; i<m_map_dir.at(group_name)->rowCount();++i){
+        auto item = m_map_dir.at(group_name)->child(i);
+        std::string name = item->text().toStdString();
+        if (std::equal(name.rbegin(), name.rend(), leaf.rbegin())){
+          if (item->isCheckable()){
+             item->setCheckState(Qt::CheckState::Checked);
+          }
         }
       }
     }

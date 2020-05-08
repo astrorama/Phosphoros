@@ -87,12 +87,7 @@ void DialogLuminosityPrior::priorSelectionChanged(QModelIndex new_index, QModelI
   auto config = m_prior_configs.at(name);
   ui->txt_name->setText(QString::fromStdString(config.getName()));
 
-  size_t cb_index =0;
-  if (!config.getInMag()){
-    cb_index=1;
-  }
-
-  ui->cb_unit->setCurrentIndex(cb_index);
+  ui->cb_unit->setCurrentIndex(0);
   ui->ck_reddening->setChecked(!config.getReddened());
   ui->lb_filter->setText(QString::fromStdString(config.getFilterName()));
 
@@ -102,7 +97,13 @@ void DialogLuminosityPrior::priorSelectionChanged(QModelIndex new_index, QModelI
   m_luminosityInfos=std::move(config.getLuminosityFunctionArray());
   loadGrid();
 
+  if (!config.getInMag()) {
+       ui->cb_unit->setCurrentIndex(1);
+  }
   manageBtnEnability(false,false,true);
+
+
+
 }
 
 void DialogLuminosityPrior::on_btn_new_clicked(){

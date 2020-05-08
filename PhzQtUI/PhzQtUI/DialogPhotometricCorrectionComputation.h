@@ -1,11 +1,22 @@
 #ifndef DIALOGPHOTOMETRICCORRECTIONCOMPUTATION_H
 #define DIALOGPHOTOMETRICCORRECTIONCOMPUTATION_H
 
+#include <map>
+#include <string>
 #include <memory>
 #include <QDialog>
 #include <QFutureWatcher>
 #include <list>
 #include "PhzQtUI/FilterMapping.h"
+
+namespace boost{
+namespace program_options{
+
+
+
+ class variable_value;
+}
+}
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -59,7 +70,8 @@ public:
         std::string grid,
         std::list<FilterMapping> selected_filters,
         std::list<std::string> excluded_filters,
-        std::string default_catalog_path,
+        std::string default_z_column,
+        std::map<std::string, boost::program_options::variable_value> run_option,
         double non_detection);
 
 signals:
@@ -118,14 +130,14 @@ private slots:
 
     void on_bt_Cancel_clicked();
 
-
-
 private:
     QFutureWatcher<std::string> m_future_watcher {};
     std::unique_ptr<Ui::DialogPhotometricCorrectionComputation> ui;
     std::list<FilterMapping> m_selected_filters;
     std::list<std::string> m_excluded_filters;
     std::string m_id_column;
+    std::string m_refZ_column;
+    std::map<std::string, boost::program_options::variable_value> m_run_option;
     double m_non_detection;
     bool m_computing = false;
     void disablePage();
@@ -133,6 +145,8 @@ private:
     std::string runFunction();
     void setRunEnability();
     bool loadTestCatalog(QString file_name, bool with_warning);
+
+    void reject() override;
 };
 
 }

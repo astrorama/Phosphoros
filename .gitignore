@@ -1,3 +1,5 @@
+# All
+__pycache__
 
 # /
 /.project
@@ -388,3 +390,4 @@
 /cmake/*.log
 /cmake/.pydevproject
 /cmake/*.pyc
+

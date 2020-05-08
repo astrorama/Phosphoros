@@ -47,12 +47,15 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
     string id_column, string model, string grid,
     std::list<FilterMapping> selected_filters,
     std::list<std::string> excluded_filters,
-    std::string default_catalog_path,
+    std::string default_z_column,
+    std::map<std::string, boost::program_options::variable_value> run_option,
     double non_detection) {
   m_id_column = id_column;
+  m_refZ_column = default_z_column;
   m_selected_filters = selected_filters;
   m_excluded_filters = excluded_filters;
-  m_non_detection=non_detection;
+  m_run_option = run_option;
+  m_non_detection = non_detection;
   ui->txt_survey->setText(QString::fromStdString(survey));
   ui->txt_Model->setText(QString::fromStdString(model));
   ui->txt_grid->setText(QString::fromStdString(grid));
@@ -68,11 +71,7 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
 
   ui->listView_Filter->setModel(grid_model);
 
-  // default catalog
 
- if (loadTestCatalog(QString::fromStdString(default_catalog_path),false)){
-   ui->txt_catalog->setText(QString::fromStdString(default_catalog_path));
- }
   //default correction name
   string default_file_name = survey+"_"+model
       +"_"+ui->cb_SelectionMethod->currentText().toStdString();
@@ -136,11 +135,22 @@ bool DialogPhotometricCorrectionComputation::loadTestCatalog(QString file_name, 
     } else {
       ui->txt_catalog->setText(file_name);
       ui->cb_SpectroColumn->clear();
+
+      int index = 0;
+      int selected_index = -1;
+
       for (auto& column_pair : file_columns) {
         if (column_pair.second) {
-          ui->cb_SpectroColumn->addItem(
-              QString::fromStdString(column_pair.first));
+          ui->cb_SpectroColumn->addItem(QString::fromStdString(column_pair.first));
+          if (m_refZ_column == column_pair.first) {
+            selected_index = index;
+          }
+          index++;
         }
+      }
+
+      if (selected_index >= 0) {
+        ui->cb_SpectroColumn->setCurrentIndex(selected_index);
       }
 
       return true;
@@ -248,16 +258,14 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
     int max_iter_number = ui->txt_Iteration->text().toInt();
 
     auto config_map = PhotometricCorrectionHandler::GetConfigurationMap(
+        m_run_option,
         ui->txt_survey->text().toStdString(),
-        ui->txt_FileName->text().toStdString(), max_iter_number,
-
+        ui->txt_FileName->text().toStdString(),
+        max_iter_number,
         FormUtils::parseToDouble(ui->txt_Tolerence->text()),
-        m_non_detection,
         ui->cb_SelectionMethod->currentText().toStdString(),
-        ui->txt_grid->text().toStdString(),
-        ui->txt_catalog->text().toStdString(), m_id_column,
-        ui->cb_SpectroColumn->currentText().toStdString(),
-        m_excluded_filters);
+        ui->txt_catalog->text().toStdString(),
+        ui->cb_SpectroColumn->currentText().toStdString());
 
     long config_manager_id = Configuration::getUniqueManagerId();
     auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
@@ -298,6 +306,7 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
 void DialogPhotometricCorrectionComputation::runFinished() {
   std::string message = m_future_watcher.result();
   m_computing = false;
+  this->ui->bt_Cancel->setEnabled(true);
   if (message.length() == 0) {
     this->accept();
     return;
@@ -311,12 +320,25 @@ void DialogPhotometricCorrectionComputation::runFinished() {
 void DialogPhotometricCorrectionComputation::on_bt_Cancel_clicked() {
   if (m_computing) {
     PhzUtils::getStopThreadsFlag() = true;
+    this->ui->bt_Cancel->setEnabled(false);
   } else {
     this->reject();
   }
 }
 
+void DialogPhotometricCorrectionComputation::reject() {
+  // Make sure the dialog does not close until the computation is done running/canceling
+  if (m_computing) {
+    QMessageBox::warning(this, "Running...",
+      "Please, cancel the computation and wait for it to stop before closing the dialog", QMessageBox::Close);
+  }
+  else {
+    QDialog::reject();
+  }
+}
+
 void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
+  PhzUtils::getStopThreadsFlag() = false;
   m_computing = true;
   string output_file_name = FileUtils::addExt(
       ui->txt_FileName->text().toStdString(), ".txt");

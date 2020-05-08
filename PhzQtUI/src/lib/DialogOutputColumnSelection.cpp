@@ -58,9 +58,9 @@ DialogOutputColumnSelection::DialogOutputColumnSelection(
 
   ui->treeView->setModel(model);
   ui->treeView->expandAll();
-  ui->treeView->header()->setResizeMode(0, QHeaderView::Stretch);
+  ui->treeView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
 
-  ui->treeView->header()->setResizeMode(1, QHeaderView::Stretch);
+  ui->treeView->header()->setSectionResizeMode(1, QHeaderView::Stretch);
  }
 
 DialogOutputColumnSelection::~DialogOutputColumnSelection(){}

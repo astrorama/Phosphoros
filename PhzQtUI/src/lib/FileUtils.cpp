@@ -502,6 +502,22 @@ std::string FileUtils::getPhotmetricGridRootPath(bool check, const std::string& 
 }
 
 
+std::string FileUtils::getGalacticCorrectionGridRootPath(bool check, const std::string& catalog_type) {
+  if (catalog_type.length()>0){
+      QString path = QString::fromStdString(FileUtils::getIntermediaryProductRootPath(false,catalog_type))+QDir::separator()+"GalacticCorrectionCoefficientGrids";
+      QFileInfo info(path);
+      if (check){
+          if (!info.exists()){
+              QDir().mkpath(path);
+          }
+      }
+      return info.absoluteFilePath().toStdString();
+    }
+
+    return "";
+}
+
+
 
 std::string FileUtils::getLuminosityFunctionGridRootPath(bool check, const std::string & catalog_type){
   QString path = QString::fromStdString(FileUtils::getIntermediaryProductRootPath(check,""))+QDir::separator()

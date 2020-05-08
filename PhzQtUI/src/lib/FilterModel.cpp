@@ -14,7 +14,7 @@ void FilterModel::setFilters(const std::vector<FilterMapping>& initFilterList){
     this->setColumnCount(4);
     this->setRowCount(initFilterList.size());
     QStringList  setHeaders;
-    setHeaders<<"Filter Transmission Curve"<<"Flux Column Name"<<"Error Column Name"<<"Filter Transmission File Full";
+    setHeaders<<"Filter Transmission Curve"<<"Flux Column Name"<<"Flux Error Column Name"<<"Filter Transmission File Full";
     this->setHorizontalHeaderLabels(setHeaders);
 
     int i=0;

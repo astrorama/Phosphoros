@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 from __future__ import print_function
 from subprocess import call
 import sys
@@ -24,6 +23,8 @@ action_list = [
                      'Computes a grid containing the model photometries'),
     PhosphorosAction(['compute_luminosity_model_grid', 'CLMG'], 'PhosphorosComputeLuminosityModelGrid',
                      'Computes a grid containing the model photometries for the luminosity prior band'),
+    PhosphorosAction(['compute_galactic_correction_coeff_grid', 'CGCCG'], 'PhosphorosComputeGalacticAbsorptionCoefficientGrid',
+                     'Computes a grid containing the coefficient for the correction of the galactic absorption'),
     PhosphorosAction(['compute_photometric_corrections', 'CPC'], 'PhosphorosComputePhotometricCorrections',
                      'Calculates the Photometric Zero Point Corrections'),
     PhosphorosAction(['compute_redshifts', 'CR'], 'PhosphorosComputeRedshifts',
@@ -40,6 +41,8 @@ action_list = [
                      'Displays the reddened, redshifted SED data'),
     PhosphorosAction(['plot_specz_comparison', 'PSC'], 'PhosphorosPlotSpecZComparison',
                      'Shows plots comparing the PHZ result with SPECZ'),
+    PhosphorosAction(['plot_stacked_pdz', 'PSP'], 'PlotStackedPdfPitAndCrps',
+                     'Shows plots comparing the PHZ result with SPECZ'),
     PhosphorosAction(['plot_posterior', 'PP'], 'PhosphorosPlotPosterior',
                      'Plots views of a multi-dimensional posterior'),
     PhosphorosAction(['plot_photometry_comparison', 'PPC'], 'PhosphorosPlotPhotometryComparison',
@@ -51,7 +54,11 @@ action_list = [
     PhosphorosAction(['add_emission_lines', 'AEL'], 'PhosphorosAddEmissionLines',
                      'Adds emission lines to a set of SED templates'),
     PhosphorosAction(['build_reference_sample', 'BRS'], 'PhosphorosBuildReferenceSample',
-                     'Builds an NNPZ reference sample from the results of a Phosphoros output catalog')
+                     'Builds an NNPZ reference sample from the results of a Phosphoros output catalog'),
+    PhosphorosAction(['add_galactic_dust_data', 'AGDD'], 'AddGalDustToCatalog',
+                     'Lookup galactical E(B-V) in the Planck dust map and add it as an additional catalog column'),
+    PhosphorosAction(['process_output_pdz', 'POP'], 'ProcessPDF',
+                     'Process PDZ by extracting the Mean, Confidence intervals and information about the first 2 modes.'),
 ]
 
 def printHelp():

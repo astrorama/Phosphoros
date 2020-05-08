@@ -25,9 +25,17 @@ elements_install_conf_files()
 
 elements_install_python_modules()
 
-elements_install_scripts()
-elements_add_unit_test(LsAuxDirConfig_test tests/src/LsAuxDirConfig_test.cpp 
+elements_add_unit_test(LsAuxDirConfig_test tests/src/LsAuxDirConfig_test.cpp
                      LINK_LIBRARIES PhzCLI
                      TYPE Boost)
 
 elements_add_python_program(PhosphorosPlotPhotometryComparison PhzCLI.PhosphorosPlotPhotometryComparison)
+elements_add_python_program(PhosphorosOrderSeds PhzCLI.OrderSeds)
+elements_add_python_program(PhosphorosPlotPosterior PhzCLI.PlotPosterior)
+elements_add_python_program(PhosphorosPlotSpecZComparison PhzCLI.PlotSpecZComparison)
+
+# Phosphoros is a Python script but not conceived to work with Elements
+# We use the aliasing mechanism to use python2 or python3 depending
+# on the detected version
+find_package(PythonInterp ${PYTHON_EXPLICIT_VERSION} REQUIRED)
+elements_alias(Phosphoros python${PYTHON_VERSION_MAJOR} -m PhzCLI.Phosphoros)

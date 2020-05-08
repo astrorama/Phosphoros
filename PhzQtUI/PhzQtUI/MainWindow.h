@@ -7,6 +7,10 @@
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
 
+#include "PhzQtUI/OptionModel.h"
+#include "PhzQtUI/SurveyModel.h"
+#include "PhzQtUI/ModelSetModel.h"
+
 namespace Euclid {
 namespace PhzQtUI {
 
@@ -37,6 +41,8 @@ private slots:
 
     void on_btn_HomeToCatalog_clicked();
 
+    void on_btn_HomeToPP_clicked();
+
     void navigateToNewCatalog(std::string);
 
     void navigateToHome();
@@ -51,20 +57,23 @@ private slots:
 
     void navigateToConfig();
 
+    void navigateToPostProcessing(bool);
+
     void quit(bool);
 
 
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;
-    bool m_model_loaded = false;
-    bool m_mapping_loaded = false;
-
+    void resetRepo();
 
     DatasetRepo m_filter_repository;
     DatasetRepo m_seds_repository;
     DatasetRepo m_redenig_curves_repository;
     DatasetRepo m_luminosity_repository;
+    std::shared_ptr<OptionModel> m_option_model_ptr{ new OptionModel};
+    std::shared_ptr<SurveyModel> m_survey_model_ptr{ new SurveyModel};
+    std::shared_ptr<ModelSetModel> m_model_set_model_ptr{ new ModelSetModel};
 
 
 };

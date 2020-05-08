@@ -35,9 +35,13 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
     std::string catalog,
     const std::map<std::string,PhzDataModel::ModelAxesTuple>& axes,
     const std::list<std::string>& selected_filters,
-    std::string igm_type) {
+    std::string igm_type,
+    bool model_grid) {
 
   std::string rootPath = FileUtils::getPhotmetricGridRootPath(true,catalog);
+  if (!model_grid){
+    rootPath = FileUtils::getGalacticCorrectionGridRootPath(true,catalog);
+  }
   std::list < std::string > list;
   if (rootPath.length()>0){
 

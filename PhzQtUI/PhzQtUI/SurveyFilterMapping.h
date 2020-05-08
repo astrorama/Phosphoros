@@ -55,6 +55,55 @@ public:
     std::string getSourceIdColumn() const;
 
     /**
+     * @brief set the RaColumn
+     * @param newRaColumn
+     */
+    void setRaColumn(std::string newRaColumn);
+
+    /**
+     * @brief get the RaColumn
+     * @return the current RaColumn
+     */
+    std::string getRaColumn() const;
+
+    /**
+      * @brief set the DecColumn
+      * @param newDecColumn
+      */
+     void setDecColumn(std::string newDecColumn);
+
+     /**
+      * @brief get the DecColumn
+      * @return the current DecColumn
+      */
+     std::string getDecColumn() const;
+
+     /**
+       * @brief set the GalEbvColumn
+       * @param newGalEbvolumn
+       */
+      void setGalEbvColumn(std::string newGalEbvolumn);
+
+      /**
+       * @brief get the GalEbvColumn
+       * @return the current GalEbvColumn
+       */
+      std::string getGalEbvColumn() const;
+
+      /**
+        * @brief set the ref_z column
+        * @param newRefZColumn
+        */
+       void setRefZColumn(std::string newRefZColumn);
+
+       /**
+        * @brief get the RefZColumn
+        * @return the current RefZColumn
+        */
+       std::string getRefZColumn() const;
+
+
+    /**
      * @brief set the Filters by moving the provided object into the SurveyFilterMapping
      * @param filters
      */
@@ -148,6 +197,10 @@ public:
 private:
     std::string m_survey_name;
     std::string m_source_id_column;
+    std::string m_ra_column;
+    std::string m_dec_column;
+    std::string m_gal_ebv_column;
+    std::string m_ref_z_column;
     std::vector<FilterMapping> m_filters;
     std::string m_default_catalog;
     std::set<std::string> m_column_list;

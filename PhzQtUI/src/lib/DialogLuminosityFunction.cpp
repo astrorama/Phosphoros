@@ -5,10 +5,12 @@
  *      Author: fdubath
  */
 
+#include <QDoubleValidator>
 #include "ui_DialogLuminosityFunction.h"
 #include "PhzQtUI/DialogLuminosityFunction.h"
 
 #include "FormUtils.h"
+#include "FileUtils.h"
 #include "PhzQtUI/LuminosityFunctionInfo.h"
 #include "PhzQtUI/DialogLuminosityFunctionCurveSelector.h"
 
@@ -42,17 +44,19 @@ void DialogLuminosityFunction::setInfo(LuminosityFunctionInfo info, size_t x, si
     ui->lbl_equation_L->setVisible(false);
     ui->lbl_L->setVisible(false);
     ui->txt_L->setVisible(false);
+    ui->frame->setVisible(true);
   } else {
     ui->lbl_equation_M->setVisible(false);
     ui->lbl_M->setVisible(false);
     ui->txt_M->setVisible(false);
+    ui->frame->setVisible(false);
   }
 
   if (m_FunctionInfo.is_custom){
     ui->gb_schechter->setChecked(false);
+    ui->lb_curve->setText(QString::fromStdString(m_FunctionInfo.curve_name));
   } else {
     ui->gb_custom->setChecked(false);
-    ui->lb_curve->setText(QString::fromStdString(m_FunctionInfo.curve_name));
   }
 
   ui->txt_alpha->setValidator(new QDoubleValidator(this));
@@ -79,6 +83,39 @@ void DialogLuminosityFunction::on_gb_schechter_clicked(){
 void DialogLuminosityFunction::on_gb_custom_clicked(){
   ui->gb_schechter->setChecked(!ui->gb_custom->isChecked());
 }
+
+
+
+void DialogLuminosityFunction::on_btn_tophat_clicked(){
+
+  ui->frame->setEnabled(false);
+  double m_min = ui->sb_m_min->value();
+  double m_max = ui->sb_m_max->value();
+
+  if (m_min>=m_max){
+    double swap = m_min;
+    ui->sb_m_min->setValue(m_max);
+    m_min = m_max;
+    ui->sb_m_max->setValue(swap);
+    m_max = swap;
+  }
+
+  std::string name = "TopHat_"+std::to_string(m_min)+"_"+std::to_string(m_max);
+  // Get the path
+  std::string path = FileUtils::getLuminosityFunctionCurveRootPath(true);
+  // call the script
+  std::string command = "CreateSquareLuminosityCurve --step-begin "+std::to_string(m_min)+
+                        " --step-stop "+std::to_string(m_max)+
+                        " --output-file \""+path+"/"+name+".txt"+"\"";
+  system(command.c_str());
+  // refresh the provider
+  m_luminosity_repository->reload();
+  // select the curve
+  curvePopupClosing(name);
+
+  ui->frame->setEnabled(true);
+}
+
 
 void DialogLuminosityFunction::on_btn_curve_clicked(){
   std::unique_ptr<DialogLuminosityFunctionCurveSelector> dialog(new DialogLuminosityFunctionCurveSelector(m_luminosity_repository));

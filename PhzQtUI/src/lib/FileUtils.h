@@ -298,6 +298,13 @@ public:
      */
     static std::string getPhotmetricGridRootPath(bool check, const std::string& catalog_type);
 
+    /**
+     * @brief get the Galactic Correction Grid RootPath
+     * @param check
+     * if true ensure that the folder exist.
+     * @return <rootPath>/CorrectionGrid
+     */
+    static std::string getGalacticCorrectionGridRootPath(bool check, const std::string& catalog_type);
 
 
     static void buildDirectories();
