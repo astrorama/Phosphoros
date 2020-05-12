@@ -253,8 +253,9 @@ class SpeczPhotozPlot(object):
     def updateSelectedRow(self, index):
         self.selected_index = index
 
+
 #
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 #
 
 def displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers):
@@ -277,8 +278,37 @@ def displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOut
     f.canvas.mpl_connect('resize_event', lambda x: f.tight_layout())
     return f
 
+
 #
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+#
+
+def boxPlot(x, deltaz, bins=10, figsize=None):
+    # Compute binning
+    edges = np.histogram_bin_edges(x, bins=bins)
+    centers = (edges[1:] + edges[:-1]) / 2
+    bins = np.digitize(x, bins=edges)
+    # List of list of data points (one list of data points per bin)
+    data_per_bin = []
+    for b in np.arange(1, 1 + len(centers)):
+        data_per_bin.append(deltaz[bins == b])
+    # Plot
+    fig = plt.figure(figsize=figsize)
+    # Whiskers on the outlier limit
+    plt.boxplot(data_per_bin, labels=centers)
+    # 0
+    plt.axhline(0, 0, 1, linestyle='--', color='r')
+    # Outlier limit
+    plt.axhline(0.15, 0, 1, linestyle=':', color='gray')
+    plt.axhline(-0.15, 0, 1, linestyle=':', color='gray')
+    # Labels
+    if hasattr(x, 'name'):
+        plt.xlabel(x.name)
+    plt.ylabel('$\\Delta$z/(1+z)')
+    return fig
+
+#
+# -------------------------------------------------------------------------------
 #
 
 class PdfPlot(object):
