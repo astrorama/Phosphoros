@@ -30,5 +30,13 @@ void FilterMapping::setFilterFile(std::string filter_trnsmission_file){
     m_filter_trnsmission_file=filter_trnsmission_file;
 }
 
+double FilterMapping::getN() const {
+  return m_n;
+}
+
+void FilterMapping::setN(double new_n) {
+  m_n = new_n;
+}
+
 }
 }

@@ -523,9 +523,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="cb_missingPhot">
+      <widget class="QLabel" name="label_3">
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The provided value is identified in the catalog as a missing photometric value&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Missing Data&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If the flux is set to this flag value, the alalysis understand it as a missing value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
         <string>Missing Photometry flagged as:</string>
@@ -534,6 +534,9 @@
      </item>
      <item>
       <widget class="QLineEdit" name="txt_nonDetection">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Missing Data&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If the flux is set to this flag value, the alalysis understand it as a missing value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
         <string>-99</string>
        </property>
@@ -553,15 +556,22 @@
       </spacer>
      </item>
      <item>
-      <widget class="QCheckBox" name="cb_upperLimit">
+      <widget class="QLabel" name="label_5">
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If set, the algorithm will interpret negative error as indicating that the flux is not an actual value but an upper limit. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Upper Limit&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Upper limit are indicated by negative error value.&lt;/p&gt;&lt;p&gt;When a negative error is provided: the flux is the upper limit and error used is the absolute value of the one provided.&lt;/p&gt;&lt;p&gt;When the error is negative and match the flag value: the flux is the upper limit and the error is computed as = Flux/n, where n is defined in the grid bellow.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
-        <string>Upper Limit</string>
+        <string>Upper Limit recompute error flag: </string>
        </property>
-       <property name="checked">
-        <bool>false</bool>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="txt_UpperLimit">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Upper Limit&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Upper limit are indicated by negative error value.&lt;/p&gt;&lt;p&gt;When a negative error is provided: the flux is the upper limit and error used is the absolute value of the one provided.&lt;/p&gt;&lt;p&gt;When the error is negative and match the flag value: the flux is the upper limit and the error is computed as  = Flux/n, where n is defined in the grid bellow.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>-99</string>
        </property>
       </widget>
      </item>

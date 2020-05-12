@@ -103,15 +103,15 @@ void FormSurveyMapping::fillControlsWithSelected() {
       m_column_from_file = selected_survey.getColumnList();
       fillCbColumns(cb_id_text, cb_ra_text, cb_dec_text, cb_gebv_text, cb_refz_text);
 
-      ui->cb_missingPhot->setCheckState(selected_survey.getHasMissingPhotometry() ? Qt::Checked : Qt::Unchecked);
       ui->txt_nonDetection->setText(QString::number(selected_survey.getNonDetection()));
-      ui->cb_upperLimit->setCheckState(selected_survey.getHasUpperLimit() ? Qt::Checked : Qt::Unchecked);
+      ui->txt_UpperLimit->setText(QString::number(selected_survey.getUpperLimit()));
 
 
-      disconnect(ui->table_Filter->model(), SIGNAL(itemChanged(QStandardItem * )),0,0);
+      disconnect(ui->table_Filter->model(), SIGNAL(itemChanged(QStandardItem * )), 0, 0);
       FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
       filter_model->setFilters(selected_survey.getFilters());
-      ui->table_Filter->setItemDelegate(new FilterMappingItemDelegate(getFilteredColumns()));
+      ui->table_Filter->setItemDelegateForColumn(1, new FilterMappingItemDelegate(getFilteredColumns()));
+      ui->table_Filter->setItemDelegateForColumn(2, new FilterMappingItemDelegate(getFilteredColumns()));
       ui->table_Filter->setModel(filter_model);
       ui->table_Filter->setColumnHidden(3, true);
       ui->table_Filter->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -133,6 +133,7 @@ void FormSurveyMapping::loadMappingPage(
     logger.info()<< "Load the Catalog Page";
     m_survey_model_ptr = survey_model_ptr;
     ui->txt_nonDetection->setValidator(new QDoubleValidator());
+    ui->txt_UpperLimit->setValidator(new QDoubleValidator());
     m_filter_repository = filter_repository;
 
     loadCatalogCB(m_survey_model_ptr->getSelectedSurvey().getName());
@@ -168,9 +169,9 @@ void FormSurveyMapping::setFilterMappingInEdition(){
     ui->cb_GalEbv->setEnabled(has_mapping_selected);
     ui->cb_RefZ->setEnabled(has_mapping_selected);
 
-    ui->cb_missingPhot->setEnabled(has_mapping_selected);
-    ui->txt_nonDetection->setEnabled(has_mapping_selected && ui->cb_missingPhot->checkState()== Qt::Checked);
-    ui->cb_upperLimit->setEnabled(has_mapping_selected);
+    ui->txt_nonDetection->setEnabled(has_mapping_selected);
+    ui->txt_UpperLimit->setEnabled(has_mapping_selected);
+
     ui->btn_SelectFilters->setEnabled(has_mapping_selected);
 
 
@@ -194,9 +195,8 @@ void FormSurveyMapping::setFilterMappingInView() {
     ui->cb_GalEbv->setEnabled(has_mapping_selected);
     ui->cb_RefZ->setEnabled(has_mapping_selected);
 
-    ui->cb_missingPhot->setEnabled(has_mapping_selected);
-    ui->txt_nonDetection->setEnabled(has_mapping_selected && ui->cb_missingPhot->checkState()== Qt::Checked);
-    ui->cb_upperLimit->setEnabled(has_mapping_selected);
+    ui->txt_nonDetection->setEnabled(has_mapping_selected);
+    ui->txt_UpperLimit->setEnabled(has_mapping_selected);
     ui->btn_SelectFilters->setEnabled(has_mapping_selected);
 
     m_mappingInsert = false;
@@ -316,24 +316,15 @@ void FormSurveyMapping::on_cb_RefZ_currentIndexChanged(int) {
   setFilterMappingInEdition();
 }
 
-
-void FormSurveyMapping::on_cb_missingPhot_stateChanged(int state) {
-  ui->txt_nonDetection->setEnabled(state == Qt::Checked);
-  m_survey_model_ptr->setHasMissingPhotToSelected(state == Qt::Checked);
-  setFilterMappingInEdition();
-}
-
 void FormSurveyMapping::on_txt_nonDetection_textEdited(const QString& text) {
   m_survey_model_ptr->setNonDetectionToSelected(text);
   setFilterMappingInEdition();
 }
 
-void FormSurveyMapping::on_cb_upperLimit_stateChanged(int state) {
-  m_survey_model_ptr->setHasUpperLimitToSelected(state == Qt::Checked);
+void FormSurveyMapping::on_txt_UpperLimit_textEdited(const QString& text) {
+  m_survey_model_ptr->setHasUpperLimitToSelected(text);
   setFilterMappingInEdition();
 }
-
-
 
 void FormSurveyMapping::filter_model_changed(QStandardItem *) {
   logger.info() << "Table filter model changed";

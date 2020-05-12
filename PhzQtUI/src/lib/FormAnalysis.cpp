@@ -709,9 +709,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
   SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
-  double non_detection = selected_survey.getNonDetection();
-  bool has_Missing_data = selected_survey.getHasMissingPhotometry();
-  bool has_upper_limit = selected_survey.getHasUpperLimit();
+
+
 
   std::map<std::string, boost::program_options::variable_value> options_map =
       FileUtils::getPathConfiguration(true, false, true, true);
@@ -755,16 +754,15 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
       QString(QDir::separator()).toStdString());
   options_map["input-catalog-file"].value() = boost::any(input_catalog_file);
   options_map["source-id-column-name"].value() = boost::any(m_survey_model_ptr->getSelectedSurvey().getSourceIdColumn());
-  if (has_Missing_data) {
-    options_map["missing-photometry-flag"].value() = boost::any(non_detection);
-  }
 
 
-  if (has_upper_limit) {
-    options_map["enable-upper-limit"].value() = boost::any(yes_flag);
-  } else {
-    options_map["enable-upper-limit"].value() = boost::any(no_flag);
-  }
+  double non_detection = selected_survey.getNonDetection();
+  options_map["missing-photometry-flag"].value() = boost::any(non_detection);
+
+  double upper_limit_flin_flag = selected_survey.getUpperLimit();
+  options_map["enable-upper-limit"].value() = boost::any(yes_flag);
+  options_map["upper-limit-use-threshod-flag"].value() = boost::any(upper_limit_flin_flag);
+
 
 
   auto filter_excluded = getExcludedFilters();

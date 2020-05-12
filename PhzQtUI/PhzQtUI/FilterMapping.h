@@ -55,10 +55,16 @@ public:
      */
     void setFilterFile(std::string filter_trnsmission_file);
 
+
+    double getN() const;
+
+    void setN(double new_n);
+
 private:
     std::string m_flux_column;
     std::string m_error_column;
     std::string m_filter_trnsmission_file;
+    double m_n;
 };
 
 }

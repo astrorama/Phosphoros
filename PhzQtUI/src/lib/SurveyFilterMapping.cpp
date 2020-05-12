@@ -107,23 +107,14 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
       return m_non_detection;
     }
 
-
-    void SurveyFilterMapping::setHasMissingPhotometry(bool has_missing_phot){
-      m_has_missing_phot = has_missing_phot;
+    void SurveyFilterMapping::setUpperLimit(double non_detection){
+      m_upper_limit = non_detection;
     }
 
-     bool SurveyFilterMapping::getHasMissingPhotometry() const{
-       return m_has_missing_phot;
-     }
+    double SurveyFilterMapping::getUpperLimit() const{
+      return m_upper_limit;
+    }
 
-
-     void SurveyFilterMapping::setHasUpperLimit(bool has_upper_limit){
-       m_has_upper_limit = has_upper_limit;
-     }
-
-     bool SurveyFilterMapping::getHasUpperLimit() const{
-       return m_has_upper_limit;
-     }
 
      void SurveyFilterMapping::setCopiedColumns(std::map<std::string,std::string> copied_columns){
        m_copied_columns = copied_columns;
@@ -220,11 +211,9 @@ SurveyFilterMapping SurveyFilterMapping::loadCatalog(std::string name) {
   if (root_node.hasAttribute("NonDetection")){
     survey.setNonDetection(root_node.attribute("NonDetection").toDouble());
   }
-  if (root_node.hasAttribute("HasMissingPhotometry")){
-    survey.setHasMissingPhotometry(root_node.attribute("HasMissingPhotometry").toInt());
-  }
-  if (root_node.hasAttribute("HasUpperLimit")){
-    survey.setHasUpperLimit(root_node.attribute("HasUpperLimit").toInt());
+
+  if (root_node.hasAttribute("UpperLimit")){
+    survey.setUpperLimit(root_node.attribute("UpperLimit").toInt());
   }
 
   auto columns_node = root_node.firstChildElement("AvailableColumns");
@@ -272,9 +261,11 @@ void SurveyFilterMapping::ReadFilters(){
       + QDir::separator() + "filter_mapping.txt";
 
   try{
+
+
     std::ifstream in { mapping_path.toStdString() };
     std::string line;
-    regex expr { "\\s*([^\\s#]+)\\s+([^\\s#]+)\\s+([^\\s#]+)\\s*(#.*)?" };
+    regex expr {"\\s*([^\\s#]+)\\s+([^\\s#]+)\\s+([^\\s#]+)(\\s+[^\\s#]+\\s*$)?"};
     while (std::getline(in, line)) {
       boost::trim(line);
       if (line[0] == '#') {
@@ -292,6 +283,14 @@ void SurveyFilterMapping::ReadFilters(){
       mapping.setFilterFile(match_res.str(1));
       mapping.setFluxColumn(match_res.str(2));
       mapping.setErrorColumn(match_res.str(3));
+
+      if (match_res.str(4) == "") {
+        mapping.setN(3.0);
+      } else {
+        float n = std::stof(match_res.str(4));
+        mapping.setN(n);
+     }
+
       mappings.push_back(mapping);
 
     }
@@ -330,8 +329,7 @@ void SurveyFilterMapping::saveSurvey(std::string oldName){
   root.setAttribute("GalEbvColumn",QString::fromStdString(m_gal_ebv_column));
   root.setAttribute("RefZColumn",QString::fromStdString(m_ref_z_column));
   root.setAttribute("NonDetection",QString::number(m_non_detection));
-  root.setAttribute("HasUpperLimit",QString::number(m_has_upper_limit));
-  root.setAttribute("HasMissingPhotometry",QString::number(m_has_missing_phot));
+  root.setAttribute("UpperLimit",QString::number(m_upper_limit));
 
   std::string path = m_default_catalog;
   std::string root_path = FileUtils::getRootPath(true);
@@ -381,7 +379,8 @@ void SurveyFilterMapping::saveSurvey(std::string oldName){
   for (auto& filter : m_filters) {
     mapping_stream<< QString::fromStdString(filter.getFilterFile()) << " "
             << QString::fromStdString(filter.getFluxColumn())<< " "
-            << QString::fromStdString(filter.getErrorColumn()) << "\n";
+            << QString::fromStdString(filter.getErrorColumn()) <<  " "
+            << QString::number(filter.getN()) << "\n";
   }
 
   mapping_file.close();
