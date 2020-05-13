@@ -61,7 +61,7 @@ def read_specz_catalog(filename, id_col, specz_col):
 #-------------------------------------------------------------------------------
 #
 
-def read_phosphoros_catalog(out_dir, out_cat, phz_col):
+def read_phosphoros_catalog(out_dir, out_cat, id_col, phz_col):
     if not out_cat:
         out_cat = os.path.join(out_dir, 'phz_cat.fits')
         if not os.path.exists(out_cat):
@@ -73,6 +73,10 @@ def read_phosphoros_catalog(out_dir, out_cat, phz_col):
     phos_cat.add_column(table.Column(np.arange(len(phos_cat)), name='Index'))
     if phz_col not in phos_cat.colnames:
         raise ValueError('ERROR : Photo-z catalog does not have column with name {}'.format(phz_col))
+    if id_col not in phos_cat.colnames:
+        raise ValueError('ERROR : Photo-z catalog does not have ID column with name {}'.format(id_col))
+    if id_col != 'ID':
+        phos_cat.rename_column(id_col, 'ID')
     phos_cat.rename_column(phz_col, 'PHZ')
 
     cols = ['ID', 'PHZ']
@@ -516,8 +520,9 @@ def defineSpecificProgramOptions():
     parser.add_argument('-sid', '--specz-cat-id', type=str, default='ID', help='Spec-z catalog ID column')
     parser.add_argument('-scol', '--specz-column', type=str, default='ZSPEC', help='Spec-z column name')
     parser.add_argument('-pod', '--phosphoros-output-dir', required=False, type=str, help='Directory to read Phosphoros outputs from')
-    parser.add_argument('-pcol', '--phz-column', type=str, default='Z', help='Photo-z column name')
     parser.add_argument('-pcat', '--phz-catalog', type=str, default=None, help='Photo-z catalog')
+    parser.add_argument('-pid', '--phz_id', type=str, default='ID', help='Photo-z catalog ID column')
+    parser.add_argument('-pcol', '--phz-column', type=str, default='Z', help='Photo-z column name')
     parser.add_argument("-nd", "--no-display", action="store_true", default=False, help="Disables the plot window")
     parser.add_argument("-samp", "--samp", action="store_true", default=False, help="Enables communication with other SAMP applications")
 
@@ -536,7 +541,7 @@ def mainMethod(args):
 
     specz_cat = read_specz_catalog(args.specz_catalog, args.specz_cat_id, args.specz_column)
 
-    phos_cat = read_phosphoros_catalog(args.phosphoros_output_dir, args.phz_catalog, args.phz_column)
+    phos_cat = read_phosphoros_catalog(args.phosphoros_output_dir, args.phz_catalog, args.phz_id, args.phz_column)
 
     # Make sure the comments metadata are only picked from phos_cat, as the
     # bins are stored there. Otherwise, specz_cat may have COMMENT, and phos_cat comments, we end with both,
