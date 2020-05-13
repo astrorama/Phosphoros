@@ -258,9 +258,8 @@ class SpeczPhotozPlot(object):
 # -------------------------------------------------------------------------------
 #
 
-def displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers):
-
-    f, ax = plt.subplots(figsize=(10, 4))
+def displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers, figsize=None):
+    f, ax = plt.subplots(figsize=figsize)
 
     plt.hist(data, bins=100)
     ax.axvline(x=0.15, c='r', alpha=.3)
@@ -565,7 +564,8 @@ def mainMethod(args):
         exit()
 
     fig1 = SpeczPhotozPlot(catalog['ID'], specz, phz, data, figsize=(7, 8))
-    fig2 = displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers)
+    fig2 = displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers,
+                            figsize=(10, 4))
 
     pdfs = read_pdfs(catalog, args.phosphoros_output_dir)
     pdf_plots = [
