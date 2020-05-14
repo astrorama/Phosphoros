@@ -358,7 +358,8 @@ void FormSurveyMapping::copyingFinished(bool s, QVector<QString> path){
  if (s){
     logger.info() << "file copied to "<< path[0].toStdString();
     loadColumnFromFile(path[0].toStdString());
-    ui->table_Filter->setItemDelegate(new FilterMappingItemDelegate(m_column_from_file));
+    ui->table_Filter->setItemDelegateForColumn(1, new FilterMappingItemDelegate(getFilteredColumns()));
+    ui->table_Filter->setItemDelegateForColumn(2, new FilterMappingItemDelegate(getFilteredColumns()));
     m_default_survey = path[0].toStdString();
     m_survey_model_ptr->setDefaultCatalogToSelected(QString::fromStdString(m_default_survey));
     m_survey_model_ptr->setColumnListToSelected(m_column_from_file);
@@ -586,10 +587,13 @@ std::vector<FilterMapping> FormSurveyMapping::getMappingFromGrid() const {
        auto name = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 3)).toString().toStdString();
        auto flux = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 1)).toString().toStdString();
        auto err = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 2)).toString().toStdString();
+       auto n = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 4)).toString().toDouble();
+
        FilterMapping mapping{};
        mapping.setFilterFile(name);
        mapping.setFluxColumn(flux);
        mapping.setErrorColumn(err);
+       mapping.setN(n);
        filters.push_back(mapping);
      }
      return filters;
@@ -642,6 +646,12 @@ void FormSurveyMapping::filterEditionPopupClosing(std::vector<std::string> filte
    ui->table_Filter->update(QModelIndex());
 
    m_survey_model_ptr->setFiltersToSelected(new_filters);
+
+
+
+   ui->table_Filter->setItemDelegateForColumn(1, new FilterMappingItemDelegate(getFilteredColumns()));
+   ui->table_Filter->setItemDelegateForColumn(2, new FilterMappingItemDelegate(getFilteredColumns()));
+
 
    setFilterMappingInEdition();
 }
