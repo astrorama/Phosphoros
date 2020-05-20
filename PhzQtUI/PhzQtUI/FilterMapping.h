@@ -64,7 +64,7 @@ private:
     std::string m_flux_column;
     std::string m_error_column;
     std::string m_filter_trnsmission_file;
-    double m_n;
+    double m_n = 3;
 };
 
 }
