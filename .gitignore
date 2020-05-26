@@ -131,6 +131,10 @@ __pycache__
 /EmissionLines/tests/src/.pydevproject
 /EmissionLines/tests/src/*.pyc
 
+
+# DataManagement/Server/Data/
+DataManagement/Server/Data/*
+
 # /PhzCLI/
 /PhzCLI/.project
 /PhzCLI/.cproject
