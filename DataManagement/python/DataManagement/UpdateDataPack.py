@@ -40,6 +40,7 @@ import shutil
 import hashlib
 from glob import glob
 from pathlib import Path
+import json
 
 
 logger = log.getLogger('UpdateDataPack')
@@ -63,6 +64,19 @@ def defineSpecificProgramOptions():
         
     parser.add_argument('--temp-folder', default='./temp', type=str,
         help='Where to download and untar the data pack')
+        
+    parser.add_argument('--force', default=False, type=bool,
+        help='If true: force to reload unchanged version')
+        
+    parser.add_argument('--download', default=False, type=bool,
+        help='If true bypass the user input for the download')
+        
+    parser.add_argument('--output-conflict', default='', type=str,
+        help='If set: output the list of file in conflict in a json instead of request the user to handle them.')
+
+    parser.add_argument('--conflict-resolution', default='', type=str,
+        help='If set: read the list of file in conflict and action in a json {"<newpath1>":"k","<newpath2>":"r"} instead of request the user to handle them.')
+
 
     return parser
     
@@ -121,14 +135,22 @@ def importFiles(file_dict):
     for path in file_dict.keys():
         logger.info('Importing file: '+file_dict[path])
         shutil.copy(path, file_dict[path])
+        
+def record_version(version):
+    with open(data_dir+"version.txt", 'w') as f:
+        f.truncate()
+        f.write(version)
 
 
 def mainMethod(args):
     logger.info('The Phosphoros AuxiliaryData directory is set to :' +data_dir)
     version_local, version_remote = checkVersions(args.repo_url)
     
-    if version_remote!=version_local:
-        user_input = input("The version "+str(version_remote)+" of the data package is available, do you want to download it (y/n)") 
+    if version_remote!=version_local or args.force:
+        if args.download:
+            user_input='y'
+        else:
+            user_input = input("The version "+str(version_remote)+" of the data package is available, do you want to download it (y/n)") 
         if user_input=='y':
             downloadVersion(args.temp_folder, args.repo_url, version_remote)
             base_dir_new = args.temp_folder+'/AuxiliaryData/'
@@ -142,24 +164,42 @@ def mainMethod(args):
             
           
             if len(conflicting)>0:
-                logger.info('Handling conflicting files')
-                keys = list(conflicting.keys()).copy()
-                
-                for key in keys:
-                    short = key.replace(base_dir_new, './')
-                    user_input = input(short+" is in your data and is different in the version "+str(version_remote)+" (k-keep, r-replace,  l-keep all, e-replace all)") 
-                    if user_input=='k':
-                        del conflicting[key]
-                    if user_input=='l' or user_input=='e':
-                        break
-                if user_input!='l' :
-                
-                    logger.info('Overwriting files')
-                    importFiles(conflicting)
+                if args.output_conflict != '':
+                    logger.info('Output conflicting files to '+args.output_conflict)
+                    with open(args.output_conflict, 'w') as f:
+                        json.dump(conflicting, f)
+                else:
+                    if args.conflict_resolution != '':
+                        logger.info('Input conflict reslution from file '+args.conflict_resolution)
+                        with open(args.conflict_resolution, 'r') as f:
+                            resolution = json.load(f)
+                        keys = list(conflicting.keys()).copy()
+                        for key in keys:
+                            if resolution[key]=='k':
+                                del conflicting[key]
+                        logger.info('Overwriting files')
+                        importFiles(conflicting)
+                        
+                    else:
+                        logger.info('Handling conflicting files')
+                        keys = list(conflicting.keys()).copy()
+                        
+                        for key in keys:
+                            short = key.replace(base_dir_new, './')
+                            user_input = input(short+" is in your data and is different in the version "+str(version_remote)+" (k-keep, r-replace,  l-keep all, e-replace all)") 
+                            if user_input=='k':
+                                del conflicting[key]
+                            if user_input=='l' or user_input=='e':
+                                break
+                        if user_input!='l' :
+                        
+                            logger.info('Overwriting files')
+                            importFiles(conflicting)
             
-            
+            record_version(str(version_remote))
             cleanTempDir(args.temp_folder+'/AuxiliaryData')
-            
+    else:
+        logger.info("The version "+str(version_remote)+" of the data package is up to date.")               
                 
             
             
