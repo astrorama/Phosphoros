@@ -91,7 +91,7 @@ def checkVersions(url):
             lines = f.readlines()
             version_local=lines[0]
             
-    version_remote = urllib.request.urlopen(url).read().decode("utf-8") 
+    version_remote = urllib.request.urlopen(url+'/last_version.html').read().decode("utf-8").strip()
     logger.info('Local Version = '+version_local)
     logger.info('Remote Version = '+version_remote)
     return version_local, version_remote
@@ -99,7 +99,7 @@ def checkVersions(url):
 def downloadVersion(temp, url, version):
     if not os.path.exists(temp):
         os.makedirs(temp)
-    full_url = url+'?version='+version
+    full_url = url+'/Data/AuxiliaryData_'+version+'.tar.xz'
     r = requests.get(full_url,verify=False,stream=True)
     r.raw.decode_content = True
     with open(temp+'/downloaded.tar.xz', 'wb') as f:

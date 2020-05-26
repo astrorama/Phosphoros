@@ -1,11 +1,16 @@
-
 #include <QDir>
-#include <QMessageBox>
+#include <fstream>
+#include <QProcess>
 #include <QFileInfo>
+#include <QMessageBox>
 #include "FileUtils.h"
 #include "PhzQtUI/MainWindow.h"
 #include "ui_MainWindow.h"
 #include "XYDataset/AsciiParser.h"
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <stdio.h>
+#include "PhzQtUI/DialogConflictingFilesHandling.h"
 
 #include "ThisProject.h"             // for the name and version of this very project
 
@@ -84,44 +89,68 @@ MainWindow::MainWindow(QWidget *parent) :
 
   FileUtils::buildDirectories();
 
+  /*  DataPack handling */
+  auto dataPackVersionFile =  boost::filesystem::path(FileUtils::getGUIConfigPath()+"/dp_version.json");
+  std::remove(dataPackVersionFile.c_str());
+  auto get_version_process =new QProcess ;
+
+  connect(get_version_process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(getDPVersionFinished(int, QProcess::ExitStatus)));
+
+   QStringList s3;
+   s3
+   /*dbg*/   << QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001")
+      << QString::fromStdString("--output-version-match") <<  QString::fromStdString((dataPackVersionFile).string());
+
+  // get_version_process->setReadChannelMode(QProcess::MergedChannels);
+   const QString& command = QString("Phosphoros UDP ") + s3.join(" ");
+   get_version_process->start(command);
+   /*  DataPack handling */
 
 
-  std::unique_ptr <XYDataset::FileParser > filter_file_parser {new XYDataset::AsciiParser { } };
-  std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(
-      new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true),
-      std::move(filter_file_parser) });
-  m_filter_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(filter_provider)));
-  m_filter_repository->reload();
 
-  std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
-  std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true),
-    std::move(sed_file_parser) });
-  m_seds_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(sed_provider)));
-  m_seds_repository->reload();
 
-  std::unique_ptr <XYDataset::FileParser > reddening_file_parser {new XYDataset::AsciiParser { } };
-  std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(
-      new XYDataset::FileSystemProvider{FileUtils::getRedCurveRootPath(true),
-      std::move(reddening_file_parser) });
-  m_redenig_curves_repository.reset(
-      new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(red_curve_provider)});
-  m_redenig_curves_repository->reload();
 
-  std::unique_ptr <XYDataset::FileParser > luminosity_file_parser {new XYDataset::AsciiParser { } };
-  std::unique_ptr<XYDataset::FileSystemProvider> luminosity_curve_provider(
-      new XYDataset::FileSystemProvider{  FileUtils::getLuminosityFunctionCurveRootPath(true),
-      std::move(luminosity_file_parser) });
-  m_luminosity_repository.reset(new DatasetRepository<
-      std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(luminosity_curve_provider)});
-  m_luminosity_repository->reload();
-
-  m_option_model_ptr->loadOption(m_filter_repository, m_seds_repository, m_redenig_curves_repository, m_luminosity_repository);
-  ui->widget_configuration->loadOptionPage(m_option_model_ptr);
-
-  resetRepo();
 }
 
 MainWindow::~MainWindow() {
+}
+
+
+
+void MainWindow::loadAuxData() {
+   std::unique_ptr <XYDataset::FileParser > filter_file_parser {new XYDataset::AsciiParser { } };
+   std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(
+       new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true),
+       std::move(filter_file_parser) });
+   m_filter_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(filter_provider)));
+   m_filter_repository->reload();
+
+   std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
+   std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true),
+     std::move(sed_file_parser) });
+   m_seds_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(sed_provider)));
+   m_seds_repository->reload();
+
+   std::unique_ptr <XYDataset::FileParser > reddening_file_parser {new XYDataset::AsciiParser { } };
+   std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(
+       new XYDataset::FileSystemProvider{FileUtils::getRedCurveRootPath(true),
+       std::move(reddening_file_parser) });
+   m_redenig_curves_repository.reset(
+       new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(red_curve_provider)});
+   m_redenig_curves_repository->reload();
+
+   std::unique_ptr <XYDataset::FileParser > luminosity_file_parser {new XYDataset::AsciiParser { } };
+   std::unique_ptr<XYDataset::FileSystemProvider> luminosity_curve_provider(
+       new XYDataset::FileSystemProvider{  FileUtils::getLuminosityFunctionCurveRootPath(true),
+       std::move(luminosity_file_parser) });
+   m_luminosity_repository.reset(new DatasetRepository<
+       std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(luminosity_curve_provider)});
+   m_luminosity_repository->reload();
+
+   m_option_model_ptr->loadOption(m_filter_repository, m_seds_repository, m_redenig_curves_repository, m_luminosity_repository);
+   ui->widget_configuration->loadOptionPage(m_option_model_ptr);
+
+   resetRepo();
 }
 
 void MainWindow::resetRepo() {
@@ -181,6 +210,94 @@ void MainWindow::navigateToPostProcessing(bool reset) {
   }
 
   on_btn_HomeToPP_clicked();
+}
+
+
+
+///// Data Pack handling
+
+void MainWindow::getDPVersionFinished(int, QProcess::ExitStatus){
+  auto version_file = FileUtils::getGUIConfigPath()+"/dp_version.json";
+
+  std::ifstream f(version_file.c_str());
+  if (f.good()) {
+    boost::property_tree::ptree loadPtreeRoot;
+    boost::property_tree::read_json(version_file, loadPtreeRoot);
+
+    std::string remote = loadPtreeRoot.get_child("version_remote").get_value<std::string>();
+    std::string local = loadPtreeRoot.get_child("version_local").get_value<std::string>();
+
+    if (remote != local && QMessageBox::Yes == QMessageBox::question(this, "New Data Package Avalable ...",
+           QString::fromStdString("The version "+remote+" of the data package is available. Do you want to download it ?"),
+           QMessageBox::Yes|QMessageBox::Ignore)) {
+
+        auto dataPackTemp =  FileUtils::getRootPath(true)+"Temp/";
+        QFileInfo info(QString::fromStdString(dataPackTemp));
+        if (!info.exists()){
+             QDir().mkpath(QString::fromStdString(dataPackTemp));
+        }
+
+        auto conflict_file =  dataPackTemp + "conflict.json";
+        std::remove(conflict_file.c_str());
+
+        auto get_conflict_process =new QProcess ;
+
+        connect(get_conflict_process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(getConflictFinished(int, QProcess::ExitStatus)));
+
+         QStringList s3;
+         s3
+         /*dbg*/   << QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001")
+            << QString::fromStdString("--force") <<  QString::fromStdString("True")
+           << QString::fromStdString("--download") <<  QString::fromStdString("True")
+         << QString::fromStdString("--temp-folder") <<  QString::fromStdString(dataPackTemp)
+           << QString::fromStdString("--output-conflict") <<  QString::fromStdString(conflict_file);
+
+         const QString& command = QString("Phosphoros UDP ") + s3.join(" ");
+         get_conflict_process->start(command);
+
+
+    } else {
+      loadAuxData();
+    }
+  } else {
+    loadAuxData();
+  }
+}
+
+
+void MainWindow::getConflictFinished(int, QProcess::ExitStatus) {
+   auto dataPackTemp =  FileUtils::getRootPath(true)+"Temp/";
+   auto conflict_file =  dataPackTemp + "conflict.json";
+   auto resolution_file =  dataPackTemp + "resolution.json";
+   std::remove(resolution_file.c_str());
+
+   QFileInfo info(QString::fromStdString(conflict_file));
+   if (info.exists()) {
+      std::ifstream in(conflict_file.c_str());
+      std::ostringstream sstr;
+      sstr << in.rdbuf();
+      std::string conflict_content = sstr.str();
+
+      std::unique_ptr<DialogConflictingFilesHandling> popUp(new DialogConflictingFilesHandling());
+      popUp->setFilesPath(conflict_file, resolution_file);
+      if (popUp->exec() == QDialog::Accepted) {
+
+      } else {
+
+      }
+
+
+
+
+
+
+      // handel merge + loadAuxData
+   } else {
+     loadAuxData();
+     QMessageBox::information(this, "Data Package Imported ...",
+                        QString::fromStdString("The new version of the data package has been successfully imported."),
+                        QMessageBox::Close);
+   }
 }
 
 //Todo (?) confirmation on quit

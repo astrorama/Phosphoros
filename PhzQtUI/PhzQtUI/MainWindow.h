@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <map>
+#include <QProcess>
 #include <QMainWindow>
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
@@ -61,11 +62,16 @@ private slots:
 
     void quit(bool);
 
+    void getDPVersionFinished(int, QProcess::ExitStatus);
+
+    void getConflictFinished(int, QProcess::ExitStatus);
+
 
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;
     void resetRepo();
+    void loadAuxData();
 
     DatasetRepo m_filter_repository;
     DatasetRepo m_seds_repository;
