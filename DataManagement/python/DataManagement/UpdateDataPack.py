@@ -65,9 +65,12 @@ def defineSpecificProgramOptions():
     parser.add_argument('--temp-folder', default='./temp', type=str,
         help='Where to download and untar the data pack')
         
+    parser.add_argument('--output-version-match', default='', type=str,
+        help='If set: output the versions in the files and exit')
+        
     parser.add_argument('--force', default=False, type=bool,
         help='If true: force to reload unchanged version')
-        
+
     parser.add_argument('--download', default=False, type=bool,
         help='If true bypass the user input for the download')
         
@@ -89,7 +92,6 @@ def checkVersions(url):
             version_local=lines[0]
             
     version_remote = urllib.request.urlopen(url).read().decode("utf-8") 
-    
     logger.info('Local Version = '+version_local)
     logger.info('Remote Version = '+version_remote)
     return version_local, version_remote
@@ -146,7 +148,12 @@ def mainMethod(args):
     logger.info('The Phosphoros AuxiliaryData directory is set to :' +data_dir)
     version_local, version_remote = checkVersions(args.repo_url)
     
-    if version_remote!=version_local or args.force:
+    if args.output_version_match!='':
+        logger.info('Output versions to '+args.output_version_match)
+        with open(args.output_version_match, 'w') as f:
+            json.dump({"version_remote":version_remote,"version_local":version_local}, f)
+    
+    elif version_remote!=version_local or args.force:
         if args.download:
             user_input='y'
         else:
