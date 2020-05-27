@@ -31,7 +31,7 @@ public:
   ~DialogConflictingFilesHandling();
 
 
-  void setFilesPath(std::string conflicting_file, std::string resolution_file);
+  void setFilesPath(std::string temp_folder, std::string conflicting_file, std::string resolution_file);
 
   void loadConflicts();
 
@@ -41,12 +41,13 @@ public:
 private slots:
 
   void on_btn_apply_clicked();
-  void on_cd_all_clicked();
+  void on_cb_all_clicked();
 
 
 
 private:
   std::unique_ptr<Ui::DialogConflictingFilesHandling> ui;
+  std::string m_temp_folder;
   std::string m_conflicting_file;
   std::string m_resolution_file;
 

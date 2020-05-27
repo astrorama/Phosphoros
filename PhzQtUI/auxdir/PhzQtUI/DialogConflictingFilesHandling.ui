@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>927</width>
-    <height>654</height>
+    <width>584</width>
+    <height>333</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,6 +37,16 @@ Choose the one(s) you want to be overrided by the new version : </string>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
+      <widget class="QCheckBox" name="cb_all">
+       <property name="text">
+        <string>Select all</string>
+       </property>
+       <property name="tristate">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -48,16 +58,6 @@ Choose the one(s) you want to be overrided by the new version : </string>
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="cb_all">
-       <property name="text">
-        <string>Select all</string>
-       </property>
-       <property name="tristate">
-        <bool>true</bool>
-       </property>
-      </widget>
      </item>
     </layout>
    </item>

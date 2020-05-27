@@ -66,6 +66,8 @@ private slots:
 
     void getConflictFinished(int, QProcess::ExitStatus);
 
+    void getResolutionFinished(int, QProcess::ExitStatus);
+
 
 
 private:

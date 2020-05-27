@@ -150,6 +150,13 @@ void MainWindow::loadAuxData() {
    m_option_model_ptr->loadOption(m_filter_repository, m_seds_repository, m_redenig_curves_repository, m_luminosity_repository);
    ui->widget_configuration->loadOptionPage(m_option_model_ptr);
 
+   ui->btn_HomeToAnalysis->setEnabled(true);
+   ui->btn_HomeToCatalog->setEnabled(true);
+   ui->btn_HomeToModel->setEnabled(true);
+   ui->btn_HomeToOption->setEnabled(true);
+   ui->btn_HomeToPP->setEnabled(true);
+
+
    resetRepo();
 }
 
@@ -279,25 +286,37 @@ void MainWindow::getConflictFinished(int, QProcess::ExitStatus) {
       std::string conflict_content = sstr.str();
 
       std::unique_ptr<DialogConflictingFilesHandling> popUp(new DialogConflictingFilesHandling());
-      popUp->setFilesPath(conflict_file, resolution_file);
+      popUp->setFilesPath(dataPackTemp, conflict_file, resolution_file);
+      popUp->loadConflicts();
       if (popUp->exec() == QDialog::Accepted) {
+        auto get_resolution_process =new QProcess ;
+        connect(get_resolution_process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(getResolutionFinished(int, QProcess::ExitStatus)));
 
-      } else {
+        QStringList s3;
+        s3
+        /*dbg*/   << QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001")
+            << QString::fromStdString("--force") <<  QString::fromStdString("True")
+            << QString::fromStdString("--download") <<  QString::fromStdString("True")
+            << QString::fromStdString("--temp-folder") <<  QString::fromStdString(dataPackTemp)
+            << QString::fromStdString("--conflict-resolution") <<  QString::fromStdString(resolution_file);
 
+        const QString& command = QString("Phosphoros UDP ") + s3.join(" ");
+        get_resolution_process->start(command);
       }
-
-
-
-
-
-
-      // handel merge + loadAuxData
    } else {
      loadAuxData();
      QMessageBox::information(this, "Data Package Imported ...",
                         QString::fromStdString("The new version of the data package has been successfully imported."),
                         QMessageBox::Close);
    }
+}
+
+
+void MainWindow::getResolutionFinished(int, QProcess::ExitStatus){
+  loadAuxData();
+  QMessageBox::information(this, "Data Package Imported ...",
+                          QString::fromStdString("The new version of the data package has been successfully imported."),
+                          QMessageBox::Close);
 }
 
 //Todo (?) confirmation on quit
