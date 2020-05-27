@@ -11,6 +11,8 @@
 #include "PhzQtUI/OptionModel.h"
 #include "PhzQtUI/SurveyModel.h"
 #include "PhzQtUI/ModelSetModel.h"
+#include "PhzQtUI/DataPackHandler.h"
+
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -31,6 +33,7 @@ public:
 
 signals:
     void changeMainStackedWidgetIndex(int index);
+
 
 private slots:
 
@@ -62,18 +65,14 @@ private slots:
 
     void quit(bool);
 
-    void getDPVersionFinished(int, QProcess::ExitStatus);
+    void loadAuxData();
 
-    void getConflictFinished(int, QProcess::ExitStatus);
-
-    void getResolutionFinished(int, QProcess::ExitStatus);
 
 
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;
     void resetRepo();
-    void loadAuxData();
 
     DatasetRepo m_filter_repository;
     DatasetRepo m_seds_repository;
@@ -82,7 +81,7 @@ private:
     std::shared_ptr<OptionModel> m_option_model_ptr{ new OptionModel};
     std::shared_ptr<SurveyModel> m_survey_model_ptr{ new SurveyModel};
     std::shared_ptr<ModelSetModel> m_model_set_model_ptr{ new ModelSetModel};
-
+    std::unique_ptr<DataPackHandler> m_dataPackHandler;
 
 };
 

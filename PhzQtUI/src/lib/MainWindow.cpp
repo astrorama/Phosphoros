@@ -1,16 +1,14 @@
 #include <QDir>
 #include <fstream>
-#include <QProcess>
 #include <QFileInfo>
 #include <QMessageBox>
 #include "FileUtils.h"
 #include "PhzQtUI/MainWindow.h"
 #include "ui_MainWindow.h"
 #include "XYDataset/AsciiParser.h"
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 #include <stdio.h>
-#include "PhzQtUI/DialogConflictingFilesHandling.h"
+
+#include "PhzQtUI/DataPackHandler.h"
 
 #include "ThisProject.h"             // for the name and version of this very project
 
@@ -90,26 +88,9 @@ MainWindow::MainWindow(QWidget *parent) :
   FileUtils::buildDirectories();
 
   /*  DataPack handling */
-  auto dataPackVersionFile =  boost::filesystem::path(FileUtils::getGUIConfigPath()+"/dp_version.json");
-  std::remove(dataPackVersionFile.c_str());
-  auto get_version_process =new QProcess ;
-
-  connect(get_version_process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(getDPVersionFinished(int, QProcess::ExitStatus)));
-
-   QStringList s3;
-   s3
-   /*dbg*/   << QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001")
-      << QString::fromStdString("--output-version-match") <<  QString::fromStdString((dataPackVersionFile).string());
-
-  // get_version_process->setReadChannelMode(QProcess::MergedChannels);
-   const QString& command = QString("Phosphoros UDP ") + s3.join(" ");
-   get_version_process->start(command);
-   /*  DataPack handling */
-
-
-
-
-
+  m_dataPackHandler.reset(new DataPackHandler(this));
+  connect(m_dataPackHandler.get(), SIGNAL(completed()), this, SLOT(loadAuxData()));
+  m_dataPackHandler->check(false);
 }
 
 MainWindow::~MainWindow() {
@@ -220,104 +201,6 @@ void MainWindow::navigateToPostProcessing(bool reset) {
 }
 
 
-
-///// Data Pack handling
-
-void MainWindow::getDPVersionFinished(int, QProcess::ExitStatus){
-  auto version_file = FileUtils::getGUIConfigPath()+"/dp_version.json";
-
-  std::ifstream f(version_file.c_str());
-  if (f.good()) {
-    boost::property_tree::ptree loadPtreeRoot;
-    boost::property_tree::read_json(version_file, loadPtreeRoot);
-
-    std::string remote = loadPtreeRoot.get_child("version_remote").get_value<std::string>();
-    std::string local = loadPtreeRoot.get_child("version_local").get_value<std::string>();
-
-    if (remote != local && QMessageBox::Yes == QMessageBox::question(this, "New Data Package Avalable ...",
-           QString::fromStdString("The version "+remote+" of the data package is available. Do you want to download it ?"),
-           QMessageBox::Yes|QMessageBox::Ignore)) {
-
-        auto dataPackTemp =  FileUtils::getRootPath(true)+"Temp/";
-        QFileInfo info(QString::fromStdString(dataPackTemp));
-        if (!info.exists()){
-             QDir().mkpath(QString::fromStdString(dataPackTemp));
-        }
-
-        auto conflict_file =  dataPackTemp + "conflict.json";
-        std::remove(conflict_file.c_str());
-
-        auto get_conflict_process =new QProcess ;
-
-        connect(get_conflict_process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(getConflictFinished(int, QProcess::ExitStatus)));
-
-         QStringList s3;
-         s3
-         /*dbg*/   << QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001")
-            << QString::fromStdString("--force") <<  QString::fromStdString("True")
-           << QString::fromStdString("--download") <<  QString::fromStdString("True")
-         << QString::fromStdString("--temp-folder") <<  QString::fromStdString(dataPackTemp)
-           << QString::fromStdString("--output-conflict") <<  QString::fromStdString(conflict_file);
-
-         const QString& command = QString("Phosphoros UDP ") + s3.join(" ");
-         get_conflict_process->start(command);
-
-
-    } else {
-      loadAuxData();
-    }
-  } else {
-    loadAuxData();
-  }
-}
-
-
-void MainWindow::getConflictFinished(int, QProcess::ExitStatus) {
-   auto dataPackTemp =  FileUtils::getRootPath(true)+"Temp/";
-   auto conflict_file =  dataPackTemp + "conflict.json";
-   auto resolution_file =  dataPackTemp + "resolution.json";
-   std::remove(resolution_file.c_str());
-
-   QFileInfo info(QString::fromStdString(conflict_file));
-   if (info.exists()) {
-      std::ifstream in(conflict_file.c_str());
-      std::ostringstream sstr;
-      sstr << in.rdbuf();
-      std::string conflict_content = sstr.str();
-
-      std::unique_ptr<DialogConflictingFilesHandling> popUp(new DialogConflictingFilesHandling());
-      popUp->setFilesPath(dataPackTemp, conflict_file, resolution_file);
-      popUp->loadConflicts();
-      if (popUp->exec() == QDialog::Accepted) {
-        auto get_resolution_process =new QProcess ;
-        connect(get_resolution_process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(getResolutionFinished(int, QProcess::ExitStatus)));
-
-        QStringList s3;
-        s3
-        /*dbg*/   << QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001")
-            << QString::fromStdString("--force") <<  QString::fromStdString("True")
-            << QString::fromStdString("--download") <<  QString::fromStdString("True")
-            << QString::fromStdString("--temp-folder") <<  QString::fromStdString(dataPackTemp)
-            << QString::fromStdString("--conflict-resolution") <<  QString::fromStdString(resolution_file);
-
-        const QString& command = QString("Phosphoros UDP ") + s3.join(" ");
-        get_resolution_process->start(command);
-      }
-   } else {
-     loadAuxData();
-     QMessageBox::information(this, "Data Package Imported ...",
-                        QString::fromStdString("The new version of the data package has been successfully imported."),
-                        QMessageBox::Close);
-   }
-}
-
-
-void MainWindow::getResolutionFinished(int, QProcess::ExitStatus){
-  loadAuxData();
-  QMessageBox::information(this, "Data Package Imported ...",
-                          QString::fromStdString("The new version of the data package has been successfully imported."),
-                          QMessageBox::Close);
-}
 
 //Todo (?) confirmation on quit
 void MainWindow::quit(bool) {
