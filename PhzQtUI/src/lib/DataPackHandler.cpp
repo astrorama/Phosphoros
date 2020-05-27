@@ -37,7 +37,7 @@ void DataPackHandler::check(bool force) {
 
   QStringList s3;
   s3
-  /*dbg*/ << QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001")
+  /*dbg << QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001") */
       << QString::fromStdString("--output-version-match") <<  QString::fromStdString(m_version_file);
 
    const QString& command = QString("Phosphoros UDP ") + s3.join(" ");
@@ -73,7 +73,7 @@ void DataPackHandler::getDPVersionFinished(int, QProcess::ExitStatus){
 
         QStringList s3;
         s3
-        /*dbg*/   << QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001")
+        /*dbg   << QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001") */
             << QString::fromStdString("--force") <<  QString::fromStdString("True")
             << QString::fromStdString("--download") <<  QString::fromStdString("True")
             << QString::fromStdString("--temp-folder") <<  QString::fromStdString(m_temp_folder)
@@ -86,6 +86,11 @@ void DataPackHandler::getDPVersionFinished(int, QProcess::ExitStatus){
       completed();
     }
   } else {
+    if (m_force) {
+      QMessageBox::information(m_parent, "Data Package Management...",
+                              QString::fromStdString("Unable to contact the Data Package Repository. Check your Internet connection and try again."),
+                              QMessageBox::Close);
+    }
     // Unable to contact the backend
     completed();
   }
@@ -111,7 +116,7 @@ void DataPackHandler::getConflictFinished(int, QProcess::ExitStatus) {
 
       QStringList s3;
       s3
-      /*dbg*/   << QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001")
+      /*dbg  << QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001") */
             << QString::fromStdString("--force") <<  QString::fromStdString("True")
             << QString::fromStdString("--download") <<  QString::fromStdString("True")
             << QString::fromStdString("--temp-folder") <<  QString::fromStdString(m_temp_folder)
