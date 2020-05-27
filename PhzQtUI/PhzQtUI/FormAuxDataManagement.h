@@ -7,6 +7,7 @@
 #include "XYDataset/FileSystemProvider.h"
 #include "PhzQtUI/SedTreeModel.h"
 #include "PhzQtUI/MessageButton.h"
+#include "PhzQtUI/DataPackHandler.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -54,6 +55,9 @@ void on_btn_import_sed_clicked();
 void on_btn_import_reddening_clicked();
 void on_btn_import_luminosity_clicked();
 
+void on_bt_reloadDP_clicked();
+void reloadAuxData();
+
 void copyingFilterFinished(bool, QVector<QString>);
 void copyingSEDFinished(bool, QVector<QString>);
 void copyingRedFinished(bool, QVector<QString>);
@@ -68,6 +72,7 @@ private:
     DatasetRepo m_seds_repository;
     DatasetRepo m_redenig_curves_repository;
     DatasetRepo m_luminosity_repository;
+    std::unique_ptr<DataPackHandler> m_dataPackHandler;
 
     std::vector<MessageButton*> m_message_buttons;
     void addButtonsToSedItem(QStandardItem* item, SedTreeModel* treeModel_sed);

@@ -471,6 +471,19 @@ void FormAuxDataManagement::on_btn_import_luminosity_clicked() {
      }
 }
 
+void FormAuxDataManagement::on_bt_reloadDP_clicked(){
+    m_dataPackHandler.reset(new DataPackHandler(this));
+    connect(m_dataPackHandler.get(), SIGNAL(completed()), this, SLOT(reloadAuxData()));
+    m_dataPackHandler->check(true);
+}
+
+void FormAuxDataManagement::reloadAuxData(){
+   copyingFilterFinished(true, {});
+   copyingSEDFinished(true, {});
+   copyingRedFinished(true, {});
+   copyingLumFinished(true, {});
+}
+
 }
 }
 
