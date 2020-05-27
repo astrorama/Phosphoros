@@ -185,7 +185,8 @@ class SpeczPhotozPlot(object):
         self.spzPhzAx = plt.subplot2grid((4,3), (0,0), rowspan=3, colspan=3)
         self.spzPhzAx.set_ylabel('PhotoZ')
         # Plot the data
-        self.spzPhzAx.scatter(self.specz, self.photz, c=self.density, marker='o', s=10, cmap='jet', picker=True)
+        self.spzPhzAx.scatter(self.specz, self.photz, c=self.density, marker='o', s=10, cmap='jet',
+                              picker=not self.embedded, rasterized=self.embedded)
         self.spzPhzAx.set_xlim([-0.1, self.z_max])
         self.spzPhzAx.set_ylim([-0.1, self.z_max])
         # Plot the diagonal
@@ -201,7 +202,8 @@ class SpeczPhotozPlot(object):
         self.deltaZAx = plt.subplot2grid((4,3), (3,0), colspan=3)
         self.deltaZAx.set_ylabel('$\\Delta$z/(1+z)')
         self.deltaZAx.set_xlabel('SpecZ')
-        self.deltaZAx.scatter(self.specz, self.data, c=self.density, marker='o', s=10, cmap='jet', picker=True)
+        self.deltaZAx.scatter(self.specz, self.data, c=self.density, marker='o', s=10, cmap='jet',
+                              picker=not self.embedded, rasterized=self.embedded)
         # Plot the zero line
         self.deltaZAx.plot ([-0.1, self.z_max], [0, 0], c='k', alpha=0.2)
         # Plot the outlier limits
@@ -229,11 +231,12 @@ class SpeczPhotozPlot(object):
         self.fig.tight_layout()
         self.fig.subplots_adjust(hspace=0)
 
-    def __init__(self, ids, specz, photz, data, figsize=None):
+    def __init__(self, ids, specz, photz, data, figsize=None, embedded=True):
         self.ids = ids
         self.specz = specz
         self.photz = photz
         self.data = data
+        self.embedded = embedded
 
         self.fig = plt.figure(figsize=figsize)
         self.z_max = max(max(specz), max(photz)) + 0.1
@@ -245,14 +248,19 @@ class SpeczPhotozPlot(object):
 
         self._createSpeczPhotozPlot()
         self._createDeltaZPlot()
-        self._createSelected()
+
+        if not self.embedded:
+            self._createSelected()
 
         self._makeTightLayout()
-        self.fig.canvas.mpl_connect('resize_event', lambda x:self._makeTightLayout())
+        if not self.embedded:
+            self.fig.canvas.mpl_connect('resize_event', lambda x:self._makeTightLayout())
         self.canvas = self.fig.canvas
 
         self.selected_index = None
-        self.anim = animation.FuncAnimation(self.fig, lambda n:self._updatePlots(), interval=100, blit=True, repeat=True)
+
+        if not self.embedded:
+            self.anim = animation.FuncAnimation(self.fig, lambda n:self._updatePlots(), interval=100, blit=True, repeat=True)
 
     def updateSelectedRow(self, index):
         self.selected_index = index
@@ -568,7 +576,7 @@ def mainMethod(args):
     if args.no_display:
         exit()
 
-    fig1 = SpeczPhotozPlot(catalog['ID'], specz, phz, data, figsize=(7, 8))
+    fig1 = SpeczPhotozPlot(catalog['ID'], specz, phz, data, figsize=(7, 8), embedded=False)
     fig2 = displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers,
                             figsize=(10, 4))
 
