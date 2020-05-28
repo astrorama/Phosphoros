@@ -59,6 +59,8 @@ action_list = [
                      'Lookup galactical E(B-V) in the Planck dust map and add it as an additional catalog column'),
     PhosphorosAction(['process_output_pdz', 'POP'], 'ProcessPDF',
                      'Process PDZ by extracting the Mean, Confidence intervals and information about the first 2 modes.'),
+    PhosphorosAction(['update_data_package', 'UDP'], 'UpdateDataPack',
+                     'Check for Data Pacakge online.'),
 ]
 
 def printHelp():

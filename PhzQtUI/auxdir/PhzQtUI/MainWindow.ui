@@ -38,6 +38,9 @@
             <layout class="QHBoxLayout" name="horizontalLayout_7">
              <item>
               <widget class="QPushButton" name="btn_HomeToOption">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -59,6 +62,9 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_HomeToCatalog">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -80,6 +86,9 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_HomeToModel">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -101,6 +110,9 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_HomeToAnalysis">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -122,6 +134,9 @@
              </item>
              <item>
               <widget class="QPushButton" name="btn_HomeToPP">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="text">
                 <string>Post Processing</string>
                </property>

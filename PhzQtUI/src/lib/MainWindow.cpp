@@ -1,11 +1,14 @@
-
 #include <QDir>
-#include <QMessageBox>
+#include <fstream>
 #include <QFileInfo>
+#include <QMessageBox>
 #include "FileUtils.h"
 #include "PhzQtUI/MainWindow.h"
 #include "ui_MainWindow.h"
 #include "XYDataset/AsciiParser.h"
+#include <stdio.h>
+
+#include "PhzQtUI/DataPackHandler.h"
 
 #include "ThisProject.h"             // for the name and version of this very project
 
@@ -84,44 +87,58 @@ MainWindow::MainWindow(QWidget *parent) :
 
   FileUtils::buildDirectories();
 
-
-
-  std::unique_ptr <XYDataset::FileParser > filter_file_parser {new XYDataset::AsciiParser { } };
-  std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(
-      new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true),
-      std::move(filter_file_parser) });
-  m_filter_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(filter_provider)));
-  m_filter_repository->reload();
-
-  std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
-  std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true),
-    std::move(sed_file_parser) });
-  m_seds_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(sed_provider)));
-  m_seds_repository->reload();
-
-  std::unique_ptr <XYDataset::FileParser > reddening_file_parser {new XYDataset::AsciiParser { } };
-  std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(
-      new XYDataset::FileSystemProvider{FileUtils::getRedCurveRootPath(true),
-      std::move(reddening_file_parser) });
-  m_redenig_curves_repository.reset(
-      new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(red_curve_provider)});
-  m_redenig_curves_repository->reload();
-
-  std::unique_ptr <XYDataset::FileParser > luminosity_file_parser {new XYDataset::AsciiParser { } };
-  std::unique_ptr<XYDataset::FileSystemProvider> luminosity_curve_provider(
-      new XYDataset::FileSystemProvider{  FileUtils::getLuminosityFunctionCurveRootPath(true),
-      std::move(luminosity_file_parser) });
-  m_luminosity_repository.reset(new DatasetRepository<
-      std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(luminosity_curve_provider)});
-  m_luminosity_repository->reload();
-
-  m_option_model_ptr->loadOption(m_filter_repository, m_seds_repository, m_redenig_curves_repository, m_luminosity_repository);
-  ui->widget_configuration->loadOptionPage(m_option_model_ptr);
-
-  resetRepo();
+  /*  DataPack handling */
+  m_dataPackHandler.reset(new DataPackHandler(this));
+  connect(m_dataPackHandler.get(), SIGNAL(completed()), this, SLOT(loadAuxData()));
+  m_dataPackHandler->check(false);
 }
 
 MainWindow::~MainWindow() {
+}
+
+
+
+void MainWindow::loadAuxData() {
+   std::unique_ptr <XYDataset::FileParser > filter_file_parser {new XYDataset::AsciiParser { } };
+   std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(
+       new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true),
+       std::move(filter_file_parser) });
+   m_filter_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(filter_provider)));
+   m_filter_repository->reload();
+
+   std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
+   std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true),
+     std::move(sed_file_parser) });
+   m_seds_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(sed_provider)));
+   m_seds_repository->reload();
+
+   std::unique_ptr <XYDataset::FileParser > reddening_file_parser {new XYDataset::AsciiParser { } };
+   std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(
+       new XYDataset::FileSystemProvider{FileUtils::getRedCurveRootPath(true),
+       std::move(reddening_file_parser) });
+   m_redenig_curves_repository.reset(
+       new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(red_curve_provider)});
+   m_redenig_curves_repository->reload();
+
+   std::unique_ptr <XYDataset::FileParser > luminosity_file_parser {new XYDataset::AsciiParser { } };
+   std::unique_ptr<XYDataset::FileSystemProvider> luminosity_curve_provider(
+       new XYDataset::FileSystemProvider{  FileUtils::getLuminosityFunctionCurveRootPath(true),
+       std::move(luminosity_file_parser) });
+   m_luminosity_repository.reset(new DatasetRepository<
+       std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(luminosity_curve_provider)});
+   m_luminosity_repository->reload();
+
+   m_option_model_ptr->loadOption(m_filter_repository, m_seds_repository, m_redenig_curves_repository, m_luminosity_repository);
+   ui->widget_configuration->loadOptionPage(m_option_model_ptr);
+
+   ui->btn_HomeToAnalysis->setEnabled(true);
+   ui->btn_HomeToCatalog->setEnabled(true);
+   ui->btn_HomeToModel->setEnabled(true);
+   ui->btn_HomeToOption->setEnabled(true);
+   ui->btn_HomeToPP->setEnabled(true);
+
+
+   resetRepo();
 }
 
 void MainWindow::resetRepo() {
@@ -182,6 +199,8 @@ void MainWindow::navigateToPostProcessing(bool reset) {
 
   on_btn_HomeToPP_clicked();
 }
+
+
 
 //Todo (?) confirmation on quit
 void MainWindow::quit(bool) {

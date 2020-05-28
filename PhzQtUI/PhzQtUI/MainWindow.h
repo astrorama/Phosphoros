@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <map>
+#include <QProcess>
 #include <QMainWindow>
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
@@ -10,6 +11,8 @@
 #include "PhzQtUI/OptionModel.h"
 #include "PhzQtUI/SurveyModel.h"
 #include "PhzQtUI/ModelSetModel.h"
+#include "PhzQtUI/DataPackHandler.h"
+
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -30,6 +33,7 @@ public:
 
 signals:
     void changeMainStackedWidgetIndex(int index);
+
 
 private slots:
 
@@ -61,6 +65,9 @@ private slots:
 
     void quit(bool);
 
+    void loadAuxData();
+
+
 
 
 private:
@@ -74,7 +81,7 @@ private:
     std::shared_ptr<OptionModel> m_option_model_ptr{ new OptionModel};
     std::shared_ptr<SurveyModel> m_survey_model_ptr{ new SurveyModel};
     std::shared_ptr<ModelSetModel> m_model_set_model_ptr{ new ModelSetModel};
-
+    std::unique_ptr<DataPackHandler> m_dataPackHandler;
 
 };
 
