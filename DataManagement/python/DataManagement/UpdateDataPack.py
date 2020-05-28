@@ -44,7 +44,9 @@ import json
 
 
 logger = log.getLogger('UpdateDataPack')
-data_dir = str(Path(os.getenv('PHOSPHOROS_ROOT', '~/Phosphoros') + '/AuxiliaryData/').expanduser())+'/'
+phosphoros_root = str(Path(os.getenv('PHOSPHOROS_ROOT', '~/Phosphoros')).expanduser())
+data_dir = phosphoros_root + '/AuxiliaryData/'
+temp_dir = phosphoros_root + 'Temp'
 
 
 def md5(fname):
@@ -62,7 +64,7 @@ def defineSpecificProgramOptions():
     parser.add_argument('--repo-url', default='<tobedefined>.unige.ch', type=str,
         help='URL of the Data Package server')
         
-    parser.add_argument('--temp-folder', default='./temp', type=str,
+    parser.add_argument('--temp-folder', default=temp_dir, type=str,
         help='Where to download and untar the data pack')
         
     parser.add_argument('--output-version-match', default='', type=str,
@@ -207,13 +209,3 @@ def mainMethod(args):
             cleanTempDir(args.temp_folder+'/AuxiliaryData')
     else:
         logger.info("The version "+str(version_remote)+" of the data package is up to date.")               
-                
-            
-            
-        
-
-    
-        
-    
-    
-   
