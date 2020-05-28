@@ -138,6 +138,7 @@ def listFiles(base_dir_new):
 def importFiles(file_dict):
     for path in file_dict.keys():
         logger.info('Importing file: '+file_dict[path])
+        os.makedirs(os.path.dirname(file_dict[path]), exist_ok=True)
         shutil.copy(path, file_dict[path])
         
 def record_version(version):
