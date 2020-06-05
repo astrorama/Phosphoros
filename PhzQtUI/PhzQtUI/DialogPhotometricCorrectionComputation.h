@@ -72,6 +72,8 @@ public:
         std::list<std::string> excluded_filters,
         std::string default_z_column,
         std::map<std::string, boost::program_options::variable_value> run_option,
+        const std::map<std::string, boost::program_options::variable_value>& luminosity_config,
+        const std::map<std::string, boost::program_options::variable_value>& sed_config,
         double non_detection);
 
 signals:
@@ -127,25 +129,34 @@ private slots:
     void on_bt_Run_clicked();
 
     void runFinished();
+    void lumFinished();
+    void sedFinished();
 
     void on_bt_Cancel_clicked();
 
 private:
     QFutureWatcher<std::string> m_future_watcher {};
+    QFutureWatcher<std::string> m_future_lum_watcher {};
+    QFutureWatcher<std::string> m_future_sed_watcher {};
     std::unique_ptr<Ui::DialogPhotometricCorrectionComputation> ui;
     std::list<FilterMapping> m_selected_filters;
     std::list<std::string> m_excluded_filters;
     std::string m_id_column;
     std::string m_refZ_column;
     std::map<std::string, boost::program_options::variable_value> m_run_option;
+    std::map<std::string, boost::program_options::variable_value> m_lum_config;
+    std::map<std::string, boost::program_options::variable_value> m_sed_config;
     double m_non_detection;
     bool m_computing = false;
     void disablePage();
     void enablePage();
     std::string runFunction();
+    std::string runLumFunction();
+    std::string runSedFunction();
     void setRunEnability();
     bool loadTestCatalog(QString file_name, bool with_warning);
 
+    bool needLuminosityGrid();
     void reject() override;
 };
 

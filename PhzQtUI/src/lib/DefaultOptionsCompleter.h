@@ -32,11 +32,12 @@
 #include "Configuration/ConfigManager.h"
 #include "ElementsKernel/Logging.h"
 #include "Configuration/Utils.h"
+#include "ElementsKernel/Logging.h"
 
 namespace Euclid {
 namespace PhzQtUI {
 
-static Elements::Logging logger = Elements::Logging::getLogger("test");
+//static Elements::Logging logger_dbg = Elements::Logging::getLogger("completeWithDefaults");
 
 template <typename T>
 static void completeWithDefaults(std::map<std::string, boost::program_options::variable_value>& options_map) {
@@ -51,8 +52,10 @@ static void completeWithDefaults(std::map<std::string, boost::program_options::v
         default_options
   );
 
+ // logger_dbg.info() << "Completing " ;
   for (auto& pair : default_options) {
     if (options_map.count(pair.first) == 0) {
+      //logger_dbg.info() << pair.first << " - " ;
       options_map.emplace(pair);
     }
   }

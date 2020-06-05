@@ -543,7 +543,53 @@
           <attribute name="label">
            <string>3. Prior</string>
           </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_8">
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_13">
+             <item>
+              <widget class="QCheckBox" name="cb_sedweight">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Add SEDs' weights computation</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_15">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="Line" name="line_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Prior selection:</string>
+             </property>
+            </widget>
+           </item>
            <item>
             <widget class="QRadioButton" name="rb_noPrior">
              <property name="font">
@@ -1648,12 +1694,10 @@
           </layout>
           <zorder></zorder>
           <zorder>verticalSpacer</zorder>
-          <zorder>horizontalLayoutWidget</zorder>
           <zorder>line</zorder>
           <zorder>line_2</zorder>
           <zorder></zorder>
           <zorder>line_3</zorder>
-          <zorder>horizontalLayoutWidget_2</zorder>
          </widget>
         </widget>
        </item>

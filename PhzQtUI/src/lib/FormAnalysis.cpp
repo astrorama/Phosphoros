@@ -7,6 +7,7 @@
 #include <functional>
 #include <QFileDialog>
 #include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -40,6 +41,11 @@
 #include "PhzDataModel/PhzModel.h"
 #include <ctime>
 #include "PhzUtils/Multithreading.h"
+
+#include "DefaultOptionsCompleter.h"
+#include "PhzExecutables/ComputeSedWeight.h"
+#include "PhzConfiguration/ComputeSedWeightConfig.h"
+#include "Configuration/ConfigManager.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -700,6 +706,69 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
     return options_map;
 }
 
+////////////////////////////////////////////////////////////////////////////
+
+
+bool FormAnalysis::checkSedWeightFile(std::string file_name) {
+  std::string folder = FileUtils::getSedPriorRootPath();
+  QFileInfo info(QString::fromStdString(folder) + QDir::separator() + QString::fromStdString(file_name));
+  return info.exists();
+}
+
+std::string FormAnalysis::getSedWeightFileName() {
+  std::string survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+  std::string model_name =  m_model_set_model_ptr->getSelectedModelSet().getName();
+  std::list<std::string> filter_excluded = getExcludedFilters();
+  std::string list_excluded_filters = "";
+  for (auto& filter_item : filter_excluded) {
+    list_excluded_filters = list_excluded_filters + filter_item;
+  }
+  std::size_t h1 = std::hash<std::string>{}(list_excluded_filters);
+
+  return "SED_Prior_"+model_name+"_"+survey_name+"_"+std::to_string(h1)+".ascii";
+}
+
+std::map<std::string, boost::program_options::variable_value> FormAnalysis::getSedWeightOptionMap(std::string output_name) {
+  /// Config path
+  std::map<std::string, boost::program_options::variable_value> options_map =
+       FileUtils::getPathConfiguration(false, true, false, false);
+  auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+  options_map["catalog-type"].value() = boost::any(survey_name);
+
+
+  /// Filters
+  std::list<std::string> filters = getSelectedFilters();
+  std::vector<std::string> filter_add_vector;
+  for (auto& filter_item : filters) {
+     filter_add_vector.push_back(filter_item);
+  }
+  options_map["filter-name"].value() = boost::any(filter_add_vector);
+
+  auto filter_excluded = getExcludedFilters();
+  if (filter_excluded.size() > 0) {
+   std::vector<std::string> excluded;
+   for (auto& filter : filter_excluded) {
+     excluded.push_back(filter);
+   }
+   options_map["exclude-filter"].value() = boost::any(excluded);
+  }
+
+  /// SED
+  auto grid_config_map = getGridConfiguration();
+  for (auto& pair : grid_config_map) {
+    if (pair.first.rfind("sed-", 0) == 0) {
+      options_map.insert(pair);
+    }
+  }
+
+  /// output name
+  options_map["SED-Weight-Output"].value() = boost::any(output_name);
+
+  return options_map;
+}
+
+////////////////////////////////////////////////////////////////////////////
+
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getRunOptionMap() {
   std::string yes_flag = "YES";
   std::string no_flag = "NO";
@@ -896,6 +965,12 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
      options_map["create-output-likelihood-pdf"].value() = boost::any(likelihood_pdf_output_axis);
    }
 
+   if (ui->cb_sedweight->isChecked()) {
+     std::string sed_prior_name = getSedWeightFileName();
+     std::vector<std::string>  tablename{boost::filesystem::path{sed_prior_name}.filename().stem().string()};
+     options_map["axis-weight-prior-sed"].value() = boost::any(tablename);
+   }
+
 
   if (m_copied_columns.size() > 0) {
     std::string option ="";
@@ -1052,6 +1127,12 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   } else {
     ui->gb_corrections->setChecked(false);
   }
+
+  auto saved_sed_weight = PreferencesUtils::getUserPreference(
+       selected_survey.getName(), "ComputeSedWeight");
+  ui->cb_sedweight->setChecked(saved_sed_weight!="False");
+
+
 
   setCopiedColumns(selected_survey.getCopiedColumns());
   setRunAnnalysisEnable(true);
@@ -1335,8 +1416,17 @@ template<typename ReturnType, int I>
     }
 
 
+    std::map<std::string, boost::program_options::variable_value> config_sed_weight{};
+    if (ui->cb_sedweight->isChecked()) {
+       // Compute the SED Axis Prior
+       std::string sed_prior_name = getSedWeightFileName();
+       if (!checkSedWeightFile(sed_prior_name)) {
+          config_sed_weight = getSedWeightOptionMap(sed_prior_name);
+       }
+    }
 
 
+    auto config_map_luminosity = getLuminosityOptionMap();
 
     std::unique_ptr<DialogPhotometricCorrectionComputation> popup(new DialogPhotometricCorrectionComputation());
     popup->setData(survey_name, m_survey_model_ptr->getSelectedSurvey().getSourceIdColumn(),
@@ -1346,6 +1436,8 @@ template<typename ReturnType, int I>
         getExcludedFilters(),
         selected_survey.getRefZColumn(),
         config_map,
+        config_map_luminosity,
+        config_sed_weight,
         selected_survey.getNonDetection());
 
     connect(popup.get(), SIGNAL(correctionComputed(const QString &)),
@@ -1366,6 +1458,13 @@ template<typename ReturnType, int I>
 
 
 // 4. algorithm options
+
+  void FormAnalysis::on_cb_sedweight_clicked() {
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "ComputeSedWeight", ui->cb_sedweight->isChecked()?"True":"False");
+  }
+
+
+
   void FormAnalysis::on_btn_confLuminosityPrior_clicked() {
         std::unique_ptr<DialogLuminosityPrior> dialog(new DialogLuminosityPrior(m_filter_repository, m_luminosity_repository));
 
@@ -1727,6 +1826,8 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
   }
 
   void FormAnalysis::on_btn_GetConfigAnalysis_clicked() {
+
+    // TODO get the full configs & command files
     QString filter = "Config (*.conf)";
 
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save Configuration File"),
@@ -1792,11 +1893,19 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
       }
     }
 
+    std::map<std::string, boost::program_options::variable_value> config_sed_weight{};
+    if (ui->cb_sedweight->isChecked()) {
+      // Compute the SED Axis Prior
+      std::string sed_prior_name = getSedWeightFileName();
+      if (!checkSedWeightFile(sed_prior_name)) {
+        config_sed_weight = getSedWeightOptionMap(sed_prior_name);
+      }
+    }
 
     auto config_map_luminosity = getLuminosityOptionMap();
 
     std::unique_ptr<DialogRunAnalysis> dialog(new DialogRunAnalysis());
-    dialog->setValues(out_dir, config_map, config_map_luminosity);
+    dialog->setValues(out_dir, config_map, config_map_luminosity, config_sed_weight);
     if (dialog->exec()) {
       saveCopiedColumnToCatalog();
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),

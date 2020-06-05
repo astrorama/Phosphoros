@@ -20,6 +20,27 @@
 #include "PhzExecutables/ComputePhotometricCorrections.h"
 #include "PhzUtils/Multithreading.h"
 #include "Configuration/Utils.h"
+#include "PhzConfiguration/ComputeRedshiftsConfig.h"
+#include "PhzConfiguration/ComputeLuminosityModelGridConfig.h"
+#include "PhzConfiguration/ComputeSedWeightConfig.h"
+#include "DefaultOptionsCompleter.h"
+#include "PhzConfiguration/PhotometryGridConfig.h"
+#include "PhzConfiguration/LikelihoodGridFuncConfig.h"
+#include "PhzConfiguration/MarginalizationConfig.h"
+#include "PhzConfiguration/PhotometricCorrectionConfig.h"
+#include "PhzConfiguration/PriorConfig.h"
+#include "Configuration/CatalogConfig.h"
+#include "PhzConfiguration/ComputeModelGridConfig.h"
+#include "PhzConfiguration/SedProviderConfig.h"
+#include "PhzConfiguration/ReddeningProviderConfig.h"
+#include "PhzConfiguration/FilterProviderConfig.h"
+#include "PhzConfiguration/LuminosityBandConfig.h"
+#include "PhzConfiguration/IgmConfig.h"
+#include "PhzConfiguration/ModelGridOutputConfig.h"
+
+#include "PhzModeling/SparseGridCreator.h"
+#include "PhzModeling/NoIgmFunctor.h"
+#include "PhzExecutables/ComputeSedWeight.h"
 
 using namespace std;
 using namespace Euclid::PhzConfiguration;
@@ -37,7 +58,10 @@ DialogPhotometricCorrectionComputation::DialogPhotometricCorrectionComputation(
 
   connect(this, SIGNAL(signalUpdateCurrentIteration(const QString&)),
           ui->txt_current_iteration, SLOT(setText(const QString&)));
+
   connect(&m_future_watcher, SIGNAL(finished()), this, SLOT(runFinished()));
+  connect(&m_future_lum_watcher, SIGNAL(finished()), this, SLOT(lumFinished()));
+  connect(&m_future_sed_watcher, SIGNAL(finished()), this, SLOT(sedFinished()));
 }
 
 DialogPhotometricCorrectionComputation::~DialogPhotometricCorrectionComputation() {
@@ -49,12 +73,16 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
     std::list<std::string> excluded_filters,
     std::string default_z_column,
     std::map<std::string, boost::program_options::variable_value> run_option,
+    const std::map<std::string, boost::program_options::variable_value>& luminosity_config,
+    const std::map<std::string, boost::program_options::variable_value>& sed_config,
     double non_detection) {
   m_id_column = id_column;
   m_refZ_column = default_z_column;
   m_selected_filters = selected_filters;
   m_excluded_filters = excluded_filters;
   m_run_option = run_option;
+  m_sed_config = sed_config;
+  m_lum_config = luminosity_config;
   m_non_detection = non_detection;
   ui->txt_survey->setText(QString::fromStdString(survey));
   ui->txt_Model->setText(QString::fromStdString(model));
@@ -282,6 +310,8 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
             std::stringstream iter_no_message;
             iter_no_message << "Iteration : " << (iter_no+1);
             emit signalUpdateCurrentIteration(QString::fromStdString(iter_no_message.str()));
+          } else {
+            emit signalUpdateCurrentIteration(QString::fromStdString("Canceling..."));
           }
         };
         
@@ -300,6 +330,139 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
   }
   catch (...) {
     return "Sorry, an error occurred during the computation.";
+  }
+}
+
+
+
+
+std::string DialogPhotometricCorrectionComputation::runLumFunction(){
+  try {
+    completeWithDefaults<ComputeLuminosityModelGridConfig>(m_lum_config);
+
+    long config_manager_id = Configuration::getUniqueManagerId();
+    auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+    config_manager.registerConfiguration<ComputeLuminosityModelGridConfig>();
+    config_manager.closeRegistration();
+
+    config_manager.initialize(m_lum_config);
+
+
+    auto& sed_provider = config_manager.getConfiguration<SedProviderConfig>().getSedDatasetProvider();
+    auto& reddening_provider = config_manager.getConfiguration<ReddeningProviderConfig>().getReddeningDatasetProvider();
+    const auto& filter_provider = config_manager.getConfiguration<FilterProviderConfig>().getFilterDatasetProvider();
+    auto& igm_abs_func = config_manager.getConfiguration<IgmConfig>().getIgmAbsorptionFunction();
+
+    Euclid::PhzModeling::SparseGridCreator creator {sed_provider, reddening_provider, filter_provider, igm_abs_func};
+
+    auto param_space_map = config_manager.getConfiguration<ComputeLuminosityModelGridConfig>().getParameterSpaceRegions();
+    std::vector<Euclid::XYDataset::QualifiedName> filter_list = {config_manager.getConfiguration<Euclid::PhzConfiguration::LuminosityBandConfig>().getLuminosityFilter()};
+
+
+    auto monitor_function = [this](size_t step, size_t total) {
+       int value = (step * 100) / total;
+       // If the user has canceled we do not want to update the progress bar,
+       // because the GUI thread might have already deleted it
+       if (!PhzUtils::getStopThreadsFlag()) {
+         std::stringstream progress_message;
+         progress_message << "Luminosity Grid: " << value << "%";
+         emit signalUpdateCurrentIteration(QString::fromStdString(progress_message.str()));
+       } else {
+         emit signalUpdateCurrentIteration(QString::fromStdString("Canceling..."));
+       }
+    };
+
+    auto results = creator.createGrid(param_space_map, filter_list, monitor_function);
+
+    auto output = config_manager.getConfiguration<ModelGridOutputConfig>().getOutputFunction();
+    output(results);
+    return "";
+
+  }
+  catch (const Elements::Exception & e) {
+    return "Sorry, an error occurred during the Luminosity grid computation :\n"
+        + std::string(e.what());
+  }
+  catch (const std::exception& e) {
+    return "Sorry, an error occurred during the Luminosity grid computation:\n"
+        + std::string(e.what());
+  }
+  catch (...) {
+    return "Sorry, an error occurred during the Luminosity grid computation.";
+  }
+}
+
+
+std::string DialogPhotometricCorrectionComputation::runSedFunction(){
+
+  try {
+    completeWithDefaults<PhzConfiguration::ComputeSedWeightConfig>(m_sed_config);
+    long config_manager_id = Configuration::getUniqueManagerId();
+    auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+    config_manager.registerConfiguration<PhzConfiguration::ComputeSedWeightConfig>();
+    config_manager.closeRegistration();
+    config_manager.initialize(m_sed_config);
+
+
+    auto monitor_function = [this](size_t step, size_t total) {
+      int value = (step * 100) / total;
+      // If the user has canceled we do not want to update the progress bar,
+      // because the GUI thread might have already deleted it
+      if (!PhzUtils::getStopThreadsFlag()) {
+        std::stringstream progress_message;
+        progress_message << "SED's Weights: " << value << "%";
+        emit signalUpdateCurrentIteration(QString::fromStdString(progress_message.str()));
+      } else {
+        emit signalUpdateCurrentIteration(QString::fromStdString("Canceling..."));
+      }
+    };
+
+    PhzExecutables::ComputeSedWeight{monitor_function}.run(config_manager);
+
+    return "";
+
+  }
+  catch (const Elements::Exception & e) {
+    return "Sorry, an error occurred during the SEDs' weights computation :\n"
+        + std::string(e.what());
+  }
+  catch (const std::exception& e) {
+    return "Sorry, an error occurred during the SEDs' weights computation:\n"
+        + std::string(e.what());
+  }
+  catch (...) {
+    return "Sorry, an error occurred during the SEDs' weights computation.";
+  }
+}
+
+
+void DialogPhotometricCorrectionComputation::lumFinished() {
+  auto message = m_future_lum_watcher.result();
+  if (message.length() == 0) {
+    if (m_sed_config.size() > 0) {
+      m_future_sed_watcher.setFuture(QtConcurrent::run(this, &DialogPhotometricCorrectionComputation::runSedFunction));
+    } else {
+      m_future_watcher.setFuture(QtConcurrent::run(this, &DialogPhotometricCorrectionComputation::runFunction));
+    }
+  } else {
+    m_computing = false;
+    this->ui->bt_Cancel->setEnabled(true);
+    QMessageBox::warning(this, "Error in the computation...",
+        QString::fromStdString(message), QMessageBox::Close);
+    enablePage();
+  }
+}
+
+void DialogPhotometricCorrectionComputation::sedFinished() {
+  auto message = m_future_sed_watcher.result();
+  if (message.length() == 0) {
+    m_future_watcher.setFuture(QtConcurrent::run(this, &DialogPhotometricCorrectionComputation::runFunction));
+  } else {
+    m_computing = false;
+    this->ui->bt_Cancel->setEnabled(true);
+    QMessageBox::warning(this, "Error in the computation...",
+        QString::fromStdString(message), QMessageBox::Close);
+    enablePage();
   }
 }
 
@@ -354,8 +517,40 @@ void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
   }
 
   disablePage();
+  if (needLuminosityGrid()) {
+     m_future_lum_watcher.setFuture(QtConcurrent::run(this, &DialogPhotometricCorrectionComputation::runLumFunction));
+   } else if (m_sed_config.size() > 0) {
+     m_future_sed_watcher.setFuture(QtConcurrent::run(this, &DialogPhotometricCorrectionComputation::runSedFunction));
+   } else {
+     m_future_watcher.setFuture(QtConcurrent::run(this, &DialogPhotometricCorrectionComputation::runFunction));
+   }
 
-  m_future_watcher.setFuture(QtConcurrent::run(this, &DialogPhotometricCorrectionComputation::runFunction));
+}
+
+
+/// Luminosity grid Computation
+bool DialogPhotometricCorrectionComputation::needLuminosityGrid(){
+  if (m_run_option.count("luminosity-prior")==1 && m_run_option.at("luminosity-prior").as<std::string>()=="YES"){
+    //check the grid
+    try{
+      completeWithDefaults<ComputeRedshiftsConfig>(m_run_option);
+      long config_manager_id = Configuration::getUniqueManagerId();
+      auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+      config_manager.registerConfiguration<ComputeRedshiftsConfig>();
+      config_manager.closeRegistration();
+      config_manager.initialize(m_run_option);
+
+      // the file exists nothing to do
+      return false;
+
+    } catch(const Elements::Exception&) {}
+    // The grid need to be computed
+    return true;
+
+  } else {
+    // The luminosity prior is not enabled: no need for a luminosity grid
+    return false;
+  }
 }
 
 }

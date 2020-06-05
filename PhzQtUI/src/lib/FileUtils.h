@@ -307,6 +307,9 @@ public:
     static std::string getGalacticCorrectionGridRootPath(bool check, const std::string& catalog_type);
 
 
+    static std::string getSedPriorRootPath();
+
+
     static void buildDirectories();
 
     //////////////////////////////////////////////////////////

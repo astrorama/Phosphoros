@@ -27,6 +27,8 @@ action_list = [
                      'Computes a grid containing the coefficient for the correction of the galactic absorption'),
     PhosphorosAction(['compute_photometric_corrections', 'CPC'], 'PhosphorosComputePhotometricCorrections',
                      'Calculates the Photometric Zero Point Corrections'),
+    PhosphorosAction(['compute_sed_weights', 'CSW'], 'PhosphorosComputeSedWeight',
+                     'Calculate the weights of the SEDs and produce a prior from it'),
     PhosphorosAction(['compute_redshifts', 'CR'], 'PhosphorosComputeRedshifts',
                      'Calculates the PHZ results for a given catalog'),
     PhosphorosAction(['display_filters', 'DF'], 'PhosphorosLsAux --type Filters',
