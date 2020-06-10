@@ -43,6 +43,8 @@ namespace Euclid {
 namespace PhzQtUI {
 
 
+static Elements::Logging logger_DGC = Elements::Logging::getLogger("DialogGalCorrGridGeneration");
+
 class SparseProgressReporter {
 
 public:
@@ -139,7 +141,7 @@ std::string DialogGalCorrGridGeneration::runFunction() {
 
      for(auto& grid_pair : model_phot_grid.region_axes_map){
        if (!PhzUtils::getStopThreadsFlag()) {
-         logger.info() << "Correction computation for region '"<<grid_pair.first<<"'";
+         logger_DGC.info() << "Correction computation for region '"<<grid_pair.first<<"'";
          SparseProgressReporter reporter {monitor_function, already_done, total};
          result_map.emplace(std::make_pair(grid_pair.first, grid_creator.createGrid(grid_pair.second, model_phot_grid.filter_names, reporter)));
          already_done+=GridContainer::makeGridIndexHelper(grid_pair.second).m_axes_index_factors.back();

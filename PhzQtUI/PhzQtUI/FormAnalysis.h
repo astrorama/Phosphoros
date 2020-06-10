@@ -132,6 +132,8 @@ void on_btn_ToPP_clicked();
 
     void on_cb_gen_likelihood_clicked();
 
+    void on_cb_sedweight_clicked();
+
     void on_btn_confLuminosityPrior_clicked();
 
     void on_cb_luminosityPrior_2_currentIndexChanged(const QString &);
@@ -158,6 +160,8 @@ private:
     std::list<FilterMapping> getSelectedFilterMapping();
 
 
+
+
     void updateCopiedColumns(std::list<std::string> new_columns);
 
     void saveCopiedColumnToCatalog();
@@ -178,6 +182,10 @@ private:
     bool checkGalacticGridSelection(bool addFileCheck, bool acceptNewFile);
     std::map<std::string, boost::program_options::variable_value> getGridConfiguration();
     std::map<std::string, boost::program_options::variable_value> getGalacticCorrectionGridConfiguration();
+
+    bool checkSedWeightFile(std::string file_name);
+    std::string getSedWeightFileName();
+    std::map<std::string, boost::program_options::variable_value> getSedWeightOptionMap(std::string output_name);
 
 
 
