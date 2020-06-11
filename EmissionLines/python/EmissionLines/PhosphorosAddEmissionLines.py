@@ -43,21 +43,19 @@ aux_dir = next((p+os.path.sep+'EmissionLines' for p in os.environ['ELEMENTS_AUX_
 def defineSpecificProgramOptions():
     def wavelengthRange(s):
         try:
-            start, end = map(int, s.split(','))
+            start, end = map(float, s.split(','))
             return start, end
         except:
-            raise argparse.ArgumentParser('A range must be start,end')
+            raise argparse.ArgumentParser('A range must be start,end (in Angstrom)')
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--emission-lines', default=None, type=str, metavar='FILE',
-        help='The emission lines file (default: $ELEMENTS_AUX_PATH/EmissionLines/emission_lines.txt)')
+    parser.add_argument('--emission-lines', default='Ha_lines.txt', type=str, metavar='FILE',
+        help='The emission lines file')
     parser.add_argument('--uv-range', default=(1500.0, 2800.0), type=wavelengthRange,
         help='The beginning of the UV range to integrate')
-    parser.add_argument('--oii-factor', default=0.745e13, type=float,
-        help='The luminosity factor between UV and [OII]')
-    parser.add_argument('--oii-factor-range', default=(1500.0, 2800.0), type=wavelengthRange,
-        help='')
+    parser.add_argument('--reference-factor', default=5.91e-6, type=float,
+        help='The luminosity factor between UV and the reference line')
     parser.add_argument('--sed-dir', required=True, type=str, metavar='DIR',
         help='The directory containing the SEDs to add the mission lines on')
     parser.add_argument('--velocity', default=None, type=float,
@@ -71,9 +69,7 @@ def defineSpecificProgramOptions():
 
 
 def readEmissionLinesFromFile(emission_lines_file):
-    if emission_lines_file == None:
-        emission_lines_file = os.path.join(aux_dir, 'emission_lines.txt')
-    elif not "/" in emission_lines_file:
+    if "/" not in emission_lines_file:
         emission_lines_file = os.path.join(aux_dir, emission_lines_file)
 
     logger.info('Reading emission lines from '+emission_lines_file)
@@ -170,10 +166,9 @@ class EmissionLinesAdder(object):
         def getValues(self, xs, flux):
             return [flux*np.exp(-np.power((x-self.mu), 2.)/(2*np.power(self.sigma, 2.)))/(self.sigma*np.sqrt(2*np.pi)) for x in xs]
     
-    def __init__(self, uv_range, oii_factor, oii_factor_range, emission_lines, velocity, no_sed):
+    def __init__(self, uv_range, ref_factor, emission_lines, velocity, no_sed):
         self.uv_range = uv_range
-        self.oii_factor = oii_factor
-        self.oii_factor_range_size = oii_factor_range[1] - oii_factor_range[0]
+        self.ref_factor = ref_factor
         self.emission_lines = emission_lines
         self.no_sed = no_sed
         if velocity is None:
@@ -214,32 +209,20 @@ class EmissionLinesAdder(object):
         selection_filter = np.logical_and(sed.data[:,0] >= self.uv_range[0], sed.data[:,0] <= self.uv_range[1])
         trunc_sed = sed.data[selection_filter,:]
 
-        # Create a new one, using frequency for x, and f_nu for y
-        uv_freq_sed = np.ndarray(trunc_sed.shape)
-        uv_freq_sed[:, 0] = C_ANGSTROM / trunc_sed[:, 0]
-        uv_freq_sed[:, 1] = trunc_sed[:, 1] * (trunc_sed[:, 0] ** 2 / C_ANGSTROM)
+        # Integrate this segment
+        uv_flux = np.trapz(trunc_sed[:, 1], trunc_sed[:, 0])
 
-        # Integrate this segment (reversing because now the x axis is decrementing)
-        uv_flux_nu = np.trapz(np.flipud(uv_freq_sed[:, 1]), np.flipud(uv_freq_sed[:, 0]))
-
-        # Flux density
-        uv_freq_size = uv_freq_sed[0, 0] - uv_freq_sed[-1, 0]
-        uv_flux_nu_density = uv_flux_nu / uv_freq_size
-
-        # Calculate the [OII] flux density
-        # We need to divide the [OII] factor by the range for which is was calculated
-        # and then multiply by the range we are considering
-        uv_range_size = self.uv_range[1] - self.uv_range[0]
-        new_oii_factor = (self.oii_factor / self.oii_factor_range_size) * uv_range_size
-        oii_flux_nu = new_oii_factor * uv_flux_nu_density
+        # Calculate the reference band flux density
+        ref_flux = (self.ref_factor * self.uv_range[1] * self.uv_range[0]) / (self.uv_range[1] - self.uv_range[0])
+        ref_flux *= uv_flux
 
         result = np.array(sed.data, copy=True)
         if self.no_sed:
             result[:, 1] = 0
 
-        for l in self.emission_lines:
-            wavelength = l[1]
-            flux_freq = oii_flux_nu * l[2]
+        for line in self.emission_lines:
+            wavelength = line[1]
+            flux_freq = ref_flux * line[2]
             result = self._addSingleLine(result, flux_freq, wavelength)
         return result
 
@@ -261,8 +244,7 @@ def mainMethod(args):
     emission_lines = readEmissionLinesFromFile(args.emission_lines)
     adder = EmissionLinesAdder(
         args.uv_range,
-        args.oii_factor,
-        args.oii_factor_range,
+        args.reference_factor,
         emission_lines,
         args.velocity,
         args.no_sed
@@ -275,4 +257,3 @@ def mainMethod(args):
             out_sed = adder(sed)
             t = table.Table(rows=out_sed, names=('Wave', 'Flux'))
             t.write(os.path.join(out_dir, sed_file), format='ascii.commented_header')
-
