@@ -1628,6 +1628,55 @@
               </widget>
              </item>
              <item>
+              <widget class="QComboBox" name="cb_multi_out">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Sampling</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Full grid</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_4">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Sample number:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="sb_sample_numb">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>10000</number>
+               </property>
+               <property name="value">
+                <number>1000</number>
+               </property>
+              </widget>
+             </item>
+             <item>
               <spacer name="horizontalSpacer_2">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
@@ -1654,7 +1703,7 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>Generate Likelihood Files</string>
+                  <string>Output Likelihood</string>
                  </property>
                 </widget>
                </item>
@@ -1670,7 +1719,7 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>Generate Posterior Files</string>
+                  <string>Output Posterior</string>
                  </property>
                 </widget>
                </item>
