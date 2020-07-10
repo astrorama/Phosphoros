@@ -315,7 +315,7 @@
        <item>
         <widget class="QPushButton" name="btn_ImportColumn">
          <property name="toolTip">
-          <string>Select a file to be used as default file for this catalog. The columns of the catalog will be used to populate the drop-down for the ID and the Filters columns.</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select a file to be used as template file for this catalog. &lt;/p&gt;&lt;p&gt;The columns of this file will be used to populate the drop-down for the ID and the Filters columns.&lt;/p&gt;&lt;p&gt;You will have to choose the file to be processed, which could be different, in the &amp;quot;Compute Redshifts&amp;quot; tab.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
           <string>Select File and Import Columns </string>
