@@ -259,7 +259,7 @@ void FormAnalysis::adjustGalCorrGridButtons(bool enabled) {
   bool name_ok = checkGridSelection(false, true);
   ui->btn_GetConfigGrid->setEnabled(enabled && name_ok);
   ui->btn_RunGrid->setEnabled(enabled && name_ok);
-  QString tool_tip = "";
+  QString tool_tip = "Export the configuration file needed to run Phosphoros CMG tool which produce the grid containing the model photometries";
 
   QColor tab_color = Qt::black;
 
@@ -283,7 +283,7 @@ void FormAnalysis::adjustGalCorrGridButtons(bool enabled) {
   ui->cb_CompatibleGalCorrGrid->setEnabled(needed && enabled);
   ui->btn_GetGalCorrConfigGrid->setEnabled(needed && enabled && name_ok);
   ui->btn_RunGalCorrGrid->setEnabled(needed && enabled && valid_model_grid && name_ok);
-  QString tool_tip_mw = "";
+  QString tool_tip_mw = "Export the configuration file needed to run Phosphoros CGCCG tool which produce the grid containing the coefficient for the correction of the Milky Way absorption";
   if (!needed) {
     ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet("QLineEdit { color: black }");
     tool_tip_mw = "With 'Correction type' set to 'OFF' there is no need to generate this grid.";
@@ -519,7 +519,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
         correction_ok && lum_prior_ok && lum_prior_compatible && nz_prior_ok && run_ok)) {
     tool_tip_conf = tool_tip_conf + "Before getting the configuration.";
   } else {
-    tool_tip_conf = "Get the configuration file.";
+    tool_tip_conf = "Export the configuration file needed to run Phosphoros CR tool which perform the template fitting.";
   }
 
   if (!(grid_name_exists &&
@@ -530,6 +530,10 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   } else {
     tool_tip_run = "Run the analysis.";
   }
+
+
+
+
 
   ui->btn_GetConfigAnalysis->setToolTip(tool_tip_conf);
   ui->btn_RunAnalysis->setToolTip(tool_tip_run);
@@ -1198,14 +1202,14 @@ template<typename ReturnType, int I>
           "It is not possible to save the Grid under the name you have provided. Please enter a new name.",
           QMessageBox::Ok);
     } else {
-      QString filter = "Config (*.conf)";
+      QString filter = "Config (*.CMG.conf)";
       QString fileName = QFileDialog::getSaveFileName(this,
           tr("Save Configuration File"),
           QString::fromStdString(FileUtils::getRootPath(true))+"config",
           filter, &filter);
       if (fileName.length() > 0) {
-        if (!fileName.endsWith(".conf", Qt::CaseInsensitive)) {
-          fileName = fileName+".conf";
+        if (!fileName.endsWith(".CMG.conf", Qt::CaseInsensitive)) {
+          fileName = fileName+".CMG.conf";
         }
         auto config_map = getGridConfiguration();
         PhzUITools::ConfigurationWriter::writeConfiguration(config_map, fileName.toStdString());
@@ -1281,14 +1285,14 @@ template<typename ReturnType, int I>
             "It is not possible to save the Galactic Correction Grid under the name you have provided. Please enter a new name.",
             QMessageBox::Ok);
     } else {
-      QString filter = "Config (*.conf)";
+      QString filter = "Config (*.CGCCG.conf)";
       QString fileName = QFileDialog::getSaveFileName(this,
           tr("Save Configuration File"),
           QString::fromStdString(FileUtils::getRootPath(true))+"config",
           filter, &filter);
       if (fileName.length() > 0) {
-        if (!fileName.endsWith(".conf", Qt::CaseInsensitive)) {
-          fileName = fileName + ".conf";
+        if (!fileName.endsWith(".CGCCG.conf", Qt::CaseInsensitive)) {
+          fileName = fileName + ".CGCCG.conf";
         }
         auto config_map = getGalacticCorrectionGridConfiguration();
         if (config_map.size() > 0) {
@@ -1828,14 +1832,14 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
   void FormAnalysis::on_btn_GetConfigAnalysis_clicked() {
 
     // TODO get the full configs & command files
-    QString filter = "Config (*.conf)";
+    QString filter = "Config (*.CR.conf)";
 
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save Configuration File"),
         QString::fromStdString(FileUtils::getRootPath(true))+"config",
         filter, &filter);
     if (fileName.length() > 0) {
-      if (!fileName.endsWith(".conf", Qt::CaseInsensitive)) {
-               fileName = fileName+".conf";
+      if (!fileName.endsWith(".CR.conf", Qt::CaseInsensitive)) {
+               fileName = fileName+".CR.conf";
       }
       auto config_map = getRunOptionMap();
       PhzUITools::ConfigurationWriter::writeConfiguration(config_map, fileName.toStdString());
