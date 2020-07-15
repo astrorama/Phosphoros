@@ -1,3 +1,4 @@
+#include <sstream>
 #include <string>
 #include <QString>
 #include "PhzQtUI/Range.h"
@@ -14,17 +15,18 @@ Range::Range(){
 
 Range::Range(double min,double max, double step):m_min(min), m_max(max),m_step(step){}
 
-std::string Range::getStringRepresentation() const{
-
- QString string ="[" +QString::number(m_min,'g',2)+" , "+QString::number(m_max,'g',2)+"] step "+QString::number(m_step,'g',4);
-
-
-    return string.toStdString();
+std::string Range::getStringRepresentation() const {
+  QString string = "[" + QString::number(m_min, 'g', 2) + " , " + QString::number(m_max, 'g', 2) + "] step " +
+                   QString::number(m_step, 'g', 4);
+  return string.toStdString();
 }
 
 
 std::string Range::getConfigStringRepresentation() const{
-  return std::to_string(m_min)+" " +std::to_string(m_max)+" " +std::to_string(m_step);
+  std::stringstream stream;
+  stream.imbue(std::locale("C"));
+  stream << m_min << ' ' << m_max << ' ' << m_step;
+  return stream.str();
 }
 
 
