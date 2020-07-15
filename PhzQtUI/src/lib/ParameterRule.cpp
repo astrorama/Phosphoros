@@ -28,6 +28,13 @@ using namespace std;
 namespace Euclid {
 namespace PhzQtUI {
 
+template <typename T>
+static std::string nonLocalizedString(const T& v) {
+  std::stringstream stream;
+  stream.imbue(std::locale("C"));
+  stream << v;
+  return stream.str();
+}
 
 ParameterRule::ParameterRule()
 {
@@ -206,7 +213,7 @@ std::map<std::string, boost::program_options::variable_value> ParameterRule::get
 
   vector<string> z_value_vector;
   for (auto& value : m_redshift_values){
-    z_value_vector.push_back(std::to_string(value));
+    z_value_vector.push_back(nonLocalizedString(value));
   }
   if (z_value_vector.size()>0){
     options["z-value"+postfix].value() = boost::any(z_value_vector);
@@ -222,7 +229,7 @@ std::map<std::string, boost::program_options::variable_value> ParameterRule::get
 
   vector<string> ebv_value_vector;
   for(auto& value : m_ebv_values){
-    ebv_value_vector.push_back(std::to_string(value));
+    ebv_value_vector.push_back(nonLocalizedString(value));
   }
   if (ebv_value_vector.size()>0){
     options["ebv-value"+postfix].value() = boost::any(ebv_value_vector);
@@ -350,7 +357,7 @@ std::string ParameterRule::getAxisStringValue(std::vector<double> axis) const{
 
    return "[" + QString::number(min, 'g', 2).toStdString() + ", "
        + QString::number(max, 'g', 2).toStdString() + "] #"
-       + std::to_string(size);
+       + nonLocalizedString(size);
 }
 
 
