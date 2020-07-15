@@ -1394,29 +1394,13 @@ template<typename ReturnType, int I>
     auto config_map = getRunOptionMap();
 
 
+    std::string ra_col = "";
+    std::string dec_col = "";
+
     if (ui->rb_gc_planck->isChecked()) {
-      auto path = ui->txt_inputCatalog->text().toStdString();
-      auto column_reader = PhzUITools::CatalogColumnReader(path);
-      auto column_from_file = column_reader.getColumnNames();
-      if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
-        // the E(B-V) has to be looked up in the Planck map
-        SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
-        std::unique_ptr<DialogAddGalEbv> dialog(new DialogAddGalEbv());
-        dialog->setInputs(path, selected_survey.getRaColumn(), selected_survey.getDecColumn());
-        if (dialog->exec()) {
-         // new catalog contains the PLANCK_GAL_EBV column
-
-         auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
-         auto input_catalog_file = FileUtils::removeStart(dialog->getOutputName(),
-                     FileUtils::getCatalogRootPath(false, survey_name) +
-                     QString(QDir::separator()).toStdString());
-
-         config_map["input-catalog-file"].value() = boost::any(input_catalog_file);
-        } else {
-         // user has canceled the operation
-         return;
-        }
-      }
+      SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
+      ra_col = selected_survey.getRaColumn();
+      dec_col = selected_survey.getDecColumn();
     }
 
 
@@ -1432,6 +1416,7 @@ template<typename ReturnType, int I>
 
     auto config_map_luminosity = getLuminosityOptionMap();
 
+
     std::unique_ptr<DialogPhotometricCorrectionComputation> popup(new DialogPhotometricCorrectionComputation());
     popup->setData(survey_name, m_survey_model_ptr->getSelectedSurvey().getSourceIdColumn(),
         ui->cb_AnalysisModel->currentText().toStdString(),
@@ -1442,7 +1427,9 @@ template<typename ReturnType, int I>
         config_map,
         config_map_luminosity,
         config_sed_weight,
-        selected_survey.getNonDetection());
+        selected_survey.getNonDetection(),
+        ra_col,
+        dec_col);
 
     connect(popup.get(), SIGNAL(correctionComputed(const QString &)),
         SLOT(onCorrectionComputed(const QString &)));
