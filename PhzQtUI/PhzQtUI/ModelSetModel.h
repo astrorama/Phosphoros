@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include <set>
 #include <string>
 #include <QStandardItemModel>
 #include <memory>
@@ -61,6 +62,8 @@ public:
 
 public slots:
   void setNameToSelected(const QString& value);
+  void setGlobalRedshiftRangeToSelected(const std::vector<Range>& ranges, const std::set<double>& values);
+  void setGlobalEbvRangeToSelected(const std::vector<Range>& ranges, const std::set<double>& values);
   void setParameterRulesToSelected(const std::map<int, ParameterRule>& value);
 
 private:

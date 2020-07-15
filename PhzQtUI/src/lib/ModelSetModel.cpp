@@ -201,6 +201,18 @@ void ModelSetModel::setParameterRulesToSelected(const std::map<int, ParameterRul
   m_in_edition = true;
 }
 
+void ModelSetModel::setGlobalRedshiftRangeToSelected(const std::vector<Range>& ranges, const std::set<double>& values) {
+  m_edited_modelSet.setZRange(ranges);
+  m_edited_modelSet.setZValues(values);
+  m_in_edition = true;
+}
+
+void ModelSetModel::setGlobalEbvRangeToSelected(const std::vector<Range>& ranges, const std::set<double>& values) {
+  m_edited_modelSet.setEbvRange(ranges);
+  m_edited_modelSet.setEbvValues(values);
+  m_in_edition = true;
+}
+
 bool ModelSetModel::doNeedReload() const{
   return m_need_reload;
 }

@@ -2,6 +2,8 @@
 #define FORMMODELSET_H
 
 #include <memory>
+#include <vector>
+#include <set>
 #include "PhzQtUI/ModelSetModel.h"
 #include <QWidget>
 #include <QModelIndex>
@@ -54,11 +56,14 @@ void quit(bool);
 
 private slots:
 
-void on_btn_ToAnalysis_clicked();
-void on_btn_ToOption_clicked();
-void on_btn_ToCatalog_clicked();
-void on_btn_ToPP_clicked();
-void on_btn_exit_clicked();
+    void on_btn_ToAnalysis_clicked();
+    void on_btn_ToOption_clicked();
+    void on_btn_ToCatalog_clicked();
+    void on_btn_ToPP_clicked();
+    void on_btn_exit_clicked();
+
+    void on_btn_conf_z_clicked();
+    void on_btn_conf_ebv_clicked();
 
 
     void on_cb_selSpace_currentIndexChanged(const QString &);
@@ -68,7 +73,9 @@ void on_btn_exit_clicked();
 
     void parameterGridDoubleClicked(QModelIndex);
 
-    void setEditionPopupClosing(int,ParameterRule,bool);
+    void setEditionPopupClosing(int, ParameterRule, bool);
+    void redshiftRangePopupClosing(std::vector<Range>, std::set<double>);
+    void ebvRangePopupClosing(std::vector<Range>, std::set<double>);
 
 
     void on_btn_SetCancel_clicked();

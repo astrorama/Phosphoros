@@ -3,6 +3,7 @@
 
 #include "ui_FormModelSet.h"
 #include "PhzQtUI/DialogModelSet.h"
+#include "PhzQtUI/DialogRange.h"
 #include "FileUtils.h"
 
 #include "ElementsKernel/Exception.h"
@@ -65,7 +66,41 @@ void FormModelSet::updateSelection(){
 
 }
 
+void FormModelSet::redshiftRangePopupClosing(std::vector<Range> ranges, std::set<double> values) {
+  m_model_set_model_ptr->setGlobalRedshiftRangeToSelected(ranges, values);
+}
 
+void FormModelSet::ebvRangePopupClosing(std::vector<Range> ranges, std::set<double> values) {
+  m_model_set_model_ptr->setGlobalEbvRangeToSelected(ranges, values);
+}
+
+void FormModelSet::on_btn_conf_z_clicked() {
+   std::unique_ptr<DialogRange> popUp( new  DialogRange());
+
+   popUp->setData(m_model_set_model_ptr->getSelectedModelSet().getZRanges(),
+                  m_model_set_model_ptr->getSelectedModelSet().getZValues(),
+                  true);
+
+   connect(popUp.get(),
+       SIGNAL(popupClosing(std::vector<Range>, std::set<double>)),
+       SLOT(redshiftRangePopupClosing(std::vector<Range>, std::set<double>)));
+
+   popUp->exec();
+}
+
+void FormModelSet::on_btn_conf_ebv_clicked() {
+    std::unique_ptr<DialogRange> popUp( new  DialogRange());
+
+    popUp->setData(m_model_set_model_ptr->getSelectedModelSet().getEbvRanges(),
+                   m_model_set_model_ptr->getSelectedModelSet().getEbvValues(),
+                   false);
+
+    connect(popUp.get(),
+          SIGNAL(popupClosing(std::vector<Range>, std::set<double>)),
+          SLOT(ebvRangePopupClosing(std::vector<Range>, std::set<double>)));
+
+    popUp->exec();
+}
 
 
 void FormModelSet::loadSetPage(
