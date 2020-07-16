@@ -3,6 +3,7 @@
 
 #include "ui_FormModelSet.h"
 #include "PhzQtUI/DialogModelSet.h"
+#include "PhzQtUI/DialogRange.h"
 #include "FileUtils.h"
 
 #include "ElementsKernel/Exception.h"
@@ -65,7 +66,43 @@ void FormModelSet::updateSelection(){
 
 }
 
+void FormModelSet::redshiftRangePopupClosing(std::vector<Range> ranges, std::set<double> values) {
+  m_model_set_model_ptr->setGlobalRedshiftRangeToSelected(ranges, values);
+  setModelInEdition();
+}
 
+void FormModelSet::ebvRangePopupClosing(std::vector<Range> ranges, std::set<double> values) {
+  m_model_set_model_ptr->setGlobalEbvRangeToSelected(ranges, values);
+  setModelInEdition();
+}
+
+void FormModelSet::on_btn_conf_z_clicked() {
+   std::unique_ptr<DialogRange> popUp( new  DialogRange());
+
+   popUp->setData(m_model_set_model_ptr->getSelectedModelSet().getZRanges(),
+                  m_model_set_model_ptr->getSelectedModelSet().getZValues(),
+                  true);
+
+   connect(popUp.get(),
+       SIGNAL(popupClosing(std::vector<Range>, std::set<double>)),
+       SLOT(redshiftRangePopupClosing(std::vector<Range>, std::set<double>)));
+
+   popUp->exec();
+}
+
+void FormModelSet::on_btn_conf_ebv_clicked() {
+    std::unique_ptr<DialogRange> popUp( new  DialogRange());
+
+    popUp->setData(m_model_set_model_ptr->getSelectedModelSet().getEbvRanges(),
+                   m_model_set_model_ptr->getSelectedModelSet().getEbvValues(),
+                   false);
+
+    connect(popUp.get(),
+          SIGNAL(popupClosing(std::vector<Range>, std::set<double>)),
+          SLOT(ebvRangePopupClosing(std::vector<Range>, std::set<double>)));
+
+    popUp->exec();
+}
 
 
 void FormModelSet::loadSetPage(
@@ -271,10 +308,39 @@ void FormModelSet::rulesSelectionChanged(QModelIndex, QModelIndex) {
 }
 
 
+bool FormModelSet::checkEbvZ() {
+if (m_model_set_model_ptr->getSelectedModelSet().getEbvRanges().size() == 0 &&
+      m_model_set_model_ptr->getSelectedModelSet().getEbvValues().size() == 0) {
+      QMessageBox::warning(this,
+                             "Missing E(B-V) range...",
+                             "You must configure the E(B-V) range before setting up a parametre sub-space.",
+                             QMessageBox::Ok);
+    return false;
+  } else   if (m_model_set_model_ptr->getSelectedModelSet().getZRanges().size() == 0 &&
+      m_model_set_model_ptr->getSelectedModelSet().getZValues().size() == 0) {
+      QMessageBox::warning(this,
+                             "Missing redshift range...",
+                             "You must configure the redshift range before setting up a parametre sub-space.",
+                             QMessageBox::Ok);
+    return false;
+  } else {
+    return true;
+  }
+}
+
+
 void FormModelSet::on_btn_open_region_clicked() {
+  if (!checkEbvZ()){
+    return;
+  }
   std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet(m_seds_repository, m_redenig_curves_repository));
   int refid = ui->tableView_ParameterRule->getSelectedRuleId();
-  popUp->loadData(refid, ui->tableView_ParameterRule->getModel()->getParameterRules());
+  popUp->loadData(refid,
+                  ui->tableView_ParameterRule->getModel()->getParameterRules(),
+                  m_model_set_model_ptr->getSelectedModelSet().getZRanges(),
+                  m_model_set_model_ptr->getSelectedModelSet().getZValues(),
+                  m_model_set_model_ptr->getSelectedModelSet().getEbvRanges(),
+                  m_model_set_model_ptr->getSelectedModelSet().getEbvValues());
 
   connect(popUp.get(),
       SIGNAL(popupClosing(int, ParameterRule, bool)),
@@ -285,10 +351,17 @@ void FormModelSet::on_btn_open_region_clicked() {
 
 
 void FormModelSet::on_btn_new_region_clicked() {
+  if (!checkEbvZ()){
+    return;
+  }
   std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet(m_seds_repository, m_redenig_curves_repository));
       auto current_list = ui->tableView_ParameterRule->getModel()->getParameterRules();
       current_list.insert(std::make_pair(-1, ParameterRule {}));
-      popUp->loadData(-1, current_list);
+      popUp->loadData(-1, current_list,
+          m_model_set_model_ptr->getSelectedModelSet().getZRanges(),
+          m_model_set_model_ptr->getSelectedModelSet().getZValues(),
+          m_model_set_model_ptr->getSelectedModelSet().getEbvRanges(),
+          m_model_set_model_ptr->getSelectedModelSet().getEbvValues());
 
       connect(popUp.get(),
         SIGNAL(popupClosing(int, ParameterRule, bool)),
@@ -299,12 +372,19 @@ void FormModelSet::on_btn_new_region_clicked() {
 
 
 void FormModelSet::on_btn_duplicate_region_clicked() {
+  if (!checkEbvZ()){
+    return;
+  }
   std::unique_ptr<DialogModelSet> popUp( new  DialogModelSet(m_seds_repository, m_redenig_curves_repository));
         auto current_list = ui->tableView_ParameterRule->getModel()->getParameterRules();
         auto rule = ui->tableView_ParameterRule->getSelectedRule();
         rule.setName(rule.getName()+"_Copy");
         current_list.insert(std::make_pair(-1, rule));
-        popUp->loadData(-1, current_list);
+        popUp->loadData(-1, current_list,
+            m_model_set_model_ptr->getSelectedModelSet().getZRanges(),
+            m_model_set_model_ptr->getSelectedModelSet().getZValues(),
+            m_model_set_model_ptr->getSelectedModelSet().getEbvRanges(),
+            m_model_set_model_ptr->getSelectedModelSet().getEbvValues());
 
         connect(popUp.get(),
           SIGNAL(popupClosing(int, ParameterRule, bool)),

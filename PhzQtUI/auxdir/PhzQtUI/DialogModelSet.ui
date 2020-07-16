@@ -236,31 +236,21 @@
           <attribute name="title">
            <string>E(B-V)</string>
           </attribute>
-          <layout class="QVBoxLayout" name="verticalLayout_5">
+          <layout class="QVBoxLayout" name="verticalLayout_4">
            <item>
-            <widget class="QRadioButton" name="rb_ebv_val">
-             <property name="text">
-              <string>Values (coma separated) :</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="txt_ebv_values"/>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
-              <widget class="QRadioButton" name="rb_ebv_range">
+              <widget class="QLabel" name="label_3">
                <property name="text">
-                <string>Ranges :</string>
+                <string>Minimum E(B-V)</string>
                </property>
               </widget>
              </item>
              <item>
-              <spacer name="horizontalSpacer_5">
+              <widget class="QComboBox" name="min_ebv_cb"/>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
@@ -273,51 +263,42 @@
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_add_ebv_range">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
+              <widget class="QLabel" name="label">
                <property name="text">
-                <string>Add Range</string>
+                <string>Maximum E(B-V)</string>
                </property>
               </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="max_ebv_cb"/>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
              </item>
             </layout>
            </item>
            <item>
-            <widget class="QScrollArea" name="scroll_ebv">
-             <property name="widgetResizable">
-              <bool>true</bool>
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
              </property>
-             <widget class="QWidget" name="scrollAreaWidgetContents_2">
-              <property name="geometry">
-               <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>831</width>
-                <height>363</height>
-               </rect>
-              </property>
-              <layout class="QVBoxLayout" name="verticalLayout_3">
-               <item>
-                <layout class="QVBoxLayout" name="Layout_ebv_range"/>
-               </item>
-               <item>
-                <spacer name="verticalSpacer">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>40</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-              </layout>
-             </widget>
-            </widget>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -327,29 +308,19 @@
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout">
            <item>
-            <widget class="QRadioButton" name="rb_z_val">
-             <property name="text">
-              <string>Values (coma separated) :</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="txt_z_values"/>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
              <item>
-              <widget class="QRadioButton" name="rb_z_range">
+              <widget class="QLabel" name="label_4">
                <property name="text">
-                <string>Ranges :</string>
+                <string>Minimum Z</string>
                </property>
               </widget>
              </item>
              <item>
-              <spacer name="horizontalSpacer_3">
+              <widget class="QComboBox" name="min_z_cb"/>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_6">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
@@ -362,51 +333,42 @@
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="btn_add_z_range">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
+              <widget class="QLabel" name="label_5">
                <property name="text">
-                <string>Add Range</string>
+                <string>Maximum Z</string>
                </property>
               </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="max_z_cb"/>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_7">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
              </item>
             </layout>
            </item>
            <item>
-            <widget class="QScrollArea" name="scroll_z">
-             <property name="widgetResizable">
-              <bool>true</bool>
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
              </property>
-             <widget class="QWidget" name="scrollAreaWidgetContents">
-              <property name="geometry">
-               <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>831</width>
-                <height>363</height>
-               </rect>
-              </property>
-              <layout class="QVBoxLayout" name="verticalLayout_2">
-               <item>
-                <layout class="QVBoxLayout" name="Layout_z_range"/>
-               </item>
-               <item>
-                <spacer name="verticalSpacer_2">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>40</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-              </layout>
-             </widget>
-            </widget>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>

@@ -86,14 +86,70 @@ ModelSet ModelSet::deserialize(QDomDocument& doc, ModelSet& model) {
     QDomElement root_node = doc.documentElement();
     model.setName(root_node.attribute("Name").toStdString());
 
+
+    /* Global Z & EBV */
+    auto global_z_node = root_node.firstChildElement("GlobalRedshift");
+    if (!global_z_node.isNull()) {
+        std::set<double> gb_z_values {};
+        auto z_sub_list = global_z_node.firstChildElement("RedshiftValues").childNodes();
+        for (int j = 0; j < z_sub_list.count(); ++j) {
+          auto sub_node = z_sub_list.at(j).toElement();
+          if (sub_node.hasChildNodes()) {
+            gb_z_values.insert(sub_node.text().toDouble());
+          }
+        }
+        model.setZValues(gb_z_values);
+
+        std::vector<Range> gb_z_ranges {};
+        auto z_range_node_list = global_z_node.firstChildElement("RedshiftRanges").childNodes();
+        for (int j = 0; j < z_range_node_list.count(); ++j) {
+          auto range_node = z_range_node_list.at(j).toElement();
+          Range range;
+          range.setMin(range_node.attribute("Min").toDouble());
+          range.setMax(range_node.attribute("Max").toDouble());
+          range.setStep(range_node.attribute("Step").toDouble());
+          gb_z_ranges.push_back(std::move(range));
+        }
+        model.setZRange(gb_z_ranges);
+    }
+
+
+
+    auto global_ebv_node = root_node.firstChildElement("GlobalEbv");
+    if (!global_ebv_node.isNull()) {
+        std::set<double> gb_ebv_values {};
+        auto z_sub_list = global_ebv_node.firstChildElement("EbvValues").childNodes();
+        for (int j = 0; j < z_sub_list.count(); ++j) {
+          auto sub_node = z_sub_list.at(j).toElement();
+          if (sub_node.hasChildNodes()) {
+            gb_ebv_values.insert(sub_node.text().toDouble());
+          }
+        }
+        model.setEbvValues(gb_ebv_values);
+
+        std::vector<Range> gb_ebv_ranges {};
+        auto z_range_node_list = global_ebv_node.firstChildElement("EbvRanges").childNodes();
+        for (int j = 0; j < z_range_node_list.count(); ++j) {
+          auto range_node = z_range_node_list.at(j).toElement();
+          Range range;
+          range.setMin(range_node.attribute("Min").toDouble());
+          range.setMax(range_node.attribute("Max").toDouble());
+          range.setStep(range_node.attribute("Step").toDouble());
+          gb_ebv_ranges.push_back(std::move(range));
+        }
+        model.setEbvRange(gb_ebv_ranges);
+    }
+    /* /Global Z & EBV */
+
+
     auto rules_node = root_node.firstChildElement("ParameterRules");
     auto list = rules_node.childNodes();
     for (int i = 0; i < list.count(); ++i) {
       auto node_rule = list.at(i).toElement();
       bool ok;
       auto number = node_rule.attribute("ModelNumber").toLongLong(&ok);
-      if (!ok){
-        number=-1;
+      if (!ok) {
+        number = -1;
       }
 
       ParameterRule rule{number};
@@ -116,7 +172,7 @@ ModelSet ModelSet::deserialize(QDomDocument& doc, ModelSet& model) {
       std::vector<Range> ebv_ranges { };
       /*for backward compatibility */
       auto ebv_node = node_rule.firstChildElement("EbvRange");
-      if (!ebv_node.isNull()){
+      if (!ebv_node.isNull()) {
         Range range;
         range.setMin(ebv_node.attribute("Min").toDouble());
         range.setMax(ebv_node.attribute("Max").toDouble());
@@ -154,9 +210,9 @@ ModelSet ModelSet::deserialize(QDomDocument& doc, ModelSet& model) {
       }
 
       std::vector<Range> z_ranges { };
-      /*for backward compatibility */;
+      /*for backward compatibility */
       auto z_node = node_rule.firstChildElement("ZRange");
-      if (!z_node.isNull()){
+      if (!z_node.isNull()) {
         Range range;
         range.setMin(z_node.attribute("Min").toDouble());
         range.setMax(z_node.attribute("Max").toDouble());
@@ -181,7 +237,7 @@ ModelSet ModelSet::deserialize(QDomDocument& doc, ModelSet& model) {
 
       auto sed_node_list = node_rule.firstChildElement("SedsSelection");
       DatasetSelection sed_selection{};
-      if (!sed_node_list.isNull()){
+      if (!sed_node_list.isNull()) {
         std::vector<std::string> groups{};
         auto group_nodes = sed_node_list.firstChildElement("SedGroups").childNodes();
          for (int j = 0; j < group_nodes.count(); ++j) {
@@ -210,7 +266,7 @@ ModelSet ModelSet::deserialize(QDomDocument& doc, ModelSet& model) {
 
       auto red_curve_node_list = node_rule.firstChildElement("RedCurvesSelection");
       DatasetSelection red_selection{};
-      if (!red_curve_node_list.isNull()){
+      if (!red_curve_node_list.isNull()) {
         std::vector<std::string> groups{};
         auto group_nodes = red_curve_node_list.firstChildElement("RedCurveGroups").childNodes();
          for (int j = 0; j < group_nodes.count(); ++j) {
@@ -248,6 +304,47 @@ QDomDocument ModelSet::serialize(){
     QDomElement root = doc.createElement("ParameterSpace");
     root.setAttribute("Name", QString::fromStdString(getName()));
     doc.appendChild(root);
+
+
+    QDomElement gb_redshift_Node = doc.createElement("GlobalRedshift");
+    QDomElement gb_redshift_values_node = doc.createElement("RedshiftValues");
+    for (auto& value : m_z_values) {
+       QDomElement value_element = doc.createElement("Value");
+       value_element.appendChild(doc.createTextNode(QString::number(value,'g',20)));
+       gb_redshift_values_node.appendChild(value_element);
+    }
+    gb_redshift_Node.appendChild(gb_redshift_values_node);
+    QDomElement gb_redshift_ranges_node = doc.createElement("RedshiftRanges");
+    for (auto& range : m_z_ranges) {
+       QDomElement range_element = doc.createElement("Range");
+       range_element.setAttribute("Min",range.getMin());
+       range_element.setAttribute("Max",range.getMax());
+       range_element.setAttribute("Step",range.getStep());
+       gb_redshift_ranges_node.appendChild(range_element);
+    }
+    gb_redshift_Node.appendChild(gb_redshift_ranges_node);
+    root.appendChild(gb_redshift_Node);
+
+
+    QDomElement gb_ebv_Node = doc.createElement("GlobalEbv");
+    QDomElement gb_ebv_values_node = doc.createElement("EbvValues");
+    for (auto& value : m_ebv_values) {
+       QDomElement value_element = doc.createElement("Value");
+       value_element.appendChild(doc.createTextNode(QString::number(value,'g',20)));
+       gb_ebv_values_node.appendChild(value_element);
+    }
+    gb_ebv_Node.appendChild(gb_ebv_values_node);
+    QDomElement gb_ebv_ranges_node = doc.createElement("EbvRanges");
+    for (auto& range : m_ebv_ranges) {
+       QDomElement range_element = doc.createElement("Range");
+       range_element.setAttribute("Min",range.getMin());
+       range_element.setAttribute("Max",range.getMax());
+       range_element.setAttribute("Step",range.getStep());
+       gb_ebv_ranges_node.appendChild(range_element);
+    }
+    gb_ebv_Node.appendChild(gb_ebv_ranges_node);
+    root.appendChild(gb_ebv_Node);
+
 
     QDomElement rules_Node = doc.createElement("ParameterRules");
     root.appendChild(rules_Node);
@@ -437,6 +534,72 @@ std::vector<std::string> ModelSet::getSeds() const{
   return result;
 
 }
+
+
+/**
+   * @brief set the Z ranges.
+   * @param the Z ranges.
+   */
+  void ModelSet::setZRange(std::vector<Range> z_ranges) {
+    m_z_ranges = z_ranges;
+  }
+
+  /**
+   * @brief get the Z ranges.
+   * @return the current Z ranges.
+   */
+  const std::vector<Range>& ModelSet::getZRanges() const {
+    return m_z_ranges;
+  }
+
+  /**
+   * @brief set the Z values.
+   * @param the Z values.
+   */
+  void ModelSet::setZValues(std::set<double> z_values) {
+    m_z_values = z_values;
+  }
+
+  /**
+   * @brief get the Z values.
+   * @return the current Z values.
+   */
+  const std::set<double>& ModelSet::getZValues() const {
+    return m_z_values;
+  }
+
+  /**
+   * @brief set the EBV ranges.
+   * @param the EBV ranges.
+   */
+  void ModelSet::setEbvRange(std::vector<Range> ebv_ranges) {
+    m_ebv_ranges = ebv_ranges;
+  }
+
+  /**
+   * @brief get the EBV ranges.
+   * @return the current  EBV ranges.
+   */
+  const std::vector<Range>& ModelSet::getEbvRanges() const {
+    return m_ebv_ranges;
+  }
+
+  /**
+   * @brief set the EBV values.
+   * @param the EBV values.
+   */
+  void ModelSet::setEbvValues(std::set<double> ebv_values) {
+    m_ebv_values = ebv_values;
+  }
+
+  /**
+   * @brief get the EBV values.
+   * @return the current EBV values.
+   */
+  const std::set<double>& ModelSet::getEbvValues() const {
+    return m_ebv_values;
+  }
+
 
 }
 }

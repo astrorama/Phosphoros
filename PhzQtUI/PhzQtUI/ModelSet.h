@@ -2,10 +2,13 @@
 #define MODELSET_H
 
 #include <map>
+#include <set>
+#include <vector>
 #include <string>
 #include <QDomDocument>
 #include "PhzDataModel/PhzModel.h"
 #include "ParameterRule.h"
+#include "PhzQtUI/Range.h"
 
 
 namespace boost{
@@ -56,17 +59,67 @@ public:
      */
     void setName(std::string name);
 
+
+    /**
+     * @brief set the Z ranges.
+     * @param the Z ranges.
+     */
+    void setZRange(std::vector<Range> z_ranges);
+
+    /**
+     * @brief get the Z ranges.
+     * @return the current Z ranges.
+     */
+    const std::vector<Range>& getZRanges() const;
+
+    /**
+     * @brief set the Z values.
+     * @param the Z values.
+     */
+    void setZValues(std::set<double> z_values);
+
+    /**
+     * @brief get the Z values.
+     * @return the current Z values.
+     */
+    const std::set<double>& getZValues() const;
+
+    /**
+     * @brief set the EBV ranges.
+     * @param the EBV ranges.
+     */
+    void setEbvRange(std::vector<Range> ebv_ranges);
+
+    /**
+     * @brief get the EBV ranges.
+     * @return the current  EBV ranges.
+     */
+    const std::vector<Range>& getEbvRanges() const;
+
+    /**
+     * @brief set the EBV values.
+     * @param the EBV values.
+     */
+    void setEbvValues(std::set<double> ebv_values);
+
+    /**
+     * @brief get the EBV values.
+     * @return the current EBV values.
+     */
+    const std::set<double>& getEbvValues() const;
+
+
     /**
      * @brief get the ParameterRules list
      * @return  a const ref on the ParameterRules list
      */
-    std::map<int,ParameterRule> getParameterRules() const;
+    std::map<int, ParameterRule> getParameterRules() const;
 
     /**
      * @brief set the ParameterRules by moving the provided object into the ModelSet
      * @param parameter_rules
      */
-    void setParameterRules( std::map<int,ParameterRule> parameter_rules);
+    void setParameterRules(std::map<int, ParameterRule> parameter_rules);
 
     /**
      * @brief Read from the disk all the ModelSet stored in a given folder.
@@ -74,7 +127,7 @@ public:
      * The folder containing the persisted SurveyFilterMapping;
      * @return
      */
-    static std::map<int,ModelSet> loadModelSetsFromFolder(std::string root_path);
+    static std::map<int, ModelSet> loadModelSetsFromFolder(std::string root_path);
 
     /**
      * @brief load a ModelSet from a xml file
@@ -82,7 +135,7 @@ public:
      * @param root_path
      * @return the ModelSet.
      */
-    static ModelSet loadModelSetFromFile(std::string file_name,std::string root_path);
+    static ModelSet loadModelSetFromFile(std::string file_name, std::string root_path);
 
 
 
@@ -102,7 +155,7 @@ public:
     /**
      * @brief create a ModelSet out of its xml serialized version
      */
-    static ModelSet deserialize(QDomDocument& doc,ModelSet& model);
+    static ModelSet deserialize(QDomDocument& doc, ModelSet& model);
 
     /**
      * create a xml serialized version of the ModelSet
@@ -123,14 +176,18 @@ public:
     /**
      * @brief compute the ModelAxeTuple corresponding to this ModelSet
      */
-    std::map<std::string,PhzDataModel::ModelAxesTuple> getAxesTuple() const;
+    std::map<std::string, PhzDataModel::ModelAxesTuple> getAxesTuple() const;
 
     std::vector<std::string> getSeds() const;
 
 private:
     std::string m_name;
-    std::map<int,ParameterRule> m_parameter_rules {};
+    std::map<int, ParameterRule> m_parameter_rules {};
     std::string m_root_path;
+    std::vector<Range> m_z_ranges {};
+    std::set<double> m_z_values {};
+    std::vector<Range> m_ebv_ranges {};
+    std::set<double> m_ebv_values {};
 };
 
 }
