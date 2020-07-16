@@ -29,6 +29,8 @@ namespace PhzQtUI {
 
 DialogRange::DialogRange(QWidget *parent) : QDialog(parent) , ui(new Ui::DialogRange) {
     ui->setupUi(this);
+    QRegExp rx("(\\s*(\\d+|\\d+\\.\\d*)\\s*(,|$))*");
+    ui->txt_values->setValidator(new QRegExpValidator(rx));
 }
 
 
@@ -37,17 +39,21 @@ void DialogRange::setData(std::vector<Range> ranges, std::set<double> values, bo
    m_values = values;
    m_is_redshift = redshift;
 
-   if (ranges.size() > 0) {
-     ui->rb_range->setChecked(true);
-     on_rb_range_clicked();
-   }
 
-   populateRangesAndValues();
+
    if (redshift) {
      ui->lbl_title->setText("Redshift Range");
    } else {
      ui->lbl_title->setText("E(B-V) Range");
    }
+
+   populateRangesAndValues();
+
+   if (ranges.size() > 0) {
+       ui->rb_range->setChecked(true);
+   }
+
+   on_rb_range_clicked();
 }
 
 
@@ -57,12 +63,12 @@ DialogRange::~DialogRange() {
 
 
 void DialogRange::populateRangesAndValues() {
-    cleanRangeControl( ui->Layout_range);
+    cleanRangeControl(ui->Layout_range);
     m_current_range_id = 0;
     for (auto& range : m_ranges) {
       auto del_button = new GridButton(0, m_current_range_id, "Delete");
-      connect(del_button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
-      SLOT(onDeleteClicked(size_t,size_t)));
+      connect(del_button, SIGNAL(GridButtonClicked(size_t, size_t)), this,
+      SLOT(onDeleteClicked(size_t, size_t)));
       ui->Layout_range->addWidget(createRangeControls(del_button, m_current_range_id, false, range));
       ++m_current_range_id;
     }

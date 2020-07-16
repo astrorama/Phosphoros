@@ -1,6 +1,7 @@
 
 #include <QMessageBox>
 #include <QProcess>
+#include <algorithm>
 #include <QStandardItemModel>
 #include <QDir>
 #include "ElementsKernel/Exception.h"
@@ -34,7 +35,6 @@ void DialogModelSet::loadSeds() {
       treeModel_sed->load();
       ui->treeView_Sed->setModel(treeModel_sed);
       ui->treeView_Sed->collapseAll();
-      //ui->treeView_Sed->setColumnWidth(0, 500);
 
       connect(treeModel_sed, SIGNAL(itemChanged(QStandardItem*)), treeModel_sed,
                    SLOT(onItemChanged(QStandardItem*)));
@@ -44,7 +44,7 @@ void DialogModelSet::loadSeds() {
                       "There is no SED to select. "
                       "You can provide and manage SEDs in the \"Configuration/Aux. Data\" page.",
                       QMessageBox::Ok);
-         }
+      }
 
 }
 
@@ -57,8 +57,6 @@ DialogModelSet::DialogModelSet(DatasetRepo seds_repository,
     m_redenig_curves_repository(redenig_curves_repository) {
     ui->setupUi(this);
 
-
-
     loadSeds();
 
     DataSetTreeModel* treeModel_red = new DataSetTreeModel(m_redenig_curves_repository);
@@ -66,7 +64,7 @@ DialogModelSet::DialogModelSet(DatasetRepo seds_repository,
     ui->treeView_Reddening->setModel(treeModel_red);
     ui->treeView_Reddening->collapseAll();
 
-    connect( treeModel_red, SIGNAL(itemChanged(QStandardItem*)), treeModel_red,
+    connect(treeModel_red, SIGNAL(itemChanged(QStandardItem*)), treeModel_red,
                  SLOT(onItemChanged(QStandardItem*)));
 
     if (treeModel_red->rowCount() == 0) {
@@ -75,12 +73,6 @@ DialogModelSet::DialogModelSet(DatasetRepo seds_repository,
                  "You can provide and manage reddening curves in the \"Configuration/Aux. Data\" page.",
                  QMessageBox::Ok);
     }
-
-    QRegExp rx("(\\s*(\\d+|\\d+\\.\\d*)\\s*(,|$))*");
-    ui->txt_ebv_values->setValidator(new QRegExpValidator(rx));
-    ui->txt_z_values->setValidator(new QRegExpValidator(rx));
-
-
 }
 
 
@@ -92,7 +84,7 @@ DialogModelSet::~DialogModelSet() {
 
 void DialogModelSet::sedProcessStarted() {
     ui->labelMessage->setText("Adding emission Lines to the SEDs...");
-    for (auto button :m_message_buttons){
+    for (auto button : m_message_buttons) {
       button->setEnabled(false);
     }
 
@@ -100,14 +92,11 @@ void DialogModelSet::sedProcessStarted() {
 
 void DialogModelSet::sedProcessfinished(int, QProcess::ExitStatus) {
       // remove the buttons
-      for (auto button :m_message_buttons){
+      for (auto button : m_message_buttons) {
         delete button;
       }
 
       m_message_buttons = std::vector<MessageButton*>();
-
-
-
 
       // reload the provider and the model
       std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
@@ -152,33 +141,142 @@ void DialogModelSet::addEmissionLineButtonClicked(const QString& group) {
 
 
  void DialogModelSet::setViewMode() {
-     m_view_popup=true;
+     m_view_popup = true;
      turnControlsInView();
  }
 
 
-void DialogModelSet::loadData(int ref ,const std::map<int,ParameterRule>& init_parameter_rules){
-  m_rules=init_parameter_rules;
-  m_ref=ref;
+void DialogModelSet::loadData(int ref,
+                              const std::map<int, ParameterRule>& init_parameter_rules,
+                              std::vector<Range> z_ranges,
+                              std::set<double> z_values,
+                              std::vector<Range> ebv_ranges,
+                              std::set<double> ebv_values) {
+  m_rules = init_parameter_rules;
+  m_ref = ref;
+  m_z_ranges = z_ranges;
+  m_z_values = z_values;
+  m_ebv_ranges = ebv_ranges;
+  m_ebv_values = ebv_values;
 
   auto selected_rule = m_rules[m_ref];
 
-          ui->txt_name->setText(QString::fromStdString(selected_rule.getName()));
+  ui->txt_name->setText(QString::fromStdString(selected_rule.getName()));
 
-          // SED
-          static_cast<SedTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedSelection());
-          // Reddening Curve
-          static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getRedCurveSelection());
-
-
-          // Redshift & E(B-V)
-          populateZRangesAndValues(selected_rule);
-          populateEbvRangesAndValues(selected_rule);
+  // SED
+  static_cast<SedTreeModel*>(ui->treeView_Sed->model())->setState(selected_rule.getSedSelection());
+  // Reddening Curve
+  static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->setState(selected_rule.getRedCurveSelection());
 
 
-  turnControlsInEdition();
+  // find the current borders
+  std::set<double> old_z_val {};
+  if (selected_rule.getZRanges().size() > 0) {
+    for (auto& range : selected_rule.getZRanges()) {
+      for (double val = range.getMin(); val <= range.getMax(); val += range.getStep()) {
+        old_z_val.insert(val);
+      }
+    }
+  } else {
+    old_z_val = selected_rule.getRedshiftValues();
+  }
+  double old_z_min = 0;
+  double old_z_max = 10000;
+  if (old_z_val.size() > 0) {
+    old_z_min = *(old_z_val.begin());
+    old_z_max = *(old_z_val.rbegin());
+  }
+
+  // get the global values
+  std::set<double> z_val {};
+  if (m_z_ranges.size() > 0) {
+    for (auto& range : m_z_ranges) {
+      for (double val = range.getMin(); val <= range.getMax(); val += range.getStep()) {
+        z_val.insert(val);
+      }
+    }
+  } else {
+    z_val = m_z_values;
+  }
+
+  // fill the CB and find the selected values
+  ui->min_z_cb->clear();
+  ui->max_z_cb->clear();
+  size_t index_z = 0;
+  size_t index_z_min = -1;
+  size_t index_z_max = -1;
+  for (auto& data : z_val) {
+     ui->min_z_cb->addItem(QString::number(data));
+     ui->max_z_cb->addItem(QString::number(data));
+
+     if (data <= old_z_min) {
+       index_z_min = index_z;
+     }
+
+     if (data <= old_z_max) {
+       index_z_max = index_z;
+     }
+
+     ++index_z;
+  }
+  ui->max_z_cb->setCurrentIndex(index_z_max);
+  ui->min_z_cb->setCurrentIndex(index_z_min);
+
+
+  // find the current borders
+   std::set<double> old_ebv_val {};
+   if (selected_rule.getEbvRanges().size() > 0) {
+     for (auto& range : selected_rule.getEbvRanges()) {
+       for (double val = range.getMin(); val <= range.getMax(); val += range.getStep()) {
+         old_ebv_val.insert(val);
+       }
+     }
+   } else {
+     old_ebv_val = selected_rule.getEbvValues();
+   }
+   double old_ebv_min = 0;
+   double old_ebv_max = 10000;
+   if (old_ebv_val.size() > 0) {
+     old_ebv_min = *(old_ebv_val.begin());
+     old_ebv_max = *(old_ebv_val.rbegin());
+   }
+
+  std::set<double> ebv_val {};
+    if (m_ebv_ranges.size() > 0) {
+      for (auto& range : m_ebv_ranges) {
+        for (double val = range.getMin(); val <= range.getMax(); val += range.getStep()) {
+          ebv_val.insert(val);
+        }
+      }
+    } else {
+      ebv_val = m_ebv_values;
+    }
+
+    ui->min_ebv_cb->clear();
+    ui->max_ebv_cb->clear();
+    size_t index_ebv = 0;
+    size_t index_ebv_min = -1;
+    size_t index_ebv_max = -1;
+    for (auto& data : ebv_val) {
+       ui->min_ebv_cb->addItem(QString::number(data));
+       ui->max_ebv_cb->addItem(QString::number(data));
+
+       if (data <= old_ebv_min) {
+         index_ebv_min = index_ebv;
+       }
+
+       if (data <= old_ebv_max) {
+         index_ebv_max = index_ebv;
+       }
+
+       ++index_ebv;
+    }
+
+    ui->max_ebv_cb->setCurrentIndex(index_ebv_max);
+    ui->min_ebv_cb->setCurrentIndex(index_ebv_min);
+
+    turnControlsInEdition();
 }
-
 
 
 void DialogModelSet::turnControlsInEdition(){
@@ -190,18 +288,10 @@ void DialogModelSet::turnControlsInEdition(){
     ui->txt_name->setEnabled(true);
 
   // Redshift & E(B-V)
-     ui->rb_ebv_val->setEnabled(true);
-     ui->rb_ebv_range->setEnabled(true);
-
-     ui->txt_ebv_values->setEnabled( ui->rb_ebv_val->isChecked());
-     ui->btn_add_ebv_range->setEnabled(!ui->rb_ebv_val->isChecked());
-     SetRangeControlsEnabled(ui->Layout_ebv_range,!ui->rb_ebv_val->isChecked());
-
-     ui->rb_z_val->setEnabled(true);
-     ui->rb_z_range->setEnabled(true);
-     ui->txt_z_values->setEnabled(ui->rb_z_val->isChecked());
-     ui->btn_add_z_range->setEnabled(!ui->rb_z_val->isChecked());
-     SetRangeControlsEnabled(ui->Layout_z_range,!ui->rb_z_val->isChecked());
+    ui->min_z_cb->setEnabled(true);
+    ui->max_z_cb->setEnabled(true);
+    ui->min_ebv_cb->setEnabled(true);
+    ui->max_ebv_cb->setEnabled(true);
 
 }
 
@@ -216,84 +306,16 @@ void DialogModelSet::turnControlsInView() {
     ui->txt_name->setEnabled(false);
 
     // Redshift & E(B-V)
-    ui->rb_ebv_val->setEnabled(false);
-    ui->rb_ebv_range->setEnabled(false);
-    ui->txt_ebv_values->setEnabled(false);
-    ui->btn_add_z_range->setEnabled(false);
-    SetRangeControlsEnabled(ui->Layout_ebv_range,false);
-
-    ui->rb_z_val->setEnabled(false);
-    ui->rb_z_range->setEnabled(false);
-    ui->txt_z_values->setEnabled(false);
-    ui->btn_add_ebv_range->setEnabled(false);
-    SetRangeControlsEnabled(ui->Layout_z_range,false);
+    ui->min_z_cb->setEnabled(false);
+    ui->max_z_cb->setEnabled(false);
+    ui->min_ebv_cb->setEnabled(false);
+    ui->max_ebv_cb->setEnabled(false);
 
 }
-
-void DialogModelSet::on_rb_ebv_val_clicked() {
-  ui->rb_ebv_range->setChecked(!ui->rb_ebv_val->isChecked());
-  ui->txt_ebv_values->setEnabled( ui->rb_ebv_val->isChecked());
-  ui->btn_add_ebv_range->setEnabled(!ui->rb_ebv_val->isChecked());
-  SetRangeControlsEnabled(ui->Layout_ebv_range,!ui->rb_ebv_val->isChecked());
-  if (ui->rb_ebv_val->isChecked()) {
-     for (int i = ui->Layout_ebv_range->count()-1; i >=0; --i) {
-       QWidget *range_frame =  ui->Layout_ebv_range->itemAt(i)->widget();
-       if (range_frame != NULL) {
-         delete range_frame;
-       }
-     }
-     cleanRangeControl( ui->Layout_ebv_range);
-  }
-}
-
-void DialogModelSet::on_rb_ebv_range_clicked() {
-  ui->rb_ebv_val->setChecked(!ui->rb_ebv_range->isChecked());
-  ui->txt_ebv_values->setEnabled( ui->rb_ebv_val->isChecked());
-  ui->btn_add_ebv_range->setEnabled(!ui->rb_ebv_val->isChecked());
-  SetRangeControlsEnabled(ui->Layout_ebv_range,!ui->rb_ebv_val->isChecked());
-  if (ui->rb_ebv_range->isChecked()) {
-     ui->txt_ebv_values->setText("");
-  }
-}
-
-
-void DialogModelSet::on_rb_z_val_clicked() {
-  ui->rb_z_range->setChecked(!ui->rb_z_val->isChecked());
-  ui->txt_z_values->setEnabled( ui->rb_z_val->isChecked());
-  ui->btn_add_z_range->setEnabled(!ui->rb_z_val->isChecked());
-  SetRangeControlsEnabled(ui->Layout_z_range,!ui->rb_z_val->isChecked());
-  if (ui->rb_z_val->isChecked()) {
-     for (int i = ui->Layout_z_range->count()-1; i >=0; --i) {
-       QWidget *range_frame =  ui->Layout_z_range->itemAt(i)->widget();
-       if (range_frame != NULL) {
-         delete range_frame;
-       }
-     }
-     cleanRangeControl( ui->Layout_z_range);
-  }
-}
-
-void DialogModelSet::on_rb_z_range_clicked() {
-  ui->rb_z_val->setChecked(!ui->rb_z_range->isChecked());
-  ui->txt_z_values->setEnabled( ui->rb_z_val->isChecked());
-  ui->btn_add_z_range->setEnabled(!ui->rb_z_val->isChecked());
-  SetRangeControlsEnabled(ui->Layout_z_range,!ui->rb_z_val->isChecked());
-  if (ui->rb_z_range->isChecked()) {
-     ui->txt_z_values->setText("");
-  }
-}
-
-
-
-
-
-
-
-
 
 
 void DialogModelSet::on_buttonBox_rejected() {
-  this->popupClosing(m_ref,m_rules[m_ref],false);
+  this->popupClosing(m_ref, m_rules[m_ref], false);
 }
 
 
@@ -303,76 +325,109 @@ void DialogModelSet::on_buttonBox_accepted()
   auto sed_selection = static_cast<SedTreeModel*>(ui->treeView_Sed->model())->getState();
   auto red_curve_selection = static_cast<DataSetTreeModel*>(ui->treeView_Reddening->model())->getState();
 
-  if (ui->txt_name->text().trimmed().size()==0){
-    QMessageBox::warning( this,
+  if (ui->txt_name->text().trimmed().size() == 0) {
+    QMessageBox::warning(this,
                              "Missing Data...",
                              "Please provide a name.",
-                             QMessageBox::Ok );
+                             QMessageBox::Ok);
        return;
   }
-  for(auto it = m_rules.begin(); it != m_rules.end(); ++it ) {
-    if (it->second.getName()==ui->txt_name->text().toStdString() &&  it->first!=m_ref){
-      QMessageBox::warning( this,
+  for (auto it = m_rules.begin(); it != m_rules.end(); ++it) {
+    if (it->second.getName() == ui->txt_name->text().toStdString() &&  it->first != m_ref) {
+      QMessageBox::warning(this,
                                "Duplicate Name...",
                                "The name you enter is already used, please provide another name.",
-                               QMessageBox::Ok );
+                               QMessageBox::Ok);
          return;
     }
   }
 
 
-  if (sed_selection.isEmpty() ){
-    QMessageBox::warning( this,
+  if (sed_selection.isEmpty()) {
+    QMessageBox::warning(this,
                           "Missing Data...",
                           "Please provide SED(s) selection.",
-                          QMessageBox::Ok );
+                          QMessageBox::Ok);
     return;
   }
 
-  if (red_curve_selection.isEmpty()){
-    QMessageBox::warning( this,
+  if (red_curve_selection.isEmpty()) {
+    QMessageBox::warning(this,
                           "Missing Data...",
                           "Please provide Reddening Curve(s) selection.",
-                          QMessageBox::Ok );
+                          QMessageBox::Ok);
     return;
   }
 
+  // Redshift and E(B-V)
 
+  double min_z = ui->min_z_cb->currentText().toDouble();
+  double max_z = ui->max_z_cb->currentText().toDouble();
+  std::set<double> new_z_values{};
+  std::vector<Range> new_z_ranges{};
+  if (m_z_ranges.size() > 0) {
+    for (auto& range : m_z_ranges) {
+      double start = std::max(min_z, range.getMin());
+      double stop = std::min(max_z, range.getMax());
+      new_z_ranges.emplace_back(start, stop, range.getStep());
+    }
+  } else {
+    for (auto& value : m_z_values) {
+      if (value >= min_z && value <= max_z) {
+        new_z_values.insert(value);
+      }
+    }
+  }
 
-    // Redshift and E(B-V)
-    auto new_z_ranges = getRanges( ui->Layout_z_range);
-    auto new_ebv_ranges = getRanges( ui->Layout_ebv_range);
+  auto old_z_ranges = m_rules[m_ref].getZRanges();
 
+  try {
+    m_rules[m_ref].setRedshiftValues(std::move(new_z_values));
+    m_rules[m_ref].setZRanges(std::move(new_z_ranges));
+    m_rules[m_ref].getModelNumber(true);
+    m_rules[m_ref].getRedshiftRangeString();
+  } catch (const Elements::Exception& e) {
+      QMessageBox::warning(this, "Error while setting redshift ranges...",
+                                e.what(),
+                                QMessageBox::Ok);
 
+      m_rules[m_ref].setZRanges(std::move(old_z_ranges));
+      return;
+  }
 
-    auto old_z_ranges =m_rules[m_ref].getZRanges();
-    auto old_ebv_ranges =m_rules[m_ref].getEbvRanges();
+  double min_ebv = ui->min_ebv_cb->currentText().toDouble();
+  double max_ebv = ui->max_ebv_cb->currentText().toDouble();
+  std::set<double> new_ebv_values{};
+  std::vector<Range> new_ebv_ranges{};
+  if (m_ebv_ranges.size() > 0) {
+     for (auto& range : m_ebv_ranges) {
+       double start = std::max(min_ebv, range.getMin());
+       double stop = std::min(max_ebv, range.getMax());
+       new_ebv_ranges.emplace_back(start, stop, range.getStep());
+     }
+  } else {
+     for (auto& value : m_ebv_values) {
+       if (value >= min_ebv && value <= max_ebv) {
+         new_ebv_values.insert(value);
+       }
+     }
+  }
 
-    try {
-      m_rules[m_ref].setZRanges(std::move(new_z_ranges));
-      m_rules[m_ref].getModelNumber(true);
-      m_rules[m_ref].getRedshiftRangeString();
+  auto old_ebv_ranges = m_rules[m_ref].getEbvRanges();
+
+  try {
+    m_rules[m_ref].setEbvValues(std::move(new_ebv_values));
+    m_rules[m_ref].setEbvRanges(std::move(new_ebv_ranges));
+    m_rules[m_ref].getModelNumber(true);
+    m_rules[m_ref].getEbvRangeString();
     } catch (const Elements::Exception& e) {
-        QMessageBox::warning( this, "Error while setting redshift ranges...",
+        QMessageBox::warning(this, "Error while setting E(B-V) ranges...",
                                   e.what(),
-                                  QMessageBox::Ok );
+                                  QMessageBox::Ok);
 
-        m_rules[m_ref].setZRanges(std::move(old_z_ranges));
+        m_rules[m_ref].setEbvRanges(std::move(old_ebv_ranges));
         return;
     }
-
-    try {
-      m_rules[m_ref].setEbvRanges(std::move(new_ebv_ranges));
-      m_rules[m_ref].getModelNumber(true);
-      m_rules[m_ref].getEbvRangeString();
-      } catch (const Elements::Exception& e) {
-          QMessageBox::warning( this, "Error while setting E(B-V) ranges...",
-                                    e.what(),
-                                    QMessageBox::Ok );
-
-          m_rules[m_ref].setEbvRanges(std::move(old_ebv_ranges));
-          return;
-      }
 
 
       m_rules[m_ref].setName(ui->txt_name->text().toStdString());
@@ -384,196 +439,9 @@ void DialogModelSet::on_buttonBox_accepted()
     // Reddeing Curves
     m_rules[m_ref].setRedCurveSelection(std::move(red_curve_selection));
 
-    auto new_z_values = ParameterRule::parseValueList(ui->txt_z_values->text().toStdString());
-    m_rules[m_ref].setRedshiftValues(std::move(new_z_values));
-    auto new_ebv_values = ParameterRule::parseValueList(ui->txt_ebv_values->text().toStdString());
-    m_rules[m_ref].setEbvValues(std::move(new_ebv_values));
     m_rules[m_ref].getModelNumber(true);
-    this->popupClosing(m_ref,m_rules[m_ref],true);
+    this->popupClosing(m_ref, m_rules[m_ref], true);
     this->close();
-}
-
- void DialogModelSet::populateZRangesAndValues(ParameterRule selected_rule){
-    cleanRangeControl( ui->Layout_z_range);
-    m_current_z_range_id = 0;
-    if ( selected_rule.getZRanges().size()>0){
-      for (auto& range : selected_rule.getZRanges()) {
-        auto del_button = new GridButton(0, m_current_z_range_id, "Delete");
-        connect(del_button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
-        SLOT(onZDeleteClicked(size_t,size_t)));
-        ui->Layout_z_range->addWidget(createRangeControls(del_button, m_current_z_range_id, false, range));
-        ++m_current_z_range_id;
-      }
-      ui->txt_z_values->setText(QString::fromStdString(selected_rule.getRedshiftStringValueList()));
-      selected_rule.setRedshiftValues({});
-      ui->rb_z_range->setChecked(true);
-      ui->rb_z_val->setChecked(false);
-    } else {
-      ui->txt_z_values->setText(QString::fromStdString(selected_rule.getRedshiftStringValueList()));
-      ui->rb_z_range->setChecked(false);
-      ui->rb_z_val->setChecked(true);
-    }
-}
-
- void DialogModelSet::populateEbvRangesAndValues(ParameterRule selected_rule){
-    cleanRangeControl( ui->Layout_ebv_range);
-    m_current_ebv_range_id = 0;
-    if ( selected_rule.getEbvRanges().size()>0){
-      for (auto& range : selected_rule.getEbvRanges()) {
-        auto del_button = new GridButton(0, m_current_ebv_range_id, "Delete");
-        connect(del_button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
-        SLOT(onEbvDeleteClicked(size_t,size_t)));
-        ui->Layout_ebv_range->addWidget(createRangeControls(del_button, m_current_ebv_range_id, false, range));
-        ++m_current_ebv_range_id;
-      }
-      ui->txt_ebv_values->setText(QString::fromStdString(""));
-      selected_rule.setEbvValues({});
-      ui->rb_ebv_range->setChecked(true);
-      ui->rb_ebv_val->setChecked(false);
-    } else {
-      ui->txt_ebv_values->setText(QString::fromStdString(selected_rule.getEbvStringValueList()));
-      ui->rb_ebv_range->setChecked(false);
-      ui->rb_ebv_val->setChecked(true);
-    }
-}
-
- void DialogModelSet::onZDeleteClicked(size_t,size_t ref){
-   deleteRangeAt(ui->Layout_z_range, ref);
- }
-
- void DialogModelSet::onEbvDeleteClicked(size_t,size_t ref){
-   deleteRangeAt(ui->Layout_ebv_range, ref);
- }
-
-
-
-void DialogModelSet::on_btn_add_z_range_clicked() {
-  auto del_button = new GridButton(0, m_current_z_range_id, "Delete");
-  connect(del_button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
-      SLOT(onZDeleteClicked(size_t,size_t)));
-  ui->Layout_z_range->addWidget(createRangeControls(del_button, m_current_z_range_id, true));
-  ++m_current_z_range_id;
-  turnControlsInEdition();
-}
-
-void DialogModelSet::on_btn_add_ebv_range_clicked() {
-  auto del_button = new GridButton(0, m_current_ebv_range_id, "Delete");
-  connect(del_button, SIGNAL(GridButtonClicked(size_t,size_t)), this,
-      SLOT(onEbvDeleteClicked(size_t,size_t)));
-  ui->Layout_ebv_range->addWidget(createRangeControls(del_button, m_current_ebv_range_id, true));
-  ++m_current_ebv_range_id;
-  turnControlsInEdition();
-}
-
-
-QFrame* DialogModelSet::createRangeControls(GridButton* del_button, int range_id, bool enabled ){
-   return createRangeControls(del_button, range_id, enabled,{-1,-1,-1});
- }
-
-QFrame* DialogModelSet::createRangeControls(GridButton* del_button, int range_id, bool enabled, const Range& range){
-  bool do_create_void = range.getStep()<0;
-
-  auto range_frame = new QFrame();
-  auto range_layout = new QHBoxLayout();
-  range_frame->setLayout(range_layout);
-  auto lbl_min = new QLabel("Min :");
-  range_layout->addWidget(lbl_min);
-  auto txt_min = new QLineEdit();
-  if (!do_create_void){
-    txt_min->setText(QString::number(range.getMin(),'g',15));
-  }
-  txt_min->setValidator(new QDoubleValidator(0, 10000, 20));
-  txt_min->setEnabled(enabled);
-  range_layout->addWidget(txt_min);
-
-  auto lbl_max = new QLabel("Max :");
-  range_layout->addWidget(lbl_max);
-  auto txt_max = new QLineEdit();
-  if (!do_create_void){
-    txt_max->setText(QString::number(range.getMax(),'g',15));
-  }
-  txt_max->setValidator(new QDoubleValidator(0, 10000, 20));
-  txt_max->setEnabled(enabled);
-  range_layout->addWidget(txt_max);
-
-  auto lbl_step = new QLabel("Step :");
-  range_layout->addWidget(lbl_step);
-  auto txt_step = new QLineEdit();
-  if (!do_create_void){
-    txt_step->setText(QString::number(range.getStep(),'g',15));
-  }
-  txt_step->setValidator(new QDoubleValidator(0, 10000, 20));
-  txt_step->setEnabled(enabled);
-  range_layout->addWidget(txt_step);
-
-
-  del_button->setEnabled(enabled);
-  range_layout->addWidget(del_button);
-
-  auto lbl_id = new QLabel(QString::number(range_id));
-  lbl_id->setVisible(false);
-
-  range_layout->addWidget(lbl_id);
-  return range_frame;
-}
-
-
-
-
-void DialogModelSet::cleanRangeControl(QVBoxLayout* ranges_layout) {
-  for (int i = ranges_layout->count() - 1; i >= 0; --i) {
-    QWidget *widget = ranges_layout->itemAt(i)->widget();
-    if (widget != NULL) {
-      delete widget;
-    }
-  }
-}
-
-
-void DialogModelSet::SetRangeControlsEnabled(QVBoxLayout* ranges_layout, bool is_enabled) {
-  for (int i = 0; i < ranges_layout->count(); ++i) {
-    QWidget *range_frame = ranges_layout->itemAt(i)->widget();
-    if (range_frame != NULL) {
-      auto range_layout = range_frame->layout();
-      range_layout->itemAt(1)->widget()->setEnabled(is_enabled);
-      range_layout->itemAt(3)->widget()->setEnabled(is_enabled);
-      range_layout->itemAt(5)->widget()->setEnabled(is_enabled);
-      range_layout->itemAt(6)->widget()->setEnabled(is_enabled);
-    }
-  }
-}
-
-
-std::vector<Range> DialogModelSet::getRanges(QVBoxLayout* ranges_layout) {
-  std::vector<Range> new_ranges { };
-
-  for (int i = 0; i < ranges_layout->count(); ++i) {
-    QWidget *range_frame = ranges_layout->itemAt(i)->widget();
-    if (range_frame != NULL) {
-      auto range_layout = range_frame->layout();
-      double min = static_cast<QLineEdit*>(range_layout->itemAt(1)->widget())->text().toDouble();
-      double max = static_cast<QLineEdit*>(range_layout->itemAt(3)->widget())->text().toDouble();
-      double step = static_cast<QLineEdit*>(range_layout->itemAt(5)->widget())->text().toDouble();
-      new_ranges.push_back( { min, max, step });
-    }
-  }
-
-  return new_ranges;
-}
-
-void DialogModelSet::deleteRangeAt(QVBoxLayout* ranges_layout, size_t range_id) {
-
- for (int i = 0; i < ranges_layout->count(); ++i) {
-   QWidget *range_frame = ranges_layout->itemAt(i)->widget();
-   if (range_frame != NULL) {
-     auto range_layout = range_frame->layout();
-     size_t value = static_cast<QLabel*>(range_layout->itemAt(7)->widget())->text().toUInt();
-     if (range_id == value) {
-       delete range_frame;
-       break;
-     }
-   }
- }
 }
 
 }

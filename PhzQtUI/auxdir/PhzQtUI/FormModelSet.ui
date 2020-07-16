@@ -257,14 +257,14 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="label">
        <property name="text">
-        <string>Redshift range</string>
+        <string>E(B-V) range</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_conf_z">
+      <widget class="QPushButton" name="btn_conf_ebv">
        <property name="text">
         <string>Configure</string>
        </property>
@@ -284,14 +284,14 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>E(B-V) range</string>
+        <string>Redshift range</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_conf_ebv">
+      <widget class="QPushButton" name="btn_conf_z">
        <property name="text">
         <string>Configure</string>
        </property>

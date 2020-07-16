@@ -106,6 +106,7 @@ private:
     void setModelInView();
     void selectFromGrid();
     void reload_cb();
+    bool checkEbvZ();
 
     std::shared_ptr<ModelSetModel> m_model_set_model_ptr;
     bool m_setInsert;
