@@ -43,7 +43,8 @@ gpgcheck=0
 repo_gpgcheck=0
 enabled=1
 EOF
-  CMAKEFLAGS="$CMAKEFLAGS -DCPACK_PACKAGE_RELEASE=dev"
+  REL_NUMBER=$(git describe --tags | cut -d- -f2,3 --output-delimiter _)
+  CMAKEFLAGS="$CMAKEFLAGS -DCPACK_PACKAGE_RELEASE=${REL_NUMBER}"
 fi
 
 # From the CMakeLists.txt, retrieve the list of dependencies
