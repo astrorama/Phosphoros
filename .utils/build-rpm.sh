@@ -24,6 +24,9 @@ elif [ "$ID" == "centos" ]; then
   PYTHON="python"
 fi
 
+# Git may not be available
+yum install -y git
+
 # Astrorama repository
 cat > /etc/yum.repos.d/astrorama.repo << EOF
 [bintray--astrorama-fedora]
@@ -44,7 +47,7 @@ repo_gpgcheck=0
 enabled=1
 EOF
   REL_NUMBER=$(git describe --tags | cut -d- -f2,3 --output-delimiter _)
-  CMAKEFLAGS="$CMAKEFLAGS -DCPACK_PACKAGE_RELEASE=${REL_NUMBER}"
+  CMAKEFLAGS="$CMAKEFLAGS -DCPACK_PACKAGE_RELEASE=r${REL_NUMBER}"
 fi
 
 # From the CMakeLists.txt, retrieve the list of dependencies
