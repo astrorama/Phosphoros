@@ -173,7 +173,7 @@ void DialogModelSet::loadData(int ref,
   std::set<double> old_z_val {};
   if (selected_rule.getZRanges().size() > 0) {
     for (auto& range : selected_rule.getZRanges()) {
-      for (double val = range.getMin(); val <= range.getMax(); val += range.getStep()) {
+      for (double val = range.getMin(); val < range.getMax()+range.getStep(); val += range.getStep()) {
         old_z_val.insert(val);
       }
     }
@@ -191,7 +191,7 @@ void DialogModelSet::loadData(int ref,
   std::set<double> z_val {};
   if (m_z_ranges.size() > 0) {
     for (auto& range : m_z_ranges) {
-      for (double val = range.getMin(); val <= range.getMax(); val += range.getStep()) {
+      for (double val = range.getMin(); val < range.getMax()+range.getStep(); val += range.getStep()) {
         z_val.insert(val);
       }
     }
@@ -227,7 +227,7 @@ void DialogModelSet::loadData(int ref,
    std::set<double> old_ebv_val {};
    if (selected_rule.getEbvRanges().size() > 0) {
      for (auto& range : selected_rule.getEbvRanges()) {
-       for (double val = range.getMin(); val <= range.getMax(); val += range.getStep()) {
+       for (double val = range.getMin(); val < range.getMax()+range.getStep(); val += range.getStep()) {
          old_ebv_val.insert(val);
        }
      }
@@ -244,7 +244,7 @@ void DialogModelSet::loadData(int ref,
   std::set<double> ebv_val {};
     if (m_ebv_ranges.size() > 0) {
       for (auto& range : m_ebv_ranges) {
-        for (double val = range.getMin(); val <= range.getMax(); val += range.getStep()) {
+        for (double val = range.getMin(); val < range.getMax()+range.getStep(); val += range.getStep()) {
           ebv_val.insert(val);
         }
       }
