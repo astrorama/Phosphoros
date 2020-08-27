@@ -232,19 +232,18 @@ class SpeczPhotozPlot(object):
         self.fig.subplots_adjust(hspace=0)
 
     def __init__(self, ids, specz, photz, data, figsize=None, embedded=True):
-        self.ids = ids
-        self.specz = specz
-        self.photz = photz
         self.data = data
         self.embedded = embedded
 
         self.fig = plt.figure(figsize=figsize)
         self.z_max = max(max(specz), max(photz)) + 0.1
         self.data_max = max(max(data), abs(min(data))) + 0.1
-        xy = np.vstack([self.specz, self.photz])
-        self.density = gaussian_kde(xy)(xy)
-        z_order = np.argsort(self.density)
-        self.specz, self.photz, self.density = self.specz[z_order], self.photz[z_order], self.density[z_order]
+        xy = np.vstack([specz, photz])
+        density = gaussian_kde(xy)(xy)
+        z_order = np.argsort(density)
+        self.specz, self.photz, self.density = specz[z_order], photz[z_order], density[z_order]
+        self.data = self.data[z_order]
+        self.ids = ids[z_order]
 
         self._createSpeczPhotozPlot()
         self._createDeltaZPlot()

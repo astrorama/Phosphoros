@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <map>
+#include <set>
 #include <vector>
 #include <QDialog>
 #include <QProcess>
@@ -54,7 +55,12 @@ public:
    * @param init_parameter_rules
    * the map of ParameterRules to be displayed/modified
    */
-  void loadData(int ref, const std::map<int, ParameterRule>&);
+  void loadData(int ref,
+                const std::map<int, ParameterRule>& init_parameter_rules,
+                std::vector<Range> z_ranges,
+                std::set<double> z_values,
+                std::vector<Range> ebv_ranges,
+                std::set<double> ebv_values);
 
   /**
    * @brief When called, set the popup in read-only.
@@ -78,12 +84,6 @@ void addEmissionLineButtonClicked(const QString&);
    */
   void on_buttonBox_rejected();
 
-  void on_rb_ebv_val_clicked();
-  void on_rb_ebv_range_clicked();
-  void on_rb_z_val_clicked();
-  void on_rb_z_range_clicked();
-
-
   /**
    * @brief SLOT on_buttonBox_accepted: The user close the popup,
    * and rise the SIGNAL popupClosing
@@ -91,49 +91,20 @@ void addEmissionLineButtonClicked(const QString&);
 
   void on_buttonBox_accepted();
 
-  /**
-   * @brief SLOT raised when the user delete a redshift range
-   */
-  void onZDeleteClicked(size_t, size_t);
-
-  /**
-   * @brief SLOT raised when the user add a redshift range
-   */
-  void on_btn_add_z_range_clicked();
-
-  /**
-   * @brief SLOT raised when the user delete a E(B-V) range
-   */
-  void onEbvDeleteClicked(size_t, size_t);
-
-  /**
-   * @brief SLOT raised when the user add a E(B-V) range
-   */
-  void on_btn_add_ebv_range_clicked();
 
 private:
   void loadSeds();
   void turnControlsInEdition();
   void turnControlsInView();
-  void populateZRangesAndValues(ParameterRule selected_rule);
-  void populateEbvRangesAndValues(ParameterRule selected_rule);
-
-  QFrame* createRangeControls(GridButton* del_button, int range_id,
-      bool enabled);
-  QFrame* createRangeControls(GridButton* del_button, int range_id,
-      bool enabled, const Range& range);
-
-  void cleanRangeControl(QVBoxLayout* ranges_layout);
-  void SetRangeControlsEnabled(QVBoxLayout* ranges_layout, bool is_enabled);
-  std::vector<Range> getRanges(QVBoxLayout* ranges_layout);
-
-  void deleteRangeAt(QVBoxLayout* ranges_layout, size_t range_id);
 
   std::unique_ptr<Ui::DialogModelSet> ui;
   bool m_view_popup = false;
 
-  int m_current_z_range_id = 0;
-  int m_current_ebv_range_id = 0;
+  std::vector<Range> m_z_ranges;
+  std::set<double> m_z_values;
+  std::vector<Range> m_ebv_ranges;
+  std::set<double> m_ebv_values;
+
 
   DatasetRepo m_seds_repository;
   DatasetRepo m_redenig_curves_repository;

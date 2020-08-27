@@ -74,7 +74,9 @@ public:
         std::map<std::string, boost::program_options::variable_value> run_option,
         const std::map<std::string, boost::program_options::variable_value>& luminosity_config,
         const std::map<std::string, boost::program_options::variable_value>& sed_config,
-        double non_detection);
+        double non_detection,
+        std::string ra_col ="",
+        std::string dec_col ="");
 
 signals:
    /**
@@ -143,6 +145,8 @@ private:
     std::list<std::string> m_excluded_filters;
     std::string m_id_column;
     std::string m_refZ_column;
+    std::string m_ra_col;
+    std::string m_dec_col;
     std::map<std::string, boost::program_options::variable_value> m_run_option;
     std::map<std::string, boost::program_options::variable_value> m_lum_config;
     std::map<std::string, boost::program_options::variable_value> m_sed_config;

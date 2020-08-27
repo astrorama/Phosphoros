@@ -42,9 +42,14 @@ BOOST_FIXTURE_TEST_CASE(string_test, Range_Fixture) {
   std::string expected = "[1.2 , 5.1] step 0.5123";
   BOOST_CHECK_EQUAL(range.getStringRepresentation(),expected);
 
-  expected = "1.234500 5.123450 0.512345";
-  BOOST_CHECK_EQUAL(range.getConfigStringRepresentation(),expected);
-
+  std::stringstream stream(range.getConfigStringRepresentation());
+  double val;
+  stream >> val;
+  BOOST_CHECK_CLOSE(val, ref_min, 1e-6);
+  stream >> val;
+  BOOST_CHECK_CLOSE(val, ref_max, 1e-6);
+  stream >> val;
+  BOOST_CHECK_CLOSE(val, ref_step, 1e-6);
 }
 
 

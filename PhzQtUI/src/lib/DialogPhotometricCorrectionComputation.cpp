@@ -41,12 +41,16 @@
 #include "PhzModeling/SparseGridCreator.h"
 #include "PhzModeling/NoIgmFunctor.h"
 #include "PhzExecutables/ComputeSedWeight.h"
+#include "PhzQtUI/DialogAddGalEbv.h"
+
+#include "ElementsKernel/Logging.h"
 
 using namespace std;
 using namespace Euclid::PhzConfiguration;
 
 namespace Euclid {
 namespace PhzQtUI {
+static Elements::Logging logger = Elements::Logging::getLogger("DialogPhotometricCorrectionComputation");
 
 DialogPhotometricCorrectionComputation::DialogPhotometricCorrectionComputation(
     QWidget *parent) :
@@ -75,7 +79,9 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
     std::map<std::string, boost::program_options::variable_value> run_option,
     const std::map<std::string, boost::program_options::variable_value>& luminosity_config,
     const std::map<std::string, boost::program_options::variable_value>& sed_config,
-    double non_detection) {
+    double non_detection,
+    std::string ra_col,
+    std::string dec_col) {
   m_id_column = id_column;
   m_refZ_column = default_z_column;
   m_selected_filters = selected_filters;
@@ -84,6 +90,8 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
   m_sed_config = sed_config;
   m_lum_config = luminosity_config;
   m_non_detection = non_detection;
+  m_ra_col = ra_col;
+  m_dec_col = dec_col;
   ui->txt_survey->setText(QString::fromStdString(survey));
   ui->txt_Model->setText(QString::fromStdString(model));
   ui->txt_grid->setText(QString::fromStdString(grid));
@@ -104,6 +112,9 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
   string default_file_name = survey+"_"+model
       +"_"+ui->cb_SelectionMethod->currentText().toStdString();
   ui->txt_FileName->setText(QString::fromStdString(default_file_name));
+
+
+  logger.info()<< "ra_col = "<<m_ra_col<< " dec_col = "<<m_dec_col;
 
 }
 
@@ -501,6 +512,28 @@ void DialogPhotometricCorrectionComputation::reject() {
 }
 
 void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
+  if (m_run_option.find("dust-column-density-column-name") != m_run_option.end() &&
+      m_run_option.at("dust-column-density-column-name").as<std::string>() == "PLANCK_GAL_EBV") {
+
+
+      std::string path = ui->txt_catalog->text().toStdString();
+      auto column_reader = PhzUITools::CatalogColumnReader(path);
+      auto column_from_file = column_reader.getColumnNames();
+      if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
+           // the E(B-V) has to be looked up in the Planck map
+           std::unique_ptr<DialogAddGalEbv> dialog(new DialogAddGalEbv());
+           dialog->setInputs(path, m_ra_col, m_dec_col);
+           if (dialog->exec()) {
+              // new catalog contains the PLANCK_GAL_EBV column
+             ui->txt_catalog->setText(QString::fromStdString(dialog->getOutputName()));
+           } else {
+            // user has canceled the operation
+            return;
+           }
+     }
+  }
+
+
   PhzUtils::getStopThreadsFlag() = false;
   m_computing = true;
   string output_file_name = FileUtils::addExt(
@@ -513,6 +546,7 @@ void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
       && QMessageBox::question(this, "Override existing file...",
           "A File with the very same name as the one you provided already exist. Do you want to replace it?",
           QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
+    m_computing = false;
     return;
   }
 
