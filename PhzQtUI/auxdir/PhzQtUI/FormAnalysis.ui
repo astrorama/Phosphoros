@@ -220,8 +220,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>920</width>
-            <height>574</height>
+            <width>503</width>
+            <height>217</height>
            </rect>
           </property>
           <attribute name="label">
@@ -368,8 +368,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>920</width>
-            <height>574</height>
+            <width>418</width>
+            <height>150</height>
            </rect>
           </property>
           <attribute name="label">
@@ -536,8 +536,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>920</width>
-            <height>574</height>
+            <width>558</width>
+            <height>232</height>
            </rect>
           </property>
           <attribute name="label">
@@ -770,8 +770,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>920</width>
-            <height>574</height>
+            <width>478</width>
+            <height>158</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1693,22 +1693,6 @@
            </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_12">
-             <item>
-              <layout class="QVBoxLayout" name="verticalLayout_29">
-               <item>
-                <widget class="QCheckBox" name="cb_gen_likelihood">
-                 <property name="font">
-                  <font>
-                   <pointsize>11</pointsize>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Output Likelihood</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
              <item>
               <layout class="QVBoxLayout" name="verticalLayout_30">
                <item>

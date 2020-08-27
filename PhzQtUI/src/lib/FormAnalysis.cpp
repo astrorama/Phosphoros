@@ -883,9 +883,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     options_map["full-PDF-samplig"].value() = boost::any(no_flag);
   }
 
-  if (ui->cb_gen_likelihood->isChecked()) {
-   options_map["create-output-likelihoods"].value() = boost::any(yes_flag);
-  }
+
 
   if (ui->cb_gen_posterior->isChecked()) {
     options_map["create-output-posteriors"].value() = boost::any(yes_flag);
@@ -1812,22 +1810,6 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
 
   }
 
-
-  void FormAnalysis::on_cb_gen_likelihood_clicked() {
-    if (ui->cb_gen_likelihood->isChecked()) {
-       if (ui->cb_multi_out->currentText()=="Sampling") {
-         QMessageBox::warning(this, "Slow computation...",
-                       "Sampling the multi-dimensional likelihood grids "
-                       " will slow down the computation.", QMessageBox::Ok);
-       }else {
-         QMessageBox::warning(this, "Large output volume...",
-                       "Outputing multi-dimensional likelihood grids (one file per source)"
-                       " will generate a large output volume.", QMessageBox::Ok);
-       }
-
-    }
-    setRunAnnalysisEnable(true);
-  }
 
   void FormAnalysis::on_cb_gen_posterior_clicked() {
     if (ui->cb_gen_posterior->isChecked()) {
