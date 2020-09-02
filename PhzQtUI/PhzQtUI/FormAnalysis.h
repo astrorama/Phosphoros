@@ -130,8 +130,6 @@ void on_btn_ToPP_clicked();
 
     void on_cb_gen_posterior_clicked();
 
-    void on_cb_gen_likelihood_clicked();
-
     void on_cb_sedweight_clicked();
 
     void on_btn_confLuminosityPrior_clicked();

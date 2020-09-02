@@ -220,8 +220,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>920</width>
-            <height>574</height>
+            <width>503</width>
+            <height>217</height>
            </rect>
           </property>
           <attribute name="label">
@@ -368,8 +368,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>920</width>
-            <height>574</height>
+            <width>418</width>
+            <height>150</height>
            </rect>
           </property>
           <attribute name="label">
@@ -536,8 +536,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>920</width>
-            <height>574</height>
+            <width>558</width>
+            <height>232</height>
            </rect>
           </property>
           <attribute name="label">
@@ -770,8 +770,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>920</width>
-            <height>574</height>
+            <width>478</width>
+            <height>158</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1628,6 +1628,55 @@
               </widget>
              </item>
              <item>
+              <widget class="QComboBox" name="cb_multi_out">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Sampling</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Full grid</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_4">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Sample number:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="sb_sample_numb">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>10000</number>
+               </property>
+               <property name="value">
+                <number>1000</number>
+               </property>
+              </widget>
+             </item>
+             <item>
               <spacer name="horizontalSpacer_2">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
@@ -1645,22 +1694,6 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_12">
              <item>
-              <layout class="QVBoxLayout" name="verticalLayout_29">
-               <item>
-                <widget class="QCheckBox" name="cb_gen_likelihood">
-                 <property name="font">
-                  <font>
-                   <pointsize>11</pointsize>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Generate Likelihood Files</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
               <layout class="QVBoxLayout" name="verticalLayout_30">
                <item>
                 <widget class="QCheckBox" name="cb_gen_posterior">
@@ -1670,7 +1703,7 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>Generate Posterior Files</string>
+                  <string>Output Posterior</string>
                  </property>
                 </widget>
                </item>
