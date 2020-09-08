@@ -729,7 +729,7 @@ std::string FormAnalysis::getSedWeightFileName() {
   }
   std::size_t h1 = std::hash<std::string>{}(list_excluded_filters);
 
-  return "SED_Prior_"+model_name+"_"+survey_name+"_"+std::to_string(h1)+".ascii";
+  return "SED_Prior_"+model_name+"_"+survey_name+"_"+std::to_string(h1)+".fits";
 }
 
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getSedWeightOptionMap(std::string output_name) {
@@ -757,13 +757,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getS
    options_map["exclude-filter"].value() = boost::any(excluded);
   }
 
-  /// SED
-  auto grid_config_map = getGridConfiguration();
-  for (auto& pair : grid_config_map) {
-    if (pair.first.rfind("sed-", 0) == 0) {
-      options_map.insert(pair);
-    }
-  }
+  options_map["model-grid-file"].value() = boost::any(ui->cb_CompatibleGrid->currentText().toStdString());
 
   /// output name
   options_map["SED-Weight-Output"].value() = boost::any(output_name);
@@ -975,8 +969,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
    if (ui->cb_sedweight->isChecked()) {
      std::string sed_prior_name = getSedWeightFileName();
-     std::vector<std::string>  tablename{boost::filesystem::path{sed_prior_name}.filename().stem().string()};
-     options_map["axis-weight-prior-sed"].value() = boost::any(tablename);
+     std::vector<std::string>  tablename{"SedWeight/" + boost::filesystem::path{sed_prior_name}.filename().stem().string()+".fits"};
+     options_map["generic-grid-prior"].value() = boost::any(tablename);
    }
 
 
