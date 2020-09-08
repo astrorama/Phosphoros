@@ -1812,26 +1812,90 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
   }
 
   void FormAnalysis::on_btn_GetConfigAnalysis_clicked() {
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::Directory);
+    dialog.setDirectory(QString::fromStdString(FileUtils::getRootPath(true))+"config");
+    dialog.setOption(QFileDialog::DontUseNativeDialog);
+    dialog.setLabelText(QFileDialog::Accept, "Select Folder");
+    if (dialog.exec()) {
+          auto selected_folder = dialog.selectedFiles()[0];
 
-    // TODO get the full configs & command files
-    QString filter = "Config (*.CR.conf)";
+          QString cr{"\n\n"};
+          QString command{""};
 
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Configuration File"),
-        QString::fromStdString(FileUtils::getRootPath(true))+"config",
-        filter, &filter);
-    if (fileName.length() > 0) {
-      if (!fileName.endsWith(".CR.conf", Qt::CaseInsensitive)) {
-               fileName = fileName+".CR.conf";
-      }
-      auto config_map = getRunOptionMap();
-      PhzUITools::ConfigurationWriter::writeConfiguration(config_map, fileName.toStdString());
-      saveCopiedColumnToCatalog();
-      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
-          "IGM", ui->cb_igm->currentText().toStdString());
-      if (ui->gb_corrections->isChecked()) {
-        PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
-            "Correction", ui->cb_AnalysisCorrection->currentText().toStdString());
-      }
+          // Model Grid
+          auto grid_model_file_name = selected_folder+QString::fromStdString("/ModelGrid.CMG.conf");
+          auto grid_model_config_map = getGridConfiguration();
+          PhzUITools::ConfigurationWriter::writeConfiguration(grid_model_config_map, grid_model_file_name.toStdString());
+          command += QString::fromStdString("Phosphoros CMG --config-file ") + grid_model_file_name + cr;
+
+          // GalCorr Grid
+          if (!ui->rb_gc_off->isChecked()) {
+            auto grid_galactic_corr_file_name = selected_folder+QString::fromStdString("/GalacticCorrGrid.CGCCG.conf");
+            auto galactic_corr_config_map = getGridConfiguration();
+            PhzUITools::ConfigurationWriter::writeConfiguration(galactic_corr_config_map,
+                                                                grid_galactic_corr_file_name.toStdString());
+            command += QString::fromStdString("Phosphoros CGCCG --config-file ") + grid_galactic_corr_file_name + cr;
+          }
+
+          // Sed weight
+          if (ui->cb_sedweight->isChecked()) {
+             auto grid_sed_weight_file_name = selected_folder+QString::fromStdString("/SedWeightGrid.CSW.conf");
+             std::string sed_prior_name = getSedWeightFileName();
+             auto sed_weight_config_map = getSedWeightOptionMap(sed_prior_name);
+             PhzUITools::ConfigurationWriter::writeConfiguration(sed_weight_config_map, grid_sed_weight_file_name.toStdString());
+                      command += QString::fromStdString("Phosphoros CSW --config-file ") + grid_sed_weight_file_name + cr;
+          }
+
+          // Luminosity Grid
+          if (ui->rb_luminosityPrior->isChecked()) {
+            auto grid_luminosity_file_name = selected_folder+QString::fromStdString("/LuminosityGrid.CLMG.conf");
+            auto luminosity_config_map = getLuminosityOptionMap();
+            PhzUITools::ConfigurationWriter::writeConfiguration(luminosity_config_map,
+                grid_luminosity_file_name.toStdString());
+                        command += QString::fromStdString("Phosphoros CLMG --config-file ") + grid_luminosity_file_name + cr;
+          }
+
+          // Lookup Galactic EBV
+          if (ui->rb_gc_planck->isChecked()) {
+            auto path = ui->txt_inputCatalog->text().toStdString();
+            auto column_reader = PhzUITools::CatalogColumnReader(path);
+            auto column_from_file = column_reader.getColumnNames();
+            if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
+              // the E(B-V) has to be looked up in the Planck map
+              SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
+              std::map<std::string, boost::program_options::variable_value> add_column_options_map{};
+              add_column_options_map["galatic-ebv-col"].value() = boost::any(std::string("PLANCK_GAL_EBV"));
+              add_column_options_map["input-catalog"].value() = boost::any(path);
+              add_column_options_map["ra"].value() = boost::any(selected_survey.getRaColumn());
+              add_column_options_map["dec"].value() = boost::any(selected_survey.getDecColumn());
+              add_column_options_map["output-catalog"].value() = boost::any(path);
+              auto lookup_planck_file_name = selected_folder+QString::fromStdString("/LookupGalacticEBV.AGDD.conf");
+              PhzUITools::ConfigurationWriter::writeConfiguration(add_column_options_map, lookup_planck_file_name.toStdString());
+              command += QString::fromStdString("Phosphoros AGDD --config-file ") + lookup_planck_file_name + cr;
+            }
+          }
+
+          // Template fitting
+          auto template_fitting_file_name = selected_folder+QString::fromStdString("/TemplateFitting.CR.conf");
+          auto run_config_map = getRunOptionMap();
+          PhzUITools::ConfigurationWriter::writeConfiguration(run_config_map, template_fitting_file_name.toStdString());
+          command += QString::fromStdString("Phosphoros CR --config-file ") + template_fitting_file_name + cr;
+
+          // command file
+          auto command_file_name = selected_folder+QString::fromStdString("/command");
+          std::ofstream file;
+          file.open(command_file_name.toStdString());
+          file << command.toStdString();
+          file.close();
+
+          saveCopiedColumnToCatalog();
+          PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+              "IGM", ui->cb_igm->currentText().toStdString());
+          if (ui->gb_corrections->isChecked()) {
+            PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                "Correction", ui->cb_AnalysisCorrection->currentText().toStdString());
+          }
     }
   }
 
@@ -1844,7 +1908,7 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
       auto path = ui->txt_inputCatalog->text().toStdString();
       auto column_reader = PhzUITools::CatalogColumnReader(path);
       auto column_from_file = column_reader.getColumnNames();
-      if (column_from_file.find("GAL_EBV") == column_from_file.end()) {
+      if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
         // the E(B-V) has to be looked up in the Planck map
         SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
         std::unique_ptr<DialogAddGalEbv> dialog(new DialogAddGalEbv());
@@ -1881,7 +1945,7 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
 
     std::map<std::string, boost::program_options::variable_value> config_sed_weight{};
     if (ui->cb_sedweight->isChecked()) {
-      // Compute the SED Axis Prior
+      // Compute the SED Prior
       std::string sed_prior_name = getSedWeightFileName();
       if (!checkSedWeightFile(sed_prior_name)) {
         config_sed_weight = getSedWeightOptionMap(sed_prior_name);
