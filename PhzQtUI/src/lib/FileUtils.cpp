@@ -535,7 +535,7 @@ std::string FileUtils::getLuminosityFunctionGridRootPath(bool check, const std::
 
 
 std::string FileUtils::getSedPriorRootPath() {
-  QString path = QString::fromStdString(readPath()["AuxiliaryData"])+QDir::separator()+"GenericPriors"+QDir::separator()+"sedWeight";
+  QString path = QString::fromStdString(readPath()["AuxiliaryData"])+QDir::separator()+"GenericPriors"+QDir::separator()+"SedWeight";
   QFileInfo info(path);
   return info.absoluteFilePath().toStdString();
 }
