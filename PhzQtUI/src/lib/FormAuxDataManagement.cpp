@@ -131,7 +131,7 @@ void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
           lineAdder->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
 
           auto aux_path = FileUtils::getAuxRootPath();
-          QString command = QString::fromStdString("PhosphorosAddEmissionLines --suffix _lpel --oii-factor 1.0e13 --uv-range 2100,2500 --oii-factor-range 2100,2500 --emission-lines LePhare_lines.txt --sed-dir " + aux_path)
+          QString command = QString::fromStdString("PhosphorosAddEmissionLines --suffix _lpel --reference-factor 1.0e13 --uv-range 2100,2500 --emission-lines LePhare_lines.txt --sed-dir " + aux_path)
                             + QDir::separator() + QString::fromStdString("SEDs")
                             + QDir::separator() + group;
 
