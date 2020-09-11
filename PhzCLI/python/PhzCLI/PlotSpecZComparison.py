@@ -566,9 +566,10 @@ def defineSpecificProgramOptions():
     parser.add_argument('-pcol', '--phz-column', type=str, default='Z', help='Photo-z column name')
     parser.add_argument("-nd", "--no-display", action="store_true", default=False,
                         help="Disables the plot window")
+    parser.add_argument("-n", "--sample_size", type=int,
+                        help="Plot only a sample of the full catalog")
     parser.add_argument("-samp", "--samp", action="store_true", default=False,
                         help="Enables communication with other SAMP applications")
-
     return parser
 
 
@@ -614,6 +615,15 @@ def mainMethod(args):
 
     if args.no_display:
         exit()
+
+    if args.sample_size:
+        idx = np.arange(len(specz))
+        np.random.shuffle(idx)
+        idx = idx[:args.sample_size]
+        specz = specz[idx]
+        phz = phz[idx]
+        catalog = catalog[idx]
+        data = data[idx]
 
     fig1 = SpeczPhotozPlot(catalog['ID'], specz, phz, data, figsize=(7, 8), embedded=False)
     fig2 = displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers,
