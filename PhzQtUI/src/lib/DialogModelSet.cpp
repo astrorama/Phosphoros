@@ -192,7 +192,9 @@ void DialogModelSet::loadData(int ref,
   if (m_z_ranges.size() > 0) {
     for (auto& range : m_z_ranges) {
       for (double val = range.getMin(); val < range.getMax()+range.getStep(); val += range.getStep()) {
-        z_val.insert(val);
+        if(val <= range.getMax()) {
+          z_val.insert(val);
+        }
       }
     }
   } else {
@@ -245,7 +247,9 @@ void DialogModelSet::loadData(int ref,
     if (m_ebv_ranges.size() > 0) {
       for (auto& range : m_ebv_ranges) {
         for (double val = range.getMin(); val < range.getMax()+range.getStep(); val += range.getStep()) {
-          ebv_val.insert(val);
+          if (val <=  range.getMax()) {
+            ebv_val.insert(val);
+          }
         }
       }
     } else {
@@ -369,7 +373,9 @@ void DialogModelSet::on_buttonBox_accepted()
     for (auto& range : m_z_ranges) {
       double start = std::max(min_z, range.getMin());
       double stop = std::min(max_z, range.getMax());
-      new_z_ranges.emplace_back(start, stop, range.getStep());
+      if (start <= range.getMax() &&  stop >= range.getMin()) {
+        new_z_ranges.emplace_back(start, stop, range.getStep());
+      }
     }
   } else {
     for (auto& value : m_z_values) {
@@ -403,7 +409,9 @@ void DialogModelSet::on_buttonBox_accepted()
      for (auto& range : m_ebv_ranges) {
        double start = std::max(min_ebv, range.getMin());
        double stop = std::min(max_ebv, range.getMax());
-       new_ebv_ranges.emplace_back(start, stop, range.getStep());
+       if (start <= range.getMax() &&  stop >= range.getMin()){
+         new_ebv_ranges.emplace_back(start, stop, range.getStep());
+       }
      }
   } else {
      for (auto& value : m_ebv_values) {
