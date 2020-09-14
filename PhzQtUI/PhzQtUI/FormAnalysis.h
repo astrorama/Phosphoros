@@ -178,6 +178,7 @@ private:
     void updateGalCorrGridSelection();
     bool checkGridSelection(bool addFileCheck, bool acceptNewFile);
     bool checkGalacticGridSelection(bool addFileCheck, bool acceptNewFile);
+    bool checkCompatibleGalacticGrid(std::string file_name);
     std::map<std::string, boost::program_options::variable_value> getGridConfiguration();
     std::map<std::string, boost::program_options::variable_value> getGalacticCorrectionGridConfiguration();
 

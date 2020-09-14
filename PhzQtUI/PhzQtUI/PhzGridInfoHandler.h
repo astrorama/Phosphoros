@@ -24,6 +24,10 @@ class PhzGridInfoHandler
 {
 public:
 
+  static bool checkGridFileCompatibility(QString file_path,
+      const std::map<std::string,PhzDataModel::ModelAxesTuple>& axes,
+      const std::list<std::string> & selected_filters,
+      std::string igm_type);
 
   /**
    * @brief Get the name of the file containing a grid with the same axes and

@@ -334,8 +334,9 @@ bool DialogRunAnalysis::needLuminosityGrid(){
       config_manager.closeRegistration();
       config_manager.initialize(m_config);
 
-      // the file exists nothing to do
-      return false;
+      // Need a check for compatibility between the grids without it recompute it each time.
+      // the file exists if it is compatible nothing to do => return false;
+      return true;
 
     } catch(const Elements::Exception&) {}
     // The grid need to be computed

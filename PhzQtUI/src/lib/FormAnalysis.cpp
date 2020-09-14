@@ -47,6 +47,11 @@
 #include "PhzConfiguration/ComputeSedWeightConfig.h"
 #include "Configuration/ConfigManager.h"
 
+#include "PhzDataModel/DoubleGrid.h"
+#include <CCfits/CCfits>
+#include "PhzDataModel/PhotometryGridInfo.h"
+#include "PhzDataModel/serialization/PhotometryGridInfo.h"
+
 namespace Euclid {
 namespace PhzQtUI {
 
@@ -189,6 +194,29 @@ try {
   }
 }
 
+
+bool FormAnalysis::checkCompatibleGalacticGrid(std::string file_name){
+  QFileInfo info(
+      QString::fromStdString(
+          FileUtils::getGalacticCorrectionGridRootPath(true,
+              ui->cb_AnalysisSurvey->currentText().toStdString()))
+          + QDir::separator() + QString::fromStdString(file_name));
+
+ if(!info.exists()) {
+   return false;
+ } else {
+
+   auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
+   auto axis = selected_model.getAxesTuple();
+   auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
+         m_survey_model_ptr->getSelectedSurvey().getName(), axis,
+         getSelectedFilters(), ui->cb_igm->currentText().toStdString(),
+         false);
+   return (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
+
+ }
+}
+
 void FormAnalysis::updateGalCorrGridSelection() {
   try {
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
@@ -300,6 +328,10 @@ void FormAnalysis::adjustGalCorrGridButtons(bool enabled) {
     if (tab_color == Qt::black) {
       tab_color = QColor("orange");
     }
+  } else if (!checkCompatibleGalacticGrid(ui->cb_CompatibleGalCorrGrid->currentText().toStdString())){
+    tab_color = Qt::red;
+    ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet("QLineEdit { color: red }");
+    tool_tip_mw = "The grid has been computed with a modified parameter space: please recompute it.";
   } else {
     ui->cb_CompatibleGalCorrGrid->lineEdit()->setStyleSheet("QLineEdit { color: black }");
   }
@@ -313,14 +345,16 @@ void FormAnalysis::setComputeCorrectionEnable() {
   bool name_exists = checkGridSelection(true, false);
   bool gal_corr_needed = !ui->rb_gc_off->isChecked();
   bool grid_gal_corr_name_exists = checkGalacticGridSelection(true, false);
+  bool grid_gal_ok = checkCompatibleGalacticGrid(ui->cb_CompatibleGalCorrGrid->currentText().toStdString());
+
   ui->btn_computeCorrections->setEnabled(
       name_exists &&
-      (!gal_corr_needed || grid_gal_corr_name_exists) &&
+      (!gal_corr_needed || (grid_gal_corr_name_exists && grid_gal_ok)) &&
       ui->gb_corrections->isChecked());
 
   QString tool_tip = "Open the photometric zero-point correction popup.";
 
-  if (gal_corr_needed && !grid_gal_corr_name_exists) {
+  if (gal_corr_needed && (!grid_gal_corr_name_exists || !grid_gal_ok)) {
       tool_tip =
           "Please run the Galactic Correction grid computation before computing the photometric corrections.";
   }
@@ -342,6 +376,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   bool need_gal_correction = !ui->rb_gc_off->isChecked();
   bool grid_gal_corr_name_ok = checkGalacticGridSelection(false, true);
   bool grid_gal_corr_name_exists = checkGalacticGridSelection(true, false);
+  bool grid_gal_ok = checkCompatibleGalacticGrid(ui->cb_CompatibleGalCorrGrid->currentText().toStdString());
 
 
   bool correction_ok = !ui->gb_corrections->isChecked()
@@ -436,7 +471,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
       grid_name_ok && (!need_gal_correction || grid_gal_corr_name_ok) &&
       correction_ok && lum_prior_ok && lum_prior_compatible && nz_prior_ok && run_ok && enabled);
   ui->btn_RunAnalysis->setEnabled(
-      grid_name_exists && (!need_gal_correction || grid_gal_corr_name_exists) &&
+      grid_name_exists && (!need_gal_correction || (grid_gal_corr_name_exists && grid_gal_ok)) &&
       correction_ok && correction_exists && lum_prior_ok && lum_prior_compatible && nz_prior_ok && run_ok && enabled);
 
   QString tool_tip_run = "";
@@ -458,7 +493,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
             "You have enabled the Galactic Absorption Correction Please enter a valid Galactic correction grid name. \n";
       }
 
-      if (!grid_gal_corr_name_exists) {
+      if (!grid_gal_corr_name_exists || !grid_gal_ok) {
         tool_tip_run = tool_tip_run + "Please run the Galactic Absorption Correction grid computation. \n";
       }
   }
@@ -523,7 +558,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   }
 
   if (!(grid_name_exists &&
-        (!need_gal_correction || grid_gal_corr_name_exists)  &&
+        (!need_gal_correction || (grid_gal_corr_name_exists && grid_gal_ok))  &&
         correction_ok && correction_exists &&
         lum_prior_ok && lum_prior_compatible && nz_prior_ok && run_ok)) {
     tool_tip_run = tool_tip_run + "Before running the analysis.";
@@ -716,7 +751,157 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 bool FormAnalysis::checkSedWeightFile(std::string file_name) {
   std::string folder = FileUtils::getSedPriorRootPath();
   QFileInfo info(QString::fromStdString(folder) + QDir::separator() + QString::fromStdString(file_name));
-  return info.exists();
+  if (info.exists()) {
+    auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
+    auto igm = ui->cb_igm->currentText().toStdString();
+    auto axis = selected_model.getAxesTuple();
+
+
+    std::string file_name = info.absoluteFilePath().toStdString();
+    int hdu_count = 0;
+    {
+       CCfits::FITS fits {file_name, CCfits::RWmode::Read};
+       hdu_count = fits.extension().size();
+    }
+
+    std::vector<PhzDataModel::DoubleGrid> sed_weight_grids {};
+    for (int i = 1; i <= hdu_count; i += PhzDataModel::DoubleGrid::axisNumber()+1) {
+      sed_weight_grids.emplace_back(GridContainer::gridFitsImport<PhzDataModel::DoubleGrid>(file_name, i));
+    }
+
+
+    std::string survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+    std::string model_grid_file = FileUtils::getPhotmetricGridRootPath(true, survey_name) + "/" +ui->cb_CompatibleGrid->currentText().toStdString();
+
+    PhzDataModel::PhotometryGridInfo model_grid_info;
+    std::ifstream in {model_grid_file};
+    boost::archive::binary_iarchive bia {in};
+    bia >> model_grid_info;
+
+
+
+
+    // check the axis
+    if (model_grid_info.region_axes_map.size()!=sed_weight_grids.size()){
+      return false;
+    }
+
+    size_t found=0;
+    for (auto& current_axe : sed_weight_grids){
+      for (auto& file_axe : model_grid_info.region_axes_map){
+
+        // SED
+
+        auto& sed_axis_file = std::get<PhzDataModel::ModelParameter::SED>(file_axe.second);
+        auto& sed_axis_requested = current_axe.getAxis<PhzDataModel::ModelParameter::SED>();
+        if (sed_axis_file.size()!=sed_axis_requested.size()) {
+          return false;
+        }
+
+        bool all_found=true;
+        for(auto& sed_requested : sed_axis_requested) {
+          if (std::find(sed_axis_file.begin(), sed_axis_file.end(), sed_requested)==sed_axis_file.end()) {
+            all_found = false;
+           }
+        }
+
+        if (!all_found) {
+          return false;
+        }
+
+        // RED
+        auto& red_axis_file = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(file_axe.second);
+        auto& red_axis_requested = current_axe.getAxis<PhzDataModel::ModelParameter::REDDENING_CURVE>();
+        if (red_axis_file.size()!=red_axis_requested.size()) {
+          return false;
+        }
+        all_found=true;
+        for(auto& red_requested : red_axis_requested) {
+          if (std::find(red_axis_file.begin(), red_axis_file.end(), red_requested)==red_axis_file.end()) {
+            all_found=false;
+          }
+        }
+
+        if (!all_found) {
+          return false;
+        }
+
+        std::vector<double> z_axis_file;
+        for(double value : std::get<PhzDataModel::ModelParameter::Z>(file_axe.second)){
+          z_axis_file.push_back(value);
+        }
+
+        std::vector<double> z_axis_requested;
+        for(double value : current_axe.getAxis<PhzDataModel::ModelParameter::Z>()){
+          z_axis_requested.push_back(value);
+        }
+
+        if (z_axis_file.size()!=z_axis_requested.size()) {
+          return false;
+        }
+
+        std::sort(z_axis_file.begin(),z_axis_file.end());
+        std::sort(z_axis_requested.begin(),z_axis_requested.end());
+
+        bool match=true;
+        auto z_file_it = z_axis_file.begin();
+        for(auto& z_requested : z_axis_requested) {
+          if (std::fabs(*z_file_it - z_requested) > 1E-10) {
+            match=false;
+            break;
+          }
+          ++z_file_it;
+        }
+
+        if (!match) {
+          return false;
+        }
+
+        std::vector<double> ebv_axis_file;
+        for(double value : std::get<PhzDataModel::ModelParameter::EBV>(file_axe.second)){
+          ebv_axis_file.push_back(value);
+        }
+
+        std::vector<double> ebv_axis_requested;
+        for(double value : current_axe.getAxis<PhzDataModel::ModelParameter::EBV>()){
+          ebv_axis_requested.push_back(value);
+        }
+
+        if (ebv_axis_file.size()!=ebv_axis_requested.size()) {
+          return false;
+        }
+
+        std::sort(ebv_axis_file.begin(),ebv_axis_file.end());
+        std::sort(ebv_axis_requested.begin(),ebv_axis_requested.end());
+
+        auto ebv_file_it = ebv_axis_file.begin();
+        for(auto& ebv_requested : ebv_axis_requested) {
+          if (std::fabs(*ebv_file_it - ebv_requested) > 1E-10) {
+            match=false;
+            break;
+          }
+          ++ebv_file_it;
+        }
+
+        if (!match) {
+          return false;
+        }
+
+        ++found;
+        break;
+      }
+    }
+
+    if (sed_weight_grids.size()!=found){
+      return false;
+    }
+
+    // Both grid are compatible
+    return true;
+
+  } else {
+    return false;
+  }
 }
 
 std::string FormAnalysis::getSedWeightFileName() {
