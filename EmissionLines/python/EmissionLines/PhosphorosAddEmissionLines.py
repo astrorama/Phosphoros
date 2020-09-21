@@ -36,7 +36,7 @@ import ElementsKernel.Logging as log
 C_ANGSTROM = 2.99792458e+18
 
 logger = log.getLogger('PhosphorosAddEmissionLines')
-phos_dir = os.getenv('PHOSPHOROS_ROOT', None)
+phos_dir = os.getenv('PHOSPHOROS_ROOT', os.path.expanduser('~/Phosphoros'))
 aux_dir = next(filter(
     os.path.isdir,
     map(lambda p: os.path.join(p, 'EmissionLines'), os.getenv('ELEMENTS_AUX_PATH', '').split(os.pathsep))
@@ -71,7 +71,7 @@ def defineSpecificProgramOptions():
 
 
 def readEmissionLinesFromFile(emission_lines_file):
-    if "/" not in emission_lines_file:
+    if "/" not in emission_lines_file and aux_dir:
         emission_lines_file = os.path.join(aux_dir, emission_lines_file)
 
     logger.info('Reading emission lines from ' + emission_lines_file)
@@ -84,7 +84,7 @@ def getSedDir(sed_dir):
             logger.error(sed_dir + ' is not a directory')
             exit(1)
         return sed_dir
-    if not os.path.isabs(sed_dir):
+    if not os.path.isabs(sed_dir) and not os.path.exists(sed_dir):
         path_in_phos_sed = os.path.join(phos_dir, 'AuxiliaryData', 'SEDs', sed_dir)
         if os.path.isdir(path_in_phos_sed):
             return path_in_phos_sed
@@ -235,9 +235,9 @@ def mainMethod(args):
     else:
         os.makedirs(out_dir)
 
-    logger.info('SED directory ' + sed_dir)
-    logger.info('Output directory ' + out_dir)
-    logger.info('Aux directory' + aux_dir)
+    logger.info('SED directory: %s', sed_dir)
+    logger.info('Output directory: %s', out_dir)
+    logger.info('Aux directory: %s', aux_dir)
 
     emission_lines = readEmissionLinesFromFile(args.emission_lines)
     adder = EmissionLinesAdder(
