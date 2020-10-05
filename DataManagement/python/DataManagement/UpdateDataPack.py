@@ -61,8 +61,11 @@ def defineSpecificProgramOptions():
     
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--repo-url', default='<tobedefined>.unige.ch', type=str,
+    parser.add_argument('--repo-url', default='https://github.com/astrorama/PhosphorosAuxData/blob/master/', type=str,
         help='URL of the Data Package server')
+        
+    parser.add_argument('--url_query', default='raw=true', type=str,
+        help='Additional query string to be added to the url (without the question mark)')
         
     parser.add_argument('--temp-folder', default=temp_dir, type=str,
         help='Where to download and untar the data pack')
@@ -86,22 +89,28 @@ def defineSpecificProgramOptions():
     return parser
     
     
-def checkVersions(url):
+def checkVersions(url, query_string):
     version_local = '0.0'
     if os.path.exists(data_dir+"version.txt"):
         with open(data_dir+"version.txt") as f:
             lines = f.readlines()
             version_local=lines[0]
+    
+    url_version = url+'/last_version.html'
+    if len(query_string)>0:
+       url_version = url_version + '?' + query_string 
             
-    version_remote = urllib.request.urlopen(url+'/last_version.html').read().decode("utf-8").strip()
+    version_remote = urllib.request.urlopen(url_version).read().decode("utf-8").strip()
     logger.info('Local Version = '+version_local)
     logger.info('Remote Version = '+version_remote)
     return version_local, version_remote
     
-def downloadVersion(temp, url, version):
+def downloadVersion(temp, url, query_string, version):
     if not os.path.exists(temp):
         os.makedirs(temp)
     full_url = url+'/Data/AuxiliaryData_'+version+'.tar.xz'
+    if len(query_string)>0:
+        full_url = full_url + '?' + query_string 
     r = requests.get(full_url,verify=False,stream=True)
     r.raw.decode_content = True
     with open(temp+'/downloaded.tar.xz', 'wb') as f:
@@ -149,7 +158,7 @@ def record_version(version):
 
 def mainMethod(args):
     logger.info('The Phosphoros AuxiliaryData directory is set to :' +data_dir)
-    version_local, version_remote = checkVersions(args.repo_url)
+    version_local, version_remote = checkVersions(args.repo_url, args.url_query)
     
     if args.output_version_match!='':
         logger.info('Output versions to '+args.output_version_match)
@@ -162,7 +171,7 @@ def mainMethod(args):
         else:
             user_input = input("The version "+str(version_remote)+" of the data package is available, do you want to download it (y/n)") 
         if user_input=='y':
-            downloadVersion(args.temp_folder, args.repo_url, version_remote)
+            downloadVersion(args.temp_folder, args.repo_url, args.url_query, version_remote)
             base_dir_new = args.temp_folder+'/AuxiliaryData/'
             new_data, unchanged, conflicting = listFiles(base_dir_new)
             logger.info('In Version = '+version_remote + ' there is '+str(len(new_data) + len(unchanged) + len(conflicting))+' files')
