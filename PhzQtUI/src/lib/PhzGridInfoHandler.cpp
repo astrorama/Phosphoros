@@ -39,7 +39,7 @@ namespace PhzQtUI {
 
 
    try { // If a file cannot be opened or is ill formated: just skip it!
-         // We directly use the boost iarchive, because we just need the grid info
+         // We directly use the boost archive, because we just need the grid info
          // from the beginning of the file. Reading the full file whould be very
          // slow
          PhzDataModel::PhotometryGridInfo grid_info;
@@ -79,7 +79,7 @@ namespace PhzQtUI {
              auto& sed_axis_file = std::get<PhzDataModel::ModelParameter::SED>(file_axe.second);
              auto& sed_axis_requested = std::get<PhzDataModel::ModelParameter::SED>(current_axe.second);
              if (sed_axis_file.size()!=sed_axis_requested.size()) {
-               return false;
+               continue;
              }
 
              bool all_found=true;
@@ -90,14 +90,14 @@ namespace PhzQtUI {
              }
 
              if (!all_found) {
-               return false;
+               continue;
              }
 
              // RED
              auto& red_axis_file = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(file_axe.second);
              auto& red_axis_requested = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(current_axe.second);
              if (red_axis_file.size()!=red_axis_requested.size()) {
-               return false;
+               continue;
              }
              all_found=true;
              for(auto& red_requested : red_axis_requested) {
@@ -107,7 +107,7 @@ namespace PhzQtUI {
              }
 
              if (!all_found) {
-               return false;
+               continue;
              }
 
              std::vector<double> z_axis_file;
@@ -121,7 +121,7 @@ namespace PhzQtUI {
              }
 
              if (z_axis_file.size()!=z_axis_requested.size()) {
-               return false;
+               continue;
              }
 
              std::sort(z_axis_file.begin(),z_axis_file.end());
@@ -138,7 +138,7 @@ namespace PhzQtUI {
              }
 
              if (!match) {
-               return false;
+               continue;
              }
 
              std::vector<double> ebv_axis_file;
@@ -152,7 +152,7 @@ namespace PhzQtUI {
              }
 
              if (ebv_axis_file.size()!=ebv_axis_requested.size()) {
-               return false;
+               continue;
              }
 
              std::sort(ebv_axis_file.begin(),ebv_axis_file.end());
@@ -168,7 +168,7 @@ namespace PhzQtUI {
              }
 
              if (!match) {
-               return false;
+               continue;
              }
 
              ++found;
