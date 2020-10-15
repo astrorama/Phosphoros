@@ -977,6 +977,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
        options_map[pair.first] = pair.second;
   }
 
+  options_map["input-buffer-size"].value() = boost::any(PreferencesUtils::getBufferSize());
+
   options_map["catalog-type"].value() = boost::any(survey_name);
 
 

@@ -106,6 +106,12 @@ void on_btn_browseRes_clicked();
 void on_btn_default_clicked();
 
 /**
+ * @brief SLOT Raised when the user change the buffer number
+ */
+void on_sb_buffer_valueChanged(int i);
+
+
+/**
  * @brief SLOT Raised when the user check/uncheck the group box for the threads
  */
 void on_gb_thread_clicked();

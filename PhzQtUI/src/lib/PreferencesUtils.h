@@ -35,6 +35,10 @@ public:
 
     static void setThreadNumberOverride(int value);
 
+    static int getBufferSize();
+
+    static void setBufferSize(int value);
+
     static PhysicsUtils::CosmologicalParameters getCosmologicalParameters();
 
     static void setCosmologicalParameters(const PhysicsUtils::CosmologicalParameters& parameters);

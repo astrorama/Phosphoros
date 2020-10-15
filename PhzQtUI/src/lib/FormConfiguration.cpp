@@ -64,6 +64,7 @@ void FormConfiguration::loadGeneralValues() {
    ui->txt_resDir->setText(m_option_model_ptr->getResPath());
    ui->gb_thread->setChecked(m_option_model_ptr->getOverrideThread());
    ui->sb_thread->setValue(m_option_model_ptr->getThreadNb());
+   ui->sb_buffer->setValue(m_option_model_ptr->getBufferSize());
    checkDirectories();
 }
 
@@ -210,6 +211,14 @@ void FormConfiguration::on_sb_thread_valueChanged(int i) {
 }
 
 
+void FormConfiguration::on_sb_buffer_valueChanged(int i) {
+  if (m_option_model_ptr->getBufferSize()!=i) {
+    startEdition(0);
+    m_option_model_ptr->setBufferSize(i);
+    setGeneralControlEdition(true);
+  }
+}
+
 void FormConfiguration::on_btn_default_clicked(){
   startEdition(0);
   setGeneralControlEdition(true);
@@ -225,6 +234,9 @@ void FormConfiguration::on_btn_default_clicked(){
 
   ui->gb_thread->setChecked(false);
   ui->sb_thread->setValue(PhzUtils::getThreadNumber());
+
+  m_option_model_ptr->setBufferSize(5000);
+  ui->sb_buffer->setValue(5000);
   checkDirectories();
 }
 

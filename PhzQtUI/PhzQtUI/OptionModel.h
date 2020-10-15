@@ -36,6 +36,7 @@ namespace Euclid {
         bool isResPathDefault();
         bool getOverrideThread();
         size_t getThreadNb();
+        size_t getBufferSize();
         double getHubble();
         double getOmegaM();
         double getOmegaLambda();
@@ -78,8 +79,12 @@ namespace Euclid {
 
 
         void setThread(int thread_nb);
+
+
         void setDefaultThread(bool custom);
 
+
+        void setBufferSize(int buffer_size);
 
         /**
          * If new_h0<=-1 set the default value
@@ -118,6 +123,8 @@ namespace Euclid {
         bool m_override_thread_edited;
         size_t m_thread_number_saved;
         size_t m_thread_number_edited;
+        size_t m_buffer_size_saved;
+        size_t m_buffer_size_edited;
         double m_hubble_saved;
         double m_hubble_edited;
         double m_omega_m_saved;

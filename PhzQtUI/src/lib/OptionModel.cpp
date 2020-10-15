@@ -47,6 +47,9 @@ namespace PhzQtUI {
     }
     m_thread_number_edited = m_thread_number_saved;
 
+    m_buffer_size_saved = PreferencesUtils::getBufferSize();
+    m_buffer_size_edited = m_buffer_size_saved;
+
     auto cosmology = PreferencesUtils::getCosmologicalParameters();
     m_hubble_saved = cosmology.getHubbleConstant();
     m_hubble_edited = m_hubble_saved;
@@ -108,6 +111,10 @@ namespace PhzQtUI {
     return m_thread_number_edited;
   }
 
+  size_t OptionModel::getBufferSize() {
+    return m_buffer_size_edited;
+  }
+
   double OptionModel::getHubble() {
     return m_hubble_edited;
   }
@@ -143,6 +150,8 @@ namespace PhzQtUI {
       m_inter_path_saved = m_inter_path_edited;
       m_res_path_saved = m_res_path_edited;
 
+      m_buffer_size_saved = m_buffer_size_edited;
+
       m_override_thread_saved = m_override_thread_edited;
       m_thread_number_saved = m_thread_number_edited;
 
@@ -159,6 +168,7 @@ namespace PhzQtUI {
         thread_value = m_thread_number_saved;
       }
       PreferencesUtils::setThreadNumberOverride(thread_value);
+      PreferencesUtils::setBufferSize(m_buffer_size_saved);
 
       std::unique_ptr <XYDataset::FileParser > filter_file_parser {new XYDataset::AsciiParser { } };
       std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true), std::move(filter_file_parser) });
@@ -194,6 +204,7 @@ namespace PhzQtUI {
       m_res_path_edited = m_res_path_saved;
       m_override_thread_edited = m_override_thread_saved;
       m_thread_number_edited = m_thread_number_saved;
+      m_buffer_size_edited = m_buffer_size_saved;
       m_global_edition = false;
     }
 
@@ -255,6 +266,14 @@ namespace PhzQtUI {
       m_thread_number_edited = PhzUtils::getThreadNumber();
     }
   }
+
+  void OptionModel::setBufferSize(int new_buffer_size) {
+    m_global_edition = true;
+    if (new_buffer_size > 0) {
+        m_buffer_size_edited = new_buffer_size;
+    }
+  }
+
 
   void OptionModel::setHubble(const QString &  new_h0) {
     m_cosmo_edition = true;

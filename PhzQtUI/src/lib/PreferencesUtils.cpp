@@ -128,6 +128,22 @@ void PreferencesUtils::setThreadNumberOverride(int value){
   setUserPreference("_global_preferences_","Thread-Number",std::to_string(value));
 }
 
+int PreferencesUtils::getBufferSize() {
+   auto value = getUserPreference("_global_preferences_","Buffer-Size");
+   if (value.length()==0){
+     return 5000;
+   } else {
+     return std::stoi(value);
+   }
+}
+
+void PreferencesUtils::setBufferSize(int value) {
+  if (value<=0) value=5000;
+    setUserPreference("_global_preferences_","Buffer-Size",std::to_string(value));
+}
+
+
+
 
 PhysicsUtils::CosmologicalParameters PreferencesUtils::getCosmologicalParameters(){
   auto value_omega_m = getUserPreference("_global_preferences_", "Cosmological-Parameter-Omega-Matter");
