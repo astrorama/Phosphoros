@@ -1,4 +1,5 @@
 #include <QFileDialog>
+#include <list>
 #include <QFileInfo>
 #include <QFile>
 #include <QTextStream>
@@ -12,6 +13,7 @@
 #include "ElementsKernel/Logging.h"
 
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include "PhzUITools/CatalogColumnReader.h"
 
 #include "PhzQtUI/DialogPSC.h"
@@ -50,6 +52,20 @@ void DialogPSC::setFolder(std::string output_folder) {
   ui->le_path->setReadOnly(true);
   // get the file snd  check .fits
   auto basepath =  boost::filesystem::path(output_folder);
+
+
+  for (auto &entry : boost::make_iterator_range(boost::filesystem::directory_iterator(basepath), {})) {
+     if (boost::algorithm::ends_with(entry.path().filename().string(), "_Statistic.fits")) {
+       auto column_reader = PhzUITools::CatalogColumnReader(entry.path().string());
+       // fill the CBB
+       for (auto& name : column_reader.getColumnNames()) {
+         if (std::find(m_list_columns_ok.begin(), m_list_columns_ok.end(), name) != m_list_columns_ok.end()) {
+           ui->cbb_z_col->insertItem(-1, QString::fromStdString(entry.path().stem().string() + " - " + name));
+         }
+       }
+     }
+  }
+
   m_catalog = basepath.parent_path().filename().string();
   if (boost::filesystem::exists(basepath/"phz_cat.fits")) {
     // get columns
@@ -65,6 +81,11 @@ void DialogPSC::setFolder(std::string output_folder) {
          ui->cbb_pdf_col->insertItem(-1, QString::fromStdString(name));
       }
     }
+
+
+
+
+
 
     ui->cbb_z_col->setCurrentIndex(0);
     ui->cbb_pdf_col->setCurrentIndex(0);
@@ -197,15 +218,31 @@ void DialogPSC::on_btn_compute_clicked(){
 
   connect(m_P, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processingFinished(int, QProcess::ExitStatus)));
 
+
+  std::string point_estimate_column = ui->cbb_z_col->currentText().toStdString();
+  std::string point_estimate_file = "";
+  for (auto& col : m_list_columns_ok) {
+    if (point_estimate_column.find(" - "+col) != std::string::npos) {
+
+      point_estimate_file = m_folder + "/" + point_estimate_column.substr(0, point_estimate_column.length() - (col.length() +3))+".fits";
+      point_estimate_column = col;
+    }
+  }
+
+
   QString cmd = "";
   if (ui->gb_scater->isChecked()) {
       QStringList s3;
       s3 << QString::fromStdString("--phosphoros-output-dir") <<  QString::fromStdString(m_folder)
-         << QString::fromStdString("--phz-column") << ui->cbb_z_col->currentText()
+         << QString::fromStdString("--phz-column") << QString::fromStdString(point_estimate_column)
          << QString::fromStdString("--specz-catalog") << ui->le_path->text()
          << QString::fromStdString("--specz-cat-id") << ui->cdd_ref_id_col->currentText()
          << QString::fromStdString("--specz-column") << ui->cbb_ref_z_col->currentText()
          << QString::fromStdString("--samp");
+
+      if (point_estimate_file.length() > 0) {
+        s3 << QString::fromStdString("--pe-catalog") << QString::fromStdString(point_estimate_file);
+      }
 
       if (ui->cb_no_plot->checkState() != Qt::Unchecked) {
         s3 << QString::fromStdString("--no-display");
@@ -217,7 +254,7 @@ void DialogPSC::on_btn_compute_clicked(){
       QStringList s3;
          s3 << QString::fromStdString("--pdz-catalog-file") <<  QString::fromStdString(m_folder + "/phz_cat.fits")
             << QString::fromStdString("--refz-catalog-file") << ui->le_path->text()
-            << QString::fromStdString("--pdz-col-pe") << ui->cbb_z_col->currentText()
+            << QString::fromStdString("--pdz-col-pe") << QString::fromStdString(point_estimate_column)
             << QString::fromStdString("--pdz-col-pdf") << ui->cbb_pdf_col->currentText()
 
             << QString::fromStdString("--refz-col-id") << ui->cdd_ref_id_col->currentText()
@@ -226,6 +263,9 @@ void DialogPSC::on_btn_compute_clicked(){
             << QString::fromStdString("--hist-bins") << QString::number(ui->sb_hist_bin->value())
             << QString::fromStdString("--stacked-point-estimate") <<ui->cb_pe_type->currentText();
 
+         if (point_estimate_file.length() > 0) {
+           s3 << QString::fromStdString("--pe-catalog-file") << QString::fromStdString(point_estimate_file);
+         }
 
          if (ui->cb_st_ref->checkState() != Qt::Checked) {
            s3 << QString::fromStdString("--ref-plot") << QString::fromStdString("False");

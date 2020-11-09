@@ -31,7 +31,11 @@ def defineSpecificProgramOptions():
     parser.add_argument('--refz-catalog-file', type=str, default='', help='Path to the .fits file containing the reference redshift ( If not provided the program looks for the refZ into pdz-catalog-file)')
     parser.add_argument('--pdz-col-id', type=str, default='ID', help='Column containing the identifiant of the source in the pdz-catalog-file')
     parser.add_argument('--pdz-col-pdf', type=str, default='Z-1D-PDF', help='Column containing the PDZ in the pdz-catalog-file')
+    
     parser.add_argument('--pdz-col-pe', type=str, default='Z', help='Column containing the point estimate of the redshift in the pdz-catalog-file')
+    parser.add_argument('--pe-catalog-file', type=str, default='', help='(Optional) name of an external catalog for looking up the point estimate')
+    parser.add_argument('--pe-catalog-id', type=str, default='SOURCE_ID', help='(Optional) Id column for the point estimate external catalog')
+   
     parser.add_argument('--refz-col-id', type=str, default='ID', help='Column containing the identifiant of the source in the refz-catalog-file (Not used if refz-catalog-file is skipped or identical to pdz-catalog-file)')
     parser.add_argument('--refz-col-ref', type=str, default='Z-TRUE', help='Column containing the reference Redshift of the source in the refz-catalog-file')
     parser.add_argument('--stack-bins', type=int, default='20', help='Number of bin for the stacking of the pdf')
@@ -75,7 +79,7 @@ def readPdzSampling(comment):
 def readTable(file_path, columns, index =1):
     hdul = fits.open(file_path) 
     checkColumns(hdul[index], columns)
-    data = hdul[index].data
+    data = table.Table(hdul[index].data)
     return data  
   
 def checkColumns(hdu, columns):
@@ -103,32 +107,41 @@ def mainMethod(args):
     logger = Logging.getLogger('PlotStackedPdfPitAndCrps')
     logger.info('Entering PlotStackedPdfPitAndCrps mainMethod()')
     
-    columns_in_pdz = [args.pdz_col_id, args.pdz_col_pdf, args.pdz_col_pe]
-    column_in_refz = [args.refz_col_id, args.refz_col_ref]
-    
-    two_files = True
-    if args.refz_catalog_file == '' or args.refz_catalog_file == args.pdz_catalog_file:
-        columns_in_pdz.append(args.refz_col_ref) 
-        two_files = False
-    
+    columns_in_pdz = [args.pdz_col_id, args.pdz_col_pdf]
     # Get the PDZ sampling
     pdz_bins = np.array(readPdzSampling(getFitsComment(args.pdz_catalog_file))) 
     nb_bin = args.stack_bins
     stack_bins= [ pdz_bins[0] + (pdz_bins[-1]+pdz_bins[0])/(1.0*nb_bin)*index for index in range(nb_bin+1)]
     logger.info('Bins borders for the stacking of the PDF :' + str(stack_bins))
 
-    #get the data
+    # get the pdf data
+    logger.info('Read PDZ from column:' + args.pdz_col_pdf + ' of file '+args.pdz_catalog_file)
     data = readTable(args.pdz_catalog_file, columns_in_pdz)
-    
     pdf_data = data[:][args.pdz_col_pdf]
-    point_estimates = data[:][args.pdz_col_pe]
     
-    
-    if two_files:
-        data2 = readTable(args.refz_catalog_file, column_in_refz)
-        reference_values = data2[:][args.refz_col_ref]
+    # get the point estimate data
+    if len(args.pe_catalog_file) > 0 and args.pe_catalog_file != args.pdz_catalog_file:
+        logger.info('Read Point Estimate from column:' + args.pdz_col_pe + ' of file:'+args.pe_catalog_file)
+        data_pe = readTable(args.pe_catalog_file, [args.pe_catalog_id,args.pdz_col_pe])
+        point_estimates = data_pe[:][args.pdz_col_pe]
     else:
+        logger.info('Read Point Estimate from column:' + args.pdz_col_pe + ' of file:'+args.pdz_catalog_file)
+        if  not args.pdz_col_pe in data.colnames:
+            raise Exception('The Column '+args.pdz_col_pe+' is missing in the fits file.') 
+        point_estimates = data[:][args.pdz_col_pe]
+    
+    if len(args.refz_catalog_file)==0 or args.refz_catalog_file == args.pdz_catalog_file:
+        logger.info('Read Reference Redshift from column:' + args.refz_col_ref + ' of file:'+args.pdz_catalog_file)
+        if  not args.refz_col_ref in data.colnames:
+            raise Exception('The Column '+args.refz_col_ref+' is missing in the fits file.') 
         reference_values = data[:][args.refz_col_ref]
+    else:
+        logger.info('Read Reference Redshift from column:' + args.refz_col_ref + ' of file:'+args.refz_catalog_file)
+        column_in_refz = [args.refz_col_id, args.refz_col_ref]
+        data_ref = readTable(args.refz_catalog_file, column_in_refz)
+        reference_values = data_ref[:][args.refz_col_ref]
+    
+    
         
     if args.ref_plot.upper()=="TRUE" or args.ref_bin_plot.upper()=="TRUE" or args.ref_bias_plot.upper()=="TRUE" or args.ref_frac_plot.upper()=="TRUE":
         logger.info('Computing the reference map')  

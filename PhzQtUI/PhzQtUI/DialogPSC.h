@@ -2,6 +2,7 @@
 #define DIALOGPSC_H
 
 #include <memory>
+#include <list>
 #include <QDialog>
 #include <string>
 #include <vector>
@@ -64,6 +65,9 @@ private:
   std::string m_catalog;
   std::string m_id_column;
   std::string m_z_ref_column;
+
+  const std::list<std::string>  m_list_columns_ok = {"MEDIAN", "PHZ_MODE_1_SAMP",
+      "PHZ_MODE_1_MEAN", "PHZ_MODE_1_FIT", "PHZ_MODE_2_SAMP", "PHZ_MODE_2_MEAN", "PHZ_MODE_2_FIT"};
 
   QProcess *m_P;
   QTimer *m_timer;
