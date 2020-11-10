@@ -132,6 +132,12 @@ void ModelSetModel::newModelSet(bool duplicate_from_selected) {
     text_1 = QString::fromStdString(getDuplicateName(m_edited_modelSet.getName()));
     text_2 = QString::number(m_edited_modelSet.getModelNumber(false));
     m_set_list[max_ref].setParameterRules(m_edited_modelSet.getParameterRules());
+
+    m_set_list[max_ref].setZRange(m_edited_modelSet.getZRanges());
+    m_set_list[max_ref].setZValues(m_edited_modelSet.getZValues());
+    m_set_list[max_ref].setEbvRange(m_edited_modelSet.getEbvRanges());
+    m_set_list[max_ref].setEbvValues(m_edited_modelSet.getEbvValues());
+
   }
   m_set_list[max_ref].setName(text_1.toStdString());
 
