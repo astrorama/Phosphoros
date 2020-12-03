@@ -53,8 +53,8 @@ void FormSurveyMapping::on_cb_catalog_type_currentIndexChanged(const QString &) 
   }
 }
 
-void  FormSurveyMapping::loadCatalogCB(std::string selected){
-       m_diconnect_cb=true;
+void  FormSurveyMapping::loadCatalogCB(std::string selected) {
+       m_diconnect_cb = true;
        ui->cb_catalog_type->clear();
        int index = 0;
        for (auto& catalog_name : m_survey_model_ptr->getSurveyList()) {
@@ -64,12 +64,12 @@ void  FormSurveyMapping::loadCatalogCB(std::string selected){
               }
               ++index;
        }
-       m_diconnect_cb=false;
+       m_diconnect_cb = false;
 }
 
 void FormSurveyMapping::updateSelection(bool force_reload_cb) {
     if (force_reload_cb ||
-        (m_survey_model_ptr->getSelectedRow()>=0 &&
+        (m_survey_model_ptr->getSelectedRow() >= 0 &&
         ui->cb_catalog_type->currentText().toStdString() != m_survey_model_ptr->getSelectedSurvey().getName())) {
       loadCatalogCB(m_survey_model_ptr->getSelectedSurvey().getName());
     }
@@ -77,7 +77,7 @@ void FormSurveyMapping::updateSelection(bool force_reload_cb) {
     setFilterMappingInView();
 }
 
-std::set<std::string> FormSurveyMapping::getFilteredColumns(){
+std::set<std::string> FormSurveyMapping::getFilteredColumns() {
   const SurveyFilterMapping& selected_survey = m_survey_model_ptr->getSelectedSurvey();
   auto full_list = std::set<std::string>{selected_survey.getColumnList()};
   full_list.erase(selected_survey.getSourceIdColumn());
@@ -105,23 +105,40 @@ void FormSurveyMapping::fillControlsWithSelected() {
 
       ui->txt_nonDetection->setText(QString::number(selected_survey.getNonDetection()));
       ui->txt_UpperLimit->setText(QString::number(selected_survey.getUpperLimit()));
+      ui->ckb_error_prop->setCheckState(selected_survey.getDoRecomputeError() ? Qt::Checked : Qt::Unchecked);
 
 
-      disconnect(ui->table_Filter->model(), SIGNAL(itemChanged(QStandardItem * )), 0, 0);
+      disconnect(ui->table_Filter->model(), SIGNAL(itemChanged(QStandardItem *)), 0, 0);
+      disconnect(ui->table_Filter->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), 0, 0);
+
       FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
       filter_model->setFilters(selected_survey.getFilters());
       ui->table_Filter->setItemDelegateForColumn(1, new FilterMappingItemDelegate(getFilteredColumns()));
       ui->table_Filter->setItemDelegateForColumn(2, new FilterMappingItemDelegate(getFilteredColumns()));
       ui->table_Filter->setModel(filter_model);
       ui->table_Filter->setColumnHidden(3, true);
+      ui->table_Filter->setColumnHidden(5, !selected_survey.getDoRecomputeError());
+      ui->table_Filter->setColumnHidden(6, !selected_survey.getDoRecomputeError());
+      ui->table_Filter->setColumnHidden(7, !selected_survey.getDoRecomputeError());
       ui->table_Filter->setSelectionBehavior(QAbstractItemView::SelectRows);
       ui->table_Filter->setSelectionMode(QAbstractItemView::SingleSelection);
       ui->table_Filter->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
       ui->table_Filter->update(QModelIndex());
 
-      connect(ui->table_Filter->model(), SIGNAL(itemChanged(QStandardItem * )), SLOT(filter_model_changed(QStandardItem *)));
+      ui->btn_prop_err->setEnabled(ui->table_Filter->selectionModel()->hasSelection());
+
+
+      connect(ui->table_Filter->model(), SIGNAL(itemChanged(QStandardItem *)), SLOT(filter_model_changed(QStandardItem *)));
+      connect(ui->table_Filter->selectionModel(),
+          SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
+          SLOT(filterMappingSelectionChanged(const QItemSelection &, const QItemSelection &)));
 
 }
+
+
+
+
+
 
 
 
@@ -171,10 +188,11 @@ void FormSurveyMapping::setFilterMappingInEdition(){
 
     ui->txt_nonDetection->setEnabled(has_mapping_selected);
     ui->txt_UpperLimit->setEnabled(has_mapping_selected);
+    ui->ckb_error_prop->setEnabled(has_mapping_selected);
 
     ui->btn_SelectFilters->setEnabled(has_mapping_selected);
 
-
+    ui->btn_prop_err->setEnabled(false);
     m_filterInsert = false;
 }
 
@@ -197,6 +215,7 @@ void FormSurveyMapping::setFilterMappingInView() {
 
     ui->txt_nonDetection->setEnabled(has_mapping_selected);
     ui->txt_UpperLimit->setEnabled(has_mapping_selected);
+    ui->ckb_error_prop->setEnabled(has_mapping_selected);
     ui->btn_SelectFilters->setEnabled(has_mapping_selected);
 
     m_mappingInsert = false;
@@ -330,6 +349,56 @@ void FormSurveyMapping::filter_model_changed(QStandardItem *) {
   logger.info() << "Table filter model changed";
   setFilterMappingInEdition();
 }
+
+
+void FormSurveyMapping::on_btn_prop_err_clicked(){
+  if (ui->table_Filter->selectionModel()->hasSelection()){
+    bool do_err = m_survey_model_ptr->getSelectedSurvey().getDoRecomputeError();
+    QModelIndexList selection = ui->table_Filter->selectionModel()->selectedRows();
+    QModelIndex index = selection.at(0);
+    FilterModel* model = static_cast<FilterModel*>(ui->table_Filter->model());
+    FilterMapping filter = model->getFilter(index.row());
+    double n = filter.getN();
+    double alpha = filter.getAlpha();
+    double beta = filter.getBeta();
+    double gamma =  filter.getGamma();
+    QString message = "Do you really want to set the following values to all the filters?\n \n"
+        "Upper limit over error ratio = "+ QString::number(n);
+    if (do_err) {
+      message +="\n"
+          "Alpha = "+ QString::number(alpha)+"\n"
+          "Beta = "+ QString::number(beta)+"\n"
+          "Gamma = "+ QString::number(gamma)+"\n";
+    }
+
+    if (QMessageBox::question(this, "Confirm copy...",
+           message ,
+           QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+
+      for (int index = 0 ; index < model->getFilters().size(); ++index) {
+        model->setItem(index, 4, new QStandardItem(QString::number(n)));
+        if (do_err) {
+          model->setItem(index, 5, new QStandardItem(QString::number(alpha)));
+          model->setItem(index, 6, new QStandardItem(QString::number(beta)));
+          model->setItem(index, 7, new QStandardItem(QString::number(gamma)));
+        }
+      }
+      setFilterMappingInEdition();
+
+    }
+  }
+}
+
+void FormSurveyMapping::on_ckb_error_prop_stateChanged(int state){
+  m_survey_model_ptr->setDoRecomputeErrorToSelected(state);
+
+  ui->table_Filter->setColumnHidden(5, state == 0);
+  ui->table_Filter->setColumnHidden(6, state == 0);
+  ui->table_Filter->setColumnHidden(7, state == 0);
+
+  setFilterMappingInEdition();
+}
+
 
 //  - Slots on this page
 
@@ -540,15 +609,8 @@ void FormSurveyMapping::on_btn_MapSave_clicked() {
 
 }
 
-void FormSurveyMapping::filterMappingSelectionChanged(QModelIndex new_index, QModelIndex) {
-  if (new_index.isValid()) {
-    m_survey_model_ptr->selectSurvey(new_index.row());
-  } else {
-    m_survey_model_ptr->selectSurvey(-1);
-  }
-
-  fillControlsWithSelected();
-  setFilterMappingInView();
+void FormSurveyMapping::filterMappingSelectionChanged(const QItemSelection &, const QItemSelection &) {
+  ui->btn_prop_err->setEnabled(ui->table_Filter->selectionModel()->hasSelection());
 }
 
 void FormSurveyMapping::on_btn_ImportColumn_clicked() {
@@ -588,12 +650,18 @@ std::vector<FilterMapping> FormSurveyMapping::getMappingFromGrid() const {
        auto flux = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 1)).toString().toStdString();
        auto err = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 2)).toString().toStdString();
        auto n = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 4)).toString().toDouble();
+       auto alpha = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 5)).toString().toDouble();
+       auto beta = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 6)).toString().toDouble();
+       auto gamma = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 7)).toString().toDouble();
 
        FilterMapping mapping{};
        mapping.setFilterFile(name);
        mapping.setFluxColumn(flux);
        mapping.setErrorColumn(err);
        mapping.setN(n);
+       mapping.setAlpha(alpha);
+       mapping.setBeta(beta);
+       mapping.setGamma(gamma);
        filters.push_back(mapping);
      }
      return filters;

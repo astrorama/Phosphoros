@@ -55,16 +55,30 @@ public:
      */
     void setFilterFile(std::string filter_trnsmission_file);
 
-
     double getN() const;
 
     void setN(double new_n);
+
+    double getAlpha() const;
+
+    void setAlpha(double new_alpha);
+
+    double getBeta() const;
+
+    void setBeta(double new_beta);
+
+    double getGamma() const;
+
+    void setGamma(double new_gamma);
 
 private:
     std::string m_flux_column;
     std::string m_error_column;
     std::string m_filter_trnsmission_file;
     double m_n = 3;
+    double m_alpha = 1.0;
+    double m_beta = 0.0;
+    double m_gamma = 0.0;
 };
 
 }

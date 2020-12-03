@@ -1010,6 +1010,9 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   options_map["source-id-column-name"].value() = boost::any(m_survey_model_ptr->getSelectedSurvey().getSourceIdColumn());
 
 
+  options_map["enable-error-adjustment"].value() = boost::any(m_survey_model_ptr->getSelectedSurvey().getDoRecomputeError()? yes_flag : no_flag);
+
+
   double non_detection = selected_survey.getNonDetection();
   options_map["missing-photometry-flag"].value() = boost::any(non_detection);
 

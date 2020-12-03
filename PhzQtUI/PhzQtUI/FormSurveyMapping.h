@@ -9,6 +9,7 @@
 #include <QWidget>
 #include <QModelIndex>
 #include <QStandardItem>
+#include <QItemSelection>
 #include "FilterMapping.h"
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
@@ -65,7 +66,8 @@ void filter_model_changed(QStandardItem *);
 
 
 
-    void filterMappingSelectionChanged(QModelIndex, QModelIndex);
+
+    void filterMappingSelectionChanged(const QItemSelection &, const QItemSelection &);
 
     void filterEditionPopupClosing(std::vector<std::string>);
 
@@ -98,6 +100,10 @@ void filter_model_changed(QStandardItem *);
     void on_txt_UpperLimit_textEdited(const QString& text);
 
     void on_cb_catalog_type_currentIndexChanged(const QString &);
+
+    void on_btn_prop_err_clicked();
+
+    void on_ckb_error_prop_stateChanged(int state);
 
 
 

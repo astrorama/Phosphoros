@@ -14,6 +14,7 @@ using boost::smatch;
 #include <QTextStream>
 #include <QDomDocument>
 
+#include "PhzDataModel/AdjustErrorParamMap.h"
 #include "PhzQtUI/SurveyFilterMapping.h"
 
 namespace Euclid {
@@ -115,17 +116,21 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
       return m_upper_limit;
     }
 
+    void SurveyFilterMapping::setDoRecomputeError(bool do_recompute_error) {
+      m_do_recompute_error = do_recompute_error;
+    }
 
-     void SurveyFilterMapping::setCopiedColumns(std::map<std::string,std::string> copied_columns){
+    bool SurveyFilterMapping::getDoRecomputeError() const {
+      return m_do_recompute_error;
+    }
+
+    void SurveyFilterMapping::setCopiedColumns(std::map<std::string,std::string> copied_columns){
        m_copied_columns = copied_columns;
-     }
+    }
 
      const std::map<std::string,std::string>& SurveyFilterMapping::getCopiedColumns() const{
        return m_copied_columns;
-     }
-
-
-
+    }
 
 
     std::vector<std::string> SurveyFilterMapping::getAvailableCatalogs(){
@@ -164,7 +169,6 @@ std::map<int,SurveyFilterMapping> SurveyFilterMapping::loadCatalogMappings(){
      ++id;
   }
 
-
   return mappings;
 }
 
@@ -201,20 +205,25 @@ SurveyFilterMapping SurveyFilterMapping::loadCatalog(std::string name) {
 
   std::string path = root_node.attribute("DefaultCatalogPath").toStdString();
 
-  if (!FileUtils::starts_with(path,"/")){
+  if (!FileUtils::starts_with(path,"/")) {
     std::string root_path = FileUtils::getRootPath(true);
     path = root_path+path;
   }
 
   survey.setDefaultCatalogFile(path);
 
-  if (root_node.hasAttribute("NonDetection")){
+  if (root_node.hasAttribute("NonDetection")) {
     survey.setNonDetection(root_node.attribute("NonDetection").toDouble());
   }
 
-  if (root_node.hasAttribute("UpperLimit")){
-    survey.setUpperLimit(root_node.attribute("UpperLimit").toInt());
+  if (root_node.hasAttribute("UpperLimit")) {
+    survey.setUpperLimit(root_node.attribute("UpperLimit").toDouble());
   }
+
+  if (root_node.hasAttribute("DoRecomputeError")){
+    survey.setDoRecomputeError(root_node.attribute("DoRecomputeError").toInt());
+  }
+
 
   auto columns_node = root_node.firstChildElement("AvailableColumns");
   auto list = columns_node.childNodes();
@@ -240,10 +249,10 @@ SurveyFilterMapping SurveyFilterMapping::loadCatalog(std::string name) {
        col_name =  col_name.substr(0, pos);
      }
 
-     survey.m_copied_columns[col_name]=col_aliases;
+     survey.m_copied_columns[col_name] = col_aliases;
   }
 
-   if (survey.m_column_list.count(survey.getSourceIdColumn())==0){
+   if (survey.m_column_list.count(survey.getSourceIdColumn()) == 0) {
      survey.m_column_list.insert(survey.getSourceIdColumn());
    }
 
@@ -253,16 +262,14 @@ SurveyFilterMapping SurveyFilterMapping::loadCatalog(std::string name) {
 }
 
 
-void SurveyFilterMapping::ReadFilters(){
+void SurveyFilterMapping::ReadFilters() {
   std::vector<FilterMapping> mappings { };
 
   auto mapping_path = QString::fromStdString(
       FileUtils::getIntermediaryProductRootPath(true, getName()))
       + QDir::separator() + "filter_mapping.txt";
 
-  try{
-
-
+  try {
     std::ifstream in { mapping_path.toStdString() };
     std::string line;
     regex expr {"\\s*([^\\s#]+)\\s+([^\\s#]+)\\s+([^\\s#]+)(\\s+[^\\s#]+\\s*$)?"};
@@ -294,7 +301,30 @@ void SurveyFilterMapping::ReadFilters(){
       mappings.push_back(mapping);
 
     }
-  } catch (...){}
+  } catch (...) {}
+
+  // read the error re-computation parameters
+  auto error_param_path = QString::fromStdString(
+       FileUtils::getIntermediaryProductRootPath(true, getName()))
+       + QDir::separator() + "error_adjustment_param.txt";
+  try{
+     std::ifstream in { error_param_path.toStdString() };
+     auto param_map = PhzDataModel::readAdjustErrorParamMap(in);
+
+     for (auto& mapping : mappings) {
+      // Check if element exists in map or not
+      if (param_map.find(mapping.getFilterFile()) != param_map.end()) {
+        auto tuple = param_map[mapping.getFilterFile()];
+        mapping.setAlpha(std::get<0>(tuple));
+        mapping.setBeta(std::get<1>(tuple));
+        mapping.setGamma(std::get<2>(tuple));
+      }
+     }
+
+   } catch (...) {
+
+     logger.warn() << "Unable to read recomputation parameters saved in " << error_param_path.toStdString() ;
+   }
 
   setFilters(mappings);
 }
@@ -330,6 +360,7 @@ void SurveyFilterMapping::saveSurvey(std::string oldName){
   root.setAttribute("RefZColumn",QString::fromStdString(m_ref_z_column));
   root.setAttribute("NonDetection",QString::number(m_non_detection));
   root.setAttribute("UpperLimit",QString::number(m_upper_limit));
+  root.setAttribute("DoRecomputeError",QString::number(m_do_recompute_error));
 
   std::string path = m_default_catalog;
   std::string root_path = FileUtils::getRootPath(true);
@@ -383,8 +414,27 @@ void SurveyFilterMapping::saveSurvey(std::string oldName){
             << QString::number(filter.getN()) << "\n";
   }
 
+
   mapping_file.close();
 
+
+  // Save the error recomputation params
+  PhzDataModel::AdjustErrorParamMap param_map = {};
+  for (auto& filter : m_filters) {
+    auto filter_name =  XYDataset::QualifiedName {filter.getFilterFile()};
+    auto tuple = std::make_tuple(filter.getAlpha(), filter.getBeta(), filter.getGamma());
+    param_map.insert({filter_name, tuple});
+  }
+
+  std::string error_param_file = mapping_path.toStdString()+ "error_adjustment_param.txt";
+
+  std::filebuf fb;
+  fb.open (error_param_file, std::ios::out);
+  std::ostream os(&fb);
+  PhzDataModel::writeAdjustErrorParamMap(os, param_map);
+  fb.close();
+
+  logger.info() << "Error recomputation parameters saved in " << error_param_file;
 
 }
 
