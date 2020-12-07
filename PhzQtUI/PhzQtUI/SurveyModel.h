@@ -131,6 +131,7 @@ public slots:
   void setDefaultCatalogToSelected(QString new_name);
   void setNonDetectionToSelected(QString new_name);
   void setHasUpperLimitToSelected(QString new_name);
+  void setDoRecomputeErrorToSelected(bool new_do_recompute);
   void setCopiedColumnsToSelected(std::map<std::string, std::string> copied_columns);
 
 private:

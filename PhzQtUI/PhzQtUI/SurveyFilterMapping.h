@@ -122,8 +122,8 @@ public:
 
 
 
-    void setCopiedColumns(std::map<std::string,std::string> copied_columns);
-    const std::map<std::string,std::string>& getCopiedColumns() const;
+    void setCopiedColumns(std::map<std::string, std::string> copied_columns);
+    const std::map<std::string, std::string>& getCopiedColumns() const;
 
     /**
      * @brief Move the list of column inbto the Survey.
@@ -137,6 +137,10 @@ public:
     void setUpperLimit(double upper_limit);
 
     double getUpperLimit() const;
+
+    void setDoRecomputeError(bool do_recompute_error);
+
+    bool getDoRecomputeError() const;
 
 
 
@@ -203,6 +207,7 @@ private:
 
     double m_non_detection = -99.;
     double m_upper_limit = -99.;
+    bool m_do_recompute_error = false;
 
     void ReadFilters();
 

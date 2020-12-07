@@ -588,6 +588,16 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QCheckBox" name="ckb_error_prop">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Error re-Calibration&lt;/span&gt;&lt;/p&gt;&lt;p&gt;When this check-box is ticked, the Photometric error for each band is recomputed using the alpha&lt;span style=&quot; vertical-align:sub;&quot;&gt;i&lt;/span&gt;, beta&lt;span style=&quot; vertical-align:sub;&quot;&gt;i&lt;/span&gt; and gamma&lt;span style=&quot; vertical-align:sub;&quot;&gt;i&lt;/span&gt; parameters as follow:&lt;/p&gt;&lt;p&gt;Error&lt;span style=&quot; vertical-align:sub;&quot;&gt;i,new&lt;/span&gt; = (alpha&lt;span style=&quot; vertical-align:sub;&quot;&gt;i&lt;/span&gt;&lt;span style=&quot; vertical-align:super;&quot;&gt;2 &lt;/span&gt;*Error&lt;span style=&quot; vertical-align:sub;&quot;&gt;i&lt;/span&gt;&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt; + beta&lt;span style=&quot; vertical-align:sub;&quot;&gt;i&lt;/span&gt;&lt;span style=&quot; vertical-align:super;&quot;&gt;2 &lt;/span&gt;*Flux&lt;span style=&quot; vertical-align:sub;&quot;&gt;i&lt;/span&gt;&lt;span style=&quot; vertical-align:super;&quot;&gt;2&lt;/span&gt; + gamma&lt;span style=&quot; vertical-align:sub;&quot;&gt;i&lt;/span&gt;*Flux&lt;span style=&quot; vertical-align:sub;&quot;&gt;i&lt;/span&gt;)&lt;span style=&quot; vertical-align:super;&quot;&gt;1/2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Error re-calibration</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -618,6 +628,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_prop_err">
+       <property name="text">
+        <string>Propagate Error Param</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="btn_SelectFilters">

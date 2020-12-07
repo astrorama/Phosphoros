@@ -244,6 +244,12 @@ void SurveyModel::loadSurvey() {
  }
 
 
+ void SurveyModel::setDoRecomputeErrorToSelected(bool new_do_recompute){
+   m_edited_survey.setDoRecomputeError(new_do_recompute);
+   m_in_edition = true;
+ }
+
+
  const std::vector<QString> SurveyModel::getSurveyList() const {
    std::vector<QString> result = {};
    for (auto it = m_survey_filter_mappings.begin(); it != m_survey_filter_mappings.end(); ++it) {
