@@ -46,7 +46,7 @@ gpgcheck=0
 repo_gpgcheck=0
 enabled=1
 EOF
-  REL_NUMBER=$(git describe --tags | cut -d- -f2,3 --output-delimiter _)
+  REL_NUMBER=$(date +%Y%m%d%H%M)
   CMAKEFLAGS="$CMAKEFLAGS -DCPACK_PACKAGE_RELEASE=r${REL_NUMBER}"
 fi
 
