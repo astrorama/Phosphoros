@@ -58,7 +58,7 @@ yum install -y ${rpm_dev_deps} ${rpm_doc_deps}
 
 # Dependencies
 yum install -y cmake make gcc-c++ rpm-build
-yum install -y boost-devel $PYTHON-pytest log4cpp-devel doxygen CCfits-devel qt5-devel
+yum install -y boost-devel $PYTHON-pytest log4cpp-devel doxygen CCfits-devel qt5-qtbase-devel
 yum install -y graphviz $PYTHON-sphinx $PYTHON-sphinxcontrib-apidoc $PYTHON-astropy
 
 # Build
