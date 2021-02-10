@@ -425,6 +425,7 @@ void SurveyFilterMapping::saveSurvey(std::string oldName){
 
 
   mapping_file.close();
+  logger.info() << "Filter Mapping saved in " << mapping_path.toStdString()+"filter_mapping.txt";
 
 
   // Save the error recomputation params
@@ -440,7 +441,9 @@ void SurveyFilterMapping::saveSurvey(std::string oldName){
   std::filebuf fb;
   fb.open (error_param_file, std::ios::out);
   std::ostream os(&fb);
-  PhzDataModel::writeAdjustErrorParamMap(os, param_map);
+  if (param_map.size() > 0) {
+    PhzDataModel::writeAdjustErrorParamMap(os, param_map);
+  }
   fb.close();
 
   logger.info() << "Error recomputation parameters saved in " << error_param_file;
