@@ -71,6 +71,10 @@ public:
 
     void setGamma(double new_gamma);
 
+    bool getFromMag() const;
+
+    void setFromMag(bool new_from_mag);
+
 private:
     std::string m_flux_column;
     std::string m_error_column;
@@ -79,6 +83,7 @@ private:
     double m_alpha = 1.0;
     double m_beta = 0.0;
     double m_gamma = 0.0;
+    bool m_from_mag = false;
 };
 
 }

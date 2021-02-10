@@ -61,5 +61,13 @@ void FilterMapping::setGamma(double new_gamma) {
   m_gamma = new_gamma;
 }
 
+bool FilterMapping::getFromMag() const {
+  return m_from_mag;
+}
+
+void FilterMapping::setFromMag(bool new_from_mag) {
+  m_from_mag = new_from_mag;
+}
+
 }
 }
