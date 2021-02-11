@@ -272,7 +272,7 @@ void SurveyFilterMapping::ReadFilters() {
   try {
     std::ifstream in { mapping_path.toStdString() };
     std::string line;
-    regex expr {"\\s*([^\\s#]+)\\s+([^\\s#]+)\\s+([^\\s#]+)(\\s+[^\\s#]+\\s*$)?"};
+    regex expr {"\\s*([^\\s#]+)\\s+([^\\s#]+)\\s+([^\\s#]+)(\\s+[^\\s#]+)?(\\s+[^\\s#]+\\s*$)?"};
     while (std::getline(in, line)) {
       boost::trim(line);
       if (line[0] == '#') {
@@ -291,12 +291,19 @@ void SurveyFilterMapping::ReadFilters() {
       mapping.setFluxColumn(match_res.str(2));
       mapping.setErrorColumn(match_res.str(3));
 
-      if (match_res.str(4) == "") {
-        mapping.setN(3.0);
+      if (match_res.size() < 5 || match_res.str(4) == "") {
+         mapping.setN(3.0);
       } else {
-        float n = std::stof(match_res.str(4));
-        mapping.setN(n);
-     }
+         float n = std::stof(match_res.str(4));
+         mapping.setN(n);
+      }
+
+      if (match_res.size() < 6 || match_res.str(5) == "") {
+         mapping.setFromMag(false);
+      } else {
+         bool f = std::stoi(match_res.str(5));
+         mapping.setFromMag(f);
+      }
 
       mappings.push_back(mapping);
 
@@ -407,15 +414,18 @@ void SurveyFilterMapping::saveSurvey(std::string oldName){
   mapping_file.open(QIODevice::WriteOnly );
   QTextStream mapping_stream(&mapping_file);
 
+  mapping_stream << "# Filter, Flux Column, Error Column, Upper Limit/error ratio, Convert from MAG\n";
   for (auto& filter : m_filters) {
-    mapping_stream<< QString::fromStdString(filter.getFilterFile()) << " "
+    mapping_stream << QString::fromStdString(filter.getFilterFile()) << " "
             << QString::fromStdString(filter.getFluxColumn())<< " "
             << QString::fromStdString(filter.getErrorColumn()) <<  " "
-            << QString::number(filter.getN()) << "\n";
+            << QString::number(filter.getN()) <<  " "
+            << QString::number(filter.getFromMag()) <<"\n";
   }
 
 
   mapping_file.close();
+  logger.info() << "Filter Mapping saved in " << mapping_path.toStdString()+"filter_mapping.txt";
 
 
   // Save the error recomputation params
@@ -431,7 +441,9 @@ void SurveyFilterMapping::saveSurvey(std::string oldName){
   std::filebuf fb;
   fb.open (error_param_file, std::ios::out);
   std::ostream os(&fb);
-  PhzDataModel::writeAdjustErrorParamMap(os, param_map);
+  if (param_map.size() > 0) {
+    PhzDataModel::writeAdjustErrorParamMap(os, param_map);
+  }
   fb.close();
 
   logger.info() << "Error recomputation parameters saved in " << error_param_file;

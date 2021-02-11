@@ -20,6 +20,8 @@
 #include "PreferencesUtils.h"
 
 #include "PhzQtUI/FilterMappingItemDelegate.h"
+#include "PhzQtUI/NumberItemDelegate.h"
+#include "PhzQtUI/BoolItemDelegate.h"
 #include "ElementsKernel/Logging.h"
 #include "PhzQtUI/filecopyer.h"
 
@@ -115,6 +117,15 @@ void FormSurveyMapping::fillControlsWithSelected() {
       filter_model->setFilters(selected_survey.getFilters());
       ui->table_Filter->setItemDelegateForColumn(1, new FilterMappingItemDelegate(getFilteredColumns()));
       ui->table_Filter->setItemDelegateForColumn(2, new FilterMappingItemDelegate(getFilteredColumns()));
+
+      ui->table_Filter->setItemDelegateForColumn(4, new NumberItemDelegate());
+      ui->table_Filter->setItemDelegateForColumn(5, new NumberItemDelegate());
+      ui->table_Filter->setItemDelegateForColumn(6, new NumberItemDelegate());
+      ui->table_Filter->setItemDelegateForColumn(7, new NumberItemDelegate());
+      ui->table_Filter->setItemDelegateForColumn(8, new BoolItemDelegate());
+
+
+
       ui->table_Filter->setModel(filter_model);
       ui->table_Filter->setColumnHidden(3, true);
       ui->table_Filter->setColumnHidden(5, !selected_survey.getDoRecomputeError());
@@ -653,6 +664,7 @@ std::vector<FilterMapping> FormSurveyMapping::getMappingFromGrid() const {
        auto alpha = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 5)).toString().toDouble();
        auto beta = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 6)).toString().toDouble();
        auto gamma = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 7)).toString().toDouble();
+       bool fromMag = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 8)).toString().toInt();
 
        FilterMapping mapping{};
        mapping.setFilterFile(name);
@@ -662,6 +674,7 @@ std::vector<FilterMapping> FormSurveyMapping::getMappingFromGrid() const {
        mapping.setAlpha(alpha);
        mapping.setBeta(beta);
        mapping.setGamma(gamma);
+       mapping.setFromMag(fromMag);
        filters.push_back(mapping);
      }
      return filters;

@@ -1,6 +1,7 @@
 #include "PhzQtUI/FilterModel.h"
 #include "FileUtils.h"
 
+
 namespace Euclid {
 namespace PhzQtUI {
 
@@ -16,7 +17,7 @@ void FilterModel::setFilters(const std::vector<FilterMapping>& initFilterList) {
     QStringList  setHeaders;
     setHeaders<<"Filter Transmission \nCurve"<<"Flux Column \nName"<<"Flux Error\nColumn Name"
               <<"Filter Transmission File Full"<<"Upper limit \n over error ratio"
-              <<"Alpha"<<"Beta"<<"Gamma";
+              <<"Alpha"<<"Beta"<<"Gamma"<< "From MAG";
     this->setHorizontalHeaderLabels(setHeaders);
 
     int i = 0;
@@ -34,6 +35,7 @@ void FilterModel::setFilters(const std::vector<FilterMapping>& initFilterList) {
         this->setItem(i, 5, new QStandardItem(QString::number(filter.getAlpha())));
         this->setItem(i, 6, new QStandardItem(QString::number(filter.getBeta())));
         this->setItem(i, 7, new QStandardItem(QString::number(filter.getGamma())));
+        this->setItem(i, 8, new QStandardItem(QString::number(filter.getFromMag())));
         ++i;
     }
 }
@@ -51,6 +53,7 @@ void FilterModel::setFilter(const FilterMapping& filter, int row) {
     item(row, 5)->setText(QString::number(filter.getAlpha()));
     item(row, 6)->setText(QString::number(filter.getBeta()));
     item(row, 7)->setText(QString::number(filter.getGamma()));
+    item(row, 8)->setText(QString::number(filter.getFromMag()));
 }
 
 std::vector<FilterMapping> FilterModel::getFilters() const {
@@ -71,6 +74,8 @@ FilterMapping FilterModel::getFilter(int row) const {
     filter.setAlpha(item(row, 5)->text().toDouble());
     filter.setBeta(item(row, 6)->text().toDouble());
     filter.setGamma(item(row, 7)->text().toDouble());
+    filter.setFromMag(QVariant(item(row, 8)->text()).toBool());
+
     return filter;
 
 }
@@ -91,6 +96,7 @@ void FilterModel::addFilter(const FilterMapping& filter) {
     items.push_back(new QStandardItem(QString::number(filter.getAlpha())));
     items.push_back(new QStandardItem(QString::number(filter.getBeta())));
     items.push_back(new QStandardItem(QString::number(filter.getGamma())));
+    items.push_back(new QStandardItem(QString::number(filter.getFromMag())));
     this->appendRow(items);
 }
 
