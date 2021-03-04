@@ -74,7 +74,7 @@ private:
     DatasetRepo m_luminosity_repository;
     std::unique_ptr<DataPackHandler> m_dataPackHandler;
 
-    std::vector<MessageButton*> m_message_buttons;
+    std::vector<std::unique_ptr<MessageButton>> m_message_buttons;
     void addButtonsToSedItem(QStandardItem* item, SedTreeModel* treeModel_sed);
 };
 
