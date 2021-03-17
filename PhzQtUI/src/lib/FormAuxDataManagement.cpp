@@ -8,6 +8,7 @@
 #include <boost/filesystem/path.hpp>
 #include "ElementsKernel/Logging.h"
 
+#include "AlexandriaKernel/memory_tools.h"
 #include "PhzQtUI/FormAuxDataManagement.h"
 #include "ui_FormAuxDataManagement.h"
 #include "PhzQtUI/DataSetTreeModel.h"
@@ -150,45 +151,40 @@ void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
 }
 
 
-
-void FormAuxDataManagement::addButtonsToSedItem(QStandardItem* item, SedTreeModel* treeModel_sed){
+void FormAuxDataManagement::addButtonsToSedItem(QStandardItem *item, SedTreeModel *treeModel_sed) {
   if (treeModel_sed->canAddEmissionLineToGroup(item) || treeModel_sed->canAddLpEmissionLineToGroup(item)) {
-             auto name = treeModel_sed->getFullGroupName(item);
+    auto name = treeModel_sed->getFullGroupName(item);
 
-             MessageButton *cartButton = new MessageButton(name, "Add Emission Line to SEDs");
-             m_message_buttons.push_back(cartButton);
+    auto cartButton = Euclid::make_unique<MessageButton>(name, "Add Emission Line to SEDs");
 
-             auto index = item->index().sibling(item->index().row(), 1);
+    auto index = item->index().sibling(item->index().row(), 1);
 
-             ui->treeView_ManageSed->setIndexWidget(index, cartButton);
+    ui->treeView_ManageSed->setIndexWidget(index, cartButton.get());
 
-             connect(cartButton, SIGNAL(MessageButtonClicked(const QString&)), this,
-                             SLOT(addEmissionLineButtonClicked(const QString&)));
+    connect(cartButton.get(), SIGNAL(MessageButtonClicked(const QString&)), this,
+            SLOT(addEmissionLineButtonClicked(const QString&)));
+
+    m_message_buttons.push_back(std::move(cartButton));
   }
 
 
   for (int i = 0; i < item->rowCount(); i++) {
-    addButtonsToSedItem(item->child(i),treeModel_sed);
+    addButtonsToSedItem(item->child(i), treeModel_sed);
   }
 }
 
 
 
 void FormAuxDataManagement::sedProcessStarted() {
-    ui->labelMessage->setText("Adding emission Lines to the SEDs...");
-    for (auto button :m_message_buttons){
-      button->setEnabled(false);
-    }
-
+  ui->labelMessage->setText("Adding emission Lines to the SEDs...");
+  for (auto& button :m_message_buttons) {
+    button->setEnabled(false);
+  }
 }
 
 void FormAuxDataManagement::sedProcessfinished(int, QProcess::ExitStatus) {
       // remove the buttons
-      for (auto button : m_message_buttons) {
-        delete button;
-      }
-
-      m_message_buttons = std::vector<MessageButton*>();
+      m_message_buttons.clear();
 
       // reload the provider and the model
       std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
@@ -232,6 +228,8 @@ void FormAuxDataManagement::copyingFilterFinished(bool success, QVector<QString>
 
 void FormAuxDataManagement::copyingSEDFinished(bool success, QVector<QString> ){
  if (success){
+    m_message_buttons.clear();
+
     logger.info() << "files imported ";
     // reload the provider and the model
     std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
