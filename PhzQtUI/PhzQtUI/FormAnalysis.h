@@ -154,6 +154,10 @@ void on_btn_ToPP_clicked();
     void setLumFilter(std::string new_filter);
 
 
+    void on_rb_best_scaling_toggled(bool);
+    void on_rb_sample_scaling_toggled(bool);
+
+
 private:
     std::unique_ptr<Ui::FormAnalysis> ui;
     std::list<std::string> getFilters();

@@ -183,7 +183,7 @@ void FormAnalysis::updateSelection() {
 
 
 
-
+  updateGridSelection();
 
 
 }
@@ -269,7 +269,7 @@ void FormAnalysis::updateGalCorrGridSelection() {
     if (!added) {
       ui->cb_CompatibleGalCorrGrid->addItem(
           QString::fromStdString("Grid_" + selected_model.getName() + "_")
-              + ui->cb_igm->currentText() + "_MW_Param.dat");
+              + ui->cb_igm->currentText() + "_MW_Param.txt");
     }
 
     ui->cb_CompatibleGalCorrGrid->addItem("<Enter a new name>");
@@ -724,7 +724,7 @@ bool FormAnalysis::checkGalacticGridSelection(bool addFileCheck, bool acceptNewF
 
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getGridConfiguration() {
   std::string file_name = FileUtils::addExt(
-      ui->cb_CompatibleGrid->currentText().toStdString(), ".dat");
+      ui->cb_CompatibleGrid->currentText().toStdString(), ".txt");
   ui->cb_CompatibleGrid->setItemText(ui->cb_CompatibleGrid->currentIndex(),
       QString::fromStdString(file_name));
   auto& selected_model =  m_model_set_model_ptr->getSelectedModelSet();
@@ -738,6 +738,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
     config[pair.first] = pair.second;
   }
 
+  std::string text_format = "TEXT";
+  config["output-model-grid-format"].value() = boost::any(text_format);
 
   return config;
 }
@@ -745,7 +747,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 
 
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getGalacticCorrectionGridConfiguration() {
-  std::string file_name = FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ".dat");
+  std::string file_name = FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ".txt");
   ui->cb_CompatibleGalCorrGrid->setItemText(ui->cb_CompatibleGalCorrGrid->currentIndex(),
         QString::fromStdString(file_name));
   std::string grid_name = ui->cb_CompatibleGrid->currentText().toStdString();
@@ -769,6 +771,10 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
              FileUtils::getPathConfiguration(false, true, true, false);
     options_map["catalog-type"].value() = boost::any(catalog_type);
     options_map["output-galactic-correction-coefficient-grid"].value() = boost::any(file_name);
+
+    std::string text_format = "TEXT";
+    options_map["output-model-grid-format"].value() = boost::any(text_format);
+
     options_map["model-grid-file"].value() = boost::any(grid_name);
     options_map["normalization-filter"].value() = boost::any(lum_filter);
     options_map["igm-absorption-type"].value() = boost::any(igm);
@@ -1230,6 +1236,15 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     options_map["copy-columns"].value() = boost::any(option);
   }
 
+
+  if (ui->rb_sample_scaling->isChecked()) {
+    options_map["scale-factor-magrinalization-enabled"].value() = boost::any(yes_flag);
+
+    options_map["scale-factor-magrinalization-sample-number"].value() = boost::any(ui->sb_lum_sample_number->value());
+
+    options_map["scale-factor-magrinalization-range-size"].value() = boost::any(ui->dsb_sample_range->value());
+  }
+
   return options_map;
 }
 
@@ -1391,7 +1406,7 @@ template<typename ReturnType, int I>
           grid_name = grid_name.substr(0, index);
         }
      ui->cb_CompatibleGalCorrGrid->setItemText(ui->cb_CompatibleGalCorrGrid->currentIndex(),
-                QString::fromStdString(grid_name+"_MW_Param.dat"));
+                QString::fromStdString(grid_name+"_MW_Param.txt"));
     adjustGalCorrGridButtons(true);
     setComputeCorrectionEnable();
     setRunAnnalysisEnable(true);
@@ -1880,9 +1895,21 @@ template<typename ReturnType, int I>
                       i_filter);
     setRunAnnalysisEnable(true);
   }
+// 5. Algo
 
 
-// 5. Run
+  void FormAnalysis::on_rb_best_scaling_toggled(bool on) {
+    ui->rb_sample_scaling->setChecked(!on);
+    ui->wdg_sample->setEnabled(!on);
+  }
+  void FormAnalysis::on_rb_sample_scaling_toggled(bool on) {
+    ui->rb_best_scaling->setChecked(!on);
+    ui->wdg_sample->setEnabled(on);
+  }
+
+
+
+// 6. Run
 void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
   if (do_test) {
     std::vector<std::string> needed_columns { };
