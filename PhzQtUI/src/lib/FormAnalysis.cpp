@@ -51,6 +51,7 @@
 #include <CCfits/CCfits>
 #include "PhzDataModel/PhotometryGridInfo.h"
 #include "PhzDataModel/serialization/PhotometryGridInfo.h"
+#include "PhzQtUI/DialogFilterSelector.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -76,11 +77,32 @@ void FormAnalysis::loadAnalysisPage(
   m_model_set_model_ptr = model_set_model_ptr;
   m_filter_repository = filter_repository;
   m_luminosity_repository = luminosity_repository;
+
   logger.info()<< "Load the Analysis Page";
 
   updateSelection();
 
 
+}
+
+
+
+void FormAnalysis::on_btn_lum_filter_clicked() {
+  std::unique_ptr<DialogFilterSelector> dialog(new DialogFilterSelector(m_filter_repository));
+  dialog->setFilter(ui->lbl_lum_filter->text().toStdString());
+  connect(dialog.get(), SIGNAL(popupClosing(std::string)),
+            SLOT(setLumFilter(std::string)));
+  dialog->exec();
+}
+
+void FormAnalysis::setLumFilter(std::string new_filter) {
+    ui->lbl_lum_filter->setText(QString::fromStdString(new_filter));
+
+    PreferencesUtils::setUserPreference(
+                   ui->cb_AnalysisSurvey->currentText().toStdString(),
+                   ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityFilter",
+                   new_filter);
+    updateGridSelection();
 }
 
 
@@ -159,6 +181,11 @@ void FormAnalysis::updateSelection() {
   connect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString &)),
         SLOT(on_cb_AnalysisSurvey_currentIndexChanged(const QString &)));
 
+
+
+
+
+
 }
 
 ///////////////////////////////////////////////////
@@ -171,7 +198,9 @@ try {
   auto axis = selected_model.getAxesTuple();
   auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
       m_survey_model_ptr->getSelectedSurvey().getName(), axis,
-      getSelectedFilters(), ui->cb_igm->currentText().toStdString());
+      getSelectedFilters(), ui->cb_igm->currentText().toStdString(),
+      ui->lbl_lum_filter->text().toStdString(),
+      true);
 
   ui->cb_CompatibleGrid->clear();
   bool added = false;
@@ -211,6 +240,7 @@ bool FormAnalysis::checkCompatibleGalacticGrid(std::string file_name){
    auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          m_survey_model_ptr->getSelectedSurvey().getName(), axis,
          getSelectedFilters(), ui->cb_igm->currentText().toStdString(),
+         ui->lbl_lum_filter->text().toStdString(),
          false);
    return (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
 
@@ -226,6 +256,7 @@ void FormAnalysis::updateGalCorrGridSelection() {
     auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
         m_survey_model_ptr->getSelectedSurvey().getName(), axis,
         getSelectedFilters(), ui->cb_igm->currentText().toStdString(),
+        ui->lbl_lum_filter->text().toStdString(),
         false);
 
     ui->cb_CompatibleGalCorrGrid->clear();
@@ -396,10 +427,10 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   bool lum_prior_ok = !ui->rb_luminosityPrior->isChecked() || ui->cb_luminosityPrior_2->currentText().length() > 0;
   bool lum_prior_compatible = true;
   if (lum_prior_ok && ui->rb_luminosityPrior->isChecked()) {
-    LuminosityPriorConfig info;
+    LuminosityPriorConfig prior_info;
     for (auto prior_pair : m_prior_config) {
       if (ui->cb_luminosityPrior_2->currentText().toStdString() == prior_pair.first) {
-        info = prior_pair.second;
+        prior_info = prior_pair.second;
       }
     }
 
@@ -431,7 +462,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
       }
     }
 
-    lum_prior_compatible = info.isCompatibleWithParameterSpace(z_min, z_max, selected_model.getSeds());
+    lum_prior_compatible = prior_info.isCompatibleWithParameterSpace(z_min, z_max, selected_model.getSeds());
 
   }
 
@@ -698,9 +729,17 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
       QString::fromStdString(file_name));
   auto& selected_model =  m_model_set_model_ptr->getSelectedModelSet();
 
-  return PhzGridInfoHandler::GetConfigurationMap(
+  auto config = PhzGridInfoHandler::GetConfigurationMap(
       ui->cb_AnalysisSurvey->currentText().toStdString(), file_name, selected_model,
-      getFilters(), ui->cb_igm->currentText().toStdString());
+      getFilters(), ui->lbl_lum_filter->text().toStdString(), ui->cb_igm->currentText().toStdString());
+
+  auto cosmo_conf = PreferencesUtils::getCosmologyConfigurations();
+  for (auto& pair : cosmo_conf) {
+    config[pair.first] = pair.second;
+  }
+
+
+  return config;
 }
 
 
@@ -711,6 +750,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
         QString::fromStdString(file_name));
   std::string grid_name = ui->cb_CompatibleGrid->currentText().toStdString();
   std::string catalog_type = ui->cb_AnalysisSurvey->currentText().toStdString();
+  std::string lum_filter = ui->lbl_lum_filter->text().toStdString();
   std::string igm = ui->cb_igm->currentText().toStdString();
 
   QFileInfo f99_curve_info(
@@ -730,7 +770,13 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
     options_map["catalog-type"].value() = boost::any(catalog_type);
     options_map["output-galactic-correction-coefficient-grid"].value() = boost::any(file_name);
     options_map["model-grid-file"].value() = boost::any(grid_name);
+    options_map["normalization-filter"].value() = boost::any(lum_filter);
     options_map["igm-absorption-type"].value() = boost::any(igm);
+
+    auto cosmo_conf = PreferencesUtils::getCosmologyConfigurations();
+    for (auto& pair : cosmo_conf) {
+          options_map[pair.first] = pair.second;
+     }
 
 
     std::string f99 = "F99/F99_3.1";
@@ -748,9 +794,9 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 ////////////////////////////////////////////////////////////////////////////
 
 
-bool FormAnalysis::checkSedWeightFile(std::string file_name) {
+bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
   std::string folder = FileUtils::getSedPriorRootPath();
-  QFileInfo info(QString::fromStdString(folder) + QDir::separator() + QString::fromStdString(file_name));
+  QFileInfo info(QString::fromStdString(folder) + QDir::separator() + QString::fromStdString(sed_weight_file_name));
   if (info.exists()) {
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
     auto igm = ui->cb_igm->currentText().toStdString();
@@ -1002,6 +1048,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     options_map["dust-column-density-column-name"].value() = boost::any(gal_ebv_default_column);
   }
 
+
+
   auto input_catalog_file = FileUtils::removeStart(
       ui->txt_inputCatalog->text().toStdString(),
       FileUtils::getCatalogRootPath(false, survey_name) +
@@ -1186,42 +1234,6 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 }
 
 
-
-std::map < std::string, boost::program_options::variable_value > FormAnalysis::getLuminosityOptionMap() {
-  std::map<std::string, boost::program_options::variable_value> options_map =
-      FileUtils::getPathConfiguration(false, true, true, true);
-
-  if (ui->rb_luminosityPrior->isChecked()) {
-
-    LuminosityPriorConfig info;
-    for (auto prior_pair : m_prior_config) {
-      if (ui->cb_luminosityPrior_2->currentText().toStdString()
-          == prior_pair.first) {
-        info = prior_pair.second;
-      }
-    }
-
-    for (auto& pair : info.getBasicConfigOptions(false)) {
-      options_map[pair.first] = pair.second;
-    }
-
-    auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
-
-    auto global_options = PreferencesUtils::getThreadConfigurations();
-    for (auto& pair : global_options) {
-          options_map[pair.first] = pair.second;
-    }
-
-    options_map["catalog-type"].value() = boost::any(std::string(survey_name));
-
-    options_map["model-grid-file"].value() = boost::any(
-        ui->cb_CompatibleGrid->currentText().toStdString());
-
-    options_map["output-model-grid"].value() = boost::any(
-        info.getLuminosityModelGridName());
-  }
-  return options_map;
-}
 //////////////////////////////////////////////////
 // User interaction
 
@@ -1352,6 +1364,7 @@ template<typename ReturnType, int I>
     updateGalCorrGridSelection();
     loadLuminosityPriors();
   }
+
 
   void FormAnalysis::on_cb_igm_currentIndexChanged(const QString &) {
     updateGridSelection();
@@ -1586,9 +1599,9 @@ template<typename ReturnType, int I>
     std::string dec_col = "";
 
     if (ui->rb_gc_planck->isChecked()) {
-      SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
-      ra_col = selected_survey.getRaColumn();
-      dec_col = selected_survey.getDecColumn();
+      SurveyFilterMapping sel_survey = m_survey_model_ptr->getSelectedSurvey();
+      ra_col = sel_survey.getRaColumn();
+      dec_col = sel_survey.getDecColumn();
     }
 
 
@@ -1602,8 +1615,6 @@ template<typename ReturnType, int I>
     }
 
 
-    auto config_map_luminosity = getLuminosityOptionMap();
-
 
     std::unique_ptr<DialogPhotometricCorrectionComputation> popup(new DialogPhotometricCorrectionComputation());
     popup->setData(survey_name, m_survey_model_ptr->getSelectedSurvey().getSourceIdColumn(),
@@ -1613,7 +1624,6 @@ template<typename ReturnType, int I>
         getExcludedFilters(),
         selected_survey.getRefZColumn(),
         config_map,
-        config_map_luminosity,
         config_sed_weight,
         selected_survey.getNonDetection(),
         ra_col,
@@ -1645,7 +1655,7 @@ template<typename ReturnType, int I>
 
 
   void FormAnalysis::on_btn_confLuminosityPrior_clicked() {
-        std::unique_ptr<DialogLuminosityPrior> dialog(new DialogLuminosityPrior(m_filter_repository, m_luminosity_repository));
+        std::unique_ptr<DialogLuminosityPrior> dialog(new DialogLuminosityPrior(ui->lbl_lum_filter->text().toStdString(), m_luminosity_repository));
 
         std::string model_grid = ui->cb_CompatibleGrid->currentText().toStdString();
 
@@ -1688,6 +1698,22 @@ template<typename ReturnType, int I>
     auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
 
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
+
+    // set the Luminosity filter
+    std::string lum_filter = PreferencesUtils::getUserPreference(survey_name,
+                     ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityFilter");
+
+      if (lum_filter !="") {
+        ui->lbl_lum_filter->setText(QString::fromStdString(lum_filter));
+      } else {
+        // use first filter with r as default value (TODO update with full name);
+        for (auto& filter_name : m_filter_repository->getContent()) {
+           if (filter_name.datasetName().find("r") != std::string::npos) {
+              setLumFilter(filter_name.qualifiedName());
+           }
+        }
+      }
+
 
     auto folder = FileUtils::getGUILuminosityPriorConfig(true, survey_name,
         selected_model.getName());
@@ -2037,14 +2063,7 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
                       command += QString::fromStdString("Phosphoros CSW --config-file ") + grid_sed_weight_file_name + cr;
           }
 
-          // Luminosity Grid
-          if (ui->rb_luminosityPrior->isChecked()) {
-            auto grid_luminosity_file_name = selected_folder+QString::fromStdString("/LuminosityGrid.CLMG.conf");
-            auto luminosity_config_map = getLuminosityOptionMap();
-            PhzUITools::ConfigurationWriter::writeConfiguration(luminosity_config_map,
-                grid_luminosity_file_name.toStdString());
-                        command += QString::fromStdString("Phosphoros CLMG --config-file ") + grid_luminosity_file_name + cr;
-          }
+
 
           // Lookup Galactic EBV
           if (ui->rb_gc_planck->isChecked()) {
@@ -2142,10 +2161,8 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
       }
     }
 
-    auto config_map_luminosity = getLuminosityOptionMap();
-
     std::unique_ptr<DialogRunAnalysis> dialog(new DialogRunAnalysis());
-    dialog->setValues(out_dir, config_map, config_map_luminosity, config_sed_weight);
+    dialog->setValues(out_dir, config_map, config_sed_weight);
     if (dialog->exec()) {
       saveCopiedColumnToCatalog();
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),

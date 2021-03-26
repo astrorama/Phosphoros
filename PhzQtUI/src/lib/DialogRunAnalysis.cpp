@@ -25,12 +25,10 @@
 #include "PhzConfiguration/PhotometricCorrectionConfig.h"
 #include "PhzConfiguration/PriorConfig.h"
 #include "Configuration/CatalogConfig.h"
-#include "PhzConfiguration/ComputeLuminosityModelGridConfig.h"
 #include "PhzConfiguration/ComputeModelGridConfig.h"
 #include "PhzConfiguration/SedProviderConfig.h"
 #include "PhzConfiguration/ReddeningProviderConfig.h"
 #include "PhzConfiguration/FilterProviderConfig.h"
-#include "PhzConfiguration/LuminosityBandConfig.h"
 #include "PhzConfiguration/IgmConfig.h"
 #include "PhzConfiguration/ModelGridOutputConfig.h"
 #include "PhzModeling/SparseGridCreator.h"
@@ -61,7 +59,6 @@ DialogRunAnalysis::DialogRunAnalysis(QWidget *parent) :
         PhzUtils::getStopThreadsFlag() = false;
         ui->setupUi(this);
         ui->progressBar->setValue(0);
-        ui->lum_progress->setValue(0);
         ui->sed_progress->setValue(0);
         ui->btn_cancel->setEnabled(true);
 
@@ -74,10 +71,8 @@ DialogRunAnalysis::DialogRunAnalysis(QWidget *parent) :
         m_timer->start();
 
         connect(&m_future_watcher, SIGNAL(finished()), this, SLOT(runFinished()));
-        connect(&m_future_lum_watcher, SIGNAL(finished()), this, SLOT(lumFinished()));
         connect(&m_future_sed_watcher, SIGNAL(finished()), this, SLOT(sedFinished()));
         connect(this, SIGNAL(signalUpdateBar(int)), ui->progressBar, SLOT(setValue(int)));
-        connect(this, SIGNAL(signalUpdateLumBar(int)), ui->lum_progress, SLOT(setValue(int)));
         connect(this, SIGNAL(signalUpdateSedBar(int)), ui->sed_progress, SLOT(setValue(int)));
     }
 
@@ -85,7 +80,6 @@ DialogRunAnalysis::~DialogRunAnalysis() {}
 
 void DialogRunAnalysis::setValues(std::string output_dir,
           const std::map<std::string, boost::program_options::variable_value>& config,
-          const std::map<std::string, boost::program_options::variable_value>& luminosity_config,
           const std::map<std::string, boost::program_options::variable_value>& sed_config) {
   
   ui->label_out_dir->setText(QString::fromStdString(output_dir));
@@ -97,15 +91,9 @@ void DialogRunAnalysis::setValues(std::string output_dir,
     m_original_config.emplace(pair);
   }
 
-  m_lum_config = luminosity_config;
   m_sed_config = sed_config;
 
-  // hide unwanted progress bar
-  if (!needLuminosityGrid()) {
-    ui->w_lum->hide();
-  } else {
-    ui->w_lum->show();
-  }
+
 
   if (!needSedWeights()) {
     ui->w_sed->hide();
@@ -154,57 +142,6 @@ std::string DialogRunAnalysis::runFunction(){
 }
 
 
-std::string DialogRunAnalysis::runLumFunction(){
-  try {
-    completeWithDefaults<ComputeLuminosityModelGridConfig>(m_lum_config);
-
-    long config_manager_id = Configuration::getUniqueManagerId();
-    auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
-    config_manager.registerConfiguration<ComputeLuminosityModelGridConfig>();
-    config_manager.closeRegistration();
-
-    config_manager.initialize(m_lum_config);
-
-
-    auto& sed_provider = config_manager.getConfiguration<SedProviderConfig>().getSedDatasetProvider();
-    auto& reddening_provider = config_manager.getConfiguration<ReddeningProviderConfig>().getReddeningDatasetProvider();
-    const auto& filter_provider = config_manager.getConfiguration<FilterProviderConfig>().getFilterDatasetProvider();
-    auto& igm_abs_func = config_manager.getConfiguration<IgmConfig>().getIgmAbsorptionFunction();
-
-    Euclid::PhzModeling::SparseGridCreator creator {sed_provider, reddening_provider, filter_provider, igm_abs_func};
-
-    auto param_space_map = config_manager.getConfiguration<ComputeLuminosityModelGridConfig>().getParameterSpaceRegions();
-    std::vector<Euclid::XYDataset::QualifiedName> filter_list = {config_manager.getConfiguration<Euclid::PhzConfiguration::LuminosityBandConfig>().getLuminosityFilter()};
-
-
-    auto monitor_function = [this](size_t step, size_t total) {
-       int value = (step * 100) / total;
-       // If the user has canceled we do not want to update the progress bar,
-       // because the GUI thread might have already deleted it
-       if (!PhzUtils::getStopThreadsFlag()) {
-         emit signalUpdateLumBar(value);
-       }
-    };
-
-    auto results = creator.createGrid(param_space_map, filter_list, monitor_function);
-
-    auto output = config_manager.getConfiguration<ModelGridOutputConfig>().getOutputFunction();
-    output(results);
-    return "";
-
-  }
-  catch (const Elements::Exception & e) {
-    return "Sorry, an error occurred during the Luminosity grid computation :\n"
-        + std::string(e.what());
-  }
-  catch (const std::exception& e) {
-    return "Sorry, an error occurred during the Luminosity grid computation:\n"
-        + std::string(e.what());
-  }
-  catch (...) {
-    return "Sorry, an error occurred during the Luminosity grid computation.";
-  }
-}
 
 
 std::string DialogRunAnalysis::runSedFunction(){
@@ -252,33 +189,10 @@ void DialogRunAnalysis::on_btn_cancel_clicked() {
 }
 
 void DialogRunAnalysis::run() {
-  if (needLuminosityGrid()) {
-    m_future_lum_watcher.setFuture(QtConcurrent::run(this, &DialogRunAnalysis::runLumFunction));
-  } else if (needSedWeights()) {
+   if (needSedWeights()) {
     m_future_sed_watcher.setFuture(QtConcurrent::run(this, &DialogRunAnalysis::runSedFunction));
   } else {
     m_future_watcher.setFuture(QtConcurrent::run(this, &DialogRunAnalysis::runFunction));
-  }
-}
-
-void DialogRunAnalysis::lumFinished() {
-
-
-
-  auto message = m_future_lum_watcher.result();
-  if (message.length() == 0) {
-
-    if (needSedWeights()) {
-      m_future_sed_watcher.setFuture(QtConcurrent::run(this, &DialogRunAnalysis::runSedFunction));
-    } else {
-      m_future_watcher.setFuture(QtConcurrent::run(this, &DialogRunAnalysis::runFunction));
-    }
-
-
-  } else {
-    QMessageBox::warning(this, "Error in the computation...",
-        QString::fromStdString(message), QMessageBox::Close);
-    this->reject();
   }
 }
 
@@ -320,32 +234,6 @@ void DialogRunAnalysis::runFinished() {
 bool DialogRunAnalysis::needSedWeights() {
 
   return m_sed_config.size() > 0;
-}
-
-/// Luminosity grid Computation
-bool DialogRunAnalysis::needLuminosityGrid(){
-  if (m_config.count("luminosity-prior")==1 && m_config.at("luminosity-prior").as<std::string>()=="YES"){
-    //check the grid
-    try{
-      completeWithDefaults<ComputeRedshiftsConfig>(m_config);
-      long config_manager_id = Configuration::getUniqueManagerId();
-      auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
-      config_manager.registerConfiguration<ComputeRedshiftsConfig>();
-      config_manager.closeRegistration();
-      config_manager.initialize(m_config);
-
-      // Need a check for compatibility between the grids without it recompute it each time.
-      // the file exists if it is compatible nothing to do => return false;
-      return true;
-
-    } catch(const Elements::Exception&) {}
-    // The grid need to be computed
-    return true;
-
-  } else {
-    // The luminosity prior is not enabled: no need for a luminosity grid
-    return false;
-  }
 }
 
 

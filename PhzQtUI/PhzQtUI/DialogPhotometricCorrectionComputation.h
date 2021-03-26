@@ -72,7 +72,6 @@ public:
         std::list<std::string> excluded_filters,
         std::string default_z_column,
         std::map<std::string, boost::program_options::variable_value> run_option,
-        const std::map<std::string, boost::program_options::variable_value>& luminosity_config,
         const std::map<std::string, boost::program_options::variable_value>& sed_config,
         double non_detection,
         std::string ra_col ="",
@@ -148,14 +147,12 @@ private:
     std::string m_ra_col;
     std::string m_dec_col;
     std::map<std::string, boost::program_options::variable_value> m_run_option;
-    std::map<std::string, boost::program_options::variable_value> m_lum_config;
     std::map<std::string, boost::program_options::variable_value> m_sed_config;
     double m_non_detection;
     bool m_computing = false;
     void disablePage();
     void enablePage();
     std::string runFunction();
-    std::string runLumFunction();
     std::string runSedFunction();
     void setRunEnability();
     bool loadTestCatalog(QString file_name, bool with_warning);

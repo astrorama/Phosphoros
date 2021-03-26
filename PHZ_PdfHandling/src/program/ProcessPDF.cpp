@@ -56,8 +56,6 @@ using boost::program_options::options_description;
 using boost::program_options::variable_value;
 
 
-static Elements::Logging logger = Elements::Logging::getLogger("ProcessPDF");
-
 static long config_manager_id = getUniqueManagerId();
 
 class ProcessPDF : public Elements::Program {
@@ -252,7 +250,7 @@ public:
            Row row0 {values0, column_info};
            row_list.push_back(row0);
 
-         } catch (Elements::Exception e){
+         } catch (Elements::Exception& e){
 
            logger.warn("The processing of the PDF of the source with ID " + id_str + " has failed :" + e.what());
 

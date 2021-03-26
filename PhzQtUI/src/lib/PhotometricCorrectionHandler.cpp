@@ -14,7 +14,7 @@
 #include "XYDataset/FileSystemProvider.h"
 #include "XYDataset/AsciiParser.h"
 
-#include "PhzConfiguration/ComputePhotometricCorrectionsConfig.h"
+//#include "PhzConfiguration/ComputePhotometricCorrectionsConfig.h"
 #include "DefaultOptionsCompleter.h"
 
 namespace Euclid {
@@ -91,7 +91,7 @@ std::map<std::string, boost::program_options::variable_value> PhotometricCorrect
     run_option["input-catalog-file"].value() = boost::any(training_catalog_file);
     run_option["spec-z-column-name"].value() = boost::any(z_column);
 
-    completeWithDefaults<PhzConfiguration::ComputePhotometricCorrectionsConfig>(run_option);
+    //completeWithDefaults<PhzConfiguration::ComputePhotometricCorrectionsConfig>(run_option);
 
     return run_option;
 }

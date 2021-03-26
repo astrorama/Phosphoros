@@ -52,19 +52,16 @@ public:
      */
     void setValues(std::string output_dir,
                    const std::map<std::string, boost::program_options::variable_value>& config,
-                   const std::map<std::string, boost::program_options::variable_value>& luminosity_config,
                    const std::map<std::string, boost::program_options::variable_value>& sed_config);
   
 private slots:
 
   std::string runFunction();
-  std::string runLumFunction();
   std::string runSedFunction();
 
   void run();
 
   void runFinished();
-  void lumFinished();
   void sedFinished();
 
   void on_btn_cancel_clicked();
@@ -72,7 +69,6 @@ private slots:
 signals:
 
   void signalUpdateBar(int);
-  void signalUpdateLumBar(int);
   void signalUpdateSedBar(int);
 
 private:
@@ -80,11 +76,9 @@ private:
   bool needSedWeights();
 
   QFutureWatcher<std::string> m_future_watcher {};
-  QFutureWatcher<std::string> m_future_lum_watcher {};
   QFutureWatcher<std::string> m_future_sed_watcher {};
   std::map<std::string, boost::program_options::variable_value> m_config;
   std::map<std::string, boost::program_options::variable_value> m_original_config;
-  std::map<std::string, boost::program_options::variable_value> m_lum_config;
   std::map<std::string, boost::program_options::variable_value> m_sed_config;
   std::unique_ptr<Ui::DialogRunAnalysis> ui;
   std::unique_ptr<QTimer> m_timer;

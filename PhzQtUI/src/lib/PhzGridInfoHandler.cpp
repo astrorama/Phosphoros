@@ -35,7 +35,8 @@ namespace PhzQtUI {
  bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
     const std::map<std::string,PhzDataModel::ModelAxesTuple>& axes,
     const std::list<std::string> & selected_filters,
-    std::string igm_type) {
+    const std::string igm_type,
+    const std::string luminosity_filter) {
 
 
    try { // If a file cannot be opened or is ill formated: just skip it!
@@ -50,6 +51,11 @@ namespace PhzQtUI {
          // Check the IGM type compatibility
          if (igm_type!=grid_info.igm_method) {
                  return false;
+         }
+
+         // Check the Luminosity filter compatibility
+         if (luminosity_filter!=grid_info.luminosity_filter_name.qualifiedName()) {
+                return false;
          }
 
          // check the filters
@@ -193,6 +199,7 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
     const std::map<std::string,PhzDataModel::ModelAxesTuple>& axes,
     const std::list<std::string>& selected_filters,
     std::string igm_type,
+    const std::string luminosity_filter,
     bool model_grid) {
 
   std::string rootPath = FileUtils::getPhotmetricGridRootPath(true,catalog);
@@ -207,7 +214,7 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
 
     foreach (const QString &fileName , fileNames) {
       auto file_path = root_qdir.absoluteFilePath(fileName);
-      if (checkGridFileCompatibility(file_path, axes, selected_filters, igm_type)) {
+      if (checkGridFileCompatibility(file_path, axes, selected_filters, igm_type, luminosity_filter)) {
         list.push_back(fileName.toStdString());
       }
     }
@@ -219,7 +226,9 @@ std::map<std::string, boost::program_options::variable_value> PhzGridInfoHandler
     std::string catalog,
     std::string output_file,
     ModelSet model,
-    const std::list<std::string>& selected_filters, std::string igm_type) {
+    const std::list<std::string>& selected_filters,
+    std::string luminosity_filter,
+    std::string igm_type) {
 
 
   std::map<std::string, boost::program_options::variable_value> options_map =
@@ -236,6 +245,7 @@ std::map<std::string, boost::program_options::variable_value> PhzGridInfoHandler
   }
 
 
+  options_map["normalization-filter"].value() = boost::any(luminosity_filter);
   options_map["catalog-type"].value() = boost::any(catalog);
 
   options_map["output-model-grid"].value() = boost::any(output_file);

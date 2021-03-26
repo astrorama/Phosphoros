@@ -91,6 +91,8 @@ void on_btn_ToPP_clicked();
 
     void on_btn_computeCorrections_clicked();
 
+    void on_btn_lum_filter_clicked();
+
     void on_cb_AnalysisModel_currentIndexChanged(const QString &);
 
     void on_cbb_pdf_out_currentIndexChanged(const QString &);
@@ -103,6 +105,7 @@ void on_btn_ToPP_clicked();
     void on_cb_CompatibleGrid_currentTextChanged(const QString &);
 
     void on_cb_CompatibleGalCorrGrid_textChanged(const QString &);
+
 
     void on_btn_GetConfigGrid_clicked();
 
@@ -148,6 +151,7 @@ void on_btn_ToPP_clicked();
     void setCopiedColumns(std::map<std::string, std::string> columns);
 
     void setNzFilters(std::string b_filter, std::string i_filter);
+    void setLumFilter(std::string new_filter);
 
 
 private:
@@ -197,7 +201,6 @@ private:
 
     void setRunAnnalysisEnable(bool enabled);
     std::map < std::string, boost::program_options::variable_value > getRunOptionMap();
-    std::map < std::string, boost::program_options::variable_value > getLuminosityOptionMap();
     std::map<std::string, LuminosityPriorConfig> m_prior_config;
     std::map<std::string,std::string> m_copied_columns = {};
 

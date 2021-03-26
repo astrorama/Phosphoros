@@ -291,9 +291,9 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="btn_filter">
+             <widget class="QLabel" name="label_9">
               <property name="text">
-               <string>Select Filter</string>
+               <string>(Luminosity filter can be changed in the &quot;Compute Redshift&quot; page step 1 )</string>
               </property>
              </widget>
             </item>
@@ -373,7 +373,7 @@
                <x>0</x>
                <y>0</y>
                <width>920</width>
-               <height>257</height>
+               <height>265</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -388,7 +388,7 @@
                    <x>0</x>
                    <y>0</y>
                    <width>900</width>
-                   <height>237</height>
+                   <height>245</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_8">

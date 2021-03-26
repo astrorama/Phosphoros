@@ -12,6 +12,6 @@ set(CXX_SUGGEST_OVERRIDE ON
 
 # Declare project name and version
 
-elements_project(Phosphoros 0.18 USE PhosphorosCore 0.18)
+elements_project(Phosphoros 1.0 USE PhosphorosCore 1.0)
 
 

@@ -23,6 +23,9 @@
 #include "DefaultOptionsCompleter.h"
 #include "Configuration/Utils.h"
 #include "PhzUtils/Multithreading.h"
+#include "PhzConfiguration/ModelNormalizationConfig.h"
+#include "PhzModeling/NormalizationFunctorFactory.h"
+#include "PhzConfiguration/CosmologicalParameterConfig.h"
 
 // #include <future>
 
@@ -71,9 +74,17 @@ std::string DialogGridGeneration::runFunction() {
     auto& reddening_provider = config_manager.getConfiguration<ReddeningProviderConfig>().getReddeningDatasetProvider();
     const auto& filter_provider = config_manager.getConfiguration<FilterProviderConfig>().getFilterDatasetProvider();
     auto& igm_abs_func = config_manager.getConfiguration<IgmConfig>().getIgmAbsorptionFunction();
+    auto& cosmology = config_manager.template getConfiguration<CosmologicalParameterConfig>().getCosmologicalParam();
     
+    auto lum_filter_name = config_manager.template getConfiguration<ModelNormalizationConfig>().getNormalizationFilter();
+    double integrated_flux = config_manager.template getConfiguration<ModelNormalizationConfig>().getIntegratedFlux();
+
+    auto normalizer_functor =
+           Euclid::PhzModeling::NormalizationFunctorFactory::NormalizationFunctorFactory::GetFunction(filter_provider, lum_filter_name, integrated_flux);
+
+
     Euclid::PhzModeling::SparseGridCreator creator {
-                sed_provider, reddening_provider, filter_provider, igm_abs_func};
+                sed_provider, reddening_provider, filter_provider, igm_abs_func, normalizer_functor};
     
     auto monitor_function = [this](size_t step, size_t total) {
       int value = (step * 100) / total;
@@ -87,7 +98,7 @@ std::string DialogGridGeneration::runFunction() {
     auto param_space_map = config_manager.getConfiguration<ParameterSpaceConfig>().getParameterSpaceRegions();
     auto filter_list = config_manager.getConfiguration<FilterConfig>().getFilterList();
     
-    auto result = creator.createGrid(param_space_map, filter_list, monitor_function);
+    auto result = creator.createGrid(param_space_map, filter_list, cosmology, monitor_function);
 
     auto output = config_manager.getConfiguration<ModelGridOutputConfig>().getOutputFunction();
     output(result);

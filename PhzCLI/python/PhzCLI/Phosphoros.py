@@ -21,8 +21,6 @@ action_list = [
                      'Starts the Graphical User Interface'),
     PhosphorosAction(['compute_model_grid', 'CMG'], 'PhosphorosComputeModelGrid',
                      'Computes a grid containing the model photometries'),
-    PhosphorosAction(['compute_luminosity_model_grid', 'CLMG'], 'PhosphorosComputeLuminosityModelGrid',
-                     'Computes a grid containing the model photometries for the luminosity prior band'),
     PhosphorosAction(['compute_galactic_correction_coeff_grid', 'CGCCG'], 'PhosphorosComputeGalacticAbsorptionCoefficientGrid',
                      'Computes a grid containing the coefficient for the correction of the galactic absorption'),
     PhosphorosAction(['compute_photometric_corrections', 'CPC'], 'PhosphorosComputePhotometricCorrections',
