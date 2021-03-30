@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/archive/text_iarchive.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -182,11 +183,28 @@ void FormAnalysis::updateSelection() {
         SLOT(on_cb_AnalysisSurvey_currentIndexChanged(const QString &)));
 
 
+  // set the Luminosity filter
+  std::string lum_filter = PreferencesUtils::getUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                   ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityFilter");
+
+    if (lum_filter !="") {
+      ui->lbl_lum_filter->setText(QString::fromStdString(lum_filter));
+    } else {
+      // use first filter with r as default value (TODO update with full name);
+      for (auto& filter_name : m_filter_repository->getContent()) {
+         if (filter_name.datasetName().find("r") != std::string::npos) {
+            setLumFilter(filter_name.qualifiedName());
+         }
+      }
+    }
+
 
   updateGridSelection();
 
 
+
 }
+
 
 ///////////////////////////////////////////////////
 //  Handle controls enability
@@ -196,9 +214,12 @@ try {
   auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
   auto axis = selected_model.getAxesTuple();
+  logger.info() << "Expected filter " <<   ui->lbl_lum_filter->text().toStdString();
   auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
-      m_survey_model_ptr->getSelectedSurvey().getName(), axis,
-      getSelectedFilters(), ui->cb_igm->currentText().toStdString(),
+      m_survey_model_ptr->getSelectedSurvey().getName(),
+      axis,
+      getSelectedFilters(),
+      ui->cb_igm->currentText().toStdString(),
       ui->lbl_lum_filter->text().toStdString(),
       true);
 
@@ -730,8 +751,12 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
   auto& selected_model =  m_model_set_model_ptr->getSelectedModelSet();
 
   auto config = PhzGridInfoHandler::GetConfigurationMap(
-      ui->cb_AnalysisSurvey->currentText().toStdString(), file_name, selected_model,
-      getFilters(), ui->lbl_lum_filter->text().toStdString(), ui->cb_igm->currentText().toStdString());
+      ui->cb_AnalysisSurvey->currentText().toStdString(),
+      file_name,
+      selected_model,
+      getFilters(),
+      ui->lbl_lum_filter->text().toStdString(),
+      ui->cb_igm->currentText().toStdString());
 
   auto cosmo_conf = PreferencesUtils::getCosmologyConfigurations();
   for (auto& pair : cosmo_conf) {
@@ -804,152 +829,158 @@ bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
   std::string folder = FileUtils::getSedPriorRootPath();
   QFileInfo info(QString::fromStdString(folder) + QDir::separator() + QString::fromStdString(sed_weight_file_name));
   if (info.exists()) {
-    auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
-    auto igm = ui->cb_igm->currentText().toStdString();
-    auto axis = selected_model.getAxesTuple();
+    try {
+        auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
+        auto igm = ui->cb_igm->currentText().toStdString();
+        auto axis = selected_model.getAxesTuple();
 
 
-    std::string file_name = info.absoluteFilePath().toStdString();
-    int hdu_count = 0;
-    {
-       CCfits::FITS fits {file_name, CCfits::RWmode::Read};
-       hdu_count = fits.extension().size();
-    }
+        std::string file_name = info.absoluteFilePath().toStdString();
+        int hdu_count = 0;
+        {
+           CCfits::FITS fits {file_name, CCfits::RWmode::Read};
+           hdu_count = fits.extension().size();
+        }
 
-    std::vector<PhzDataModel::DoubleGrid> sed_weight_grids {};
-    for (int i = 1; i <= hdu_count; i += PhzDataModel::DoubleGrid::axisNumber()+1) {
-      sed_weight_grids.emplace_back(GridContainer::gridFitsImport<PhzDataModel::DoubleGrid>(file_name, i));
-    }
-
-
-    std::string survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
-    std::string model_grid_file = FileUtils::getPhotmetricGridRootPath(true, survey_name) + "/" +ui->cb_CompatibleGrid->currentText().toStdString();
-
-    PhzDataModel::PhotometryGridInfo model_grid_info;
-    std::ifstream in {model_grid_file};
-    boost::archive::binary_iarchive bia {in};
-    bia >> model_grid_info;
+        std::vector<PhzDataModel::DoubleGrid> sed_weight_grids {};
+        for (int i = 1; i <= hdu_count; i += PhzDataModel::DoubleGrid::axisNumber()+1) {
+          sed_weight_grids.emplace_back(GridContainer::gridFitsImport<PhzDataModel::DoubleGrid>(file_name, i));
+        }
 
 
+        std::string survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+        std::string model_grid_file = FileUtils::getPhotmetricGridRootPath(true, survey_name) + "/" +ui->cb_CompatibleGrid->currentText().toStdString();
+
+        PhzDataModel::PhotometryGridInfo model_grid_info;
+        std::ifstream in {model_grid_file};
+        boost::archive::text_iarchive bia {in};
+        bia >> model_grid_info;
 
 
-    // check the axis
-    if (model_grid_info.region_axes_map.size()!=sed_weight_grids.size()){
+
+
+        // check the axis
+        if (model_grid_info.region_axes_map.size()!=sed_weight_grids.size()){
+          return false;
+        }
+
+        size_t found=0;
+        for (auto& current_axe : sed_weight_grids){
+          for (auto& file_axe : model_grid_info.region_axes_map){
+
+            // SED
+
+            auto& sed_axis_file = std::get<PhzDataModel::ModelParameter::SED>(file_axe.second);
+            auto& sed_axis_requested = current_axe.getAxis<PhzDataModel::ModelParameter::SED>();
+            if (sed_axis_file.size()!=sed_axis_requested.size()) {
+              return false;
+            }
+
+            bool all_found=true;
+            for(auto& sed_requested : sed_axis_requested) {
+              if (std::find(sed_axis_file.begin(), sed_axis_file.end(), sed_requested)==sed_axis_file.end()) {
+                all_found = false;
+               }
+            }
+
+            if (!all_found) {
+              return false;
+            }
+
+            // RED
+            auto& red_axis_file = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(file_axe.second);
+            auto& red_axis_requested = current_axe.getAxis<PhzDataModel::ModelParameter::REDDENING_CURVE>();
+            if (red_axis_file.size()!=red_axis_requested.size()) {
+              return false;
+            }
+            all_found=true;
+            for(auto& red_requested : red_axis_requested) {
+              if (std::find(red_axis_file.begin(), red_axis_file.end(), red_requested)==red_axis_file.end()) {
+                all_found=false;
+              }
+            }
+
+            if (!all_found) {
+              return false;
+            }
+
+            std::vector<double> z_axis_file;
+            for(double value : std::get<PhzDataModel::ModelParameter::Z>(file_axe.second)){
+              z_axis_file.push_back(value);
+            }
+
+            std::vector<double> z_axis_requested;
+            for(double value : current_axe.getAxis<PhzDataModel::ModelParameter::Z>()){
+              z_axis_requested.push_back(value);
+            }
+
+            if (z_axis_file.size()!=z_axis_requested.size()) {
+              return false;
+            }
+
+            std::sort(z_axis_file.begin(),z_axis_file.end());
+            std::sort(z_axis_requested.begin(),z_axis_requested.end());
+
+            bool match=true;
+            auto z_file_it = z_axis_file.begin();
+            for(auto& z_requested : z_axis_requested) {
+              if (std::fabs(*z_file_it - z_requested) > 1E-10) {
+                match = false;
+                break;
+              }
+              ++z_file_it;
+            }
+
+            if (!match) {
+              return false;
+            }
+
+            std::vector<double> ebv_axis_file;
+            for (double value : std::get<PhzDataModel::ModelParameter::EBV>(file_axe.second)) {
+              ebv_axis_file.push_back(value);
+            }
+
+            std::vector<double> ebv_axis_requested;
+            for (double value : current_axe.getAxis<PhzDataModel::ModelParameter::EBV>()) {
+              ebv_axis_requested.push_back(value);
+            }
+
+            if (ebv_axis_file.size() != ebv_axis_requested.size()) {
+              return false;
+            }
+
+            std::sort(ebv_axis_file.begin(), ebv_axis_file.end());
+            std::sort(ebv_axis_requested.begin(), ebv_axis_requested.end());
+
+            auto ebv_file_it = ebv_axis_file.begin();
+            for (auto& ebv_requested : ebv_axis_requested) {
+              if (std::fabs(*ebv_file_it - ebv_requested) > 1E-10) {
+                match = false;
+                break;
+              }
+              ++ebv_file_it;
+            }
+
+            if (!match) {
+              return false;
+            }
+
+            ++found;
+            break;
+          }
+        }
+
+        if (sed_weight_grids.size() != found) {
+          return false;
+        }
+
+        // Both grid are compatible
+        return true;
+    } catch(...) {
+      logger.warn() << "Wrong format for the grid file " << sed_weight_file_name;
       return false;
     }
 
-    size_t found=0;
-    for (auto& current_axe : sed_weight_grids){
-      for (auto& file_axe : model_grid_info.region_axes_map){
-
-        // SED
-
-        auto& sed_axis_file = std::get<PhzDataModel::ModelParameter::SED>(file_axe.second);
-        auto& sed_axis_requested = current_axe.getAxis<PhzDataModel::ModelParameter::SED>();
-        if (sed_axis_file.size()!=sed_axis_requested.size()) {
-          return false;
-        }
-
-        bool all_found=true;
-        for(auto& sed_requested : sed_axis_requested) {
-          if (std::find(sed_axis_file.begin(), sed_axis_file.end(), sed_requested)==sed_axis_file.end()) {
-            all_found = false;
-           }
-        }
-
-        if (!all_found) {
-          return false;
-        }
-
-        // RED
-        auto& red_axis_file = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(file_axe.second);
-        auto& red_axis_requested = current_axe.getAxis<PhzDataModel::ModelParameter::REDDENING_CURVE>();
-        if (red_axis_file.size()!=red_axis_requested.size()) {
-          return false;
-        }
-        all_found=true;
-        for(auto& red_requested : red_axis_requested) {
-          if (std::find(red_axis_file.begin(), red_axis_file.end(), red_requested)==red_axis_file.end()) {
-            all_found=false;
-          }
-        }
-
-        if (!all_found) {
-          return false;
-        }
-
-        std::vector<double> z_axis_file;
-        for(double value : std::get<PhzDataModel::ModelParameter::Z>(file_axe.second)){
-          z_axis_file.push_back(value);
-        }
-
-        std::vector<double> z_axis_requested;
-        for(double value : current_axe.getAxis<PhzDataModel::ModelParameter::Z>()){
-          z_axis_requested.push_back(value);
-        }
-
-        if (z_axis_file.size()!=z_axis_requested.size()) {
-          return false;
-        }
-
-        std::sort(z_axis_file.begin(),z_axis_file.end());
-        std::sort(z_axis_requested.begin(),z_axis_requested.end());
-
-        bool match=true;
-        auto z_file_it = z_axis_file.begin();
-        for(auto& z_requested : z_axis_requested) {
-          if (std::fabs(*z_file_it - z_requested) > 1E-10) {
-            match=false;
-            break;
-          }
-          ++z_file_it;
-        }
-
-        if (!match) {
-          return false;
-        }
-
-        std::vector<double> ebv_axis_file;
-        for(double value : std::get<PhzDataModel::ModelParameter::EBV>(file_axe.second)){
-          ebv_axis_file.push_back(value);
-        }
-
-        std::vector<double> ebv_axis_requested;
-        for(double value : current_axe.getAxis<PhzDataModel::ModelParameter::EBV>()){
-          ebv_axis_requested.push_back(value);
-        }
-
-        if (ebv_axis_file.size()!=ebv_axis_requested.size()) {
-          return false;
-        }
-
-        std::sort(ebv_axis_file.begin(),ebv_axis_file.end());
-        std::sort(ebv_axis_requested.begin(),ebv_axis_requested.end());
-
-        auto ebv_file_it = ebv_axis_file.begin();
-        for(auto& ebv_requested : ebv_axis_requested) {
-          if (std::fabs(*ebv_file_it - ebv_requested) > 1E-10) {
-            match=false;
-            break;
-          }
-          ++ebv_file_it;
-        }
-
-        if (!match) {
-          return false;
-        }
-
-        ++found;
-        break;
-      }
-    }
-
-    if (sed_weight_grids.size()!=found){
-      return false;
-    }
-
-    // Both grid are compatible
-    return true;
 
   } else {
     return false;
@@ -1243,6 +1274,12 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     options_map["scale-factor-magrinalization-sample-number"].value() = boost::any(ui->sb_lum_sample_number->value());
 
     options_map["scale-factor-magrinalization-range-size"].value() = boost::any(ui->dsb_sample_range->value());
+
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+        ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSamplingNumber", QString::number(ui->sb_lum_sample_number->value()).toStdString());
+
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+           ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSamplingRange", QString::number(ui->dsb_sample_range->value()).toStdString());
   }
 
   return options_map;
@@ -1321,7 +1358,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   }
 
 
-
+  setupAlgo();
   updateGridSelection();
   updateGalCorrGridSelection();
   loadLuminosityPriors();
@@ -1375,6 +1412,7 @@ template<typename ReturnType, int I>
     logger.info()<< "The selected index of the Parameter Space ComboBox has changed. New selected item:"<<model_name.toStdString();
     m_model_set_model_ptr->selectModelSet(model_name);
 
+    setupAlgo();
     updateGridSelection();
     updateGalCorrGridSelection();
     loadLuminosityPriors();
@@ -1714,21 +1752,6 @@ template<typename ReturnType, int I>
 
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
-    // set the Luminosity filter
-    std::string lum_filter = PreferencesUtils::getUserPreference(survey_name,
-                     ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityFilter");
-
-      if (lum_filter !="") {
-        ui->lbl_lum_filter->setText(QString::fromStdString(lum_filter));
-      } else {
-        // use first filter with r as default value (TODO update with full name);
-        for (auto& filter_name : m_filter_repository->getContent()) {
-           if (filter_name.datasetName().find("r") != std::string::npos) {
-              setLumFilter(filter_name.qualifiedName());
-           }
-        }
-      }
-
 
     auto folder = FileUtils::getGUILuminosityPriorConfig(true, survey_name,
         selected_model.getName());
@@ -1901,11 +1924,46 @@ template<typename ReturnType, int I>
   void FormAnalysis::on_rb_best_scaling_toggled(bool on) {
     ui->rb_sample_scaling->setChecked(!on);
     ui->wdg_sample->setEnabled(!on);
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                         ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSampling",
+                         "False");
   }
   void FormAnalysis::on_rb_sample_scaling_toggled(bool on) {
     ui->rb_best_scaling->setChecked(!on);
     ui->wdg_sample->setEnabled(on);
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                         ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSampling",
+                         "True");
   }
+
+
+  void FormAnalysis::setupAlgo() {
+
+  // get the alog Values
+   std::string scale_sampling = PreferencesUtils::getUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                    ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSampling");
+
+   bool do_sample = (scale_sampling == "True");
+   ui->rb_best_scaling->setChecked(!do_sample);
+   ui->rb_sample_scaling->setChecked(do_sample);
+   on_rb_sample_scaling_toggled(do_sample);
+
+   std::string sampling_number = PreferencesUtils::getUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSamplingNumber");
+   if (sampling_number != "") {
+     ui->sb_lum_sample_number->setValue(QString::fromStdString(sampling_number).toInt());
+   } else {
+     ui->sb_lum_sample_number->setValue(101);
+   }
+
+   std::string sampling_range = PreferencesUtils::getUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSamplingRange");
+   if (sampling_range != "") {
+       ui->dsb_sample_range->setValue(QString::fromStdString(sampling_range).toDouble());
+   } else {
+     ui->dsb_sample_range->setValue(5.0);
+   }
+}
 
 
 
@@ -2137,6 +2195,7 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
 
   void FormAnalysis::on_btn_RunAnalysis_clicked() {
     auto config_map = getRunOptionMap();
+
     if (ui->rb_gc_planck->isChecked()) {
       // User requests that we lookup Planck EBV from the position:
       // Check if the catalog contains the "GAL_EBV" column
@@ -2179,14 +2238,18 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
       }
     }
 
+
     std::map<std::string, boost::program_options::variable_value> config_sed_weight{};
     if (ui->cb_sedweight->isChecked()) {
       // Compute the SED Prior
       std::string sed_prior_name = getSedWeightFileName();
+
+
       if (!checkSedWeightFile(sed_prior_name)) {
         config_sed_weight = getSedWeightOptionMap(sed_prior_name);
       }
     }
+
 
     std::unique_ptr<DialogRunAnalysis> dialog(new DialogRunAnalysis());
     dialog->setValues(out_dir, config_map, config_sed_weight);

@@ -166,7 +166,7 @@ private:
     std::list<FilterMapping> getSelectedFilterMapping();
 
 
-
+    void setupAlgo();
 
     void updateCopiedColumns(std::list<std::string> new_columns);
 

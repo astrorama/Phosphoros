@@ -15,6 +15,8 @@
 #include <vector>
 #include <boost/program_options.hpp>
 #include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include "ElementsKernel/Logging.h"
 
 #include "Configuration/ConfigManager.h"
 #include "PhzQtUI/PhzGridInfoHandler.h"
@@ -32,6 +34,10 @@ namespace po = boost::program_options;
 namespace Euclid {
 namespace PhzQtUI {
 
+
+
+static Elements::Logging logger = Elements::Logging::getLogger("PhzGridInfoHandler");
+
  bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
     const std::map<std::string,PhzDataModel::ModelAxesTuple>& axes,
     const std::list<std::string> & selected_filters,
@@ -45,16 +51,18 @@ namespace PhzQtUI {
          // slow
          PhzDataModel::PhotometryGridInfo grid_info;
          std::ifstream in {file_path.toStdString()};
-         boost::archive::binary_iarchive bia {in};
+         boost::archive::text_iarchive bia {in};
          bia >> grid_info;
 
          // Check the IGM type compatibility
          if (igm_type!=grid_info.igm_method) {
+                // logger.info() << "Incompatible IGM. (Expected: "<< igm_type << " found " << grid_info.igm_method <<  ")";
                  return false;
          }
 
          // Check the Luminosity filter compatibility
-         if (luminosity_filter!=grid_info.luminosity_filter_name.qualifiedName()) {
+         if (luminosity_filter != grid_info.luminosity_filter_name.qualifiedName()) {
+              //  logger.info() << "Incompatible Luminosity filter. (Expected: "<< luminosity_filter << " found " << grid_info.luminosity_filter_name.qualifiedName() <<  ")";
                 return false;
          }
 
@@ -67,17 +75,19 @@ namespace PhzQtUI {
          }
 
          if (selected_filters.size() != number_found) {
+         //  logger.info() << "Incompatible Filter number. (Expected: "<< selected_filters.size() << " found " << number_found <<  ")";
            return false;
          }
 
 
          // check the axis
          if (grid_info.region_axes_map.size()!=axes.size()){
+         //  logger.info() << "Incompatible region number. (Expected: "<< grid_info.region_axes_map.size() << " found " << axes.size() <<  ")";
            return false;
          }
 
          size_t found=0;
-         for (auto& current_axe : axes){
+         for (auto& current_axe : axes) {
            for (auto& file_axe : grid_info.region_axes_map){
 
              // SED
@@ -182,13 +192,16 @@ namespace PhzQtUI {
            }
          }
 
-         if (axes.size()!=found){
+         if (axes.size() != found) {
+         //  logger.info() << "Incompatible region.";
+
            return false;
          }
 
 
          return true;
        } catch(...) {
+         logger.warn() << "Wrong format for the grid file " << file_path.toStdString();
          return false;
        }
 
@@ -214,6 +227,7 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
 
     foreach (const QString &fileName , fileNames) {
       auto file_path = root_qdir.absoluteFilePath(fileName);
+     // logger.info() << "Checking parameter compatibility for file :" << file_path.toStdString();
       if (checkGridFileCompatibility(file_path, axes, selected_filters, igm_type, luminosity_filter)) {
         list.push_back(fileName.toStdString());
       }
