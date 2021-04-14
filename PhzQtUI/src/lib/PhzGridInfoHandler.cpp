@@ -258,8 +258,9 @@ std::map<std::string, boost::program_options::variable_value> PhzGridInfoHandler
       options_map[pair.first]=pair.second;
   }
 
-
   options_map["normalization-filter"].value() = boost::any(luminosity_filter);
+  std::string sun_sed = PreferencesUtils::getUserPreference("AuxData","SUN_SED");
+  options_map["normalization-solar-sed"].value() = boost::any(sun_sed);
   options_map["catalog-type"].value() = boost::any(catalog);
 
   options_map["output-model-grid"].value() = boost::any(output_file);

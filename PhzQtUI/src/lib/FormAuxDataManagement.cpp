@@ -7,6 +7,7 @@
 #include <QtCore/qurl.h>
 #include <boost/filesystem/path.hpp>
 #include "ElementsKernel/Logging.h"
+#include "PreferencesUtils.h"
 
 #include "PhzQtUI/FormAuxDataManagement.h"
 #include "ui_FormAuxDataManagement.h"
@@ -16,6 +17,7 @@
 #include "FileUtils.h"
 #include "XYDataset/AsciiParser.h"
 #include "PhzQtUI/filecopyer.h"
+#include "PhzQtUI/DialogSedSelector.h"
 
 
 namespace Euclid {
@@ -80,6 +82,11 @@ void FormAuxDataManagement::loadManagementPage(int index){
     if (index>=0){
       ui->tab_Management->setCurrentIndex(index);
     }
+
+
+    std::string sun_sed = PreferencesUtils::getUserPreference("AuxData","SUN_SED");
+    ui->lbl_sun_sed->setText(QString::fromStdString(sun_sed));
+
 }
 
 void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
@@ -482,6 +489,24 @@ void FormAuxDataManagement::reloadAuxData(){
    copyingSEDFinished(true, {});
    copyingRedFinished(true, {});
    copyingLumFinished(true, {});
+}
+
+
+
+void FormAuxDataManagement::on_btn_sun_sed_clicked() {
+    std::unique_ptr<DialogSedSelector> dialog(new DialogSedSelector(m_seds_repository));
+    dialog->setSed(PreferencesUtils::getUserPreference("AuxData","SUN_SED"));
+
+    connect(dialog.get(),
+            SIGNAL(popupClosing(std::string)),
+            this,
+            SLOT(sunSedPopupClosing(std::string)));
+    dialog->exec();
+}
+
+void FormAuxDataManagement::sunSedPopupClosing(std::string sed){
+  PreferencesUtils::setUserPreference("AuxData","SUN_SED", sed);
+  ui->lbl_sun_sed->setText(QString::fromStdString(sed));
 }
 
 }

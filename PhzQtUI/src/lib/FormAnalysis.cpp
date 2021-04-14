@@ -802,6 +802,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 
     options_map["model-grid-file"].value() = boost::any(grid_name);
     options_map["normalization-filter"].value() = boost::any(lum_filter);
+    std::string sun_sed = PreferencesUtils::getUserPreference("AuxData","SUN_SED");
+    options_map["normalization-solar-sed"].value() = boost::any(sun_sed);
     options_map["igm-absorption-type"].value() = boost::any(igm);
 
     auto cosmo_conf = PreferencesUtils::getCosmologyConfigurations();

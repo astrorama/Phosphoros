@@ -119,10 +119,10 @@ std::string DialogGalCorrGridGeneration::runFunction() {
      auto& cosmology = config_manager.template getConfiguration<CosmologicalParameterConfig>().getCosmologicalParam();
 
      auto lum_filter_name = config_manager.template getConfiguration<ModelNormalizationConfig>().getNormalizationFilter();
-     double integrated_flux = config_manager.template getConfiguration<ModelNormalizationConfig>().getIntegratedFlux();
+     auto sun_sed_name = config_manager.getConfiguration<ModelNormalizationConfig>().getReferenceSolarSed();
 
-     auto normalizer_functor =
-             Euclid::PhzModeling::NormalizationFunctorFactory::NormalizationFunctorFactory::GetFunction(filter_provider, lum_filter_name, integrated_flux);
+        auto normalizer_functor =
+              Euclid::PhzModeling::NormalizationFunctorFactory::NormalizationFunctorFactory::GetFunction(filter_provider, lum_filter_name, sed_provider, sun_sed_name);
 
 
      std::map<std::string, PhzDataModel::PhotometryGrid> result_map{};
