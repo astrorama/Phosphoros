@@ -78,8 +78,7 @@ std::string DialogGridGeneration::runFunction() {
     
     auto lum_filter_name = config_manager.template getConfiguration<ModelNormalizationConfig>().getNormalizationFilter();
     auto sun_sed_name = config_manager.getConfiguration<ModelNormalizationConfig>().getReferenceSolarSed();
-
-       auto normalizer_functor =
+    auto normalizer_functor =
              Euclid::PhzModeling::NormalizationFunctorFactory::NormalizationFunctorFactory::GetFunction(filter_provider, lum_filter_name, sed_provider, sun_sed_name);
 
 

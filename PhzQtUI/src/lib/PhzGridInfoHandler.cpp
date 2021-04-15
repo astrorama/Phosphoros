@@ -49,14 +49,15 @@ static Elements::Logging logger = Elements::Logging::getLogger("PhzGridInfoHandl
          // We directly use the boost archive, because we just need the grid info
          // from the beginning of the file. Reading the full file whould be very
          // slow
+
          PhzDataModel::PhotometryGridInfo grid_info;
          std::ifstream in {file_path.toStdString()};
          boost::archive::text_iarchive bia {in};
          bia >> grid_info;
 
          // Check the IGM type compatibility
-         if (igm_type!=grid_info.igm_method) {
-                // logger.info() << "Incompatible IGM. (Expected: "<< igm_type << " found " << grid_info.igm_method <<  ")";
+         if (igm_type != grid_info.igm_method) {
+               //  logger.info() << "Incompatible IGM. (Expected: "<< igm_type << " found " << grid_info.igm_method <<  ")";
                  return false;
          }
 

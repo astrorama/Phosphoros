@@ -798,11 +798,11 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
     options_map["output-galactic-correction-coefficient-grid"].value() = boost::any(file_name);
 
     std::string text_format = "TEXT";
-    options_map["output-model-grid-format"].value() = boost::any(text_format);
+    options_map["output-galactic-correction-coefficient-grid-format"].value() = boost::any(text_format);
 
     options_map["model-grid-file"].value() = boost::any(grid_name);
     options_map["normalization-filter"].value() = boost::any(lum_filter);
-    std::string sun_sed = PreferencesUtils::getUserPreference("AuxData","SUN_SED");
+    std::string sun_sed = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
     options_map["normalization-solar-sed"].value() = boost::any(sun_sed);
     options_map["igm-absorption-type"].value() = boost::any(igm);
 
@@ -831,6 +831,8 @@ bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
   std::string folder = FileUtils::getSedPriorRootPath();
   QFileInfo info(QString::fromStdString(folder) + QDir::separator() + QString::fromStdString(sed_weight_file_name));
   if (info.exists()) {
+
+    logger.info() << "A file with the same name exists " << sed_weight_file_name << " checking if compatible...";
     try {
         auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
         auto igm = ui->cb_igm->currentText().toStdString();
@@ -875,7 +877,8 @@ bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
             auto& sed_axis_file = std::get<PhzDataModel::ModelParameter::SED>(file_axe.second);
             auto& sed_axis_requested = current_axe.getAxis<PhzDataModel::ModelParameter::SED>();
             if (sed_axis_file.size()!=sed_axis_requested.size()) {
-              return false;
+
+              continue;
             }
 
             bool all_found=true;
@@ -886,14 +889,16 @@ bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
             }
 
             if (!all_found) {
-              return false;
+
+              continue;
             }
 
             // RED
             auto& red_axis_file = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(file_axe.second);
             auto& red_axis_requested = current_axe.getAxis<PhzDataModel::ModelParameter::REDDENING_CURVE>();
             if (red_axis_file.size()!=red_axis_requested.size()) {
-              return false;
+
+              continue;
             }
             all_found=true;
             for(auto& red_requested : red_axis_requested) {
@@ -903,11 +908,13 @@ bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
             }
 
             if (!all_found) {
-              return false;
+
+              continue;
             }
 
             std::vector<double> z_axis_file;
             for(double value : std::get<PhzDataModel::ModelParameter::Z>(file_axe.second)){
+
               z_axis_file.push_back(value);
             }
 
@@ -917,7 +924,7 @@ bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
             }
 
             if (z_axis_file.size()!=z_axis_requested.size()) {
-              return false;
+              continue;
             }
 
             std::sort(z_axis_file.begin(),z_axis_file.end());
@@ -934,7 +941,7 @@ bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
             }
 
             if (!match) {
-              return false;
+              continue;
             }
 
             std::vector<double> ebv_axis_file;
@@ -948,7 +955,9 @@ bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
             }
 
             if (ebv_axis_file.size() != ebv_axis_requested.size()) {
-              return false;
+
+
+              continue;
             }
 
             std::sort(ebv_axis_file.begin(), ebv_axis_file.end());
@@ -964,7 +973,8 @@ bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
             }
 
             if (!match) {
-              return false;
+
+              continue;
             }
 
             ++found;
@@ -979,7 +989,7 @@ bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
         // Both grid are compatible
         return true;
     } catch(...) {
-      logger.warn() << "Wrong format for the grid file " << sed_weight_file_name;
+      logger.warn() << "Wrong format for sed weight file " << sed_weight_file_name;
       return false;
     }
 
