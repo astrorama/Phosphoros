@@ -33,6 +33,7 @@ elements_add_python_program(PhosphorosPlotPhotometryComparison PhzCLI.Phosphoros
 elements_add_python_program(PhosphorosOrderSeds PhzCLI.OrderSeds)
 elements_add_python_program(PhosphorosPlotPosterior PhzCLI.PlotPosterior)
 elements_add_python_program(PhosphorosPlotSpecZComparison PhzCLI.PlotSpecZComparison)
+elements_add_python_program(SedHeaderHandler PhzCLI.SedUtils)
 
 # Phosphoros is a Python script but not conceived to work with Elements
 # We use the aliasing mechanism to use python2 or python3 depending
