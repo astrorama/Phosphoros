@@ -76,7 +76,24 @@ def replaceXYDatasetKeyword(file_path, keyword_dict):
 
 
 
-
+def compareXYDatasetKeyword(keyword_dict_1, keyword_dict_2):
+    if (len(keyword_dict_1)==len(keyword_dict_2)):
+        for key in keyword_dict_1.keys():
+            if key in keyword_dict_2.keys():
+                if len(keyword_dict_1[key])==len(keyword_dict_2[key]):
+                    for val in keyword_dict_1[key]:
+                        if not val in keyword_dict_2[key]:
+                            return False
+                else:
+                    return False
+            else:
+                return False
+        return True    
+    else:
+        return False        
+    
+    
+        
 
 
 
@@ -99,8 +116,17 @@ def defineSpecificProgramOptions():
     parser.add_argument('-d', '--drop', action='store_true',
                         help="drop all the current KEYWORD arguments")
    
+    
     parser.add_argument(
-        '--keyword-argument',
+        '--remove-key',
+        nargs='+',
+        type=str,
+        default=[],
+        help='remove a keyword key to the file (all the occurences - done before adding new key)'
+    )
+    
+    parser.add_argument(
+        '--add-argument',
         nargs='+',
         type=str,
         default=[],
@@ -120,17 +146,21 @@ def mainMethod(args):
         return 1
 
     current = readXYDatasetKeyword(args.file)
-    if args.show:
-        logger.info("Listing the KEYWORD argument")
-        for key, values in current.items():
-            for val in values:
-                logger.info(" -> "+key+" : "+val)
+  
     
     new_header = {}            
     if not args.drop:
         new_header = current.copy()
         
-    for input in args.keyword_argument:
+    for key in args.remove_key:
+        if key in  new_header.keys():
+            logger.info("Removing the KEYWORD "+key+" from the header")
+            del new_header[key]
+        else:
+            logger.warn("Cannot remove the KEYWORD "+key+" : it was not present into the header")
+        
+        
+    for input in args.add_argument:
         bits = input.split(':')
         if len(bits)!=2:
             logger.error('Provided keyword-argument ('+input +')not valid')
@@ -139,8 +169,16 @@ def mainMethod(args):
             new_header[bits[0]]=[]
         if not bits[1] in new_header[bits[0]]:
             new_header[bits[0]].append(bits[1])
+            
+    if args.show:
+        logger.info("Listing the KEYWORD argument")
+        for key, values in new_header.items():
+            for val in values:
+                logger.info(" -> "+key+" : "+val)
     
-    replaceXYDatasetKeyword(args.file, new_header)
+    if not compareXYDatasetKeyword(current, new_header):
+        logger.info("The header has been modified: overwriting the file")
+        replaceXYDatasetKeyword(args.file, new_header)
             
 
 
