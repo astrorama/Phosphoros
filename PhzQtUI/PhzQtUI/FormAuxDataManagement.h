@@ -48,6 +48,7 @@ void sedProcessStarted();
 void sedProcessfinished(int, QProcess::ExitStatus);
 
 void addEmissionLineButtonClicked(const QString& group);
+void getParameterInfoClicked(const QString& file);
 
 
 void on_btn_import_filter_clicked();

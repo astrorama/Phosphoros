@@ -100,6 +100,11 @@ void SedTreeModel::load(bool selectable, bool onlyLeaves) {
 }
 
 
+bool SedTreeModel::canOpenInfo(QStandardItem* item) const {
+  return item->rowCount()==0;
+}
+
+
 bool SedTreeModel::canAddEmissionLineToGroup(QStandardItem* item) const {
   if (item->rowCount()>0){
     QString name = getFullGroupName(item);
@@ -157,11 +162,20 @@ bool SedTreeModel::canAddLpEmissionLineToGroup(QStandardItem* item) const {
 
 
 QString SedTreeModel::getFullGroupName(QStandardItem* item) const {
-  for (auto & pair : m_map_dir) {
-    if (pair.second==item) {
-      return QString::fromStdString(pair.first);
+  if (item->rowCount()>0) {
+    for (auto & pair : m_map_dir) {
+      if (pair.second==item) {
+        return QString::fromStdString(pair.first);
+      }
+    }
+  } else {
+    for (auto & pair : m_map_dir) {
+      if (pair.second==item->parent()) {
+        return QString::fromStdString(pair.first);
+      }
     }
   }
+
 
   return "";
 }

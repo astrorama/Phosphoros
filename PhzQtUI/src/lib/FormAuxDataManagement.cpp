@@ -1,4 +1,5 @@
 #include <QMessageBox>
+#include <QStandardItemModel>
 #include <QProcess>
 #include <QDir>
 #include <QFileDialog>
@@ -18,6 +19,7 @@
 #include "XYDataset/AsciiParser.h"
 #include "PhzQtUI/filecopyer.h"
 #include "PhzQtUI/DialogSedSelector.h"
+#include "PhzQtUI/DialogSedParam.h"
 
 
 namespace Euclid {
@@ -88,6 +90,18 @@ void FormAuxDataManagement::loadManagementPage(int index){
     ui->lbl_sun_sed->setText(QString::fromStdString(sun_sed));
 
 }
+
+
+
+void FormAuxDataManagement::getParameterInfoClicked(const QString& file) {
+  logger.info() << "File selected :"<< file.toStdString();
+
+
+  std::unique_ptr<DialogSedParam> dialog(new DialogSedParam(m_seds_repository));
+    dialog->setSed(XYDataset::QualifiedName(file.toStdString()));
+    dialog->exec();
+}
+
 
 void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
 
@@ -172,6 +186,26 @@ void FormAuxDataManagement::addButtonsToSedItem(QStandardItem* item, SedTreeMode
              connect(cartButton, SIGNAL(MessageButtonClicked(const QString&)), this,
                              SLOT(addEmissionLineButtonClicked(const QString&)));
   }
+  if (treeModel_sed->canOpenInfo(item)) {
+
+            auto name = treeModel_sed->getFullGroupName(item);
+            if (name != "") {
+              name = name + "/";
+            }
+
+            name = name + item->text();
+
+
+            MessageButton *cartButton = new MessageButton(name, item->text());
+            m_message_buttons.push_back(cartButton);
+
+            auto index = item->index();
+
+            ui->treeView_ManageSed->setIndexWidget(index, cartButton);
+
+            connect(cartButton, SIGNAL(MessageButtonClicked(const QString&)), this,
+                            SLOT(getParameterInfoClicked(const QString&)));
+  }
 
 
   for (int i = 0; i < item->rowCount(); i++) {
@@ -214,6 +248,7 @@ void FormAuxDataManagement::sedProcessfinished(int, QProcess::ExitStatus) {
         for (int i = 0; i < treeModel_Sed->rowCount(); i++) {
           addButtonsToSedItem(treeModel_Sed->item(i), treeModel_Sed);
         }
+
 
       ui->labelMessage->setText("Processing of SEDs completed.");
 }
