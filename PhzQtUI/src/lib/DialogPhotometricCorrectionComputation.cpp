@@ -33,7 +33,6 @@
 #include "PhzConfiguration/SedProviderConfig.h"
 #include "PhzConfiguration/ReddeningProviderConfig.h"
 #include "PhzConfiguration/FilterProviderConfig.h"
-#include "PhzConfiguration/LuminosityBandConfig.h"
 #include "PhzConfiguration/IgmConfig.h"
 #include "PhzConfiguration/ModelGridOutputConfig.h"
 
