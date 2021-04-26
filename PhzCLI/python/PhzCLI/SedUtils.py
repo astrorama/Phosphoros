@@ -119,17 +119,17 @@ def defineSpecificProgramOptions():
     
     parser.add_argument(
         '--remove-key',
-        nargs='+',
         type=str,
         default=[],
+        action='append',
         help='remove a keyword key to the file (all the occurences - done before adding new key)'
     )
     
     parser.add_argument(
         '--add-argument',
-        nargs='+',
         type=str,
         default=[],
+        action='append',
         help='Add a keyword:argument key to the file (if not duplicated)'
     )
     

@@ -981,6 +981,14 @@
           </layout>
          </widget>
          <widget class="QWidget" name="page_6">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>920</width>
+            <height>536</height>
+           </rect>
+          </property>
           <attribute name="label">
            <string>5. Algorithm</string>
           </attribute>
@@ -1476,6 +1484,18 @@
                </property>
                <property name="text">
                 <string>Copy columns</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_pp">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Select Parameters</string>
                </property>
               </widget>
              </item>

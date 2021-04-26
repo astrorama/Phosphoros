@@ -131,6 +131,8 @@ void on_btn_ToPP_clicked();
 
     void on_btn_RunAnalysis_clicked();
 
+    void on_btn_pp_clicked();
+
     void on_cb_gen_posterior_clicked();
 
     void on_cb_sedweight_clicked();
@@ -149,6 +151,7 @@ void on_btn_ToPP_clicked();
 
     void on_output_column_btn_clicked();
     void setCopiedColumns(std::map<std::string, std::string> columns);
+    void update_pp_selection(std::vector<std::string> params);
 
     void setNzFilters(std::string b_filter, std::string i_filter);
     void setLumFilter(std::string new_filter);
@@ -205,6 +208,7 @@ private:
 
     void setRunAnnalysisEnable(bool enabled);
     std::map < std::string, boost::program_options::variable_value > getRunOptionMap();
+    std::set<std::string> getPPListFromConfig();
     std::map<std::string, LuminosityPriorConfig> m_prior_config;
     std::map<std::string,std::string> m_copied_columns = {};
 

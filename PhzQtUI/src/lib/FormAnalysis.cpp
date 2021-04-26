@@ -36,6 +36,8 @@
 #include "PhzQtUI/DialogNz.h"
 #include "PhzQtUI/DialogZeroPointName.h"
 
+#include "PhzQtUI/DialogSelectParam.h"
+
 #include "PhzUITools/ConfigurationWriter.h"
 #include "PhzUITools/CatalogColumnReader.h"
 
@@ -53,6 +55,7 @@
 #include "PhzDataModel/PhotometryGridInfo.h"
 #include "PhzDataModel/serialization/PhotometryGridInfo.h"
 #include "PhzQtUI/DialogFilterSelector.h"
+#include "SedParamUtils.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -187,22 +190,18 @@ void FormAnalysis::updateSelection() {
   std::string lum_filter = PreferencesUtils::getUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                    ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityFilter");
 
-    if (lum_filter !="") {
-      ui->lbl_lum_filter->setText(QString::fromStdString(lum_filter));
-    } else {
-      // use first filter with r as default value (TODO update with full name);
-      for (auto& filter_name : m_filter_repository->getContent()) {
-         if (filter_name.datasetName().find("r") != std::string::npos) {
-            setLumFilter(filter_name.qualifiedName());
-         }
-      }
+  if (lum_filter !="") {
+    ui->lbl_lum_filter->setText(QString::fromStdString(lum_filter));
+  } else {
+    // use first filter with r as default value (TODO update with full name);
+    for (auto& filter_name : m_filter_repository->getContent()) {
+       if (filter_name.datasetName().find("r") != std::string::npos) {
+          setLumFilter(filter_name.qualifiedName());
+          break;
+       }
     }
-
-
+  }
   updateGridSelection();
-
-
-
 }
 
 
@@ -1404,6 +1403,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
 
   setCopiedColumns(selected_survey.getCopiedColumns());
   setRunAnnalysisEnable(true);
+  getPPListFromConfig();
 }
 
 template<typename ReturnType, int I>
@@ -1428,6 +1428,7 @@ template<typename ReturnType, int I>
     updateGridSelection();
     updateGalCorrGridSelection();
     loadLuminosityPriors();
+    getPPListFromConfig();
   }
 
 
@@ -2077,6 +2078,61 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
   }
 
 
+
+  void FormAnalysis::on_btn_pp_clicked() {
+    std::unique_ptr<DialogSelectParam> popup(new DialogSelectParam(m_model_set_model_ptr->getSelectedModelSet(), this));
+
+    popup->setParams(getPPListFromConfig());
+
+    connect(popup.get(), SIGNAL(popupClosing(std::vector<std::string>)),
+            SLOT(update_pp_selection(std::vector<std::string>)));
+
+    popup->exec();
+
+  }
+
+  std::set<std::string> FormAnalysis::getPPListFromConfig() {
+    auto pp_list = PreferencesUtils::getUserPreference(
+                   ui->cb_AnalysisSurvey->currentText().toStdString(),
+                   ui->cb_AnalysisModel->currentText().toStdString() + "_PP");
+
+    auto list_param = QString::fromStdString(pp_list);
+    std::set<std::string> res {};
+    if (list_param.length() > 0) {
+      for (auto& part : list_param.split(";")) {
+        res.insert(part.toStdString());
+      }
+
+      ui->btn_pp->setText(QString::fromStdString("Select Parameters (") +
+                              QString::number(res.size()) +
+                              QString::fromStdString(")"));
+    } else {
+      ui->btn_pp->setText(QString::fromStdString("Select Parameters"));
+    }
+    return res;
+  }
+
+  void FormAnalysis::update_pp_selection(std::vector<std::string> params) {
+
+    ui->btn_pp->setText(QString::fromStdString("Select Parameters (") +
+                        QString::number(params.size()) +
+                        QString::fromStdString(")"));
+
+    std::string pps ="";
+    for (auto& param : params) {
+      if (pps.length() > 0) {
+        pps = pps + ";";
+      }
+
+      pps = pps + param;
+    }
+
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+        ui->cb_AnalysisModel->currentText().toStdString() + "_PP", pps);
+
+  }
+
+
   void FormAnalysis::saveCopiedColumnToCatalog() {
     m_survey_model_ptr->setCopiedColumnsToSelected(m_copied_columns);
     m_survey_model_ptr->saveSelected();
@@ -2133,6 +2189,9 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
     if (dialog.exec()) {
           auto selected_folder = dialog.selectedFiles()[0];
 
+
+
+
           QString cr{"\n\n"};
           QString command{""};
 
@@ -2185,6 +2244,17 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
           // Template fitting
           auto template_fitting_file_name = selected_folder+QString::fromStdString("/TemplateFitting.CR.conf");
           auto run_config_map = getRunOptionMap();
+
+
+          auto pp_conf_file_name = selected_folder+QString::fromStdString("/PhysicalParameterConfig.fits");
+
+          auto pp_list = getPPListFromConfig();
+          if (pp_list.size() > 0) {
+              SedParamUtils::createPPConfig(m_model_set_model_ptr->getSelectedModelSet(), pp_list, pp_conf_file_name.toStdString());
+              std::string pp_conf_file = pp_conf_file_name.toStdString();
+              run_config_map["physical_parameter_config_file"].value() = boost::any(pp_conf_file);
+          }
+
           PhzUITools::ConfigurationWriter::writeConfiguration(run_config_map, template_fitting_file_name.toStdString());
           command += QString::fromStdString("Phosphoros CR --config-file ") + template_fitting_file_name + cr;
 
@@ -2239,15 +2309,20 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
     std::string out_dir = ui->txt_outputFolder->text().toStdString();
 
     QDir dir(QString::fromStdString(out_dir));
-    if (dir.exists() && dir.entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() > 0) {
-      if (QMessageBox::question(this, "Existing Output Folder...",
-               "The Output Folder you selected already exists.\n"
-                   "In order to avoid confusion, the Output Folder will be cleared. Do you want to proceed?",
-               QMessageBox::Cancel | QMessageBox::Ok) == QMessageBox::Ok) {
-             FileUtils::removeDir(QString::fromStdString(out_dir));
-      } else {
-        return;
+    if (dir.exists()) {
+      if (dir.entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() > 0) {
+        if (QMessageBox::question(this, "Existing Output Folder...",
+                 "The Output Folder you selected already exists.\n"
+                     "In order to avoid confusion, the Output Folder will be cleared. Do you want to proceed?",
+                 QMessageBox::Cancel | QMessageBox::Ok) == QMessageBox::Ok) {
+               FileUtils::removeDir(QString::fromStdString(out_dir));
+               dir.mkpath(".");
+        } else {
+          return;
+        }
       }
+    } else {
+      dir.mkpath(".");
     }
 
 
@@ -2260,6 +2335,15 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
       if (!checkSedWeightFile(sed_prior_name)) {
         config_sed_weight = getSedWeightOptionMap(sed_prior_name);
       }
+    }
+
+
+    auto pp_conf_file_name = QString::fromStdString(out_dir) +QString::fromStdString("/PhysicalParameterConfig.fits");
+    auto pp_list = getPPListFromConfig();
+    if (pp_list.size() > 0) {
+         SedParamUtils::createPPConfig(m_model_set_model_ptr->getSelectedModelSet(), pp_list, pp_conf_file_name.toStdString());
+         std::string pp_conf_file = pp_conf_file_name.toStdString();
+         config_map["physical_parameter_config_file"].value() = boost::any(pp_conf_file);
     }
 
 

@@ -61,6 +61,9 @@ action_list = [
                      'Process PDZ by extracting the Mean, Confidence intervals and information about the first 2 modes.'),
     PhosphorosAction(['update_data_package', 'UDP'], 'UpdateDataPack',
                      'Check for Data Pacakge online.'),
+    PhosphorosAction(['build_pp_config', 'BPPC'], 'PhosphorosBuildPPConfig',
+                     'Build the Physical Parameter config allowing the redshift computation to output them.'),
+    
 ]
 
 def printHelp():

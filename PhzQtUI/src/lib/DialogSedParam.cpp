@@ -14,6 +14,7 @@
 #include "PhzQtUI/DialogSedParam.h"
 #include "ui_DialogSedParam.h"
 #include "FileUtils.h"
+#include "SedParamUtils.h"
 #include "PhzQtUI/MessageButton.h"
 
 
@@ -39,94 +40,8 @@ DialogSedParam::DialogSedParam(DatasetRepo sed_repository, QWidget *parent) :
 DialogSedParam::~DialogSedParam() {}
 
 
-std::string getParameter(const std::string& file, const std::string& key_word) {
-  std::ifstream sfile(file);
-  if (!sfile) {
-    throw Elements::Exception() << "File does not exist : " << file;
-  }
-
-  std::string  value{};
-  std::string  line{};
-  std::string  dataset_name{};
-  std::string  reg_ex_str = "^\\s*#\\s*" + key_word + "\\s*:\\s*(.+)\\s*$";
-  boost::regex expression(reg_ex_str);
-
-  while (sfile.good()) {
-    std::getline(sfile, line);
-    boost::smatch s_match;
-    if (!line.empty() && boost::regex_match(line, s_match, expression)) {
-      if (value != "") {
-         value +=";";
-      }
-      std::string new_val = s_match[1].str();
-      boost::trim(new_val);
-      value += new_val;
-
-    }
-  }
-  return value;
-}
-
-std::string getName(const std::string& file) {
-  // The data set name can be a parameter with keyword NAME
-  std::string dataset_name = getParameter(file, "NAME");
-
-  if (dataset_name == "") {
-    // IF not present chack the first non-empty line (Backward comatibility)
-    std::ifstream sfile(file);
-    std::string line{};
-    // Check dataset name is in the file
-    // Convention: read until found first non empty line, removing empty lines.
-    while (line.empty() && sfile.good()) {
-      std::getline(sfile, line);
-    }
-
-    boost::regex  expression("^\\s*#\\s*(\\w+)\\s*$");
-    boost::smatch s_match;
-    if (boost::regex_match(line, s_match, expression)) {
-      dataset_name = s_match[1].str();
-    } else {
-      dataset_name = "";
-    }
-  }
-
-  return dataset_name;
-}
-
-
-
-
-std::string DialogSedParam::getFile(const XYDataset::QualifiedName& sed) const {
-  std::string root_path = FileUtils::getSedRootPath(false) + "/";
-
-  for (std::string group : sed.groups()) {
-    root_path = root_path + group + "/";
-  }
-
-  QDir directory(QString::fromStdString(root_path));
-  QStringList seds_in_group = directory.entryList(QStringList() << "*.*", QDir::Files);
-
-  for (QString filename : seds_in_group) {
-     if (QFileInfo(filename).baseName().toStdString() == sed.datasetName()) {
-        return root_path + filename.toStdString();
-     }
-  }
-
-  // name in the file
-  for (QString filename : seds_in_group) {
-      std::string name = getName(root_path + filename.toStdString());
-      if (name == sed.datasetName()) {
-         return root_path + filename.toStdString();
-      }
-   }
-
-  return "";
-}
-
-
-
 void DialogSedParam::setSed(const XYDataset::QualifiedName&  sed) {
-  m_file_path = getFile(sed);
+  m_file_path = SedParamUtils::getFile(sed);
 
   logger.info() << m_file_path;
 

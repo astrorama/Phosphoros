@@ -67,8 +67,6 @@ private slots:
    */
   void on_btn_save_clicked();
 
-  std::string getFile(const XYDataset::QualifiedName& sed) const;
-
 private:
   std::unique_ptr<Ui::DialogSedParam> ui;
   DatasetRepo m_sed_repository;
