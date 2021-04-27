@@ -135,12 +135,13 @@ void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
          lineAdder->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
 
          auto aux_path = FileUtils::getAuxRootPath();
+
          QString command = QString::fromStdString("PhosphorosAddEmissionLines --sed-dir " + aux_path)
                            + QDir::separator() + QString::fromStdString("SEDs")
                            + QDir::separator() + group;
 
 
-
+         logger.info() << "Executing :"<< command.toStdString();
 
          connect(lineAdder, SIGNAL(finished(int, QProcess::ExitStatus)), this,
                                      SLOT(sedProcessfinished(int, QProcess::ExitStatus)));
@@ -156,8 +157,7 @@ void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
                             + QDir::separator() + QString::fromStdString("SEDs")
                             + QDir::separator() + group;
 
-
-
+          logger.info() << "Executing :"<< command.toStdString();
 
           connect(lineAdder, SIGNAL(finished(int, QProcess::ExitStatus)), this,
                                       SLOT(sedProcessfinished(int, QProcess::ExitStatus)));
