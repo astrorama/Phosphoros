@@ -29,23 +29,34 @@ yum install -y git
 
 # Astrorama repository
 cat > /etc/yum.repos.d/astrorama.repo << EOF
-[bintray--astrorama-fedora]
-name=bintray--astrorama-fedora
-baseurl=https://dl.bintray.com/astrorama/travis/master/${ID}/\$releasever/\$basearch
-gpgcheck=0
-repo_gpgcheck=0
+[Artifactory-Astrorama]
+name=Artifactory-Astrorama
+baseurl=https://astrorama.jfrog.io/artifactory/rpm/stable/${ID}/\$releasever/\$basearch
 enabled=1
+gpgcheck=0
 EOF
 
 if [ "${BRANCH}" != "master" ]; then
   cat >> /etc/yum.repos.d/astrorama.repo <<EOF
-[bintray--astrorama-fedora-develop]
-name=bintray--astrorama-fedora-develop
-baseurl=https://dl.bintray.com/astrorama/travis/develop/${ID}/\$releasever/\$basearch
-gpgcheck=0
-repo_gpgcheck=0
+[Artifactory-Astrorama-Develop]
+name=Artifactory-Astrorama-Develop
+baseurl=https://astrorama.jfrog.io/artifactory/rpm/develop/${ID}/\$releasever/\$basearch
 enabled=1
+gpgcheck=0
 EOF
+
+  if [ "${BRANCH}" != "develop" ]; then
+    if $(curl --fail "https://astrorama.jfrog.io/artifactory/rpm/${BRANCH/\//-}" &> /dev/null); then
+        cat >> /etc/yum.repos.d/astrorama.repo <<EOF
+[Artifactory-Astrorama-Branch]
+name=Artifactory-Astrorama-Branch
+baseurl=https://astrorama.jfrog.io/artifactory/rpm/${BRANCH/\//-}/${ID}/\$releasever/\$basearch
+enabled=1
+gpgcheck=0
+EOF
+    fi
+  fi
+
   REL_NUMBER=$(date +%Y%m%d%H%M)
   CMAKEFLAGS="$CMAKEFLAGS -DCPACK_PACKAGE_RELEASE=r${REL_NUMBER}"
 fi
