@@ -10,9 +10,11 @@
 #include "PhzQtUI/DialogConflictingFilesHandling.h"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include "ElementsKernel/Logging.h"
 
 namespace Euclid {
 namespace PhzQtUI {
+static Elements::Logging logger = Elements::Logging::getLogger("DataPackHandler");
 
 DataPackHandler::DataPackHandler(QWidget *parent): QWidget(parent) {
   m_parent = parent;
@@ -123,6 +125,9 @@ void DataPackHandler::getConflictFinished(int, QProcess::ExitStatus) {
             << QString::fromStdString("--conflict-resolution") <<  QString::fromStdString(m_resolution_file);
 
         const QString& command = QString("Phosphoros UDP ") + s3.join(" ");
+
+        logger.info() << "Running :" << command.toStdString();
+
         get_resolution_process->start(command);
       } else {
         // Popup closed in another way

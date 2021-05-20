@@ -46,13 +46,15 @@ void DialogConflictingFilesHandling::loadConflicts() {
   std::vector<std::string> conflict_elements;
   boost::algorithm::split(conflict_elements, conflict_content, boost::is_any_of(","));
   QStringList strList;
-  for (size_t i=0; i<conflict_elements.size(); ++i){
+  for (size_t i=0; i < conflict_elements.size(); ++i){
     std::vector<std::string> conflict_names;
     boost::algorithm::split(conflict_names, conflict_elements[i], boost::is_any_of(":"));
     size_t index = 0;
     index = conflict_names[0].find(m_temp_folder, index);
     conflict_names[0].replace(index, m_temp_folder.size(), "");
-    strList << QString::fromStdString(conflict_names[0]);
+    auto name = conflict_names[0];
+    boost::trim(name);
+    strList << QString::fromStdString(name);
   }
 
   ui->lw->addItems(strList);
