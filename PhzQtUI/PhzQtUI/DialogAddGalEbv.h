@@ -38,7 +38,7 @@ public:
    */
   void setDefaultName(std::string default_name);
 
-  void setInputs(std::string input_name, std::string ra_col, std::string dec_col);
+  void setInputs(std::string input_name, std::string ra_col, std::string dec_col, std::string dust_map_file);
 
   /**
    * @brief Get the name chosen by the user.
@@ -69,6 +69,7 @@ private:
   std::string m_ra_col;
   std::string m_dec_col;
   std::string m_name;
+  std::string m_dust_map_file;
   QProcess* m_process = new QProcess(this);
 
 };

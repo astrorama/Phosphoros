@@ -4,7 +4,11 @@
 #include <memory>
 #include <QWidget>
 #include <QStandardItem>
+#include <QProgressDialog>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 #include <QToolBox>
+#include <QFile>
 #include <map>
 #include <string>
 #include "SurveyFilterMapping.h"
@@ -131,6 +135,11 @@ void on_btn_ToPP_clicked();
 
     void on_btn_RunAnalysis_clicked();
 
+    void get_config_run_second_part();
+
+    void run_analysis_second_part();
+
+
     void on_btn_pp_clicked();
 
     void on_cb_gen_posterior_clicked();
@@ -159,6 +168,10 @@ void on_btn_ToPP_clicked();
 
     void on_rb_best_scaling_toggled(bool);
     void on_rb_sample_scaling_toggled(bool);
+
+    void httpReadyPlanckRead();
+    void cancelDownloadPlanck();
+    void updateDownloadProgress(qint64 bytesRead, qint64 totalBytes);
 
 
 private:
@@ -212,11 +225,20 @@ private:
     std::map<std::string, LuminosityPriorConfig> m_prior_config;
     std::map<std::string,std::string> m_copied_columns = {};
 
+    QProgressDialog *m_progress_dialog = 0;
+
+    QNetworkAccessManager *m_network_manager;
+    QFile *m_downloaded_file;
+    bool m_httpRequestAborted;
+    QNetworkReply *m_reply;
+
 
     DatasetRepo m_filter_repository;
     DatasetRepo m_luminosity_repository;
     std::shared_ptr<SurveyModel> m_survey_model_ptr;
     std::shared_ptr<ModelSetModel> m_model_set_model_ptr;
+    std::string m_plank_file = "";
+    std::string m_plank_url = "https://lambda.gsfc.nasa.gov/data/foregrounds/EBV/lambda_meisner_finkbeiner_2015_dust_map.fits";
 
 };
 

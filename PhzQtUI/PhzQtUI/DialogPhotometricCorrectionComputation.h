@@ -74,6 +74,7 @@ public:
         std::map<std::string, boost::program_options::variable_value> run_option,
         const std::map<std::string, boost::program_options::variable_value>& sed_config,
         double non_detection,
+        std::string dust_map_file,
         std::string ra_col ="",
         std::string dec_col ="");
 
@@ -144,6 +145,7 @@ private:
     std::list<std::string> m_excluded_filters;
     std::string m_id_column;
     std::string m_refZ_column;
+    std::string m_dust_map_file;
     std::string m_ra_col;
     std::string m_dec_col;
     std::map<std::string, boost::program_options::variable_value> m_run_option;

@@ -80,6 +80,7 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
     std::map<std::string, boost::program_options::variable_value> run_option,
     const std::map<std::string, boost::program_options::variable_value>& sed_config,
     double non_detection,
+    std::string dust_map_file,
     std::string ra_col,
     std::string dec_col) {
   m_id_column = id_column;
@@ -89,6 +90,7 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
   m_run_option = run_option;
   m_sed_config = sed_config;
   m_non_detection = non_detection;
+  m_dust_map_file = dust_map_file;
   m_ra_col = ra_col;
   m_dec_col = dec_col;
   ui->txt_survey->setText(QString::fromStdString(survey));
@@ -216,6 +218,14 @@ void DialogPhotometricCorrectionComputation::on_btn_TrainingCatalog_clicked() {
 void DialogPhotometricCorrectionComputation::setRunEnability() {
   bool run_ok = true;
 
+  if (!boost::filesystem::exists(m_dust_map_file)) {
+    QMessageBox::warning(this, "Missing Dust map file...",
+               "The file containing the Milky Way dust map is missing (" + QString::fromStdString(m_dust_map_file)
+               + "). \n \n Click on the button \"Save config. File\" on the main window to download it or change the Milky Way absorption type.",
+               QMessageBox::Ok);
+    run_ok = false;
+  }
+
   // A column name is selected
   run_ok &= ui->cb_SpectroColumn->currentText().length() > 0;
 
@@ -291,6 +301,7 @@ void DialogPhotometricCorrectionComputation::enablePage(){
 
 
 std::string DialogPhotometricCorrectionComputation::runFunction(){
+
   try {
 
     int max_iter_number = ui->txt_Iteration->text().toInt();
@@ -467,7 +478,7 @@ void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
       if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
            // the E(B-V) has to be looked up in the Planck map
            std::unique_ptr<DialogAddGalEbv> dialog(new DialogAddGalEbv());
-           dialog->setInputs(path, m_ra_col, m_dec_col);
+           dialog->setInputs(path, m_ra_col, m_dec_col,m_dust_map_file);
            if (dialog->exec()) {
               // new catalog contains the PLANCK_GAL_EBV column
              ui->txt_catalog->setText(QString::fromStdString(dialog->getOutputName()));
