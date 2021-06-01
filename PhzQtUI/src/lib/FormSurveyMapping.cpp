@@ -110,8 +110,13 @@ void FormSurveyMapping::fillControlsWithSelected() {
       ui->ckb_error_prop->setCheckState(selected_survey.getDoRecomputeError() ? Qt::Checked : Qt::Unchecked);
 
 
-      disconnect(ui->table_Filter->model(), SIGNAL(itemChanged(QStandardItem *)), 0, 0);
-      disconnect(ui->table_Filter->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), 0, 0);
+      if (ui->table_Filter->model()!=NULL) {
+        disconnect(ui->table_Filter->model(), SIGNAL(itemChanged(QStandardItem *)), 0, 0);
+      }
+
+      if (ui->table_Filter->selectionModel() != NULL) {
+        disconnect(ui->table_Filter->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), 0, 0);
+      }
 
       FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
       filter_model->setFilters(selected_survey.getFilters());

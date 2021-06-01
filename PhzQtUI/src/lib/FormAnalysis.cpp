@@ -1544,7 +1544,7 @@ template<typename ReturnType, int I>
   }
 
 
-  void FormAnalysis::on_cb_CompatibleGalCorrGrid_textChanged(const QString &) {
+  void FormAnalysis::on_cb_CompatibleGalCorrGrid_currentTextChanged(const QString &) {
     adjustGalCorrGridButtons(true);
     setComputeCorrectionEnable();
     setRunAnnalysisEnable(true);

@@ -35,7 +35,9 @@ void FormModelSet::updateSelection(){
     const ModelSet& selected_model = m_model_set_model_ptr->getSelectedModelSet();
     ui->txt_SetName->setText(QString::fromStdString(selected_model.getName()));
 
-    disconnect(ui->tableView_ParameterRule->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)), 0, 0);
+    if (ui->tableView_ParameterRule->selectionModel()!=NULL) {
+       disconnect(ui->tableView_ParameterRule->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)), 0, 0);
+    }
      ui->tableView_ParameterRule->loadParameterRules(
              selected_model.getParameterRules(),
              m_seds_repository,
@@ -54,7 +56,9 @@ void FormModelSet::updateSelection(){
     // Not a valid selection
 
     ui->txt_SetName->clear();
-    disconnect(ui->tableView_ParameterRule->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)), 0, 0);
+    if (ui->tableView_ParameterRule->selectionModel()!=NULL) {
+       disconnect(ui->tableView_ParameterRule->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)), 0, 0);
+    }
          ui->tableView_ParameterRule->loadParameterRules(std::map<int,ParameterRule>{},
                  m_seds_repository,
                  m_redenig_curves_repository);

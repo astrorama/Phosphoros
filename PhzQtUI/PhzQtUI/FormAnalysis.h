@@ -108,7 +108,7 @@ void on_btn_ToPP_clicked();
 
     void on_cb_CompatibleGrid_currentTextChanged(const QString &);
 
-    void on_cb_CompatibleGalCorrGrid_textChanged(const QString &);
+    void on_cb_CompatibleGalCorrGrid_currentTextChanged(const QString &);
 
 
     void on_btn_GetConfigGrid_clicked();
