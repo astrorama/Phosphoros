@@ -70,5 +70,5 @@ elements_add_python_program(AddGalDustToCatalog GalacticDustMap.AddGalDustToCata
 #===============================================================================
 elements_install_conf_files()
 
-elements_install_aux_files()
+#elements_install_aux_files()
 
