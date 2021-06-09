@@ -225,12 +225,12 @@ private:
     std::map<std::string, LuminosityPriorConfig> m_prior_config;
     std::map<std::string,std::string> m_copied_columns = {};
 
-    QProgressDialog *m_progress_dialog = 0;
+    QProgressDialog *m_progress_dialog = nullptr;
 
-    QNetworkAccessManager *m_network_manager;
-    QFile *m_downloaded_file;
-    bool m_httpRequestAborted;
-    QNetworkReply *m_reply;
+    QNetworkAccessManager *m_network_manager = nullptr;
+    QFile *m_downloaded_file = nullptr;
+    bool m_httpRequestAborted = false;
+    QNetworkReply *m_reply = nullptr;
 
 
     DatasetRepo m_filter_repository;
