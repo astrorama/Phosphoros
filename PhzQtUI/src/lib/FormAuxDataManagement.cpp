@@ -198,7 +198,7 @@ void FormAuxDataManagement::addButtonsToSedItem(QStandardItem *item, SedTreeMode
 
 
             MessageButton *cartButton = new MessageButton(name, item->text());
-            m_message_buttons.push_back(cartButton);
+            m_message_buttons.emplace_back(cartButton);
 
             auto index = item->index();
 
