@@ -48,6 +48,10 @@ public:
     reload();
   }
 
+  T& getProvider() {
+    return m_provider;
+  }
+
   /**
    * @brief Get the (cached copy of the) content of the provider.
    * @return A vector of qualified name representing the provider content.

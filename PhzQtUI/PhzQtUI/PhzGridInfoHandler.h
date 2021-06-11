@@ -27,7 +27,8 @@ public:
   static bool checkGridFileCompatibility(QString file_path,
       const std::map<std::string,PhzDataModel::ModelAxesTuple>& axes,
       const std::list<std::string> & selected_filters,
-      std::string igm_type);
+      const std::string igm_type,
+      const std::string luminosity_filter);
 
   /**
    * @brief Get the name of the file containing a grid with the same axes and
@@ -44,6 +45,7 @@ public:
       const std::map<std::string,PhzDataModel::ModelAxesTuple>& axes,
       const std::list<std::string> & selected_filters,
       std::string igm_type,
+      const std::string luminosity_filter,
       bool model_grid = true);
 
   /**
@@ -62,6 +64,7 @@ public:
       std::string output_file,
       ModelSet model,
       const std::list<std::string>& selected_filters,
+      std::string luminosity_filter,
       std::string igm_type);
 };
 

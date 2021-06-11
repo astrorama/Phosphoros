@@ -21,8 +21,6 @@ action_list = [
                      'Starts the Graphical User Interface'),
     PhosphorosAction(['compute_model_grid', 'CMG'], 'PhosphorosComputeModelGrid',
                      'Computes a grid containing the model photometries'),
-    PhosphorosAction(['compute_luminosity_model_grid', 'CLMG'], 'PhosphorosComputeLuminosityModelGrid',
-                     'Computes a grid containing the model photometries for the luminosity prior band'),
     PhosphorosAction(['compute_galactic_correction_coeff_grid', 'CGCCG'], 'PhosphorosComputeGalacticAbsorptionCoefficientGrid',
                      'Computes a grid containing the coefficient for the correction of the galactic absorption'),
     PhosphorosAction(['compute_photometric_corrections', 'CPC'], 'PhosphorosComputePhotometricCorrections',
@@ -63,6 +61,9 @@ action_list = [
                      'Process PDZ by extracting the Mean, Confidence intervals and information about the first 2 modes.'),
     PhosphorosAction(['update_data_package', 'UDP'], 'UpdateDataPack',
                      'Check for Data Pacakge online.'),
+    PhosphorosAction(['build_pp_config', 'BPPC'], 'PhosphorosBuildPPConfig',
+                     'Build the Physical Parameter config allowing the redshift computation to output them.'),
+    
 ]
 
 def printHelp():

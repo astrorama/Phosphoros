@@ -1,4 +1,5 @@
 #include <QMessageBox>
+#include <QStandardItemModel>
 #include <QProcess>
 #include <QDir>
 #include <QFileDialog>
@@ -7,6 +8,7 @@
 #include <QtCore/qurl.h>
 #include <boost/filesystem/path.hpp>
 #include "ElementsKernel/Logging.h"
+#include "PreferencesUtils.h"
 
 #include "AlexandriaKernel/memory_tools.h"
 #include "PhzQtUI/FormAuxDataManagement.h"
@@ -17,6 +19,8 @@
 #include "FileUtils.h"
 #include "XYDataset/AsciiParser.h"
 #include "PhzQtUI/filecopyer.h"
+#include "PhzQtUI/DialogSedSelector.h"
+#include "PhzQtUI/DialogSedParam.h"
 
 
 namespace Euclid {
@@ -81,7 +85,24 @@ void FormAuxDataManagement::loadManagementPage(int index){
     if (index>=0){
       ui->tab_Management->setCurrentIndex(index);
     }
+
+
+    std::string sun_sed = PreferencesUtils::getUserPreference("AuxData","SUN_SED");
+    ui->lbl_sun_sed->setText(QString::fromStdString(sun_sed));
+
 }
+
+
+
+void FormAuxDataManagement::getParameterInfoClicked(const QString& file) {
+  logger.info() << "File selected :"<< file.toStdString();
+
+
+  std::unique_ptr<DialogSedParam> dialog(new DialogSedParam(m_seds_repository));
+    dialog->setSed(XYDataset::QualifiedName(file.toStdString()));
+    dialog->exec();
+}
+
 
 void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
 
@@ -115,12 +136,13 @@ void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
          lineAdder->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
 
          auto aux_path = FileUtils::getAuxRootPath();
+
          QString command = QString::fromStdString("PhosphorosAddEmissionLines --sed-dir " + aux_path)
                            + QDir::separator() + QString::fromStdString("SEDs")
                            + QDir::separator() + group;
 
 
-
+         logger.info() << "Executing :"<< command.toStdString();
 
          connect(lineAdder, SIGNAL(finished(int, QProcess::ExitStatus)), this,
                                      SLOT(sedProcessfinished(int, QProcess::ExitStatus)));
@@ -136,8 +158,7 @@ void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
                             + QDir::separator() + QString::fromStdString("SEDs")
                             + QDir::separator() + group;
 
-
-
+          logger.info() << "Executing :"<< command.toStdString();
 
           connect(lineAdder, SIGNAL(finished(int, QProcess::ExitStatus)), this,
                                       SLOT(sedProcessfinished(int, QProcess::ExitStatus)));
@@ -165,6 +186,26 @@ void FormAuxDataManagement::addButtonsToSedItem(QStandardItem *item, SedTreeMode
             SLOT(addEmissionLineButtonClicked(const QString&)));
 
     m_message_buttons.push_back(std::move(cartButton));
+  }
+  if (treeModel_sed->canOpenInfo(item)) {
+
+            auto name = treeModel_sed->getFullGroupName(item);
+            if (name != "") {
+              name = name + "/";
+            }
+
+            name = name + item->text();
+
+
+            MessageButton *cartButton = new MessageButton(name, item->text());
+            m_message_buttons.push_back(cartButton);
+
+            auto index = item->index();
+
+            ui->treeView_ManageSed->setIndexWidget(index, cartButton);
+
+            connect(cartButton, SIGNAL(MessageButtonClicked(const QString&)), this,
+                            SLOT(getParameterInfoClicked(const QString&)));
   }
 
 
@@ -203,6 +244,7 @@ void FormAuxDataManagement::sedProcessfinished(int, QProcess::ExitStatus) {
         for (int i = 0; i < treeModel_Sed->rowCount(); i++) {
           addButtonsToSedItem(treeModel_Sed->item(i), treeModel_Sed);
         }
+
 
       ui->labelMessage->setText("Processing of SEDs completed.");
 }
@@ -480,6 +522,24 @@ void FormAuxDataManagement::reloadAuxData(){
    copyingSEDFinished(true, {});
    copyingRedFinished(true, {});
    copyingLumFinished(true, {});
+}
+
+
+
+void FormAuxDataManagement::on_btn_sun_sed_clicked() {
+    std::unique_ptr<DialogSedSelector> dialog(new DialogSedSelector(m_seds_repository));
+    dialog->setSed(PreferencesUtils::getUserPreference("AuxData","SUN_SED"));
+
+    connect(dialog.get(),
+            SIGNAL(popupClosing(std::string)),
+            this,
+            SLOT(sunSedPopupClosing(std::string)));
+    dialog->exec();
+}
+
+void FormAuxDataManagement::sunSedPopupClosing(std::string sed){
+  PreferencesUtils::setUserPreference("AuxData","SUN_SED", sed);
+  ui->lbl_sun_sed->setText(QString::fromStdString(sed));
 }
 
 }

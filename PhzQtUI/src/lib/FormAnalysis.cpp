@@ -4,10 +4,12 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDir>
+#include <QUrl>
 #include <functional>
 #include <QFileDialog>
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/archive/text_iarchive.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -35,6 +37,8 @@
 #include "PhzQtUI/DialogNz.h"
 #include "PhzQtUI/DialogZeroPointName.h"
 
+#include "PhzQtUI/DialogSelectParam.h"
+
 #include "PhzUITools/ConfigurationWriter.h"
 #include "PhzUITools/CatalogColumnReader.h"
 
@@ -51,6 +55,8 @@
 #include <CCfits/CCfits>
 #include "PhzDataModel/PhotometryGridInfo.h"
 #include "PhzDataModel/serialization/PhotometryGridInfo.h"
+#include "PhzQtUI/DialogFilterSelector.h"
+#include "SedParamUtils.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -60,6 +66,9 @@ static Elements::Logging logger = Elements::Logging::getLogger("FormAnalysis");
 FormAnalysis::FormAnalysis(QWidget *parent) :
     QWidget(parent), ui(new Ui::FormAnalysis) {
   ui->setupUi(this);
+
+  m_plank_file = FileUtils::getAuxRootPath() +"/GalacticDustMap/PlanckEbv.fits";
+
 }
 
 FormAnalysis::~FormAnalysis() {
@@ -76,11 +85,32 @@ void FormAnalysis::loadAnalysisPage(
   m_model_set_model_ptr = model_set_model_ptr;
   m_filter_repository = filter_repository;
   m_luminosity_repository = luminosity_repository;
+
   logger.info()<< "Load the Analysis Page";
 
   updateSelection();
 
 
+}
+
+
+
+void FormAnalysis::on_btn_lum_filter_clicked() {
+  std::unique_ptr<DialogFilterSelector> dialog(new DialogFilterSelector(m_filter_repository));
+  dialog->setFilter(ui->lbl_lum_filter->text().toStdString());
+  connect(dialog.get(), SIGNAL(popupClosing(std::string)),
+            SLOT(setLumFilter(std::string)));
+  dialog->exec();
+}
+
+void FormAnalysis::setLumFilter(std::string new_filter) {
+    ui->lbl_lum_filter->setText(QString::fromStdString(new_filter));
+
+    PreferencesUtils::setUserPreference(
+                   ui->cb_AnalysisSurvey->currentText().toStdString(),
+                   ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityFilter",
+                   new_filter);
+    updateGridSelection();
 }
 
 
@@ -159,7 +189,25 @@ void FormAnalysis::updateSelection() {
   connect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString &)),
         SLOT(on_cb_AnalysisSurvey_currentIndexChanged(const QString &)));
 
+
+  // set the Luminosity filter
+  std::string lum_filter = PreferencesUtils::getUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                   ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityFilter");
+
+  if (lum_filter !="") {
+    ui->lbl_lum_filter->setText(QString::fromStdString(lum_filter));
+  } else {
+    // use first filter with r as default value (TODO update with full name);
+    for (auto& filter_name : m_filter_repository->getContent()) {
+       if (filter_name.datasetName().find("r") != std::string::npos) {
+          setLumFilter(filter_name.qualifiedName());
+          break;
+       }
+    }
+  }
+  updateGridSelection();
 }
+
 
 ///////////////////////////////////////////////////
 //  Handle controls enability
@@ -169,9 +217,14 @@ try {
   auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
   auto axis = selected_model.getAxesTuple();
+  logger.info() << "Expected filter " <<   ui->lbl_lum_filter->text().toStdString();
   auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
-      m_survey_model_ptr->getSelectedSurvey().getName(), axis,
-      getSelectedFilters(), ui->cb_igm->currentText().toStdString());
+      m_survey_model_ptr->getSelectedSurvey().getName(),
+      axis,
+      getSelectedFilters(),
+      ui->cb_igm->currentText().toStdString(),
+      ui->lbl_lum_filter->text().toStdString(),
+      true);
 
   ui->cb_CompatibleGrid->clear();
   bool added = false;
@@ -211,6 +264,7 @@ bool FormAnalysis::checkCompatibleGalacticGrid(std::string file_name){
    auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          m_survey_model_ptr->getSelectedSurvey().getName(), axis,
          getSelectedFilters(), ui->cb_igm->currentText().toStdString(),
+         ui->lbl_lum_filter->text().toStdString(),
          false);
    return (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
 
@@ -226,6 +280,7 @@ void FormAnalysis::updateGalCorrGridSelection() {
     auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
         m_survey_model_ptr->getSelectedSurvey().getName(), axis,
         getSelectedFilters(), ui->cb_igm->currentText().toStdString(),
+        ui->lbl_lum_filter->text().toStdString(),
         false);
 
     ui->cb_CompatibleGalCorrGrid->clear();
@@ -238,7 +293,7 @@ void FormAnalysis::updateGalCorrGridSelection() {
     if (!added) {
       ui->cb_CompatibleGalCorrGrid->addItem(
           QString::fromStdString("Grid_" + selected_model.getName() + "_")
-              + ui->cb_igm->currentText() + "_MW_Param.dat");
+              + ui->cb_igm->currentText() + "_MW_Param.txt");
     }
 
     ui->cb_CompatibleGalCorrGrid->addItem("<Enter a new name>");
@@ -396,10 +451,10 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
   bool lum_prior_ok = !ui->rb_luminosityPrior->isChecked() || ui->cb_luminosityPrior_2->currentText().length() > 0;
   bool lum_prior_compatible = true;
   if (lum_prior_ok && ui->rb_luminosityPrior->isChecked()) {
-    LuminosityPriorConfig info;
+    LuminosityPriorConfig prior_info;
     for (auto prior_pair : m_prior_config) {
       if (ui->cb_luminosityPrior_2->currentText().toStdString() == prior_pair.first) {
-        info = prior_pair.second;
+        prior_info = prior_pair.second;
       }
     }
 
@@ -431,7 +486,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
       }
     }
 
-    lum_prior_compatible = info.isCompatibleWithParameterSpace(z_min, z_max, selected_model.getSeds());
+    lum_prior_compatible = prior_info.isCompatibleWithParameterSpace(z_min, z_max, selected_model.getSeds());
 
   }
 
@@ -693,24 +748,39 @@ bool FormAnalysis::checkGalacticGridSelection(bool addFileCheck, bool acceptNewF
 
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getGridConfiguration() {
   std::string file_name = FileUtils::addExt(
-      ui->cb_CompatibleGrid->currentText().toStdString(), ".dat");
+      ui->cb_CompatibleGrid->currentText().toStdString(), ".txt");
   ui->cb_CompatibleGrid->setItemText(ui->cb_CompatibleGrid->currentIndex(),
       QString::fromStdString(file_name));
   auto& selected_model =  m_model_set_model_ptr->getSelectedModelSet();
 
-  return PhzGridInfoHandler::GetConfigurationMap(
-      ui->cb_AnalysisSurvey->currentText().toStdString(), file_name, selected_model,
-      getFilters(), ui->cb_igm->currentText().toStdString());
+  auto config = PhzGridInfoHandler::GetConfigurationMap(
+      ui->cb_AnalysisSurvey->currentText().toStdString(),
+      file_name,
+      selected_model,
+      getFilters(),
+      ui->lbl_lum_filter->text().toStdString(),
+      ui->cb_igm->currentText().toStdString());
+
+  auto cosmo_conf = PreferencesUtils::getCosmologyConfigurations();
+  for (auto& pair : cosmo_conf) {
+    config[pair.first] = pair.second;
+  }
+
+  std::string text_format = "TEXT";
+  config["output-model-grid-format"].value() = boost::any(text_format);
+
+  return config;
 }
 
 
 
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getGalacticCorrectionGridConfiguration() {
-  std::string file_name = FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ".dat");
+  std::string file_name = FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ".txt");
   ui->cb_CompatibleGalCorrGrid->setItemText(ui->cb_CompatibleGalCorrGrid->currentIndex(),
         QString::fromStdString(file_name));
   std::string grid_name = ui->cb_CompatibleGrid->currentText().toStdString();
   std::string catalog_type = ui->cb_AnalysisSurvey->currentText().toStdString();
+  std::string lum_filter = ui->lbl_lum_filter->text().toStdString();
   std::string igm = ui->cb_igm->currentText().toStdString();
 
   QFileInfo f99_curve_info(
@@ -729,8 +799,20 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
              FileUtils::getPathConfiguration(false, true, true, false);
     options_map["catalog-type"].value() = boost::any(catalog_type);
     options_map["output-galactic-correction-coefficient-grid"].value() = boost::any(file_name);
+
+    std::string text_format = "TEXT";
+    options_map["output-galactic-correction-coefficient-grid-format"].value() = boost::any(text_format);
+
     options_map["model-grid-file"].value() = boost::any(grid_name);
+    options_map["normalization-filter"].value() = boost::any(lum_filter);
+    std::string sun_sed = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
+    options_map["normalization-solar-sed"].value() = boost::any(sun_sed);
     options_map["igm-absorption-type"].value() = boost::any(igm);
+
+    auto cosmo_conf = PreferencesUtils::getCosmologyConfigurations();
+    for (auto& pair : cosmo_conf) {
+          options_map[pair.first] = pair.second;
+     }
 
 
     std::string f99 = "F99/F99_3.1";
@@ -748,156 +830,172 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 ////////////////////////////////////////////////////////////////////////////
 
 
-bool FormAnalysis::checkSedWeightFile(std::string file_name) {
+bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
   std::string folder = FileUtils::getSedPriorRootPath();
-  QFileInfo info(QString::fromStdString(folder) + QDir::separator() + QString::fromStdString(file_name));
+  QFileInfo info(QString::fromStdString(folder) + QDir::separator() + QString::fromStdString(sed_weight_file_name));
   if (info.exists()) {
-    auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
-    auto igm = ui->cb_igm->currentText().toStdString();
-    auto axis = selected_model.getAxesTuple();
+
+    logger.info() << "A file with the same name exists " << sed_weight_file_name << " checking if compatible...";
+    try {
+        auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
+        auto igm = ui->cb_igm->currentText().toStdString();
+        auto axis = selected_model.getAxesTuple();
 
 
-    std::string file_name = info.absoluteFilePath().toStdString();
-    int hdu_count = 0;
-    {
-       CCfits::FITS fits {file_name, CCfits::RWmode::Read};
-       hdu_count = fits.extension().size();
-    }
+        std::string file_name = info.absoluteFilePath().toStdString();
+        int hdu_count = 0;
+        {
+           CCfits::FITS fits {file_name, CCfits::RWmode::Read};
+           hdu_count = fits.extension().size();
+        }
 
-    std::vector<PhzDataModel::DoubleGrid> sed_weight_grids {};
-    for (int i = 1; i <= hdu_count; i += PhzDataModel::DoubleGrid::axisNumber()+1) {
-      sed_weight_grids.emplace_back(GridContainer::gridFitsImport<PhzDataModel::DoubleGrid>(file_name, i));
-    }
-
-
-    std::string survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
-    std::string model_grid_file = FileUtils::getPhotmetricGridRootPath(true, survey_name) + "/" +ui->cb_CompatibleGrid->currentText().toStdString();
-
-    PhzDataModel::PhotometryGridInfo model_grid_info;
-    std::ifstream in {model_grid_file};
-    boost::archive::binary_iarchive bia {in};
-    bia >> model_grid_info;
+        std::vector<PhzDataModel::DoubleGrid> sed_weight_grids {};
+        for (int i = 1; i <= hdu_count; i += PhzDataModel::DoubleGrid::axisNumber()+1) {
+          sed_weight_grids.emplace_back(GridContainer::gridFitsImport<PhzDataModel::DoubleGrid>(file_name, i));
+        }
 
 
+        std::string survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+        std::string model_grid_file = FileUtils::getPhotmetricGridRootPath(true, survey_name) + "/" +ui->cb_CompatibleGrid->currentText().toStdString();
+
+        PhzDataModel::PhotometryGridInfo model_grid_info;
+        std::ifstream in {model_grid_file};
+        boost::archive::text_iarchive bia {in};
+        bia >> model_grid_info;
 
 
-    // check the axis
-    if (model_grid_info.region_axes_map.size()!=sed_weight_grids.size()){
+
+
+        // check the axis
+        if (model_grid_info.region_axes_map.size()!=sed_weight_grids.size()){
+          return false;
+        }
+
+        size_t found=0;
+        for (auto& current_axe : sed_weight_grids){
+          for (auto& file_axe : model_grid_info.region_axes_map){
+
+            // SED
+
+            auto& sed_axis_file = std::get<PhzDataModel::ModelParameter::SED>(file_axe.second);
+            auto& sed_axis_requested = current_axe.getAxis<PhzDataModel::ModelParameter::SED>();
+            if (sed_axis_file.size()!=sed_axis_requested.size()) {
+
+              continue;
+            }
+
+            bool all_found=true;
+            for(auto& sed_requested : sed_axis_requested) {
+              if (std::find(sed_axis_file.begin(), sed_axis_file.end(), sed_requested)==sed_axis_file.end()) {
+                all_found = false;
+               }
+            }
+
+            if (!all_found) {
+
+              continue;
+            }
+
+            // RED
+            auto& red_axis_file = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(file_axe.second);
+            auto& red_axis_requested = current_axe.getAxis<PhzDataModel::ModelParameter::REDDENING_CURVE>();
+            if (red_axis_file.size()!=red_axis_requested.size()) {
+
+              continue;
+            }
+            all_found=true;
+            for(auto& red_requested : red_axis_requested) {
+              if (std::find(red_axis_file.begin(), red_axis_file.end(), red_requested)==red_axis_file.end()) {
+                all_found=false;
+              }
+            }
+
+            if (!all_found) {
+
+              continue;
+            }
+
+            std::vector<double> z_axis_file;
+            for(double value : std::get<PhzDataModel::ModelParameter::Z>(file_axe.second)){
+
+              z_axis_file.push_back(value);
+            }
+
+            std::vector<double> z_axis_requested;
+            for(double value : current_axe.getAxis<PhzDataModel::ModelParameter::Z>()){
+              z_axis_requested.push_back(value);
+            }
+
+            if (z_axis_file.size()!=z_axis_requested.size()) {
+              continue;
+            }
+
+            std::sort(z_axis_file.begin(),z_axis_file.end());
+            std::sort(z_axis_requested.begin(),z_axis_requested.end());
+
+            bool match=true;
+            auto z_file_it = z_axis_file.begin();
+            for(auto& z_requested : z_axis_requested) {
+              if (std::fabs(*z_file_it - z_requested) > 1E-10) {
+                match = false;
+                break;
+              }
+              ++z_file_it;
+            }
+
+            if (!match) {
+              continue;
+            }
+
+            std::vector<double> ebv_axis_file;
+            for (double value : std::get<PhzDataModel::ModelParameter::EBV>(file_axe.second)) {
+              ebv_axis_file.push_back(value);
+            }
+
+            std::vector<double> ebv_axis_requested;
+            for (double value : current_axe.getAxis<PhzDataModel::ModelParameter::EBV>()) {
+              ebv_axis_requested.push_back(value);
+            }
+
+            if (ebv_axis_file.size() != ebv_axis_requested.size()) {
+
+
+              continue;
+            }
+
+            std::sort(ebv_axis_file.begin(), ebv_axis_file.end());
+            std::sort(ebv_axis_requested.begin(), ebv_axis_requested.end());
+
+            auto ebv_file_it = ebv_axis_file.begin();
+            for (auto& ebv_requested : ebv_axis_requested) {
+              if (std::fabs(*ebv_file_it - ebv_requested) > 1E-10) {
+                match = false;
+                break;
+              }
+              ++ebv_file_it;
+            }
+
+            if (!match) {
+
+              continue;
+            }
+
+            ++found;
+            break;
+          }
+        }
+
+        if (sed_weight_grids.size() != found) {
+          return false;
+        }
+
+        // Both grid are compatible
+        return true;
+    } catch(...) {
+      logger.warn() << "Wrong format for sed weight file " << sed_weight_file_name;
       return false;
     }
 
-    size_t found=0;
-    for (auto& current_axe : sed_weight_grids){
-      for (auto& file_axe : model_grid_info.region_axes_map){
-
-        // SED
-
-        auto& sed_axis_file = std::get<PhzDataModel::ModelParameter::SED>(file_axe.second);
-        auto& sed_axis_requested = current_axe.getAxis<PhzDataModel::ModelParameter::SED>();
-        if (sed_axis_file.size()!=sed_axis_requested.size()) {
-          return false;
-        }
-
-        bool all_found=true;
-        for(auto& sed_requested : sed_axis_requested) {
-          if (std::find(sed_axis_file.begin(), sed_axis_file.end(), sed_requested)==sed_axis_file.end()) {
-            all_found = false;
-           }
-        }
-
-        if (!all_found) {
-          return false;
-        }
-
-        // RED
-        auto& red_axis_file = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(file_axe.second);
-        auto& red_axis_requested = current_axe.getAxis<PhzDataModel::ModelParameter::REDDENING_CURVE>();
-        if (red_axis_file.size()!=red_axis_requested.size()) {
-          return false;
-        }
-        all_found=true;
-        for(auto& red_requested : red_axis_requested) {
-          if (std::find(red_axis_file.begin(), red_axis_file.end(), red_requested)==red_axis_file.end()) {
-            all_found=false;
-          }
-        }
-
-        if (!all_found) {
-          return false;
-        }
-
-        std::vector<double> z_axis_file;
-        for(double value : std::get<PhzDataModel::ModelParameter::Z>(file_axe.second)){
-          z_axis_file.push_back(value);
-        }
-
-        std::vector<double> z_axis_requested;
-        for(double value : current_axe.getAxis<PhzDataModel::ModelParameter::Z>()){
-          z_axis_requested.push_back(value);
-        }
-
-        if (z_axis_file.size()!=z_axis_requested.size()) {
-          return false;
-        }
-
-        std::sort(z_axis_file.begin(),z_axis_file.end());
-        std::sort(z_axis_requested.begin(),z_axis_requested.end());
-
-        bool match=true;
-        auto z_file_it = z_axis_file.begin();
-        for(auto& z_requested : z_axis_requested) {
-          if (std::fabs(*z_file_it - z_requested) > 1E-10) {
-            match=false;
-            break;
-          }
-          ++z_file_it;
-        }
-
-        if (!match) {
-          return false;
-        }
-
-        std::vector<double> ebv_axis_file;
-        for(double value : std::get<PhzDataModel::ModelParameter::EBV>(file_axe.second)){
-          ebv_axis_file.push_back(value);
-        }
-
-        std::vector<double> ebv_axis_requested;
-        for(double value : current_axe.getAxis<PhzDataModel::ModelParameter::EBV>()){
-          ebv_axis_requested.push_back(value);
-        }
-
-        if (ebv_axis_file.size()!=ebv_axis_requested.size()) {
-          return false;
-        }
-
-        std::sort(ebv_axis_file.begin(),ebv_axis_file.end());
-        std::sort(ebv_axis_requested.begin(),ebv_axis_requested.end());
-
-        auto ebv_file_it = ebv_axis_file.begin();
-        for(auto& ebv_requested : ebv_axis_requested) {
-          if (std::fabs(*ebv_file_it - ebv_requested) > 1E-10) {
-            match=false;
-            break;
-          }
-          ++ebv_file_it;
-        }
-
-        if (!match) {
-          return false;
-        }
-
-        ++found;
-        break;
-      }
-    }
-
-    if (sed_weight_grids.size()!=found){
-      return false;
-    }
-
-    // Both grid are compatible
-    return true;
 
   } else {
     return false;
@@ -1001,6 +1099,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     std::string gal_ebv_default_column = "PLANCK_GAL_EBV";
     options_map["dust-column-density-column-name"].value() = boost::any(gal_ebv_default_column);
   }
+
+
 
   auto input_catalog_file = FileUtils::removeStart(
       ui->txt_inputCatalog->text().toStdString(),
@@ -1182,46 +1282,25 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     options_map["copy-columns"].value() = boost::any(option);
   }
 
-  return options_map;
-}
 
+  if (ui->rb_sample_scaling->isChecked()) {
+    options_map["scale-factor-magrinalization-enabled"].value() = boost::any(yes_flag);
 
+    options_map["scale-factor-magrinalization-sample-number"].value() = boost::any(ui->sb_lum_sample_number->value());
 
-std::map < std::string, boost::program_options::variable_value > FormAnalysis::getLuminosityOptionMap() {
-  std::map<std::string, boost::program_options::variable_value> options_map =
-      FileUtils::getPathConfiguration(false, true, true, true);
+    options_map["scale-factor-magrinalization-range-size"].value() = boost::any(ui->dsb_sample_range->value());
 
-  if (ui->rb_luminosityPrior->isChecked()) {
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+        ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSamplingNumber", QString::number(ui->sb_lum_sample_number->value()).toStdString());
 
-    LuminosityPriorConfig info;
-    for (auto prior_pair : m_prior_config) {
-      if (ui->cb_luminosityPrior_2->currentText().toStdString()
-          == prior_pair.first) {
-        info = prior_pair.second;
-      }
-    }
-
-    for (auto& pair : info.getBasicConfigOptions(false)) {
-      options_map[pair.first] = pair.second;
-    }
-
-    auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
-
-    auto global_options = PreferencesUtils::getThreadConfigurations();
-    for (auto& pair : global_options) {
-          options_map[pair.first] = pair.second;
-    }
-
-    options_map["catalog-type"].value() = boost::any(std::string(survey_name));
-
-    options_map["model-grid-file"].value() = boost::any(
-        ui->cb_CompatibleGrid->currentText().toStdString());
-
-    options_map["output-model-grid"].value() = boost::any(
-        info.getLuminosityModelGridName());
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+           ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSamplingRange", QString::number(ui->dsb_sample_range->value()).toStdString());
   }
+
   return options_map;
 }
+
+
 //////////////////////////////////////////////////
 // User interaction
 
@@ -1294,7 +1373,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
   }
 
 
-
+  setupAlgo();
   updateGridSelection();
   updateGalCorrGridSelection();
   loadLuminosityPriors();
@@ -1328,6 +1407,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(
 
   setCopiedColumns(selected_survey.getCopiedColumns());
   setRunAnnalysisEnable(true);
+  getPPListFromConfig();
 }
 
 template<typename ReturnType, int I>
@@ -1348,10 +1428,13 @@ template<typename ReturnType, int I>
     logger.info()<< "The selected index of the Parameter Space ComboBox has changed. New selected item:"<<model_name.toStdString();
     m_model_set_model_ptr->selectModelSet(model_name);
 
+    setupAlgo();
     updateGridSelection();
     updateGalCorrGridSelection();
     loadLuminosityPriors();
+    getPPListFromConfig();
   }
+
 
   void FormAnalysis::on_cb_igm_currentIndexChanged(const QString &) {
     updateGridSelection();
@@ -1378,7 +1461,7 @@ template<typename ReturnType, int I>
           grid_name = grid_name.substr(0, index);
         }
      ui->cb_CompatibleGalCorrGrid->setItemText(ui->cb_CompatibleGalCorrGrid->currentIndex(),
-                QString::fromStdString(grid_name+"_MW_Param.dat"));
+                QString::fromStdString(grid_name+"_MW_Param.txt"));
     adjustGalCorrGridButtons(true);
     setComputeCorrectionEnable();
     setRunAnnalysisEnable(true);
@@ -1461,7 +1544,7 @@ template<typename ReturnType, int I>
   }
 
 
-  void FormAnalysis::on_cb_CompatibleGalCorrGrid_textChanged(const QString &) {
+  void FormAnalysis::on_cb_CompatibleGalCorrGrid_currentTextChanged(const QString &) {
     adjustGalCorrGridButtons(true);
     setComputeCorrectionEnable();
     setRunAnnalysisEnable(true);
@@ -1586,9 +1669,9 @@ template<typename ReturnType, int I>
     std::string dec_col = "";
 
     if (ui->rb_gc_planck->isChecked()) {
-      SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
-      ra_col = selected_survey.getRaColumn();
-      dec_col = selected_survey.getDecColumn();
+      SurveyFilterMapping sel_survey = m_survey_model_ptr->getSelectedSurvey();
+      ra_col = sel_survey.getRaColumn();
+      dec_col = sel_survey.getDecColumn();
     }
 
 
@@ -1602,8 +1685,6 @@ template<typename ReturnType, int I>
     }
 
 
-    auto config_map_luminosity = getLuminosityOptionMap();
-
 
     std::unique_ptr<DialogPhotometricCorrectionComputation> popup(new DialogPhotometricCorrectionComputation());
     popup->setData(survey_name, m_survey_model_ptr->getSelectedSurvey().getSourceIdColumn(),
@@ -1613,9 +1694,9 @@ template<typename ReturnType, int I>
         getExcludedFilters(),
         selected_survey.getRefZColumn(),
         config_map,
-        config_map_luminosity,
         config_sed_weight,
         selected_survey.getNonDetection(),
+        m_plank_file,
         ra_col,
         dec_col);
 
@@ -1645,7 +1726,7 @@ template<typename ReturnType, int I>
 
 
   void FormAnalysis::on_btn_confLuminosityPrior_clicked() {
-        std::unique_ptr<DialogLuminosityPrior> dialog(new DialogLuminosityPrior(m_filter_repository, m_luminosity_repository));
+        std::unique_ptr<DialogLuminosityPrior> dialog(new DialogLuminosityPrior(ui->lbl_lum_filter->text().toStdString(), m_luminosity_repository));
 
         std::string model_grid = ui->cb_CompatibleGrid->currentText().toStdString();
 
@@ -1688,6 +1769,7 @@ template<typename ReturnType, int I>
     auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
 
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
+
 
     auto folder = FileUtils::getGUILuminosityPriorConfig(true, survey_name,
         selected_model.getName());
@@ -1854,9 +1936,56 @@ template<typename ReturnType, int I>
                       i_filter);
     setRunAnnalysisEnable(true);
   }
+// 5. Algo
 
 
-// 5. Run
+  void FormAnalysis::on_rb_best_scaling_toggled(bool on) {
+    ui->rb_sample_scaling->setChecked(!on);
+    ui->wdg_sample->setEnabled(!on);
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                         ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSampling",
+                         "False");
+  }
+  void FormAnalysis::on_rb_sample_scaling_toggled(bool on) {
+    ui->rb_best_scaling->setChecked(!on);
+    ui->wdg_sample->setEnabled(on);
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                         ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSampling",
+                         "True");
+  }
+
+
+  void FormAnalysis::setupAlgo() {
+
+  // get the alog Values
+   std::string scale_sampling = PreferencesUtils::getUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                    ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSampling");
+
+   bool do_sample = (scale_sampling == "True");
+   ui->rb_best_scaling->setChecked(!do_sample);
+   ui->rb_sample_scaling->setChecked(do_sample);
+   on_rb_sample_scaling_toggled(do_sample);
+
+   std::string sampling_number = PreferencesUtils::getUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSamplingNumber");
+   if (sampling_number != "") {
+     ui->sb_lum_sample_number->setValue(QString::fromStdString(sampling_number).toInt());
+   } else {
+     ui->sb_lum_sample_number->setValue(101);
+   }
+
+   std::string sampling_range = PreferencesUtils::getUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                      ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSamplingRange");
+   if (sampling_range != "") {
+       ui->dsb_sample_range->setValue(QString::fromStdString(sampling_range).toDouble());
+   } else {
+     ui->dsb_sample_range->setValue(5.0);
+   }
+}
+
+
+
+// 6. Run
 void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
   if (do_test) {
     std::vector<std::string> needed_columns { };
@@ -1954,6 +2083,61 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
   }
 
 
+
+  void FormAnalysis::on_btn_pp_clicked() {
+    std::unique_ptr<DialogSelectParam> popup(new DialogSelectParam(m_model_set_model_ptr->getSelectedModelSet(), this));
+
+    popup->setParams(getPPListFromConfig());
+
+    connect(popup.get(), SIGNAL(popupClosing(std::vector<std::string>)),
+            SLOT(update_pp_selection(std::vector<std::string>)));
+
+    popup->exec();
+
+  }
+
+  std::set<std::string> FormAnalysis::getPPListFromConfig() {
+    auto pp_list = PreferencesUtils::getUserPreference(
+                   ui->cb_AnalysisSurvey->currentText().toStdString(),
+                   ui->cb_AnalysisModel->currentText().toStdString() + "_PP");
+
+    auto list_param = QString::fromStdString(pp_list);
+    std::set<std::string> res {};
+    if (list_param.length() > 0) {
+      for (auto& part : list_param.split(";")) {
+        res.insert(part.toStdString());
+      }
+
+      ui->btn_pp->setText(QString::fromStdString("Select Parameters (") +
+                              QString::number(res.size()) +
+                              QString::fromStdString(")"));
+    } else {
+      ui->btn_pp->setText(QString::fromStdString("Select Parameters"));
+    }
+    return res;
+  }
+
+  void FormAnalysis::update_pp_selection(std::vector<std::string> params) {
+
+    ui->btn_pp->setText(QString::fromStdString("Select Parameters (") +
+                        QString::number(params.size()) +
+                        QString::fromStdString(")"));
+
+    std::string pps ="";
+    for (auto& param : params) {
+      if (pps.length() > 0) {
+        pps = pps + ";";
+      }
+
+      pps = pps + param;
+    }
+
+    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+        ui->cb_AnalysisModel->currentText().toStdString() + "_PP", pps);
+
+  }
+
+
   void FormAnalysis::saveCopiedColumnToCatalog() {
     m_survey_model_ptr->setCopiedColumnsToSelected(m_copied_columns);
     m_survey_model_ptr->saveSelected();
@@ -2002,166 +2186,437 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
   }
 
   void FormAnalysis::on_btn_GetConfigAnalysis_clicked() {
-    QFileDialog dialog(this);
-    dialog.setFileMode(QFileDialog::Directory);
-    dialog.setDirectory(QString::fromStdString(FileUtils::getRootPath(true))+"config");
-    dialog.setOption(QFileDialog::DontUseNativeDialog);
-    dialog.setLabelText(QFileDialog::Accept, "Select Folder");
-    if (dialog.exec()) {
-          auto selected_folder = dialog.selectedFiles()[0];
 
-          QString cr{"\n\n"};
-          QString command{""};
+    m_httpRequestAborted = false;
 
-          // Model Grid
-          auto grid_model_file_name = selected_folder+QString::fromStdString("/ModelGrid.CMG.conf");
-          auto grid_model_config_map = getGridConfiguration();
-          PhzUITools::ConfigurationWriter::writeConfiguration(grid_model_config_map, grid_model_file_name.toStdString());
-          command += QString::fromStdString("Phosphoros CMG --config-file ") + grid_model_file_name + cr;
-
-          // GalCorr Grid
-          if (!ui->rb_gc_off->isChecked()) {
-            auto grid_galactic_corr_file_name = selected_folder+QString::fromStdString("/GalacticCorrGrid.CGCCG.conf");
-            auto galactic_corr_config_map = getGridConfiguration();
-            PhzUITools::ConfigurationWriter::writeConfiguration(galactic_corr_config_map,
-                                                                grid_galactic_corr_file_name.toStdString());
-            command += QString::fromStdString("Phosphoros CGCCG --config-file ") + grid_galactic_corr_file_name + cr;
-          }
-
-          // Sed weight
-          if (ui->cb_sedweight->isChecked()) {
-             auto grid_sed_weight_file_name = selected_folder+QString::fromStdString("/SedWeightGrid.CSW.conf");
-             std::string sed_prior_name = getSedWeightFileName();
-             auto sed_weight_config_map = getSedWeightOptionMap(sed_prior_name);
-             PhzUITools::ConfigurationWriter::writeConfiguration(sed_weight_config_map, grid_sed_weight_file_name.toStdString());
-                      command += QString::fromStdString("Phosphoros CSW --config-file ") + grid_sed_weight_file_name + cr;
-          }
-
-          // Luminosity Grid
-          if (ui->rb_luminosityPrior->isChecked()) {
-            auto grid_luminosity_file_name = selected_folder+QString::fromStdString("/LuminosityGrid.CLMG.conf");
-            auto luminosity_config_map = getLuminosityOptionMap();
-            PhzUITools::ConfigurationWriter::writeConfiguration(luminosity_config_map,
-                grid_luminosity_file_name.toStdString());
-                        command += QString::fromStdString("Phosphoros CLMG --config-file ") + grid_luminosity_file_name + cr;
-          }
-
-          // Lookup Galactic EBV
-          if (ui->rb_gc_planck->isChecked()) {
-            auto path = ui->txt_inputCatalog->text().toStdString();
-            auto column_reader = PhzUITools::CatalogColumnReader(path);
-            auto column_from_file = column_reader.getColumnNames();
-            if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
-              // the E(B-V) has to be looked up in the Planck map
-              SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
-              std::map<std::string, boost::program_options::variable_value> add_column_options_map{};
-              add_column_options_map["galatic-ebv-col"].value() = boost::any(std::string("PLANCK_GAL_EBV"));
-              add_column_options_map["input-catalog"].value() = boost::any(path);
-              add_column_options_map["ra"].value() = boost::any(selected_survey.getRaColumn());
-              add_column_options_map["dec"].value() = boost::any(selected_survey.getDecColumn());
-              add_column_options_map["output-catalog"].value() = boost::any(path);
-              auto lookup_planck_file_name = selected_folder+QString::fromStdString("/LookupGalacticEBV.AGDD.conf");
-              PhzUITools::ConfigurationWriter::writeConfiguration(add_column_options_map, lookup_planck_file_name.toStdString());
-              command += QString::fromStdString("Phosphoros AGDD --config-file ") + lookup_planck_file_name + cr;
-            }
-          }
-
-          // Template fitting
-          auto template_fitting_file_name = selected_folder+QString::fromStdString("/TemplateFitting.CR.conf");
-          auto run_config_map = getRunOptionMap();
-          PhzUITools::ConfigurationWriter::writeConfiguration(run_config_map, template_fitting_file_name.toStdString());
-          command += QString::fromStdString("Phosphoros CR --config-file ") + template_fitting_file_name + cr;
-
-          // command file
-          auto command_file_name = selected_folder+QString::fromStdString("/command");
-          std::ofstream file;
-          file.open(command_file_name.toStdString());
-          file << command.toStdString();
-          file.close();
-
-          saveCopiedColumnToCatalog();
-          PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
-              "IGM", ui->cb_igm->currentText().toStdString());
-          if (ui->gb_corrections->isChecked()) {
-            PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
-                "Correction", ui->cb_AnalysisCorrection->currentText().toStdString());
-          }
-    }
-  }
-
-  void FormAnalysis::on_btn_RunAnalysis_clicked() {
-    auto config_map = getRunOptionMap();
     if (ui->rb_gc_planck->isChecked()) {
-      // User requests that we lookup Planck EBV from the position:
-      // Check if the catalog contains the "GAL_EBV" column
-
       auto path = ui->txt_inputCatalog->text().toStdString();
       auto column_reader = PhzUITools::CatalogColumnReader(path);
       auto column_from_file = column_reader.getColumnNames();
       if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
-        // the E(B-V) has to be looked up in the Planck map
-        SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
-        std::unique_ptr<DialogAddGalEbv> dialog(new DialogAddGalEbv());
-        dialog->setInputs(path, selected_survey.getRaColumn(), selected_survey.getDecColumn());
-        if (dialog->exec()) {
-          // new catalog contains the GAL_EBV column
+          if (!boost::filesystem::exists(m_plank_file)) {
+            if (QMessageBox::Ok == QMessageBox::question(this, "Missing Dust map file...",
+             "The file containing the Milky Way dust map is missing (" + QString::fromStdString(m_plank_file)
+             + ").   \n Do you want to download it now from \n" + QString::fromStdString(m_plank_url)
+             + "? \n\n This is needed before using the Milky Way absorption correction option that you choose.",
+             QMessageBox::Ok | QMessageBox::Cancel)) {
 
-          auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
-          auto input_catalog_file = FileUtils::removeStart(dialog->getOutputName(),
-                      FileUtils::getCatalogRootPath(false, survey_name) +
-                      QString(QDir::separator()).toStdString());
 
-          config_map["input-catalog-file"].value() = boost::any(input_catalog_file);
-        } else {
-          // user has canceled the operation
-          return;
-        }
-      }
-    }
+              QDir enclosing_folder = QFileInfo(QString::fromStdString(m_plank_file)).absoluteDir();
+              if (!enclosing_folder.exists()) {
+                enclosing_folder.mkpath(".");
+              }
 
-    std::string out_dir = ui->txt_outputFolder->text().toStdString();
+                m_network_manager = new QNetworkAccessManager(this);
+                QUrl url(QString::fromStdString(m_plank_url));
+                m_downloaded_file = new QFile(QString::fromStdString(m_plank_file));
+                if (!m_downloaded_file->open(QIODevice::WriteOnly)) {
+                       QMessageBox::information(this, tr("HTTP"),
+                                     tr("Unable to save the file %1: %2.")
+                                     .arg(QString::fromStdString(m_plank_file)).arg(m_downloaded_file->errorString()));
+                   delete m_downloaded_file;
+                   m_downloaded_file = 0;
+                   return;
+                }
 
-    QDir dir(QString::fromStdString(out_dir));
-    if (dir.exists() && dir.entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() > 0) {
-      if (QMessageBox::question(this, "Existing Output Folder...",
-               "The Output Folder you selected already exists.\n"
-                   "In order to avoid confusion, the Output Folder will be cleared. Do you want to proceed?",
-               QMessageBox::Cancel | QMessageBox::Ok) == QMessageBox::Ok) {
-             FileUtils::removeDir(QString::fromStdString(out_dir));
+                logger.info()<< "Preparing the progress dialog ";
+                if (m_progress_dialog) {
+                  logger.info()<< "Cleaning the progress dialog ";
+                  delete m_progress_dialog;
+                  m_progress_dialog = 0;
+                }
+
+                m_progress_dialog = new QProgressDialog(this);
+                m_progress_dialog->setWindowTitle(tr("Dowwnloading... "));
+                m_progress_dialog->setLabelText(tr("Downloading Planck dust map"));
+                m_progress_dialog->setWindowModality(Qt::WindowModal);
+
+                logger.info()<< "Connecting  the progress dialog ";
+                connect(m_progress_dialog, SIGNAL(canceled()), this, SLOT(cancelDownloadPlanck()));
+
+
+                logger.info()<< "Getting the reply ";
+                m_reply = m_network_manager->get(QNetworkRequest(url));
+                connect(m_reply, SIGNAL(readyRead()),
+                           this, SLOT(httpReadyPlanckRead()));
+                connect(m_reply, SIGNAL(downloadProgress(qint64, qint64)),
+                            this, SLOT(updateDownloadProgress(qint64, qint64)));
+                connect(m_reply, SIGNAL(finished()),
+                            this, SLOT(get_config_run_second_part()));
+            } else {
+              return;
+            }
+          } else {
+            get_config_run_second_part();
+          }
       } else {
-        return;
+        get_config_run_second_part();
       }
+    } else {
+      get_config_run_second_part();
     }
+}
 
-    std::map<std::string, boost::program_options::variable_value> config_sed_weight{};
-    if (ui->cb_sedweight->isChecked()) {
-      // Compute the SED Prior
-      std::string sed_prior_name = getSedWeightFileName();
-      if (!checkSedWeightFile(sed_prior_name)) {
-        config_sed_weight = getSedWeightOptionMap(sed_prior_name);
+
+  void FormAnalysis::get_config_run_second_part() {
+    // when it was a download and it was canceled
+          if (m_httpRequestAborted) {
+              if (m_downloaded_file) {
+                m_downloaded_file->close();
+                m_downloaded_file->remove();
+                  delete m_downloaded_file;
+                  m_downloaded_file = 0;
+              }
+              m_reply->deleteLater();
+              m_progress_dialog->hide();
+              return;
+          } else if (m_downloaded_file) {
+            m_progress_dialog->hide();
+            m_downloaded_file->flush();
+            m_downloaded_file->close();
+            if (m_reply->error()) {
+              m_downloaded_file->remove();
+              m_reply->deleteLater();
+              m_reply = 0;
+              delete m_downloaded_file;
+              m_downloaded_file = 0;
+              m_network_manager = 0;
+              return;
+            }
+
+            m_reply->deleteLater();
+            m_reply = 0;
+            delete m_downloaded_file;
+            m_downloaded_file = 0;
+            m_network_manager = 0;
+          }
+
+
+    QFileDialog dialog(this);
+      dialog.setFileMode(QFileDialog::Directory);
+      dialog.setDirectory(QString::fromStdString(FileUtils::getRootPath(true))+"config");
+      dialog.setOption(QFileDialog::DontUseNativeDialog);
+      dialog.setLabelText(QFileDialog::Accept, "Select Folder");
+      if (dialog.exec()) {
+            auto selected_folder = dialog.selectedFiles()[0];
+
+            QString cr{"\n\n"};
+            QString command{""};
+
+            // Model Grid
+            auto grid_model_file_name = selected_folder+QString::fromStdString("/ModelGrid.CMG.conf");
+            auto grid_model_config_map = getGridConfiguration();
+            PhzUITools::ConfigurationWriter::writeConfiguration(grid_model_config_map, grid_model_file_name.toStdString());
+            command += QString::fromStdString("Phosphoros CMG --config-file ") + grid_model_file_name + cr;
+
+            // GalCorr Grid
+            if (!ui->rb_gc_off->isChecked()) {
+              auto grid_galactic_corr_file_name = selected_folder+QString::fromStdString("/GalacticCorrGrid.CGCCG.conf");
+              auto galactic_corr_config_map = getGridConfiguration();
+              PhzUITools::ConfigurationWriter::writeConfiguration(galactic_corr_config_map,
+                                                                  grid_galactic_corr_file_name.toStdString());
+              command += QString::fromStdString("Phosphoros CGCCG --config-file ") + grid_galactic_corr_file_name + cr;
+            }
+
+            // Sed weight
+            if (ui->cb_sedweight->isChecked()) {
+               auto grid_sed_weight_file_name = selected_folder+QString::fromStdString("/SedWeightGrid.CSW.conf");
+               std::string sed_prior_name = getSedWeightFileName();
+               auto sed_weight_config_map = getSedWeightOptionMap(sed_prior_name);
+               PhzUITools::ConfigurationWriter::writeConfiguration(sed_weight_config_map, grid_sed_weight_file_name.toStdString());
+                        command += QString::fromStdString("Phosphoros CSW --config-file ") + grid_sed_weight_file_name + cr;
+            }
+
+
+
+            // Lookup Galactic EBV
+            if (ui->rb_gc_planck->isChecked()) {
+              auto path = ui->txt_inputCatalog->text().toStdString();
+              auto column_reader = PhzUITools::CatalogColumnReader(path);
+              auto column_from_file = column_reader.getColumnNames();
+              if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
+                // the E(B-V) has to be looked up in the Planck map
+                SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
+                std::map<std::string, boost::program_options::variable_value> add_column_options_map{};
+                add_column_options_map["planck-dust-map"].value() = boost::any(m_plank_file);
+                add_column_options_map["galatic-ebv-col"].value() = boost::any(std::string("PLANCK_GAL_EBV"));
+                add_column_options_map["input-catalog"].value() = boost::any(path);
+                add_column_options_map["ra"].value() = boost::any(selected_survey.getRaColumn());
+                add_column_options_map["dec"].value() = boost::any(selected_survey.getDecColumn());
+                add_column_options_map["output-catalog"].value() = boost::any(path);
+                auto lookup_planck_file_name = selected_folder+QString::fromStdString("/LookupGalacticEBV.AGDD.conf");
+                PhzUITools::ConfigurationWriter::writeConfiguration(add_column_options_map, lookup_planck_file_name.toStdString());
+                command += QString::fromStdString("Phosphoros AGDD --config-file ") + lookup_planck_file_name + cr;
+              }
+            }
+
+            // Template fitting
+            auto template_fitting_file_name = selected_folder+QString::fromStdString("/TemplateFitting.CR.conf");
+            auto run_config_map = getRunOptionMap();
+
+
+            auto pp_conf_file_name = selected_folder+QString::fromStdString("/PhysicalParameterConfig.fits");
+
+            auto pp_list = getPPListFromConfig();
+            if (pp_list.size() > 0) {
+                SedParamUtils::createPPConfig(m_model_set_model_ptr->getSelectedModelSet(), pp_list, pp_conf_file_name.toStdString());
+                std::string pp_conf_file = pp_conf_file_name.toStdString();
+                run_config_map["physical_parameter_config_file"].value() = boost::any(pp_conf_file);
+            }
+
+            PhzUITools::ConfigurationWriter::writeConfiguration(run_config_map, template_fitting_file_name.toStdString());
+            command += QString::fromStdString("Phosphoros CR --config-file ") + template_fitting_file_name + cr;
+
+            // command file
+            auto command_file_name = selected_folder+QString::fromStdString("/command");
+            std::ofstream file;
+            file.open(command_file_name.toStdString());
+            file << command.toStdString();
+            file.close();
+
+            saveCopiedColumnToCatalog();
+            PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                "IGM", ui->cb_igm->currentText().toStdString());
+            if (ui->gb_corrections->isChecked()) {
+              PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                  "Correction", ui->cb_AnalysisCorrection->currentText().toStdString());
+            }
       }
-    }
-
-    auto config_map_luminosity = getLuminosityOptionMap();
-
-    std::unique_ptr<DialogRunAnalysis> dialog(new DialogRunAnalysis());
-    dialog->setValues(out_dir, config_map, config_map_luminosity, config_sed_weight);
-    if (dialog->exec()) {
-      saveCopiedColumnToCatalog();
-      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
-          "IGM", ui->cb_igm->currentText().toStdString());
+  }
 
 
+  void FormAnalysis::on_btn_RunAnalysis_clicked() {
+    m_httpRequestAborted = false;
+    if (ui->rb_gc_planck->isChecked()) {
+      auto path = ui->txt_inputCatalog->text().toStdString();
+      auto column_reader = PhzUITools::CatalogColumnReader(path);
+      auto column_from_file = column_reader.getColumnNames();
+      if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
+          if (!boost::filesystem::exists(m_plank_file)) {
+            if (QMessageBox::Ok == QMessageBox::question(this, "Missing Dust map file...",
+             "The file containing the Milky Way dust map is missing (" + QString::fromStdString(m_plank_file)
+             + "). \n Do you want to download it now from \n" + QString::fromStdString(m_plank_url)
+             + "? \n\n This is needed before using the Milky Way absorption correction option that you choose.",
+             QMessageBox::Ok | QMessageBox::Cancel)) {
 
-      if (ui->gb_corrections->isChecked()) {
-        PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
-            "Correction", ui->cb_AnalysisCorrection->currentText().toStdString());
+
+              QDir enclosing_folder = QFileInfo(QString::fromStdString(m_plank_file)).absoluteDir();
+              if (!enclosing_folder.exists()) {
+                enclosing_folder.mkpath(".");
+              }
+
+
+              m_network_manager = new QNetworkAccessManager(this);
+              QUrl url(QString::fromStdString(m_plank_url));
+              m_downloaded_file = new QFile(QString::fromStdString(m_plank_file));
+              if (!m_downloaded_file->open(QIODevice::WriteOnly)) {
+                     QMessageBox::information(this, tr("HTTP"),
+                                   tr("Unable to save the file %1: %2.")
+                                   .arg(QString::fromStdString(m_plank_file)).arg(m_downloaded_file->errorString()));
+                 delete m_downloaded_file;
+                 m_downloaded_file = 0;
+                 return;
+               }
+
+              if (m_progress_dialog) {
+                 delete m_progress_dialog;
+                 m_progress_dialog = 0;
+              }
+              m_progress_dialog = new QProgressDialog(this);
+              m_progress_dialog->setWindowTitle(tr("Dowwnloading... "));
+              m_progress_dialog->setLabelText(tr("Downloading Planck dust map"));
+              m_progress_dialog->setWindowModality(Qt::WindowModal);
+
+              connect(m_progress_dialog, SIGNAL(canceled()), this, SLOT(cancelDownloadPlanck()));
+
+
+              m_reply = m_network_manager->get(QNetworkRequest(url));
+              connect(m_reply, SIGNAL(readyRead()),
+                         this, SLOT(httpReadyPlanckRead()));
+              connect(m_reply, SIGNAL(downloadProgress(qint64, qint64)),
+                          this, SLOT(updateDownloadProgress(qint64, qint64)));
+              connect(m_reply, SIGNAL(finished()),
+                          this, SLOT(run_analysis_second_part()));
+
+            } else {
+              return;
+            }
+          } else {
+            run_analysis_second_part();
+          }
       } else {
-        PreferencesUtils::clearUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
-                    "Correction");
+        run_analysis_second_part();
       }
+    } else {
+      run_analysis_second_part();
+    }
+}
+
+
+  void FormAnalysis::updateDownloadProgress(qint64 bytesRead, qint64 totalBytes) {
+    if (m_httpRequestAborted) {
+            return;
+    }
+
+    m_progress_dialog->setMaximum(totalBytes);
+    m_progress_dialog->setValue(bytesRead);
+  }
+
+  void FormAnalysis::httpReadyPlanckRead() {
+    if (m_downloaded_file)
+      m_downloaded_file->write(m_reply->readAll());
+  }
+
+  void FormAnalysis::cancelDownloadPlanck() {
+    m_httpRequestAborted = true;
+    if (m_reply) {
+      m_reply->abort();
     }
   }
+
+
+  void FormAnalysis::run_analysis_second_part() {
+
+    // when it was a download and it was canceled
+       if (m_httpRequestAborted) {
+           if (m_downloaded_file) {
+             m_downloaded_file->close();
+             m_downloaded_file->remove();
+               delete m_downloaded_file;
+               m_downloaded_file = 0;
+           }
+           m_reply->deleteLater();
+           m_progress_dialog->hide();
+           return;
+       } else if (m_downloaded_file) {
+         m_progress_dialog->hide();
+         m_downloaded_file->flush();
+         m_downloaded_file->close();
+         if (m_reply->error()) {
+           m_downloaded_file->remove();
+           m_reply->deleteLater();
+           m_reply = 0;
+           delete m_downloaded_file;
+           m_downloaded_file = 0;
+           m_network_manager = 0;
+           return;
+         }
+
+         m_reply->deleteLater();
+         m_reply = 0;
+         delete m_downloaded_file;
+         m_downloaded_file = 0;
+         m_network_manager = 0;
+       }
+
+
+
+
+
+    auto config_map = getRunOptionMap();
+
+       if (ui->rb_gc_planck->isChecked()) {
+         // User requests that we lookup Planck EBV from the position:
+         // Check if the catalog contains the "GAL_EBV" column
+
+         auto path = ui->txt_inputCatalog->text().toStdString();
+         auto column_reader = PhzUITools::CatalogColumnReader(path);
+         auto column_from_file = column_reader.getColumnNames();
+         if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
+           // the E(B-V) has to be looked up in the Planck map
+           SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
+           std::unique_ptr<DialogAddGalEbv> dialog(new DialogAddGalEbv());
+           dialog->setInputs(path, selected_survey.getRaColumn(), selected_survey.getDecColumn(), m_plank_file);
+           if (dialog->exec()) {
+             // new catalog contains the GAL_EBV column
+
+             auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+             auto input_catalog_file = FileUtils::removeStart(dialog->getOutputName(),
+                         FileUtils::getCatalogRootPath(false, survey_name) +
+                         QString(QDir::separator()).toStdString());
+
+             config_map["input-catalog-file"].value() = boost::any(input_catalog_file);
+           } else {
+             // user has canceled the operation
+             return;
+           }
+         }
+       }
+
+       std::string out_dir = ui->txt_outputFolder->text().toStdString();
+
+       QDir dir(QString::fromStdString(out_dir));
+       if (dir.exists()) {
+         if (dir.entryInfoList(QDir::NoDotAndDotDot|QDir::AllEntries).count() > 0) {
+           if (QMessageBox::question(this, "Existing Output Folder...",
+                    "The Output Folder you selected already exists.\n"
+                        "In order to avoid confusion, the Output Folder will be cleared. Do you want to proceed?",
+                    QMessageBox::Cancel | QMessageBox::Ok) == QMessageBox::Ok) {
+                  FileUtils::removeDir(QString::fromStdString(out_dir));
+                  dir.mkpath(".");
+           } else {
+             return;
+           }
+         }
+       } else {
+         dir.mkpath(".");
+       }
+
+
+       std::map<std::string, boost::program_options::variable_value> config_sed_weight{};
+       if (ui->cb_sedweight->isChecked()) {
+         // Compute the SED Prior
+         std::string sed_prior_name = getSedWeightFileName();
+
+
+         if (!checkSedWeightFile(sed_prior_name)) {
+           config_sed_weight = getSedWeightOptionMap(sed_prior_name);
+         }
+       }
+
+
+       auto pp_conf_file_name = QString::fromStdString(out_dir) +QString::fromStdString("/PhysicalParameterConfig.fits");
+       auto pp_list = getPPListFromConfig();
+       auto pp_param_list = SedParamUtils::listAvailableParam(m_model_set_model_ptr->getSelectedModelSet());
+       if (pp_list.size() > 0) {
+            for (auto& param : pp_list) {
+              if (pp_param_list.find(param) == pp_param_list.end()) {
+                 QMessageBox::question(this, "Physical Parameter Configuration Problem...",
+                                 "Please check the Parameter selection:\n"
+                                 "At least one selected parameter is not available. Did you edit the model after the selection of the parameters?",
+                                 QMessageBox::Ok);
+                 return;
+              }
+            }
+
+
+
+            SedParamUtils::createPPConfig(m_model_set_model_ptr->getSelectedModelSet(), pp_list, pp_conf_file_name.toStdString());
+            std::string pp_conf_file = pp_conf_file_name.toStdString();
+            config_map["physical_parameter_config_file"].value() = boost::any(pp_conf_file);
+       }
+
+
+       std::unique_ptr<DialogRunAnalysis> dialog(new DialogRunAnalysis());
+       dialog->setValues(out_dir, config_map, config_sed_weight);
+       if (dialog->exec()) {
+         saveCopiedColumnToCatalog();
+         PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+             "IGM", ui->cb_igm->currentText().toStdString());
+
+
+
+         if (ui->gb_corrections->isChecked()) {
+           PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+               "Correction", ui->cb_AnalysisCorrection->currentText().toStdString());
+         } else {
+           PreferencesUtils::clearUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                       "Correction");
+         }
+       }
+  }
+
+
 
   void FormAnalysis::setToolBoxButtonColor(QToolBox* toolBox, int index, QColor color) {
     int i = 0;

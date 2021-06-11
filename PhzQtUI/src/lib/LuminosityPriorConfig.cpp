@@ -41,20 +41,6 @@ bool LuminosityPriorConfig::getInMag() const{
    m_reddened=std::move(reddened);
  }
 
- std::string LuminosityPriorConfig::getFilterName() const{
-   return m_filter_name;
- }
- void LuminosityPriorConfig::setFilterName(std::string filter_name){
-   m_filter_name=std::move(filter_name);
- }
-
- std::string LuminosityPriorConfig::getLuminosityModelGridName() const{
-   return m_luminosity_model_grid_name;
- }
- void LuminosityPriorConfig::setLuminosityModelGridName(std::string grid_name){
-   m_luminosity_model_grid_name=std::move(grid_name);
- }
-
 
  std::vector<LuminosityPriorConfig::SedGroup> LuminosityPriorConfig::getSedGRoups() const{
    return m_sed_groups;
@@ -151,8 +137,6 @@ LuminosityPriorConfig LuminosityPriorConfig::deserialize(QDomDocument& doc){
     QDomElement root_node = doc.documentElement();
     config.setInMag(root_node.attribute("InMag").toStdString()!="0");
     config.setReddened(root_node.attribute("Reddened").toStdString()!="0");
-    config.setFilterName(root_node.attribute("Filter").toStdString());
-    config.setLuminosityModelGridName(root_node.attribute("GridFile").toStdString());
 
     auto groups_node = root_node.firstChildElement("SedGroups");
     auto group_list =groups_node.childNodes();
@@ -226,9 +210,6 @@ LuminosityPriorConfig LuminosityPriorConfig::deserialize(QDomDocument& doc){
 
    root.setAttribute("InMag",QString::fromStdString(std::to_string(m_in_mag)));
    root.setAttribute("Reddened",QString::fromStdString(std::to_string(m_reddened)));
-   root.setAttribute("Filter",QString::fromStdString(m_filter_name));
-   root.setAttribute("GridFile",QString::fromStdString(m_luminosity_model_grid_name));
-
    doc.appendChild(root);
 
    QDomElement groups_node = doc.createElement("SedGroups");
@@ -291,12 +272,6 @@ LuminosityPriorConfig LuminosityPriorConfig::deserialize(QDomDocument& doc){
 
        options["luminosity-function-expressed-in-magnitude"].value() = boost::any(mag_value);
        options["luminosity-function-corrected-for-extinction"].value() = boost::any(red_value);
-       options["luminosity-filter"].value() = boost::any(m_filter_name);
-       if (input){
-         options["luminosity-model-grid-file"].value() = boost::any(m_luminosity_model_grid_name);
-       } else {
-         options["output-luminosity-model-grid"].value() = boost::any(m_luminosity_model_grid_name);
-       }
 
        return options;
  }

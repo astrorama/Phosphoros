@@ -41,13 +41,6 @@ public:
   bool getReddened() const;
   void setReddened(bool reddened);
 
-  std::string getFilterName() const;
-  void setFilterName(std::string filter_name);
-
-  std::string getLuminosityModelGridName() const;
-  void setLuminosityModelGridName(std::string grid_name);
-
-
   std::vector<SedGroup> getSedGRoups() const;
   void setSedGroups(std::vector<SedGroup> sed_groups);
 
@@ -78,8 +71,6 @@ private:
     std::string m_name;
     bool m_in_mag = true;
     bool m_reddened = true;
-    std::string m_filter_name;
-    std::string m_luminosity_model_grid_name;
     std::vector<SedGroup> m_sed_groups;
     std::vector<double> m_zs;
     std::vector<LuminosityFunctionInfo> m_luminosity_function_list{};

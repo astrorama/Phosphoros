@@ -48,10 +48,12 @@ void sedProcessStarted();
 void sedProcessfinished(int, QProcess::ExitStatus);
 
 void addEmissionLineButtonClicked(const QString& group);
+void getParameterInfoClicked(const QString& file);
 
 
 void on_btn_import_filter_clicked();
 void on_btn_import_sed_clicked();
+void on_btn_sun_sed_clicked();
 void on_btn_import_reddening_clicked();
 void on_btn_import_luminosity_clicked();
 
@@ -63,6 +65,7 @@ void copyingSEDFinished(bool, QVector<QString>);
 void copyingRedFinished(bool, QVector<QString>);
 void copyingLumFinished(bool, QVector<QString>);
 void copyProgress(qint64, qint64);
+void sunSedPopupClosing(std::string);
 
 
 

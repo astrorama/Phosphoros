@@ -43,11 +43,12 @@ DialogAddGalEbv::~DialogAddGalEbv() {
 
 }
 
-void DialogAddGalEbv::setInputs(std::string input_name, std::string ra_col, std::string dec_col) {
+void DialogAddGalEbv::setInputs(std::string input_name, std::string ra_col, std::string dec_col, std::string dust_map_file) {
   m_input_name = input_name;
   m_ra_col = ra_col;
   m_dec_col = dec_col;
   m_name = m_input_name;
+  m_dust_map_file = dust_map_file;
   ui->txt_name->setText(QString::fromStdString(m_name));
   ui->txt_name->setReadOnly(false);
   ui->btn_cancel->setEnabled(true);
@@ -79,7 +80,7 @@ void DialogAddGalEbv::on_btn_create_clicked() {
       ui->btn_create->setEnabled(false);
 
       // Call the python code
-        std::string program = "AddGalDustToCatalog --galatic-ebv-col PLANCK_GAL_EBV --input-catalog \""+m_input_name+"\" --output-catalog \""+m_name+"\" --ra "+m_ra_col+" --dec " + m_dec_col;
+        std::string program = "AddGalDustToCatalog --planck-dust-map \""+m_dust_map_file+"\" --galatic-ebv-col PLANCK_GAL_EBV --input-catalog \""+m_input_name+"\" --output-catalog \""+m_name+"\" --ra "+m_ra_col+" --dec " + m_dec_col;
         std::string command = "";
 
 

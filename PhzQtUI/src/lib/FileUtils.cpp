@@ -518,22 +518,6 @@ std::string FileUtils::getGalacticCorrectionGridRootPath(bool check, const std::
 }
 
 
-
-std::string FileUtils::getLuminosityFunctionGridRootPath(bool check, const std::string & catalog_type){
-  QString path = QString::fromStdString(FileUtils::getIntermediaryProductRootPath(check,""))+QDir::separator()
-  +QString::fromStdString(catalog_type)
-  + QDir::separator()+"LuminosityModelGrids";
-    QFileInfo info(path);
-    if (check){
-        if (!info.exists()){
-            QDir().mkpath(path);
-        }
-    }
-    return info.absoluteFilePath().toStdString();
-
-}
-
-
 std::string FileUtils::getSedPriorRootPath() {
   QString path = QString::fromStdString(readPath()["AuxiliaryData"])+QDir::separator()+"GenericPriors"+QDir::separator()+"SedWeight";
   QFileInfo info(path);

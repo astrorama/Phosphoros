@@ -4,7 +4,11 @@
 #include <memory>
 #include <QWidget>
 #include <QStandardItem>
+#include <QProgressDialog>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 #include <QToolBox>
+#include <QFile>
 #include <map>
 #include <string>
 #include "SurveyFilterMapping.h"
@@ -91,6 +95,8 @@ void on_btn_ToPP_clicked();
 
     void on_btn_computeCorrections_clicked();
 
+    void on_btn_lum_filter_clicked();
+
     void on_cb_AnalysisModel_currentIndexChanged(const QString &);
 
     void on_cbb_pdf_out_currentIndexChanged(const QString &);
@@ -102,7 +108,8 @@ void on_btn_ToPP_clicked();
 
     void on_cb_CompatibleGrid_currentTextChanged(const QString &);
 
-    void on_cb_CompatibleGalCorrGrid_textChanged(const QString &);
+    void on_cb_CompatibleGalCorrGrid_currentTextChanged(const QString &);
+
 
     void on_btn_GetConfigGrid_clicked();
 
@@ -128,6 +135,13 @@ void on_btn_ToPP_clicked();
 
     void on_btn_RunAnalysis_clicked();
 
+    void get_config_run_second_part();
+
+    void run_analysis_second_part();
+
+
+    void on_btn_pp_clicked();
+
     void on_cb_gen_posterior_clicked();
 
     void on_cb_sedweight_clicked();
@@ -146,8 +160,18 @@ void on_btn_ToPP_clicked();
 
     void on_output_column_btn_clicked();
     void setCopiedColumns(std::map<std::string, std::string> columns);
+    void update_pp_selection(std::vector<std::string> params);
 
     void setNzFilters(std::string b_filter, std::string i_filter);
+    void setLumFilter(std::string new_filter);
+
+
+    void on_rb_best_scaling_toggled(bool);
+    void on_rb_sample_scaling_toggled(bool);
+
+    void httpReadyPlanckRead();
+    void cancelDownloadPlanck();
+    void updateDownloadProgress(qint64 bytesRead, qint64 totalBytes);
 
 
 private:
@@ -158,7 +182,7 @@ private:
     std::list<FilterMapping> getSelectedFilterMapping();
 
 
-
+    void setupAlgo();
 
     void updateCopiedColumns(std::list<std::string> new_columns);
 
@@ -197,15 +221,24 @@ private:
 
     void setRunAnnalysisEnable(bool enabled);
     std::map < std::string, boost::program_options::variable_value > getRunOptionMap();
-    std::map < std::string, boost::program_options::variable_value > getLuminosityOptionMap();
+    std::set<std::string> getPPListFromConfig();
     std::map<std::string, LuminosityPriorConfig> m_prior_config;
     std::map<std::string,std::string> m_copied_columns = {};
+
+    QProgressDialog *m_progress_dialog = nullptr;
+
+    QNetworkAccessManager *m_network_manager = nullptr;
+    QFile *m_downloaded_file = nullptr;
+    bool m_httpRequestAborted = false;
+    QNetworkReply *m_reply = nullptr;
 
 
     DatasetRepo m_filter_repository;
     DatasetRepo m_luminosity_repository;
     std::shared_ptr<SurveyModel> m_survey_model_ptr;
     std::shared_ptr<ModelSetModel> m_model_set_model_ptr;
+    std::string m_plank_file = "";
+    std::string m_plank_url = "https://lambda.gsfc.nasa.gov/data/foregrounds/EBV/lambda_meisner_finkbeiner_2015_dust_map.fits";
 
 };
 

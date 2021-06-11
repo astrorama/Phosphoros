@@ -32,6 +32,7 @@ import os
 import astropy.table as table
 import numpy as np
 import ElementsKernel.Logging as log
+from EmissionLines import SedUtils
 
 C_ANGSTROM = 2.99792458e+18
 
@@ -66,6 +67,8 @@ def defineSpecificProgramOptions():
     parser.add_argument('--no-sed', action='store_true', help='Output only the emission lines')
     parser.add_argument('--suffix', default="_el", type=str,
                         help='Suffix to be added to the directory name to form the output directory')
+    parser.add_argument('--copy-parameter', default=True, type=bool,
+                        help='Define if the header containing physical parameters has to be copied into the new SEDs')
 
     return parser
 
@@ -255,3 +258,8 @@ def mainMethod(args):
             out_sed = adder(sed)
             t = table.Table(rows=out_sed, names=('Wave', 'Flux'))
             t.write(os.path.join(out_dir, sed_file), format='ascii.commented_header')
+            if (args.copy_parameter):
+                logger.info('Copy the header from ' + sed_file)
+                parameters = SedUtils.readXYDatasetKeyword(os.path.join(sed_dir, sed_file))
+                parameters.pop('NAME', None)
+                SedUtils.replaceXYDatasetKeyword(os.path.join(out_dir, sed_file), parameters)

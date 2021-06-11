@@ -21,7 +21,6 @@
 #include "PhzUtils/Multithreading.h"
 #include "Configuration/Utils.h"
 #include "PhzConfiguration/ComputeRedshiftsConfig.h"
-#include "PhzConfiguration/ComputeLuminosityModelGridConfig.h"
 #include "PhzConfiguration/ComputeSedWeightConfig.h"
 #include "DefaultOptionsCompleter.h"
 #include "PhzConfiguration/PhotometryGridConfig.h"
@@ -34,7 +33,6 @@
 #include "PhzConfiguration/SedProviderConfig.h"
 #include "PhzConfiguration/ReddeningProviderConfig.h"
 #include "PhzConfiguration/FilterProviderConfig.h"
-#include "PhzConfiguration/LuminosityBandConfig.h"
 #include "PhzConfiguration/IgmConfig.h"
 #include "PhzConfiguration/ModelGridOutputConfig.h"
 
@@ -42,6 +40,9 @@
 #include "PhzModeling/NoIgmFunctor.h"
 #include "PhzExecutables/ComputeSedWeight.h"
 #include "PhzQtUI/DialogAddGalEbv.h"
+#include "PhzConfiguration/ModelNormalizationConfig.h"
+#include "PhzModeling/NormalizationFunctorFactory.h"
+#include "PhzConfiguration/CosmologicalParameterConfig.h"
 
 #include "ElementsKernel/Logging.h"
 
@@ -77,9 +78,9 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
     std::list<std::string> excluded_filters,
     std::string default_z_column,
     std::map<std::string, boost::program_options::variable_value> run_option,
-    const std::map<std::string, boost::program_options::variable_value>& luminosity_config,
     const std::map<std::string, boost::program_options::variable_value>& sed_config,
     double non_detection,
+    std::string dust_map_file,
     std::string ra_col,
     std::string dec_col) {
   m_id_column = id_column;
@@ -88,8 +89,8 @@ void DialogPhotometricCorrectionComputation::setData(string survey,
   m_excluded_filters = excluded_filters;
   m_run_option = run_option;
   m_sed_config = sed_config;
-  m_lum_config = luminosity_config;
   m_non_detection = non_detection;
+  m_dust_map_file = dust_map_file;
   m_ra_col = ra_col;
   m_dec_col = dec_col;
   ui->txt_survey->setText(QString::fromStdString(survey));
@@ -217,6 +218,14 @@ void DialogPhotometricCorrectionComputation::on_btn_TrainingCatalog_clicked() {
 void DialogPhotometricCorrectionComputation::setRunEnability() {
   bool run_ok = true;
 
+  if (!boost::filesystem::exists(m_dust_map_file)) {
+    QMessageBox::warning(this, "Missing Dust map file...",
+               "The file containing the Milky Way dust map is missing (" + QString::fromStdString(m_dust_map_file)
+               + "). \n \n Click on the button \"Save config. File\" on the main window to download it or change the Milky Way absorption type.",
+               QMessageBox::Ok);
+    run_ok = false;
+  }
+
   // A column name is selected
   run_ok &= ui->cb_SpectroColumn->currentText().length() > 0;
 
@@ -292,6 +301,7 @@ void DialogPhotometricCorrectionComputation::enablePage(){
 
 
 std::string DialogPhotometricCorrectionComputation::runFunction(){
+
   try {
 
     int max_iter_number = ui->txt_Iteration->text().toInt();
@@ -306,6 +316,9 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
         ui->txt_catalog->text().toStdString(),
         ui->cb_SpectroColumn->currentText().toStdString());
 
+    completeWithDefaults<PhzConfiguration::ComputePhotometricCorrectionsConfig>(config_map);
+
+
     long config_manager_id = Configuration::getUniqueManagerId();
     auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
     config_manager.registerConfiguration<ComputePhotometricCorrectionsConfig>();
@@ -314,7 +327,7 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
 
     emit signalUpdateCurrentIteration(QString::fromStdString("Iteration : 0"));
     auto progress_logger =
-        [this,max_iter_number](size_t iter_no, const PhzDataModel::PhotometricCorrectionMap& ) {
+        [this, max_iter_number](size_t iter_no, const PhzDataModel::PhotometricCorrectionMap& ) {
           // If the user has canceled we do not want to update the progress bar,
           // because the GUI thread might have already deleted it
           if (!PhzUtils::getStopThreadsFlag()) {
@@ -345,63 +358,6 @@ std::string DialogPhotometricCorrectionComputation::runFunction(){
 }
 
 
-
-
-std::string DialogPhotometricCorrectionComputation::runLumFunction(){
-  try {
-    completeWithDefaults<ComputeLuminosityModelGridConfig>(m_lum_config);
-
-    long config_manager_id = Configuration::getUniqueManagerId();
-    auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
-    config_manager.registerConfiguration<ComputeLuminosityModelGridConfig>();
-    config_manager.closeRegistration();
-
-    config_manager.initialize(m_lum_config);
-
-
-    auto& sed_provider = config_manager.getConfiguration<SedProviderConfig>().getSedDatasetProvider();
-    auto& reddening_provider = config_manager.getConfiguration<ReddeningProviderConfig>().getReddeningDatasetProvider();
-    const auto& filter_provider = config_manager.getConfiguration<FilterProviderConfig>().getFilterDatasetProvider();
-    auto& igm_abs_func = config_manager.getConfiguration<IgmConfig>().getIgmAbsorptionFunction();
-
-    Euclid::PhzModeling::SparseGridCreator creator {sed_provider, reddening_provider, filter_provider, igm_abs_func};
-
-    auto param_space_map = config_manager.getConfiguration<ComputeLuminosityModelGridConfig>().getParameterSpaceRegions();
-    std::vector<Euclid::XYDataset::QualifiedName> filter_list = {config_manager.getConfiguration<Euclid::PhzConfiguration::LuminosityBandConfig>().getLuminosityFilter()};
-
-
-    auto monitor_function = [this](size_t step, size_t total) {
-       int value = (step * 100) / total;
-       // If the user has canceled we do not want to update the progress bar,
-       // because the GUI thread might have already deleted it
-       if (!PhzUtils::getStopThreadsFlag()) {
-         std::stringstream progress_message;
-         progress_message << "Luminosity Grid: " << value << "%";
-         emit signalUpdateCurrentIteration(QString::fromStdString(progress_message.str()));
-       } else {
-         emit signalUpdateCurrentIteration(QString::fromStdString("Canceling..."));
-       }
-    };
-
-    auto results = creator.createGrid(param_space_map, filter_list, monitor_function);
-
-    auto output = config_manager.getConfiguration<ModelGridOutputConfig>().getOutputFunction();
-    output(results);
-    return "";
-
-  }
-  catch (const Elements::Exception & e) {
-    return "Sorry, an error occurred during the Luminosity grid computation :\n"
-        + std::string(e.what());
-  }
-  catch (const std::exception& e) {
-    return "Sorry, an error occurred during the Luminosity grid computation:\n"
-        + std::string(e.what());
-  }
-  catch (...) {
-    return "Sorry, an error occurred during the Luminosity grid computation.";
-  }
-}
 
 
 std::string DialogPhotometricCorrectionComputation::runSedFunction(){
@@ -522,7 +478,7 @@ void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
       if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
            // the E(B-V) has to be looked up in the Planck map
            std::unique_ptr<DialogAddGalEbv> dialog(new DialogAddGalEbv());
-           dialog->setInputs(path, m_ra_col, m_dec_col);
+           dialog->setInputs(path, m_ra_col, m_dec_col,m_dust_map_file);
            if (dialog->exec()) {
               // new catalog contains the PLANCK_GAL_EBV column
              ui->txt_catalog->setText(QString::fromStdString(dialog->getOutputName()));
@@ -551,40 +507,12 @@ void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
   }
 
   disablePage();
-  if (needLuminosityGrid()) {
-     m_future_lum_watcher.setFuture(QtConcurrent::run(this, &DialogPhotometricCorrectionComputation::runLumFunction));
-   } else if (m_sed_config.size() > 0) {
+    if (m_sed_config.size() > 0) {
      m_future_sed_watcher.setFuture(QtConcurrent::run(this, &DialogPhotometricCorrectionComputation::runSedFunction));
    } else {
      m_future_watcher.setFuture(QtConcurrent::run(this, &DialogPhotometricCorrectionComputation::runFunction));
    }
 
-}
-
-
-/// Luminosity grid Computation
-bool DialogPhotometricCorrectionComputation::needLuminosityGrid(){
-  if (m_run_option.count("luminosity-prior")==1 && m_run_option.at("luminosity-prior").as<std::string>()=="YES"){
-    //check the grid
-    try{
-      completeWithDefaults<ComputeRedshiftsConfig>(m_run_option);
-      long config_manager_id = Configuration::getUniqueManagerId();
-      auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
-      config_manager.registerConfiguration<ComputeRedshiftsConfig>();
-      config_manager.closeRegistration();
-      config_manager.initialize(m_run_option);
-
-      // the file exists nothing to do
-      return false;
-
-    } catch(const Elements::Exception&) {}
-    // The grid need to be computed
-    return true;
-
-  } else {
-    // The luminosity prior is not enabled: no need for a luminosity grid
-    return false;
-  }
 }
 
 }

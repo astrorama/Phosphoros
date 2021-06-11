@@ -7,6 +7,7 @@
 #include "ui_MainWindow.h"
 #include "XYDataset/AsciiParser.h"
 #include <stdio.h>
+#include "PreferencesUtils.h"
 
 #include "PhzQtUI/DataPackHandler.h"
 
@@ -91,6 +92,16 @@ MainWindow::MainWindow(QWidget *parent) :
   m_dataPackHandler.reset(new DataPackHandler(this));
   connect(m_dataPackHandler.get(), SIGNAL(completed()), this, SLOT(loadAuxData()));
   m_dataPackHandler->check(false);
+
+
+
+  std::string sun_sed = PreferencesUtils::getUserPreference("AuxData","SUN_SED");
+  if (sun_sed=="") {
+    QMessageBox::warning(this, "Missing Solar SED...",
+        "Phosphoros need a reference solar spectrum to normalize the models it use.\n "
+                   "Please navigate to Configuration/Aux. Data/SEDs and select it.",
+        QMessageBox::Ok);
+  }
 }
 
 MainWindow::~MainWindow() {

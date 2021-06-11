@@ -24,7 +24,6 @@
 #include "PhzQtUI/DialogLuminosityFunction.h"
 #include "PhzQtUI/DialogLuminositySedGroup.h"
 #include "PhzQtUI/DialogZRanges.h"
-#include "PhzQtUI/DialogFilterSelector.h"
 
 
 #include "Configuration/ConfigManager.h"
@@ -40,15 +39,16 @@ namespace po = boost::program_options;
 
 static Elements::Logging dialog_logger = Elements::Logging::getLogger("DialogLuminosityPrior");
 
-DialogLuminosityPrior::DialogLuminosityPrior(DatasetRepo filter_repository,DatasetRepo luminosity_repository,QWidget *parent) :
+DialogLuminosityPrior::DialogLuminosityPrior(std::string filter, DatasetRepo luminosity_repository,QWidget *parent) :
         QDialog(parent),
         ui(new Ui::DialogLuminosityPrior){
-  m_filter_repository=filter_repository;
+  m_filter=filter;
   m_luminosity_repository=luminosity_repository;
   ui->setupUi(this);
   ui->frame_Luminosity->setStyleSheet( "background-color: white ");
   m_z_min = 0.;
   m_z_max = 3000.;
+  ui->lb_filter->setText(QString::fromStdString(m_filter));
 }
 
 DialogLuminosityPrior::~DialogLuminosityPrior() {}
@@ -59,7 +59,6 @@ void DialogLuminosityPrior::loadData(ModelSet model,
                                      double z_min,
                                      double z_max){
   m_config_folder=QString::fromStdString(FileUtils::getGUILuminosityPriorConfig(true,survey_name,model.getName()));
-  m_grid_folder=QString::fromStdString(FileUtils::getLuminosityFunctionGridRootPath(true,survey_name));
   m_prior_configs=LuminosityPriorConfig::readFolder(m_config_folder.toStdString());
   m_model=std::move(model);
   m_survey_name=survey_name;
@@ -89,7 +88,6 @@ void DialogLuminosityPrior::priorSelectionChanged(QModelIndex new_index, QModelI
 
   ui->cb_unit->setCurrentIndex(0);
   ui->ck_reddening->setChecked(!config.getReddened());
-  ui->lb_filter->setText(QString::fromStdString(config.getFilterName()));
 
   clearGrid();
   m_groups=config.getSedGRoups();
@@ -196,7 +194,6 @@ void DialogLuminosityPrior::on_btn_delete_clicked(){
   auto row_index = select->selectedRows().at(0);
   size_t row = row_index.row();
   std::string name = row_index.sibling(row, 1).data().toString().toStdString();
-  std::string old_grid_name = m_prior_configs[name].getLuminosityModelGridName();
 
   // delete the prior from the popup list
   m_prior_configs.erase(name);
@@ -204,10 +201,6 @@ void DialogLuminosityPrior::on_btn_delete_clicked(){
   // delete the configuration file
   QFile::remove(m_config_folder + QDir::separator() + QString::fromStdString(name) + ".xml");
 
-  //delete the grid file
-  if (old_grid_name.length() > 0) {
-    QFile::remove(m_grid_folder + QDir::separator() + QString::fromStdString(old_grid_name));
-  }
 
   // reload the popup prior grid
   loadMainGrid();
@@ -219,7 +212,6 @@ void DialogLuminosityPrior::on_btn_delete_clicked(){
    ui->txt_name->setText("");
    ui->cb_unit->setCurrentIndex(0);
    ui->ck_reddening->setChecked(false);
-   ui->lb_filter->setText("");
   }
 
   // end edition in the controls
@@ -251,8 +243,6 @@ void DialogLuminosityPrior::on_btn_save_clicked(){
     return;
   }
 
-  auto old_grid_name = info.getLuminosityModelGridName();
-
   updateInfo(info);
 
   updatePriorRow(row_index,row, info);
@@ -274,12 +264,6 @@ void DialogLuminosityPrior::on_btn_save_clicked(){
   stream<<xml;
   file.close();
 
-  auto new_grid_name = info.getLuminosityModelGridName();
-
-  // model grid file handling
-  if (old_grid_name.length()>0 && new_grid_name!= old_grid_name){
-    QFile::remove(m_grid_folder+QDir::separator()+QString::fromStdString(old_grid_name));
-  }
 
   manageBtnEnability(false, false);
 
@@ -292,7 +276,6 @@ void DialogLuminosityPrior::on_btn_cancel_clicked(){
     ui->txt_name->setText("");
     ui->cb_unit->setCurrentIndex(0);
     ui->ck_reddening->setChecked(false);
-    ui->lb_filter->setText("");
     // clearGrid();
 
     // delete the record in the popup list
@@ -326,20 +309,7 @@ void DialogLuminosityPrior::on_cb_unit_currentIndexChanged(const QString &){
   loadGrid();
 }
 
-void DialogLuminosityPrior::on_btn_filter_clicked(){
-  std::unique_ptr<DialogFilterSelector> dialog(new DialogFilterSelector(m_filter_repository));
-  dialog->setFilter(ui->lb_filter->text().toStdString());
 
-  connect(dialog.get(),
-          SIGNAL(popupClosing(std::string)),
-          this,
-          SLOT(filterPopupClosing(std::string)));
-  dialog->exec();
-}
-
-void DialogLuminosityPrior::filterPopupClosing(std::string filter){
-  ui->lb_filter->setText(QString::fromStdString(filter));
-}
 
 void DialogLuminosityPrior::on_btn_group_clicked(){
   std::unique_ptr<DialogLuminositySedGroup> dialog(new DialogLuminositySedGroup());
@@ -492,7 +462,6 @@ void DialogLuminosityPrior::manageBtnEnability(bool in_edition, bool read_only ,
    ui->txt_name->setEnabled(!read_only && in_edition);
    ui->cb_unit->setEnabled(!read_only && in_edition);
    ui->ck_reddening->setEnabled(!read_only && in_edition);
-   ui->btn_filter->setEnabled(!read_only && in_edition);
    ui->btn_group->setEnabled(!read_only && in_edition);
    ui->btn_z->setEnabled(!read_only && in_edition);
 
@@ -510,10 +479,10 @@ void DialogLuminosityPrior::manageBtnEnability(bool in_edition, bool read_only )
 
 void DialogLuminosityPrior::loadMainGrid(){
   QStandardItemModel* grid_model = new QStandardItemModel();
-  grid_model->setColumnCount(6);
+  grid_model->setColumnCount(5);
 
   QStringList  setHeaders;
-  setHeaders<<"Id"<<"Name"<<"Unit"<<"Corrected for Reddening"<<"Filter"<<"Regions"<<"Message";
+  setHeaders<<"Id"<<"Name"<<"Unit"<<"Corrected for Reddening"<<"Regions"<<"Message";
   grid_model->setHorizontalHeaderLabels(setHeaders);
 
   size_t id =0;
@@ -553,12 +522,6 @@ void DialogLuminosityPrior::loadMainGrid(){
       item_red->setData(QColor("orange"), Qt::BackgroundRole);
     }
     items.push_back(item_red);
-
-    QStandardItem* item_filter = new QStandardItem(QString::fromStdString(config_pair.second.getFilterName()));
-    if (!param_space_ok){
-      item_filter->setData(QColor("orange"), Qt::BackgroundRole);
-    }
-    items.push_back(item_filter);
 
     QStandardItem* item_nb = new QStandardItem(QString::number(config_pair.second.getLuminosityFunctionList().size()));
     if (!param_space_ok){
@@ -698,14 +661,6 @@ bool DialogLuminosityPrior::validateInput(const size_t& current_index)  {
     }
   }
 
-  //check the filter
-  if (ui->lb_filter->text().length() == 0) {
-    QMessageBox::warning(this, "Missing Filter...",
-        "Please select the Filter the Luminosity is computed for.",
-        QMessageBox::Ok, QMessageBox::Ok);
-    return false;
-  }
-
   // check the functions
   for (auto& func_vect : m_luminosityInfos) {
     for (auto& func : func_vect) {
@@ -724,7 +679,6 @@ bool DialogLuminosityPrior::validateInput(const size_t& current_index)  {
 void DialogLuminosityPrior::updateInfo(LuminosityPriorConfig& info){
   info.setInMag(ui->cb_unit->currentIndex()==0);
   info.setReddened(!ui->ck_reddening->isChecked());
-  info.setFilterName(ui->lb_filter->text().toStdString());
   info.setZs(m_zs);
   info.setSedGroups(m_groups);
 
@@ -739,7 +693,6 @@ void DialogLuminosityPrior::updateInfo(LuminosityPriorConfig& info){
 
   info.setName(ui->txt_name->text().toStdString());
 
-  info.setLuminosityModelGridName(m_model_grid_name+"_"+info.getName()+".dat");
 }
 
 void DialogLuminosityPrior::updatePriorRow(QModelIndex& index,const size_t& row, const LuminosityPriorConfig& info ){
@@ -753,7 +706,6 @@ void DialogLuminosityPrior::updatePriorRow(QModelIndex& index,const size_t& row,
     ui->table_priors->model()->setData(index.sibling(row, 3),QColor("white"), Qt::BackgroundRole);
     ui->table_priors->model()->setData(index.sibling(row, 4),QColor("white"), Qt::BackgroundRole);
     ui->table_priors->model()->setData(index.sibling(row, 5),QColor("white"), Qt::BackgroundRole);
-    ui->table_priors->model()->setData(index.sibling(row, 6),QColor("white"), Qt::BackgroundRole);
   }
 
   ui->table_priors->model()->setData(index.sibling(row, 1), ui->txt_name->text());
@@ -776,9 +728,6 @@ void DialogLuminosityPrior::updatePriorRow(QModelIndex& index,const size_t& row,
   }
 
   ui->table_priors->model()->setData(index.sibling(row, 4),
-      QString::fromStdString(info.getFilterName()));
-
-  ui->table_priors->model()->setData(index.sibling(row, 5),
       QString::number((info.getZs().size() - 1) * info.getSedGRoups().size()));
   ui->table_priors->resizeColumnsToContents();
   ui->table_priors->horizontalHeader()->setStretchLastSection(true);

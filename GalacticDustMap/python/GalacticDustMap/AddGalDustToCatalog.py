@@ -56,8 +56,7 @@ def defineSpecificProgramOptions():
     #
     # !!! Write your program options here !!!
     parser.add_argument('--planck-dust-map', type=str, 
-                        help='Filename of the Planck dust map in HEALPIX format'\
-                             ' (Optional) If not provided the embeded map is used.',
+                        help='Filename of the Planck dust map in HEALPIX format.',
                         default='')
     parser.add_argument('--input-catalog', type=str, help='Input catalog filename')
     parser.add_argument('--output-catalog', type=str, help='Output catalog filename')
@@ -97,7 +96,7 @@ def mainMethod(args):
     if args.planck_dust_map:
         aux_file = args.planck_dust_map
     else:
-        aux_file = aux.getAuxiliaryPath(os.path.join('GalacticDustMap','PlanckEbv.fits'))
+        raise ValueError("Missing planck-dust-map")
     logger.info('Read the Dust Map :%s' % aux_file)
     
     map_data = GalacticDustMap.GalacticDustMap.loadMap(aux_file)

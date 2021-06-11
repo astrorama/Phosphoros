@@ -49,7 +49,7 @@ public:
   /**
    * @brief Constructor
    */
-  explicit DialogLuminosityPrior(DatasetRepo filter_repository,DatasetRepo luminosity_repository, QWidget *parent = 0);
+  explicit DialogLuminosityPrior(std::string filter ,DatasetRepo luminosity_repository, QWidget *parent = 0);
   /**
    * @brief Destructor
    */
@@ -134,16 +134,6 @@ void priorGridDoubleClicked(QModelIndex);
   void on_cb_unit_currentIndexChanged(const QString &);
 
   /**
-    * @brief SLOT raised when the browse filter button is clicked.
-    */
-  void on_btn_filter_clicked();
-
-  /**
-   * @brief SLOT raised when the filter selector popup is closing.
-   */
-  void filterPopupClosing(std::string filter);
-
-  /**
    * @brief SLOT raised when the groups management button is clicked.
    */
   void on_btn_group_clicked();
@@ -201,7 +191,7 @@ private:
   void updatePriorRow(QModelIndex& index,const size_t& row, const LuminosityPriorConfig& info );
 
   std::unique_ptr<Ui::DialogLuminosityPrior> ui;
-  DatasetRepo m_filter_repository;
+  std::string m_filter;
   DatasetRepo m_luminosity_repository;
   QString m_config_folder;
 

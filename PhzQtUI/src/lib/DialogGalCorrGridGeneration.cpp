@@ -34,6 +34,10 @@
 #include "PhzConfiguration/ReddeningProviderConfig.h"
 #include "PhzConfiguration/FilterProviderConfig.h"
 #include "PhzConfiguration/IgmConfig.h"
+#include "PhzConfiguration/CosmologicalParameterConfig.h"
+
+#include "PhzConfiguration/ModelNormalizationConfig.h"
+#include "PhzModeling/NormalizationFunctorFactory.h"
 
 // #include <future>
 
@@ -112,6 +116,14 @@ std::string DialogGalCorrGridGeneration::runFunction() {
      auto miky_way_reddening_curve = config_manager.template getConfiguration<MilkyWayReddeningConfig>().getMilkyWayReddeningCurve();
      auto output_function = config_manager.template getConfiguration<CorrectionCoefficientGridOutputConfig>().getOutputFunction();
 
+     auto& cosmology = config_manager.template getConfiguration<CosmologicalParameterConfig>().getCosmologicalParam();
+
+     auto lum_filter_name = config_manager.template getConfiguration<ModelNormalizationConfig>().getNormalizationFilter();
+     auto sun_sed_name = config_manager.getConfiguration<ModelNormalizationConfig>().getReferenceSolarSed();
+     auto normalizer_functor =
+              Euclid::PhzModeling::NormalizationFunctorFactory::NormalizationFunctorFactory::GetFunction(filter_provider, lum_filter_name, sed_provider, sun_sed_name);
+
+
      std::map<std::string, PhzDataModel::PhotometryGrid> result_map{};
 
      // Compute the total number of models
@@ -120,14 +132,14 @@ std::string DialogGalCorrGridGeneration::runFunction() {
         total += GridContainer::makeGridIndexHelper(pair.second).m_axes_index_factors.back();
       }
 
-      auto monitor_function = [this](size_t step, size_t total) {
-           int value = (step * 100) / total;
+      auto monitor_function = [this](size_t step, size_t mon_total) {
+           int value = (step * 100) / mon_total;
            if (!PhzUtils::getStopThreadsFlag()) {
              // If the user has canceled we do not want to update the progress bar,
              // because the GUI thread might have already deleted it
              emit signalUpdateBar(value);
            }
-         };
+      };
 
 
      PhzGalacticCorrection::GalacticCorrectionSingleGridCreator grid_creator{
@@ -135,6 +147,7 @@ std::string DialogGalCorrGridGeneration::runFunction() {
        reddening_provider,
        filter_provider,
        igm_abs_func,
+       normalizer_functor,
        miky_way_reddening_curve
      };
      size_t already_done = 0;
@@ -143,7 +156,7 @@ std::string DialogGalCorrGridGeneration::runFunction() {
        if (!PhzUtils::getStopThreadsFlag()) {
          logger_DGC.info() << "Correction computation for region '"<<grid_pair.first<<"'";
          SparseProgressReporter reporter {monitor_function, already_done, total};
-         result_map.emplace(std::make_pair(grid_pair.first, grid_creator.createGrid(grid_pair.second, model_phot_grid.filter_names, reporter)));
+         result_map.emplace(std::make_pair(grid_pair.first, grid_creator.createGrid(grid_pair.second, model_phot_grid.filter_names, cosmology, reporter)));
          already_done+=GridContainer::makeGridIndexHelper(grid_pair.second).m_axes_index_factors.back();
        }
      }

@@ -5,6 +5,7 @@ elements_depends_on_subdirs(XYDataset)
 elements_depends_on_subdirs(PhzConfiguration)
 elements_depends_on_subdirs(MathUtils)
 elements_depends_on_subdirs(PhzModeling)
+elements_depends_on_subdirs(EmissionLines)
 
 find_package(Boost REQUIRED COMPONENTS program_options)
 elements_add_library(PhzCLI src/lib/*.cpp
@@ -33,6 +34,7 @@ elements_add_python_program(PhosphorosPlotPhotometryComparison PhzCLI.Phosphoros
 elements_add_python_program(PhosphorosOrderSeds PhzCLI.OrderSeds)
 elements_add_python_program(PhosphorosPlotPosterior PhzCLI.PlotPosterior)
 elements_add_python_program(PhosphorosPlotSpecZComparison PhzCLI.PlotSpecZComparison)
+elements_add_python_program(SedHeaderHandler PhzCLI.SedHeaderHandler)
 
 # Phosphoros is a Python script but not conceived to work with Elements
 # We use the aliasing mechanism to use python2 or python3 depending
