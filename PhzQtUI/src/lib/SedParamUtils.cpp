@@ -121,7 +121,7 @@ std::string SedParamUtils::getFile(const XYDataset::QualifiedName& sed) {
   QStringList seds_in_group = directory.entryList(QStringList() << "*.*", QDir::Files);
 
   for (QString filename : seds_in_group) {
-     if (QFileInfo(filename).baseName().toStdString() == sed.datasetName()) {
+     if (QFileInfo(filename).completeBaseName().toStdString() == sed.datasetName()) {
         return root_path + filename.toStdString();
      }
   }
