@@ -1,6 +1,9 @@
 #include <QMessageBox>
 #include <QStandardItemModel>
 #include <QProcess>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QProgressDialog>
 #include <QDir>
 #include <QFileDialog>
 #include <QListView>
@@ -33,6 +36,7 @@ FormAuxDataManagement::FormAuxDataManagement(QWidget *parent) :
     ui(new Ui::FormAuxDataManagement)
 {
     ui->setupUi(this);
+    m_planck_file = FileUtils::getAuxRootPath() +"/GalacticDustMap/PlanckEbv.fits";
 }
 
 FormAuxDataManagement::~FormAuxDataManagement() {}
@@ -541,6 +545,87 @@ void FormAuxDataManagement::sunSedPopupClosing(std::string sed){
   PreferencesUtils::setUserPreference("AuxData","SUN_SED", sed);
   ui->lbl_sun_sed->setText(QString::fromStdString(sed));
 }
+
+
+void FormAuxDataManagement::on_btn_planck_clicked(){
+  m_httpRequestAborted = false;
+  bool file_exists = boost::filesystem::exists(m_planck_file);
+
+  QString end_message=file_exists?"The file is already present: clicking OK will owerride it":"This is needed before using the Milky Way absorption correction option that you choose.";
+
+  if (QMessageBox::Ok == QMessageBox::question(this, "Dust map file Download...",
+     "You are about to download the file containing the Milky Way dust map \n" + QString::fromStdString(m_planck_url)+
+     ". \n to \n" + QString::fromStdString(m_planck_file)+
+     " \n\n " + end_message,
+     QMessageBox::Ok | QMessageBox::Cancel)) {
+
+
+      QDir enclosing_folder = QFileInfo(QString::fromStdString(m_planck_file)).absoluteDir();
+      if (!enclosing_folder.exists()) {
+        enclosing_folder.mkpath(".");
+      }
+
+
+      m_network_manager = new QNetworkAccessManager(this);
+      QUrl url(QString::fromStdString(m_planck_url));
+      m_downloaded_file = new QFile(QString::fromStdString(m_planck_file));
+      if (!m_downloaded_file->open(QIODevice::WriteOnly)) {
+             QMessageBox::information(this, tr("HTTP"),
+                           tr("Unable to save the file %1: %2.")
+                           .arg(QString::fromStdString(m_planck_file)).arg(m_downloaded_file->errorString()));
+         delete m_downloaded_file;
+         m_downloaded_file = 0;
+         return;
+       }
+
+      if (m_progress_dialog) {
+         delete m_progress_dialog;
+         m_progress_dialog = 0;
+      }
+      m_progress_dialog = new QProgressDialog(this);
+      m_progress_dialog->setWindowTitle(tr("Dowwnloading... "));
+      m_progress_dialog->setLabelText(tr("Downloading Planck dust map"));
+      m_progress_dialog->setWindowModality(Qt::WindowModal);
+
+      connect(m_progress_dialog, SIGNAL(canceled()), this, SLOT(cancelDownloadPlanck()));
+
+
+      m_reply = m_network_manager->get(QNetworkRequest(url));
+      connect(m_reply, SIGNAL(readyRead()),
+                 this, SLOT(httpReadyPlanckRead()));
+      connect(m_reply, SIGNAL(downloadProgress(qint64, qint64)),
+                  this, SLOT(updateDownloadProgress(qint64, qint64)));
+
+
+    } else {
+      return;
+    }
+
+
+}
+
+
+void FormAuxDataManagement::updateDownloadProgress(qint64 bytesRead, qint64 totalBytes) {
+  if (m_httpRequestAborted) {
+          return;
+  }
+
+  m_progress_dialog->setMaximum(totalBytes);
+  m_progress_dialog->setValue(bytesRead);
+}
+
+void FormAuxDataManagement::httpReadyPlanckRead() {
+  if (m_downloaded_file)
+    m_downloaded_file->write(m_reply->readAll());
+}
+
+void FormAuxDataManagement::cancelDownloadPlanck() {
+  m_httpRequestAborted = true;
+  if (m_reply) {
+    m_reply->abort();
+  }
+}
+
 
 }
 }

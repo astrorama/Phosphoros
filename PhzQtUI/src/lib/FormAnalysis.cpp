@@ -67,7 +67,7 @@ FormAnalysis::FormAnalysis(QWidget *parent) :
     QWidget(parent), ui(new Ui::FormAnalysis) {
   ui->setupUi(this);
 
-  m_plank_file = FileUtils::getAuxRootPath() +"/GalacticDustMap/PlanckEbv.fits";
+  m_planck_file = FileUtils::getAuxRootPath() +"/GalacticDustMap/PlanckEbv.fits";
 
 }
 
@@ -1696,7 +1696,7 @@ template<typename ReturnType, int I>
         config_map,
         config_sed_weight,
         selected_survey.getNonDetection(),
-        m_plank_file,
+        m_planck_file,
         ra_col,
         dec_col);
 
@@ -2194,26 +2194,26 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
       auto column_reader = PhzUITools::CatalogColumnReader(path);
       auto column_from_file = column_reader.getColumnNames();
       if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
-          if (!boost::filesystem::exists(m_plank_file)) {
+          if (!boost::filesystem::exists(m_planck_file)) {
             if (QMessageBox::Ok == QMessageBox::question(this, "Missing Dust map file...",
-             "The file containing the Milky Way dust map is missing (" + QString::fromStdString(m_plank_file)
-             + ").   \n Do you want to download it now from \n" + QString::fromStdString(m_plank_url)
+             "The file containing the Milky Way dust map is missing (" + QString::fromStdString(m_planck_file)
+             + ").   \n Do you want to download it now from \n" + QString::fromStdString(m_planck_url)
              + "? \n\n This is needed before using the Milky Way absorption correction option that you choose.",
              QMessageBox::Ok | QMessageBox::Cancel)) {
 
 
-              QDir enclosing_folder = QFileInfo(QString::fromStdString(m_plank_file)).absoluteDir();
+              QDir enclosing_folder = QFileInfo(QString::fromStdString(m_planck_file)).absoluteDir();
               if (!enclosing_folder.exists()) {
                 enclosing_folder.mkpath(".");
               }
 
                 m_network_manager = new QNetworkAccessManager(this);
-                QUrl url(QString::fromStdString(m_plank_url));
-                m_downloaded_file = new QFile(QString::fromStdString(m_plank_file));
+                QUrl url(QString::fromStdString(m_planck_url));
+                m_downloaded_file = new QFile(QString::fromStdString(m_planck_file));
                 if (!m_downloaded_file->open(QIODevice::WriteOnly)) {
                        QMessageBox::information(this, tr("HTTP"),
                                      tr("Unable to save the file %1: %2.")
-                                     .arg(QString::fromStdString(m_plank_file)).arg(m_downloaded_file->errorString()));
+                                     .arg(QString::fromStdString(m_planck_file)).arg(m_downloaded_file->errorString()));
                    delete m_downloaded_file;
                    m_downloaded_file = 0;
                    return;
@@ -2338,7 +2338,7 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
                 // the E(B-V) has to be looked up in the Planck map
                 SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
                 std::map<std::string, boost::program_options::variable_value> add_column_options_map{};
-                add_column_options_map["planck-dust-map"].value() = boost::any(m_plank_file);
+                add_column_options_map["planck-dust-map"].value() = boost::any(m_planck_file);
                 add_column_options_map["galatic-ebv-col"].value() = boost::any(std::string("PLANCK_GAL_EBV"));
                 add_column_options_map["input-catalog"].value() = boost::any(path);
                 add_column_options_map["ra"].value() = boost::any(selected_survey.getRaColumn());
@@ -2392,27 +2392,27 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
       auto column_reader = PhzUITools::CatalogColumnReader(path);
       auto column_from_file = column_reader.getColumnNames();
       if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
-          if (!boost::filesystem::exists(m_plank_file)) {
+          if (!boost::filesystem::exists(m_planck_file)) {
             if (QMessageBox::Ok == QMessageBox::question(this, "Missing Dust map file...",
-             "The file containing the Milky Way dust map is missing (" + QString::fromStdString(m_plank_file)
-             + "). \n Do you want to download it now from \n" + QString::fromStdString(m_plank_url)
+             "The file containing the Milky Way dust map is missing (" + QString::fromStdString(m_planck_file)
+             + "). \n Do you want to download it now from \n" + QString::fromStdString(m_planck_url)
              + "? \n\n This is needed before using the Milky Way absorption correction option that you choose.",
              QMessageBox::Ok | QMessageBox::Cancel)) {
 
 
-              QDir enclosing_folder = QFileInfo(QString::fromStdString(m_plank_file)).absoluteDir();
+              QDir enclosing_folder = QFileInfo(QString::fromStdString(m_planck_file)).absoluteDir();
               if (!enclosing_folder.exists()) {
                 enclosing_folder.mkpath(".");
               }
 
 
               m_network_manager = new QNetworkAccessManager(this);
-              QUrl url(QString::fromStdString(m_plank_url));
-              m_downloaded_file = new QFile(QString::fromStdString(m_plank_file));
+              QUrl url(QString::fromStdString(m_planck_url));
+              m_downloaded_file = new QFile(QString::fromStdString(m_planck_file));
               if (!m_downloaded_file->open(QIODevice::WriteOnly)) {
                      QMessageBox::information(this, tr("HTTP"),
                                    tr("Unable to save the file %1: %2.")
-                                   .arg(QString::fromStdString(m_plank_file)).arg(m_downloaded_file->errorString()));
+                                   .arg(QString::fromStdString(m_planck_file)).arg(m_downloaded_file->errorString()));
                  delete m_downloaded_file;
                  m_downloaded_file = 0;
                  return;
@@ -2526,7 +2526,7 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
            // the E(B-V) has to be looked up in the Planck map
            SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
            std::unique_ptr<DialogAddGalEbv> dialog(new DialogAddGalEbv());
-           dialog->setInputs(path, selected_survey.getRaColumn(), selected_survey.getDecColumn(), m_plank_file);
+           dialog->setInputs(path, selected_survey.getRaColumn(), selected_survey.getDecColumn(), m_planck_file);
            if (dialog->exec()) {
              // new catalog contains the GAL_EBV column
 

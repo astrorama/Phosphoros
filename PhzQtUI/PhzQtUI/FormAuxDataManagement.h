@@ -3,6 +3,10 @@
 #include <memory>
 #include <QWidget>
 #include <QProcess>
+#include <QFile>
+#include <QProgressDialog>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
 #include "PhzQtUI/SedTreeModel.h"
@@ -58,6 +62,7 @@ void on_btn_import_reddening_clicked();
 void on_btn_import_luminosity_clicked();
 
 void on_bt_reloadDP_clicked();
+void on_btn_planck_clicked();
 void reloadAuxData();
 
 void copyingFilterFinished(bool, QVector<QString>);
@@ -67,9 +72,24 @@ void copyingLumFinished(bool, QVector<QString>);
 void copyProgress(qint64, qint64);
 void sunSedPopupClosing(std::string);
 
+void httpReadyPlanckRead();
+void cancelDownloadPlanck();
+void updateDownloadProgress(qint64 bytesRead, qint64 totalBytes);
+
 
 
 private:
+    QProgressDialog *m_progress_dialog = nullptr;
+
+    QNetworkAccessManager *m_network_manager = nullptr;
+    QFile *m_downloaded_file = nullptr;
+    bool m_httpRequestAborted = false;
+    QNetworkReply *m_reply = nullptr;
+    std::string m_planck_file = "";
+    std::string m_planck_url = "https://lambda.gsfc.nasa.gov/data/foregrounds/EBV/lambda_meisner_finkbeiner_2015_dust_map.fits";
+
+
+
     std::unique_ptr<Ui::FormAuxDataManagement> ui;
     DatasetRepo m_filter_repository;
     DatasetRepo m_seds_repository;

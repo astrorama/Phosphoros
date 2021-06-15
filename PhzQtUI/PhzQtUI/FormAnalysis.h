@@ -237,8 +237,8 @@ private:
     DatasetRepo m_luminosity_repository;
     std::shared_ptr<SurveyModel> m_survey_model_ptr;
     std::shared_ptr<ModelSetModel> m_model_set_model_ptr;
-    std::string m_plank_file = "";
-    std::string m_plank_url = "https://lambda.gsfc.nasa.gov/data/foregrounds/EBV/lambda_meisner_finkbeiner_2015_dust_map.fits";
+    std::string m_planck_file = "";
+    std::string m_planck_url = "https://lambda.gsfc.nasa.gov/data/foregrounds/EBV/lambda_meisner_finkbeiner_2015_dust_map.fits";
 
 };
 
