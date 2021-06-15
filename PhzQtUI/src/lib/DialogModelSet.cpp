@@ -191,10 +191,9 @@ void DialogModelSet::loadData(int ref,
   std::set<double> z_val {};
   if (m_z_ranges.size() > 0) {
     for (auto& range : m_z_ranges) {
-      for (double val = range.getMin(); val < range.getMax()+range.getStep(); val += range.getStep()) {
-        if(val <= range.getMax()) {
-          z_val.insert(val);
-        }
+      for (int index=0; index <= std::round((range.getMax()-range.getMin())/range.getStep()); index++) {
+        double val = range.getMin() + index*range.getStep();
+        z_val.insert(val);
       }
     }
   } else {
@@ -246,10 +245,9 @@ void DialogModelSet::loadData(int ref,
   std::set<double> ebv_val {};
     if (m_ebv_ranges.size() > 0) {
       for (auto& range : m_ebv_ranges) {
-        for (double val = range.getMin(); val < range.getMax()+range.getStep(); val += range.getStep()) {
-          if (val <=  range.getMax()) {
-            ebv_val.insert(val);
-          }
+        for (int index=0; index <= std::round((range.getMax()-range.getMin())/range.getStep()); index++) {
+          double val = range.getMin() + index*range.getStep();
+          ebv_val.insert(val);
         }
       }
     } else {
