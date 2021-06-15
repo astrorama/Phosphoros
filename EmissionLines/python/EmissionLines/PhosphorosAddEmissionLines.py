@@ -55,11 +55,11 @@ def defineSpecificProgramOptions():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--emission-lines', default='Ha_lines.txt', type=str, metavar='FILE',
-                        help='The emission lines file')
+                        help='The emission lines file (default: Ha_lines.txt, use LePhare_lines.txt for LePhare like lines)')
     parser.add_argument('--uv-range', default=(1500.0, 2800.0), type=wavelengthRange,
-                        help='The beginning of the UV range to integrate')
+                        help='The beginning of the UV range to integrate (default: 1500.0,2800.0 Angstrom, use  2100,2500 for LePhare like lines)' )
     parser.add_argument('--reference-factor', default=5.91e-6, type=float,
-                        help='The luminosity factor between UV and the reference line')
+                        help='The luminosity factor between UV and the reference line (default:5.91e-6, use 1.0e13 for LePhare like  lines)')
     parser.add_argument('--sed-dir', required=True, type=str, metavar='DIR',
                         help='The directory containing the SEDs to add the mission lines on')
     parser.add_argument('--velocity', default=None, type=float,

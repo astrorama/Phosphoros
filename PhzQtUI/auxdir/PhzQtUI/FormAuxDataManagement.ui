@@ -68,6 +68,13 @@
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="btn_planck">
+       <property name="text">
+        <string>Download Plack's Dust Map</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="bt_reloadDP">
        <property name="text">
         <string>Reload Last Data Pack</string>
