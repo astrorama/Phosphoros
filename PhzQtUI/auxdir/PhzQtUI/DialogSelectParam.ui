@@ -46,6 +46,27 @@
     </layout>
    </item>
    <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>A Physical Parameter is available if it is defined with the same units</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string> in all the SEDs used in the parameter space.</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QTableView" name="table_param"/>
    </item>
    <item>

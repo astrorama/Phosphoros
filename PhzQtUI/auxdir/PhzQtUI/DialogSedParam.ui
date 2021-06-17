@@ -93,7 +93,7 @@
      <item>
       <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>Parameters are of the form  P = A*L☉ + B</string>
+        <string>Parameters are of the form  P = A*L☉ + B [Units]</string>
        </property>
       </widget>
      </item>
@@ -139,6 +139,23 @@
      </item>
      <item>
       <widget class="QLineEdit" name="le_B"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_6">
+       <property name="text">
+        <string>[</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="le_unit"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>]</string>
+       </property>
+      </widget>
      </item>
      <item>
       <spacer name="horizontalSpacer_5">
