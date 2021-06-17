@@ -289,8 +289,17 @@ void DialogSedParam::on_btn_save_clicked() {
 
 }
 
-void DialogSedParam::processingFinished(int, QProcess::ExitStatus) {
+void DialogSedParam::processingFinished(int, QProcess::ExitStatus status) {
+  if (QProcess::NormalExit == status) {
    accept();
+  } else {
+    QMessageBox msgBox;
+            msgBox.setText("Error in the computations.");
+            msgBox.setInformativeText("The generation of the Physical Parameter configuration do not succeed. Try to remove all the parameters, then re-open the dialog and add them again.");
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setDefaultButton(QMessageBox::Ok);
+            msgBox.exec();
+  }
 }
 
 void DialogSedParam::on_btn_cancel_clicked() {
