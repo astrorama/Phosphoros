@@ -224,12 +224,12 @@
               </property>
               <item>
                <property name="text">
-                <string>Absolute Magnitude (mag)</string>
+                <string>Absolute Magnitude (MAG)</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>Luminosity (flux)</string>
+                <string>Absolute Luminosity (L☉)</string>
                </property>
               </item>
              </widget>
@@ -373,7 +373,7 @@
                <x>0</x>
                <y>0</y>
                <width>920</width>
-               <height>265</height>
+               <height>261</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -388,7 +388,7 @@
                    <x>0</x>
                    <y>0</y>
                    <width>900</width>
-                   <height>245</height>
+                   <height>241</height>
                   </rect>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_8">
