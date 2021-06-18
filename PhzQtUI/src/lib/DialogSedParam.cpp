@@ -1,4 +1,3 @@
-
 #include <QMessageBox>
 #include <QDir>
 #include <QStringList>
@@ -295,7 +294,7 @@ void DialogSedParam::processingFinished(int, QProcess::ExitStatus status) {
   } else {
     QMessageBox msgBox;
             msgBox.setText("Error in the computations.");
-            msgBox.setInformativeText("The generation of the Physical Parameter configuration do not succeed. Try to remove all the parameters, then re-open the dialog and add them again.");
+            msgBox.setInformativeText("The generation of the Physical Parameter configuration did not succeed. Try to remove all the parameters, then re-open the dialog and add them again.");
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setDefaultButton(QMessageBox::Ok);
             msgBox.exec();
