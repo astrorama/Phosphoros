@@ -50,7 +50,9 @@ def readXYDatasetKeyword(file_path):
         index+=1
     
     first_line = content[index]
-    if "#" in first_line and not ":" in first_line:
+    name_finder = re.compile('^\s*#\s*(\w+)\s*$')
+    matches = name_finder.match(first_line)
+    if matches:
         name = first_line.split("#")[1]
         result['NAME']=[name.strip()]
 

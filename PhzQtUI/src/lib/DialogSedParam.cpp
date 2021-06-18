@@ -1,4 +1,3 @@
-
 #include <QMessageBox>
 #include <QDir>
 #include <QStringList>
@@ -56,6 +55,7 @@ void DialogSedParam::setSed(const XYDataset::QualifiedName&  sed) {
    grid_model->setHeaderData(0, Qt::Horizontal, tr("Name"));
    grid_model->setHeaderData(1, Qt::Horizontal, tr("A"));
    grid_model->setHeaderData(2, Qt::Horizontal, tr("B"));
+   grid_model->setHeaderData(2, Qt::Horizontal, tr("Units"));
    grid_model->setHeaderData(3, Qt::Horizontal, tr(""));
 
    auto params = string_params.split(";");
@@ -67,8 +67,10 @@ void DialogSedParam::setSed(const XYDataset::QualifiedName&  sed) {
          auto bits = param.split("=");
          QStandardItem* item = new QStandardItem(bits[0]);
          items.push_back(item);
-         if (bits[1].contains("+")) {
-           auto sub_bits = bits[1].split("+");
+         auto param_bits = bits[1].split("[");
+
+         if (param_bits[0].contains("+")) {
+           auto sub_bits = param_bits[0].split("+");
            if  (sub_bits[0].contains("*L")) {
              QStandardItem* item2 = new QStandardItem(sub_bits[0].replace("*L", ""));
              items.push_back(item2);
@@ -80,20 +82,31 @@ void DialogSedParam::setSed(const XYDataset::QualifiedName&  sed) {
              QStandardItem* item3 = new QStandardItem(sub_bits[0]);
              items.push_back(item3);
            }
-         } else if (bits[1].contains("*L")) {
-            QStandardItem* item2 = new QStandardItem(bits[1].replace("*L", ""));
+         } else if (param_bits[0].contains("*L")) {
+            QStandardItem* item2 = new QStandardItem(param_bits[0].replace("*L", ""));
             items.push_back(item2);
             QStandardItem* item3 = new QStandardItem(QString::number(0));
             items.push_back(item3);
          } else {
              QStandardItem* item2 = new QStandardItem(QString::number(0));
              items.push_back(item2);
-             QStandardItem* item3 = new QStandardItem(bits[1]);
+             QStandardItem* item3 = new QStandardItem(param_bits[0]);
              items.push_back(item3);
          }
 
-         QStandardItem* item4 = new QStandardItem("");
-         items.push_back(item4);
+
+         if (param_bits.size() > 0) {
+           auto unit_bit = param_bits[1].split("]");
+           QStandardItem* item4 = new QStandardItem(unit_bit[0]);
+           items.push_back(item4);
+         } else {
+           QStandardItem* item4 = new QStandardItem("");
+           items.push_back(item4);
+         }
+
+
+         QStandardItem* item5 = new QStandardItem("");
+         items.push_back(item5);
 
          MessageButton *delButton = new MessageButton(bits[0], "Remove");
          message_buttons.push_back(delButton);
@@ -109,13 +122,14 @@ void DialogSedParam::setSed(const XYDataset::QualifiedName&  sed) {
    ui->table_param->setModel(grid_model);
 
    for (int counter =0; counter < grid_model->rowCount(); ++counter) {
-     auto item_btn = grid_model->index(counter, 3);
+     auto item_btn = grid_model->index(counter, 4);
      ui->table_param->setIndexWidget(item_btn, message_buttons[counter]);
    }
 
 
    ui->le_A->setText("0");
    ui->le_B->setText("0");
+   ui->le_unit->setText("");
 
 }
 
@@ -147,18 +161,21 @@ void DialogSedParam::on_btn_new_clicked() {
           items.push_back(item2);
           QStandardItem* item3 = new QStandardItem(ui->le_B->text());
           items.push_back(item3);
-          QStandardItem* item4 = new QStandardItem("");
+          QStandardItem* item4 = new QStandardItem(ui->le_unit->text());
           items.push_back(item4);
+          QStandardItem* item5 = new QStandardItem("");
+          items.push_back(item5);
           MessageButton *delButton = new MessageButton(ui->le_new_name->text(), "Remove");
           connect(delButton, SIGNAL(MessageButtonClicked(const QString&)), this,
                                                SLOT(delParamClicked(const QString&)));
           auto model = static_cast<QStandardItemModel*>(ui->table_param->model());
           model->appendRow(items);
-          ui->table_param->setIndexWidget(model->index(model->rowCount()-1, 3), delButton);
+          ui->table_param->setIndexWidget(model->index(model->rowCount()-1, 4), delButton);
 
           ui->le_new_name->setText("");
           ui->le_A->setText("0");
           ui->le_B->setText("0");
+          ui->le_unit->setText("");
         } else {
           QMessageBox msgBox;
           msgBox.setText("Unaccepted input.");
@@ -205,7 +222,8 @@ void DialogSedParam::on_btn_save_clicked() {
               keys.push_back(model->item(i, 0)->text().toStdString());
               params.push_back(model->item(i, 0)->text().toStdString() +
                   "=" + model->item(i, 1)->text().toStdString() +
-                  "*L+"+model->item(i, 2)->text().toStdString());
+                  "*L+" + model->item(i, 2)->text().toStdString() +
+                  "[" + model->item(i, 3)->text().toStdString() + "]");
 
             } else {
               QMessageBox msgBox;
@@ -270,8 +288,17 @@ void DialogSedParam::on_btn_save_clicked() {
 
 }
 
-void DialogSedParam::processingFinished(int, QProcess::ExitStatus) {
+void DialogSedParam::processingFinished(int, QProcess::ExitStatus status) {
+  if (QProcess::NormalExit == status) {
    accept();
+  } else {
+    QMessageBox msgBox;
+            msgBox.setText("Error in the computations.");
+            msgBox.setInformativeText("The generation of the Physical Parameter configuration did not succeed. Try to remove all the parameters, then re-open the dialog and add them again.");
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setDefaultButton(QMessageBox::Ok);
+            msgBox.exec();
+  }
 }
 
 void DialogSedParam::on_btn_cancel_clicked() {

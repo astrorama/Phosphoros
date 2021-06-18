@@ -27,8 +27,8 @@ static Elements::Logging logger = Elements::Logging::getLogger("SedParamUtils");
 
 SedParamUtils::SedParamUtils() {}
 
-std::set<std::string> SedParamUtils::getParameterList(const std::string& file) {
-  std::set<std::string> result {};
+std::map<std::string, std::string> SedParamUtils::getParameterList(const std::string& file) {
+  std::map<std::string, std::string> result {};
 
   std::ifstream sfile(file);
    if (!sfile) {
@@ -40,13 +40,21 @@ std::set<std::string> SedParamUtils::getParameterList(const std::string& file) {
    std::string  dataset_name{};
    std::string  reg_ex_str = "^\\s*#\\s*PARAMETER\\s*:\\s*([-_\\w]+)\\s*=.+\\s*$";
    boost::regex expression(reg_ex_str);
+   std::string  reg_ex_str_unit = "^\\s*#\\s*PARAMETER\\s*:\\s*[-_\\w]+\\s*=.+\\[\\s*(\\w*)\\s*\\]\\s*$";
+   boost::regex unit_regex(reg_ex_str_unit);
 
    while (sfile.good()) {
      std::getline(sfile, line);
      boost::smatch s_match;
+     boost::smatch s_unit_match;
      if (!line.empty() && boost::regex_match(line, s_match, expression)) {
-       result.insert(s_match[1].str());
-      // logger.info() << " INSERTING PARAM " << s_match[1].str();
+
+       std::string unit = "";
+       if (boost::regex_match(line, s_unit_match, unit_regex)) {
+         unit = s_unit_match[1].str();
+       }
+       result.insert(std::make_pair(s_match[1].str(), unit));
+       //logger.info() << " INSERTING PARAM " << s_match[1].str() << " With units " << unit;
      }
    }
    return result;
@@ -139,12 +147,12 @@ std::string SedParamUtils::getFile(const XYDataset::QualifiedName& sed) {
 
 
 std::set<std::string> SedParamUtils::listAvailableParam(const ModelSet& model) {
-  std::set<std::string> params{};
+  std::map<std::string, std::string> params{};
   bool firstSED = true;
   for (auto& sed : model.getSeds()) {
     auto file_name = SedParamUtils::getFile(sed);
     auto sed_param = SedParamUtils::getParameterList(file_name);
-    // logger.info() << "SED NAME : "<< sed << " FILE NAME : " << file_name;
+     logger.info() << "SED NAME : "<< sed << " FILE NAME : " << file_name;
 
     if (firstSED) {
       params = sed_param;
@@ -152,8 +160,13 @@ std::set<std::string> SedParamUtils::listAvailableParam(const ModelSet& model) {
     } else {
       std::vector<std::string> missing_param = {};
       for (auto& existing_param : params) {
-        if (sed_param.find(existing_param) == sed_param.end()) {
-          missing_param.push_back(existing_param);
+        if (sed_param.find(existing_param.first) == sed_param.end()) {
+          missing_param.push_back(existing_param.first);
+        } else {
+          if (sed_param.at(existing_param.first) != existing_param.second) {
+            // Missmatch in the units
+            missing_param.push_back(existing_param.first);
+          }
         }
       }
 
@@ -163,7 +176,14 @@ std::set<std::string> SedParamUtils::listAvailableParam(const ModelSet& model) {
     }
   }
 
-  return params;
+  // convert to set
+  std::set<std::string> ret;
+  std::pair<std::string, std::string> param_pair;
+  for (auto it = params.begin(); it != params.end(); ++it) {
+    ret.insert(it->first);
+  }
+
+  return ret;
 }
 
 

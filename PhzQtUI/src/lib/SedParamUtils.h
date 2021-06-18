@@ -3,6 +3,7 @@
 
 #include <string>
 #include <set>
+#include <map>
 #include "PhzQtUI/ModelSet.h"
 
 /**
@@ -18,7 +19,7 @@ public:
 
   static std::string getFile(const XYDataset::QualifiedName& sed);
 
-  static std::set<std::string> getParameterList(const std::string& file);
+  static std::map<std::string, std::string> getParameterList(const std::string& file);
 
   static std::string getParameter(const std::string& file, const std::string& key_word);
 
