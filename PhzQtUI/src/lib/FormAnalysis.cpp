@@ -1297,6 +1297,12 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
            ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSamplingRange", QString::number(ui->dsb_sample_range->value()).toStdString());
   }
 
+
+  std::string lum_filter = ui->lbl_lum_filter->text().toStdString();
+  options_map["normalization-filter"].value() = boost::any(lum_filter);
+  std::string sun_sed = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
+  options_map["normalization-solar-sed"].value() = boost::any(sun_sed);
+
   return options_map;
 }
 

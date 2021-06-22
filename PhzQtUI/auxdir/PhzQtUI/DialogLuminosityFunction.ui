@@ -160,7 +160,7 @@
           <item>
            <widget class="QLabel" name="lbl_M">
             <property name="text">
-             <string>M* :</string>
+             <string>M* [MAG] :</string>
             </property>
            </widget>
           </item>
@@ -197,7 +197,7 @@
           <item>
            <widget class="QLabel" name="lbl_L">
             <property name="text">
-             <string>L* [erg /s/Hz] :</string>
+             <string>L* [L☉] :</string>
             </property>
            </widget>
           </item>
