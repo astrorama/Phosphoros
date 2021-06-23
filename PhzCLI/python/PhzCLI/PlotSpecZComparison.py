@@ -508,7 +508,7 @@ class SampUpdater(object):
                 self.table_urls.append('file:' + os.path.abspath(table_path))
                 self.table_names.append(os.path.basename(table_path))
 
-                ids = table.Table.read(table_path, format='fits')[idcol]
+                ids = catalog['ID']
                 reverse_map = dict()
                 for i, obj_id in enumerate(ids):
                     reverse_map[obj_id] = i
