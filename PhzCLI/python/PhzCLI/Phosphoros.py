@@ -63,6 +63,8 @@ action_list = [
                      'Check for Data Pacakge online.'),
     PhosphorosAction(['build_pp_config', 'BPPC'], 'PhosphorosBuildPPConfig',
                      'Build the Physical Parameter config allowing the redshift computation to output them.'),
+    PhosphorosAction(['interpolate_seds', 'IS'], 'InterpolateSED',
+                     'Create SEDs interpolated between existing SEDs.'),
     
 ]
 
