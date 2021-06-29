@@ -50,11 +50,11 @@ def defineSpecificProgramOptions():
     parser.add_argument('--out-dir', type=str,  required=True,
                         help='Folder (relative to sed-dir) into which SEDs will be saved. If the folder exists it will be cleared.')                    
                                          
-    parser.add_argument('--copy-sed', default=True, type=bool,
-                        help='If true copy the original SEDs into the output folder (Default: True)' )
+    parser.add_argument('--copy-sed', default="True", type=str,
+                        help='If true copy the original SEDs into the output folder (True /False Default: True)' )
                         
-    parser.add_argument('--interpolate-pp', default=True, type=bool,
-                        help='If true interpolate also the (common) physical parameter(s) found in SEDs headers (Default: True)' )
+    parser.add_argument('--interpolate-pp', default="True", type=str,
+                        help='If true interpolate also the (common) physical parameter(s) found in SEDs headers (True /False Default: True)' )
 
 
     return parser
@@ -304,9 +304,9 @@ def mainMethod(args):
     
     prepareOutFolder(out_dir)
     
-    if args.copy_sed:
+    if args.copy_sed.lower() == "true":
         copy_seds(out_dir, sed_dir, sed_list) 
         
-    interpolate(sed_dir, sed_list, interp_number, args.interpolate_pp, out_dir)             
+    interpolate(sed_dir, sed_list, interp_number, args.interpolate_pp.lower() == "true", out_dir)             
   
 

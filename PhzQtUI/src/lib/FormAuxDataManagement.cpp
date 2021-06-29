@@ -19,6 +19,7 @@
 #include "PhzQtUI/DataSetTreeModel.h"
 #include "PhzQtUI/DialogImportAuxData.h"
 #include "PhzQtUI/DialogCreatesSubGroup.h"
+#include "PhzQtUI/DialogInterpolateSed.h"
 #include "FileUtils.h"
 #include "XYDataset/AsciiParser.h"
 #include "PhzQtUI/filecopyer.h"
@@ -96,6 +97,13 @@ void FormAuxDataManagement::loadManagementPage(int index){
 
 }
 
+
+void FormAuxDataManagement::on_btn_interp_clicked() {
+     std::unique_ptr<DialogInterpolateSed> dialog(new DialogInterpolateSed(this));
+     if (dialog->exec()) {
+       copyingSEDFinished(true,{});
+     }
+}
 
 
 void FormAuxDataManagement::getParameterInfoClicked(const QString& file) {

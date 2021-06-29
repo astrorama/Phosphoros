@@ -93,7 +93,7 @@
    <item>
     <widget class="QTabWidget" name="tab_Management">
      <property name="currentIndex">
-      <number>3</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -195,6 +195,13 @@
             </size>
            </property>
           </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btn_interp">
+           <property name="text">
+            <string>Create Interpolated SEDs</string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="btn_import_sed">
