@@ -111,12 +111,12 @@ def downloadVersion(temp, url, query_string, version):
     full_url = url+'/Data/AuxiliaryData_'+version+'.tar.xz'
     if len(query_string)>0:
         full_url = full_url + '?' + query_string 
-    r = requests.get(full_url,verify=False,stream=True)
+    r = requests.get(full_url,verify=True,stream=True)
     r.raw.decode_content = True
     with open(temp+'/downloaded.tar.xz', 'wb') as f:
         shutil.copyfileobj(r.raw, f)
     tar = tarfile.open(temp+'/downloaded.tar.xz')
-    tar.extractall(path=temp)
+    tar.extractall(path=temp+'/AuxiliaryData_'+version)
     tar.close()
     os.remove(temp+'/downloaded.tar.xz')
     logger.info('Version = '+version+' dowloaded and uncompressed.')
@@ -125,6 +125,8 @@ def cleanTempDir(temp):
     shutil.rmtree(temp)
                
 def listFiles(base_dir_new):
+    logger.info('Checking files in '+ base_dir_new)
+
     new_files = {}
     for folder,sub_folder,file_name in os.walk(base_dir_new):
         for fname in file_name:
@@ -172,7 +174,7 @@ def mainMethod(args):
             user_input = input("The version "+str(version_remote)+" of the data package is available, do you want to download it (y/n)") 
         if user_input=='y':
             downloadVersion(args.temp_folder, args.repo_url, args.url_query, version_remote)
-            base_dir_new = args.temp_folder+'/AuxiliaryData/'
+            base_dir_new = args.temp_folder+'/AuxiliaryData_'+version_remote+'/'
             new_data, unchanged, conflicting = listFiles(base_dir_new)
             logger.info('In Version = '+version_remote + ' there is '+str(len(new_data) + len(unchanged) + len(conflicting))+' files')
             logger.info('In which '+str(len(new_data))+' are new, '+str(len(unchanged))+' are unchanged and '+str(len(conflicting))+' are conflicting.')
@@ -216,6 +218,6 @@ def mainMethod(args):
                             importFiles(conflicting)
             
             record_version(str(version_remote))
-            cleanTempDir(args.temp_folder+'/AuxiliaryData')
+            cleanTempDir(args.temp_folder+'/AuxiliaryData_'+version_remote)
     else:
         logger.info("The version "+str(version_remote)+" of the data package is up to date.")               

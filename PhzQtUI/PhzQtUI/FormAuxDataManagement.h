@@ -60,6 +60,7 @@ void on_btn_import_sed_clicked();
 void on_btn_sun_sed_clicked();
 void on_btn_import_reddening_clicked();
 void on_btn_import_luminosity_clicked();
+void on_btn_interp_clicked();
 
 void on_bt_reloadDP_clicked();
 void on_btn_planck_clicked();
