@@ -317,12 +317,25 @@ def clean_name(name):
     Returns:
     str: the SED short name 
     """
+    name = clean_name_folder(name)
+    if '.' in name:
+        name = '.'.join(name.split(".")[:-1])
+
+    return name
+        
+def clean_name_folder(name):
+    """ Extract the file name from the path
+    
+    Parameters:
+    name(str): The name of the file containing the SED
+    
+    Returns:
+    str: the SED file name
+    """
     if '/' in name:
         name = name.split("/")[-1]
-    if '.' in name:
-        return '.'.join(name.split(".")[:-1])
-    else:
-        return name
+   
+    return name
          
     
 def build_name(name_1, name_2, idx, total):
@@ -394,6 +407,26 @@ def interpolate(sed_dir, sed_list, sed_number, interpolate_pp, out_dir) :
              
             if len(pp_i)>0:
                 SedUtils.replaceXYDatasetKeyword(path_i, {'PARAMETER' : pp_i})
+                
+def createOrder(out_dir, sed_list, interp_number, add_originals):
+    name_list = []
+    for index in range(len(interp_number)): 
+        if add_originals:
+            name_list.append(clean_name_folder(sed_list[index]))
+        interpolate_num  = interp_number[index]
+        for idx in range(interpolate_num):
+            name_i = build_name(sed_list[index], sed_list[index + 1], idx, interpolate_num)
+            name_list.append(name_i)
+    if add_originals:
+        name_list.append(clean_name_folder(sed_list[-1]))
+    
+    logger.info('Writing the order file')  
+    
+    f = open(os.path.join(out_dir, "order.txt"), "w")
+    for sed in name_list:
+        f.write(sed+"\n")
+    f.close()
+
         
 
 def mainMethod(args):
@@ -418,6 +451,8 @@ def mainMethod(args):
     if args.copy_sed.lower() == "true":
         copy_seds(out_dir, sed_dir, sed_list) 
         
-    interpolate(sed_dir, sed_list, interp_number, args.interpolate_pp.lower() == "true", out_dir)             
+    interpolate(sed_dir, sed_list, interp_number, args.interpolate_pp.lower() == "true", out_dir)   
+    
+    createOrder(out_dir, sed_list, interp_number,args.copy_sed.lower() == "true")          
   
 
