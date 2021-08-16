@@ -87,7 +87,6 @@ void DialogLuminosityPrior::priorSelectionChanged(QModelIndex new_index, QModelI
   ui->txt_name->setText(QString::fromStdString(config.getName()));
 
   ui->cb_unit->setCurrentIndex(0);
-  ui->ck_reddening->setChecked(!config.getReddened());
 
   clearGrid();
   m_groups=config.getSedGRoups();
@@ -211,7 +210,6 @@ void DialogLuminosityPrior::on_btn_delete_clicked(){
   } else {  //  or Clear the controls from the current information
    ui->txt_name->setText("");
    ui->cb_unit->setCurrentIndex(0);
-   ui->ck_reddening->setChecked(false);
   }
 
   // end edition in the controls
@@ -275,7 +273,6 @@ void DialogLuminosityPrior::on_btn_cancel_clicked(){
     //clear the controls
     ui->txt_name->setText("");
     ui->cb_unit->setCurrentIndex(0);
-    ui->ck_reddening->setChecked(false);
     // clearGrid();
 
     // delete the record in the popup list
@@ -461,7 +458,6 @@ void DialogLuminosityPrior::manageBtnEnability(bool in_edition, bool read_only ,
    ui->table_priors->setEnabled(!read_only && !in_edition);
    ui->txt_name->setEnabled(!read_only && in_edition);
    ui->cb_unit->setEnabled(!read_only && in_edition);
-   ui->ck_reddening->setEnabled(!read_only && in_edition);
    ui->btn_group->setEnabled(!read_only && in_edition);
    ui->btn_z->setEnabled(!read_only && in_edition);
 
@@ -482,7 +478,7 @@ void DialogLuminosityPrior::loadMainGrid(){
   grid_model->setColumnCount(5);
 
   QStringList  setHeaders;
-  setHeaders<<"Id"<<"Name"<<"Unit"<<"Corrected for Reddening"<<"Regions"<<"Message";
+  setHeaders<<"Id"<<"Name"<<"Unit"<<"Regions"<<"Message";
   grid_model->setHorizontalHeaderLabels(setHeaders);
 
   size_t id =0;
@@ -512,16 +508,6 @@ void DialogLuminosityPrior::loadMainGrid(){
       item_tp->setData(QColor("orange"), Qt::BackgroundRole);
     }
     items.push_back(item_tp);
-
-    QString red_string ="NO";
-    if (!config_pair.second.getReddened()){
-      red_string="YES";
-    }
-    QStandardItem* item_red = new QStandardItem(red_string);
-    if (!param_space_ok){
-      item_red->setData(QColor("orange"), Qt::BackgroundRole);
-    }
-    items.push_back(item_red);
 
     QStandardItem* item_nb = new QStandardItem(QString::number(config_pair.second.getLuminosityFunctionList().size()));
     if (!param_space_ok){
@@ -678,7 +664,6 @@ bool DialogLuminosityPrior::validateInput(const size_t& current_index)  {
 
 void DialogLuminosityPrior::updateInfo(LuminosityPriorConfig& info){
   info.setInMag(ui->cb_unit->currentIndex()==0);
-  info.setReddened(!ui->ck_reddening->isChecked());
   info.setZs(m_zs);
   info.setSedGroups(m_groups);
 
@@ -700,12 +685,11 @@ void DialogLuminosityPrior::updatePriorRow(QModelIndex& index,const size_t& row,
   bool param_space_ok = info.isCompatibleWithParameterSpace(m_z_min,m_z_max,m_model.getSeds());
 
   if (param_space_ok){
-    ui->table_priors->model()->setData(index.sibling(row, 6),"");
+    ui->table_priors->model()->setData(index.sibling(row, 5),"");
     ui->table_priors->model()->setData(index.sibling(row, 1),QColor("white"), Qt::BackgroundRole);
     ui->table_priors->model()->setData(index.sibling(row, 2),QColor("white"), Qt::BackgroundRole);
     ui->table_priors->model()->setData(index.sibling(row, 3),QColor("white"), Qt::BackgroundRole);
     ui->table_priors->model()->setData(index.sibling(row, 4),QColor("white"), Qt::BackgroundRole);
-    ui->table_priors->model()->setData(index.sibling(row, 5),QColor("white"), Qt::BackgroundRole);
   }
 
   ui->table_priors->model()->setData(index.sibling(row, 1), ui->txt_name->text());
@@ -718,16 +702,9 @@ void DialogLuminosityPrior::updatePriorRow(QModelIndex& index,const size_t& row,
         QString::fromStdString("FLUX"));
   }
 
-  if (info.getReddened()) {
-    ui->table_priors->model()->setData(index.sibling(row, 3),
-        QString::fromStdString("NO"));
-  } else {
-    ui->table_priors->model()->setData(index.sibling(row, 3),
-        QString::fromStdString("YES"));
 
-  }
 
-  ui->table_priors->model()->setData(index.sibling(row, 4),
+  ui->table_priors->model()->setData(index.sibling(row, 3),
       QString::number((info.getZs().size() - 1) * info.getSedGRoups().size()));
   ui->table_priors->resizeColumnsToContents();
   ui->table_priors->horizontalHeader()->setStretchLastSection(true);
