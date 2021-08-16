@@ -36,6 +36,8 @@ void DataPackHandler::check(bool force) {
   auto get_version_process = new QProcess;
   connect(get_version_process, SIGNAL(finished(int, QProcess::ExitStatus)),
       this, SLOT(getDPVersionFinished(int, QProcess::ExitStatus)));
+  connect(get_version_process, SIGNAL(errorOccurred(QProcess::ProcessError)),
+          this, SLOT(getDPVersionError(QProcess::ProcessError)));
 
   QStringList s3;
   s3
@@ -148,6 +150,13 @@ void DataPackHandler::getResolutionFinished(int, QProcess::ExitStatus){
   QMessageBox::information(m_parent, "Data Package Imported ...",
                           QString::fromStdString("The new version of the data package has been successfully imported."),
                           QMessageBox::Close);
+}
+
+void DataPackHandler::getDPVersionError(QProcess::ProcessError error) {
+  completed();
+  QMessageBox::warning(m_parent, "Failed to update Data Package",
+                       QString::fromStdString("Failed to check the remote version of the Data Package: Probably Phosphoros is not in the PATH"),
+                       QMessageBox::Close);
 }
 
 }
