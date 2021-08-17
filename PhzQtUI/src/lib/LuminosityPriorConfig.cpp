@@ -33,14 +33,6 @@ bool LuminosityPriorConfig::getInMag() const{
    m_in_mag=std::move(in_mag);
  }
 
- bool LuminosityPriorConfig::getReddened() const{
-   return m_reddened;
-
- }
- void LuminosityPriorConfig::setReddened(bool reddened){
-   m_reddened=std::move(reddened);
- }
-
 
  std::vector<LuminosityPriorConfig::SedGroup> LuminosityPriorConfig::getSedGRoups() const{
    return m_sed_groups;
@@ -136,7 +128,6 @@ LuminosityPriorConfig LuminosityPriorConfig::deserialize(QDomDocument& doc){
 
     QDomElement root_node = doc.documentElement();
     config.setInMag(root_node.attribute("InMag").toStdString()!="0");
-    config.setReddened(root_node.attribute("Reddened").toStdString()!="0");
 
     auto groups_node = root_node.firstChildElement("SedGroups");
     auto group_list =groups_node.childNodes();
@@ -209,7 +200,6 @@ LuminosityPriorConfig LuminosityPriorConfig::deserialize(QDomDocument& doc){
    QDomElement root = doc.createElement("LuminosityPrior");
 
    root.setAttribute("InMag",QString::fromStdString(std::to_string(m_in_mag)));
-   root.setAttribute("Reddened",QString::fromStdString(std::to_string(m_reddened)));
    doc.appendChild(root);
 
    QDomElement groups_node = doc.createElement("SedGroups");
@@ -265,13 +255,8 @@ LuminosityPriorConfig LuminosityPriorConfig::deserialize(QDomDocument& doc){
          mag_value = "NO";
        }
 
-       std::string red_value = "YES";
-       if (m_reddened) {
-         red_value = "NO";
-       }
 
        options["luminosity-function-expressed-in-magnitude"].value() = boost::any(mag_value);
-       options["luminosity-function-corrected-for-extinction"].value() = boost::any(red_value);
 
        return options;
  }

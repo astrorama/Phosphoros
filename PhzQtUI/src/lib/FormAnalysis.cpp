@@ -1284,11 +1284,11 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
 
   if (ui->rb_sample_scaling->isChecked()) {
-    options_map["scale-factor-magrinalization-enabled"].value() = boost::any(yes_flag);
+    options_map["scale-factor-marginalization-enabled"].value() = boost::any(yes_flag);
 
-    options_map["scale-factor-magrinalization-sample-number"].value() = boost::any(ui->sb_lum_sample_number->value());
+    options_map["scale-factor-marginalization-sample-number"].value() = boost::any(ui->sb_lum_sample_number->value());
 
-    options_map["scale-factor-magrinalization-range-size"].value() = boost::any(ui->dsb_sample_range->value());
+    options_map["scale-factor-marginalization-range-size"].value() = boost::any(ui->dsb_sample_range->value());
 
     PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
         ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSamplingNumber", QString::number(ui->sb_lum_sample_number->value()).toStdString());

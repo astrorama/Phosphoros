@@ -38,9 +38,6 @@ public:
   bool getInMag() const;
   void setInMag(bool in_mag);
 
-  bool getReddened() const;
-  void setReddened(bool reddened);
-
   std::vector<SedGroup> getSedGRoups() const;
   void setSedGroups(std::vector<SedGroup> sed_groups);
 
@@ -70,7 +67,6 @@ public:
 private:
     std::string m_name;
     bool m_in_mag = true;
-    bool m_reddened = true;
     std::vector<SedGroup> m_sed_groups;
     std::vector<double> m_zs;
     std::vector<LuminosityFunctionInfo> m_luminosity_function_list{};
