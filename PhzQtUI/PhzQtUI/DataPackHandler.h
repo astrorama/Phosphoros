@@ -34,6 +34,8 @@ private slots:
 
   void getResolutionFinished(int, QProcess::ExitStatus);
 
+  void getDPVersionError(QProcess::ProcessError);
+
 private:
   QWidget* m_parent;
   std::string m_version_file;
