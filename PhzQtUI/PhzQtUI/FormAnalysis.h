@@ -107,17 +107,16 @@ void on_btn_ToPP_clicked();
     void on_cb_igm_currentIndexChanged(const QString &);
 
     void on_cb_CompatibleGrid_currentTextChanged(const QString &);
-
-    void on_cb_CompatibleGalCorrGrid_currentTextChanged(const QString &);
-
-
     void on_btn_GetConfigGrid_clicked();
-
     void on_btn_RunGrid_clicked();
 
+    void on_cb_CompatibleGalCorrGrid_currentTextChanged(const QString &);
     void on_btn_GetGalCorrConfigGrid_clicked();
-
     void on_btn_RunGalCorrGrid_clicked();
+
+    void on_cb_CompatibleShiftGrid_currentTextChanged(const QString &);
+    void on_btn_GetShiftConfigGrid_clicked();
+    void on_btn_RunShiftGrid_clicked();
 
     void on_rb_gc_off_clicked();
     void on_rb_gc_col_clicked();
@@ -200,11 +199,18 @@ private:
 
     void updateGridSelection();
     void updateGalCorrGridSelection();
+
+
+    void updateFilterShiftGridSelection();
+
     bool checkGridSelection(bool addFileCheck, bool acceptNewFile);
     bool checkGalacticGridSelection(bool addFileCheck, bool acceptNewFile);
+    bool checkFilterShiftGridSelection(bool addFileCheck, bool acceptNewFile);
     bool checkCompatibleGalacticGrid(std::string file_name);
+    bool checkCompatibleFilterShiftGrid(std::string file_name);
     std::map<std::string, boost::program_options::variable_value> getGridConfiguration();
     std::map<std::string, boost::program_options::variable_value> getGalacticCorrectionGridConfiguration();
+    std::map<std::string, boost::program_options::variable_value> getFilterShiftGridConfiguration();
 
     bool checkSedWeightFile(std::string file_name);
     std::string getSedWeightFileName();

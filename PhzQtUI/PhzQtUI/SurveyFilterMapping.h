@@ -142,6 +142,10 @@ public:
 
     bool getDoRecomputeError() const;
 
+    void setDefineFilterShift(bool define_filter_shift);
+
+    bool getDefineFilterShift() const;
+
 
 
     /**
@@ -208,6 +212,7 @@ private:
     double m_non_detection = -99.;
     double m_upper_limit = -99.;
     bool m_do_recompute_error = false;
+    bool m_define_filter_shift = false;
 
     void ReadFilters();
 

@@ -214,11 +214,13 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
     const std::list<std::string>& selected_filters,
     std::string igm_type,
     const std::string luminosity_filter,
-    bool model_grid) {
+    int grid_type) {
 
   std::string rootPath = FileUtils::getPhotmetricGridRootPath(true,catalog);
-  if (!model_grid){
+  if (grid_type==2) {
     rootPath = FileUtils::getGalacticCorrectionGridRootPath(true,catalog);
+  } else if (grid_type==3) {
+    rootPath = FileUtils::getFilterShiftGridRootPath(true,catalog);
   }
   std::list < std::string > list;
   if (rootPath.length()>0){

@@ -108,9 +108,10 @@ void FormSurveyMapping::fillControlsWithSelected() {
       ui->txt_nonDetection->setText(QString::number(selected_survey.getNonDetection()));
       ui->txt_UpperLimit->setText(QString::number(selected_survey.getUpperLimit()));
       ui->ckb_error_prop->setCheckState(selected_survey.getDoRecomputeError() ? Qt::Checked : Qt::Unchecked);
+      ui->ckb_filterShift->setCheckState(selected_survey.getDefineFilterShift() ? Qt::Checked : Qt::Unchecked);
 
 
-      if (ui->table_Filter->model()!=NULL) {
+      if (ui->table_Filter->model() != NULL) {
         disconnect(ui->table_Filter->model(), SIGNAL(itemChanged(QStandardItem *)), 0, 0);
       }
 
@@ -128,6 +129,7 @@ void FormSurveyMapping::fillControlsWithSelected() {
       ui->table_Filter->setItemDelegateForColumn(6, new NumberItemDelegate());
       ui->table_Filter->setItemDelegateForColumn(7, new NumberItemDelegate());
       ui->table_Filter->setItemDelegateForColumn(8, new BoolItemDelegate());
+      ui->table_Filter->setItemDelegateForColumn(9, new FilterMappingItemDelegate(getFilteredColumns(), "NONE"));
 
 
 
@@ -136,6 +138,7 @@ void FormSurveyMapping::fillControlsWithSelected() {
       ui->table_Filter->setColumnHidden(5, !selected_survey.getDoRecomputeError());
       ui->table_Filter->setColumnHidden(6, !selected_survey.getDoRecomputeError());
       ui->table_Filter->setColumnHidden(7, !selected_survey.getDoRecomputeError());
+      ui->table_Filter->setColumnHidden(9, !selected_survey.getDefineFilterShift());
       ui->table_Filter->setSelectionBehavior(QAbstractItemView::SelectRows);
       ui->table_Filter->setSelectionMode(QAbstractItemView::SingleSelection);
       ui->table_Filter->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -205,7 +208,7 @@ void FormSurveyMapping::setFilterMappingInEdition(){
     ui->txt_nonDetection->setEnabled(has_mapping_selected);
     ui->txt_UpperLimit->setEnabled(has_mapping_selected);
     ui->ckb_error_prop->setEnabled(has_mapping_selected);
-
+    ui->ckb_filterShift->setEnabled(has_mapping_selected);
     ui->btn_SelectFilters->setEnabled(has_mapping_selected);
 
     ui->btn_prop_err->setEnabled(false);
@@ -232,6 +235,7 @@ void FormSurveyMapping::setFilterMappingInView() {
     ui->txt_nonDetection->setEnabled(has_mapping_selected);
     ui->txt_UpperLimit->setEnabled(has_mapping_selected);
     ui->ckb_error_prop->setEnabled(has_mapping_selected);
+    ui->ckb_filterShift->setEnabled(has_mapping_selected);
     ui->btn_SelectFilters->setEnabled(has_mapping_selected);
 
     m_mappingInsert = false;
@@ -391,12 +395,12 @@ void FormSurveyMapping::on_btn_prop_err_clicked(){
            message ,
            QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
 
-      for (int index = 0 ; index < model->getFilters().size(); ++index) {
-        model->setItem(index, 4, new QStandardItem(QString::number(n)));
+      for (size_t index_col = 0 ; index_col < model->getFilters().size(); ++index_col) {
+        model->setItem(index_col, 4, new QStandardItem(QString::number(n)));
         if (do_err) {
-          model->setItem(index, 5, new QStandardItem(QString::number(alpha)));
-          model->setItem(index, 6, new QStandardItem(QString::number(beta)));
-          model->setItem(index, 7, new QStandardItem(QString::number(gamma)));
+          model->setItem(index_col, 5, new QStandardItem(QString::number(alpha)));
+          model->setItem(index_col, 6, new QStandardItem(QString::number(beta)));
+          model->setItem(index_col, 7, new QStandardItem(QString::number(gamma)));
         }
       }
       setFilterMappingInEdition();
@@ -405,7 +409,7 @@ void FormSurveyMapping::on_btn_prop_err_clicked(){
   }
 }
 
-void FormSurveyMapping::on_ckb_error_prop_stateChanged(int state){
+void FormSurveyMapping::on_ckb_error_prop_stateChanged(int state) {
   m_survey_model_ptr->setDoRecomputeErrorToSelected(state);
 
   ui->table_Filter->setColumnHidden(5, state == 0);
@@ -413,6 +417,16 @@ void FormSurveyMapping::on_ckb_error_prop_stateChanged(int state){
   ui->table_Filter->setColumnHidden(7, state == 0);
 
   setFilterMappingInEdition();
+}
+
+
+
+void FormSurveyMapping::on_ckb_filterShift_stateChanged(int state) {
+   m_survey_model_ptr->setDefineFilterShiftToSelected(state);
+
+   ui->table_Filter->setColumnHidden(9, state == 0);
+
+   setFilterMappingInEdition();
 }
 
 
@@ -445,6 +459,7 @@ void FormSurveyMapping::copyingFinished(bool s, QVector<QString> path){
     loadColumnFromFile(path[0].toStdString());
     ui->table_Filter->setItemDelegateForColumn(1, new FilterMappingItemDelegate(getFilteredColumns()));
     ui->table_Filter->setItemDelegateForColumn(2, new FilterMappingItemDelegate(getFilteredColumns()));
+    ui->table_Filter->setItemDelegateForColumn(9, new FilterMappingItemDelegate(getFilteredColumns(),"NONE"));
     m_default_survey = path[0].toStdString();
     m_survey_model_ptr->setDefaultCatalogToSelected(QString::fromStdString(m_default_survey));
     m_survey_model_ptr->setColumnListToSelected(m_column_from_file);
@@ -670,6 +685,7 @@ std::vector<FilterMapping> FormSurveyMapping::getMappingFromGrid() const {
        auto beta = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 6)).toString().toDouble();
        auto gamma = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 7)).toString().toDouble();
        bool fromMag = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 8)).toString().toInt();
+       auto shift = ui->table_Filter->model()->data(ui->table_Filter->model()->index(i, 9)).toString().toStdString();
 
        FilterMapping mapping{};
        mapping.setFilterFile(name);
@@ -680,6 +696,7 @@ std::vector<FilterMapping> FormSurveyMapping::getMappingFromGrid() const {
        mapping.setBeta(beta);
        mapping.setGamma(gamma);
        mapping.setFromMag(fromMag);
+       mapping.setShiftColumn(shift);
        filters.push_back(mapping);
      }
      return filters;
@@ -737,6 +754,7 @@ void FormSurveyMapping::filterEditionPopupClosing(std::vector<std::string> filte
 
    ui->table_Filter->setItemDelegateForColumn(1, new FilterMappingItemDelegate(getFilteredColumns()));
    ui->table_Filter->setItemDelegateForColumn(2, new FilterMappingItemDelegate(getFilteredColumns()));
+   ui->table_Filter->setItemDelegateForColumn(9, new FilterMappingItemDelegate(getFilteredColumns(),"NONE"));
 
 
    setFilterMappingInEdition();

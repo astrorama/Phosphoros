@@ -46,7 +46,7 @@ public:
       const std::list<std::string> & selected_filters,
       std::string igm_type,
       const std::string luminosity_filter,
-      bool model_grid = true);
+      int grid_type = 1);
 
   /**
    * @breif Build a boost configuration map out of the selected parameters.

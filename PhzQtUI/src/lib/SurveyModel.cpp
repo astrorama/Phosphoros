@@ -244,11 +244,15 @@ void SurveyModel::loadSurvey() {
  }
 
 
- void SurveyModel::setDoRecomputeErrorToSelected(bool new_do_recompute){
+ void SurveyModel::setDoRecomputeErrorToSelected(bool new_do_recompute) {
    m_edited_survey.setDoRecomputeError(new_do_recompute);
    m_in_edition = true;
  }
 
+ void SurveyModel::setDefineFilterShiftToSelected(bool new_define_shift) {
+     m_edited_survey.setDefineFilterShift(new_define_shift);
+     m_in_edition = true;
+ }
 
  const std::vector<QString> SurveyModel::getSurveyList() const {
    std::vector<QString> result = {};

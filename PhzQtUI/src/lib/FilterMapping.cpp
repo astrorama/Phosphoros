@@ -3,7 +3,9 @@
 namespace Euclid {
 namespace PhzQtUI {
 
-FilterMapping::FilterMapping() {}
+FilterMapping::FilterMapping() {
+  m_shift_column = "NONE";
+}
 
 
 std::string FilterMapping::getFluxColumn() const {
@@ -20,6 +22,15 @@ std::string FilterMapping::getErrorColumn() const {
 
 void FilterMapping::setErrorColumn(std::string error_column) {
     m_error_column = error_column;
+}
+
+std::string FilterMapping::getShiftColumn() const {
+  return m_shift_column;
+}
+
+
+void FilterMapping::setShiftColumn(std::string shift_column) {
+  m_shift_column = shift_column;
 }
 
 std::string FilterMapping::getFilterFile() const {

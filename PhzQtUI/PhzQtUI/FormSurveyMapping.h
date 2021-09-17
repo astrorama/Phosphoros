@@ -105,6 +105,8 @@ void filter_model_changed(QStandardItem *);
 
     void on_ckb_error_prop_stateChanged(int state);
 
+    void on_ckb_filterShift_stateChanged(int state);
+
 
 
 private:
@@ -115,8 +117,8 @@ private:
     std::set<std::string> m_column_from_file;
     std::string m_default_survey;
     std::shared_ptr<SurveyModel> m_survey_model_ptr;
-    bool m_diconnect_cb=false;
-    bool m_loading=false;
+    bool m_diconnect_cb = false;
+    bool m_loading = false;
 
     void fillControlsWithSelected();
 
@@ -125,9 +127,12 @@ private:
     void setFilterMappingInEdition();
     void setFilterMappingInView();
     void loadColumnFromFile(std::string path);
-    void fillCbColumns(std::string current_id_value="",std::string current_ra_value="",
-        std::string current_dec_value="",std::string current_gebv_value="",
-        std::string current_refz_value="");
+    void fillCbColumns(
+        std::string current_id_value = "",
+        std::string current_ra_value = "",
+        std::string current_dec_value = "",
+        std::string current_gebv_value = "",
+        std::string current_refz_value = "");
 
     std::vector<std::string> getGridFiltersNames() const;
     std::vector<FilterMapping> getMappingFromGrid() const;

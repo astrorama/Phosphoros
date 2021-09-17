@@ -45,6 +45,18 @@ public:
     void setErrorColumn(std::string error_column);
 
     /**
+     * @brief Get the Filter Shift Column.
+     * @return the current Filter Shift Column.
+     */
+    std::string getShiftColumn() const;
+
+    /**
+     * @brief Set the Filter Shift Column.
+     * @param shift_column.
+     */
+    void setShiftColumn(std::string shift_column);
+
+    /**
      * @brief Get the Filter File Name.
      * @return the current Filter File Name.
      */
@@ -78,6 +90,7 @@ public:
 private:
     std::string m_flux_column;
     std::string m_error_column;
+    std::string m_shift_column;
     std::string m_filter_trnsmission_file;
     double m_n = 3;
     double m_alpha = 1.0;

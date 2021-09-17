@@ -15,12 +15,15 @@ namespace PhzQtUI {
 class FilterMappingItemDelegate: public QItemDelegate {
   Q_OBJECT
 public:
+
+
   /**
    * @brief constructor
    * @param columns List of the available column to be proposed in the dropdown.
    * @param parent Parent object into which the edition take place.
    */
   FilterMappingItemDelegate(std::set<std::string> columns,
+      std::string default_value = "",
       QObject * parent = 0);
 
   /**
@@ -47,6 +50,7 @@ public:
 
 private:
   std::set<std::string> m_columns;
+  std::string m_default;
 };
 
 }

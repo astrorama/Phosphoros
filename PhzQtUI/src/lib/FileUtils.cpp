@@ -518,6 +518,22 @@ std::string FileUtils::getGalacticCorrectionGridRootPath(bool check, const std::
 }
 
 
+std::string FileUtils::getFilterShiftGridRootPath(bool check, const std::string& catalog_type) {
+  if (catalog_type.length()>0){
+        QString path = QString::fromStdString(FileUtils::getIntermediaryProductRootPath(false,catalog_type))+QDir::separator()+"FilterVariationCoefficientGrids";
+        QFileInfo info(path);
+        if (check){
+            if (!info.exists()){
+                QDir().mkpath(path);
+            }
+        }
+        return info.absoluteFilePath().toStdString();
+      }
+
+      return "";
+}
+
+
 std::string FileUtils::getSedPriorRootPath() {
   QString path = QString::fromStdString(readPath()["AuxiliaryData"])+QDir::separator()+"GenericPriors"+QDir::separator()+"SedWeight";
   QFileInfo info(path);

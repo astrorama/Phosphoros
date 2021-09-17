@@ -132,6 +132,7 @@ public slots:
   void setNonDetectionToSelected(QString new_name);
   void setHasUpperLimitToSelected(QString new_name);
   void setDoRecomputeErrorToSelected(bool new_do_recompute);
+  void setDefineFilterShiftToSelected(bool new_define_shift);
   void setCopiedColumnsToSelected(std::map<std::string, std::string> copied_columns);
 
 private:
