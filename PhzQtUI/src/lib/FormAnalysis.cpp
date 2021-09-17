@@ -989,10 +989,13 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getF
   std::string grid_name = ui->cb_CompatibleGrid->currentText().toStdString();
   std::string output_grid_name = ui->cb_CompatibleShiftGrid->currentText().toStdString();
   std::string survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+  std::string f99 = "F99/F99_3.1";
 
   options_map["filter-variation-min-shift"].value() = boost::any(min_value);
   options_map["filter-variation-max-shift"].value() = boost::any(max_value);
   options_map["filter-variation-shift-samples"].value() = boost::any(sample_number);
+
+  options_map["milky-way-reddening-curve-name"].value() = boost::any(f99);
 
   auto global_options = PreferencesUtils::getCosmologyConfigurations();
   for (auto& pair : global_options) {
