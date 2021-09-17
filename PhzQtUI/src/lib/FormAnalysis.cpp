@@ -2318,7 +2318,7 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
             // GalCorr Grid
             if (!ui->rb_gc_off->isChecked()) {
               auto grid_galactic_corr_file_name = selected_folder+QString::fromStdString("/GalacticCorrGrid.CGCCG.conf");
-              auto galactic_corr_config_map = getGridConfiguration();
+              auto galactic_corr_config_map = getGalacticCorrectionGridConfiguration();
               PhzUITools::ConfigurationWriter::writeConfiguration(galactic_corr_config_map,
                                                                   grid_galactic_corr_file_name.toStdString());
               command += QString::fromStdString("Phosphoros CGCCG --config-file ") + grid_galactic_corr_file_name + cr;
