@@ -200,8 +200,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>938</width>
-        <height>782</height>
+        <width>942</width>
+        <height>766</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -220,8 +220,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>920</width>
-            <height>536</height>
+            <width>930</width>
+            <height>526</height>
            </rect>
           </property>
           <attribute name="label">
@@ -430,8 +430,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>920</width>
-            <height>536</height>
+            <width>930</width>
+            <height>526</height>
            </rect>
           </property>
           <attribute name="label">
@@ -591,6 +591,141 @@
             </widget>
            </item>
            <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_35">
+             <item>
+              <widget class="QLabel" name="label_30">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Variation Range: [</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="sp_samp_min">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="decimals">
+                <number>1</number>
+               </property>
+               <property name="minimum">
+                <double>-1000.000000000000000</double>
+               </property>
+               <property name="maximum">
+                <double>0.000000000000000</double>
+               </property>
+               <property name="value">
+                <double>-100.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_29">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>;</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="sp_samp_max">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="decimals">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <double>1000.000000000000000</double>
+               </property>
+               <property name="value">
+                <double>100.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_25">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>] Å </string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_23">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_24">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Sample number:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="sp_samp_num">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="minimum">
+                <number>3</number>
+               </property>
+               <property name="maximum">
+                <number>500</number>
+               </property>
+               <property name="value">
+                <number>200</number>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_24">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
             <layout class="QHBoxLayout" name="horizontalLayout_34">
              <item>
               <layout class="QVBoxLayout" name="verticalLayout_27">
@@ -668,8 +803,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>920</width>
-            <height>536</height>
+            <width>930</width>
+            <height>526</height>
            </rect>
           </property>
           <attribute name="label">
@@ -902,8 +1037,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>920</width>
-            <height>536</height>
+            <width>930</width>
+            <height>526</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1055,8 +1190,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>920</width>
-            <height>536</height>
+            <width>930</width>
+            <height>526</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1229,8 +1364,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>907</width>
-            <height>561</height>
+            <width>916</width>
+            <height>610</height>
            </rect>
           </property>
           <attribute name="label">
