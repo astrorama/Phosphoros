@@ -982,9 +982,9 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getFilterShiftGridConfiguration(){
   std::map<std::string, boost::program_options::variable_value> options_map =
                FileUtils::getPathConfiguration(false, true, true, false);
-  double min_value = -100.0;
-  double max_value = 100.0;
-  int sample_number = 200;
+  double min_value = ui->sp_samp_max->value();
+  double max_value = ui->sp_samp_min>value();
+  int sample_number = ui->sp_samp_num->value();
   std::string igm = ui->cb_igm->currentText().toStdString();
   std::string grid_name = ui->cb_CompatibleGrid->currentText().toStdString();
   std::string output_grid_name = ui->cb_CompatibleShiftGrid->currentText().toStdString();
