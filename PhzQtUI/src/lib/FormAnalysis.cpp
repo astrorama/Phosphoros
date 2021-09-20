@@ -982,8 +982,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getFilterShiftGridConfiguration(){
   std::map<std::string, boost::program_options::variable_value> options_map =
                FileUtils::getPathConfiguration(false, true, true, false);
-  double min_value = ui->sp_samp_max->value();
-  double max_value = ui->sp_samp_min->value();
+  double min_value = ui->sp_samp_min->value();
+  double max_value = ui->sp_samp_max->value();
   int sample_number = ui->sp_samp_num->value();
   std::string igm = ui->cb_igm->currentText().toStdString();
   std::string grid_name = ui->cb_CompatibleGrid->currentText().toStdString();
@@ -1472,7 +1472,12 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
     options_map["copy-columns"].value() = boost::any(option);
   }
-
+  
+  if (m_survey_model_ptr->getSelectedSurvey().getDefineFilterShift()) {
+  	std::string filter_grid = ui->cb_CompatibleGrid->currentText().toStdString();
+  	options_map["filter-mapping-file"].value() = boost::any(filter_grid);
+  }
+   
 
   if (ui->rb_sample_scaling->isChecked()) {
     options_map["scale-factor-marginalization-enabled"].value() = boost::any(yes_flag);
