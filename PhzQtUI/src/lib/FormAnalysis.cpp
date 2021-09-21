@@ -2589,6 +2589,15 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
               command += QString::fromStdString("Phosphoros CGCCG --config-file ") + grid_galactic_corr_file_name + cr;
             }
 
+
+            // FilterShift Grid
+			if (m_survey_model_ptr->getSelectedSurvey().getDefineFilterShift()) {
+				auto filter_shift_corr_file_name = selected_folder+QString::fromStdString("/FilterVariationCoefficientGrid.CFVCG.conf");
+				auto filter_shift_config_map = getFilterShiftGridConfiguration();
+				PhzUITools::ConfigurationWriter::writeConfiguration(filter_shift_config_map, filter_shift_corr_file_name.toStdString());
+				command += QString::fromStdString("Phosphoros CFVCG --config-file ") + filter_shift_corr_file_name + cr;
+			}
+
             // Sed weight
             if (ui->cb_sedweight->isChecked()) {
                auto grid_sed_weight_file_name = selected_folder+QString::fromStdString("/SedWeightGrid.CSW.conf");
