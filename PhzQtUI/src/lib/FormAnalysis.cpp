@@ -2235,16 +2235,18 @@ template<typename ReturnType, int I>
   void FormAnalysis::on_rb_best_scaling_toggled(bool on) {
     ui->rb_sample_scaling->setChecked(!on);
     ui->wdg_sample->setEnabled(!on);
+    std::string  param = on ? "False":"True";
     PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                          ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSampling",
-                         "False");
+						 param);
   }
   void FormAnalysis::on_rb_sample_scaling_toggled(bool on) {
     ui->rb_best_scaling->setChecked(!on);
     ui->wdg_sample->setEnabled(on);
+    std::string param = !on ? "False":"True";
     PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                          ui->cb_AnalysisModel->currentText().toStdString() + "_ScaleSampling",
-                         "True");
+						 param);
   }
 
 
