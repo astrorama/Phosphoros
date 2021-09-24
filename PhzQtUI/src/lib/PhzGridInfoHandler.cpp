@@ -230,8 +230,9 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
 
     foreach (const QString &fileName , fileNames) {
       auto file_path = root_qdir.absoluteFilePath(fileName);
-     // logger.info() << "Checking parameter compatibility for file :" << file_path.toStdString();
+      //  logger.info() << "Checking parameter compatibility for file :" << file_path.toStdString();
       if (checkGridFileCompatibility(file_path, axes, selected_filters, igm_type, luminosity_filter)) {
+       //  logger.info() << "File accepted :" << file_path.toStdString();
         list.push_back(fileName.toStdString());
       }
     }

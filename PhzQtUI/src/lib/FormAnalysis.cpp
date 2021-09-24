@@ -249,6 +249,31 @@ try {
 }
 
 
+bool FormAnalysis::checkCompatibleModelGrid(std::string file_name) {
+
+	QFileInfo info(
+	  QString::fromStdString(
+		  FileUtils::getPhotmetricGridRootPath(true,
+			  ui->cb_AnalysisSurvey->currentText().toStdString()))
+		  + QDir::separator() + QString::fromStdString(file_name));
+
+	if(!info.exists()) {
+		return false;
+	} else {
+
+		auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
+		auto axis = selected_model.getAxesTuple();
+		auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
+			 m_survey_model_ptr->getSelectedSurvey().getName(), axis,
+			 getSelectedFilters(), ui->cb_igm->currentText().toStdString(),
+			 ui->lbl_lum_filter->text().toStdString(),
+			 2);
+		return (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
+
+	}
+}
+
+
 bool FormAnalysis::checkCompatibleGalacticGrid(std::string file_name){
   QFileInfo info(
       QString::fromStdString(
@@ -274,13 +299,15 @@ bool FormAnalysis::checkCompatibleGalacticGrid(std::string file_name){
 
 
 bool FormAnalysis::checkCompatibleFilterShiftGrid(std::string file_name) {
-  QFileInfo info(
-      QString::fromStdString(
+
+  QString full_name = QString::fromStdString(
           FileUtils::getFilterShiftGridRootPath(true,
               ui->cb_AnalysisSurvey->currentText().toStdString()))
-          + QDir::separator() + QString::fromStdString(file_name));
+          + QDir::separator() + QString::fromStdString(file_name);
+  QFileInfo info(full_name);
 
  if(!info.exists()) {
+
    return false;
  } else {
 
@@ -291,6 +318,7 @@ bool FormAnalysis::checkCompatibleFilterShiftGrid(std::string file_name) {
          getSelectedFilters(), ui->cb_igm->currentText().toStdString(),
          ui->lbl_lum_filter->text().toStdString(),
          3);
+   //  logger.info()<< "checkCompatibleFilterShiftGrid : there are " << possible_files.size() << " compatible file ";
    return (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
 
  }
@@ -386,19 +414,14 @@ void FormAnalysis::updateCorrectionSelection() {
   }
 }
 
-void FormAnalysis::adjustPhzGridButtons(bool enabled) {
-  adjustGalCorrGridButtons(enabled);
-
-}
-
-void FormAnalysis::adjustGalCorrGridButtons(bool enabled) {
+void FormAnalysis::adjustGridsButtons(bool enabled) {
   int toolbox_index = 1;
-
   bool name_ok = checkGridSelection(false, true);
+
   ui->btn_GetConfigGrid->setEnabled(enabled && name_ok);
   ui->btn_RunGrid->setEnabled(enabled && name_ok);
-  QString tool_tip = "Export the configuration file needed to run Phosphoros CMG tool which produce the grid containing the model photometries";
 
+  QString tool_tip = "Export the configuration file needed to run Phosphoros CMG tool which produce the grid containing the model photometries";
   QColor tab_color = Qt::black;
 
   if (!name_ok) {
@@ -407,6 +430,7 @@ void FormAnalysis::adjustGalCorrGridButtons(bool enabled) {
     tool_tip = "Please enter a valid grid name in order to compute the Grid or export the corresponding configuration.";
   } else if (!checkGridSelection(true, false)) {
     ui->cb_CompatibleGrid->lineEdit()->setStyleSheet("QLineEdit { color: orange }");
+    tool_tip = "The grid has not yet be computed.";
     tab_color = QColor("orange");
   } else {
     ui->cb_CompatibleGrid->lineEdit()->setStyleSheet("QLineEdit { color: black }");
@@ -455,7 +479,7 @@ void FormAnalysis::adjustGalCorrGridButtons(bool enabled) {
   ui->cb_CompatibleShiftGrid->setEnabled(needed && enabled);
   ui->btn_GetShiftConfigGrid->setEnabled(needed && enabled && name_ok);
   ui->btn_RunShiftGrid->setEnabled(needed && enabled && valid_model_grid && name_ok);
-  QString tool_tip_fs = "Export the configuration file needed to run Phosphoros CGCCG tool which produce the grid containing the coefficient for the correction of the Filters variation";
+  QString tool_tip_fs = "Export the configuration file needed to run Phosphoros CFVCG tool which produce the grid containing the coefficient for the correction of the Filters variation";
   if (!needed) {
     ui->cb_CompatibleShiftGrid->lineEdit()->setStyleSheet("QLineEdit { color: black }");
     tool_tip_fs = "the selected catalog do not define columns for the filter variation: no need to generate this grid.";
@@ -845,8 +869,7 @@ bool FormAnalysis::checkGridSelection(bool addFileCheck, bool acceptNewFile) {
           FileUtils::getPhotmetricGridRootPath(false,
               ui->cb_AnalysisSurvey->currentText().toStdString()))
           + QDir::separator() + QString::fromStdString(file_name));
-
-  return acceptNewFile || info.exists();
+  return acceptNewFile || (info.exists());
 }
 
 bool FormAnalysis::checkGalacticGridSelection(bool addFileCheck, bool acceptNewFile) {
@@ -990,6 +1013,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getF
   std::string output_grid_name = ui->cb_CompatibleShiftGrid->currentText().toStdString();
   std::string survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
   std::string f99 = "F99/F99_3.1";
+  std::string text_format = "TEXT";
 
   options_map["filter-variation-min-shift"].value() = boost::any(min_value);
   options_map["filter-variation-max-shift"].value() = boost::any(max_value);
@@ -1015,7 +1039,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getF
   options_map["igm-absorption-type"].value() = boost::any(igm);
   options_map["model-grid-file"].value() = boost::any(grid_name);
   options_map["output-filter-variation-coefficient-grid"].value() = boost::any(output_grid_name);
-
+  options_map["output-filter-variation-coefficient-grid-format"].value() = boost::any(text_format);
   return options_map;
 }
 
@@ -1474,8 +1498,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   }
   
   if (m_survey_model_ptr->getSelectedSurvey().getDefineFilterShift()) {
-  	std::string filter_grid = ui->cb_CompatibleGrid->currentText().toStdString();
-  	options_map["filter-mapping-file"].value() = boost::any(filter_grid);
+  	std::string filter_grid = ui->cb_CompatibleShiftGrid->currentText().toStdString();
+  	options_map["filter-variation-coefficient-grid-file"].value() = boost::any(filter_grid);
   }
    
 
@@ -1655,7 +1679,6 @@ template<typename ReturnType, int I>
 
 //  2. Photometry Grid
   void FormAnalysis::on_cb_CompatibleGrid_currentTextChanged(const QString &) {
-    adjustPhzGridButtons(true);
     std::string grid_name = ui->cb_CompatibleGrid->currentText().toStdString();
     size_t index = grid_name.find_last_of("/\\");
     if (index != string::npos) {
@@ -1668,7 +1691,7 @@ template<typename ReturnType, int I>
         }
      ui->cb_CompatibleGalCorrGrid->setItemText(ui->cb_CompatibleGalCorrGrid->currentIndex(),
                 QString::fromStdString(grid_name+"_MW_Param.txt"));
-    adjustGalCorrGridButtons(true);
+    adjustGridsButtons(true);
     setComputeCorrectionEnable();
     setRunAnnalysisEnable(true);
   }
@@ -1719,8 +1742,7 @@ template<typename ReturnType, int I>
       std::unique_ptr<DialogGridGeneration> dialog(new DialogGridGeneration());
       dialog->setValues(ui->cb_CompatibleGrid->currentText().toStdString(), config_map);
       if (dialog->exec()) {
-        adjustPhzGridButtons(true);
-        adjustGalCorrGridButtons(true);
+    	adjustGridsButtons(true);
         setComputeCorrectionEnable();
 
         PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
@@ -1735,23 +1757,23 @@ template<typename ReturnType, int I>
 
   void FormAnalysis::on_rb_gc_off_clicked() {
     PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "GalCorrType", "OFF");
-    adjustGalCorrGridButtons(true);
+    adjustGridsButtons(true);
     setRunAnnalysisEnable(true);
   }
   void FormAnalysis::on_rb_gc_col_clicked() {
     PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "GalCorrType", "COL");
-    adjustGalCorrGridButtons(true);
+    adjustGridsButtons(true);
     setRunAnnalysisEnable(true);
   }
   void FormAnalysis::on_rb_gc_planck_clicked() {
     PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "GalCorrType", "MAP");
-    adjustGalCorrGridButtons(true);
+    adjustGridsButtons(true);
     setRunAnnalysisEnable(true);
   }
 
 
   void FormAnalysis::on_cb_CompatibleGalCorrGrid_currentTextChanged(const QString &) {
-    adjustGalCorrGridButtons(true);
+    adjustGridsButtons(true);
     setComputeCorrectionEnable();
     setRunAnnalysisEnable(true);
   }
@@ -1799,7 +1821,7 @@ template<typename ReturnType, int I>
             std::unique_ptr<DialogGalCorrGridGeneration> dialog(new DialogGalCorrGridGeneration());
                  dialog->setValues(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), config_map);
                  if (dialog->exec()) {
-                   adjustGalCorrGridButtons(true);
+                   adjustGridsButtons(true);
                    setComputeCorrectionEnable();
 
                  }
@@ -1813,7 +1835,7 @@ template<typename ReturnType, int I>
 
 
   void FormAnalysis::on_cb_CompatibleShiftGrid_currentTextChanged(const QString &) {
-    adjustGalCorrGridButtons(true);
+	adjustGridsButtons(true);
     setComputeCorrectionEnable();
     setRunAnnalysisEnable(true);
   }
@@ -1861,7 +1883,7 @@ template<typename ReturnType, int I>
                 std::unique_ptr<DialogFilterShiftGridGeneration> dialog(new DialogFilterShiftGridGeneration());
                      dialog->setValues(ui->cb_CompatibleShiftGrid->currentText().toStdString(), config_map);
                      if (dialog->exec()) {
-                       adjustGalCorrGridButtons(true);
+                       adjustGridsButtons(true);
                        setComputeCorrectionEnable();
 
                      }
