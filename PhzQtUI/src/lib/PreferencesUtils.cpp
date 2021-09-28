@@ -128,6 +128,19 @@ void PreferencesUtils::setThreadNumberOverride(int value){
   setUserPreference("_global_preferences_","Thread-Number",std::to_string(value));
 }
 
+std::string PreferencesUtils::getLogLevel() {
+  auto value = getUserPreference("_global_preferences_","Log-Level");
+  if (value.length()==0){
+	return "INFO";
+  } else {
+	return value;
+  }
+}
+
+void PreferencesUtils::setLogLevel(std::string value) {
+	setUserPreference("_global_preferences_", "Log-Level", value);
+}
+
 int PreferencesUtils::getBufferSize() {
    auto value = getUserPreference("_global_preferences_","Buffer-Size");
    if (value.length()==0){
@@ -182,9 +195,15 @@ std::map<std::string, boost::program_options::variable_value> PreferencesUtils::
     options["thread-no"].value() = boost::any(value);
   }
 
-
-
   return options;
+}
+
+std::map<std::string, boost::program_options::variable_value> PreferencesUtils::getLogLevelConfigurations() {
+	std::map<std::string, boost::program_options::variable_value> options{};
+	std::string value = getLogLevel();
+	options["log-level"].value() = boost::any(value);
+
+	return options;
 }
 
 std::map<std::string, boost::program_options::variable_value> PreferencesUtils::getCosmologyConfigurations(){

@@ -971,6 +971,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 
     std::map<std::string, boost::program_options::variable_value> options_map =
              FileUtils::getPathConfiguration(false, true, true, false);
+
     options_map["catalog-type"].value() = boost::any(catalog_type);
     options_map["output-galactic-correction-coefficient-grid"].value() = boost::any(file_name);
 
@@ -996,6 +997,11 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
          options_map[pair.first] = pair.second;
     }
 
+    global_options = PreferencesUtils::getLogLevelConfigurations();
+	for (auto& pair : global_options) {
+		options_map[pair.first] = pair.second;
+	}
+
 
 
     return options_map;
@@ -1005,6 +1011,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getFilterShiftGridConfiguration(){
   std::map<std::string, boost::program_options::variable_value> options_map =
                FileUtils::getPathConfiguration(false, true, true, false);
+
   double min_value = ui->sp_samp_min->value();
   double max_value = ui->sp_samp_max->value();
   int sample_number = ui->sp_samp_num->value();
@@ -1028,6 +1035,11 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getF
   global_options = PreferencesUtils::getThreadConfigurations();
   for (auto& pair : global_options) {
        options_map[pair.first] = pair.second;
+  }
+
+  global_options = PreferencesUtils::getLogLevelConfigurations();
+  for (auto& pair : global_options) {
+	 options_map[pair.first] = pair.second;
   }
 
   options_map["catalog-type"].value() = boost::any(survey_name);
@@ -1234,6 +1246,11 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getS
   /// Config path
   std::map<std::string, boost::program_options::variable_value> options_map =
        FileUtils::getPathConfiguration(false, true, false, false);
+  auto global_options = PreferencesUtils::getLogLevelConfigurations();
+  for (auto& pair : global_options) {
+       options_map[pair.first] = pair.second;
+  }
+
   auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
   options_map["catalog-type"].value() = boost::any(survey_name);
 
@@ -1283,6 +1300,11 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   auto global_options = PreferencesUtils::getThreadConfigurations();
   for (auto& pair : global_options) {
       options_map[pair.first] = pair.second;
+  }
+
+  global_options = PreferencesUtils::getLogLevelConfigurations();
+  for (auto& pair : global_options) {
+       options_map[pair.first] = pair.second;
   }
 
   global_options = PreferencesUtils::getCosmologyConfigurations();

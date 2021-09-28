@@ -37,6 +37,7 @@ namespace Euclid {
         bool getOverrideThread();
         size_t getThreadNb();
         size_t getBufferSize();
+        QString getLogLevel();
         double getHubble();
         double getOmegaM();
         double getOmegaLambda();
@@ -77,8 +78,10 @@ namespace Euclid {
         void setResult(const QString & new_res_path);
 
 
-
         void setThread(int thread_nb);
+
+
+        void setLogLevel(QString new_log_level);
 
 
         void setDefaultThread(bool custom);
@@ -125,6 +128,8 @@ namespace Euclid {
         size_t m_thread_number_edited;
         size_t m_buffer_size_saved;
         size_t m_buffer_size_edited;
+        QString m_loglevel_saved;
+        QString m_loglevel_edited;
         double m_hubble_saved;
         double m_hubble_edited;
         double m_omega_m_saved;
