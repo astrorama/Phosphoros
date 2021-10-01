@@ -171,6 +171,10 @@ private slots:
     void on_rb_best_scaling_toggled(bool);
     void on_rb_sample_scaling_toggled(bool);
 
+
+    void on_cb_process_limit_stateChanged(int);
+    void on_cb_skip_stateChanged(int);
+
     void httpReadyPlanckRead();
     void cancelDownloadPlanck();
     void updateDownloadProgress(qint64 bytesRead, qint64 totalBytes);

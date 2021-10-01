@@ -1314,8 +1314,18 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   options_map["input-buffer-size"].value() = boost::any(PreferencesUtils::getBufferSize());
 
-  options_map["catalog-type"].value() = boost::any(survey_name);
 
+  if (ui->cb_skip->isChecked()) {
+	  int val = ui->sb_skip->value();
+	  options_map["input-skip-head"].value() = boost::any(val);
+  }
+
+  if (ui->cb_process_limit->isChecked()) {
+ 	  int val = ui->sb_process_limit->value();
+ 	  options_map["input-process-max"].value() = boost::any(val);
+  }
+
+  options_map["catalog-type"].value() = boost::any(survey_name);
 
   options_map["phz-output-dir"].value() = boost::any(
       ui->txt_outputFolder->text().toStdString());
@@ -2351,6 +2361,13 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
     dialog.setFileMode(QFileDialog::ExistingFile);
     if (dialog.exec()) {
       setInputCatalogName(dialog.selectedFiles()[0].toStdString());
+      ui->cb_skip->setChecked(false);
+	  ui->sb_skip->setValue(0);
+	  ui->sb_skip->setEnabled(false);
+	  ui->cb_process_limit->setChecked(false);
+	  ui->sb_process_limit->setValue(0);
+	  ui->sb_process_limit->setEnabled(false);
+
       setRunAnnalysisEnable(true);
     }
   }
@@ -2484,6 +2501,16 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
 
   void FormAnalysis::on_cb_likelihood_pdf_z_stateChanged(int) {
 
+  }
+
+
+
+  void FormAnalysis::on_cb_process_limit_stateChanged(int) {
+	  ui->sb_process_limit->setEnabled(ui->cb_process_limit->isChecked());
+  }
+
+  void FormAnalysis::on_cb_skip_stateChanged(int) {
+	  ui->sb_skip->setEnabled(ui->cb_skip->isChecked());
   }
 
 
