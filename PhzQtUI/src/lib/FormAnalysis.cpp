@@ -130,12 +130,13 @@ void FormAnalysis::updateSelection() {
 
   // select the right item
 
+  QString selected_model_name="";
   if(m_model_set_model_ptr->doNeedReload() || ui->cb_AnalysisModel->currentText().toStdString() != m_model_set_model_ptr->getSelectedModelSet().getName()){
     bool found = false;
     for (int i = 0; i < ui->cb_AnalysisModel->count(); i++) {
       if (ui->cb_AnalysisModel->itemText(i).toStdString() == m_model_set_model_ptr->getSelectedModelSet().getName()) {
         ui->cb_AnalysisModel->setCurrentIndex(i);
-        on_cb_AnalysisModel_currentIndexChanged(ui->cb_AnalysisModel->itemText(i));
+        selected_model_name = ui->cb_AnalysisModel->itemText(i);
         found=true;
         break;
       }
@@ -143,7 +144,7 @@ void FormAnalysis::updateSelection() {
 
     if (!found && ui->cb_AnalysisModel->count()>0){
        ui->cb_AnalysisModel->setCurrentIndex(0);
-       on_cb_AnalysisModel_currentIndexChanged(ui->cb_AnalysisModel->itemText(0));
+       selected_model_name = ui->cb_AnalysisModel->itemText(0);
     }
   }
 
@@ -155,8 +156,8 @@ void FormAnalysis::updateSelection() {
 
 
   // Disconnect the combobox event
-
   disconnect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString &)), 0, 0);
+
   // if needed: Fill the Parameter Space Combobox and set its index
   if (m_survey_model_ptr->doNeedReload()){
     ui->cb_AnalysisSurvey->clear();
@@ -167,13 +168,14 @@ void FormAnalysis::updateSelection() {
   }
 
   auto saved_catalog = m_survey_model_ptr->getSelectedSurvey();
+  QString selected_survey_name="";
   if(m_survey_model_ptr->doNeedReload() || ui->cb_AnalysisSurvey->currentText().toStdString() != saved_catalog.getName()){
     // select the right item
     bool found = false;
     for (int i = 0; i < ui->cb_AnalysisSurvey->count(); i++) {
       if (ui->cb_AnalysisSurvey->itemText(i).toStdString() == saved_catalog.getName()) {
         ui->cb_AnalysisSurvey->setCurrentIndex(i);
-        on_cb_AnalysisSurvey_currentIndexChanged(ui->cb_AnalysisSurvey->itemText(i));
+        selected_survey_name = ui->cb_AnalysisSurvey->itemText(i);
         found=true;
         break;
       }
@@ -181,7 +183,7 @@ void FormAnalysis::updateSelection() {
 
     if (!found && ui->cb_AnalysisSurvey->count()>0){
       ui->cb_AnalysisSurvey->setCurrentIndex(0);
-      on_cb_AnalysisSurvey_currentIndexChanged(ui->cb_AnalysisSurvey->itemText(0));
+      selected_survey_name = ui->cb_AnalysisSurvey->itemText(0);
     }
   }
 
@@ -206,7 +208,15 @@ void FormAnalysis::updateSelection() {
        }
     }
   }
-  updateGridSelection();
+
+
+
+  if (selected_survey_name != "") {
+	  on_cb_AnalysisSurvey_currentIndexChanged(selected_survey_name);
+  }
+
+
+
 }
 
 
