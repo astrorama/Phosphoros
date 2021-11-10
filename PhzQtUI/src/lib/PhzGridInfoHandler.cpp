@@ -214,11 +214,13 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
     const std::list<std::string>& selected_filters,
     std::string igm_type,
     const std::string luminosity_filter,
-    bool model_grid) {
+	GridType grid_type) {
 
   std::string rootPath = FileUtils::getPhotmetricGridRootPath(true,catalog);
-  if (!model_grid){
+  if (grid_type==GalacticReddeningCorrectionGrid) {
     rootPath = FileUtils::getGalacticCorrectionGridRootPath(true,catalog);
+  } else if (grid_type==FilterShiftCorrectionGrid) {
+    rootPath = FileUtils::getFilterShiftGridRootPath(true,catalog);
   }
   std::list < std::string > list;
   if (rootPath.length()>0){
@@ -228,8 +230,9 @@ std::list<std::string> PhzGridInfoHandler::getCompatibleGridFile(
 
     foreach (const QString &fileName , fileNames) {
       auto file_path = root_qdir.absoluteFilePath(fileName);
-     // logger.info() << "Checking parameter compatibility for file :" << file_path.toStdString();
+      //  logger.info() << "Checking parameter compatibility for file :" << file_path.toStdString();
       if (checkGridFileCompatibility(file_path, axes, selected_filters, igm_type, luminosity_filter)) {
+       //  logger.info() << "File accepted :" << file_path.toStdString();
         list.push_back(fileName.toStdString());
       }
     }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Euclid::PhzQtUI::DialogGridGeneration</class>
- <widget class="QDialog" name="Euclid::PhzQtUI::DialogGridGeneration">
+ <class>Euclid::PhzQtUI::DialogFilterShiftGridGeneration</class>
+ <widget class="QDialog" name="Euclid::PhzQtUI::DialogFilterShiftGridGeneration">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Model Grid Generation</string>
+   <string>Filter Variation Coefficiants Grid Generation</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -26,7 +26,7 @@
         </font>
        </property>
        <property name="text">
-        <string>(Re)-Generation of the Model Grid</string>
+        <string>(Re)-Generation of the Filter Variation Coefficiants  Grid</string>
        </property>
       </widget>
      </item>
@@ -139,7 +139,7 @@
   <connection>
    <sender>btn_cancel</sender>
    <signal>clicked()</signal>
-   <receiver>Euclid::PhzQtUI::DialogGridGeneration</receiver>
+   <receiver>Euclid::PhzQtUI::DialogFilterShiftGridGeneration</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">

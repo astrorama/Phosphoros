@@ -35,6 +35,10 @@ public:
 
     static void setThreadNumberOverride(int value);
 
+    static std::string  getLogLevel();
+
+    static void setLogLevel(std::string  value);
+
     static int getBufferSize();
 
     static void setBufferSize(int value);
@@ -45,6 +49,8 @@ public:
 
 
     static std::map<std::string, boost::program_options::variable_value> getThreadConfigurations();
+
+    static std::map<std::string, boost::program_options::variable_value> getLogLevelConfigurations();
 
     static std::map<std::string, boost::program_options::variable_value> getCosmologyConfigurations();
 

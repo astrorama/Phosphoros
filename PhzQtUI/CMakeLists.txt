@@ -13,6 +13,7 @@ elements_depends_on_subdirs(PhzLuminosity)
 elements_depends_on_subdirs(PhysicsUtils)
 elements_depends_on_subdirs(PhzExecutables)
 elements_depends_on_subdirs(PhzGalacticCorrection)
+elements_depends_on_subdirs(PhzFilterVariation)
 elements_depends_on_subdirs(EmissionLines)
 
 if(ELEMENTS_HIDE_WARNINGS)
@@ -42,11 +43,11 @@ add_definitions(
 elements_add_library(PhzQtUI ${PhUI_SRCS} ${PhUI_HEADERS_MOC} ${PhUI_FORMS_HEADERS} ${PhUI_RESOURCES_RCC}
                      LINK_LIBRARIES
                         ElementsKernel XYDataset PhzConfiguration PhzPhotometricCorrection
-                        PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzUtils PhzGalacticCorrection PhzExecutables
+                        PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzUtils PhzGalacticCorrection PhzFilterVariation PhzExecutables
                         Qt5::Core Qt5::Network Qt5::Gui Qt5::Widgets Qt5::Xml 
                      INCLUDE_DIRS
                         ElementsKernel XYDataset PhzConfiguration PhzPhotometricCorrection PhzModeling
-                        PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzGalacticCorrection
+                        PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzGalacticCorrection PhzFilterVariation
                         "${Qt5Core_INCLUDE_DIRS}" "${Qt5Concurrent_INCLUDE_DIRS}"
                         "${Qt5Network_INCLUDE_DIRS}"
                         "${Qt5Gui_INCLUDE_DIRS}" "${Qt5Widgets_INCLUDE_DIRS}"
@@ -54,7 +55,7 @@ elements_add_library(PhzQtUI ${PhUI_SRCS} ${PhUI_HEADERS_MOC} ${PhUI_FORMS_HEADE
                      PUBLIC_HEADERS PhzQtUI)
 
 elements_add_executable(PhosphorosUI src/program/Main.cpp
-                        LINK_LIBRARIES PhzQtUI XYDataset PhzConfiguration PhzPhotometricCorrection PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzGalacticCorrection)
+                        LINK_LIBRARIES PhzQtUI XYDataset PhzConfiguration PhzPhotometricCorrection PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzGalacticCorrection PhzFilterVariation)
 
 
 elements_add_unit_test(QtUI_FileUtils_test tests/src/QtUI_FileUtils_test.cpp

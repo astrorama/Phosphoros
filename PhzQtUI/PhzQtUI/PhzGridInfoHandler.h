@@ -16,12 +16,13 @@ namespace program_options{
 namespace Euclid {
 namespace PhzQtUI {
 
+enum GridType { PhotometryGrid = 1, GalacticReddeningCorrectionGrid = 2, FilterShiftCorrectionGrid = 3};
+
 
 /**
  * @brief The PhzGridInfoHandler class
  */
-class PhzGridInfoHandler
-{
+class PhzGridInfoHandler {
 public:
 
   static bool checkGridFileCompatibility(QString file_path,
@@ -46,7 +47,7 @@ public:
       const std::list<std::string> & selected_filters,
       std::string igm_type,
       const std::string luminosity_filter,
-      bool model_grid = true);
+	  GridType grid_type = PhotometryGrid);
 
   /**
    * @breif Build a boost configuration map out of the selected parameters.

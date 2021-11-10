@@ -22,97 +22,97 @@ namespace PhzQtUI {
 
 static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapping");
 
-    SurveyFilterMapping::SurveyFilterMapping(){}
+    SurveyFilterMapping::SurveyFilterMapping() {}
 
 
-    int SurveyFilterMapping::getFilterNumber() const{
+    int SurveyFilterMapping::getFilterNumber() const {
         return m_filters.size();
     }
 
-    void SurveyFilterMapping::setName(std::string newSurveyName){
+    void SurveyFilterMapping::setName(std::string newSurveyName) {
         m_survey_name = newSurveyName;
     }
 
-    std::string SurveyFilterMapping::getName() const{
+    std::string SurveyFilterMapping::getName() const {
         return m_survey_name;
     }
 
-    void SurveyFilterMapping::setSourceIdColumn(std::string newSourceIdColumn){
+    void SurveyFilterMapping::setSourceIdColumn(std::string newSourceIdColumn) {
         m_source_id_column = newSourceIdColumn;
     }
 
-    std::string SurveyFilterMapping::getSourceIdColumn() const{
+    std::string SurveyFilterMapping::getSourceIdColumn() const {
         return m_source_id_column;
     }
 
-    void SurveyFilterMapping::setRaColumn(std::string newRaColumn){
+    void SurveyFilterMapping::setRaColumn(std::string newRaColumn) {
         m_ra_column = newRaColumn;
     }
 
-    std::string SurveyFilterMapping::getRaColumn() const{
+    std::string SurveyFilterMapping::getRaColumn() const {
        return m_ra_column;
     }
 
-    void SurveyFilterMapping::setDecColumn(std::string newDecColumn){
+    void SurveyFilterMapping::setDecColumn(std::string newDecColumn) {
        m_dec_column = newDecColumn;
     }
 
-    std::string SurveyFilterMapping::getDecColumn() const{
+    std::string SurveyFilterMapping::getDecColumn() const {
        return m_dec_column;
     }
 
-    void SurveyFilterMapping::setGalEbvColumn(std::string newGalEbvolumn){
+    void SurveyFilterMapping::setGalEbvColumn(std::string newGalEbvolumn) {
       m_gal_ebv_column = newGalEbvolumn;
     }
-    std::string SurveyFilterMapping::getGalEbvColumn() const{
+    std::string SurveyFilterMapping::getGalEbvColumn() const {
        return m_gal_ebv_column;
     }
 
-    void SurveyFilterMapping::setRefZColumn(std::string newRefZColumn){
+    void SurveyFilterMapping::setRefZColumn(std::string newRefZColumn) {
       m_ref_z_column = newRefZColumn;
     }
-    std::string SurveyFilterMapping::getRefZColumn() const{
+    std::string SurveyFilterMapping::getRefZColumn() const {
        return m_ref_z_column;
     }
 
 
-    void SurveyFilterMapping::setFilters(std::vector<FilterMapping> filters){
+    void SurveyFilterMapping::setFilters(std::vector<FilterMapping> filters) {
         m_filters = std::move(filters);
     }
 
-    const std::set<std::string>& SurveyFilterMapping::getColumnList() const{
+    const std::set<std::string>& SurveyFilterMapping::getColumnList() const {
       return m_column_list;
     }
 
-    void SurveyFilterMapping::setColumnList(std::set<std::string> new_list){
+    void SurveyFilterMapping::setColumnList(std::set<std::string> new_list) {
       m_column_list = std::move(new_list);
     }
 
-    const std::vector<FilterMapping>& SurveyFilterMapping::getFilters() const{
+    const std::vector<FilterMapping>& SurveyFilterMapping::getFilters() const {
         return m_filters;
     }
 
-    void SurveyFilterMapping::setDefaultCatalogFile(std::string new_default_catalog){
+    void SurveyFilterMapping::setDefaultCatalogFile(std::string new_default_catalog) {
       m_default_catalog = new_default_catalog;
     }
 
-    std::string SurveyFilterMapping::getDefaultCatalogFile() const{
+    std::string SurveyFilterMapping::getDefaultCatalogFile() const {
       return m_default_catalog;
     }
 
-    void SurveyFilterMapping::setNonDetection(double non_detection){
+    void SurveyFilterMapping::setNonDetection(double non_detection) {
       m_non_detection = non_detection;
     }
 
-    double SurveyFilterMapping::getNonDetection() const{
+    double SurveyFilterMapping::getNonDetection() const {
       return m_non_detection;
     }
 
-    void SurveyFilterMapping::setUpperLimit(double non_detection){
+    void SurveyFilterMapping::setUpperLimit(double non_detection) {
       m_upper_limit = non_detection;
     }
 
-    double SurveyFilterMapping::getUpperLimit() const{
+    double SurveyFilterMapping::getUpperLimit() const {
       return m_upper_limit;
     }
 
@@ -124,16 +124,25 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
       return m_do_recompute_error;
     }
 
-    void SurveyFilterMapping::setCopiedColumns(std::map<std::string,std::string> copied_columns){
+
+    void SurveyFilterMapping::setDefineFilterShift(bool define_filter_shift) {
+      m_define_filter_shift = define_filter_shift;
+    }
+
+    bool SurveyFilterMapping::getDefineFilterShift() const {
+      return m_define_filter_shift;
+    }
+
+    void SurveyFilterMapping::setCopiedColumns(std::map<std::string, std::string> copied_columns) {
        m_copied_columns = copied_columns;
     }
 
-     const std::map<std::string,std::string>& SurveyFilterMapping::getCopiedColumns() const{
+     const std::map<std::string, std::string>& SurveyFilterMapping::getCopiedColumns() const {
        return m_copied_columns;
     }
 
 
-    std::vector<std::string> SurveyFilterMapping::getAvailableCatalogs(){
+    std::vector<std::string> SurveyFilterMapping::getAvailableCatalogs() {
       auto cat_root_path = FileUtils::getCatalogRootPath(true,"");
       std::vector<std::string> all_dirs{};
       QDirIterator directories(QString::fromStdString(cat_root_path), QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot, QDirIterator::NoIteratorFlags);
@@ -146,7 +155,7 @@ static Elements::Logging logger = Elements::Logging::getLogger("SurveyFilterMapp
 
     }
 
-std::map<int,SurveyFilterMapping> SurveyFilterMapping::loadCatalogMappings(){
+std::map<int,SurveyFilterMapping> SurveyFilterMapping::loadCatalogMappings() {
   auto catalog_config_path = QString::fromStdString(FileUtils::getCatalogConfigRootPath(true));
 
   std::map<int,SurveyFilterMapping> mappings{};
@@ -164,7 +173,7 @@ std::map<int,SurveyFilterMapping> SurveyFilterMapping::loadCatalogMappings(){
        SurveyFilterMapping mapping{};
        mapping.setName(catalog_name);
        mapping.ReadFilters();
-       mappings[id]=std::move(mapping);
+       mappings[id] = std::move(mapping);
      }
      ++id;
   }
@@ -220,9 +229,15 @@ SurveyFilterMapping SurveyFilterMapping::loadCatalog(std::string name) {
     survey.setUpperLimit(root_node.attribute("UpperLimit").toDouble());
   }
 
-  if (root_node.hasAttribute("DoRecomputeError")){
+  if (root_node.hasAttribute("DoRecomputeError")) {
     survey.setDoRecomputeError(root_node.attribute("DoRecomputeError").toInt());
   }
+
+  if (root_node.hasAttribute("DefineFilterShift")) {
+    survey.setDefineFilterShift(root_node.attribute("DefineFilterShift").toInt());
+  }
+
+
 
 
   auto columns_node = root_node.firstChildElement("AvailableColumns");
@@ -261,7 +276,6 @@ SurveyFilterMapping SurveyFilterMapping::loadCatalog(std::string name) {
   return survey;
 }
 
-
 void SurveyFilterMapping::ReadFilters() {
   std::vector<FilterMapping> mappings { };
 
@@ -270,39 +284,97 @@ void SurveyFilterMapping::ReadFilters() {
       + QDir::separator() + "filter_mapping.txt";
 
   try {
+
+    bool header_found = false;
+    int filtr_column_index = 0;
+    int flux_column_index = 1;
+    int error_column_index = 2;
+    int upper_limit_column_index = -1;
+    int convertion_column_index = -1;
+    int filter_shift_column_index = -1;
+    std::vector<std::string> expected_column_name {
+      "Filter", "Flux Column", "Error Column", "Upper Limit/error ratio",
+      "Convert from MAG", "Filter Shift Column"};
+
     std::ifstream in { mapping_path.toStdString() };
     std::string line;
-    regex expr {"\\s*([^\\s#]+)\\s+([^\\s#]+)\\s+([^\\s#]+)(\\s+[^\\s#]+)?(\\s+[^\\s#]+\\s*$)?"};
     while (std::getline(in, line)) {
       boost::trim(line);
       if (line[0] == '#') {
-        continue;
+       if (!header_found) {
+         std::string trimmed_line = line.substr(1);
+         boost::trim(trimmed_line);
+         std::vector<int> proposed_column_index{-1, -1, -1, -1, -1, -1};
+         std::vector<std::string> strs;
+         boost::split(strs, trimmed_line, boost::is_any_of(","));
+
+         for (size_t index = 0; index < expected_column_name.size(); ++index) {
+           for (size_t index_string = 0; index_string < strs.size(); ++index_string) {
+             std::string item = strs[index_string];
+             boost::trim(item);
+             if (item==expected_column_name[index]) {
+               proposed_column_index[index] = index_string;
+             }
+           }
+         }
+
+         if (proposed_column_index[0] >= 0 && proposed_column_index[1] >= 0 && proposed_column_index[2] >=0) {
+            header_found = true;
+            filtr_column_index = proposed_column_index[0];
+            flux_column_index = proposed_column_index[1];
+            error_column_index = proposed_column_index[2];
+            upper_limit_column_index = proposed_column_index[3];
+            convertion_column_index = proposed_column_index[4];
+            filter_shift_column_index = proposed_column_index[5];
+         }
+
+       }
+       continue;
       }
-      smatch match_res;
-      if (!regex_match(line, match_res, expr)) {
-        logger.error() << "Syntax error in "
-            << mapping_path.toStdString() << ": " << line;
-        throw Elements::Exception() << "Syntax error in "
-            << mapping_path.toStdString() << ": " << line;
+
+      std::vector<std::string> cells;
+      boost::split(cells, line, boost::is_any_of(" "));
+
+
+      if (int(cells.size()) <= filtr_column_index ||
+          int(cells.size()) <= flux_column_index ||
+          int(cells.size()) <= error_column_index ) {
+        throw Elements::Exception() << "File with missing values for the mandatory fields";
       }
+      std::string filter_value = cells[filtr_column_index];
+      boost::trim(filter_value);
+      std::string flux_value = cells[flux_column_index];
+      boost::trim(flux_value);
+      std::string error_value = cells[error_column_index];
 
       FilterMapping mapping;
-      mapping.setFilterFile(match_res.str(1));
-      mapping.setFluxColumn(match_res.str(2));
-      mapping.setErrorColumn(match_res.str(3));
+      mapping.setFilterFile(filter_value);
+      mapping.setFluxColumn(flux_value);
+      mapping.setErrorColumn(error_value);
 
-      if (match_res.size() < 5 || match_res.str(4) == "") {
-         mapping.setN(3.0);
-      } else {
-         float n = std::stof(match_res.str(4));
+      if (upper_limit_column_index > 0 && int(cells.size()) > upper_limit_column_index && cells[upper_limit_column_index] != "" ) {
+       float n = std::stof(cells[upper_limit_column_index]);
          mapping.setN(n);
+      } else {
+         mapping.setN(3.0);
       }
 
-      if (match_res.size() < 6 || match_res.str(5) == "") {
-         mapping.setFromMag(false);
-      } else {
-         bool f = std::stoi(match_res.str(5));
+      if (convertion_column_index > 0 && int(cells.size()) > convertion_column_index && cells[convertion_column_index] != "") {
+       bool f = std::stoi(cells[convertion_column_index]);
          mapping.setFromMag(f);
+      } else {
+         mapping.setFromMag(false);
+      }
+
+      if (filter_shift_column_index > 0 && int(cells.size()) > filter_shift_column_index && cells[filter_shift_column_index] != "" && cells[filter_shift_column_index] != "NONE") {
+          std::string shift_value = cells[filter_shift_column_index];
+          boost::trim(shift_value);
+          if (shift_value=="") {
+            shift_value = "NONE";
+          }
+          mapping.setShiftColumn(shift_value);
+      } else {
+        mapping.setShiftColumn("NONE");
       }
 
       mappings.push_back(mapping);
@@ -368,6 +440,7 @@ void SurveyFilterMapping::saveSurvey(std::string oldName){
   root.setAttribute("NonDetection",QString::number(m_non_detection));
   root.setAttribute("UpperLimit",QString::number(m_upper_limit));
   root.setAttribute("DoRecomputeError",QString::number(m_do_recompute_error));
+  root.setAttribute("DefineFilterShift",QString::number(m_define_filter_shift));
 
   std::string path = m_default_catalog;
   std::string root_path = FileUtils::getRootPath(true);
@@ -414,13 +487,15 @@ void SurveyFilterMapping::saveSurvey(std::string oldName){
   mapping_file.open(QIODevice::WriteOnly );
   QTextStream mapping_stream(&mapping_file);
 
-  mapping_stream << "# Filter, Flux Column, Error Column, Upper Limit/error ratio, Convert from MAG\n";
+  mapping_stream << "# Filter, Flux Column, Error Column, Upper Limit/error ratio, Convert from MAG, Filter Shift Column\n";
   for (auto& filter : m_filters) {
+    std::string shift = m_define_filter_shift ? filter.getShiftColumn() : "NONE";
     mapping_stream << QString::fromStdString(filter.getFilterFile()) << " "
             << QString::fromStdString(filter.getFluxColumn())<< " "
             << QString::fromStdString(filter.getErrorColumn()) <<  " "
             << QString::number(filter.getN()) <<  " "
-            << QString::number(filter.getFromMag()) <<"\n";
+            << QString::number(filter.getFromMag()) <<" "
+            << QString::fromStdString(shift) <<"\n";
   }
 
 

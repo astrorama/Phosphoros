@@ -121,6 +121,8 @@ void on_gb_thread_clicked();
  */
 void on_sb_thread_valueChanged(int i);
 
+void on_cb_logLevel_currentIndexChanged(int index);
+
 
 
 /**

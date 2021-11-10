@@ -39,8 +39,8 @@ void FormConfiguration::on_btn_ToCatalog_clicked() {
   navigateToCatalog(do_need_reset);
   do_need_reset = false;
 }
-void FormConfiguration::on_btn_ToModel_clicked() {
 
+void FormConfiguration::on_btn_ToModel_clicked() {
   navigateToParameter(do_need_reset);
   do_need_reset = false;
 }
@@ -90,6 +90,8 @@ void FormConfiguration::loadOptionPage(std::shared_ptr<OptionModel> option_model
                                        m_option_model_ptr->getReddeningRepo(),
                                        m_option_model_ptr->getLuminosityRepo());
   ui->widget_aux_Data->loadManagementPage(0);
+
+  ui->cb_logLevel->setCurrentIndex(ui->cb_logLevel->findText(m_option_model_ptr->getLogLevel()));
 
   loadGeneralValues();
   loadCosmoValues();
@@ -208,6 +210,15 @@ void FormConfiguration::on_sb_thread_valueChanged(int i) {
      startEdition(0);
      setGeneralControlEdition(true);
   }
+}
+
+
+void FormConfiguration::on_cb_logLevel_currentIndexChanged(int index) {
+	if (ui->cb_logLevel->currentText() != m_option_model_ptr->getLogLevel()) {
+		 startEdition(0);
+		 m_option_model_ptr->setLogLevel(ui->cb_logLevel->currentText());
+		 setGeneralControlEdition(true);
+	}
 }
 
 

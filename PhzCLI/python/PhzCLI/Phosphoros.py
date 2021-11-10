@@ -23,6 +23,8 @@ action_list = [
                      'Computes a grid containing the model photometries'),
     PhosphorosAction(['compute_galactic_correction_coeff_grid', 'CGCCG'], 'PhosphorosComputeGalacticAbsorptionCoefficientGrid',
                      'Computes a grid containing the coefficient for the correction of the galactic absorption'),
+    PhosphorosAction(['compute_filter_variation_coeff_grid', 'CFVCG'], 'PhosphorosComputeFilterVariationCoefficientGrid',
+                     'Computes a grid containing the coefficient for the correction of the filters variation'),
     PhosphorosAction(['compute_photometric_corrections', 'CPC'], 'PhosphorosComputePhotometricCorrections',
                      'Calculates the Photometric Zero Point Corrections'),
     PhosphorosAction(['compute_sed_weights', 'CSW'], 'PhosphorosComputeSedWeight',

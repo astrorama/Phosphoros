@@ -45,6 +45,10 @@ namespace PhzQtUI {
     } else {
       m_thread_number_saved = PhzUtils::getThreadNumber();
     }
+
+    m_loglevel_saved=QString::fromStdString(PreferencesUtils::getLogLevel());
+    m_loglevel_edited = m_loglevel_saved;
+
     m_thread_number_edited = m_thread_number_saved;
 
     m_buffer_size_saved = PreferencesUtils::getBufferSize();
@@ -111,6 +115,10 @@ namespace PhzQtUI {
     return m_thread_number_edited;
   }
 
+  QString OptionModel::getLogLevel() {
+	return m_loglevel_edited;
+  }
+
   size_t OptionModel::getBufferSize() {
     return m_buffer_size_edited;
   }
@@ -154,6 +162,7 @@ namespace PhzQtUI {
 
       m_override_thread_saved = m_override_thread_edited;
       m_thread_number_saved = m_thread_number_edited;
+      m_loglevel_saved = m_loglevel_edited;
 
       std::map<std::string,std::string> map{};
       map.insert(std::make_pair("LastUsed", FileUtils::getLastUsedPath()));
@@ -169,6 +178,7 @@ namespace PhzQtUI {
       }
       PreferencesUtils::setThreadNumberOverride(thread_value);
       PreferencesUtils::setBufferSize(m_buffer_size_saved);
+      PreferencesUtils::setLogLevel(m_loglevel_saved.toStdString());
 
       std::unique_ptr <XYDataset::FileParser > filter_file_parser {new XYDataset::AsciiParser { } };
       std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true), std::move(filter_file_parser) });
@@ -204,6 +214,7 @@ namespace PhzQtUI {
       m_res_path_edited = m_res_path_saved;
       m_override_thread_edited = m_override_thread_saved;
       m_thread_number_edited = m_thread_number_saved;
+      m_loglevel_edited = m_loglevel_saved;
       m_buffer_size_edited = m_buffer_size_saved;
       m_global_edition = false;
     }
@@ -265,6 +276,13 @@ namespace PhzQtUI {
     if (!m_override_thread_edited) {
       m_thread_number_edited = PhzUtils::getThreadNumber();
     }
+  }
+
+
+  void OptionModel::setLogLevel(QString new_log_level) {
+	  m_global_edition = true;
+	  m_loglevel_edited = new_log_level;
+
   }
 
   void OptionModel::setBufferSize(int new_buffer_size) {

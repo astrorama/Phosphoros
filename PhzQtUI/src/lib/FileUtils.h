@@ -303,6 +303,13 @@ public:
      */
     static std::string getGalacticCorrectionGridRootPath(bool check, const std::string& catalog_type);
 
+    /**
+      * @brief get theFilter Shift Grid RootPath
+      * @param check
+      * if true ensure that the folder exist.
+      * @return <rootPath>/FilterVariationCoefficientGrids
+      */
+    static std::string getFilterShiftGridRootPath(bool check, const std::string& catalog_type);
 
     static std::string getSedPriorRootPath();
 

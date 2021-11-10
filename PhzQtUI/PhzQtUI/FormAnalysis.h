@@ -78,12 +78,15 @@ void quit(bool);
 
 private slots:
 
-void on_btn_ToOption_clicked();
-void on_btn_ToCatalog_clicked();
-void on_btn_exit_clicked();
-void on_btn_ToModel_clicked();
-void on_btn_ToPP_clicked();
+	void on_btn_ToOption_clicked();
 
+	void on_btn_ToCatalog_clicked();
+
+	void on_btn_exit_clicked();
+
+	void on_btn_ToModel_clicked();
+
+	void on_btn_ToPP_clicked();
 
     void on_btn_editCorrections_clicked();
 
@@ -107,17 +110,16 @@ void on_btn_ToPP_clicked();
     void on_cb_igm_currentIndexChanged(const QString &);
 
     void on_cb_CompatibleGrid_currentTextChanged(const QString &);
-
-    void on_cb_CompatibleGalCorrGrid_currentTextChanged(const QString &);
-
-
     void on_btn_GetConfigGrid_clicked();
-
     void on_btn_RunGrid_clicked();
 
+    void on_cb_CompatibleGalCorrGrid_currentTextChanged(const QString &);
     void on_btn_GetGalCorrConfigGrid_clicked();
-
     void on_btn_RunGalCorrGrid_clicked();
+
+    void on_cb_CompatibleShiftGrid_currentTextChanged(const QString &);
+    void on_btn_GetShiftConfigGrid_clicked();
+    void on_btn_RunShiftGrid_clicked();
 
     void on_rb_gc_off_clicked();
     void on_rb_gc_col_clicked();
@@ -169,6 +171,10 @@ void on_btn_ToPP_clicked();
     void on_rb_best_scaling_toggled(bool);
     void on_rb_sample_scaling_toggled(bool);
 
+
+    void on_cb_process_limit_stateChanged(int);
+    void on_cb_skip_stateChanged(int);
+
     void httpReadyPlanckRead();
     void cancelDownloadPlanck();
     void updateDownloadProgress(qint64 bytesRead, qint64 totalBytes);
@@ -195,16 +201,21 @@ private:
 
     void setInputCatalogName( std::string name,bool do_test=true);
 
-    void adjustPhzGridButtons(bool enabled);
-    void adjustGalCorrGridButtons(bool enabled);
+    void adjustGridsButtons(bool enabled);
 
     void updateGridSelection();
     void updateGalCorrGridSelection();
+    void updateFilterShiftGridSelection();
+
     bool checkGridSelection(bool addFileCheck, bool acceptNewFile);
+    bool checkCompatibleModelGrid(std::string file_name);
     bool checkGalacticGridSelection(bool addFileCheck, bool acceptNewFile);
     bool checkCompatibleGalacticGrid(std::string file_name);
+    bool checkFilterShiftGridSelection(bool addFileCheck, bool acceptNewFile);
+    bool checkCompatibleFilterShiftGrid(std::string file_name);
     std::map<std::string, boost::program_options::variable_value> getGridConfiguration();
     std::map<std::string, boost::program_options::variable_value> getGalacticCorrectionGridConfiguration();
+    std::map<std::string, boost::program_options::variable_value> getFilterShiftGridConfiguration();
 
     bool checkSedWeightFile(std::string file_name);
     std::string getSedWeightFileName();

@@ -15,9 +15,9 @@ void FilterModel::setFilters(const std::vector<FilterMapping>& initFilterList) {
     this->setColumnCount(5);
     this->setRowCount(initFilterList.size());
     QStringList  setHeaders;
-    setHeaders<<"Filter Transmission \nCurve"<<"Flux Column \nName"<<"Flux Error\nColumn Name"
-              <<"Filter Transmission File Full"<<"Upper limit \n over error ratio"
-              <<"Alpha"<<"Beta"<<"Gamma"<< "From MAG";
+    setHeaders<<"Filter Transmission"<<"Flux Column"<<"Flux Error Column"
+              <<"Filter Transmission File Full"<<"Upper limit / error"
+              <<"Alpha"<<"Beta"<<"Gamma"<< "From MAG" << "Filter Shift Column";
     this->setHorizontalHeaderLabels(setHeaders);
 
     int i = 0;
@@ -36,6 +36,7 @@ void FilterModel::setFilters(const std::vector<FilterMapping>& initFilterList) {
         this->setItem(i, 6, new QStandardItem(QString::number(filter.getBeta())));
         this->setItem(i, 7, new QStandardItem(QString::number(filter.getGamma())));
         this->setItem(i, 8, new QStandardItem(QString::number(filter.getFromMag())));
+        this->setItem(i, 9, new QStandardItem(QString::fromStdString(filter.getShiftColumn())));
         ++i;
     }
 }
@@ -54,6 +55,7 @@ void FilterModel::setFilter(const FilterMapping& filter, int row) {
     item(row, 6)->setText(QString::number(filter.getBeta()));
     item(row, 7)->setText(QString::number(filter.getGamma()));
     item(row, 8)->setText(QString::number(filter.getFromMag()));
+    item(row, 9)->setText(QString::fromStdString(filter.getShiftColumn()));
 }
 
 std::vector<FilterMapping> FilterModel::getFilters() const {
@@ -75,6 +77,7 @@ FilterMapping FilterModel::getFilter(int row) const {
     filter.setBeta(item(row, 6)->text().toDouble());
     filter.setGamma(item(row, 7)->text().toDouble());
     filter.setFromMag(QVariant(item(row, 8)->text()).toBool());
+    filter.setShiftColumn(item(row, 9)->text().toStdString());
 
     return filter;
 
@@ -97,6 +100,7 @@ void FilterModel::addFilter(const FilterMapping& filter) {
     items.push_back(new QStandardItem(QString::number(filter.getBeta())));
     items.push_back(new QStandardItem(QString::number(filter.getGamma())));
     items.push_back(new QStandardItem(QString::number(filter.getFromMag())));
+    items.push_back(new QStandardItem(QString::fromStdString(filter.getShiftColumn())));
     this->appendRow(items);
 }
 

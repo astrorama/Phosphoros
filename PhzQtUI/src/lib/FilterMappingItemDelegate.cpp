@@ -4,7 +4,10 @@
 namespace Euclid {
 namespace PhzQtUI {
 
-FilterMappingItemDelegate::FilterMappingItemDelegate( std::set<std::string> columns, QObject * parent):QItemDelegate(parent),m_columns{columns}{
+FilterMappingItemDelegate::FilterMappingItemDelegate(
+    std::set<std::string> columns,
+    std::string default_value,
+    QObject * parent) : QItemDelegate(parent), m_columns{columns}, m_default{default_value} {
 
 }
 
@@ -15,7 +18,7 @@ void  FilterMappingItemDelegate::setModelData(QWidget * editor, QAbstractItemMod
 
   auto combo = static_cast<QComboBox*>(editor);
   auto value = combo->currentText();
-  model->setData(index,value);
+  model->setData(index, value);
 
 }
 
@@ -28,7 +31,7 @@ void FilterMappingItemDelegate::setEditorData(QWidget * editor, const QModelInde
 
     auto current_text = index.data().toString().toStdString();
 
-    combo->addItem("");
+    combo->addItem(QString::fromStdString(m_default));
     bool found=false;
     int idx=1;
     for(auto item : m_columns){
@@ -54,7 +57,7 @@ QWidget * FilterMappingItemDelegate::createEditor(QWidget * parent , const QStyl
   auto combo = new QComboBox(parent);
   combo->setEditable(true);
 
-  combo->addItem("");
+  combo->addItem(QString::fromStdString(m_default));
   for(auto item : m_columns){
      combo->addItem(QString::fromStdString(item));
    }
