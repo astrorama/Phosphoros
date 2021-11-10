@@ -235,7 +235,7 @@ try {
       getSelectedFilters(),
       ui->cb_igm->currentText().toStdString(),
       ui->lbl_lum_filter->text().toStdString(),
-      1);
+	  PhotometryGrid);
 
   ui->cb_CompatibleGrid->clear();
   bool added = false;
@@ -277,7 +277,7 @@ bool FormAnalysis::checkCompatibleModelGrid(std::string file_name) {
 			 m_survey_model_ptr->getSelectedSurvey().getName(), axis,
 			 getSelectedFilters(), ui->cb_igm->currentText().toStdString(),
 			 ui->lbl_lum_filter->text().toStdString(),
-			 2);
+			 GalacticReddeningCorrectionGrid);
 		return (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
 
 	}
@@ -301,7 +301,7 @@ bool FormAnalysis::checkCompatibleGalacticGrid(std::string file_name){
          m_survey_model_ptr->getSelectedSurvey().getName(), axis,
          getSelectedFilters(), ui->cb_igm->currentText().toStdString(),
          ui->lbl_lum_filter->text().toStdString(),
-         2);
+		 GalacticReddeningCorrectionGrid);
    return (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
 
  }
@@ -327,7 +327,7 @@ bool FormAnalysis::checkCompatibleFilterShiftGrid(std::string file_name) {
          m_survey_model_ptr->getSelectedSurvey().getName(), axis,
          getSelectedFilters(), ui->cb_igm->currentText().toStdString(),
          ui->lbl_lum_filter->text().toStdString(),
-         3);
+		 FilterShiftCorrectionGrid);
    //  logger.info()<< "checkCompatibleFilterShiftGrid : there are " << possible_files.size() << " compatible file ";
    return (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
 
@@ -344,7 +344,7 @@ void FormAnalysis::updateGalCorrGridSelection() {
         m_survey_model_ptr->getSelectedSurvey().getName(), axis,
         getSelectedFilters(), ui->cb_igm->currentText().toStdString(),
         ui->lbl_lum_filter->text().toStdString(),
-        2);
+		GalacticReddeningCorrectionGrid);
 
     ui->cb_CompatibleGalCorrGrid->clear();
     bool added = false;
@@ -374,7 +374,7 @@ void FormAnalysis::updateFilterShiftGridSelection() {
           m_survey_model_ptr->getSelectedSurvey().getName(), axis,
           getSelectedFilters(), ui->cb_igm->currentText().toStdString(),
           ui->lbl_lum_filter->text().toStdString(),
-          3);
+		  FilterShiftCorrectionGrid);
 
       ui->cb_CompatibleShiftGrid->clear();
       bool added = false;
