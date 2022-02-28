@@ -42,6 +42,9 @@ aux_dir = next(filter(
     os.path.isdir,
     map(lambda p: os.path.join(p, 'EmissionLines'), os.getenv('ELEMENTS_AUX_PATH', '').split(os.pathsep))
 ), None)
+conda_prefix = os.getenv('CONDA_PREFIX', None)
+if aux_dir is None and conda_prefix is not None:
+    aux_dir = os.path.join(conda_prefix, 'share', 'auxdir', 'EmissionLines')
 
 
 def defineSpecificProgramOptions():
