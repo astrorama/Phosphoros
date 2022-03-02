@@ -52,6 +52,16 @@ long long ModelSet::getModelNumber(bool recompute ) {
 }
 
 
+long long ModelSet::getModelNumber() const{
+    long long result=0;
+    for(auto it = m_parameter_rules.begin(); it != m_parameter_rules.end(); ++it ){
+        result+=it->second.getModelNumber();
+    }
+
+    return result;
+}
+
+
 std::map<std::string, boost::program_options::variable_value> ModelSet::getModelNameConfigOptions() const{
   std::map<std::string, po::variable_value> options;
     options["parameter-space-model-name"].value() = boost::any(getName());

@@ -72,6 +72,8 @@ public:
    */
   long long getModelNumber(bool recompute = false);
 
+  long long getModelNumber() const;
+
   /**
    * @brief Get a string representing the E(B-V) range
    * @return The range as a string

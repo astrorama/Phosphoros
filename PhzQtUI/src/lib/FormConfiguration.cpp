@@ -64,6 +64,8 @@ void FormConfiguration::loadGeneralValues() {
    ui->txt_resDir->setText(m_option_model_ptr->getResPath());
    ui->gb_thread->setChecked(m_option_model_ptr->getOverrideThread());
    ui->sb_thread->setValue(m_option_model_ptr->getThreadNb());
+   ui->gb_memory->setChecked(m_option_model_ptr->getCapMemory());
+   ui->sb_memory->setValue(m_option_model_ptr->getMaxMemory());
    ui->sb_buffer->setValue(m_option_model_ptr->getBufferSize());
    checkDirectories();
 }
@@ -102,6 +104,10 @@ void FormConfiguration::loadOptionPage(std::shared_ptr<OptionModel> option_model
   connect(ui->txt_resDir, SIGNAL(textEdited(const QString &)), m_option_model_ptr.get(), SLOT(setResult(const QString &)));
   connect(ui->gb_thread, SIGNAL(clicked(bool)), m_option_model_ptr.get(), SLOT(setDefaultThread(bool)));
   connect(ui->sb_thread, SIGNAL(valueChanged(int)), m_option_model_ptr.get(), SLOT(setThread(int)));
+
+  connect(ui->gb_memory, SIGNAL(clicked(bool)), m_option_model_ptr.get(), SLOT(setCapMemory(bool)));
+  connect(ui->sb_memory, SIGNAL(valueChanged(double)), m_option_model_ptr.get(), SLOT(setMaxMemory(bool)));
+
   connect(ui->txt_hubble_param, SIGNAL(textEdited(const QString &)), m_option_model_ptr.get(), SLOT(setHubble(const QString &)));
   connect(ui->txt_omega_matter, SIGNAL(textEdited(const QString &)), m_option_model_ptr.get(), SLOT(setOmegaM(const QString &)));
   connect(ui->txt_omega_lambda, SIGNAL(textEdited(const QString &)),
@@ -212,6 +218,18 @@ void FormConfiguration::on_sb_thread_valueChanged(int i) {
   }
 }
 
+void FormConfiguration::on_gb_memory_clicked() {
+	 startEdition(0);
+	 setGeneralControlEdition(true);
+}
+
+void FormConfiguration::on_sb_memory_valueChanged(double value){
+	 if (value!= m_option_model_ptr->getMaxMemory()) {
+	     startEdition(0);
+	     setGeneralControlEdition(true);
+	 }
+}
+
 
 void FormConfiguration::on_cb_logLevel_currentIndexChanged(int index) {
 	if (ui->cb_logLevel->currentText() != m_option_model_ptr->getLogLevel()) {
@@ -245,6 +263,10 @@ void FormConfiguration::on_btn_default_clicked(){
 
   ui->gb_thread->setChecked(false);
   ui->sb_thread->setValue(PhzUtils::getThreadNumber());
+
+
+  ui->gb_memory->setChecked(false);
+  ui->sb_memory->setValue(16.0);
 
   m_option_model_ptr->setBufferSize(5000);
   ui->sb_buffer->setValue(5000);

@@ -601,6 +601,5 @@ std::map<std::string, boost::program_options::variable_value> FileUtils::getPath
   return options;
 }
 
-
 }
 }

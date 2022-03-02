@@ -36,6 +36,8 @@ namespace Euclid {
         bool isResPathDefault();
         bool getOverrideThread();
         size_t getThreadNb();
+        bool getCapMemory();
+        double getMaxMemory();
         size_t getBufferSize();
         QString getLogLevel();
         double getHubble();
@@ -78,13 +80,19 @@ namespace Euclid {
         void setResult(const QString & new_res_path);
 
 
+        void setDefaultThread(bool custom);
+
         void setThread(int thread_nb);
+
+
+        void setCapMemory(bool custom);
+
+        void setMaxMemory(double max_memory);
 
 
         void setLogLevel(QString new_log_level);
 
 
-        void setDefaultThread(bool custom);
 
 
         void setBufferSize(int buffer_size);
@@ -126,6 +134,12 @@ namespace Euclid {
         bool m_override_thread_edited;
         size_t m_thread_number_saved;
         size_t m_thread_number_edited;
+
+        bool m_cap_memory_saved;
+        bool m_cap_memory_edited;
+        double m_max_memory_saved;
+        double m_max_memory_edited;
+
         size_t m_buffer_size_saved;
         size_t m_buffer_size_edited;
         QString m_loglevel_saved;

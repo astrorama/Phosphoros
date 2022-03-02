@@ -121,9 +121,17 @@ void on_gb_thread_clicked();
  */
 void on_sb_thread_valueChanged(int i);
 
+/**
+ * @brief SLOT Raised when the user check/uncheck the group box for the memory
+ */
+void on_gb_memory_clicked();
+/**
+ * @brief SLOT Raised when the user change the max memory
+ */
+void on_sb_memory_valueChanged(double value);
+
+
 void on_cb_logLevel_currentIndexChanged(int index);
-
-
 
 /**
  * @brief SLOT Raised when the user cancel the cosmology edition

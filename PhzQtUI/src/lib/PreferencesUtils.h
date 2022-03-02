@@ -35,11 +35,17 @@ public:
 
     static void setThreadNumberOverride(int value);
 
+    static double getMaxMemory();
+
+    static void setMaxMemory(double value);
+
     static std::string  getLogLevel();
 
     static void setLogLevel(std::string  value);
 
     static int getBufferSize();
+
+    static int getCappedBufferSize(long models, long sampling);
 
     static void setBufferSize(int value);
 
