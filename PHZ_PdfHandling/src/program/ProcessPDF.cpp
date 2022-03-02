@@ -200,7 +200,7 @@ public:
 
 
            auto cumul = MathUtils::Cumulative::fromPdf(pdf_sampling, pdf);
-           double med = cumul.findValue(0.5);
+           double med = cumul.findValue(0.5, MathUtils::Cumulative::TrayPosition::begin);
            if (std::isnan(med)){
              throw  Elements::Exception("Source with ID" + id_str + "has undefined MEDIAN");
            }
