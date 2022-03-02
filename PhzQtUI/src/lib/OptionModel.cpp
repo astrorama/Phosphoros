@@ -45,11 +45,20 @@ namespace PhzQtUI {
     } else {
       m_thread_number_saved = PhzUtils::getThreadNumber();
     }
+    m_thread_number_edited = m_thread_number_saved;
+
+    double max_memory = PreferencesUtils::getMaxMemory();
+    m_cap_memory_saved = max_memory > 0;
+    m_cap_memory_edited = m_cap_memory_saved;
+    if (m_cap_memory_saved) {
+    	m_max_memory_saved = max_memory;
+    } else {
+    	m_max_memory_saved = 16.0;
+    }
+    m_max_memory_edited = m_max_memory_saved;
 
     m_loglevel_saved=QString::fromStdString(PreferencesUtils::getLogLevel());
     m_loglevel_edited = m_loglevel_saved;
-
-    m_thread_number_edited = m_thread_number_saved;
 
     m_buffer_size_saved = PreferencesUtils::getBufferSize();
     m_buffer_size_edited = m_buffer_size_saved;
@@ -115,6 +124,14 @@ namespace PhzQtUI {
     return m_thread_number_edited;
   }
 
+  bool OptionModel::getCapMemory() {
+    return m_cap_memory_edited;
+  }
+
+  double OptionModel::getMaxMemory() {
+    return m_max_memory_edited;
+  }
+
   QString OptionModel::getLogLevel() {
 	return m_loglevel_edited;
   }
@@ -162,6 +179,10 @@ namespace PhzQtUI {
 
       m_override_thread_saved = m_override_thread_edited;
       m_thread_number_saved = m_thread_number_edited;
+
+      m_cap_memory_saved = m_cap_memory_edited;
+      m_max_memory_saved = m_max_memory_edited;
+
       m_loglevel_saved = m_loglevel_edited;
 
       std::map<std::string,std::string> map{};
@@ -177,6 +198,13 @@ namespace PhzQtUI {
         thread_value = m_thread_number_saved;
       }
       PreferencesUtils::setThreadNumberOverride(thread_value);
+
+      double max_memory = 0;
+      if (m_cap_memory_saved) {
+    	  max_memory = m_max_memory_saved;
+      }
+      PreferencesUtils::setMaxMemory(max_memory);
+
       PreferencesUtils::setBufferSize(m_buffer_size_saved);
       PreferencesUtils::setLogLevel(m_loglevel_saved.toStdString());
 
@@ -214,6 +242,8 @@ namespace PhzQtUI {
       m_res_path_edited = m_res_path_saved;
       m_override_thread_edited = m_override_thread_saved;
       m_thread_number_edited = m_thread_number_saved;
+      m_cap_memory_edited = m_cap_memory_saved;
+      m_max_memory_edited = m_max_memory_saved;
       m_loglevel_edited = m_loglevel_saved;
       m_buffer_size_edited = m_buffer_size_saved;
       m_global_edition = false;
@@ -277,6 +307,22 @@ namespace PhzQtUI {
       m_thread_number_edited = PhzUtils::getThreadNumber();
     }
   }
+
+  void OptionModel::setMaxMemory(double max_memory) {
+     m_global_edition = true;
+     if (m_cap_memory_edited) {
+    	 m_max_memory_edited = max_memory;
+     }
+   }
+
+   void OptionModel::setCapMemory(bool custom) {
+     m_global_edition = true;
+     m_cap_memory_edited = custom;
+     if (!m_cap_memory_edited) {
+       m_max_memory_edited = 16.0;
+     }
+   }
+
 
 
   void OptionModel::setLogLevel(QString new_log_level) {

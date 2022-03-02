@@ -4,6 +4,7 @@
 #include <QFileInfo>
 #include <QFileInfoList>
 #include <QTextStream>
+#include <algorithm>
 #include "Configuration/ConfigManager.h"
 #include "PhzConfiguration/PhosphorosRootDirConfig.h"
 #include "PhzConfiguration/CatalogDirConfig.h"
@@ -128,6 +129,20 @@ void PreferencesUtils::setThreadNumberOverride(int value){
   setUserPreference("_global_preferences_","Thread-Number",std::to_string(value));
 }
 
+double PreferencesUtils::getMaxMemory(){
+  auto value = getUserPreference("_global_preferences_","Max-Memory");
+  if (value.length()==0){
+    return 0;
+  } else {
+    return std::stod(value);
+  }
+}
+
+void PreferencesUtils::setMaxMemory(double value){
+  if (value<=0) value=0;
+  setUserPreference("_global_preferences_","Max-Memory",std::to_string(value));
+}
+
 std::string PreferencesUtils::getLogLevel() {
   auto value = getUserPreference("_global_preferences_","Log-Level");
   if (value.length()==0){
@@ -148,6 +163,17 @@ int PreferencesUtils::getBufferSize() {
    } else {
      return std::stoi(value);
    }
+}
+
+
+int PreferencesUtils::getCappedBufferSize(long models, long sampling) {
+	int buffer = getBufferSize();
+	double max_memory = getMaxMemory();
+	if (max_memory > 0) {
+		int buffer_frm_memory = (int)std::floor(max_memory*6.0E7/(models*sampling));
+		buffer = std::min(buffer, buffer_frm_memory);
+	}
+	return buffer;
 }
 
 void PreferencesUtils::setBufferSize(int value) {

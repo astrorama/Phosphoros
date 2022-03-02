@@ -1322,7 +1322,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
        options_map[pair.first] = pair.second;
   }
 
-  options_map["input-buffer-size"].value() = boost::any(PreferencesUtils::getBufferSize());
+
 
 
   if (ui->cb_skip->isChecked()) {
@@ -1341,6 +1341,18 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
       ui->txt_outputFolder->text().toStdString());
 
   options_map["model-grid-file"].value() = boost::any(ui->cb_CompatibleGrid->currentText().toStdString());
+
+  // Get the number of sampling
+   int sampling_luminosity_number = 1;
+   if (ui->rb_sample_scaling->isChecked()) {
+ 	  sampling_luminosity_number = ui->sb_lum_sample_number->value();
+   }
+
+   // get the n model grid
+   auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
+   auto model_number = selected_model.getModelNumber();
+   options_map["input-buffer-size"].value() = boost::any(PreferencesUtils::getCappedBufferSize(model_number, sampling_luminosity_number));
+
 
   if (ui->rb_gc_col->isChecked()) {
     options_map["galactic-correction-coefficient-grid-file"].value() =

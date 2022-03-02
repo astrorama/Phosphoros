@@ -47,6 +47,9 @@ public:
      */
     long long getModelNumber(bool recompute = false);
 
+
+    long long getModelNumber() const;
+
     /**
      * @brief get the Name.
      * @return the current name.
