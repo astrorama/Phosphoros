@@ -29,6 +29,8 @@ void DialogFilterSelector::setFilter(std::string filter_name){
   treeModel_filter->setEnabled(true);
   ui->treeView_filter->setModel(treeModel_filter);
   ui->treeView_filter->expandAll();
+  ui->treeView_filter->hideColumn(1);
+  ui->treeView_filter->resizeColumnToContents(0);
 
   connect( treeModel_filter,
            SIGNAL(itemChanged(QStandardItem*)),

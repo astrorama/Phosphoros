@@ -2,6 +2,7 @@
 #define PHZQTUI_DATASETTREEMODEL_H
 
 #include <QStandardItemModel>
+#include <QString>
 #include "PhzQtUI/DatasetRepository.h"
 #include "PhzQtUI/DatasetSelection.h"
 #include "XYDataset/FileSystemProvider.h"
@@ -65,6 +66,8 @@ public:
 
   bool hasLeave() const;
 
+  QString getFullGroupName(QStandardItem* item) const;
+
 public slots:
   /**
    * @brief SLOT onItemChanged To be connected to the ItemChanged SIGNAL.
@@ -72,14 +75,14 @@ public slots:
   void onItemChanged(QStandardItem*);
   void onItemChangedSingleLeaf(QStandardItem*);
 
-private:
+
 
   /**
    * @brief Get the name of the enclosing group
    * @param qualified_name The name of the item.
    */
   static std::string getGroupName(XYDataset::QualifiedName qualified_name);
-
+private:
   /**
    * @brief Uncheck all items.
    */

@@ -7,9 +7,11 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QListView>
+#include <QTreeView>
 #include <QtGui/qdesktopservices.h>
 #include <QtCore/qurl.h>
 #include <boost/filesystem/path.hpp>
+#include <boost/filesystem.hpp>
 #include "ElementsKernel/Logging.h"
 #include "PreferencesUtils.h"
 
@@ -52,51 +54,105 @@ void FormAuxDataManagement::setRepositories(DatasetRepo filter_repository,
   m_luminosity_repository = luminosity_repository;
 }
 
+void FormAuxDataManagement::displayFilter() {
+	m_filter_del_buttons.clear();
+	DataSetTreeModel* treeModel_filter = new DataSetTreeModel(m_filter_repository);
+	treeModel_filter->load(false);
+	treeModel_filter->setEnabled(true);
+	ui->treeView_ManageFilter->setModel(treeModel_filter);
+	ui->treeView_ManageFilter->collapseAll();
+	ui->treeView_ManageFilter->header()->setStretchLastSection(false);
+	ui->treeView_ManageFilter->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+	for (int i = 0; i < treeModel_filter->rowCount(); i++) {
+		addDeleteButtonsToItem(
+				treeModel_filter->item(i),
+				treeModel_filter,
+				ui->treeView_ManageFilter,
+				SLOT(deletFilterGroupButtonClicked(const QString&)),
+				m_filter_del_buttons,
+				1);
+	}
+}
 
-void FormAuxDataManagement::loadManagementPage(int index){
+void FormAuxDataManagement::displaySED() {
+	m_message_buttons.clear();
+	m_sed_del_buttons.clear();
+	SedTreeModel* treeModel_Sed = new SedTreeModel(m_seds_repository);
+	treeModel_Sed->load(false);
+	treeModel_Sed->setEnabled(true);
+	ui->treeView_ManageSed->setModel(treeModel_Sed);
+	ui->treeView_ManageSed->collapseAll();
+	ui->treeView_ManageSed->header()->setStretchLastSection(false);
+	ui->treeView_ManageSed->header()->setSectionResizeMode(0, QHeaderView::Stretch);
 
-    DataSetTreeModel* treeModel_filter = new DataSetTreeModel(m_filter_repository);
-    treeModel_filter->load(false);
-    treeModel_filter->setEnabled(true);
-    ui->treeView_ManageFilter->setModel(treeModel_filter);
-    ui->treeView_ManageFilter->collapseAll();
+	for (int i = 0; i < treeModel_Sed->rowCount(); i++) {
+	  addButtonsToSedItem(treeModel_Sed->item(i), treeModel_Sed);
+	  addDeleteButtonsToItem(
+					treeModel_Sed->item(i),
+					treeModel_Sed,
+					ui->treeView_ManageSed,
+					SLOT(deletSedGroupButtonClicked(const QString&)),
+					m_sed_del_buttons,
+					2);
+	}
 
-    SedTreeModel* treeModel_Sed = new SedTreeModel(m_seds_repository);
-    treeModel_Sed->load(false);
-    treeModel_Sed->setEnabled(true);
-    ui->treeView_ManageSed->setModel(treeModel_Sed);
-    ui->treeView_ManageSed->collapseAll();
-    ui->treeView_ManageSed->setColumnWidth(0, 500);
+	ui->treeView_ManageSed->resizeColumnToContents(1);
+}
 
-    for (int i = 0; i < treeModel_Sed->rowCount(); i++) {
-      addButtonsToSedItem(treeModel_Sed->item(i), treeModel_Sed);
-    }
-
-
+void FormAuxDataManagement::displayRed() {
+	m_red_del_buttons.clear();
     DataSetTreeModel* treeModel_Red = new DataSetTreeModel(m_redenig_curves_repository);
     treeModel_Red->load(false);
     treeModel_Red->setEnabled(true);
     ui->treeView_ManageRed->setModel(treeModel_Red);
     ui->treeView_ManageRed->collapseAll();
+    ui->treeView_ManageRed->header()->setStretchLastSection(false);
+    ui->treeView_ManageRed->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    for (int i = 0; i < treeModel_Red->rowCount(); i++) {
+      	addDeleteButtonsToItem(
+      			treeModel_Red->item(i),
+				treeModel_Red,
+  				ui->treeView_ManageRed,
+  				SLOT(deletRedGroupButtonClicked(const QString&)),
+				m_red_del_buttons,
+  				1);
+      }
 
+}
 
-    DataSetTreeModel* treeModel_Luminosity = new DataSetTreeModel(m_luminosity_repository);
-    treeModel_Luminosity->load(false);
-    treeModel_Luminosity->setEnabled(true);
-    ui->treeView_ManageLuminosity->setModel(treeModel_Luminosity);
-    ui->treeView_ManageLuminosity->collapseAll();
+void FormAuxDataManagement::displayLum() {
+	m_lum_del_buttons.clear();
+	DataSetTreeModel* treeModel_Luminosity = new DataSetTreeModel(m_luminosity_repository);
+	treeModel_Luminosity->load(false);
+	treeModel_Luminosity->setEnabled(true);
+	ui->treeView_ManageLuminosity->setModel(treeModel_Luminosity);
+	ui->treeView_ManageLuminosity->collapseAll();
+	ui->treeView_ManageLuminosity->header()->setStretchLastSection(false);
+	ui->treeView_ManageLuminosity->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+	for (int i = 0; i < treeModel_Luminosity->rowCount(); i++) {
+		addDeleteButtonsToItem(
+				treeModel_Luminosity->item(i),
+				treeModel_Luminosity,
+				ui->treeView_ManageLuminosity,
+				SLOT(deletLumGroupButtonClicked(const QString&)),
+				m_lum_del_buttons,
+				1);
+    }
+}
 
+void FormAuxDataManagement::loadManagementPage(int index){
+	displayFilter();
+	displaySED();
+	displayRed();
+	displayLum();
 
     if (index>=0){
       ui->tab_Management->setCurrentIndex(index);
     }
 
-
     std::string sun_sed = PreferencesUtils::getUserPreference("AuxData","SUN_SED");
     ui->lbl_sun_sed->setText(QString::fromStdString(sun_sed));
-
 }
-
 
 void FormAuxDataManagement::on_btn_interp_clicked() {
      std::unique_ptr<DialogInterpolateSed> dialog(new DialogInterpolateSed(this));
@@ -104,7 +160,6 @@ void FormAuxDataManagement::on_btn_interp_clicked() {
        copyingSEDFinished(true,{});
      }
 }
-
 
 void FormAuxDataManagement::getParameterInfoClicked(const QString& file) {
   logger.info() << "File selected :"<< file.toStdString();
@@ -115,9 +170,7 @@ void FormAuxDataManagement::getParameterInfoClicked(const QString& file) {
     dialog->exec();
 }
 
-
 void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
-
   QMessageBox msgBox;
   msgBox.setText("Add Emission Lines to SEDs in a folder..");
   msgBox.setInformativeText(QString::fromStdString("This action will create a new folder named ")+
@@ -183,12 +236,36 @@ void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
 
 }
 
+template<class TreeModel>
+void FormAuxDataManagement::addDeleteButtonsToItem(QStandardItem* item,
+		TreeModel* treeModel,
+												   QTreeView * view,
+												   const char* slot,
+												   std::vector<std::unique_ptr<MessageButton>>& btn_vector,
+												   int index) {
+
+	if ( item->rowCount()>0) {
+		auto name = treeModel->getFullGroupName(item);
+		auto cartButton = Euclid::make_unique<MessageButton>(name, "Delete");
+		cartButton->setMaximumSize(100,50);
+		auto idx = item->index().sibling(item->index().row(), index);
+		view->setIndexWidget(idx, cartButton.get());
+	    connect(cartButton.get(), SIGNAL(MessageButtonClicked(const QString&)), this, slot);
+		btn_vector.push_back(std::move(cartButton));
+		for (int i = 0; i < item->rowCount(); i++) {
+			addDeleteButtonsToItem(item->child(i), treeModel, view, slot, btn_vector, index);
+		}
+	}
+
+}
 
 void FormAuxDataManagement::addButtonsToSedItem(QStandardItem *item, SedTreeModel *treeModel_sed) {
   if (treeModel_sed->canAddEmissionLineToGroup(item) || treeModel_sed->canAddLpEmissionLineToGroup(item)) {
     auto name = treeModel_sed->getFullGroupName(item);
 
     auto cartButton = Euclid::make_unique<MessageButton>(name, "Add Emission Line to SEDs");
+	cartButton->setMaximumSize(250,50);
+	cartButton->setMinimumSize(190,10);
 
     auto index = item->index().sibling(item->index().row(), 1);
 
@@ -226,8 +303,6 @@ void FormAuxDataManagement::addButtonsToSedItem(QStandardItem *item, SedTreeMode
   }
 }
 
-
-
 void FormAuxDataManagement::sedProcessStarted() {
   ui->labelMessage->setText("Adding emission Lines to the SEDs...");
   for (auto& button :m_message_buttons) {
@@ -236,47 +311,28 @@ void FormAuxDataManagement::sedProcessStarted() {
 }
 
 void FormAuxDataManagement::sedProcessfinished(int, QProcess::ExitStatus) {
-      // remove the buttons
-      m_message_buttons.clear();
-
       // reload the provider and the model
       std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
       std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(
           new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser) });
       m_seds_repository->resetProvider(std::move(sed_provider));
 
-
-      SedTreeModel* treeModel_Sed = new SedTreeModel(m_seds_repository);
-        treeModel_Sed->load(false);
-        treeModel_Sed->setEnabled(true);
-        ui->treeView_ManageSed->setModel(treeModel_Sed);
-        ui->treeView_ManageSed->collapseAll();
-        ui->treeView_ManageSed->setColumnWidth(0, 500);
-
-        for (int i = 0; i < treeModel_Sed->rowCount(); i++) {
-          addButtonsToSedItem(treeModel_Sed->item(i), treeModel_Sed);
-        }
-
+      displaySED();
 
       ui->labelMessage->setText("Processing of SEDs completed.");
 }
 
-
 void FormAuxDataManagement::copyingFilterFinished(bool success, QVector<QString> ){
  if (success){
-    logger.info() << "files imported ";
+    logger.info() << "files modified ";
     // reset repo
     std::unique_ptr <XYDataset::FileParser > filter_file_parser {new XYDataset::AsciiParser { } };
     std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(
        new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true), std::move(filter_file_parser) });
     m_filter_repository->resetProvider(std::move(filter_provider));
-    DataSetTreeModel* treeModel_filter = new DataSetTreeModel(m_filter_repository);
-    treeModel_filter->load(false);
-    treeModel_filter->setEnabled(true);
-    ui->treeView_ManageFilter->setModel(treeModel_filter);
-    ui->treeView_ManageFilter->collapseAll();
+    displayFilter();
  } else {
-   logger.warn() << "Copy of the files failed";
+   logger.warn() << "Modification of the files failed";
  }
 }
 
@@ -284,64 +340,116 @@ void FormAuxDataManagement::copyingSEDFinished(bool success, QVector<QString> ){
  if (success){
     m_message_buttons.clear();
 
-    logger.info() << "files imported ";
+    logger.info() << "files modified ";
     // reload the provider and the model
     std::unique_ptr <XYDataset::FileParser > sed_file_parser {new XYDataset::AsciiParser { } };
     std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(
        new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser) });
     m_seds_repository->resetProvider(std::move(sed_provider));
-    SedTreeModel* treeModel_Sed = new SedTreeModel(m_seds_repository);
-    treeModel_Sed->load(false);
-    treeModel_Sed->setEnabled(true);
-    ui->treeView_ManageSed->setModel(treeModel_Sed);
-    ui->treeView_ManageSed->collapseAll();
-    ui->treeView_ManageSed->setColumnWidth(0, 500);
-    for (int i = 0; i < treeModel_Sed->rowCount(); i++) {
-      addButtonsToSedItem(treeModel_Sed->item(i), treeModel_Sed);
-    }
+    displaySED();
  } else {
-   logger.warn() << "Copy of the files failed";
+   logger.warn() << "Modification of the files failed";
  }
 }
 
 void FormAuxDataManagement::copyingRedFinished(bool success, QVector<QString> ){
  if (success){
-    logger.info() << "files imported ";
+    logger.info() << "files modified ";
     // reload the provider and the model
     std::unique_ptr <XYDataset::FileParser > red_file_parser {new XYDataset::AsciiParser { } };
     std::unique_ptr<XYDataset::FileSystemProvider> red_provider(
        new XYDataset::FileSystemProvider{FileUtils::getRedCurveRootPath(true), std::move(red_file_parser) });
     m_redenig_curves_repository->resetProvider(std::move(red_provider));
-    DataSetTreeModel* treeModel_red = new DataSetTreeModel(m_redenig_curves_repository);
-    treeModel_red->load(false);
-    treeModel_red->setEnabled(true);
-    ui->treeView_ManageRed->setModel(treeModel_red);
-    ui->treeView_ManageRed->collapseAll();
+    displayRed();
  } else {
-   logger.warn() << "Copy of the files failed";
+   logger.warn() << "Modification of the files failed";
  }
 }
 
 void FormAuxDataManagement::copyingLumFinished(bool success, QVector<QString> ){
    if (success){
-      logger.info() << "files imported ";
+      logger.info() << "files modified ";
       // reload the provider and the model
       std::unique_ptr <XYDataset::FileParser > lum_file_parser {new XYDataset::AsciiParser { } };
       std::unique_ptr<XYDataset::FileSystemProvider> lum_provider(
          new XYDataset::FileSystemProvider{FileUtils::getLuminosityFunctionCurveRootPath(true), std::move(lum_file_parser) });
       m_luminosity_repository->resetProvider(std::move(lum_provider));
-      DataSetTreeModel* treeModel_lum = new DataSetTreeModel(m_luminosity_repository);
-      treeModel_lum->load(false);
-      treeModel_lum->setEnabled(true);
-      ui->treeView_ManageLuminosity->setModel(treeModel_lum);
-      ui->treeView_ManageLuminosity->collapseAll();
+      displayLum();
    } else {
-     logger.warn() << "Copy of the files failed";
+     logger.warn() << "Modification of the files failed";
    }
 }
 
 void FormAuxDataManagement::copyProgress(qint64 copy,qint64 total){
   logger.info() << "File copy progress => " << QString::number((qreal(copy) / qreal(total)) * 100.0).toStdString() << "%";
+}
+
+void FormAuxDataManagement::deletFilterGroupButtonClicked(const QString& group) {
+	logger.info() << "Filter Group " << group.toStdString() << " deletion requested.";
+	QMessageBox msgBox;
+	msgBox.setText("Delete a Filter Group..");
+	msgBox.setIcon(QMessageBox::Warning);
+	msgBox.setInformativeText(QString::fromStdString("You are about to delete the filter group ")+
+		group+QString::fromStdString(". \n\nThis is an irreversible action: the corresponding folder will be deleted from your file system.") +
+		QString::fromStdString(" \n\nIf you where using some of these filters in any Catalog no further processing of it will be possible!"));
+
+	msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Apply);
+	if (msgBox.exec() == QMessageBox::Apply) {
+		std::string path = FileUtils::getFilterRootPath(false)+"/"+group.toStdString();
+		boost::filesystem::remove_all(path);
+		copyingFilterFinished(true,{});
+	}
+}
+
+void FormAuxDataManagement::deletSedGroupButtonClicked(const QString& group){
+	logger.info() << "SED Group " << group.toStdString() << " deletion requested.";
+	QMessageBox msgBox;
+	msgBox.setText("Delete a SED Group..");
+	msgBox.setIcon(QMessageBox::Warning);
+	msgBox.setInformativeText(QString::fromStdString("You are about to delete the SED group ")+
+		group+QString::fromStdString(". \n\nThis is an irreversible action: the corresponding folder will be deleted from your file system.") +
+		QString::fromStdString(" \n\nIf you where using some of these SEDs in any Parameter Space no further processing of it will be possible!"));
+
+	msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Apply);
+	if (msgBox.exec() == QMessageBox::Apply) {
+		std::string path = FileUtils::getSedRootPath(false)+"/"+group.toStdString();
+		boost::filesystem::remove_all(path);
+		copyingSEDFinished(true,{});
+	}
+}
+
+void FormAuxDataManagement::deletRedGroupButtonClicked(const QString& group){
+	logger.info() << "Reddening Curve Group " << group.toStdString() << " deletion requested.";
+	QMessageBox msgBox;
+	msgBox.setText("Delete a Reddening Curve Group..");
+	msgBox.setIcon(QMessageBox::Warning);
+	msgBox.setInformativeText(QString::fromStdString("You are about to delete the Reddening Curve group ")+
+		group+QString::fromStdString(". \n\nThis is an irreversible action: the corresponding folder will be deleted from your file system.") +
+		QString::fromStdString(" \n\nIf you where using some of these Reddening Curves in any Parameter Space no further processing of it will be possible!"));
+
+	msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Apply);
+	if (msgBox.exec() == QMessageBox::Apply) {
+		std::string path = FileUtils::getRedCurveRootPath(false)+"/"+group.toStdString();
+		boost::filesystem::remove_all(path);
+		copyingRedFinished(true,{});
+	}
+}
+
+void FormAuxDataManagement::deletLumGroupButtonClicked(const QString& group){
+	logger.info() << "Luminosity Function Curve Group " << group.toStdString() << " deletion requested.";
+	QMessageBox msgBox;
+	msgBox.setText("Delete a Luminosity Function Curve Group..");
+	msgBox.setIcon(QMessageBox::Warning);
+	msgBox.setInformativeText(QString::fromStdString("You are about to delete the Luminosity Function Curve group ")+
+		group+QString::fromStdString(". \n\nThis is an irreversible action: the corresponding folder will be deleted from your file system.") +
+		QString::fromStdString(" \n\nIf you where using some of these Luminosity Function Curve in any Luminosity Prior configuration no further processing with it will be possible!"));
+
+	msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Apply);
+	if (msgBox.exec() == QMessageBox::Apply) {
+		std::string path = FileUtils::getLuminosityFunctionCurveRootPath(false)+"/"+group.toStdString();
+		boost::filesystem::remove_all(path);
+		copyingLumFinished(true,{});
+	}
 }
 
 void FormAuxDataManagement::on_btn_import_filter_clicked() {
@@ -536,8 +644,6 @@ void FormAuxDataManagement::reloadAuxData(){
    copyingLumFinished(true, {});
 }
 
-
-
 void FormAuxDataManagement::on_btn_sun_sed_clicked() {
     std::unique_ptr<DialogSedSelector> dialog(new DialogSedSelector(m_seds_repository));
     dialog->setSed(PreferencesUtils::getUserPreference("AuxData","SUN_SED"));
@@ -553,7 +659,6 @@ void FormAuxDataManagement::sunSedPopupClosing(std::string sed){
   PreferencesUtils::setUserPreference("AuxData","SUN_SED", sed);
   ui->lbl_sun_sed->setText(QString::fromStdString(sed));
 }
-
 
 void FormAuxDataManagement::on_btn_planck_clicked(){
   m_httpRequestAborted = false;
@@ -612,7 +717,6 @@ void FormAuxDataManagement::on_btn_planck_clicked(){
 
 }
 
-
 void FormAuxDataManagement::updateDownloadProgress(qint64 bytesRead, qint64 totalBytes) {
   if (m_httpRequestAborted) {
           return;
@@ -634,10 +738,5 @@ void FormAuxDataManagement::cancelDownloadPlanck() {
   }
 }
 
-
 }
 }
-
-
-
-

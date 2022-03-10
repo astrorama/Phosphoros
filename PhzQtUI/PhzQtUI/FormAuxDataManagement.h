@@ -7,11 +7,13 @@
 #include <QProgressDialog>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QTreeView>
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
 #include "PhzQtUI/SedTreeModel.h"
 #include "PhzQtUI/MessageButton.h"
 #include "PhzQtUI/DataPackHandler.h"
+#include "PhzQtUI/DataSetTreeModel.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -51,6 +53,12 @@ private slots:
 void sedProcessStarted();
 void sedProcessfinished(int, QProcess::ExitStatus);
 
+
+void deletFilterGroupButtonClicked(const QString& group);
+void deletSedGroupButtonClicked(const QString& group);
+void deletRedGroupButtonClicked(const QString& group);
+void deletLumGroupButtonClicked(const QString& group);
+
 void addEmissionLineButtonClicked(const QString& group);
 void getParameterInfoClicked(const QString& file);
 
@@ -65,6 +73,11 @@ void on_btn_interp_clicked();
 void on_bt_reloadDP_clicked();
 void on_btn_planck_clicked();
 void reloadAuxData();
+
+void displayFilter();
+void displaySED();
+void displayRed();
+void displayLum();
 
 void copyingFilterFinished(bool, QVector<QString>);
 void copyingSEDFinished(bool, QVector<QString>);
@@ -99,6 +112,14 @@ private:
     std::unique_ptr<DataPackHandler> m_dataPackHandler;
 
     std::vector<std::unique_ptr<MessageButton>> m_message_buttons;
+    std::vector<std::unique_ptr<MessageButton>> m_filter_del_buttons;
+    std::vector<std::unique_ptr<MessageButton>> m_sed_del_buttons;
+    std::vector<std::unique_ptr<MessageButton>> m_red_del_buttons;
+    std::vector<std::unique_ptr<MessageButton>> m_lum_del_buttons;
+
+    template<class TreeModel>
+    void addDeleteButtonsToItem(QStandardItem* item, TreeModel* treeModel, QTreeView * view, const char* slot, std::vector<std::unique_ptr<MessageButton>>& btn_vector, int index);
+
     void addButtonsToSedItem(QStandardItem* item, SedTreeModel* treeModel_sed);
 };
 

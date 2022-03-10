@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QDir>
 #include <set>
+#include <QString>
 #include "FileUtils.h"
 #include "PhzQtUI/DataSetTreeModel.h"
 #include "XYDataset/QualifiedName.h"
@@ -76,10 +77,11 @@ void DataSetTreeModel::load(bool selectable, bool onlyLeaves) {
       item->setTristate(selectable && !onlyLeaves);
 
 
+      QStandardItem* item_void = new QStandardItem("");
       if (parent_group.length()>0){
-        m_map_dir.at(parent_group)->appendRow(item);
+        m_map_dir.at(parent_group)->appendRow({item,item_void});
       } else {
-        this->appendRow(item);
+        this->appendRow({item,item_void});
       }
 
       m_map_dir[group] = item;
@@ -89,14 +91,14 @@ void DataSetTreeModel::load(bool selectable, bool onlyLeaves) {
 
   // put the items
   for (auto& name : unordered) {
-
+	QStandardItem* item_void = new QStandardItem("");
     QStandardItem* item = new QStandardItem(QString::fromStdString(name.datasetName()));
     item->setCheckable(selectable);
     auto group_name = DataSetTreeModel::getGroupName(name);
     if (group_name.length()>0){
-      m_map_dir.at(group_name)->appendRow(item);
+      m_map_dir.at(group_name)->appendRow({item,item_void});
     } else {
-      this->appendRow(item);
+      this->appendRow({item,item_void});
     }
   }
 }
@@ -405,6 +407,26 @@ DatasetSelection DataSetTreeModel::getState() const{
 
 bool DataSetTreeModel::hasLeave() const{
   return this->rowCount()>0;
+}
+
+
+QString DataSetTreeModel::getFullGroupName(QStandardItem* item) const {
+  if (item->rowCount()>0) {
+    for (auto & pair : m_map_dir) {
+      if (pair.second==item) {
+        return QString::fromStdString(pair.first);
+      }
+    }
+  } else {
+    for (auto & pair : m_map_dir) {
+      if (pair.second==item->parent()) {
+        return QString::fromStdString(pair.first);
+      }
+    }
+  }
+
+
+  return "";
 }
 
 
