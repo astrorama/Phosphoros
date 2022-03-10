@@ -30,6 +30,8 @@ void DialogFilterMapping::setFilters(const std::vector<std::string>& filters){
    connect(treeModel_filter, SIGNAL(itemChanged(QStandardItem*)), treeModel_filter, SLOT(onItemChanged(QStandardItem*)));
    ui->treeView_filter->setModel(treeModel_filter);
    ui->treeView_filter->expandAll();
+   ui->treeView_filter->hideColumn(1);
+   ui->treeView_filter->resizeColumnToContents(0);
 
   treeModel_filter->setState(filters);
 

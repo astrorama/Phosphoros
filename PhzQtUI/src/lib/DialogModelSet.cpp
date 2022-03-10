@@ -34,6 +34,10 @@ void DialogModelSet::loadSeds() {
       DataSetTreeModel* treeModel_sed = new DataSetTreeModel(m_seds_repository);
       treeModel_sed->load();
       ui->treeView_Sed->setModel(treeModel_sed);
+      ui->treeView_Sed->expandAll();
+      ui->treeView_Sed->hideColumn(1);
+      ui->treeView_Sed->hideColumn(2);
+      ui->treeView_Sed->resizeColumnToContents(0);
       ui->treeView_Sed->collapseAll();
 
       connect(treeModel_sed, SIGNAL(itemChanged(QStandardItem*)), treeModel_sed,
@@ -62,7 +66,11 @@ DialogModelSet::DialogModelSet(DatasetRepo seds_repository,
     DataSetTreeModel* treeModel_red = new DataSetTreeModel(m_redenig_curves_repository);
     treeModel_red->load();
     ui->treeView_Reddening->setModel(treeModel_red);
+    ui->treeView_Reddening->expandAll();
+    ui->treeView_Reddening->hideColumn(1);
+    ui->treeView_Reddening->resizeColumnToContents(0);
     ui->treeView_Reddening->collapseAll();
+
 
     connect(treeModel_red, SIGNAL(itemChanged(QStandardItem*)), treeModel_red,
                  SLOT(onItemChanged(QStandardItem*)));

@@ -74,10 +74,11 @@ void SedTreeModel::load(bool selectable, bool onlyLeaves) {
 
 
       QStandardItem* item_void = new QStandardItem("");
+      QStandardItem* item_void2 = new QStandardItem("");
       if (parent_group.length()>0){
-        m_map_dir.at(parent_group)->appendRow({item,item_void});
+        m_map_dir.at(parent_group)->appendRow({item, item_void, item_void2});
       } else {
-        this->appendRow({item,item_void});
+        this->appendRow({item, item_void, item_void2});
       }
 
       m_map_dir[group] = item;

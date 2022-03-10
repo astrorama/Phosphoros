@@ -29,6 +29,9 @@ void DialogSedSelector::setSed(std::string sed_name){
   treeModel_sed->setEnabled(true);
   ui->treeView_sed->setModel(treeModel_sed);
   ui->treeView_sed->expandAll();
+  ui->treeView_sed->hideColumn(1);
+  ui->treeView_sed->hideColumn(2);
+  ui->treeView_sed->resizeColumnToContents(0);
 
   connect( treeModel_sed,
            SIGNAL(itemChanged(QStandardItem*)),
