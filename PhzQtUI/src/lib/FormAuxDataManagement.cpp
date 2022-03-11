@@ -61,8 +61,10 @@ void FormAuxDataManagement::displayFilter() {
 	treeModel_filter->setEnabled(true);
 	ui->treeView_ManageFilter->setModel(treeModel_filter);
 	ui->treeView_ManageFilter->collapseAll();
-	ui->treeView_ManageFilter->header()->setStretchLastSection(false);
-	ui->treeView_ManageFilter->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    if (treeModel_filter->rowCount()>0) {
+    	ui->treeView_ManageFilter->header()->setStretchLastSection(false);
+    	ui->treeView_ManageFilter->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    }
 	for (int i = 0; i < treeModel_filter->rowCount(); i++) {
 		addDeleteButtonsToItem(
 				treeModel_filter->item(i),
@@ -82,8 +84,10 @@ void FormAuxDataManagement::displaySED() {
 	treeModel_Sed->setEnabled(true);
 	ui->treeView_ManageSed->setModel(treeModel_Sed);
 	ui->treeView_ManageSed->collapseAll();
-	ui->treeView_ManageSed->header()->setStretchLastSection(false);
-	ui->treeView_ManageSed->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    if (treeModel_Sed->rowCount()>0) {
+		ui->treeView_ManageSed->header()->setStretchLastSection(false);
+		ui->treeView_ManageSed->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    }
 
 	for (int i = 0; i < treeModel_Sed->rowCount(); i++) {
 	  addButtonsToSedItem(treeModel_Sed->item(i), treeModel_Sed);
@@ -106,8 +110,10 @@ void FormAuxDataManagement::displayRed() {
     treeModel_Red->setEnabled(true);
     ui->treeView_ManageRed->setModel(treeModel_Red);
     ui->treeView_ManageRed->collapseAll();
-    ui->treeView_ManageRed->header()->setStretchLastSection(false);
-    ui->treeView_ManageRed->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    if (treeModel_Red->rowCount()>0) {
+		ui->treeView_ManageRed->header()->setStretchLastSection(false);
+		ui->treeView_ManageRed->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    }
     for (int i = 0; i < treeModel_Red->rowCount(); i++) {
       	addDeleteButtonsToItem(
       			treeModel_Red->item(i),
@@ -121,14 +127,19 @@ void FormAuxDataManagement::displayRed() {
 }
 
 void FormAuxDataManagement::displayLum() {
-	m_lum_del_buttons.clear();
+    m_lum_del_buttons.clear();
 	DataSetTreeModel* treeModel_Luminosity = new DataSetTreeModel(m_luminosity_repository);
+
 	treeModel_Luminosity->load(false);
 	treeModel_Luminosity->setEnabled(true);
 	ui->treeView_ManageLuminosity->setModel(treeModel_Luminosity);
 	ui->treeView_ManageLuminosity->collapseAll();
-	ui->treeView_ManageLuminosity->header()->setStretchLastSection(false);
-	ui->treeView_ManageLuminosity->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+
+	if (treeModel_Luminosity->rowCount()>0) {
+		ui->treeView_ManageLuminosity->header()->setStretchLastSection(false);
+		ui->treeView_ManageLuminosity->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+	}
+
 	for (int i = 0; i < treeModel_Luminosity->rowCount(); i++) {
 		addDeleteButtonsToItem(
 				treeModel_Luminosity->item(i),
@@ -145,7 +156,6 @@ void FormAuxDataManagement::loadManagementPage(int index){
 	displaySED();
 	displayRed();
 	displayLum();
-
     if (index>=0){
       ui->tab_Management->setCurrentIndex(index);
     }
