@@ -32,6 +32,7 @@
 #include "PhzFilterVariation/FilterVariationSingleGridCreator.h"
 #include "PhzConfiguration/PhotometryGridConfig.h"
 #include "PhzConfiguration/FilterVariationCoefficientGridOutputConfig.h"
+#include "PhzConfiguration/FilterVariationConfig.h"
 
 
 
@@ -105,9 +106,7 @@ std::string DialogFilterShiftGridGeneration::runFunction() {
     const auto& filter_provider = config_manager.template getConfiguration<FilterProviderConfig>().getFilterDatasetProvider();
     auto& igm_abs_func = config_manager.template getConfiguration<IgmConfig>().getIgmAbsorptionFunction();
     auto output_function = config_manager.template getConfiguration<FilterVariationCoefficientGridOutputConfig>().getOutputFunction();
-    auto min_shift = config_manager.template getConfiguration<FilterVariationCoefficientGridOutputConfig>().getMinShift();
-    auto max_shift = config_manager.template getConfiguration<FilterVariationCoefficientGridOutputConfig>().getMaxShift();
-    auto sample_number = config_manager.template getConfiguration<FilterVariationCoefficientGridOutputConfig>().getShiftNumber();
+    auto shift_sampling = config_manager.template getConfiguration<FilterVariationConfig>().getSampling();
     auto cosmology =  config_manager.template getConfiguration<CosmologicalParameterConfig>().getCosmologicalParam();
     auto lum_filter_name = config_manager.getConfiguration<ModelNormalizationConfig>().getNormalizationFilter();
     auto sun_sed_name = config_manager.getConfiguration<ModelNormalizationConfig>().getReferenceSolarSed();
@@ -140,9 +139,7 @@ std::string DialogFilterShiftGridGeneration::runFunction() {
      filter_provider,
      igm_abs_func,
      normalizer_functor,
-     min_shift,
-     max_shift,
-     sample_number
+	 shift_sampling
     };
     size_t already_done = 0;
     for (auto& grid_pair : model_phot_grid.region_axes_map) {

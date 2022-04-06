@@ -1027,7 +1027,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getF
   int sample_number = ui->sp_samp_num->value();
   std::string igm = ui->cb_igm->currentText().toStdString();
   std::string grid_name = ui->cb_CompatibleGrid->currentText().toStdString();
-  std::string output_grid_name = ui->cb_CompatibleShiftGrid->currentText().toStdString();
+  std::string output_grid_name = FileUtils::addExt(ui->cb_CompatibleShiftGrid->currentText().toStdString(),".txt");
   std::string survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
   std::string f99 = "F99/F99_3.1";
   std::string text_format = "TEXT";
@@ -1794,7 +1794,7 @@ template<typename ReturnType, int I>
 
       auto config_map = getGridConfiguration();
       std::unique_ptr<DialogGridGeneration> dialog(new DialogGridGeneration());
-      dialog->setValues(ui->cb_CompatibleGrid->currentText().toStdString(), config_map);
+      dialog->setValues(FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(),".txt"), config_map);
       if (dialog->exec()) {
     	adjustGridsButtons(true);
         setComputeCorrectionEnable();
@@ -1873,7 +1873,7 @@ template<typename ReturnType, int I>
           auto config_map = getGalacticCorrectionGridConfiguration();
           if (config_map.size() > 0) {
             std::unique_ptr<DialogGalCorrGridGeneration> dialog(new DialogGalCorrGridGeneration());
-                 dialog->setValues(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), config_map);
+                 dialog->setValues(FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(),".txt"), config_map);
                  if (dialog->exec()) {
                    adjustGridsButtons(true);
                    setComputeCorrectionEnable();
@@ -1935,7 +1935,7 @@ template<typename ReturnType, int I>
               if (config_map.size() > 0) {
 
                 std::unique_ptr<DialogFilterShiftGridGeneration> dialog(new DialogFilterShiftGridGeneration());
-                     dialog->setValues(ui->cb_CompatibleShiftGrid->currentText().toStdString(), config_map);
+                     dialog->setValues(FileUtils::addExt(ui->cb_CompatibleShiftGrid->currentText().toStdString(),".txt"), config_map);
                      if (dialog->exec()) {
                        adjustGridsButtons(true);
                        setComputeCorrectionEnable();
