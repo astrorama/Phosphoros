@@ -217,6 +217,8 @@ void exportAsCatalog(const PhzDataModel::PhotometryGridInfo& grid_info,
     }
   }
   
+  writer.addData(Table::Table{row_list});
+
   logger.info() << "Exported model grid in file " << output_name;
 }
 
