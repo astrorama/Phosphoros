@@ -26,6 +26,7 @@
 #include "PhzConfiguration/ModelNormalizationConfig.h"
 #include "PhzModeling/NormalizationFunctorFactory.h"
 #include "PhzConfiguration/CosmologicalParameterConfig.h"
+#include "PhzConfiguration/FilterVariationConfig.h"
 #include "PhzConfiguration/ComputeFilterVariationCoefficientConfig.h"
 #include "ElementsKernel/ProgramHeaders.h"
 #include "Configuration/ConfigManager.h"

@@ -1,0 +1,12 @@
+$NUMPY
+$PYTHON-astropy
+$PYTHON-numpy
+$PYTHON-pytest
+$PYTHON-sphinx
+CCfits-devel
+boost-$PYTHON-devel
+boost-devel
+doxygen
+graphviz
+log4cpp-devel
+qt5-qtbase-devel

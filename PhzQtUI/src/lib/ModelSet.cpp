@@ -320,16 +320,16 @@ QDomDocument ModelSet::serialize(){
     QDomElement gb_redshift_values_node = doc.createElement("RedshiftValues");
     for (auto& value : m_z_values) {
        QDomElement value_element = doc.createElement("Value");
-       value_element.appendChild(doc.createTextNode(QString::number(value,'g',20)));
+       value_element.appendChild(doc.createTextNode(QString::number(static_cast<float>(value),'g',20)));
        gb_redshift_values_node.appendChild(value_element);
     }
     gb_redshift_Node.appendChild(gb_redshift_values_node);
     QDomElement gb_redshift_ranges_node = doc.createElement("RedshiftRanges");
     for (auto& range : m_z_ranges) {
        QDomElement range_element = doc.createElement("Range");
-       range_element.setAttribute("Min",range.getMin());
-       range_element.setAttribute("Max",range.getMax());
-       range_element.setAttribute("Step",range.getStep());
+       range_element.setAttribute("Min",  static_cast<float>(range.getMin()));
+       range_element.setAttribute("Max",  static_cast<float>(range.getMax()));
+       range_element.setAttribute("Step", static_cast<float>(range.getStep()));
        gb_redshift_ranges_node.appendChild(range_element);
     }
     gb_redshift_Node.appendChild(gb_redshift_ranges_node);
@@ -340,16 +340,16 @@ QDomDocument ModelSet::serialize(){
     QDomElement gb_ebv_values_node = doc.createElement("EbvValues");
     for (auto& value : m_ebv_values) {
        QDomElement value_element = doc.createElement("Value");
-       value_element.appendChild(doc.createTextNode(QString::number(value,'g',20)));
+       value_element.appendChild(doc.createTextNode(QString::number(static_cast<float>(value),'g',20)));
        gb_ebv_values_node.appendChild(value_element);
     }
     gb_ebv_Node.appendChild(gb_ebv_values_node);
     QDomElement gb_ebv_ranges_node = doc.createElement("EbvRanges");
     for (auto& range : m_ebv_ranges) {
        QDomElement range_element = doc.createElement("Range");
-       range_element.setAttribute("Min",range.getMin());
-       range_element.setAttribute("Max",range.getMax());
-       range_element.setAttribute("Step",range.getStep());
+       range_element.setAttribute("Min",  static_cast<float>(range.getMin()));
+       range_element.setAttribute("Max",  static_cast<float>(range.getMax()));
+       range_element.setAttribute("Step", static_cast<float>(range.getStep()));
        gb_ebv_ranges_node.appendChild(range_element);
     }
     gb_ebv_Node.appendChild(gb_ebv_ranges_node);
@@ -367,7 +367,7 @@ QDomDocument ModelSet::serialize(){
       QDomElement ebv_values_node = doc.createElement("EbvValues");
       for (auto& value : rule.getEbvValues()) {
         QDomElement value_element = doc.createElement("Value");
-        value_element.appendChild(doc.createTextNode(QString::number(value,'g',20)));
+        value_element.appendChild(doc.createTextNode(QString::number(static_cast<float>(value),'g',20)));
         ebv_values_node.appendChild(value_element);
       }
       rule_node.appendChild(ebv_values_node);
@@ -375,9 +375,9 @@ QDomDocument ModelSet::serialize(){
       QDomElement ebv_ranges_node = doc.createElement("EbvRanges");
       for (auto& range : rule.getEbvRanges()) {
         QDomElement range_element = doc.createElement("Range");
-        range_element.setAttribute("Min",range.getMin());
-        range_element.setAttribute("Max",range.getMax());
-        range_element.setAttribute("Step",range.getStep());
+        range_element.setAttribute("Min",  static_cast<float>(range.getMin()));
+        range_element.setAttribute("Max",  static_cast<float>(range.getMax()));
+        range_element.setAttribute("Step", static_cast<float>(range.getStep()));
         ebv_ranges_node.appendChild(range_element);
       }
       rule_node.appendChild(ebv_ranges_node);
@@ -385,7 +385,7 @@ QDomDocument ModelSet::serialize(){
       QDomElement z_value_node = doc.createElement("ZValues");
       for (auto& values : rule.getRedshiftValues()) {
         QDomElement value_element = doc.createElement("Value");
-        value_element.appendChild(doc.createTextNode(QString::number(values,'g',20)));
+        value_element.appendChild(doc.createTextNode(QString::number(static_cast<float>(values),'g',20)));
         z_value_node.appendChild(value_element);
       }
       rule_node.appendChild(z_value_node);
@@ -393,9 +393,9 @@ QDomDocument ModelSet::serialize(){
       QDomElement z_ranges_node = doc.createElement("ZRanges");
       for (auto& range : rule.getZRanges()) {
         QDomElement range_element = doc.createElement("Range");
-        range_element.setAttribute("Min", range.getMin());
-        range_element.setAttribute("Max", range.getMax());
-        range_element.setAttribute("Step", range.getStep());
+        range_element.setAttribute("Min",  static_cast<float>(range.getMin()));
+        range_element.setAttribute("Max",  static_cast<float>(range.getMax()));
+        range_element.setAttribute("Step", static_cast<float>(range.getStep()));
         z_ranges_node.appendChild(range_element);
       }
       rule_node.appendChild(z_ranges_node);
