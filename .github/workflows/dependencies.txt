@@ -1,0 +1,11 @@
+$NUMPY
+$PYTHON-devel
+$PYTHON-numpy
+$PYTHON-pytest
+$PYTHON-sphinx
+CCfits-devel
+boost-$PYTHON-devel
+boost-devel
+doxygen
+graphviz
+log4cpp-devel
