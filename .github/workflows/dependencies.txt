@@ -9,3 +9,4 @@ boost-devel
 doxygen
 graphviz
 log4cpp-devel
+qt5-qtbase-devel
