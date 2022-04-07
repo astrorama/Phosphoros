@@ -185,10 +185,11 @@ def compute_stats(specz, phz):
     print('--> Median              : ', median)
     print('--> Sigma               : ', sigma)
     print('--> Mad                 : ', mad)
+    print('--> NMad                : ', 1.4826*mad)
     print('--> Outliers            : ', outliersPercent, '%')
     print('--> Sigma (no outliers) : ', sigmaNoOutliers)
 
-    return dataArr, mean, median, sigma, mad, outliersPercent, sigmaNoOutliers, meanNoOutliers
+    return dataArr, mean, median, sigma, mad, 1.4826*mad, outliersPercent, sigmaNoOutliers, meanNoOutliers
 
 
 #
@@ -302,7 +303,7 @@ class SpeczPhotozPlot(object):
 # -------------------------------------------------------------------------------
 #
 
-def displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers,
+def displayHistogram(data, mean, median, mad, nmad, sigma, outliersPercent, sigmaNoOutliers,
                      meanNoOutliers, figsize=None):
     f, ax = plt.subplots(figsize=figsize)
 
@@ -314,8 +315,8 @@ def displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOut
     ax.set_title('Distribution of : (PhotoZ - SpecZ)/(1 + SpecZ)')
 
     # Write information
-    txt = '\n  Mean : %2.5f\n  Median : %2.5f\n  Mad : %2.5f\n  Sigma : %2.5f\n  Outliers : %2.5f%%\n  Sigma(no outliers) : %2.5f\n  Mean((no outliers) : %2.5f ' \
-          % (mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers)
+    txt = '\n  Mean : %2.5f\n  Median : %2.5f\n  Mad : %2.5f\n  NMad : %2.5f\n  Sigma : %2.5f\n  Outliers : %2.5f%%\n  Sigma(no outliers) : %2.5f\n  Mean((no outliers) : %2.5f ' \
+          % (mean, median, mad, nmad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers)
     ax.text(ax.get_xlim()[0], ax.get_ylim()[1], txt, fontsize=10, family='sans-serif',
             style='italic', ha='left', va='top', alpha=.5)
 
@@ -623,7 +624,7 @@ def mainMethod(args):
 
     specz = catalog['SPECZ']
     phz = catalog['PHZ']
-    data, mean, median, sigma, mad, outliersPercent, sigmaNoOutliers, meanNoOutliers = compute_stats(
+    data, mean, median, sigma, mad, nmad, outliersPercent, sigmaNoOutliers, meanNoOutliers = compute_stats(
         specz, phz)
 
     if args.no_display:
@@ -639,7 +640,7 @@ def mainMethod(args):
         data = data[idx]
 
     fig1 = SpeczPhotozPlot(catalog['ID'], specz, phz, data, figsize=(7, 8), embedded=False)
-    fig2 = displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers,
+    fig2 = displayHistogram(data, mean, median, mad, nmad, sigma, outliersPercent, sigmaNoOutliers,
                             meanNoOutliers,
                             figsize=(10, 4))
 
