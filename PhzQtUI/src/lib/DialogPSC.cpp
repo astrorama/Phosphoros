@@ -181,11 +181,14 @@ void DialogPSC::on_btn_browse_clicked() {
 
 void DialogPSC::on_btn_cancel_clicked(){
   if (m_processing) {
-     m_P->kill();
+     m_P->terminate();
+     m_processing = false;
+     ui->out_cons->setPlainText("Processing stop by the user");
      logger.info()<< "Processing stop by the user";
    }
   ui->btn_cancel->hide();
   ui->btn_close->show();
+  ui->btn_compute->show();
 }
 
 void DialogPSC::on_gb_scater_clicked(bool checked){
@@ -201,12 +204,14 @@ void DialogPSC::on_gb_stacked_clicked(bool checked){
 
 void DialogPSC::on_btn_compute_clicked(){
   if (m_processing) {
-        m_P->kill();
-        logger.info()<< "Processing stop by the user";
+        m_P->terminate();
+        m_processing = false;
   }
+  ui->out_cons->setPlainText("");
 
   ui->btn_cancel->show();
   ui->btn_close->hide();
+  ui->btn_compute->hide();
   ui->out_cons->show();
   ui->out_cons->setReadOnly(true);
   m_processing = true;
@@ -214,7 +219,7 @@ void DialogPSC::on_btn_compute_clicked(){
 
 
 
-  m_P =new QProcess;
+  m_P =new QProcess(this);
 
   connect(m_P, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processingFinished(int, QProcess::ExitStatus)));
 
@@ -248,7 +253,7 @@ void DialogPSC::on_btn_compute_clicked(){
         s3 << QString::fromStdString("--no-display");
       }
 
-      cmd =  QString("Phosphoros PSC ")+s3.join(" ");
+      cmd =  QString("PhosphorosPlotSpecZComparison ")+s3.join(" ");
 
   } else {
       QStringList s3;
@@ -304,7 +309,7 @@ void DialogPSC::on_btn_compute_clicked(){
          }
 
 
-         cmd =  QString("Phosphoros PSP ")+s3.join(" ");
+         cmd =  QString("PlotStackedPdfPitAndCrps ")+s3.join(" ");
   }
   logger.info()<< "Processing cmd:" << cmd.toStdString();
 
@@ -347,6 +352,7 @@ void DialogPSC::checkComputePossible() {
 }
 
 void DialogPSC::on_btn_close_clicked() {
+  on_btn_compute_clicked();
   accept();
 }
 
@@ -354,10 +360,13 @@ void DialogPSC::on_btn_close_clicked() {
 void DialogPSC::processingFinished(int, QProcess::ExitStatus) {
    m_timer->stop();
    m_processing = false;
+   logger.info() << "Processing Finished";
    updateOutCons();
    ui->btn_cancel->hide();
    ui->btn_close->show();
+   ui->btn_compute->show();
    logger.info() << ui->out_cons->toPlainText().toStdString();
+   ui->out_cons->setPlainText("Processing Finished");
 }
 
 

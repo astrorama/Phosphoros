@@ -34,9 +34,10 @@ DialogPOP::~DialogPOP(){}
 void DialogPOP::setFolder(std::string output_folder){
   m_folder = output_folder;
   ui->out_cons->hide();
-  ui->btn_close->hide();
+  ui->btn_close->show();
   ui->btn_compute->show();
   ui->btn_cancel->setDisabled(false);
+  ui->btn_cancel->hide();
   // get the file snd  check .fits
   auto basepath =  boost::filesystem::path(output_folder);
   if (boost::filesystem::exists(basepath/"phz_cat.fits")) {
@@ -101,10 +102,14 @@ void DialogPOP::setFolder(std::string output_folder){
 
 void DialogPOP::on_btn_cancel_clicked(){
   if (m_processing) {
-     m_P->kill();
-     logger.info()<< "PDF processing stop by the user";
+	  m_P->terminate();
+	  m_processing = false;
+	  ui->out_cons->setPlainText("Processing stop by the user");
+	  logger.info()<< "Processing stop by the user";
    }
-  reject();
+  ui->btn_close->show();
+  ui->btn_cancel->hide();
+  ui->btn_compute->show();
 }
 
 
@@ -186,10 +191,10 @@ void DialogPOP::on_btn_compute_clicked(){
      excluded.push_back("PHZ_MODE_2_AREA");
   }
 
-  ui->btn_close->show();
+  ui->btn_close->hide();
   ui->btn_compute->hide();
+  ui->btn_cancel->show();
   ui->out_cons->show();
-  ui->btn_close->setDisabled(true);
   ui->out_cons->setReadOnly(true);
   m_processing=true;
   qApp->processEvents();
@@ -211,7 +216,7 @@ void DialogPOP::on_btn_compute_clicked(){
      << QString::fromStdString("--pdf-column") << ui->cbb_columns->currentText();
 
   m_P->setReadChannelMode(QProcess::MergedChannels);
-  const QString& command = QString("Phosphoros POP ") + s3.join(" ");
+  const QString& command = QString("ProcessPDF ") + s3.join(" ");
   logger.info(command.toStdString());
   m_P->start(command);
 
@@ -221,7 +226,6 @@ void DialogPOP::on_btn_compute_clicked(){
 }
 
 void DialogPOP::on_btn_close_clicked(){
-
   accept();
 }
 
@@ -230,8 +234,9 @@ void DialogPOP::processingFinished(int, QProcess::ExitStatus){
    m_timer->stop();
    m_processing=false;
    updateOutCons();
-   ui->btn_close->setDisabled(false);
-   ui->btn_cancel->setDisabled(true);
+   ui->btn_cancel->hide();
+   ui->btn_compute->show();
+   ui->btn_close->show();
    logger.info() <<  ui->out_cons->toPlainText().toStdString();
 }
 
