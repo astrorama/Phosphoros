@@ -247,7 +247,7 @@ try {
   if (!added) {
     ui->cb_CompatibleGrid->addItem(
         QString::fromStdString("Grid_" + selected_model.getName() + "_")
-            + ui->cb_igm->currentText());
+            + ui->cb_igm->currentText()+".txt");
   }
 
   ui->cb_CompatibleGrid->addItem("<Enter a new name>");
