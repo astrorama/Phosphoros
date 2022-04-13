@@ -2,6 +2,7 @@
 #define DialogSedSelector_H
 
 #include <set>
+#include <vector>
 #include <memory>
 #include <QDialog>
 #include "FilterMapping.h"
@@ -28,7 +29,7 @@ public:
   /**
    * @brief Constructor
    */
-  explicit DialogSedSelector(DatasetRepo filter_repository, QWidget *parent = 0);
+  explicit DialogSedSelector(DatasetRepo filter_repository, bool single_sed = true, QWidget *parent = 0);
 
   /**
    * @brief Destructor
@@ -39,14 +40,14 @@ public:
    * @brief Set the initial sed value
    * @param sed_name Name of the initially selected sed.
    */
-  void setSed(std::string sed_name);
+  void setSed(std::vector<std::string> sed_names);
 
   signals:
   /**
    * @brief SIGNAL popupClosing: rised when the popup is closed.
    * The argument is the selected SED Name.
    */
-  void popupClosing(std::string);
+  void popupClosing(std::vector<std::string>);
 
 private slots:
   /**
@@ -63,6 +64,7 @@ private slots:
 private:
   std::unique_ptr<Ui::DialogSedSelector> ui;
   DatasetRepo m_sed_repository;
+  bool m_single_sed;
 };
 
 }

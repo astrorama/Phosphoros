@@ -165,7 +165,7 @@ void FormAuxDataManagement::loadManagementPage(int index){
 }
 
 void FormAuxDataManagement::on_btn_interp_clicked() {
-     std::unique_ptr<DialogInterpolateSed> dialog(new DialogInterpolateSed(this));
+     std::unique_ptr<DialogInterpolateSed> dialog(new DialogInterpolateSed(m_seds_repository, this));
      if (dialog->exec()) {
        copyingSEDFinished(true,{});
      }
@@ -656,18 +656,18 @@ void FormAuxDataManagement::reloadAuxData(){
 
 void FormAuxDataManagement::on_btn_sun_sed_clicked() {
     std::unique_ptr<DialogSedSelector> dialog(new DialogSedSelector(m_seds_repository));
-    dialog->setSed(PreferencesUtils::getUserPreference("AuxData","SUN_SED"));
+    dialog->setSed({PreferencesUtils::getUserPreference("AuxData","SUN_SED")});
 
     connect(dialog.get(),
-            SIGNAL(popupClosing(std::string)),
+            SIGNAL(popupClosing(std::vector<std::string>)),
             this,
-            SLOT(sunSedPopupClosing(std::string)));
+            SLOT(sunSedPopupClosing(std::vector<std::string>)));
     dialog->exec();
 }
 
-void FormAuxDataManagement::sunSedPopupClosing(std::string sed){
-  PreferencesUtils::setUserPreference("AuxData","SUN_SED", sed);
-  ui->lbl_sun_sed->setText(QString::fromStdString(sed));
+void FormAuxDataManagement::sunSedPopupClosing(std::vector<std::string> sed){
+  PreferencesUtils::setUserPreference("AuxData","SUN_SED", sed[0]);
+  ui->lbl_sun_sed->setText(QString::fromStdString(sed[0]));
 }
 
 void FormAuxDataManagement::on_btn_planck_clicked(){

@@ -1,6 +1,7 @@
 #ifndef FORMAUXDATAMANAGEMENT_H
 #define FORMAUXDATAMANAGEMENT_H
 #include <memory>
+#include <vector>
 #include <QWidget>
 #include <QProcess>
 #include <QFile>
@@ -84,7 +85,7 @@ void copyingSEDFinished(bool, QVector<QString>);
 void copyingRedFinished(bool, QVector<QString>);
 void copyingLumFinished(bool, QVector<QString>);
 void copyProgress(qint64, qint64);
-void sunSedPopupClosing(std::string);
+void sunSedPopupClosing(std::vector<std::string>);
 
 void httpReadyPlanckRead();
 void cancelDownloadPlanck();

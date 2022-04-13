@@ -23,6 +23,7 @@
 #include <QSpinBox>
 #include <QSpacerItem>
 #include <QStringList>
+#include "PhzQtUI/DialogSedSelector.h"
 
 using namespace std;
 
@@ -33,48 +34,42 @@ namespace PhzQtUI {
 static Elements::Logging logger = Elements::Logging::getLogger("DialogInterpolateSed");
 
 
-DialogInterpolateSed::DialogInterpolateSed(QWidget *parent):
+DialogInterpolateSed::DialogInterpolateSed(DatasetRepo sed_repo, QWidget *parent):
     QDialog(parent),
     ui(new Ui::DialogInterpolateSed) {
   ui->setupUi(this);
+  m_seds_repository=sed_repo;
 
 
-  auto sed_folder = QString::fromStdString(FileUtils::getSedRootPath(false)) + "/";
-
-
-
-  QDirIterator it(sed_folder, QStringList() << "*.*", QDir::Files, QDirIterator::Subdirectories);
-  while (it.hasNext()) {
-
-    auto name = it.next();
-
-    name = name.replace(sed_folder, "");
-
-    m_sed_list << name;
-  }
-
-  m_sed_list.sort();
 
   ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
   ui->scrollArea->setWidgetResizable( true );
 
-  //ui->layout_SED->
-  ui->layout_SED->addWidget(createControls(true, false));
-  ui->layout_SED->addWidget(createControls(false, false));
+
+  //ui->layout_SED->addWidget(createControls(true, false,"Toto"));
 }
 
 
 DialogInterpolateSed::~DialogInterpolateSed() {
 }
 
-
 void DialogInterpolateSed::on_btn_plus_clicked() {
-  ui->layout_SED->addWidget(createControls(false, true));
+
+std::unique_ptr<DialogSedSelector> dialog(new DialogSedSelector(m_seds_repository,false));
+dialog->setSed({});
+
+connect(dialog.get(),
+		SIGNAL(popupClosing(std::vector<std::string>)),
+		this,
+		SLOT(sedPopupClosing(std::vector<std::string>)));
+dialog->exec();
 }
 
 
-QFrame* DialogInterpolateSed::createControls(bool first, bool del) {
+
+QFrame* DialogInterpolateSed::createControls(bool first, bool del, std::string sed) {
+//	logger.info()<<"Creating controls for "<<sed;
    auto main_frame = new QFrame();
    auto main_layout = new QVBoxLayout();
    main_frame->setLayout(main_layout);
@@ -87,7 +82,7 @@ QFrame* DialogInterpolateSed::createControls(bool first, bool del) {
      number_layout->addWidget(lbl_number);
      auto spin_nbr = new QSpinBox();
      spin_nbr->setMinimum(0);
-     spin_nbr->setValue(0);
+     spin_nbr->setValue(ui->sb_default_nb->value());
      number_layout->addWidget(spin_nbr);
      number_layout->addSpacerItem(new QSpacerItem(300, 0));
 
@@ -100,9 +95,8 @@ QFrame* DialogInterpolateSed::createControls(bool first, bool del) {
    sed_layout->addWidget(lbl_sed);
 
    auto cb_sed = new QComboBox();
-   for (int index=0; index < m_sed_list.size(); ++index) {
-     cb_sed->addItem(m_sed_list[index]);
-   }
+   cb_sed->addItem(QString::fromStdString(sed));
+
    sed_layout->addWidget(cb_sed);
 
 
@@ -113,13 +107,32 @@ QFrame* DialogInterpolateSed::createControls(bool first, bool del) {
         SLOT(onDelButtonClicked(const QString&)));
      sed_layout->addWidget(btn);
    }
-   sed_layout->addSpacerItem(new QSpacerItem(300, 0));
+  // sed_layout->addSpacerItem(new QSpacerItem(300, 0));
    main_layout->addWidget(sed_frame);
 
    return main_frame;
 }
 
+void DialogInterpolateSed::sedPopupClosing(std::vector<std::string> selected_seds) {
 
+	QList<QFrame*> frames =  ui->scrollArea->findChildren<QFrame *>();
+	bool first=frames.count()==0;
+	for(uint i=0; i<selected_seds.size(); ++i){
+		ui->layout_SED->addWidget(createControls(first, !first, selected_seds[i]));
+		first=false;
+	}
+}
+
+
+void DialogInterpolateSed::on_btn_rma_clicked() {
+	QList<QFrame*> frames =  ui->scrollArea->findChildren<QFrame *>();
+	for(int i=0; i<frames.count(); ++i){
+		//  MessageButton* btn = ui->scrollArea->findChild<MessageButton *>(QString::fromStdString("btn_") +frames[i]->objectName());
+		//  disconnect(btn, SIGNAL(MessageButtonClicked(const QString&)), this, SLOT(onDelButtonClicked(const QString&)));
+		  ui->layout_SED->removeWidget(frames[i]);
+		  frames[i]->deleteLater();
+	}
+}
 
 void DialogInterpolateSed::onDelButtonClicked(const QString& uid) {
 
@@ -142,6 +155,8 @@ void DialogInterpolateSed::on_btn_cancel_clicked() {
 }
 
 void DialogInterpolateSed::on_btn_create_clicked() {
+
+
 
   auto sed_folder = QString::fromStdString(FileUtils::getSedRootPath(false));
   auto folder_name = ui->le_folder->text();
@@ -184,7 +199,7 @@ void DialogInterpolateSed::on_btn_create_clicked() {
         // add the sed
         auto* cb = (*frame_iter)->findChild<QComboBox *>();
         if (cb != nullptr) {
-          seds << cb->currentText();
+          seds << QString::fromStdString(FileUtils::getDataSetFilePath(cb->currentText().toStdString(), FileUtils::getSedRootPath(false)));
         } else {
           logger.warn() << "No SED in Frame " << (*frame_iter)->objectName().toStdString();
         }
@@ -193,10 +208,10 @@ void DialogInterpolateSed::on_btn_create_clicked() {
 
   logger.info() << "total new sed =" << total;
 
-  if (total == 0) {
+  if (total < 2) {
     QMessageBox::warning(this, tr("SED Interpolation"),
                                        tr("Your configuration will not generate new SEDs.\n"
-                                          "Please set at least one of the number to a value bigger than 0"),
+                                          "Please select at least 2 SEDs and set at least one of the number to a value bigger than 0"),
                                        QMessageBox::Ok,
                                        QMessageBox::Ok);
     return;
@@ -230,6 +245,8 @@ void DialogInterpolateSed::on_btn_create_clicked() {
     ui->btn_create->setEnabled(false);
 
 }
+
+
 
 
 void DialogInterpolateSed::processingFinished(int code , QProcess::ExitStatus status) {

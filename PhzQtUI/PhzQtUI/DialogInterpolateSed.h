@@ -10,6 +10,8 @@
 #include <vector>
 #include <QFrame>
 #include <QVBoxLayout>
+#include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -18,6 +20,7 @@ namespace Ui {
 class DialogInterpolateSed;
 }
 
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 /**
  * @class DialogInterpolateSed
 
@@ -29,7 +32,7 @@ public:
   /**
    * @brief Constructor
    */
-  explicit DialogInterpolateSed(QWidget *parent = 0);
+  explicit DialogInterpolateSed(DatasetRepo sed_repo, QWidget *parent = 0);
 
   /**
    * @brief Destructor
@@ -43,6 +46,10 @@ public:
 private slots:
 
   void on_btn_plus_clicked();
+  void on_btn_rma_clicked();
+  void sedPopupClosing(std::vector<std::string>);
+
+
   void onDelButtonClicked(const QString&);
 
   /**
@@ -62,8 +69,8 @@ private slots:
 private:
   std::unique_ptr<Ui::DialogInterpolateSed> ui;
 
-  QFrame* createControls(bool first, bool del);
-
+  QFrame* createControls(bool first, bool del, std::string sed);
+  DatasetRepo m_seds_repository;
   QStringList m_sed_list{};
   QProcess * m_is = nullptr;
 
