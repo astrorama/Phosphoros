@@ -6,11 +6,19 @@ elements_depends_on_subdirs(PhzConfiguration)
 elements_depends_on_subdirs(MathUtils)
 elements_depends_on_subdirs(PhzModeling)
 elements_depends_on_subdirs(EmissionLines)
+elements_depends_on_subdirs(NdArray)
 
 find_package(Boost REQUIRED COMPONENTS program_options)
+find_package(PythonLibs ${PYTHON_EXPLICIT_VERSION} REQUIRED)
+find_package(pybind11 REQUIRED)
+
 elements_add_library(PhzCLI src/lib/*.cpp
                      LINK_LIBRARIES PhzConfiguration ElementsKernel
                      PUBLIC_HEADERS PhzCLI)
+
+elements_add_pybind11_module(_DisplayModelGrid src/_DisplayModelGrid.cpp
+        LINK_LIBRARIES PhzCLI)                     
+                    
 elements_add_executable(PhosphorosLsAux src/program/LsAux.cpp
                      LINK_LIBRARIES ElementsKernel Boost XYDataset PhzCLI)
 
@@ -35,6 +43,7 @@ elements_add_python_program(PhosphorosOrderSeds PhzCLI.OrderSeds)
 elements_add_python_program(PhosphorosPlotPosterior PhzCLI.PlotPosterior)
 elements_add_python_program(PhosphorosPlotSpecZComparison PhzCLI.PlotSpecZComparison)
 elements_add_python_program(SedHeaderHandler PhzCLI.SedHeaderHandler)
+elements_add_python_program(PhosphorosPlotFluxDiff PhzCLI.PlotFluxDifference)
 
 # Phosphoros is a Python script but not conceived to work with Elements
 # We use the aliasing mechanism to use python2 or python3 depending
