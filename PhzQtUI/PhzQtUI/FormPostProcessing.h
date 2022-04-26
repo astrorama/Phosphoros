@@ -62,6 +62,7 @@ void on_cb_catalog_currentIndexChanged(const QString &);
 
 void computePdfStat(int);
 void plotZVsZref(int);
+void plotResiduals(int);
 
 
 private:

@@ -20,6 +20,7 @@ from __future__ import print_function
 from os.path import exists
 import argparse
 import re
+import sys
 from astropy.table import Table, join
 import numpy as np
 
@@ -130,7 +131,7 @@ def read_flux_catalog(phosphoros_root, intermediate_product_dir, catalog, input_
     if  exists(input_file):
         input_table = Table.read(input_file)
     else:
-        logger.error('result file ('+input_file+') not found')
+        logger.error('Input Flux file ('+input_file+') not found')
         sys.exit(1) 
     
     filter_mapping_file =  intermediate_product_dir + '/' + catalog + '/filter_mapping.txt'
@@ -154,7 +155,8 @@ def plot_data(data_to_plot, band_column, z_limit, vertical_sigma_limit, sliding_
     z_min=np.min(data_to_plot['Z'])
     z_max=np.max(data_to_plot['Z'])
     ordered_z = np.sort(np.copy(data_to_plot['Z']))
-    limit_z = ordered_z[int(z_limit*len(ordered_z))]
+    
+    limit_z = ordered_z[int(z_limit*(len(ordered_z)-1))]
     
     for band_index in range(len(band_column)):
         offset = (data_to_plot[band_column[band_index]+'_Measured'] - data_to_plot[band_column[band_index]+'_Model']) / data_to_plot[band_column[band_index]+'_Model']
