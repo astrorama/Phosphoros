@@ -20,10 +20,12 @@ from __future__ import print_function
 from os.path import exists
 import argparse
 import re
-from astropy.table import Table
+from astropy.table import Table, join
+import numpy as np
 
 import _DisplayModelGrid as dmg
 from ElementsKernel import Logging
+import matplotlib.pyplot as plt
 
 logger = Logging.getLogger('PlotFluxDifference')
 
@@ -42,52 +44,58 @@ def defineSpecificProgramOptions():
             Compare the Sources photometry with the (scaled) Best Fit Model. 
             
             The code assume Phosphoros files location. 
-            """
-
+    """
+    
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument("-rd", "--result-dir", type=str, required=True,
                         help="The folder containing the outputs and config of ComputeRedshift Run")
     parser.add_argument("-ip", "--intermediate-product-dir", type=str, required=True,
-                        
                         help="The folder containing Phosphoros Intermedaie Product")
+    
+    parser.add_argument("-zl", "--z-limit", type=float, default=0.95,
+                        help="Max redshift limit as a fraction of the available data (default=0.95)")
+    
+    parser.add_argument("-vl", "--vertical-sigma-limit", type=float, default=3,
+                        help="Y-Axis limit in multiple of the sigma of the data (default=3.0)")
+    
+    parser.add_argument("-sm", "--sliding-mean-sampling", type=int, default=10,
+                        help="The number of points the sliding mean is computed (default=10)")
 
     return parser
 
-def mainMethod(args):
-    """
-    @brief The "main" method.
-    @details
-        This method is the entry point to the program. In this sense, it is
-        similar to a main (and it is why it is called mainMethod()).
-    """
+def running_med(off, z, zmax, dz):
+    z_arr = np.linspace(0., zmax, int(zmax/(dz/3.)))
+    off_arr = np.zeros(len(z_arr))
+    for i in range(len(z_arr)):
+        off_arr[i] = np.median(off[(z>=z_arr[i]-dz/2.) & (z<=z_arr[i]+dz/2.)])
+    return z_arr, off_arr
 
-    # 1) Get the config file, extract the grid name and the catalog type
-    folder_name = args.result_dir
+def extract_value(keyword, file_content, parent_folder):
+    keyword_search = re.search('\s*'+keyword+'\s*=(.*)', "\n".join(file_content))
+    if keyword_search :
+        return keyword_search.group(1).strip() 
+    else:
+        logger.error('config file  ('+parent_folder+'/run_config.config) do not contains the '+keyword+' keyword')
+        sys.exit(1) 
+    
+def read_config_file(folder_name): 
     if not exists(folder_name+'/run_config.config'):
         logger.error('Provided folder do not contains a config file  ('+folder_name+'/run_config.config)')
-        return 1 
-    grid='' # model-grid-file
-    catalog ='' # catalog-type
+        sys.exit(1) 
     contents=''
     with open(folder_name+'/run_config.config') as f:
         contents = f.readlines()
+        
+    catalog = extract_value('catalog-type',contents, folder_name)
+    grid = extract_value('model-grid-file',contents, folder_name)
+    input_file = extract_value('input-catalog-file',contents, folder_name)
+    phosphoros_root = extract_value('phosphoros-root',contents, folder_name)
+    source_id = extract_value('source-id-column-name',contents, folder_name)
      
-    grid_search = re.search('\s*model-grid-file\s*=(.*)', "\n".join(contents))
-    catalog_search = re.search('\s*catalog-type\s*=(.*)',  "\n".join(contents))
+    return catalog, grid, input_file, phosphoros_root, source_id
 
-    if grid_search :
-        catalog=catalog_search.group(1).strip() 
-    else:
-        logger.error('config file  ('+folder_name+'/run_config.config) do not contains the model-grid-file keyword')
-        return 1 
-    if catalog_search:
-        grid=grid_search.group(1).strip()
-    else:
-        logger.error('config file  ('+folder_name+'/run_config.config) do not contains the catalog-type keyword')
-   
-
-    # 2) read the result file, check for  best fitted model and scaling
+def read_result_file(folder_name):
     if  exists(folder_name+'/phz_cat.fits'):
         results = Table.read(folder_name+'/phz_cat.fits')
     elif exists(folder_name+'/phz_cat.txt'):
@@ -104,16 +112,110 @@ def mainMethod(args):
         
     else:
         logger.error('result file not found in folder ('+folder_name+')')
-        return 1  
+        sys.exit(1)
        
     if not 'SED-Index' in results.colnames:
         logger.error('The Best fitted model is missing into the result file')
-        return 1 
+        sys.exit(1)
     
-    print(results)
-    # 3) Read the grid
+    if not 'Scale' in results.colnames:
+        logger.error('The Scale of the Best fitted model is missing into the result file')
+        sys.exit(1)
     
-    # 4) lookup the model flux in the grid
-    
-    # 5) plots the data
+    return results
 
+def read_flux_catalog(phosphoros_root, intermediate_product_dir, catalog, input_file):
+    if not input_file.startswith('/'):
+        input_file = phosphoros_root + '/Catalogs/' + catalog + '/' + input_file
+    if  exists(input_file):
+        input_table = Table.read(input_file)
+    else:
+        logger.error('result file ('+input_file+') not found')
+        sys.exit(1) 
+    
+    filter_mapping_file =  intermediate_product_dir + '/' + catalog + '/filter_mapping.txt'
+    if  exists(filter_mapping_file):
+        filter_mapping = Table.read(filter_mapping_file, format='ascii')
+        filter_mapping['col1'].name='Filter'
+        filter_mapping['col2'].name='Flux'
+        filter_mapping['col3'].name='Err'
+    else:
+        logger.error('Filter mapping file ('+filter_mapping_file+') not found')
+        sys.exit(1)
+    
+    for row_index in range(len(filter_mapping)):
+        input_table[filter_mapping[row_index]['Flux']].name = filter_mapping[row_index]['Filter']+'_Measured'
+        input_table.remove_column(filter_mapping[row_index]['Err'])
+    return input_table
+
+
+def plot_data(data_to_plot, band_column, z_limit, vertical_sigma_limit, sliding_mean_sampling):
+    # Compute redshift limits 
+    z_min=np.min(data_to_plot['Z'])
+    z_max=np.max(data_to_plot['Z'])
+    ordered_z = np.sort(np.copy(data_to_plot['Z']))
+    limit_z = ordered_z[int(z_limit*len(ordered_z))]
+    
+    for band_index in range(len(band_column)):
+        offset = (data_to_plot[band_column[band_index]+'_Measured'] - data_to_plot[band_column[band_index]+'_Model']) / data_to_plot[band_column[band_index]+'_Model']
+        offset = np.nan_to_num(offset, nan=0.0, posinf=0.0, neginf=0.0)
+        average = np.mean(offset)
+        sigma = np.sqrt(np.var(offset))
+        z_arr, off = running_med(offset, data_to_plot['Z'], limit_z, limit_z/sliding_mean_sampling)
+
+        fig = plt.figure(band_index, figsize=[9,5],dpi=100)
+        fig.subplots_adjust(wspace=0.18, hspace=0.0,left=0.09,bottom=0.15,right=0.98,top=0.98)
+        ax = fig.add_subplot(111)
+        ax.plot(data_to_plot['Z'], offset, '.', alpha=0.1)
+        ax.plot([z_min,z_max],[0,0],'k-')
+        ax.plot([z_min,z_max],[average,average],'k--')
+        ax.plot(z_arr, off, color='r')
+        
+        ax.set_xlim(0, limit_z)
+        ax.set_ylim(average -vertical_sigma_limit*sigma, average +vertical_sigma_limit*sigma)
+        
+        ax.text(0.4*limit_z, average +0.75*vertical_sigma_limit*sigma, r'{}-band'.format(band_column[band_index]), fontsize=18, bbox=dict(boxstyle='round',facecolor='white'))
+       
+        ax.set_xlabel(r'z', fontsize=18) 
+        ax.set_ylabel(r'(Flux - Flux$_{Mod}$) / Flux$_{Mod}$', fontsize=18)
+        
+    plt.show()
+
+def mainMethod(args):
+    """
+    @brief The "main" method.
+    @details
+        This method is the entry point to the program. In this sense, it is
+        similar to a main (and it is why it is called mainMethod()).
+    """
+
+    # 1) Get the config file, extract the grid name, the catalog type and the input file
+    folder_name = args.result_dir
+    catalog, grid, input_file, phosphoros_root, source_id = read_config_file(folder_name)
+
+    # 2) read the result file, check for availability of best fitted model and scaling
+    results = read_result_file(folder_name)
+    
+    # 3) read the input flux file, filter mapping and convert the flux column name 
+    input_table = read_flux_catalog(phosphoros_root, args.intermediate_product_dir, catalog, input_file)
+
+    # 4) Read the grid
+    grid_data = dmg.readModelGrid(catalog, args.intermediate_product_dir, grid)
+    grid_columns =  dmg.getModelGridColumns(catalog, args.intermediate_product_dir, grid)
+    dtypes = ['int32', 'int32', 'int32', 'int32', 'int32']
+    for index in range(len(grid_columns)-5):
+        dtypes.append('float64')
+    grid_table = Table(rows=grid_data.T, names=grid_columns, dtype=dtypes)
+
+    # 5) lookup the model flux in the grid, scale them, merge with flux 
+    merged = join(results, grid_table, keys=('region-Index', 'SED-Index', 'ReddeningCurve-Index', 'E(B-V)-Index', 'Z-Index'))
+    band_column = grid_columns[5:]
+    for column in band_column:
+        merged[column]= merged['Scale']* merged[column]
+        merged[column].name = column+'_Model' 
+    merged['ID'].name = source_id
+    data_to_plot = join(merged, input_table, keys=(source_id))
+    
+    # plot the data
+    plot_data(data_to_plot, band_column, args.z_limit,  args.vertical_sigma_limit,  args.sliding_mean_sampling)  
+        

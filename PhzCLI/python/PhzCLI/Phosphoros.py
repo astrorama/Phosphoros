@@ -45,6 +45,8 @@ action_list = [
                      'Shows plots comparing the PHZ result with SPECZ'),
     PhosphorosAction(['plot_stacked_pdz', 'PSP'], 'PlotStackedPdfPitAndCrps',
                      'Shows plots comparing the PHZ result with SPECZ'),
+    PhosphorosAction(['plot_flux_model_diff', 'PFM'], 'PhosphorosPlotFluxDiff',
+                     'Shows plots comparing the measured flux with the flux from the best fitted model'),
     PhosphorosAction(['plot_posterior', 'PP'], 'PhosphorosPlotPosterior',
                      'Plots views of a multi-dimensional posterior'),
     PhosphorosAction(['plot_photometry_comparison', 'PPC'], 'PhosphorosPlotPhotometryComparison',
