@@ -17,10 +17,16 @@
 #include "PhzConfiguration/PhotometryGridConfig.h"
 #include "PhzCLI/DisplayModelGridConfig.h"
 #include "Configuration/Utils.h"
+#include "NdArray/NdArray.h"
 
 using namespace std;
 using namespace Euclid;
 namespace po = boost::program_options;
+
+
+
+template <typename T>
+using NdArray = Euclid::NdArray::NdArray<T>;
 
 static Elements::Logging logger = Elements::Logging::getLogger("PhosphorosDisplayModelGrid");
 
@@ -221,6 +227,7 @@ void exportAsCatalog(const PhzDataModel::PhotometryGridInfo& grid_info,
 
   logger.info() << "Exported model grid in file " << output_name;
 }
+
 
 class DisplayModelGrid : public Elements::Program {
 

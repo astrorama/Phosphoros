@@ -8,6 +8,7 @@
 #include "PhzQtUI/ResultRunModel.h"
 #include "PhzQtUI/DialogPOP.h"
 #include "PhzQtUI/DialogPSC.h"
+#include "PhzQtUI/DialogResid.h"
 #include "ui_FormPostProcessing.h"
 #include "FileUtils.h"
 
@@ -98,6 +99,7 @@ void FormPostProcessing::updateSelection(bool force_reload_cb){
 
   QSignalMapper *signalMapper_one = new QSignalMapper(this);
   QSignalMapper *signalMapper_two = new QSignalMapper(this);
+  QSignalMapper *signalMapper_three = new QSignalMapper(this);
 
   for( int i=0; i<ui->table_res_file->model()->rowCount(); i++ ) {
 
@@ -108,9 +110,13 @@ void FormPostProcessing::updateSelection(bool force_reload_cb){
       QHBoxLayout *layout = new QHBoxLayout;
       QPushButton *button1 = new QPushButton("PDF stat");
 
-      QPushButton *button2 = new QPushButton("Plots");
+      QPushButton *button2 = new QPushButton("Residuals");
+      QPushButton *button3 = new QPushButton("Plots");
       layout->addWidget(button1);
       layout->addWidget(button2);
+      layout->addWidget(button3);
+
+
 
       widget->setLayout(layout);
 
@@ -121,10 +127,14 @@ void FormPostProcessing::updateSelection(bool force_reload_cb){
 
       signalMapper_two->setMapping(button2, i);
       connect(button2, SIGNAL(clicked(bool)), signalMapper_two, SLOT(map()));
+
+      signalMapper_three->setMapping(button3, i);
+      connect(button3, SIGNAL(clicked(bool)), signalMapper_three, SLOT(map()));
   }
 
   connect(signalMapper_one, SIGNAL(mapped(int)), this, SLOT(computePdfStat(int)));
-  connect(signalMapper_two, SIGNAL(mapped(int)), this, SLOT(plotZVsZref(int)));
+  connect(signalMapper_two, SIGNAL(mapped(int)), this, SLOT(plotResiduals(int)));
+  connect(signalMapper_three, SIGNAL(mapped(int)), this, SLOT(plotZVsZref(int)));
 
 
 }
@@ -155,6 +165,15 @@ void FormPostProcessing::plotZVsZref(int row){
     auto folder = ui->table_res_file->model()->data(ui->table_res_file->model()->index(row,2)).toString().toStdString();
     std::unique_ptr<DialogPSC> dialog(new DialogPSC());
     dialog->setDefaultColumn(m_survey_model_ptr->getSelectedSurvey().getSourceIdColumn(), m_survey_model_ptr->getSelectedSurvey().getRefZColumn());
+    dialog->setFolder(folder);
+    if (dialog->exec()) {
+
+    }
+}
+
+void FormPostProcessing::plotResiduals(int row) {
+    auto folder = ui->table_res_file->model()->data(ui->table_res_file->model()->index(row,2)).toString().toStdString();
+    std::unique_ptr<DialogResid> dialog(new DialogResid());
     dialog->setFolder(folder);
     if (dialog->exec()) {
 
