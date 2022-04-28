@@ -17,16 +17,19 @@
 #
 
 from __future__ import print_function
-from os.path import exists
+from os.path import exists , join
 import argparse
 import re
 import sys
-from astropy.table import Table, join
+from astropy.table import Table
+from astropy.table import join as tablejoin
 import numpy as np
 
 import _DisplayModelGrid as dmg
 from ElementsKernel import Logging
 import matplotlib.pyplot as plt
+from configparser import ConfigParser
+
 
 logger = Logging.getLogger('PlotFluxDifference')
 
@@ -71,39 +74,44 @@ def running_med(off, z, zmax, dz):
     for i in range(len(z_arr)):
         off_arr[i] = np.median(off[(z>=z_arr[i]-dz/2.) & (z<=z_arr[i]+dz/2.)])
     return z_arr, off_arr
-
-def extract_value(keyword, file_content, parent_folder):
-    keyword_search = re.search('\s*'+keyword+'\s*=(.*)', "\n".join(file_content))
-    if keyword_search :
-        return keyword_search.group(1).strip() 
-    else:
-        logger.error('config file  ('+parent_folder+'/run_config.config) do not contains the '+keyword+' keyword')
-        sys.exit(1) 
+    
+def get_run_config(conf_file):
+    parser = ConfigParser()
+    with open(conf_file) as stream:
+        parser.read_string("[top]\n" + stream.read())
+    return parser['top']
+    
+def get_conf_value(configs, keyword): 
+    if not keyword in configs:
+        logger.error('run config file do not contains the '+keyword+' keyword')
+        sys.exit(1)
+    else :
+        return configs[keyword]
     
 def read_config_file(folder_name): 
-    if not exists(folder_name+'/run_config.config'):
-        logger.error('Provided folder do not contains a config file  ('+folder_name+'/run_config.config)')
+    config_file = join(folder_name,'run_config.config')
+    if not exists(config_file):
+        logger.error('Provided folder do not contains a config file  ('+str(config_file)+')')
         sys.exit(1) 
-    contents=''
-    with open(folder_name+'/run_config.config') as f:
-        contents = f.readlines()
         
-    catalog = extract_value('catalog-type',contents, folder_name)
-    grid = extract_value('model-grid-file',contents, folder_name)
-    input_file = extract_value('input-catalog-file',contents, folder_name)
-    phosphoros_root = extract_value('phosphoros-root',contents, folder_name)
-    source_id = extract_value('source-id-column-name',contents, folder_name)
+    configs = get_run_config(config_file)
+        
+    catalog = get_conf_value(configs, 'catalog-type')
+    grid = get_conf_value(configs, 'model-grid-file')
+    input_file = get_conf_value(configs, 'input-catalog-file')
+    phosphoros_root = get_conf_value(configs, 'phosphoros-root')
+    source_id = get_conf_value(configs, 'source-id-column-name')
      
     return catalog, grid, input_file, phosphoros_root, source_id
 
 def read_result_file(folder_name):
-    if  exists(folder_name+'/phz_cat.fits'):
-        results = Table.read(folder_name+'/phz_cat.fits')
-    elif exists(folder_name+'/phz_cat.txt'):
-        results = Table.read(folder_name+'/phz_cat.txt', format='ascii')
+    if  exists(join(folder_name, 'phz_cat.fits')):
+        results = Table.read(join(folder_name, 'phz_cat.fits'))
+    elif exists(join(folder_name,'phz_cat.txt')):
+        results = Table.read(join(folder_name,'phz_cat.txt'), format='ascii')
         
         nb_col = len(results.colnames)
-        with open(folder_name+'/phz_cat.txt') as f:
+        with open(join(folder_name,'phz_cat.txt')) as f:
             for col_id in range(nb_col):
                 col_search=False
                 while not col_search :
@@ -127,14 +135,14 @@ def read_result_file(folder_name):
 
 def read_flux_catalog(phosphoros_root, intermediate_product_dir, catalog, input_file):
     if not input_file.startswith('/'):
-        input_file = phosphoros_root + '/Catalogs/' + catalog + '/' + input_file
+        input_file = join(phosphoros_root, 'Catalogs', catalog, input_file)
     if  exists(input_file):
         input_table = Table.read(input_file)
     else:
         logger.error('Input Flux file ('+input_file+') not found')
         sys.exit(1) 
     
-    filter_mapping_file =  intermediate_product_dir + '/' + catalog + '/filter_mapping.txt'
+    filter_mapping_file =  join(intermediate_product_dir, catalog, 'filter_mapping.txt')
     if  exists(filter_mapping_file):
         filter_mapping = Table.read(filter_mapping_file, format='ascii')
         filter_mapping['col1'].name='Filter'
@@ -210,13 +218,13 @@ def mainMethod(args):
     grid_table = Table(rows=grid_data.T, names=grid_columns, dtype=dtypes)
 
     # 5) lookup the model flux in the grid, scale them, merge with flux 
-    merged = join(results, grid_table, keys=('region-Index', 'SED-Index', 'ReddeningCurve-Index', 'E(B-V)-Index', 'Z-Index'))
+    merged = tablejoin(results, grid_table, keys=('region-Index', 'SED-Index', 'ReddeningCurve-Index', 'E(B-V)-Index', 'Z-Index'))
     band_column = grid_columns[5:]
     for column in band_column:
         merged[column]= merged['Scale']* merged[column]
         merged[column].name = column+'_Model' 
     merged['ID'].name = source_id
-    data_to_plot = join(merged, input_table, keys=(source_id))
+    data_to_plot = tablejoin(merged, input_table, keys=(source_id))
     
     # plot the data
     plot_data(data_to_plot, band_column, args.z_limit,  args.vertical_sigma_limit,  args.sliding_mean_sampling)  
