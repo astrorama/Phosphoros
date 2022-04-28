@@ -48,8 +48,8 @@ py::array_t<double>  readModelGrid(const std::string& catalog_type,
     config_manager.initialize(options_map);
     auto& grid_map = config_manager.getConfiguration<PhzConfiguration::PhotometryGridConfig>().getPhotometryGrid();
 
-    long total_size=0;
-    int photometry_band_number = 0;
+    size_t total_size=0;
+    size_t photometry_band_number = 0;
     for (auto& pair : grid_map) {
         photometry_band_number = (*(pair.second.begin())).size();
 
