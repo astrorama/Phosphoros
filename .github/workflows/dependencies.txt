@@ -4,6 +4,7 @@ $PYTHON-astropy
 $PYTHON-numpy
 $PYTHON-pytest
 $PYTHON-sphinx
+pybind11-devel
 CCfits-devel
 boost-$PYTHON-devel
 boost-devel
