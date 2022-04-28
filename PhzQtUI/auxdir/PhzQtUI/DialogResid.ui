@@ -1103,7 +1103,7 @@
       <enum>Qt::NoFocus</enum>
      </property>
      <property name="plainText">
-      <string>Processing...</string>
+      <string/>
      </property>
     </widget>
    </item>
