@@ -42,9 +42,30 @@
       </spacer>
      </item>
      <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Default  number</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="sb_default_nb">
+       <property name="minimum">
+        <number>1</number>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="btn_plus">
        <property name="text">
-        <string>Add SED</string>
+        <string>Add SED(s)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_rma">
+       <property name="text">
+        <string>Remove All</string>
        </property>
       </widget>
      </item>
@@ -66,8 +87,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>691</width>
-        <height>448</height>
+        <width>695</width>
+        <height>446</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">

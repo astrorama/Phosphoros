@@ -89,6 +89,9 @@ public:
 
     static std::string checkFileColumns(const std::string & file_name, const std::vector<std::string>& requiered_columns);
 
+    ///////////////////////////////////////////////////
+    // Action on DataSet
+    static std::string getDataSetFilePath(const std::string & dataset_name, const std::string & parent_folder);
 
     //////////////////////////////////////////////////////////
     //// Application base paths as of configuration.

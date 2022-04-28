@@ -1,5 +1,6 @@
 #include <chrono>
 #include <QDir>
+#include <string>
 #include <QFile>
 #include <QFileInfo>
 #include <QFileInfoList>
@@ -13,6 +14,7 @@
 #include "FileUtils.h"
 #include "DefaultOptionsCompleter.h"
 #include "Configuration/Utils.h"
+#include "XYDataset/AsciiParser.h"
 
 #include "PhzUITools/CatalogColumnReader.h"
 
@@ -600,6 +602,32 @@ std::map<std::string, boost::program_options::variable_value> FileUtils::getPath
 
   return options;
 }
+
+std::string FileUtils::getDataSetFilePath(const std::string & dataset_name, const std::string & parent_folder) {
+	size_t found = dataset_name.find_last_of('/');
+	std::string folder = parent_folder;
+	std::string sub_folder = "";
+	std::string name = dataset_name;
+	if (found != std::string::npos) {
+		folder= parent_folder+"/" + dataset_name.substr(0,found);
+		sub_folder = dataset_name.substr(0,found);
+		name = dataset_name.substr(found+1);
+	}
+
+	QDir directory(QString::fromStdString(folder));
+	auto list = directory.entryList(QStringList() << "*.*" ,QDir::Files);
+
+	XYDataset::AsciiParser parser{};
+	for (int i =0; i<list.count();++i) {
+		if (parser.getName(folder + "/" + list[i].toStdString())==name) {
+			return sub_folder +"/"+list[i].toStdString();
+		}
+	}
+
+
+    throw Elements::Exception() << "File does not exist for SED: " << dataset_name;
+}
+
 
 }
 }
