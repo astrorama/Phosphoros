@@ -13,4 +13,3 @@ set(CXX_SUGGEST_OVERRIDE ON
 # Declare project name and version
 
 elements_project(Phosphoros 1.3 USE PhosphorosCore 1.3)
-

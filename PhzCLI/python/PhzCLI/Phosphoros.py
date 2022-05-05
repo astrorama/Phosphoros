@@ -59,6 +59,8 @@ action_list = [
                      'Adds emission lines to a set of SED templates'),
     PhosphorosAction(['build_reference_sample', 'BRS'], 'PhosphorosBuildReferenceSample',
                      'Builds an NNPZ reference sample from the results of a Phosphoros output catalog'),
+    PhosphorosAction(['build_photometry', 'BPY'], 'PhosphorosBuildPhotometry',
+                     'Build The photometry using the best fitted models from the results of a Phosphoros output catalog'),
     PhosphorosAction(['add_galactic_dust_data', 'AGDD'], 'AddGalDustToCatalog',
                      'Lookup galactical E(B-V) in the Planck dust map and add it as an additional catalog column'),
     PhosphorosAction(['process_output_pdz', 'POP'], 'ProcessPDF',
