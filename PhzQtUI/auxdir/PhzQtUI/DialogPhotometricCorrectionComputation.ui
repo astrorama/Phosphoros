@@ -356,14 +356,14 @@
        <item>
         <widget class="QLabel" name="label_10">
          <property name="text">
-          <string>Tolerence :</string>
+          <string>Tolerance</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QLineEdit" name="txt_Tolerence">
          <property name="text">
-          <string>1E-4</string>
+          <string>1E-3</string>
          </property>
         </widget>
        </item>
