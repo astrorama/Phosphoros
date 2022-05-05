@@ -2372,7 +2372,7 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
       QString::fromStdString(
           FileUtils::getResultRootPath(false,
               ui->cb_AnalysisSurvey->currentText().toStdString(),
-              info.baseName().toStdString())));
+              info.completeBaseName().toStdString())));
 }
 
   void FormAnalysis::on_btn_BrowseInput_clicked() {
