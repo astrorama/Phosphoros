@@ -1387,7 +1387,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   double upper_limit_flin_flag = selected_survey.getUpperLimit();
   options_map["enable-upper-limit"].value() = boost::any(yes_flag);
-  options_map["upper-limit-use-threshod-flag"].value() = boost::any(upper_limit_flin_flag);
+  options_map["upper-limit-use-threshold-flag"].value() = boost::any(upper_limit_flin_flag);
 
 
 
@@ -1434,10 +1434,10 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   options_map["output-pdf-normalized"].value() = boost::any(yes_flag);
 
   if (ui->cb_multi_out->currentText()=="Sampling") {
-    options_map["full-PDF-samplig"].value() = boost::any(yes_flag);
+    options_map["full-PDF-sampling"].value() = boost::any(yes_flag);
     options_map["PDF-sample-number"].value() = boost::any(ui->sb_sample_numb->value());
   } else {
-    options_map["full-PDF-samplig"].value() = boost::any(no_flag);
+    options_map["full-PDF-sampling"].value() = boost::any(no_flag);
   }
 
 

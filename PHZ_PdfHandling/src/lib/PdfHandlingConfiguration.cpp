@@ -67,9 +67,9 @@ auto PdfHandlingConfiguration::getProgramOptions() -> std::map<std::string, Opti
     {CHUNK_SIZE.c_str(), po::value<uint>()->default_value(500),
         "Number of sources to be read and processed together"},
     {MERGE_RATIO.c_str(), po::value<double>()->default_value(0.8),
-        "Forced in range [0,1] give the ratio of the mode hight for which non-decreassing point are still part of the mode if 0 any non-decressing point stop the capture, if 1 the full pdf is captured"},
+        "Forced in range [0,1]. This parameter gives the ratio with respect to the mode height for which non-decreasing point are still part of the mode. If set to 0 any non-decreasing point stop the capture, if set to 1 the full pdf is captured"},
     {MODE_SORTING.c_str(), po::value<std::string>()->default_value("AREA"),
-    "Methode for sorting the pdf modes: ['AREA', 'HEIGHT'] default: AREA"}
+    "Method for sorting the pdf modes: ['AREA', 'HEIGHT'] default: AREA"}
 
   }},{"Output options",{
       {OUTPUT_CATALOG.c_str(), po::value<std::string>(),

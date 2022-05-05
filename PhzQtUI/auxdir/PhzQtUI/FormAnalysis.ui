@@ -130,6 +130,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="btn_ToPP">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Computing PDF statistics, residuals between data and best fitted models, plots scatter, PIT and CRPS &lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="text">
          <string>Post Processing</string>
         </property>
@@ -220,8 +223,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>526</height>
+            <width>593</width>
+            <height>301</height>
            </rect>
           </property>
           <attribute name="label">
@@ -430,8 +433,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>526</height>
+            <width>768</width>
+            <height>275</height>
            </rect>
           </property>
           <attribute name="label">
@@ -803,8 +806,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>526</height>
+            <width>573</width>
+            <height>242</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1037,8 +1040,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>526</height>
+            <width>486</width>
+            <height>171</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1190,8 +1193,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>526</height>
+            <width>554</width>
+            <height>186</height>
            </rect>
           </property>
           <attribute name="label">

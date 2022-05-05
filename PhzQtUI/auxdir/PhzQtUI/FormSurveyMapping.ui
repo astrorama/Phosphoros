@@ -118,6 +118,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="btn_ToPP">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Computing PDF statistics, residuals between data and best fitted models, plots scatter, PIT and CRPS &lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="text">
          <string>Post Processing</string>
         </property>
@@ -525,7 +528,7 @@
      <item>
       <widget class="QLabel" name="label_3">
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Missing Data&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If the flux is set to this flag value, the alalysis understand it as a missing value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Missing Data&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If the flux is set to this flag value, the analysis understand it as a missing value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
         <string>Missing Photometry flagged as:</string>
@@ -535,7 +538,7 @@
      <item>
       <widget class="QLineEdit" name="txt_nonDetection">
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Missing Data&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If the flux is set to this flag value, the alalysis understand it as a missing value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Missing Data&lt;/span&gt;&lt;/p&gt;&lt;p&gt;If the flux is set to this flag value, the analysis understand it as a missing value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
         <string>-99</string>
@@ -561,7 +564,7 @@
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Upper Limit&lt;/span&gt;&lt;/p&gt;&lt;p&gt;Upper limit are indicated by negative error value.&lt;/p&gt;&lt;p&gt;When a negative error is provided: the flux is the upper limit and error used is the absolute value of the one provided.&lt;/p&gt;&lt;p&gt;When the error is negative and match the flag value: the flux is the upper limit and the error is computed as = Flux/n, where n is defined in the grid bellow.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
-        <string>Upper Limit recompute error flag: </string>
+        <string>Upper Limit error flag: </string>
        </property>
       </widget>
      </item>
@@ -590,6 +593,9 @@
      </item>
      <item>
       <widget class="QCheckBox" name="ckb_filterShift">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Filter Shift&lt;/span&gt;&lt;/p&gt;&lt;p&gt;When this check-box is ticked, the user specify additional column containing the shift between the actual filter average wavelength and the nominal value.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
         <string>Filter Shift</string>
        </property>

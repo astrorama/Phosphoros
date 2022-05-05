@@ -98,7 +98,7 @@ MainWindow::MainWindow(QWidget *parent) :
   std::string sun_sed = PreferencesUtils::getUserPreference("AuxData","SUN_SED");
   if (sun_sed=="") {
     QMessageBox::warning(this, "Missing Solar SED...",
-        "Phosphoros need a reference solar spectrum to normalize the models it use.\n "
+        "Phosphoros needs a reference solar spectrum to normalize the models it uses.\n "
                    "Please navigate to Configuration/Aux. Data/SEDs and select it.",
         QMessageBox::Ok);
   }
