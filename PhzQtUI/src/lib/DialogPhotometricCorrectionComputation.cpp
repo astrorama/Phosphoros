@@ -43,6 +43,7 @@
 #include "PhzConfiguration/ModelNormalizationConfig.h"
 #include "PhzModeling/NormalizationFunctorFactory.h"
 #include "PhzConfiguration/CosmologicalParameterConfig.h"
+#include "PhzUITools/ConfigurationWriter.h"
 
 #include "ElementsKernel/Logging.h"
 
@@ -239,6 +240,7 @@ void DialogPhotometricCorrectionComputation::setRunEnability() {
   run_ok &= ui->txt_FileName->text().length() > 0;
 
   ui->bt_Run->setEnabled(run_ok);
+  ui->btn_conf->setEnabled(run_ok);
 }
 
 void DialogPhotometricCorrectionComputation::on_cb_SelectionMethod_currentIndexChanged(const QString & method){
@@ -284,6 +286,7 @@ void DialogPhotometricCorrectionComputation::disablePage(){
      ui->cb_SelectionMethod->setEnabled(false);
      ui->txt_FileName->setEnabled(false);
      ui->bt_Run->setEnabled(false);
+     ui->btn_conf->setEnabled(false);
      ui->bt_Cancel->setEnabled(true);
 }
 
@@ -295,6 +298,7 @@ void DialogPhotometricCorrectionComputation::enablePage(){
      ui->cb_SelectionMethod->setEnabled(true);
      ui->txt_FileName->setEnabled(true);
      ui->bt_Run->setEnabled(true);
+     ui->btn_conf->setEnabled(true);
      ui->bt_Cancel->setEnabled(true);
      ui->txt_current_iteration->setText("");
 }
@@ -513,6 +517,76 @@ void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
      m_future_watcher.setFuture(QtConcurrent::run(this, &DialogPhotometricCorrectionComputation::runFunction));
    }
 
+}
+
+
+void DialogPhotometricCorrectionComputation::on_btn_conf_clicked() {
+
+    int max_iter_number = ui->txt_Iteration->text().toInt();
+	auto config_map = PhotometricCorrectionHandler::GetConfigurationMap(
+        m_run_option,
+        ui->txt_survey->text().toStdString(),
+        ui->txt_FileName->text().toStdString(),
+        max_iter_number,
+        FormUtils::parseToDouble(ui->txt_Tolerence->text()),
+        ui->cb_SelectionMethod->currentText().toStdString(),
+        ui->txt_catalog->text().toStdString(),
+        ui->cb_SpectroColumn->currentText().toStdString()
+	);
+
+    completeWithDefaults<PhzConfiguration::ComputePhotometricCorrectionsConfig>(config_map);
+
+    QString filter = "Config (*.CPC.conf)";
+	QString fileName = QFileDialog::getSaveFileName(this,
+	  tr("Save Configuration File"),
+	  QString::fromStdString(FileUtils::getRootPath(true))+"config",
+	  filter, &filter
+	);
+	if (fileName.length() > 0) {
+
+        QString cr{"\n\n"};
+        QString command{""};
+
+		if (!fileName.endsWith(".CPC.conf", Qt::CaseInsensitive)) {
+		    fileName = fileName+".CPC.conf";
+		}
+
+		PhzUITools::ConfigurationWriter::writeConfiguration(config_map, fileName.toStdString());
+		command += QString::fromStdString("Phosphoros CPC --config-file ") + fileName;
+
+		if (m_run_option.find("dust-column-density-column-name") != m_run_option.end() &&
+		      m_run_option.at("dust-column-density-column-name").as<std::string>() == "PLANCK_GAL_EBV") {
+			std::string path = ui->txt_catalog->text().toStdString();
+			auto column_reader = PhzUITools::CatalogColumnReader(path);
+			auto column_from_file = column_reader.getColumnNames();
+			if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
+				std::string path = ui->txt_catalog->text().toStdString();
+				std::map<std::string, boost::program_options::variable_value> add_column_options_map{};
+				add_column_options_map["planck-dust-map"].value() = boost::any(m_dust_map_file);
+				add_column_options_map["galatic-ebv-col"].value() = boost::any(std::string("PLANCK_GAL_EBV"));
+				add_column_options_map["input-catalog"].value() = boost::any(path);
+				add_column_options_map["ra"].value() = boost::any(m_ra_col);
+				add_column_options_map["dec"].value() = boost::any(m_dec_col);
+				add_column_options_map["output-catalog"].value() = boost::any(path);
+				auto lookup_planck_file_name = fileName.replace(".CPC.conf",".AGDD.conf");
+
+				PhzUITools::ConfigurationWriter::writeConfiguration(add_column_options_map, lookup_planck_file_name.toStdString());
+				command = QString::fromStdString("Phosphoros AGDD --config-file ") + lookup_planck_file_name + cr + command;
+		   }
+		}
+		if (m_sed_config.size() > 0) {
+			completeWithDefaults<PhzConfiguration::ComputeSedWeightConfig>(m_sed_config);
+			auto sed_file_name = fileName.replace(".CPC.conf",".CSW.conf").replace(".AGDD.conf",".CSW.conf");
+			PhzUITools::ConfigurationWriter::writeConfiguration(m_sed_config, sed_file_name.toStdString());
+			command = QString::fromStdString("Phosphoros CSW --config-file ") + sed_file_name + cr + command;
+		}
+
+		auto cmd_file_name = fileName.replace(".CPC.conf",".cmd").replace(".AGDD.conf",".cmd").replace(".CSW.conf",".cmd");
+		std::ofstream file;
+		file.open(cmd_file_name.toStdString());
+		file << command.toStdString();
+		file.close();
+	}
 }
 
 }

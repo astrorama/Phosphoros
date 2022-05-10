@@ -130,6 +130,11 @@ private slots:
      */
     void on_bt_Run_clicked();
 
+    /**
+     * @brief SLOT Output the configuration file for the computation of the Photometric Correction
+     */
+    void on_btn_conf_clicked();
+
     void runFinished();
     void lumFinished();
     void sedFinished();
