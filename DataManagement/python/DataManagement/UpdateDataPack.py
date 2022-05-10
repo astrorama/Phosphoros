@@ -116,7 +116,7 @@ def downloadVersion(temp, url, query_string, version):
     with open(temp+'/downloaded.tar.xz', 'wb') as f:
         shutil.copyfileobj(r.raw, f)
     tar = tarfile.open(temp+'/downloaded.tar.xz')
-    tar.extractall(path=temp+'/AuxiliaryData_'+version)
+    tar.extractall(path=temp+'/')
     tar.close()
     os.remove(temp+'/downloaded.tar.xz')
     logger.info('Version = '+version+' dowloaded and uncompressed.')
@@ -134,7 +134,10 @@ def listFiles(base_dir_new):
     conflicting = {}
     unchanged = {}
     new_data = {}
+    print(base_dir_new)
+    print(data_dir)
     for path, f_md5 in new_files.items():
+        print(path)
         old_path = path.replace(base_dir_new, data_dir)
         if os.path.exists(old_path):
             old_md5=md5(old_path)
