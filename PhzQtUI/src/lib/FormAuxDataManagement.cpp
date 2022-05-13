@@ -670,6 +670,8 @@ void FormAuxDataManagement::sunSedPopupClosing(std::vector<std::string> sed){
   ui->lbl_sun_sed->setText(QString::fromStdString(sed[0]));
 }
 
+////////////////////////////////////////////////////
+
 void FormAuxDataManagement::on_btn_planck_clicked(){
   m_httpRequestAborted = false;
   bool file_exists = boost::filesystem::exists(m_planck_file);
@@ -714,7 +716,9 @@ void FormAuxDataManagement::on_btn_planck_clicked(){
 
 
       m_reply = m_network_manager->get(QNetworkRequest(url));
-      connect(m_reply, SIGNAL(readyRead()),
+      //connect(m_reply, SIGNAL(readyRead()),
+      //           this, SLOT(httpReadyPlanckRead()));
+      connect(m_reply, SIGNAL(finished()),
                  this, SLOT(httpReadyPlanckRead()));
       connect(m_reply, SIGNAL(downloadProgress(qint64, qint64)),
                   this, SLOT(updateDownloadProgress(qint64, qint64)));
@@ -737,8 +741,9 @@ void FormAuxDataManagement::updateDownloadProgress(qint64 bytesRead, qint64 tota
 }
 
 void FormAuxDataManagement::httpReadyPlanckRead() {
-  if (m_downloaded_file)
+  if (m_downloaded_file){
     m_downloaded_file->write(m_reply->readAll());
+  }
 }
 
 void FormAuxDataManagement::cancelDownloadPlanck() {

@@ -102,7 +102,14 @@ void DialogAddGalEbv::on_btn_create_clicked() {
 
 void DialogAddGalEbv::processFinished(int exitCode, QProcess::ExitStatus exitStatus) {
   logger.info()<<"AddGalDustToCatalog: Exit code and status "<< exitCode<<"  "<<exitStatus;
-  accept();
+  if (exitCode==0) {
+	  accept();
+  } else {
+      QMessageBox::warning(this, "Error during the computation...",
+                      "Something went wrong while adding Planck E(B-V) to the catalog. This may be caused by a corrupted Planck dust file. Try to download it again from the Configuration/Aux. Data page.",
+                      QMessageBox::Ok);
+	  reject();
+  }
 }
 
 void DialogAddGalEbv::readError() {
