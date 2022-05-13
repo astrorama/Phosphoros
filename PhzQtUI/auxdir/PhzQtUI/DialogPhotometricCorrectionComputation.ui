@@ -345,7 +345,7 @@
        <item>
         <widget class="QLineEdit" name="txt_Iteration">
          <property name="text">
-          <string>100</string>
+          <string>5</string>
          </property>
         </widget>
        </item>
@@ -382,22 +382,22 @@
         <widget class="QComboBox" name="cb_SelectionMethod">
          <item>
           <property name="text">
-           <string>WEIGHTED_MEDIAN</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
            <string>MEDIAN</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>WEIGHTED_MEAN</string>
+           <string>WEIGHTED_MEDIAN</string>
           </property>
          </item>
          <item>
           <property name="text">
            <string>MEAN</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>WEIGHTED_MEAN</string>
           </property>
          </item>
         </widget>
