@@ -54,6 +54,11 @@
 - Remove check on the galactic correction grids preventing 
   run with unselected filters 
     * https://redmine.isdc.unige.ch/issues/26479
+
+- Ensure that the width of the OBJECT_ID column in sampling 
+  files is large enough (the automatic case was trunkating 
+  the ID in some cases)
+    * https://redmine.isdc.unige.ch/issues/26751
     
 -------------------------------------------------------------
  Reference: build from 2022 april 28                       
