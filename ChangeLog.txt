@@ -42,6 +42,11 @@
   correction popup 
     * reported in https://redmine.isdc.unige.ch/issues/26634
 
+- Chnge the warning message diplayed when one compute zero-
+  point corrections with a photometric band having only 
+  missing values
+   * https://redmine.isdc.unige.ch/issues/26634
+
 - update the default output folder name when the input 
   catalog contains '.' 
     * https://redmine.isdc.unige.ch/issues/26646
