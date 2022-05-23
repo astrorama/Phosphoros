@@ -18,6 +18,9 @@
   files from the type found in the input catalog file.
     * https://redmine.isdc.unige.ch/issues/26756
 
+- Fix the configuration produced for the CPC. 
+    * reported in https://redmine.isdc.unige.ch/issues/26640
+
 -------------------------------------------------------------
  Reference: build from 2022 May 20                   
 -------------------------------------------------------------
