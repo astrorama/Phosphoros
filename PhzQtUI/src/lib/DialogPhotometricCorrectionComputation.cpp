@@ -535,6 +535,22 @@ void DialogPhotometricCorrectionComputation::on_btn_conf_clicked() {
 	);
 
     completeWithDefaults<PhzConfiguration::ComputePhotometricCorrectionsConfig>(config_map);
+    std::vector<std::string> correction = {"PDF-sample-number",
+    		"create-output-best-likelihood-model",
+    		"create-output-best-model",
+    		"enable-photometric-correction",
+    		"full-PDF-sampling",
+    		"input-buffer-size",
+    		"output-catalog-format",
+    		"output-pdf-format",
+    		"output-pdf-normalized",
+    		"photometric-correction-file",
+    		"phz-output-dir",
+    		"upper-limit-use-threshold-flag"};
+
+    for(const auto& value: correction) {
+    	config_map.erase(value);
+    }
 
     QString filter = "Config (*.CPC.conf)";
 	QString fileName = QFileDialog::getSaveFileName(this,
