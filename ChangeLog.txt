@@ -20,6 +20,9 @@
 
 - Fix the configuration produced for the CPC. 
     * reported in https://redmine.isdc.unige.ch/issues/26640
+    
+- Fix the PP unit clash.
+    * https://redmine.isdc.unige.ch/issues/26822
 
 -------------------------------------------------------------
  Reference: build from 2022 May 20                   
