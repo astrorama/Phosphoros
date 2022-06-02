@@ -23,6 +23,10 @@
     
 - Fix the PP unit clash.
     * https://redmine.isdc.unige.ch/issues/26822
+    
+- Fix the computation of the Zero point corrections for 
+  photometries flagged as missing or upper limit. 
+    * https://redmine.isdc.unige.ch/issues/26640
 
 -------------------------------------------------------------
  Reference: build from 2022 May 20                   
