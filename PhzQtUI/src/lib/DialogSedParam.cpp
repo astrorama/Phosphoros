@@ -13,7 +13,7 @@
 #include "PhzQtUI/DialogSedParam.h"
 #include "ui_DialogSedParam.h"
 #include "FileUtils.h"
-#include "SedParamUtils.h"
+#include "PhzQtUI/SedParamUtils.h"
 #include "PhzQtUI/MessageButton.h"
 
 

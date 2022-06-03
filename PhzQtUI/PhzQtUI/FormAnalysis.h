@@ -18,6 +18,7 @@
 #include "XYDataset/FileSystemProvider.h"
 #include "PhzQtUI/SurveyModel.h"
 #include "PhzQtUI/ModelSetModel.h"
+#include "SedParamUtils.h"
 
 namespace boost{
 namespace program_options{
@@ -178,6 +179,7 @@ private slots:
     void httpReadyPlanckRead();
     void cancelDownloadPlanck();
     void updateDownloadProgress(qint64 bytesRead, qint64 totalBytes);
+    void updatePpProgress(size_t current, size_t total);
 
 
 private:
@@ -237,6 +239,7 @@ private:
     std::map<std::string,std::string> m_copied_columns = {};
 
     QProgressDialog *m_progress_dialog = nullptr;
+    SedParamUtils *m_sed_param = new SedParamUtils();
 
     QNetworkAccessManager *m_network_manager = nullptr;
     QFile *m_downloaded_file = nullptr;

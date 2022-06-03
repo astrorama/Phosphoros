@@ -5,6 +5,8 @@
 #include <QTextStream>
 #include <QDir>
 #include <QUrl>
+#include <QList>
+#include <QPushButton>
 #include <functional>
 #include <QFileDialog>
 #include <boost/program_options.hpp>
@@ -57,7 +59,7 @@
 #include "PhzDataModel/PhotometryGridInfo.h"
 #include "PhzDataModel/serialization/PhotometryGridInfo.h"
 #include "PhzQtUI/DialogFilterSelector.h"
-#include "SedParamUtils.h"
+#include "PhzQtUI/SedParamUtils.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -2438,18 +2440,42 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
     popup->exec();
   }
 
+  void FormAnalysis::updatePpProgress(size_t current, size_t total) {
+
+      m_progress_dialog->setMaximum(total);
+      m_progress_dialog->setValue(current);
+
+      if (total==current) {
+
+    	  disconnect(m_sed_param, SIGNAL(progress(size_t, size_t)), 0, 0);
+	      m_progress_dialog->hide();
+	      delete m_progress_dialog;
+	      m_progress_dialog = 0;
+	      auto list_param = m_sed_param->getList();
+	      std::unique_ptr<DialogSelectParam> popup(new DialogSelectParam(list_param, this));
+
+	      popup->setParams(getPPListFromConfig());
+
+	      connect(popup.get(), SIGNAL(popupClosing(std::vector<std::string>)),
+	              SLOT(update_pp_selection(std::vector<std::string>)));
+
+	      popup->exec();
+      }
+    }
+
 
 
   void FormAnalysis::on_btn_pp_clicked() {
-    std::unique_ptr<DialogSelectParam> popup(new DialogSelectParam(m_model_set_model_ptr->getSelectedModelSet(), this));
-
-    popup->setParams(getPPListFromConfig());
-
-    connect(popup.get(), SIGNAL(popupClosing(std::vector<std::string>)),
-            SLOT(update_pp_selection(std::vector<std::string>)));
-
-    popup->exec();
-
+	m_progress_dialog = new QProgressDialog(this);
+	m_progress_dialog->setWindowTitle(tr("Collecting PP... "));
+	m_progress_dialog->setLabelText(tr("Parsing the SED to list the available Physical Parameters."));
+	QList<QPushButton *> L=m_progress_dialog->findChildren<QPushButton *>();
+	L.at(0)->hide();
+    m_progress_dialog->setMaximum(10);
+    m_progress_dialog->setValue(0);
+	m_progress_dialog->setWindowModality(Qt::WindowModal);
+    connect(m_sed_param, SIGNAL(progress(size_t, size_t)), this, SLOT(updatePpProgress(size_t, size_t)));
+    m_sed_param->listAvailableParam(m_model_set_model_ptr->getSelectedModelSet());
   }
 
   std::set<std::string> FormAnalysis::getPPListFromConfig() {
@@ -2952,9 +2978,9 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
 
        auto pp_conf_file_name = QString::fromStdString(out_dir) +QString::fromStdString("/PhysicalParameterConfig.fits");
        auto pp_list = getPPListFromConfig();
-       auto pp_param_list = SedParamUtils::listAvailableParam(m_model_set_model_ptr->getSelectedModelSet());
+       //auto pp_param_list = SedParamUtils::listAvailableParam(m_model_set_model_ptr->getSelectedModelSet());
        if (pp_list.size() > 0) {
-            for (auto& param : pp_list) {
+           /* for (auto& param : pp_list) {
               if (pp_param_list.find(param) == pp_param_list.end()) {
                  QMessageBox::question(this, "Physical Parameter Configuration Problem...",
                                  "Please check the Parameter selection:\n"
@@ -2963,7 +2989,7 @@ void FormAnalysis::setInputCatalogName(std::string name, bool do_test) {
                  return;
               }
             }
-
+            */
 
 
             SedParamUtils::createPPConfig(m_model_set_model_ptr->getSelectedModelSet(), pp_list, pp_conf_file_name.toStdString());

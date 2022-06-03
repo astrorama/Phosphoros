@@ -4,7 +4,7 @@
 #include "PhzQtUI/DialogSelectParam.h"
 #include "ui_DialogSelectParam.h"
 #include <QStandardItemModel>
-#include "SedParamUtils.h"
+#include "PhzQtUI/SedParamUtils.h"
 
 using namespace std;
 
@@ -12,14 +12,14 @@ namespace Euclid {
 namespace PhzQtUI {
 
 
-DialogSelectParam::DialogSelectParam(const ModelSet& model, QWidget *parent) :
+DialogSelectParam::DialogSelectParam(const std::set<std::string>& param_list, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::DialogSelectParam), m_model{model} {
+    ui(new Ui::DialogSelectParam), m_param_list{param_list} {
     ui->setupUi(this);
 
     QStandardItemModel* table_model = new QStandardItemModel();
 
-    for (auto& param : SedParamUtils::listAvailableParam(model)) {
+    for (auto& param : m_param_list) {
        QStandardItem* item = new QStandardItem(QString::fromStdString(param));
        item->setCheckable(true);
        table_model->appendRow(item);

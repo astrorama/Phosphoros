@@ -18,7 +18,7 @@
 #include "Configuration/Utils.h"
 
 #include "FileUtils.h"
-#include "SedParamUtils.h"
+#include "PhzQtUI/SedParamUtils.h"
 #include "ElementsKernel/Logging.h"
 
 namespace Euclid {
@@ -42,11 +42,14 @@ std::map<std::string, std::string> SedParamUtils::getParameterList(const std::st
    boost::regex expression(reg_ex_str);
    std::string  reg_ex_str_unit = "^\\s*#\\s*PARAMETER\\s*:\\s*[-_\\w]+\\s*=.+\\[\\s*(\\w*)\\s*\\]\\s*$";
    boost::regex unit_regex(reg_ex_str_unit);
+   std::string  regex_column = "^\\s*[\\d.-eE]*\\s*[\\d.\\-eE]*\\s*$";
+   boost::regex col_regex(regex_column);
 
    while (sfile.good()) {
      std::getline(sfile, line);
      boost::smatch s_match;
      boost::smatch s_unit_match;
+     boost::smatch s_col_match;
      if (!line.empty() && boost::regex_match(line, s_match, expression)) {
 
        std::string unit = "";
@@ -55,8 +58,11 @@ std::map<std::string, std::string> SedParamUtils::getParameterList(const std::st
        }
        result.insert(std::make_pair(s_match[1].str(), unit));
        //logger.info() << " INSERTING PARAM " << s_match[1].str() << " With units " << unit;
+     } else if (boost::regex_match(line, s_col_match, col_regex)) {
+    	 break;
      }
    }
+
    return result;
 }
 
@@ -145,10 +151,17 @@ std::string SedParamUtils::getFile(const XYDataset::QualifiedName& sed) {
   return "";
 }
 
+std::set<std::string> SedParamUtils::getList() {
+	return m_list;
+}
 
-std::set<std::string> SedParamUtils::listAvailableParam(const ModelSet& model) {
+void SedParamUtils::listAvailableParam(const ModelSet& model) {
   std::map<std::string, std::string> params{};
   bool firstSED = true;
+
+  auto sed_list = model.getSeds();
+  m_total = sed_list.size();
+  m_progress = 0;
   for (auto& sed : model.getSeds()) {
     auto file_name = SedParamUtils::getFile(sed);
     auto sed_param = SedParamUtils::getParameterList(file_name);
@@ -174,6 +187,8 @@ std::set<std::string> SedParamUtils::listAvailableParam(const ModelSet& model) {
         params.erase(to_be_removed);
       }
     }
+    progress(m_progress, m_total);
+    ++m_progress;
   }
 
   // convert to set
@@ -183,7 +198,8 @@ std::set<std::string> SedParamUtils::listAvailableParam(const ModelSet& model) {
     ret.insert(it->first);
   }
 
-  return ret;
+  m_list = ret;
+  progress(m_progress, m_total);
 }
 
 

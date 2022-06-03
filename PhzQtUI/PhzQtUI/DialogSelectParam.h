@@ -26,7 +26,7 @@ public:
   /**
    * @brief Constructor
    */
-  explicit DialogSelectParam(const ModelSet& model, QWidget *parent = 0);
+  explicit DialogSelectParam(const std::set<std::string>& param_list, QWidget *parent = 0);
 
   /**
    * @brief Destructor
@@ -60,7 +60,7 @@ private slots:
 
 private:
   std::unique_ptr<Ui::DialogSelectParam> ui;
-  const ModelSet& m_model;
+  const std::set<std::string>& m_param_list;
 };
 
 }
