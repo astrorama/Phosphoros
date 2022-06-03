@@ -28,6 +28,10 @@
   photometries flagged as missing or upper limit. 
     * https://redmine.isdc.unige.ch/issues/26640
 
+- Change the way the PP are extracted from the SEDs to speed 
+  up the interface.
+    * https://redmine.isdc.unige.ch/issues/26860
+    
 -------------------------------------------------------------
  Reference: build from 2022 May 20                   
 -------------------------------------------------------------
