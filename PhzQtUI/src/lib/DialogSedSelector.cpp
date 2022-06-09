@@ -21,7 +21,7 @@ DialogSedSelector::DialogSedSelector(DatasetRepo sed_repository, bool single_sed
 
 DialogSedSelector::~DialogSedSelector(){}
 
-void DialogSedSelector::setSed(std::vector<std::string> sed_names){
+void DialogSedSelector::setSed(std::string sed_names){
   //// Setup the DataSetTreeModel withthe filters
   string path_sed = FileUtils::getSedRootPath(true);
   DataSetTreeModel* treeModel_sed = new DataSetTreeModel(m_sed_repository);
@@ -48,7 +48,7 @@ void DialogSedSelector::setSed(std::vector<std::string> sed_names){
 
   // set the current selected filter
   if (sed_names.size()>0){
-    treeModel_sed->setState(sed_names);
+    treeModel_sed->setState({sed_names});
   }
 
   if (!treeModel_sed->hasLeave()){
