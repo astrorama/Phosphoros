@@ -40,7 +40,7 @@ public:
    * @brief Set the initial sed value
    * @param sed_name Name of the initially selected sed.
    */
-  void setSed(std::vector<std::string> sed_names);
+  void setSed(std::string sed_names);
 
   signals:
   /**

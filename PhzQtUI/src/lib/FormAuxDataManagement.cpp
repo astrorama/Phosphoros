@@ -656,7 +656,7 @@ void FormAuxDataManagement::reloadAuxData(){
 
 void FormAuxDataManagement::on_btn_sun_sed_clicked() {
     std::unique_ptr<DialogSedSelector> dialog(new DialogSedSelector(m_seds_repository));
-    dialog->setSed({PreferencesUtils::getUserPreference("AuxData","SUN_SED")});
+    dialog->setSed(PreferencesUtils::getUserPreference("AuxData","SUN_SED"));
 
     connect(dialog.get(),
             SIGNAL(popupClosing(std::vector<std::string>)),
