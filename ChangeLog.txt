@@ -13,6 +13,13 @@
   Current version: Phosphoros 1.3 (dev)                      
 -------------------------------------------------------------
 
+- Output the corrected photometry
+    * https://redmine.isdc.unige.ch/issues/26822
+
+-------------------------------------------------------------
+ Reference: build from 2022 June 08                   
+-------------------------------------------------------------
+
 - Following up issue 26751, which was fixed temporary, we get 
   the type of the OBJECTD_ID column in the sampling and index 
   files from the type found in the input catalog file.
