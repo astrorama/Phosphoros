@@ -32,6 +32,8 @@ import matplotlib.animation as animation
 import PhzCLI.TableUtils as tut
 
 from scipy.stats import gaussian_kde
+from django.utils.translation.trans_real import catalog
+#from numpy.typing.tests.data import pass
 
 # Astropy >= 2.0rc1
 try:
@@ -92,7 +94,44 @@ def read_phosphoros_catalog(out_cat, id_col, phz_col, pe_cat):
 
     return phos_cat[cols]
 
+#
+# -------------------------------------------------------------------------------
+#
 
+def read_pp_pdf_catalog(ppp_file):
+    ppp_1d = {}
+    ppp_2d = {}
+    ppp_sample = {}
+    if (len(ppp_file)>0 and os.path.exists(ppp_file)) : 
+        ppp_cat = tut.read_table(ppp_file)   
+        ppp_2d_name = []
+        ppp_sampling = []
+        for name in ppp_cat.colnames:
+            if name!="OBJECT_ID":
+                if '_' in name:
+                    ppp_2d_name.append(name)
+                    for elem in name.split('_'):
+                        if not elem in ppp_sampling:
+                            ppp_sampling.append(elem)
+                else:
+                    ppp_1d[name] = ppp_cat[name]
+                    if not name in ppp_sampling:
+                            ppp_sampling.append(name)
+
+        hdul = fits.open(ppp_file)
+        for ppp_s in ppp_sampling:
+            name = ('S_' + ppp_s)[:8]
+            sampling = [float(smp) for smp in hdul[1].header[name].replace('[','').replace(']','').split(',')]
+            ppp_sample[ppp_s] = sampling
+        
+        for ppp2d in ppp_2d_name:
+            # reshape the array
+            elems = ppp2d.split('_')
+            dim_1 = len(ppp_sample[elems[0]])
+            dim_2 = len(ppp_sample[elems[1]])
+            ppp_2d[ppp2d] = ppp_cat[ppp2d].reshape((len(ppp_cat), dim_1, dim_2))
+        logger.info(str(len(ppp_1d)) + ' 1D-PDF and ' + str(len(ppp_2d)) + ' 2D-PDF physical parameters found')    
+    return ppp_cat["OBJECT_ID"], ppp_sample, ppp_1d, ppp_2d
 #
 # -------------------------------------------------------------------------------
 #
@@ -433,6 +472,35 @@ class PdfPlot(object):
     def updateSelectedObject(self, obj_id):
         self.selected_index = np.argwhere(self.catalog['ID'] == obj_id)[0][0]
 
+#
+# -------------------------------------------------------------------------------
+#
+
+class PpPdfPlot(object):
+
+    def _updatePlot(self):
+        if self.selected_index is None:
+            return []
+        
+        return []
+    
+    def _initFigure(self):
+        pass
+
+    def __init__(self, ids, bins, pdf_1d_list):
+        self.ids = ids
+        self.bins = bins
+        self.pdf_1d_list = pdf_1d_list
+
+        self._initFigure()
+
+        self.selected_index = None
+        # TODO!
+        #self.anim = animation.FuncAnimation(self.fig, lambda n: self._updatePlot(), interval=100, blit=False, repeat=True)
+
+    def updateSelectedObject(self, obj_id):
+        self.selected_index = np.argwhere(self.ids == obj_id)[0][0]
+
 
 #
 # -------------------------------------------------------------------------------
@@ -568,6 +636,9 @@ def defineSpecificProgramOptions():
     parser.add_argument('-scol', '--specz-column', type=str, default='ZSPEC',
                         help='Spec-z column name')
     
+    parser.add_argument('-ppcat', '--pppdf-catalog', type=str, required=False,  default='',
+                        help='Catalog file containing the physical parameter pdfs')
+    
     parser.add_argument('-pod', '--phosphoros-output-dir', required=False, type=str,
                         help='Directory to read Phosphoros outputs from')
     parser.add_argument('-pcat', '--phz-catalog', type=str, default=None, help='Photo-z catalog')
@@ -605,7 +676,8 @@ def mainMethod(args):
     specz_cat = read_specz_catalog(args.specz_catalog, args.specz_cat_id, args.specz_column)
 
     phos_cat = read_phosphoros_catalog(args.phz_catalog, args.phz_id, args.phz_column, args.pe_catalog)
-
+    
+   
     # Make sure the comments metadata are only picked from phos_cat, as the
     # bins are stored there. Otherwise, specz_cat may have COMMENT, and phos_cat comments, we end with both,
     # and later methods pick the first over the second
@@ -649,6 +721,21 @@ def mainMethod(args):
         PdfPlot(param, bins, pdf_list, catalog, 'PHZ') for param, bins, pdf_list in pdfs if
         len(bins) > 1
     ]
+    
+    pppdf_file = str(args.pppdf_catalog)
+    if len(pppdf_file)>0 and not pppdf_file.startswith('/'):
+        pppdf_file= os.path.join(args.phosphoros_output_dir, pppdf_file)
+    if len(pppdf_file)==0 and os.path.exists(os.path.join(args.phosphoros_output_dir, 'pp_pdf.fits')):
+        pppdf_file = os.path.join(args.phosphoros_output_dir, 'pp_pdf.fits')   
+    ppp_ids, ppp_sample, ppp_1d, ppp_2d = read_pp_pdf_catalog(pppdf_file)
+
+    pp_1d_pdf_plots = [ 
+        PpPdfPlot(ppp_ids, ppp_sample[pp_1d_name], ppp_1d[pp_1d_name]) for pp_1d_name in ppp_1d if len(ppp_sample[pp_1d_name])>1]
+        
+    
+    
+    
+    
 
     samp = None
     if args.samp:
