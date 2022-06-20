@@ -53,7 +53,7 @@ void DialogPpPdf::setFolder(std::string result_folder) {
 	arguments << "-z" << "true" << "--result-dir" << QString::fromStdString(m_result_folder)
 	          << "--output-range-file" << QString::fromStdString(m_result_folder + "/pp_ranges.csv");
 
-    logger.debug() << prog.toStdString() << " " << arguments.join(" ").toStdString();
+    logger.info() << prog.toStdString() << " " << arguments.join(" ").toStdString();
 	m_P =new QProcess(this);
 	m_P->setProcessChannelMode(QProcess::MergedChannels);
 	connect(m_P, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processingFinished(int, QProcess::ExitStatus)));
@@ -85,6 +85,7 @@ void DialogPpPdf::processingFinished(int, QProcess::ExitStatus){
 		m_pps = std::vector<std::string>{};
 		std::vector<double> min_val{};
 		std::vector<double> max_val{};
+		std::vector<std::string> units{};
 		string row;
 		ifstream readFile(m_result_folder + "/pp_ranges.csv");
 		bool first_row = true;
@@ -96,6 +97,7 @@ void DialogPpPdf::processingFinished(int, QProcess::ExitStatus){
 				m_pps.push_back(parts[0].toStdString());
 				min_val.push_back(parts[1].toFloat());
 				max_val.push_back(parts[2].toFloat());
+				units.push_back(parts[3].toStdString());
 			}
 		}
 		readFile.close();
@@ -103,7 +105,7 @@ void DialogPpPdf::processingFinished(int, QProcess::ExitStatus){
 		QStandardItemModel* grid_model = new QStandardItemModel();
 	    grid_model->setColumnCount(5);
 	    QStringList  setHeaders;
-	    setHeaders<<"Name"<<"Min"<<"Max"<<"Sample #"<<"1D PDF";
+	    setHeaders<<"Name"<<"Min"<<"Max"<<"Unit"<<"Sample #"<<"1D PDF";
 	    grid_model->setHorizontalHeaderLabels(setHeaders);
 	    for (size_t index=0; index < m_pps.size(); ++index) {
 	    	QList<QStandardItem*> items;
@@ -114,6 +116,13 @@ void DialogPpPdf::processingFinished(int, QProcess::ExitStatus){
 	    	items.push_back(item_min);
 	    	QStandardItem* item_max = new QStandardItem(QString::number(max_val[index]));
 	    	items.push_back(item_max);
+
+
+	    	QStandardItem* item_unit = new QStandardItem(QString::fromStdString(units[index]));
+	    	item_unit->setFlags(Qt::NoItemFlags);
+	    	items.push_back(item_unit);
+
+
 	    	QStandardItem* item_sample = new QStandardItem(QString::number(50));
 	    	items.push_back(item_sample);
 
@@ -134,8 +143,8 @@ void DialogPpPdf::processingFinished(int, QProcess::ExitStatus){
         ui->tv_range->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 		ui->tv_range->setItemDelegateForColumn(1, new NumberItemDelegate());
 		ui->tv_range->setItemDelegateForColumn(2, new NumberItemDelegate());
-		ui->tv_range->setItemDelegateForColumn(3, new IntItemDelegate(1,5000));
-	    ui->tv_range->setItemDelegateForColumn(4, new BoolItemDelegate());
+		ui->tv_range->setItemDelegateForColumn(4, new IntItemDelegate(1,5000));
+	    ui->tv_range->setItemDelegateForColumn(5, new BoolItemDelegate());
 		ui->wg_1d->show();
 
 		//---------------------------------------------------------------
@@ -197,12 +206,12 @@ void DialogPpPdf::on_btn_save_clicked() {
 	std::vector<double> max_v {};
 	std::vector<int> number {};
 	for (size_t index=0; index < m_pps.size(); ++index) {
-		if (ui->tv_range->model()->data(ui->tv_range->model()->index(index, 4)).toInt()==1) {
+		if (ui->tv_range->model()->data(ui->tv_range->model()->index(index, 5)).toInt()==1) {
 			pdf_1d.push_back(m_pps[index]);
 	    }
 		min_v.push_back(ui->tv_range->model()->data(ui->tv_range->model()->index(index, 1)).toFloat());
 		max_v.push_back(ui->tv_range->model()->data(ui->tv_range->model()->index(index, 2)).toFloat());
-		number.push_back(std::max(1,ui->tv_range->model()->data(ui->tv_range->model()->index(index, 3)).toInt()));
+		number.push_back(std::max(1,ui->tv_range->model()->data(ui->tv_range->model()->index(index, 4)).toInt()));
 	}
 
 
