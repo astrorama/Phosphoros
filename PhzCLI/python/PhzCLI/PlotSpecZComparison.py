@@ -551,10 +551,16 @@ class PpPdf2DPlot(object):
         self.ax.set_xlim(min(self.bins_x), max(self.bins_x))
         self.ax.set_ylim(min(self.bins_y), max(self.bins_y))
         self.ax.set_title(' ')
+        axis_names = self.pp_name.split('_')
         if len(self.units_x)>0:
-            self.ax.set_xlabel(self.units_x)
+            self.ax.set_xlabel(axis_names[0] + ' ' + self.units_x)
+        else:
+            self.ax.set_xlabel(axis_names[0]) 
+            
         if len(self.units_y)>0:
-            self.ax.set_ylabel(self.units_y)
+            self.ax.set_ylabel(axis_names[1] + ' ' + self.units_y)
+        else:
+            self.ax.set_ylabel(axis_names[1]) 
             
             
         zs = np.zeros((len(self.bins_x),len(self.bins_y)))
