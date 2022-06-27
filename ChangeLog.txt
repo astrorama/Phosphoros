@@ -16,6 +16,14 @@
 - Output the corrected photometry
     * https://redmine.isdc.unige.ch/issues/26822
 
+- Change the default value of the luminosity sampling into 
+  the GUI
+    * https://redmine.isdc.unige.ch/issues/26995
+    
+- Compute 1D and 2D PDF for PP, add the sampling of the PP 
+  and units into the header of the fits. 
+    * https://redmine.isdc.unige.ch/issues/26858
+
 -------------------------------------------------------------
  Reference: build from 2022 June 08                   
 -------------------------------------------------------------
