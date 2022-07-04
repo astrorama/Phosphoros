@@ -32,8 +32,6 @@ import matplotlib.animation as animation
 import PhzCLI.TableUtils as tut
 
 from scipy.stats import gaussian_kde
-from django.utils.translation.trans_real import catalog
-#from numpy.typing.tests.data import pass
 
 # Astropy >= 2.0rc1
 try:
@@ -104,7 +102,7 @@ def read_pp_pdf_catalog(ppp_file):
     ppp_sample = {}
     ppp_units = {}
     ppp_ids={}
-    if (len(ppp_file)>0 and os.path.exists(ppp_file)) : 
+    if (ppp_file and os.path.exists(ppp_file)) : 
         ppp_cat = tut.read_table(ppp_file)   
         ppp_2d_name = []
         ppp_sampling = []
@@ -137,7 +135,7 @@ def read_pp_pdf_catalog(ppp_file):
             dim_2 = len(ppp_sample[elems[1]])
             ppp_2d[ppp2d] = ppp_cat[ppp2d].reshape((len(ppp_cat), dim_1, dim_2))
         ppp_ids = ppp_cat["OBJECT_ID"]
-        logger.info(str(len(ppp_1d)) + ' 1D-PDF and ' + str(len(ppp_2d)) + ' 2D-PDF physical parameters found')    
+        logger.info('%d 1D-PDF and %d 2D-PDF physical parameters found', len(ppp_1d), len(ppp_2d))    
     return ppp_ids, ppp_sample, ppp_units, ppp_1d, ppp_2d
 #
 # -------------------------------------------------------------------------------
