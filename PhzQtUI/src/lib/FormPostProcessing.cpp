@@ -176,7 +176,7 @@ void FormPostProcessing::computePdfStat(int row){
   auto folder = ui->table_res_file->model()->data(ui->table_res_file->model()->index(row,2)).toString().toStdString();
   std::unique_ptr<DialogPOP> dialog(new DialogPOP());
   dialog->setFolder(folder);
-  if (dialog->exec()) {}
+  dialog->exec();
 }
 
 void FormPostProcessing::plotZVsZref(int row){
@@ -184,14 +184,14 @@ void FormPostProcessing::plotZVsZref(int row){
     std::unique_ptr<DialogPSC> dialog(new DialogPSC());
     dialog->setDefaultColumn(m_survey_model_ptr->getSelectedSurvey().getSourceIdColumn(), m_survey_model_ptr->getSelectedSurvey().getRefZColumn());
     dialog->setFolder(folder);
-    if (dialog->exec()) {}
+    dialog->exec();
 }
 
 void FormPostProcessing::plotResiduals(int row) {
     auto folder = ui->table_res_file->model()->data(ui->table_res_file->model()->index(row,2)).toString().toStdString();
     std::unique_ptr<DialogResid> dialog(new DialogResid());
     dialog->setFolder(folder);
-    if (dialog->exec()) {}
+    dialog->exec();
 }
 
 
@@ -199,7 +199,7 @@ void FormPostProcessing::computePpPdf(int row) {
 	auto folder = ui->table_res_file->model()->data(ui->table_res_file->model()->index(row,2)).toString().toStdString();
 	std::unique_ptr<DialogPpPdf> dialog(new DialogPpPdf());
 	dialog->setFolder(folder);
-	if (dialog->exec()) {}
+	dialog->exec();
 
 }
 
