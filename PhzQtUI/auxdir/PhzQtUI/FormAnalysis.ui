@@ -223,8 +223,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>593</width>
-            <height>301</height>
+            <width>930</width>
+            <height>526</height>
            </rect>
           </property>
           <attribute name="label">
@@ -433,8 +433,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>768</width>
-            <height>275</height>
+            <width>930</width>
+            <height>526</height>
            </rect>
           </property>
           <attribute name="label">
@@ -806,8 +806,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>573</width>
-            <height>242</height>
+            <width>930</width>
+            <height>526</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1040,8 +1040,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>486</width>
-            <height>171</height>
+            <width>930</width>
+            <height>526</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1193,8 +1193,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>554</width>
-            <height>186</height>
+            <width>930</width>
+            <height>526</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1367,8 +1367,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>916</width>
-            <height>710</height>
+            <width>935</width>
+            <height>716</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1817,6 +1817,45 @@
                <property name="text">
                 <string>Select Parameters</string>
                </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_31">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Corrected photometry :</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="cb_corr_phot">
+               <property name="font">
+                <font>
+                 <pointsize>10</pointsize>
+                </font>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ouput the photometry corrected for the filter shifts and/or galactic reddening, errors are recomputed if ordered to.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;NO&lt;/span&gt;: do not output corrected phototmetry.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;BESTFIT&lt;/span&gt;: compute the correction coefficient based on the best fit model.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;POSTERIOR&lt;/span&gt;: compute the correction coefficient for all the models and take the weighted mean using the posterior as weight.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string>NO</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>BESTFIT</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>POSTERIOR</string>
+                </property>
+               </item>
               </widget>
              </item>
              <item>

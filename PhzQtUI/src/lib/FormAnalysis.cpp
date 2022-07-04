@@ -1579,6 +1579,10 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
   std::string sun_sed = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
   options_map["normalization-solar-sed"].value() = boost::any(sun_sed);
 
+
+  std::string corrected_phot = ui->cb_corr_phot->currentText().toStdString();
+  options_map["output-corrected-photometry"].value() = boost::any(corrected_phot);
+
   return options_map;
 }
 
