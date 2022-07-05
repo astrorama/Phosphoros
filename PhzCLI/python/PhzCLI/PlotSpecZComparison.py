@@ -107,25 +107,25 @@ def read_pp_pdf_catalog(ppp_file):
         ppp_2d_name = []
         ppp_sampling = []
         for name in ppp_cat.colnames:
-            if name!="OBJECT_ID":
-                if '_' in name:
-                    ppp_2d_name.append(name)
-                    for elem in name.split('_'):
+            if name!="ID":
+                processed_name = name.replace("MC_","")
+                if '_' in processed_name:
+                    ppp_2d_name.append(processed_name)
+                    for elem in processed_name.split('_'):
                         if not elem in ppp_sampling:
                             ppp_sampling.append(elem)
                 else:
-                    ppp_1d[name] = ppp_cat[name]
-                    if not name in ppp_sampling:
-                            ppp_sampling.append(name)
+                    ppp_1d[processed_name] = ppp_cat[name]
+                    if not processed_name in ppp_sampling:
+                            ppp_sampling.append(processed_name)
 
         hdul = fits.open(ppp_file)
+    
         for ppp_s in ppp_sampling:
-            name = ('S_' + ppp_s)[:8]
-            sampling = [float(smp) for smp in hdul[1].header[name].replace('[','').replace(']','').split(',')]
-            ppp_sample[ppp_s] = sampling
             
-            name = ('U_' + ppp_s)[:8]
-            unit_name = hdul[1].header[name]
+            name = ('BINS_MC_PDF_' + ppp_s.upper())
+            ppp_sample[ppp_s] =  hdul[name].data['BINS']
+            unit_name = hdul[name].data.columns['BINS'].unit
             ppp_units[ppp_s] = unit_name
         
         for ppp2d in ppp_2d_name:
@@ -133,8 +133,8 @@ def read_pp_pdf_catalog(ppp_file):
             elems = ppp2d.split('_')
             dim_1 = len(ppp_sample[elems[0]])
             dim_2 = len(ppp_sample[elems[1]])
-            ppp_2d[ppp2d] = ppp_cat[ppp2d].reshape((len(ppp_cat), dim_1, dim_2))
-        ppp_ids = ppp_cat["OBJECT_ID"]
+            ppp_2d[ppp2d] = ppp_cat["MC_" + ppp2d].reshape((len(ppp_cat), dim_1, dim_2))
+        ppp_ids = ppp_cat["ID"]
         logger.info('%d 1D-PDF and %d 2D-PDF physical parameters found', len(ppp_1d), len(ppp_2d))    
     return ppp_ids, ppp_sample, ppp_units, ppp_1d, ppp_2d
 #
