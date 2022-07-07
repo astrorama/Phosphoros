@@ -1,11 +1,11 @@
 #ifndef DIALOGLUMINOSITYFUNCTIONS_H
 #define DIALOGLUMINOSITYFUNCTIONS_H
 
-#include <memory>
-#include <QDialog>
-#include <string>
 #include "PhzQtUI/LuminosityFunctionInfo.h"
 #include "PhzQtUI/LuminosityPriorConfig.h"
+#include <QDialog>
+#include <memory>
+#include <string>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -19,14 +19,14 @@ class DialogLuminosityFunctions;
  * @brief This popup allows the bulk edition of the Schechter parameters.
  * It is called from the Luminosity prior configuration popup.
  */
-class DialogLuminosityFunctions: public QDialog {
+class DialogLuminosityFunctions : public QDialog {
   Q_OBJECT
 
 public:
   /**
    * @brief Constructor
    */
-  explicit DialogLuminosityFunctions(QWidget *parent = 0);
+  explicit DialogLuminosityFunctions(QWidget* parent = 0);
   /**
    * @brief Destructor
    */
@@ -39,10 +39,9 @@ public:
    * Schechter parameters values.
    */
   void setInfos(std::vector<std::vector<LuminosityFunctionInfo>> infos,
-      std::vector<LuminosityPriorConfig::SedGroup> groups,
-      std::vector<double> zs);
+                std::vector<LuminosityPriorConfig::SedGroup> groups, std::vector<double> zs);
 
-  signals:
+signals:
   /**
    * @brief SIGNAL popupClosing: raised when the dialog is saved and the
    * popup close. The argument is the new set of functions.
@@ -65,12 +64,11 @@ private:
   std::unique_ptr<Ui::DialogLuminosityFunctions> ui;
 
   std::vector<std::vector<LuminosityFunctionInfo>> m_infos;
-  std::vector<LuminosityPriorConfig::SedGroup> m_groups;
-  std::vector<double> m_zs;
-
+  std::vector<LuminosityPriorConfig::SedGroup>     m_groups;
+  std::vector<double>                              m_zs;
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
-#endif // DIALOGLUMINOSITYFUNCTIONS_H
+#endif  // DIALOGLUMINOSITYFUNCTIONS_H

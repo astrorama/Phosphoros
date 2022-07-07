@@ -1,16 +1,16 @@
+#include "ElementsKernel/Logging.h"
+#include "FileUtils.h"
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QProcess>
-#include <QThread>
-#include <QStringList>
-#include <QScrollBar>
 #include <QMessageBox>
-#include "FileUtils.h"
+#include <QProcess>
+#include <QScrollBar>
+#include <QStringList>
+#include <QThread>
 #include <sstream>
-#include "ElementsKernel/Logging.h"
 
-#include <boost/filesystem.hpp>
 #include "PhzUITools/CatalogColumnReader.h"
+#include <boost/filesystem.hpp>
 
 #include "PhzQtUI/DialogPOP.h"
 #include "ui_DialogPOP.h"
@@ -23,15 +23,13 @@ namespace PhzQtUI {
 
 static Elements::Logging logger = Elements::Logging::getLogger("DialogPOP");
 
-DialogPOP::DialogPOP(QWidget *parent) :
-        QDialog(parent),
-        ui(new Ui::DialogPOP){
-      ui->setupUi(this);
-    }
+DialogPOP::DialogPOP(QWidget* parent) : QDialog(parent), ui(new Ui::DialogPOP) {
+  ui->setupUi(this);
+}
 
-DialogPOP::~DialogPOP(){}
+DialogPOP::~DialogPOP() {}
 
-void DialogPOP::setFolder(std::string output_folder){
+void DialogPOP::setFolder(std::string output_folder) {
   m_folder = output_folder;
   ui->out_cons->hide();
   ui->btn_close->show();
@@ -39,156 +37,139 @@ void DialogPOP::setFolder(std::string output_folder){
   ui->btn_cancel->setDisabled(false);
   ui->btn_cancel->hide();
   // get the file snd  check .fits
-  auto basepath =  boost::filesystem::path(output_folder);
-  if (boost::filesystem::exists(basepath/"phz_cat.fits")) {
+  auto basepath = boost::filesystem::path(output_folder);
+  if (boost::filesystem::exists(basepath / "phz_cat.fits")) {
 
     // get columns
-    auto column_reader = PhzUITools::CatalogColumnReader((basepath/"phz_cat.fits").string());
+    auto column_reader = PhzUITools::CatalogColumnReader((basepath / "phz_cat.fits").string());
 
     // fill the CBB
     for (auto& name : column_reader.getColumnNames()) {
 
       std::size_t found = name.find("Z-1D-PDF");
-      if (found!=std::string::npos) {
+      if (found != std::string::npos) {
         ui->cbb_columns->insertItem(0, QString::fromStdString(name));
       }
     }
 
-    if (ui->cbb_columns->count()>0) {
-         // Check the CB
-          ui->cb_median->setCheckState(Qt::Checked);
-          ui->cb_70_c_min->setCheckState(Qt::Checked);
-          ui->cb_70_c_max->setCheckState(Qt::Checked);
-          ui->cb_90_c_min->setCheckState(Qt::Checked);
-          ui->cb_90_c_max->setCheckState(Qt::Checked);
-          ui->cb_95_c_min->setCheckState(Qt::Checked);
-          ui->cb_95_c_max->setCheckState(Qt::Checked);
-          ui->cb_70_m_min->setCheckState(Qt::Checked);
-          ui->cb_70_m_max->setCheckState(Qt::Checked);
-          ui->cb_90_m_min->setCheckState(Qt::Checked);
-          ui->cb_90_m_max->setCheckState(Qt::Checked);
-          ui->cb_95_m_min->setCheckState(Qt::Checked);
-          ui->cb_95_m_max->setCheckState(Qt::Checked);
-          ui->cb_01_sampl->setCheckState(Qt::Checked);
-          ui->cb_01_mean->setCheckState(Qt::Checked);
-          ui->cb_01_fited->setCheckState(Qt::Checked);
-          ui->cb_01_area->setCheckState(Qt::Checked);
-          ui->cb_02_sampl->setCheckState(Qt::Checked);
-          ui->cb_02_mean->setCheckState(Qt::Checked);
-          ui->cb_02_fited->setCheckState(Qt::Checked);
-          ui->cb_02_area->setCheckState(Qt::Checked);
+    if (ui->cbb_columns->count() > 0) {
+      // Check the CB
+      ui->cb_median->setCheckState(Qt::Checked);
+      ui->cb_70_c_min->setCheckState(Qt::Checked);
+      ui->cb_70_c_max->setCheckState(Qt::Checked);
+      ui->cb_90_c_min->setCheckState(Qt::Checked);
+      ui->cb_90_c_max->setCheckState(Qt::Checked);
+      ui->cb_95_c_min->setCheckState(Qt::Checked);
+      ui->cb_95_c_max->setCheckState(Qt::Checked);
+      ui->cb_70_m_min->setCheckState(Qt::Checked);
+      ui->cb_70_m_max->setCheckState(Qt::Checked);
+      ui->cb_90_m_min->setCheckState(Qt::Checked);
+      ui->cb_90_m_max->setCheckState(Qt::Checked);
+      ui->cb_95_m_min->setCheckState(Qt::Checked);
+      ui->cb_95_m_max->setCheckState(Qt::Checked);
+      ui->cb_01_sampl->setCheckState(Qt::Checked);
+      ui->cb_01_mean->setCheckState(Qt::Checked);
+      ui->cb_01_fited->setCheckState(Qt::Checked);
+      ui->cb_01_area->setCheckState(Qt::Checked);
+      ui->cb_02_sampl->setCheckState(Qt::Checked);
+      ui->cb_02_mean->setCheckState(Qt::Checked);
+      ui->cb_02_fited->setCheckState(Qt::Checked);
+      ui->cb_02_area->setCheckState(Qt::Checked);
 
-
-          ui->lbl_warning->setText("");
-          ui->btn_compute->setEnabled(true);
+      ui->lbl_warning->setText("");
+      ui->btn_compute->setEnabled(true);
 
     } else {
-         ui->lbl_warning->setText("File 'phz_cat.fits' do not contains PDZ column");
-         ui->btn_compute->setEnabled(false);
+      ui->lbl_warning->setText("File 'phz_cat.fits' do not contains PDZ column");
+      ui->btn_compute->setEnabled(false);
     }
-
 
   } else {
     ui->lbl_warning->setText("File 'phz_cat' not found or not in .fits format");
     ui->btn_compute->setEnabled(false);
   }
-
-
-
-
-
 }
 
-
-void DialogPOP::on_btn_cancel_clicked(){
+void DialogPOP::on_btn_cancel_clicked() {
   if (m_processing) {
-	  m_P->terminate();
-	  m_processing = false;
-	  ui->out_cons->setPlainText("Processing stop by the user");
-	  logger.info()<< "Processing stop by the user";
-   }
+    m_P->terminate();
+    m_processing = false;
+    ui->out_cons->setPlainText("Processing stop by the user");
+    logger.info() << "Processing stop by the user";
+  }
   ui->btn_close->show();
   ui->btn_cancel->hide();
   ui->btn_compute->show();
 }
 
-
-
-
-
-
-
-
-void DialogPOP::on_btn_compute_clicked(){
-  auto basepath =  boost::filesystem::path(m_folder);
-
+void DialogPOP::on_btn_compute_clicked() {
+  auto basepath = boost::filesystem::path(m_folder);
 
   std::vector<std::string> excluded{};
-  if (ui->cb_median->checkState()==Qt::Unchecked){
+  if (ui->cb_median->checkState() == Qt::Unchecked) {
     excluded.push_back("MEDIAN");
-
   }
-  if (ui->cb_70_c_min->checkState()==Qt::Unchecked){
+  if (ui->cb_70_c_min->checkState() == Qt::Unchecked) {
     excluded.push_back("MED_CENTER_MIN_70");
   }
-  if (ui->cb_70_c_max->checkState()==Qt::Unchecked){
+  if (ui->cb_70_c_max->checkState() == Qt::Unchecked) {
     excluded.push_back("MED_CENTER_MAX_70");
   }
-  if (ui->cb_90_c_min->checkState()==Qt::Unchecked){
+  if (ui->cb_90_c_min->checkState() == Qt::Unchecked) {
     excluded.push_back("MED_CENTER_MIN_90");
   }
-  if (ui->cb_90_c_max->checkState()==Qt::Unchecked){
+  if (ui->cb_90_c_max->checkState() == Qt::Unchecked) {
     excluded.push_back("MED_CENTER_MAX_90");
   }
-  if (ui->cb_95_c_min->checkState()==Qt::Unchecked){
+  if (ui->cb_95_c_min->checkState() == Qt::Unchecked) {
     excluded.push_back("MED_CENTER_MIN_95");
   }
-  if (ui->cb_95_c_max->checkState()==Qt::Unchecked){
+  if (ui->cb_95_c_max->checkState() == Qt::Unchecked) {
     excluded.push_back("MED_CENTER_MAX_95");
   }
 
-  if (ui->cb_70_m_min->checkState()==Qt::Unchecked){
+  if (ui->cb_70_m_min->checkState() == Qt::Unchecked) {
     excluded.push_back("MIN_70");
   }
-  if (ui->cb_70_m_max->checkState()==Qt::Unchecked){
+  if (ui->cb_70_m_max->checkState() == Qt::Unchecked) {
     excluded.push_back("MAX_70");
   }
-  if (ui->cb_90_m_min->checkState()==Qt::Unchecked){
+  if (ui->cb_90_m_min->checkState() == Qt::Unchecked) {
     excluded.push_back("MIN_90");
   }
-  if (ui->cb_90_m_max->checkState()==Qt::Unchecked){
+  if (ui->cb_90_m_max->checkState() == Qt::Unchecked) {
     excluded.push_back("MAX_90");
   }
-  if (ui->cb_95_m_min->checkState()==Qt::Unchecked){
+  if (ui->cb_95_m_min->checkState() == Qt::Unchecked) {
     excluded.push_back("MIN_95");
   }
-  if (ui->cb_95_m_max->checkState()==Qt::Unchecked){
+  if (ui->cb_95_m_max->checkState() == Qt::Unchecked) {
     excluded.push_back("MAX_95");
   }
 
-  if (ui->cb_01_sampl->checkState()==Qt::Unchecked){
-     excluded.push_back("PHZ_MODE_1_SAMP");
+  if (ui->cb_01_sampl->checkState() == Qt::Unchecked) {
+    excluded.push_back("PHZ_MODE_1_SAMP");
   }
-  if (ui->cb_01_mean->checkState()==Qt::Unchecked){
-     excluded.push_back("PHZ_MODE_1_MEAN");
+  if (ui->cb_01_mean->checkState() == Qt::Unchecked) {
+    excluded.push_back("PHZ_MODE_1_MEAN");
   }
-  if (ui->cb_01_fited->checkState()==Qt::Unchecked){
-     excluded.push_back("PHZ_MODE_1_FIT");
+  if (ui->cb_01_fited->checkState() == Qt::Unchecked) {
+    excluded.push_back("PHZ_MODE_1_FIT");
   }
-  if (ui->cb_01_area->checkState()==Qt::Unchecked){
-     excluded.push_back("PHZ_MODE_1_AREA");
+  if (ui->cb_01_area->checkState() == Qt::Unchecked) {
+    excluded.push_back("PHZ_MODE_1_AREA");
   }
-  if (ui->cb_02_sampl->checkState()==Qt::Unchecked){
-       excluded.push_back("PHZ_MODE_2_SAMP");
+  if (ui->cb_02_sampl->checkState() == Qt::Unchecked) {
+    excluded.push_back("PHZ_MODE_2_SAMP");
   }
-  if (ui->cb_02_mean->checkState()==Qt::Unchecked){
-     excluded.push_back("PHZ_MODE_2_MEAN");
+  if (ui->cb_02_mean->checkState() == Qt::Unchecked) {
+    excluded.push_back("PHZ_MODE_2_MEAN");
   }
-  if (ui->cb_02_fited->checkState()==Qt::Unchecked){
-     excluded.push_back("PHZ_MODE_2_FIT");
+  if (ui->cb_02_fited->checkState() == Qt::Unchecked) {
+    excluded.push_back("PHZ_MODE_2_FIT");
   }
-  if (ui->cb_02_area->checkState()==Qt::Unchecked){
-     excluded.push_back("PHZ_MODE_2_AREA");
+  if (ui->cb_02_area->checkState() == Qt::Unchecked) {
+    excluded.push_back("PHZ_MODE_2_AREA");
   }
 
   ui->btn_close->hide();
@@ -196,7 +177,7 @@ void DialogPOP::on_btn_compute_clicked(){
   ui->btn_cancel->show();
   ui->out_cons->show();
   ui->out_cons->setReadOnly(true);
-  m_processing=true;
+  m_processing = true;
   qApp->processEvents();
 
   // input-cat    (basepath/"phz_cat.fits").string()
@@ -205,14 +186,14 @@ void DialogPOP::on_btn_compute_clicked(){
 
   // excluded-output-columns excluded
 
-
-  m_P =new QProcess ;
+  m_P = new QProcess;
 
   connect(m_P, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processingFinished(int, QProcess::ExitStatus)));
 
   QStringList s3;
-  s3 << QString::fromStdString("--input-cat") <<  QString::fromStdString((basepath/"phz_cat.fits").string())
-     << QString::fromStdString("--output-cat") << QString::fromStdString((basepath/(ui->cbb_columns->currentText().toStdString()+"_Statistic.fits")).string())
+  s3 << QString::fromStdString("--input-cat") << QString::fromStdString((basepath / "phz_cat.fits").string())
+     << QString::fromStdString("--output-cat")
+     << QString::fromStdString((basepath / (ui->cbb_columns->currentText().toStdString() + "_Statistic.fits")).string())
      << QString::fromStdString("--pdf-column") << ui->cbb_columns->currentText();
 
   m_P->setReadChannelMode(QProcess::MergedChannels);
@@ -225,28 +206,25 @@ void DialogPOP::on_btn_compute_clicked(){
   m_timer->start(100);
 }
 
-void DialogPOP::on_btn_close_clicked(){
+void DialogPOP::on_btn_close_clicked() {
   accept();
 }
 
-
-void DialogPOP::processingFinished(int, QProcess::ExitStatus){
-   m_timer->stop();
-   m_processing=false;
-   updateOutCons();
-   ui->btn_cancel->hide();
-   ui->btn_compute->show();
-   ui->btn_close->show();
-   logger.info() <<  ui->out_cons->toPlainText().toStdString();
+void DialogPOP::processingFinished(int, QProcess::ExitStatus) {
+  m_timer->stop();
+  m_processing = false;
+  updateOutCons();
+  ui->btn_cancel->hide();
+  ui->btn_compute->show();
+  ui->btn_close->show();
+  logger.info() << ui->out_cons->toPlainText().toStdString();
 }
 
-
-void DialogPOP::updateOutCons(){
-  QString result_all=  m_P->readAllStandardOutput();
-    ui->out_cons->setPlainText(ui->out_cons->toPlainText() + result_all);
-    ui->out_cons->verticalScrollBar()->setValue( ui->out_cons->verticalScrollBar()->maximum());
+void DialogPOP::updateOutCons() {
+  QString result_all = m_P->readAllStandardOutput();
+  ui->out_cons->setPlainText(ui->out_cons->toPlainText() + result_all);
+  ui->out_cons->verticalScrollBar()->setValue(ui->out_cons->verticalScrollBar()->maximum());
 }
 
-
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid

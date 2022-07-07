@@ -10,17 +10,14 @@
 namespace Euclid {
 namespace PhzQtUI {
 
-
-MessageButton::MessageButton(const QString& message, const QString &text, QWidget *parent)
-  : QPushButton(text,parent), m_message{message} {
-    QObject::connect( this, SIGNAL(clicked()), this,SLOT(recievClicked()));
-  }
-
-  void MessageButton::recievClicked() {
-    this->MessageButtonClicked(m_message);
-  }
-
-
-
+MessageButton::MessageButton(const QString& message, const QString& text, QWidget* parent)
+    : QPushButton(text, parent), m_message{message} {
+  QObject::connect(this, SIGNAL(clicked()), this, SLOT(recievClicked()));
 }
+
+void MessageButton::recievClicked() {
+  this->MessageButtonClicked(m_message);
 }
+
+}  // namespace PhzQtUI
+}  // namespace Euclid

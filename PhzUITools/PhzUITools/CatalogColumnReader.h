@@ -8,8 +8,8 @@
 #ifndef CATALOGCOLUMNREADER_H_
 #define CATALOGCOLUMNREADER_H_
 
-#include<set>
-#include<string>
+#include <set>
+#include <string>
 
 namespace Euclid {
 namespace PhzUITools {
@@ -34,12 +34,10 @@ public:
   std::set<std::string> getColumnNames();
 
 private:
-
   std::string m_file_name;
-
 };
 
-}
-}
+}  // namespace PhzUITools
+}  // namespace Euclid
 
 #endif /* CATALOGCOLUMNREADER_H_ */

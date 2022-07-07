@@ -4,26 +4,24 @@
  * @author Nikolaos Apostolakos
  */
 
+#include "Configuration/ConfigManager.h"
+#include "ElementsKernel/ProgramHeaders.h"
+#include "Table/FitsWriter.h"
+#include "XYDataset/QualifiedName.h"
+#include <chrono>
 #include <iostream>
 #include <set>
-#include <chrono>
 #include <sstream>
-#include "ElementsKernel/ProgramHeaders.h"
-#include "Configuration/ConfigManager.h"
-#include "XYDataset/QualifiedName.h"
-#include "Table/FitsWriter.h"
 
-#include "PhzDataModel/PhotometryGridInfo.h"
-#include "PhzConfiguration/PhotometryGridConfig.h"
-#include "PhzCLI/DisplayModelGridConfig.h"
 #include "Configuration/Utils.h"
 #include "NdArray/NdArray.h"
+#include "PhzCLI/DisplayModelGridConfig.h"
+#include "PhzConfiguration/PhotometryGridConfig.h"
+#include "PhzDataModel/PhotometryGridInfo.h"
 
 using namespace std;
 using namespace Euclid;
 namespace po = boost::program_options;
-
-
 
 template <typename T>
 using NdArray = Euclid::NdArray::NdArray<T>;
@@ -45,12 +43,12 @@ void printPhotometryInfo(const PhzDataModel::PhotometryGridInfo& grid_info) {
 
 void printOverall(const PhzDataModel::PhotometryGridInfo& grid_info) {
   printPhotometryInfo(grid_info);
-  std::string region_names {};
-  std::set<XYDataset::QualifiedName> overall_seds {};
-  std::set<XYDataset::QualifiedName> overall_reddening_curves {};
-  std::set<double> overall_ebv {};
-  std::set<double> overall_z {};
-  std::size_t total_models_no = 0;
+  std::string                        region_names{};
+  std::set<XYDataset::QualifiedName> overall_seds{};
+  std::set<XYDataset::QualifiedName> overall_reddening_curves{};
+  std::set<double>                   overall_ebv{};
+  std::set<double>                   overall_z{};
+  std::size_t                        total_models_no = 0;
   for (auto& pair : grid_info.region_axes_map) {
     region_names += " \"" + pair.first + '\"';
     auto& sed_axis = std::get<PhzDataModel::ModelParameter::SED>(pair.second);
@@ -61,7 +59,7 @@ void printOverall(const PhzDataModel::PhotometryGridInfo& grid_info) {
     overall_ebv.insert(ebv_axis.begin(), ebv_axis.end());
     auto& z_axis = std::get<PhzDataModel::ModelParameter::Z>(pair.second);
     overall_z.insert(z_axis.begin(), z_axis.end());
-    total_models_no += sed_axis.size()*redcurve_axis.size()*ebv_axis.size()*z_axis.size();
+    total_models_no += sed_axis.size() * redcurve_axis.size() * ebv_axis.size() * z_axis.size();
   }
   cout << "Parameter Space info\n";
   cout << "--------------------\n";
@@ -81,16 +79,17 @@ void printAllRegionsInfo(const PhzDataModel::PhotometryGridInfo& grid_info) {
   for (auto& pair : grid_info.region_axes_map) {
     cout << "Region: " << pair.first << '\n';
     auto& sed_axis = std::get<PhzDataModel::ModelParameter::SED>(pair.second);
-    cout << "    Number of SED templates: " <<sed_axis.size() << '\n';
+    cout << "    Number of SED templates: " << sed_axis.size() << '\n';
     auto& redcurve_axis = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(pair.second);
     cout << "    Number of Reddeining Curves: " << redcurve_axis.size() << '\n';
     auto& ebv_axis = std::get<PhzDataModel::ModelParameter::EBV>(pair.second);
-    cout << "    E(B-V) range: [" << ebv_axis[0] << ", " << ebv_axis[ebv_axis.size()-1] << "] ("
-         << ebv_axis.size() << " values)\n";
+    cout << "    E(B-V) range: [" << ebv_axis[0] << ", " << ebv_axis[ebv_axis.size() - 1] << "] (" << ebv_axis.size()
+         << " values)\n";
     auto& z_axis = std::get<PhzDataModel::ModelParameter::Z>(pair.second);
-    cout << "    Redshift Z range: [" << z_axis[0] << ", " << z_axis[z_axis.size()-1] << "] ("
-         << z_axis.size() << " values)\n";
-    cout << "    Number of models: " << (sed_axis.size()*redcurve_axis.size()*ebv_axis.size()*z_axis.size()) << '\n';
+    cout << "    Redshift Z range: [" << z_axis[0] << ", " << z_axis[z_axis.size() - 1] << "] (" << z_axis.size()
+         << " values)\n";
+    cout << "    Number of models: " << (sed_axis.size() * redcurve_axis.size() * ebv_axis.size() * z_axis.size())
+         << '\n';
   }
   cout << '\n';
 }
@@ -98,16 +97,17 @@ void printAllRegionsInfo(const PhzDataModel::PhotometryGridInfo& grid_info) {
 void printGeneric(const PhzDataModel::PhotometryGridInfo& grid_info, const std::string& region_name) {
   printPhotometryInfo(grid_info);
   auto sed_size = std::get<PhzDataModel::ModelParameter::SED>(grid_info.region_axes_map.at(region_name)).size();
-  auto red_curve_size = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(grid_info.region_axes_map.at(region_name)).size();
+  auto red_curve_size =
+      std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(grid_info.region_axes_map.at(region_name)).size();
   auto ebv_size = std::get<PhzDataModel::ModelParameter::EBV>(grid_info.region_axes_map.at(region_name)).size();
-  auto z_size = std::get<PhzDataModel::ModelParameter::Z>(grid_info.region_axes_map.at(region_name)).size();
+  auto z_size   = std::get<PhzDataModel::ModelParameter::Z>(grid_info.region_axes_map.at(region_name)).size();
   cout << "\nParameter Space info\n";
   cout << "--------------------\n";
   cout << "SED axis size: " << sed_size << '\n';
   cout << "Reddening curve axis size: " << red_curve_size << '\n';
   cout << "E(B-V) axis size: " << ebv_size << '\n';
   cout << "Z axis size: " << z_size << '\n';
-  cout << "Total grid size : " << sed_size*red_curve_size*ebv_size*z_size << "\n";
+  cout << "Total grid size : " << sed_size * red_curve_size * ebv_size * z_size << "\n";
   cout << '\n';
 }
 
@@ -115,38 +115,37 @@ template <typename Axis>
 void printAxis(const Axis& axis) {
   cout << "\nAxis " << axis.name() << " (" << axis.size() << ")\n";
   cout << "Index\tValue\n";
-  int i {0};
+  int i{0};
   for (auto& value : axis) {
     cout << i++ << '\t' << value << '\n';
   }
   cout << '\n';
 }
 
-void printPhotometry(const PhzDataModel::PhotometryGrid& grid,
-                     const tuple<size_t,size_t,size_t,size_t>& coords) {
+void printPhotometry(const PhzDataModel::PhotometryGrid& grid, const tuple<size_t, size_t, size_t, size_t>& coords) {
   size_t c1 = get<0>(coords);
   size_t c2 = get<1>(coords);
   size_t c3 = get<2>(coords);
   size_t c4 = get<3>(coords);
   // Note that the photometry grid indices have the opposit order
-  auto& phot = grid.at(c4,c3,c2,c1);
+  auto& phot = grid.at(c4, c3, c2, c1);
   cout << "\nCell (" << c1 << "," << c2 << "," << c3 << "," << c4 << ") axis information:\n";
   cout << "SED      " << grid.getAxis<PhzDataModel::ModelParameter::SED>()[c1] << '\n';
   cout << "REDCURVE " << grid.getAxis<PhzDataModel::ModelParameter::REDDENING_CURVE>()[c2] << '\n';
   cout << "EBV      " << grid.getAxis<PhzDataModel::ModelParameter::EBV>()[c3] << '\n';
   cout << "Z        " << grid.getAxis<PhzDataModel::ModelParameter::Z>()[c4] << '\n';
   cout << "\nCell (" << c1 << "," << c2 << "," << c3 << "," << c4 << ") Photometry:\n";
-  for (auto iter=phot.begin(); iter!=phot.end(); ++iter) {
+  for (auto iter = phot.begin(); iter != phot.end(); ++iter) {
     cout << iter.filterName() << "\t" << (*iter).flux << '\n';
   }
   cout << '\n';
 }
 
 template <int Axis>
-std::map<PhzDataModel::PhotometryGrid::axis_type<Axis>, int> axisOverallIndices(
-                    const std::map<std::string, PhzDataModel::PhotometryGrid>& grid_map) {
+std::map<PhzDataModel::PhotometryGrid::axis_type<Axis>, int>
+axisOverallIndices(const std::map<std::string, PhzDataModel::PhotometryGrid>& grid_map) {
   std::map<PhzDataModel::PhotometryGrid::axis_type<Axis>, int> result;
-  int i = 0;
+  int                                                          i = 0;
   for (auto& pair : grid_map) {
     auto& axis = pair.second.getAxis<Axis>();
     for (auto& key : axis) {
@@ -155,15 +154,15 @@ std::map<PhzDataModel::PhotometryGrid::axis_type<Axis>, int> axisOverallIndices(
       }
     }
   }
-  
+
   return result;
 }
 
 template <typename T>
 std::string axisIndicesToString(const std::map<T, int>& indices) {
-  std::stringstream result {};
+  std::stringstream result{};
   result << '[';
-  std::vector<T> ordered (indices.size(), {"temp"});
+  std::vector<T> ordered(indices.size(), {"temp"});
   for (auto& pair : indices) {
     ordered[pair.second] = pair.first;
   }
@@ -175,43 +174,41 @@ std::string axisIndicesToString(const std::map<T, int>& indices) {
   return result.str();
 }
 
-void exportAsCatalog(const PhzDataModel::PhotometryGridInfo& grid_info,
+void exportAsCatalog(const PhzDataModel::PhotometryGridInfo&                    grid_info,
                      const std::map<std::string, PhzDataModel::PhotometryGrid>& grid_map,
-                     const std::string& output_name) {
-  
+                     const std::string&                                         output_name) {
+
   // Create the Table writer
-  Table::FitsWriter writer {output_name, true};
-  
+  Table::FitsWriter writer{output_name, true};
+
   // Get the overall indices for the non numerical axes
   auto sed_indices = axisOverallIndices<PhzDataModel::ModelParameter::SED>(grid_map);
   writer.addComment("SEDs : " + axisIndicesToString(sed_indices));
   auto redcurve_indices = axisOverallIndices<PhzDataModel::ModelParameter::REDDENING_CURVE>(grid_map);
   writer.addComment("RedCurves : " + axisIndicesToString(redcurve_indices));
-  
+
   // Create the column info of the table
-  std::vector<Table::ColumnInfo::info_type> info_list {
-    {"ID", typeid(int)},
-    {"Model_SED", typeid(int)},
-    {"Model_RedCurve", typeid(int)},
-    {"Model_EBV", typeid(float)},
-    {"Model_Z", typeid(float)}
-  };
+  std::vector<Table::ColumnInfo::info_type> info_list{{"ID", typeid(int)},
+                                                      {"Model_SED", typeid(int)},
+                                                      {"Model_RedCurve", typeid(int)},
+                                                      {"Model_EBV", typeid(float)},
+                                                      {"Model_Z", typeid(float)}};
   for (auto& filter : grid_info.filter_names) {
     info_list.emplace_back(filter.datasetName(), typeid(double));
   }
   auto column_info = make_shared<Table::ColumnInfo>(move(info_list));
-  
+
   // Now populate the catalog
-  int id = 0;
-  vector<Table::Row> row_list {};
+  int                id = 0;
+  vector<Table::Row> row_list{};
   for (auto& pair : grid_map) {
     for (auto it = pair.second.begin(); it != pair.second.end(); ++it) {
       ++id;
-      int sed = sed_indices.at(it.axisValue<PhzDataModel::ModelParameter::SED>());
-      int redcurve = redcurve_indices.at(it.axisValue<PhzDataModel::ModelParameter::REDDENING_CURVE>());
-      float ebv = it.axisValue<PhzDataModel::ModelParameter::EBV>();
-      float z = it.axisValue<PhzDataModel::ModelParameter::Z>();
-      std::vector<Table::Row::cell_type> cells {id, sed, redcurve, ebv, z};
+      int   sed      = sed_indices.at(it.axisValue<PhzDataModel::ModelParameter::SED>());
+      int   redcurve = redcurve_indices.at(it.axisValue<PhzDataModel::ModelParameter::REDDENING_CURVE>());
+      float ebv      = it.axisValue<PhzDataModel::ModelParameter::EBV>();
+      float z        = it.axisValue<PhzDataModel::ModelParameter::Z>();
+      std::vector<Table::Row::cell_type> cells{id, sed, redcurve, ebv, z};
       for (auto& filter : grid_info.filter_names) {
         cells.emplace_back(it->find(filter.qualifiedName())->flux);
       }
@@ -222,12 +219,11 @@ void exportAsCatalog(const PhzDataModel::PhotometryGridInfo& grid_info,
       }
     }
   }
-  
+
   writer.addData(Table::Table{row_list});
 
   logger.info() << "Exported model grid in file " << output_name;
 }
-
 
 class DisplayModelGrid : public Elements::Program {
 
@@ -241,10 +237,10 @@ class DisplayModelGrid : public Elements::Program {
 
     auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
     config_manager.initialize(args);
-    
-    auto& conf = config_manager.getConfiguration<PhzCLI::DisplayModelGridConfig>();
+
+    auto& conf      = config_manager.getConfiguration<PhzCLI::DisplayModelGridConfig>();
     auto& grid_info = config_manager.getConfiguration<PhzConfiguration::PhotometryGridConfig>().getPhotometryGridInfo();
-    
+
     cout << '\n';
     if (conf.exportAsCatalog()) {
       auto& grid_map = config_manager.getConfiguration<PhzConfiguration::PhotometryGridConfig>().getPhotometryGrid();
@@ -288,10 +284,8 @@ class DisplayModelGrid : public Elements::Program {
       }
     }
 
-
     return Elements::ExitCode::OK;
   }
-
 };
 
 MAIN_FOR(DisplayModelGrid)

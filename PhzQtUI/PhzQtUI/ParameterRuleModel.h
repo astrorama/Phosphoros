@@ -1,25 +1,24 @@
 #ifndef PARAMETERRULEMODEL_H
 #define PARAMETERRULEMODEL_H
 
-#include <QStandardItemModel>
-#include <vector>
-#include <set>
 #include "ParameterRule.h"
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
+#include <QStandardItemModel>
+#include <set>
+#include <vector>
 
 namespace Euclid {
 namespace PhzQtUI {
 
-typedef std::shared_ptr<
-    PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>>DatasetRepo;
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 /**
  * @class ParameterRuleModel
  * @brief This class provide a Model to be used in TableView.
  * It handle the ParameterRule.
  */
-class ParameterRuleModel: public QStandardItemModel {
+class ParameterRuleModel : public QStandardItemModel {
 public:
   /**
    * @brief Initialise the ParameterRuleModel by copying the 'init_parameter_rules'.
@@ -28,8 +27,8 @@ public:
    * @param sedRootPath
    * @param redRootPath
    */
-  ParameterRuleModel(std::map<int, ParameterRule> init_parameter_rules,
-      DatasetRepo sed_repo, DatasetRepo red_curve_repo);
+  ParameterRuleModel(std::map<int, ParameterRule> init_parameter_rules, DatasetRepo sed_repo,
+                     DatasetRepo red_curve_repo);
 
   /**
    * @briefcheck if the provided new name is already used for
@@ -125,20 +124,19 @@ public:
   const ParameterRule& getRule(int row) const;
 
 private:
-
   std::string getParamName(const ParameterRule& rule) const;
   std::string getSedStatus(const ParameterRule& rule) const;
   std::string getSedGroupName(const ParameterRule& rule) const;
   std::string getRedStatus(const ParameterRule& rule) const;
   std::string getRedGroupName(const ParameterRule& rule) const;
 
-  std::list<QString> getItemsRepresentation(ParameterRule& rule, int id) const;
+  std::list<QString>           getItemsRepresentation(ParameterRule& rule, int id) const;
   std::map<int, ParameterRule> m_parameter_rules;
-  DatasetRepo m_sed_repo;
-  DatasetRepo m_red_curve_repo;
+  DatasetRepo                  m_sed_repo;
+  DatasetRepo                  m_red_curve_repo;
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
-#endif // PARAMETERRULEMODEL_H
+#endif  // PARAMETERRULEMODEL_H

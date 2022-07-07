@@ -1,17 +1,14 @@
-#include <iostream>
-#include <dirent.h>
+#include "PhzQtUI/ModelSetTable.h"
+#include <QHeaderView>
 #include <QMessageBox>
 #include <QStandardItemModel>
-#include <QHeaderView>
-#include "PhzQtUI/ModelSetTable.h"
+#include <dirent.h>
+#include <iostream>
 
 namespace Euclid {
 namespace PhzQtUI {
 
-
-ModelSetTable::ModelSetTable(QWidget*& parent): QTableView(parent){
-
-}
+ModelSetTable::ModelSetTable(QWidget*& parent) : QTableView(parent) {}
 
 void ModelSetTable::load(std::shared_ptr<ModelSetModel> model_set_model_ptr) {
   setModel(model_set_model_ptr.get());
@@ -20,9 +17,7 @@ void ModelSetTable::load(std::shared_ptr<ModelSetModel> model_set_model_ptr) {
   this->setSelectionMode(QAbstractItemView::SingleSelection);
   this->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
   this->update(QModelIndex());
-
 }
 
-
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid

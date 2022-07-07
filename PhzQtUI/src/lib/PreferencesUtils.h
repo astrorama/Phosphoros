@@ -1,11 +1,11 @@
 #ifndef PREFERENCESUTILS_H
 #define PREFERENCESUTILS_H
-#include <QString>
-#include <string>
-#include <map>
-#include <boost/program_options.hpp>
 #include "Configuration/ConfigManager.h"
 #include "PhysicsUtils/CosmologicalParameters.h"
+#include <QString>
+#include <boost/program_options.hpp>
+#include <map>
+#include <string>
 
 /**
  * @brief The PreferencesUtils class
@@ -14,56 +14,51 @@
 namespace Euclid {
 namespace PhzQtUI {
 
-class PreferencesUtils
-{
+class PreferencesUtils {
 public:
   PreferencesUtils();
 
-    /////////////////////////////////////////////////////////
-    //// Preferences
-    static std::map<std::string,std::map<std::string,std::string>> readUserPreferences();
+  /////////////////////////////////////////////////////////
+  //// Preferences
+  static std::map<std::string, std::map<std::string, std::string>> readUserPreferences();
 
-    static void writeUserPreferences(std::map<std::string,std::map<std::string,std::string>> preferences);
+  static void writeUserPreferences(std::map<std::string, std::map<std::string, std::string>> preferences);
 
-    static void setUserPreference(const std::string& catalog, const std::string& key, const std::string& value );
+  static void setUserPreference(const std::string& catalog, const std::string& key, const std::string& value);
 
-    static void clearUserPreference(const std::string& catalog, const std::string& key);
+  static void clearUserPreference(const std::string& catalog, const std::string& key);
 
-    static std::string getUserPreference(const std::string& catalog, const std::string& key);
+  static std::string getUserPreference(const std::string& catalog, const std::string& key);
 
-    static int getThreadNumberOverride();
+  static int getThreadNumberOverride();
 
-    static void setThreadNumberOverride(int value);
+  static void setThreadNumberOverride(int value);
 
-    static double getMaxMemory();
+  static double getMaxMemory();
 
-    static void setMaxMemory(double value);
+  static void setMaxMemory(double value);
 
-    static std::string  getLogLevel();
+  static std::string getLogLevel();
 
-    static void setLogLevel(std::string  value);
+  static void setLogLevel(std::string value);
 
-    static int getBufferSize();
+  static int getBufferSize();
 
-    static int getCappedBufferSize(long models, long sampling);
+  static int getCappedBufferSize(long models, long sampling);
 
-    static void setBufferSize(int value);
+  static void setBufferSize(int value);
 
-    static PhysicsUtils::CosmologicalParameters getCosmologicalParameters();
+  static PhysicsUtils::CosmologicalParameters getCosmologicalParameters();
 
-    static void setCosmologicalParameters(const PhysicsUtils::CosmologicalParameters& parameters);
+  static void setCosmologicalParameters(const PhysicsUtils::CosmologicalParameters& parameters);
 
+  static std::map<std::string, boost::program_options::variable_value> getThreadConfigurations();
 
-    static std::map<std::string, boost::program_options::variable_value> getThreadConfigurations();
+  static std::map<std::string, boost::program_options::variable_value> getLogLevelConfigurations();
 
-    static std::map<std::string, boost::program_options::variable_value> getLogLevelConfigurations();
-
-    static std::map<std::string, boost::program_options::variable_value> getCosmologyConfigurations();
-
-
-
+  static std::map<std::string, boost::program_options::variable_value> getCosmologyConfigurations();
 };
 
-}
-}
-#endif // PREFERENCESUTILS_H
+}  // namespace PhzQtUI
+}  // namespace Euclid
+#endif  // PREFERENCESUTILS_H

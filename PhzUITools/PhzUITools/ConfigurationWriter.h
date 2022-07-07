@@ -8,9 +8,9 @@
 #ifndef CONFIGURATIONWRITER_H_
 #define CONFIGURATIONWRITER_H_
 
-#include<map>
-#include<string>
 #include <boost/program_options.hpp>
+#include <map>
+#include <string>
 namespace po = boost::program_options;
 
 namespace Euclid {
@@ -29,12 +29,8 @@ public:
    *
    * @return true if the opertion succed.
    */
-  static bool writeConfiguration(
-      const std::map<std::string,
-      po::variable_value>& config,
-      std::string file_name);
-
+  static bool writeConfiguration(const std::map<std::string, po::variable_value>& config, std::string file_name);
 };
-}
-}
+}  // namespace PhzUITools
+}  // namespace Euclid
 #endif /* CONFIGURATIONWRITER_H_ */

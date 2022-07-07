@@ -1,14 +1,14 @@
 #ifndef DialogPpPdf_H
 #define DialogPpPdf_H
 
-#include <memory>
-#include <list>
 #include <QDialog>
+#include <QProcess>
+#include <QString>
+#include <QTimer>
+#include <list>
+#include <memory>
 #include <string>
 #include <vector>
-#include <QProcess>
-#include <QTimer>
-#include <QString>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -17,15 +17,13 @@ namespace Ui {
 class DialogPpPdf;
 }
 
-
-class DialogPpPdf: public QDialog {
+class DialogPpPdf : public QDialog {
   Q_OBJECT
 public:
-
   /**
    * @brief Constructor
    */
-  explicit DialogPpPdf(QWidget *parent = 0);
+  explicit DialogPpPdf(QWidget* parent = 0);
 
   /**
    * @brief Destructor
@@ -33,8 +31,6 @@ public:
   ~DialogPpPdf();
 
   void setFolder(std::string result_folder);
-
-
 
 private slots:
 
@@ -48,15 +44,15 @@ private slots:
 
 private:
   std::unique_ptr<Ui::DialogPpPdf> ui;
-  std::string m_result_folder = "";
-  QProcess *m_P;
-  QTimer *m_timer;
-  bool m_configured=false;
-  bool m_processing=false;
-  std::vector<std::string> m_pps{};
+  std::string                      m_result_folder = "";
+  QProcess*                        m_P;
+  QTimer*                          m_timer;
+  bool                             m_configured = false;
+  bool                             m_processing = false;
+  std::vector<std::string>         m_pps{};
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
-#endif // DialogPpPdf_H
+#endif  // DialogPpPdf_H

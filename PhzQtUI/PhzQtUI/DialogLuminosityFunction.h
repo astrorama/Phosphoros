@@ -8,21 +8,20 @@
 #ifndef DialogLUMINOSITYFUNCTION_H_
 #define DialogLUMINOSITYFUNCTION_H_
 
-#include <memory>
+#include "ElementsKernel/Exception.h"
+#include "PhzQtUI/DatasetRepository.h"
+#include "PhzQtUI/LuminosityFunctionInfo.h"
+#include "XYDataset/FileSystemProvider.h"
 #include <QDialog>
 #include <QTimer>
 #include <map>
-#include "ElementsKernel/Exception.h"
-#include "PhzQtUI/LuminosityFunctionInfo.h"
-#include "PhzQtUI/DatasetRepository.h"
-#include "XYDataset/FileSystemProvider.h"
-
+#include <memory>
 
 namespace boost {
 namespace program_options {
 class variable_value;
 }
-}
+}  // namespace boost
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -38,14 +37,14 @@ class DialogLuminosityFunction;
  * @brief This popup allow to specify the Luminosity function, providing
  * Schechter parameters or a custom curve.
  */
-class DialogLuminosityFunction: public QDialog {
+class DialogLuminosityFunction : public QDialog {
   Q_OBJECT
 
 public:
   /**
    * @brief Constructor
    */
-  explicit DialogLuminosityFunction(DatasetRepo luminosity_repository, QWidget *parent = 0);
+  explicit DialogLuminosityFunction(DatasetRepo luminosity_repository, QWidget* parent = 0);
 
   /**
    * @brief Destructor
@@ -64,7 +63,7 @@ public:
    */
   void setInfo(LuminosityFunctionInfo info, size_t x, size_t y);
 
-  signals:
+signals:
   /**
    * @brief SIGNAL Rised when the popup is closing after a save action:
    * return the new luminosity function info and the calling coordinates.
@@ -88,7 +87,6 @@ private slots:
    * SIGNAL popupClosing and close the popup
    */
   void on_btn_save_clicked();
-
 
   void on_btn_tophat_clicked();
 
@@ -118,14 +116,13 @@ private slots:
 
 private:
   std::unique_ptr<Ui::DialogLuminosityFunction> ui;
-  LuminosityFunctionInfo m_FunctionInfo;
-  size_t m_x;
-  size_t m_y;
-  DatasetRepo m_luminosity_repository;
-
+  LuminosityFunctionInfo                        m_FunctionInfo;
+  size_t                                        m_x;
+  size_t                                        m_y;
+  DatasetRepo                                   m_luminosity_repository;
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
 #endif /* DialogLUMINOSITYFUNCTION_H_*/

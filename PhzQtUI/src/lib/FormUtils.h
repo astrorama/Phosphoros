@@ -1,32 +1,27 @@
 #ifndef FORMUTILS_H
 #define FORMUTILS_H
-#include <QString>
 #include <QLocale>
-
+#include <QString>
 
 namespace Euclid {
 namespace PhzQtUI {
 
-class FormUtils
-{
+class FormUtils {
 public:
   FormUtils();
 
-
-    static double parseToDouble(QString string){
-      QLocale locale{};
-      bool ok;
-      double d = locale.toDouble(string, &ok );
-      if(ok) {
-         return d;
-      }
-
-      return 0.;
+  static double parseToDouble(QString string) {
+    QLocale locale{};
+    bool    ok;
+    double  d = locale.toDouble(string, &ok);
+    if (ok) {
+      return d;
     }
 
-
+    return 0.;
+  }
 };
 
-}
-}
-#endif // FORMUTILS_H
+}  // namespace PhzQtUI
+}  // namespace Euclid
+#endif  // FORMUTILS_H

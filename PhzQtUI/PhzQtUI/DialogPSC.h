@@ -1,14 +1,14 @@
 #ifndef DIALOGPSC_H
 #define DIALOGPSC_H
 
-#include <memory>
-#include <list>
 #include <QDialog>
+#include <QProcess>
+#include <QString>
+#include <QTimer>
+#include <list>
+#include <memory>
 #include <string>
 #include <vector>
-#include <QProcess>
-#include <QTimer>
-#include <QString>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -17,21 +17,18 @@ namespace Ui {
 class DialogPSC;
 }
 
-
-class DialogPSC: public QDialog {
+class DialogPSC : public QDialog {
   Q_OBJECT
 public:
-
   /**
    * @brief Constructor
    */
-  explicit DialogPSC(QWidget *parent = 0);
+  explicit DialogPSC(QWidget* parent = 0);
 
   /**
    * @brief Destructor
    */
   ~DialogPSC();
-
 
   void setFolder(std::string output_folder);
   void setDefaultColumn(std::string id_column, std::string zref_column);
@@ -61,23 +58,22 @@ private slots:
 
 private:
   std::unique_ptr<Ui::DialogPSC> ui;
-  std::string m_folder;
-  std::string m_catalog;
-  std::string m_id_column;
-  std::string m_z_ref_column;
+  std::string                    m_folder;
+  std::string                    m_catalog;
+  std::string                    m_id_column;
+  std::string                    m_z_ref_column;
 
-  const std::list<std::string>  m_list_columns_ok = {"MEDIAN", "PHZ_MODE_1_SAMP",
-      "PHZ_MODE_1_MEAN", "PHZ_MODE_1_FIT", "PHZ_MODE_2_SAMP", "PHZ_MODE_2_MEAN", "PHZ_MODE_2_FIT"};
+  const std::list<std::string> m_list_columns_ok = {"MEDIAN",         "PHZ_MODE_1_SAMP", "PHZ_MODE_1_MEAN",
+                                                    "PHZ_MODE_1_FIT", "PHZ_MODE_2_SAMP", "PHZ_MODE_2_MEAN",
+                                                    "PHZ_MODE_2_FIT"};
 
-  QProcess *m_P;
-  QTimer *m_timer;
-  bool m_processing=false;
-  void setCatalogFile(QString path);
-
-
+  QProcess* m_P;
+  QTimer*   m_timer;
+  bool      m_processing = false;
+  void      setCatalogFile(QString path);
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
-#endif // DIALOGPSC_H
+#endif  // DIALOGPSC_H

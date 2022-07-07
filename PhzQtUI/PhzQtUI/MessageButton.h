@@ -8,24 +8,22 @@
 #ifndef PHZQTUI_PHZQTUI_MESSAGEBUTTON_H_
 #define PHZQTUI_PHZQTUI_MESSAGEBUTTON_H_
 
-#include <QString>
-#include <QWidget>
 #include <QPushButton>
+#include <QString>
 #include <QToolBox>
+#include <QWidget>
 
 namespace Euclid {
 namespace PhzQtUI {
 
-
 class MessageButton : public QPushButton {
   Q_OBJECT
 public:
-  MessageButton(const QString& message, const QString &text, QWidget *parent=0) ;
+  MessageButton(const QString& message, const QString& text, QWidget* parent = 0);
 
+  virtual ~MessageButton() = default;
 
-  virtual ~MessageButton()=default;
-
-  signals:
+signals:
   void MessageButtonClicked(const QString&);
 
 private slots:
@@ -35,8 +33,7 @@ private:
   QString m_message;
 };
 
-}
-}
-
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
 #endif /* PHZQTUI_PHZQTUI_MESSAGEBUTTON_H_ */

@@ -1,8 +1,8 @@
 #ifndef PHZQTUI_DATASETSELECTION
 #define PHZQTUI_DATASETSELECTION
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -13,11 +13,8 @@ namespace PhzQtUI {
  * groups but not selected itself and the selected items which do not belong
  * to any group.
  */
-class DatasetSelection
-{
+class DatasetSelection {
 public:
-
-
   /**
    * @brief Set the selected groups
    * @param groups A vector of string containing the (full) name of the groups.
@@ -69,14 +66,14 @@ public:
   bool hasMultipleGroups() const;
 
   std::string getBaseGroupName() const;
+
 private:
   std::vector<std::string> m_groupes;
   std::vector<std::string> m_isolated;
   std::vector<std::string> m_exclusions;
-
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
-#endif // PHZQTUI_DATASETSELECTION
+#endif  // PHZQTUI_DATASETSELECTION

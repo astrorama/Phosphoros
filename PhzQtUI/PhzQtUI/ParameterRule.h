@@ -1,26 +1,25 @@
 #ifndef PARAMETERRULE_H
 #define PARAMETERRULE_H
 
-#include <string>
-#include <vector>
-#include <set>
-#include <map>
-#include "Range.h"
 #include "DatasetSelection.h"
 #include "PhzQtUI/DatasetRepository.h"
+#include "Range.h"
 #include "XYDataset/FileSystemProvider.h"
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
 
 namespace boost {
 namespace program_options {
 class variable_value;
 }
-}
+}  // namespace boost
 
 namespace Euclid {
 namespace PhzQtUI {
 
-typedef std::shared_ptr<
-    PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>>DatasetRepo;
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 /**
  * @class ParameterRule
@@ -53,8 +52,7 @@ public:
    * @brief get Reddening Curves Number
    * @return the cardinality of selected Reddening Curves in the the ParameterRule
    */
-  std::pair<long, long> getRedCurveNumber(
-      DatasetRepo redenig_curves_repository) const;
+  std::pair<long, long> getRedCurveNumber(DatasetRepo redenig_curves_repository) const;
 
   std::string getRedCurveGroupName() const;
 
@@ -133,8 +131,7 @@ public:
    */
   void setZRanges(std::vector<Range> z_ranges);
 
-  std::map<std::string, boost::program_options::variable_value> getConfigOptions(
-      std::string region) const;
+  std::map<std::string, boost::program_options::variable_value> getConfigOptions(std::string region) const;
 
   void setRedCurveSelection(DatasetSelection red_curve_selection);
   void setSedSelection(DatasetSelection sed_selection);
@@ -145,18 +142,17 @@ public:
   static std::set<double> parseValueList(const std::string& list);
 
 private:
-  std::pair<long, long> getSelectionNumbers(DatasetSelection selection,
-      DatasetRepo repository) const;
-  std::string getAxisStringValue(std::vector<double> axis) const;
-  std::string getStringValueList(const std::set<double>& list) const;
+  std::pair<long, long> getSelectionNumbers(DatasetSelection selection, DatasetRepo repository) const;
+  std::string           getAxisStringValue(std::vector<double> axis) const;
+  std::string           getStringValueList(const std::set<double>& list) const;
 
   std::string m_name;
 
-  std::set<double> m_ebv_values { };
-  std::set<double> m_redshift_values { };
+  std::set<double> m_ebv_values{};
+  std::set<double> m_redshift_values{};
 
-  std::vector<Range> m_ebv_ranges { };
-  std::vector<Range> m_redshift_ranges { };
+  std::vector<Range> m_ebv_ranges{};
+  std::vector<Range> m_redshift_ranges{};
 
   long long m_model_number = -1;
 
@@ -164,6 +160,6 @@ private:
   DatasetSelection m_sed_selection;
 };
 
-}
-}
-#endif // PARAMETERRULE_H
+}  // namespace PhzQtUI
+}  // namespace Euclid
+#endif  // PARAMETERRULE_H

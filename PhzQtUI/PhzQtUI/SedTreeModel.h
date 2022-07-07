@@ -1,17 +1,17 @@
 #ifndef PHZQTUI_SEDTREEMODEL_H
 #define PHZQTUI_SEDTREEMODEL_H
 
-#include <QString>
-#include <QStandardItemModel>
 #include "PhzQtUI/DatasetRepository.h"
 #include "PhzQtUI/DatasetSelection.h"
 #include "XYDataset/FileSystemProvider.h"
 #include "XYDataset/QualifiedName.h"
+#include <QStandardItemModel>
+#include <QString>
 
 namespace Euclid {
 namespace PhzQtUI {
 
-typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>>DatasetRepo;
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 /**
  * @class DataSetTreeModel
@@ -21,7 +21,7 @@ typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::Fi
  * selection. The selection state is set and retrieve using a DatasetSelection
  * object.
  */
-class SedTreeModel: public QStandardItemModel {
+class SedTreeModel : public QStandardItemModel {
   Q_OBJECT
 public:
   /**
@@ -31,14 +31,13 @@ public:
    * structure to be displayed
    * @param parent the parent QObject
    */
-  explicit SedTreeModel(DatasetRepo repository, QObject *parent = 0);
-
+  explicit SedTreeModel(DatasetRepo repository, QObject* parent = 0);
 
   /**
    * @brief Read the provided repository and create the items needed to
    * represent it. To be called once.
    */
-  void load(bool selectable=true, bool onlyLeaves=false);
+  void load(bool selectable = true, bool onlyLeaves = false);
 
   /**
    * @brief Turn the model Enabled (In edition: the user can check/uncheck
@@ -53,7 +52,6 @@ public:
    */
   void setState(const DatasetSelection& selection);
 
-
   void setState(const std::vector<std::string>& selected_leaves);
 
   /**
@@ -66,10 +64,9 @@ public:
 
   bool hasLeave() const;
 
-
-  bool canOpenInfo(QStandardItem* item) const;
-  bool canAddEmissionLineToGroup(QStandardItem* item) const;
-  bool canAddLpEmissionLineToGroup(QStandardItem* item) const;
+  bool    canOpenInfo(QStandardItem* item) const;
+  bool    canAddEmissionLineToGroup(QStandardItem* item) const;
+  bool    canAddLpEmissionLineToGroup(QStandardItem* item) const;
   QString getFullGroupName(QStandardItem* item) const;
 
 public slots:
@@ -80,7 +77,6 @@ public slots:
   void onItemChangedSingleLeaf(QStandardItem*);
 
 private:
-
   /**
    * @brief Get the name of the enclosing group
    * @param qualified_name The name of the item.
@@ -98,7 +94,6 @@ private:
    */
   void checkGroup(XYDataset::QualifiedName name);
 
-
   /**
    * @brief look for a group which is the direct parent of the provided child,
    * mark it as partially checked
@@ -112,13 +107,12 @@ private:
    */
   void setEditionStatus(bool inEdition);
 
-  bool m_in_edition = false;
-  bool m_bypass = false;
+  bool                                  m_in_edition = false;
+  bool                                  m_bypass     = false;
   std::map<std::string, QStandardItem*> m_map_dir;
-  DatasetRepo m_repository;
-
+  DatasetRepo                           m_repository;
 };
 
-}
-}
-#endif // PHZQTUI_SEDTREEMODEL_H
+}  // namespace PhzQtUI
+}  // namespace Euclid
+#endif  // PHZQTUI_SEDTREEMODEL_H

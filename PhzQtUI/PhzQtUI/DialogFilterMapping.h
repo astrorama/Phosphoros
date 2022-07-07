@@ -1,18 +1,17 @@
 #ifndef DIALOGFILTERMAPPING_H
 #define DIALOGFILTERMAPPING_H
 
-#include <set>
-#include <string>
-#include <vector>
-#include <memory>
-#include <QDialog>
 #include "FilterMapping.h"
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
+#include <QDialog>
+#include <memory>
+#include <set>
+#include <string>
+#include <vector>
 
 namespace Euclid {
 namespace PhzQtUI {
-
 
 typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
@@ -25,14 +24,14 @@ class DialogFilterMapping;
  * @brief This popup allows the user to select the filters to be mapped
  * in the calling form. It instanciate and access directly the filters provider.
  */
-class DialogFilterMapping: public QDialog {
+class DialogFilterMapping : public QDialog {
   Q_OBJECT
 
 public:
   /**
    * @brief Constructor
    */
-  explicit DialogFilterMapping(DatasetRepo filter_repository, QWidget *parent = 0);
+  explicit DialogFilterMapping(DatasetRepo filter_repository, QWidget* parent = 0);
 
   /**
    * @brief Destructor
@@ -47,13 +46,13 @@ public:
    */
   void setFilters(const std::vector<std::string>& filters);
 
-  signals:
+signals:
   /**
    * @brief SIGNAL popupClosing: rised when the FilterMapping is saved and
    * the popup close.
    * The argument is the vector of selected filters.
    */
-  void popupClosing( std::vector<std::string>);
+  void popupClosing(std::vector<std::string>);
 
 private slots:
   /**
@@ -69,10 +68,10 @@ private slots:
 
 private:
   std::unique_ptr<Ui::DialogFilterMapping> ui;
-  DatasetRepo m_filter_repository;
+  DatasetRepo                              m_filter_repository;
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
-#endif // DIALOGFILTERMAPPING_H
+#endif  // DIALOGFILTERMAPPING_H

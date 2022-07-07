@@ -8,18 +8,18 @@
 #ifndef DIALOGGRIDGENERATION_H_
 #define DIALOGGRIDGENERATION_H_
 
-#include <memory>
+#include "ElementsKernel/Exception.h"
 #include <QDialog>
 #include <QFutureWatcher>
 #include <QTimer>
-#include "ElementsKernel/Exception.h"
 #include <map>
+#include <memory>
 
 namespace boost {
 namespace program_options {
 class variable_value;
 }
-}
+}  // namespace boost
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -32,14 +32,14 @@ class DialogGridGeneration;
  * @class DialogGridGeneration
  * @brief This popup show the progress-bar during grid computation.
  */
-class DialogGridGeneration: public QDialog {
+class DialogGridGeneration : public QDialog {
   Q_OBJECT
 
 public:
   /**
    * @brief Constructor
    */
-  explicit DialogGridGeneration(QWidget *parent = 0);
+  explicit DialogGridGeneration(QWidget* parent = 0);
 
   /**
    * @brief Destructor
@@ -76,7 +76,7 @@ private slots:
    */
   void on_btn_cancel_clicked();
 
-  signals:
+signals:
 
   /**
    * @brief SIGNAL Update the progress bar.
@@ -84,15 +84,13 @@ private slots:
   void signalUpdateBar(int);
 
 private:
-
-  QFutureWatcher<std::string> m_future_watcher { };
+  QFutureWatcher<std::string>                                   m_future_watcher{};
   std::map<std::string, boost::program_options::variable_value> m_config;
-  std::unique_ptr<Ui::DialogGridGeneration> ui;
-  std::unique_ptr<QTimer> m_timer;
-
+  std::unique_ptr<Ui::DialogGridGeneration>                     ui;
+  std::unique_ptr<QTimer>                                       m_timer;
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
 #endif /* DIALOGGRIDGENERATION_H_ */

@@ -8,25 +8,23 @@
 #ifndef PHZQTUI_PHZQTUI_GRIDBUTTON_H_
 #define PHZQTUI_PHZQTUI_GRIDBUTTON_H_
 
-#include <QString>
-#include <QWidget>
 #include <QPushButton>
+#include <QString>
 #include <QToolBox>
+#include <QWidget>
 
 namespace Euclid {
 namespace PhzQtUI {
 
-
 class GridButton : public QPushButton {
   Q_OBJECT
 public:
-  GridButton(size_t x, size_t y, const QString &text, QWidget *parent=0) ;
+  GridButton(size_t x, size_t y, const QString& text, QWidget* parent = 0);
 
+  virtual ~GridButton() = default;
 
-  virtual ~GridButton()=default;
-
-  signals:
-  void GridButtonClicked(size_t,size_t);
+signals:
+  void GridButtonClicked(size_t, size_t);
 
 private slots:
   void recievClicked();
@@ -36,8 +34,7 @@ private:
   size_t m_y;
 };
 
-}
-}
-
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
 #endif /* PHZQTUI_PHZQTUI_GRIDBUTTON_H_ */

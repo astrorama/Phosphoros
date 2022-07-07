@@ -1,14 +1,14 @@
 #ifndef DialogResid_H
 #define DialogResid_H
 
-#include <memory>
-#include <list>
 #include <QDialog>
+#include <QProcess>
+#include <QString>
+#include <QTimer>
+#include <list>
+#include <memory>
 #include <string>
 #include <vector>
-#include <QProcess>
-#include <QTimer>
-#include <QString>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -17,21 +17,18 @@ namespace Ui {
 class DialogResid;
 }
 
-
-class DialogResid: public QDialog {
+class DialogResid : public QDialog {
   Q_OBJECT
 public:
-
   /**
    * @brief Constructor
    */
-  explicit DialogResid(QWidget *parent = 0);
+  explicit DialogResid(QWidget* parent = 0);
 
   /**
    * @brief Destructor
    */
   ~DialogResid();
-
 
   void setFolder(std::string output_folder);
 
@@ -52,14 +49,14 @@ private slots:
 
 private:
   std::unique_ptr<Ui::DialogResid> ui;
-  std::string m_folder;
+  std::string                      m_folder;
 
-  QProcess *m_P;
-  QTimer *m_timer;
-  bool m_processing=false;
+  QProcess* m_P;
+  QTimer*   m_timer;
+  bool      m_processing = false;
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
-#endif // DialogResid_H
+#endif  // DialogResid_H
