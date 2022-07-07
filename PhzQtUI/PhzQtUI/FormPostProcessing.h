@@ -6,8 +6,6 @@
 #include <QModelIndex>
 #include "ParameterRule.h"
 #include "PhzQtUI/SurveyModel.h"
-#include "PhzQtUI/DatasetRepository.h"
-#include "XYDataset/FileSystemProvider.h"
 
 
 namespace Euclid {
@@ -63,6 +61,7 @@ void on_cb_catalog_currentIndexChanged(const QString &);
 void computePdfStat(int);
 void plotZVsZref(int);
 void plotResiduals(int);
+void computePpPdf(int);
 
 
 private:

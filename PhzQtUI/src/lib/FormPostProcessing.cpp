@@ -2,6 +2,7 @@
 #include <QSignalMapper>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QFileInfo>
 #include "PhzQtUI/FormPostProcessing.h"
 
 #include "PhzQtUI/ResultModel.h"
@@ -9,6 +10,7 @@
 #include "PhzQtUI/DialogPOP.h"
 #include "PhzQtUI/DialogPSC.h"
 #include "PhzQtUI/DialogResid.h"
+#include "PhzQtUI/DialogPpPdf.h"
 #include "ui_FormPostProcessing.h"
 #include "FileUtils.h"
 
@@ -100,23 +102,35 @@ void FormPostProcessing::updateSelection(bool force_reload_cb){
   QSignalMapper *signalMapper_one = new QSignalMapper(this);
   QSignalMapper *signalMapper_two = new QSignalMapper(this);
   QSignalMapper *signalMapper_three = new QSignalMapper(this);
+  QSignalMapper *signalMapper_pp = new QSignalMapper(this);
+
 
   for( int i=0; i<ui->table_res_file->model()->rowCount(); i++ ) {
+	  QString res_folder = ui->table_res_file->model()->index(i, 0).data().toString();
+	  std::string pathPpConf = FileUtils::getResultRootPath(false, m_survey_model_ptr->getSelectedSurvey().getName(), res_folder.toStdString()+"/PhysicalParameterConfig.fits");
+	  std::string pathFileIndex = FileUtils::getResultRootPath(false, m_survey_model_ptr->getSelectedSurvey().getName(), res_folder.toStdString()+"/posteriors/Index_File_posterior.fits");
+
+	  bool has_pp = QFileInfo::exists(QString::fromStdString(pathPpConf)) and QFileInfo::exists(QString::fromStdString(pathFileIndex));
+
+	  logger.info() <<res_folder.toStdString()<<" "<<pathPpConf<<" "<<pathFileIndex<<" "<<has_pp;
 
       //make new button for this row
       QModelIndex index = ui->table_res_file->model()->index(i, 1);
 
       QWidget *widget = new QWidget();
       QHBoxLayout *layout = new QHBoxLayout;
-      QPushButton *button1 = new QPushButton("PDF stat");
+      QPushButton *button1 = new QPushButton("PDZ stat");
 
       QPushButton *button2 = new QPushButton("Residuals");
+      QPushButton *buttonPP = new QPushButton("PP PDF");
       QPushButton *button3 = new QPushButton("Plots");
       layout->addWidget(button1);
       layout->addWidget(button2);
+
+      if(has_pp) {
+    	  layout->addWidget(buttonPP);
+      }
       layout->addWidget(button3);
-
-
 
       widget->setLayout(layout);
 
@@ -128,6 +142,11 @@ void FormPostProcessing::updateSelection(bool force_reload_cb){
       signalMapper_two->setMapping(button2, i);
       connect(button2, SIGNAL(clicked(bool)), signalMapper_two, SLOT(map()));
 
+      if(has_pp) {
+    	  signalMapper_pp->setMapping(buttonPP, i);
+    	  connect(buttonPP, SIGNAL(clicked(bool)), signalMapper_pp, SLOT(map()));
+      }
+
       signalMapper_three->setMapping(button3, i);
       connect(button3, SIGNAL(clicked(bool)), signalMapper_three, SLOT(map()));
   }
@@ -135,6 +154,7 @@ void FormPostProcessing::updateSelection(bool force_reload_cb){
   connect(signalMapper_one, SIGNAL(mapped(int)), this, SLOT(computePdfStat(int)));
   connect(signalMapper_two, SIGNAL(mapped(int)), this, SLOT(plotResiduals(int)));
   connect(signalMapper_three, SIGNAL(mapped(int)), this, SLOT(plotZVsZref(int)));
+  connect(signalMapper_pp, SIGNAL(mapped(int)), this, SLOT(computePpPdf(int)));
 
 
 }
@@ -156,9 +176,7 @@ void FormPostProcessing::computePdfStat(int row){
   auto folder = ui->table_res_file->model()->data(ui->table_res_file->model()->index(row,2)).toString().toStdString();
   std::unique_ptr<DialogPOP> dialog(new DialogPOP());
   dialog->setFolder(folder);
-  if (dialog->exec()) {
-
-  }
+  dialog->exec();
 }
 
 void FormPostProcessing::plotZVsZref(int row){
@@ -166,18 +184,23 @@ void FormPostProcessing::plotZVsZref(int row){
     std::unique_ptr<DialogPSC> dialog(new DialogPSC());
     dialog->setDefaultColumn(m_survey_model_ptr->getSelectedSurvey().getSourceIdColumn(), m_survey_model_ptr->getSelectedSurvey().getRefZColumn());
     dialog->setFolder(folder);
-    if (dialog->exec()) {
-
-    }
+    dialog->exec();
 }
 
 void FormPostProcessing::plotResiduals(int row) {
     auto folder = ui->table_res_file->model()->data(ui->table_res_file->model()->index(row,2)).toString().toStdString();
     std::unique_ptr<DialogResid> dialog(new DialogResid());
     dialog->setFolder(folder);
-    if (dialog->exec()) {
+    dialog->exec();
+}
 
-    }
+
+void FormPostProcessing::computePpPdf(int row) {
+	auto folder = ui->table_res_file->model()->data(ui->table_res_file->model()->index(row,2)).toString().toStdString();
+	std::unique_ptr<DialogPpPdf> dialog(new DialogPpPdf());
+	dialog->setFolder(folder);
+	dialog->exec();
+
 }
 
 

@@ -71,6 +71,8 @@ action_list = [
                      'Build the Physical Parameter config allowing the redshift computation to output them.'),
     PhosphorosAction(['interpolate_seds', 'IS'], 'InterpolateSED',
                      'Create SEDs interpolated between existing SEDs.'),
+    PhosphorosAction(['extract_pp_pdf', 'EPP'], 'PhosphorosExtractPpPdf',
+                     'Extract 1d/2d pp pdf from the sampling of the full pdf.'),
     
 ]
 
