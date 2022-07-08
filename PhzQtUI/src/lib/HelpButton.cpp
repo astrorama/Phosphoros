@@ -12,19 +12,17 @@
 namespace Euclid {
 namespace PhzQtUI {
 
-HelpButton::HelpButton(QWidget *parent) : QPushButton(parent){
-    QObject::connect( this, SIGNAL(clicked()), this,SLOT(recievClicked()));
-  }
-
-HelpButton::HelpButton( const QString &text, QWidget *parent) : QPushButton(text,parent){
-    QObject::connect( this, SIGNAL(clicked()), this,SLOT(recievClicked()));
-  }
-
-  void HelpButton::recievClicked(){
-    QDesktopServices::openUrl(QUrl(whatsThis()) );
-  }
-
-
-
+HelpButton::HelpButton(QWidget* parent) : QPushButton(parent) {
+  QObject::connect(this, SIGNAL(clicked()), this, SLOT(recievClicked()));
 }
+
+HelpButton::HelpButton(const QString& text, QWidget* parent) : QPushButton(text, parent) {
+  QObject::connect(this, SIGNAL(clicked()), this, SLOT(recievClicked()));
 }
+
+void HelpButton::recievClicked() {
+  QDesktopServices::openUrl(QUrl(whatsThis()));
+}
+
+}  // namespace PhzQtUI
+}  // namespace Euclid

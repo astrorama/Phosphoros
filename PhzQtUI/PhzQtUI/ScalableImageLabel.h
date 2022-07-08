@@ -5,13 +5,12 @@
  *      Author: fdubath
  */
 
-
 #ifndef SCALABLEIMAGELABEL_H_
 #define SCALABLEIMAGELABEL_H_
 
-#include <QWidget>
-#include <QPixmap>
 #include <QPaintEvent>
+#include <QPixmap>
+#include <QWidget>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -20,27 +19,26 @@ namespace PhzQtUI {
  * @class ScalableImageLabel
  * @brief Widget displaying an image and adjusting its size to its parent
  */
-class ScalableImageLabel : public QWidget
-{
-    Q_OBJECT
+class ScalableImageLabel : public QWidget {
+  Q_OBJECT
 
 public:
-    explicit ScalableImageLabel(QWidget *parent = 0);
+  explicit ScalableImageLabel(QWidget* parent = 0);
 
-    const QPixmap* pixmap() const;
+  const QPixmap* pixmap() const;
 
-    void setTopMargin(int margin);
+  void setTopMargin(int margin);
 
-    void setPixmap(const QPixmap&);
+  void setPixmap(const QPixmap&);
 
 protected:
-    void paintEvent(QPaintEvent *) override;
+  void paintEvent(QPaintEvent*) override;
 
 private:
-    QPixmap pix;
-    int m_top_margin=0;
+  QPixmap pix;
+  int     m_top_margin = 0;
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 #endif /* SCALABLEIMAGELABEL_H_ */

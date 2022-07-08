@@ -1,20 +1,20 @@
-/*  
- * Copyright (C) 2012-2020 Euclid Science Ground Segment    
- *  
+/*
+ * Copyright (C) 2012-2020 Euclid Science Ground Segment
+ *
  * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free 
- * Software Foundation; either version 3.0 of the License, or (at your option)  
- * any later version.  
- *  
- * This library is distributed in the hope that it will be useful, but WITHOUT 
+ * the terms of the GNU Lesser General Public License as published by the Free
+ * Software Foundation; either version 3.0 of the License, or (at your option)
+ * any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more  
- * details.  
- *  
- * You should have received a copy of the GNU Lesser General Public License 
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
  * along with this library; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA  
- */  
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 /**
  * @file PhzCLI/LsAuxDirConfig.h
@@ -42,7 +42,6 @@ namespace PhzCLI {
 class LsAuxDirConfig : public Configuration::Configuration {
 
 public:
-
   /// Constructor
   LsAuxDirConfig(long manager_id);
 
@@ -65,20 +64,27 @@ public:
   /// Initializes
   void initialize(const UserValues& args) override;
 
-  std::shared_ptr<XYDataset::XYDatasetProvider> getDatasetProvider() { return m_provider; }
+  std::shared_ptr<XYDataset::XYDatasetProvider> getDatasetProvider() {
+    return m_provider;
+  }
 
-  const std::string& getGroup() const { return m_group; }
+  const std::string& getGroup() const {
+    return m_group;
+  }
 
-  const std::string& getDatasetToShow() const { return m_dataset_to_show; }
+  const std::string& getDatasetToShow() const {
+    return m_dataset_to_show;
+  }
 
-  const bool& showData() const { return m_show_data;}
+  const bool& showData() const {
+    return m_show_data;
+  }
 
 private:
-
   std::shared_ptr<XYDataset::XYDatasetProvider> m_provider;
-  std::string m_group;
-  std::string m_dataset_to_show;
-  bool        m_show_data {false};
+  std::string                                   m_group;
+  std::string                                   m_dataset_to_show;
+  bool                                          m_show_data{false};
 
 }; /* End of LsAuxDirConfig class */
 

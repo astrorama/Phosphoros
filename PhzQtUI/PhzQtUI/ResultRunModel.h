@@ -8,31 +8,24 @@
 #ifndef PHZQTUI_PHZQTUI_RESULTRUNMODEL_H_
 #define PHZQTUI_PHZQTUI_RESULTRUNMODEL_H_
 
-#include <QString>
 #include <QStandardItemModel>
+#include <QString>
 #include <map>
-#include <vector>
 #include <set>
 #include <string>
+#include <vector>
 
 namespace Euclid {
 namespace PhzQtUI {
 
-
-
-class ResultRunModel: public QStandardItemModel {
+class ResultRunModel : public QStandardItemModel {
   Q_OBJECT
 public:
   ResultRunModel();
   void load(std::string catalog_result_folder);
-
-
-
 };
 
-}
-}
-
-
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
 #endif /* PHZQTUI_PHZQTUI_RESULTRUNMODEL_H_ */

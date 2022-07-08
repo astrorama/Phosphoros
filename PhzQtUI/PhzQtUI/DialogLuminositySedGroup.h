@@ -8,19 +8,19 @@
 #ifndef DIALOGLUMINOSITYSEDGROUP_H_
 #define DIALOGLUMINOSITYSEDGROUP_H_
 
-#include <vector>
-#include <memory>
+#include "ElementsKernel/Exception.h"
+#include "PhzQtUI/LuminosityPriorConfig.h"
 #include <QDialog>
 #include <QVBoxLayout>
 #include <map>
-#include "ElementsKernel/Exception.h"
-#include "PhzQtUI/LuminosityPriorConfig.h"
+#include <memory>
+#include <vector>
 
 namespace boost {
 namespace program_options {
 class variable_value;
 }
-}
+}  // namespace boost
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -33,14 +33,14 @@ class DialogLuminositySedGroup;
  * @class DialogLuminositySedGroup
  * @brief This popup allows to define and manage the SED groups.
  */
-class DialogLuminositySedGroup: public QDialog {
+class DialogLuminositySedGroup : public QDialog {
   Q_OBJECT
 
 public:
   /**
    * @brief Constructor
    */
-  explicit DialogLuminositySedGroup(QWidget *parent = 0);
+  explicit DialogLuminositySedGroup(QWidget* parent = 0);
 
   /**
    * @brief Destructor
@@ -60,10 +60,9 @@ public:
    * @param new_seds
    * SEDs not present in the config to be added
    */
-  void setDiff(std::vector<std::string> missing_seds,
-      std::vector<std::string> new_seds);
+  void setDiff(std::vector<std::string> missing_seds, std::vector<std::string> new_seds);
 
-  signals:
+signals:
   /**
    * @brief SIGNAL popupClosing Called when the popup is closing
    * @param groups A vector of SedGroup containings the new groups
@@ -92,14 +91,13 @@ private slots:
   void onDeleteGroupClicked(size_t sed_group_id, size_t);
 
 private:
-  void readNewGroups();
-  void addGroup(LuminosityPriorConfig::SedGroup group, size_t i, size_t i_max);
+  void                                          readNewGroups();
+  void                                          addGroup(LuminosityPriorConfig::SedGroup group, size_t i, size_t i_max);
   std::unique_ptr<Ui::DialogLuminositySedGroup> ui;
-  std::vector<LuminosityPriorConfig::SedGroup> m_groups;
-
+  std::vector<LuminosityPriorConfig::SedGroup>  m_groups;
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
 #endif /* DIALOGLUMINOSITYSEDGROUP_H_*/

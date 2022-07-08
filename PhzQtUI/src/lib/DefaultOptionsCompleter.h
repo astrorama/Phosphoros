@@ -25,44 +25,41 @@
 #ifndef _DEFAULTOPTIONSCOMPLETER_H_
 #define _DEFAULTOPTIONSCOMPLETER_H_
 
-#include <map>
-#include <string>
-#include <chrono>
-#include <boost//program_options.hpp>
 #include "Configuration/ConfigManager.h"
-#include "ElementsKernel/Logging.h"
 #include "Configuration/Utils.h"
 #include "ElementsKernel/Logging.h"
+#include <boost/program_options.hpp>
+#include <chrono>
+#include <map>
+#include <string>
 
 namespace Euclid {
 namespace PhzQtUI {
 
-//static Elements::Logging logger_dbg = Elements::Logging::getLogger("completeWithDefaults");
+// static Elements::Logging logger_dbg = Elements::Logging::getLogger("completeWithDefaults");
 
 template <typename T>
 static void completeWithDefaults(std::map<std::string, boost::program_options::variable_value>& options_map) {
-  long config_manager_id = Configuration::getUniqueManagerId();
-  auto& config_manager = Configuration::ConfigManager::getInstance(config_manager_id);
+  long  config_manager_id = Configuration::getUniqueManagerId();
+  auto& config_manager    = Configuration::ConfigManager::getInstance(config_manager_id);
   config_manager.template registerConfiguration<T>();
   auto options_desc = config_manager.closeRegistration();
 
-  boost::program_options::variables_map default_options {};
+  boost::program_options::variables_map default_options{};
   boost::program_options::store(
-        boost::program_options::command_line_parser({}).options(options_desc).allow_unregistered().run(),
-        default_options
-  );
+      boost::program_options::command_line_parser({}).options(options_desc).allow_unregistered().run(),
+      default_options);
 
- // logger_dbg.info() << "Completing " ;
+  // logger_dbg.info() << "Completing " ;
   for (auto& pair : default_options) {
     if (options_map.count(pair.first) == 0) {
-      //logger_dbg.info() << pair.first << " - " ;
+      // logger_dbg.info() << pair.first << " - " ;
       options_map.emplace(pair);
     }
   }
 }
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
 #endif /* _DEFAULTOPTIONSCOMPLETER_H_ */
-

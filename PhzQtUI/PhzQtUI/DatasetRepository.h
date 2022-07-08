@@ -1,10 +1,9 @@
 #ifndef PHZQTUI_DATASETREPOSITORY
 #define PHZQTUI_DATASETREPOSITORY
 
-#include <vector>
-#include <memory>
 #include "XYDataset/QualifiedName.h"
-
+#include <memory>
+#include <vector>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -16,18 +15,15 @@ namespace PhzQtUI {
  * a (costly) access to the underlying storage every time the content
  * of the provider is requested.
  */
-template<class T>
-class DatasetRepository
-{
+template <class T>
+class DatasetRepository {
 public:
   /**
    * @brief constructor
    * @param provider
    * The XYDatasetProvider to be moved into the DatasetRepository.
    */
-  DatasetRepository(T provider) :
-      m_provider(std::move(provider)) {
-  }
+  DatasetRepository(T provider) : m_provider(std::move(provider)) {}
 
   /**
    * @brief Flush the data and reload them from the provider.
@@ -56,16 +52,16 @@ public:
    * @brief Get the (cached copy of the) content of the provider.
    * @return A vector of qualified name representing the provider content.
    */
-  const std::vector<XYDataset::QualifiedName> & getContent() const {
+  const std::vector<XYDataset::QualifiedName>& getContent() const {
     return m_content;
   }
 
 private:
-  T m_provider;
+  T                                     m_provider;
   std::vector<XYDataset::QualifiedName> m_content;
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
-#endif // PHZQTUI_DATASETREPOSITORY
+#endif  // PHZQTUI_DATASETREPOSITORY

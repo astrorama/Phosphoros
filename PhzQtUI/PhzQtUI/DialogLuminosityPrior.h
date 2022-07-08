@@ -8,26 +8,26 @@
 #ifndef DIALOGLUMINOSITYPRIOR_H_
 #define DIALOGLUMINOSITYPRIOR_H_
 
-#include <memory>
 #include <QDialog>
+#include <QModelIndex>
 #include <QTimer>
 #include <map>
-#include <QModelIndex>
+#include <memory>
 
 #include "ElementsKernel/Exception.h"
 #include "PhzQtUI/LuminosityFunctionInfo.h"
 
-#include "PhzQtUI/LuminosityPriorConfig.h"
-#include "PhzQtUI/GridButton.h"
 #include "ModelSet.h"
 #include "PhzQtUI/DatasetRepository.h"
+#include "PhzQtUI/GridButton.h"
+#include "PhzQtUI/LuminosityPriorConfig.h"
 #include "XYDataset/FileSystemProvider.h"
 
-namespace boost{
-namespace program_options{
- class variable_value;
+namespace boost {
+namespace program_options {
+class variable_value;
 }
-}
+}  // namespace boost
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -42,14 +42,14 @@ class DialogLuminosityPrior;
  * @class DialogLuminosityPrior
  * @brief This popup Allows to create and configure Luminosity priors.
  */
-class DialogLuminosityPrior : public QDialog{
+class DialogLuminosityPrior : public QDialog {
   Q_OBJECT
 
 public:
   /**
    * @brief Constructor
    */
-  explicit DialogLuminosityPrior(std::string filter ,DatasetRepo luminosity_repository, QWidget *parent = 0);
+  explicit DialogLuminosityPrior(std::string filter, DatasetRepo luminosity_repository, QWidget* parent = 0);
   /**
    * @brief Destructor
    */
@@ -64,38 +64,36 @@ public:
    * @param z_max The maximal value of the redshift (also contained in the model)
    *
    */
-  void loadData(ModelSet model, std::string survey_name,
-      std::string model_grid, double z_min,
-      double z_max);
+  void loadData(ModelSet model, std::string survey_name, std::string model_grid, double z_min, double z_max);
 
   /*
    * @brief called for updating the progress bar
    */
-  void onProgress(int current,int total);
+  void onProgress(int current, int total);
 
 signals:
-/**
- * @brief SIGNAL Rised when the popup is closed.
- */
+  /**
+   * @brief SIGNAL Rised when the popup is closed.
+   */
   void popupClosing();
 
 private slots:
 
-/**
- * @brief SLOT Open the bulk schechter edition popup.
- */
-void on_bulk_btn_clicked();
+  /**
+   * @brief SLOT Open the bulk schechter edition popup.
+   */
+  void on_bulk_btn_clicked();
 
-/**
- * @brief SLOT Edit the Luminosity Prior when a grid cell is double-clicked.
- */
-void priorGridDoubleClicked(QModelIndex);
+  /**
+   * @brief SLOT Edit the Luminosity Prior when a grid cell is double-clicked.
+   */
+  void priorGridDoubleClicked(QModelIndex);
 
-/**
- * @brief SLOT The user has changed the Prior (master) selection.
- * Will update the details part of the popup.
- * @param new_index The index for the selected Prior.
- */
+  /**
+   * @brief SLOT The user has changed the Prior (master) selection.
+   * Will update the details part of the popup.
+   * @param new_index The index for the selected Prior.
+   */
   void priorSelectionChanged(QModelIndex new_index, QModelIndex);
 
   /**
@@ -104,34 +102,34 @@ void priorGridDoubleClicked(QModelIndex);
   void on_btn_new_clicked();
 
   /**
-    * @brief SLOT The user has clicked the duplicate Prior button.
-    */
+   * @brief SLOT The user has clicked the duplicate Prior button.
+   */
   void on_btn_duplicate_clicked();
 
   /**
-    * @brief SLOT The user has clicked the delete Prior button.
-    */
+   * @brief SLOT The user has clicked the delete Prior button.
+   */
   void on_btn_delete_clicked();
 
   /**
-    * @brief SLOT The user has clicked the edit Prior button.
-    */
+   * @brief SLOT The user has clicked the edit Prior button.
+   */
   void on_btn_edit_clicked();
 
   /**
-    * @brief SLOT The user has clicked the save Prior button.
-    */
+   * @brief SLOT The user has clicked the save Prior button.
+   */
   void on_btn_save_clicked();
 
   /**
-    * @brief SLOT The user has clicked the Cancel Prior edition button.
-    */
+   * @brief SLOT The user has clicked the Cancel Prior edition button.
+   */
   void on_btn_cancel_clicked();
 
   /**
-    * @brief SLOT raised when the MAGNITUDE/FLUX combobox is changed.
-    */
-  void on_cb_unit_currentIndexChanged(const QString &);
+   * @brief SLOT raised when the MAGNITUDE/FLUX combobox is changed.
+   */
+  void on_cb_unit_currentIndexChanged(const QString&);
 
   /**
    * @brief SLOT raised when the groups management button is clicked.
@@ -156,7 +154,7 @@ void priorGridDoubleClicked(QModelIndex);
   /**
    * @brief SLOT raised when the luminosity function define button is clicked.
    */
-  void onGridButtonClicked(size_t x,size_t y);
+  void onGridButtonClicked(size_t x, size_t y);
 
   /**
    * @brief SLOT raised when the Luminosity function popup is closing.
@@ -184,16 +182,14 @@ private:
 
   void loadGrid();
 
-
-
-  bool validateInput(const size_t& current_index) ;
+  bool validateInput(const size_t& current_index);
   void updateInfo(LuminosityPriorConfig& info);
-  void updatePriorRow(QModelIndex& index,const size_t& row, const LuminosityPriorConfig& info );
+  void updatePriorRow(QModelIndex& index, const size_t& row, const LuminosityPriorConfig& info);
 
   std::unique_ptr<Ui::DialogLuminosityPrior> ui;
-  std::string m_filter;
-  DatasetRepo m_luminosity_repository;
-  QString m_config_folder;
+  std::string                                m_filter;
+  DatasetRepo                                m_luminosity_repository;
+  QString                                    m_config_folder;
 
   QString m_grid_folder;
 
@@ -212,12 +208,12 @@ private:
   bool m_new = false;
 
   // currently select Prior informations (needed for the Lum. Function Grid)
-  std::vector<std::vector<LuminosityFunctionInfo>> m_luminosityInfos { };
-  std::vector<LuminosityPriorConfig::SedGroup> m_groups { };
-  std::vector<double> m_zs { };
-  std::vector<GridButton*> m_grid_buttons { };
+  std::vector<std::vector<LuminosityFunctionInfo>> m_luminosityInfos{};
+  std::vector<LuminosityPriorConfig::SedGroup>     m_groups{};
+  std::vector<double>                              m_zs{};
+  std::vector<GridButton*>                         m_grid_buttons{};
 };
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
 #endif /* DIALOGLUMINOSITYPRIOR_H_*/

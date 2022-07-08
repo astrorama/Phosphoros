@@ -1,8 +1,8 @@
 #ifndef DIALOGIMPORTAUXDATA_H
 #define DIALOGIMPORTAUXDATA_H
 
-#include <memory>
 #include <QDialog>
+#include <memory>
 #include <string>
 
 namespace Euclid {
@@ -16,14 +16,14 @@ class DialogImportAuxData;
  * @class DialogImportAuxData
  * @brie This popup allows the user to copy file/folder into the provided path.
  */
-class DialogImportAuxData: public QDialog {
+class DialogImportAuxData : public QDialog {
   Q_OBJECT
 
 public:
   /**
    * @brief Constructor
    */
-  explicit DialogImportAuxData(QWidget *parent = 0);
+  explicit DialogImportAuxData(QWidget* parent = 0);
 
   /**
    * @brief Destructor
@@ -39,8 +39,7 @@ public:
    * @param parentFolderDisplay
    * An aliases for displaying the parent folder to the user.
    */
-  void setData(std::string title, std::string parentFolderFull,
-      std::string parentFolderDisplay);
+  void setData(std::string title, std::string parentFolderFull, std::string parentFolderDisplay);
 
 private slots:
   /**
@@ -72,10 +71,10 @@ private slots:
 
 private:
   std::unique_ptr<Ui::DialogImportAuxData> ui;
-  std::string m_parent_folder;
+  std::string                              m_parent_folder;
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
-#endif // DIALOGIMPORTAUXDATA_H
+#endif  // DIALOGIMPORTAUXDATA_H
