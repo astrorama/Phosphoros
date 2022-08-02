@@ -1,9 +1,9 @@
 #ifndef DIALOGOUTPUTCOLUMNSELECTION_H
 #define DIALOGOUTPUTCOLUMNSELECTION_H
 
-#include <memory>
-#include <map>
 #include <QDialog>
+#include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -18,28 +18,23 @@ class DialogOutputColumnSelection;
  * @class DialogOutputColumnSelection
  * @brief
  * */
-class DialogOutputColumnSelection: public QDialog {
+class DialogOutputColumnSelection : public QDialog {
   Q_OBJECT
 public:
-
   /**
    * @brief Constructor
    */
-  explicit DialogOutputColumnSelection(
-      std::list<std::string> all_columns,
-      std::string id_column ="",
-      std::map<std::string,std::string> copied_columns={},
-      QWidget *parent = 0);
+  explicit DialogOutputColumnSelection(std::list<std::string> all_columns, std::string id_column = "",
+                                       std::map<std::string, std::string> copied_columns = {}, QWidget* parent = 0);
 
   /**
    * @brief Destructor
    */
   ~DialogOutputColumnSelection();
 
+signals:
 
-  signals:
-
-  void selectedColumns(std::map<std::string,std::string>);
+  void selectedColumns(std::map<std::string, std::string>);
 
 private slots:
 
@@ -56,14 +51,12 @@ private slots:
 private:
   std::unique_ptr<Ui::DialogOutputColumnSelection> ui;
 
-  std::list<std::string> m_all_columns;
-  std::string m_id_column;
-  std::map<std::string,std::string> m_copied_columns;
-
-
+  std::list<std::string>             m_all_columns;
+  std::string                        m_id_column;
+  std::map<std::string, std::string> m_copied_columns;
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
-#endif // DIALOGOUTPUTCOLUMNSELECTION_H
+#endif  // DIALOGOUTPUTCOLUMNSELECTION_H

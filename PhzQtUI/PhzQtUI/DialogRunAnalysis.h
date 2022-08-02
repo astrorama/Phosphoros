@@ -8,18 +8,18 @@
 #ifndef DIALOGRUNANALYSIS_H_
 #define DIALOGRUNANALYSIS_H_
 
-#include <memory>
+#include "ElementsKernel/Exception.h"
 #include <QDialog>
 #include <QFutureWatcher>
 #include <QTimer>
 #include <map>
-#include "ElementsKernel/Exception.h"
+#include <memory>
 
-namespace boost{
-namespace program_options{
- class variable_value;
+namespace boost {
+namespace program_options {
+class variable_value;
 }
-}
+}  // namespace boost
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -32,28 +32,26 @@ class DialogRunAnalysis;
  * @brief The DialogRunAnalysis class.
  * This popup show the progress-bar during analysis run.
  */
-class DialogRunAnalysis : public QDialog
-{
-    Q_OBJECT
+class DialogRunAnalysis : public QDialog {
+  Q_OBJECT
 
 public:
-    /**
-     * @brief Constructor
-     */
-    explicit DialogRunAnalysis(QWidget *parent = 0);
+  /**
+   * @brief Constructor
+   */
+  explicit DialogRunAnalysis(QWidget* parent = 0);
 
-    /**
-     * @brief Destructor
-     */
-    ~DialogRunAnalysis();
+  /**
+   * @brief Destructor
+   */
+  ~DialogRunAnalysis();
 
-    /**
-     * @brief Initialise the popup by setting its internal data
-     */
-    void setValues(std::string output_dir,
-                   const std::map<std::string, boost::program_options::variable_value>& config,
-                   const std::map<std::string, boost::program_options::variable_value>& sed_config);
-  
+  /**
+   * @brief Initialise the popup by setting its internal data
+   */
+  void setValues(std::string output_dir, const std::map<std::string, boost::program_options::variable_value>& config,
+                 const std::map<std::string, boost::program_options::variable_value>& sed_config);
+
 private slots:
 
   std::string runFunction();
@@ -75,19 +73,16 @@ private:
   bool needLuminosityGrid();
   bool needSedWeights();
 
-  QFutureWatcher<std::string> m_future_watcher {};
-  QFutureWatcher<std::string> m_future_sed_watcher {};
+  QFutureWatcher<std::string>                                   m_future_watcher{};
+  QFutureWatcher<std::string>                                   m_future_sed_watcher{};
   std::map<std::string, boost::program_options::variable_value> m_config;
   std::map<std::string, boost::program_options::variable_value> m_original_config;
   std::map<std::string, boost::program_options::variable_value> m_sed_config;
-  std::unique_ptr<Ui::DialogRunAnalysis> ui;
-  std::unique_ptr<QTimer> m_timer;
-
+  std::unique_ptr<Ui::DialogRunAnalysis>                        ui;
+  std::unique_ptr<QTimer>                                       m_timer;
 };
 
-}
-}
-
-
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
 #endif /* DIALOGRUNANALYSIS_H_*/

@@ -57,7 +57,7 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Model Grid File Name :</string>
+        <string>Grid File Name :</string>
        </property>
       </widget>
      </item>

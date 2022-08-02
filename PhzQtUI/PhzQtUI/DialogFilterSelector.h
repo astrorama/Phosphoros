@@ -1,12 +1,12 @@
 #ifndef DialogFilterSelector_H
 #define DialogFilterSelector_H
 
-#include <set>
-#include <memory>
-#include <QDialog>
 #include "FilterMapping.h"
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
+#include <QDialog>
+#include <memory>
+#include <set>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -22,14 +22,14 @@ class DialogFilterSelector;
  * @brief This popup allows the user to select a single filter. It is used
  * by the DialogLuminosityPrior.
  */
-class DialogFilterSelector: public QDialog {
+class DialogFilterSelector : public QDialog {
   Q_OBJECT
 
 public:
   /**
    * @brief Constructor
    */
-  explicit DialogFilterSelector(DatasetRepo filter_repository, QWidget *parent = 0);
+  explicit DialogFilterSelector(DatasetRepo filter_repository, QWidget* parent = 0);
 
   /**
    * @brief Destructor
@@ -42,7 +42,7 @@ public:
    */
   void setFilter(std::string filter_name);
 
-  signals:
+signals:
   /**
    * @brief SIGNAL popupClosing: rised when the popup is closed.
    * The argument is the selected Filter Name.
@@ -63,10 +63,10 @@ private slots:
 
 private:
   std::unique_ptr<Ui::DialogFilterSelector> ui;
-  DatasetRepo m_filter_repository;
+  DatasetRepo                               m_filter_repository;
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
-#endif // DialogFilterSelector_H
+#endif  // DialogFilterSelector_H

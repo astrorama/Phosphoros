@@ -1,9 +1,9 @@
 #ifndef DIALOGADDGALEBV_H
 #define DIALOGADDGALEBV_H
 
-#include <memory>
 #include <QDialog>
 #include <QProcess>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -18,14 +18,13 @@ class DialogAddGalEbv;
  * @class DialogAddGalEbv
 
  */
-class DialogAddGalEbv: public QDialog {
+class DialogAddGalEbv : public QDialog {
   Q_OBJECT
 public:
-
   /**
    * @brief Constructor
    */
-  explicit DialogAddGalEbv(QWidget *parent = 0);
+  explicit DialogAddGalEbv(QWidget* parent = 0);
 
   /**
    * @brief Destructor
@@ -65,16 +64,15 @@ private slots:
 
 private:
   std::unique_ptr<Ui::DialogAddGalEbv> ui;
-  std::string m_input_name;
-  std::string m_ra_col;
-  std::string m_dec_col;
-  std::string m_name;
-  std::string m_dust_map_file;
-  QProcess* m_process = new QProcess(this);
-
+  std::string                          m_input_name;
+  std::string                          m_ra_col;
+  std::string                          m_dec_col;
+  std::string                          m_name;
+  std::string                          m_dust_map_file;
+  QProcess*                            m_process = new QProcess(this);
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
-#endif // DIALOGADDGALEBV_H
+#endif  // DIALOGADDGALEBV_H

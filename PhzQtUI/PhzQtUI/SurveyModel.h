@@ -1,27 +1,25 @@
 #ifndef SURVEYMODEL_H
 #define SURVEYMODEL_H
 
-#include <QString>
-#include <QStandardItemModel>
 #include "SurveyFilterMapping.h"
+#include <QStandardItemModel>
+#include <QString>
 #include <map>
-#include <vector>
 #include <set>
 #include <string>
+#include <vector>
 
 namespace Euclid {
 namespace PhzQtUI {
-
 
 /**
  * @brief The SurveyModel class
  * This class provide a Model to be used in TableView. It store a survey on
  * each of its row and handle the loading, selection and edition of the survey.
  */
-class SurveyModel: public QStandardItemModel {
- Q_OBJECT
+class SurveyModel : public QStandardItemModel {
+  Q_OBJECT
 public:
-
   SurveyModel();
 
   /**
@@ -132,22 +130,22 @@ public slots:
   void setNonDetectionToSelected(QString new_name);
   void setHasUpperLimitToSelected(QString new_name);
   void setDoRecomputeErrorToSelected(bool new_do_recompute);
+  void setDefineFilterShiftToSelected(bool new_define_shift);
   void setCopiedColumnsToSelected(std::map<std::string, std::string> copied_columns);
 
 private:
-  bool m_in_edition = false;
-  bool m_need_reload = true;
-  int m_selected_row = -1;
-  int m_selected_index = -1;
-  SurveyFilterMapping m_edited_survey;
+  bool                               m_in_edition     = false;
+  bool                               m_need_reload    = true;
+  int                                m_selected_row   = -1;
+  int                                m_selected_index = -1;
+  SurveyFilterMapping                m_edited_survey;
   std::map<int, SurveyFilterMapping> m_survey_filter_mappings;
-  const QString getValue(int row, int column) const;
-
+  const QString                      getValue(int row, int column) const;
 
   std::string getDuplicateName(std::string name) const;
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
-#endif //  SURVEYMODEL_H
+#endif  //  SURVEYMODEL_H

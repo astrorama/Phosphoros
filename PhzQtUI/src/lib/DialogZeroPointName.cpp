@@ -1,51 +1,39 @@
 
+#include "PhzQtUI/DialogZeroPointName.h"
+#include "FileUtils.h"
+#include "ui_DialogZeroPointName.h"
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QRegExpValidator>
-#include "PhzQtUI/DialogZeroPointName.h"
-#include "ui_DialogZeroPointName.h"
-#include "FileUtils.h"
 
 using namespace std;
 
 namespace Euclid {
 namespace PhzQtUI {
 
-
-DialogZeroPointName::DialogZeroPointName(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::DialogZeroPointName){
+DialogZeroPointName::DialogZeroPointName(QWidget* parent) : QDialog(parent), ui(new Ui::DialogZeroPointName) {
   ui->setupUi(this);
 
   QRegExp rx("[\\w\\s]+");
   ui->txt_name->setValidator(new QRegExpValidator(rx));
-
 }
 
-DialogZeroPointName::~DialogZeroPointName() {
-
-
-}
-
-
+DialogZeroPointName::~DialogZeroPointName() {}
 
 void DialogZeroPointName::setFolder(std::string base_folder) {
   m_folder = base_folder;
 }
 
-
-void DialogZeroPointName::on_btn_cancel_clicked(){
+void DialogZeroPointName::on_btn_cancel_clicked() {
   reject();
 }
 
-
-void DialogZeroPointName::on_btn_create_clicked(){
+void DialogZeroPointName::on_btn_create_clicked() {
   m_name = ui->txt_name->text().trimmed().toStdString();
 
-
-  if (m_name.length()==0){
-    QMessageBox::warning( this, "Empty Name...","Please enter a name.", QMessageBox::Ok );
+  if (m_name.length() == 0) {
+    QMessageBox::warning(this, "Empty Name...", "Please enter a name.", QMessageBox::Ok);
     return;
   }
 
@@ -59,23 +47,18 @@ void DialogZeroPointName::on_btn_create_clicked(){
 
   QFileInfo check_file(QString::fromStdString(path));
 
-
   if (check_file.exists() && check_file.isFile()) {
-  QMessageBox::warning( this, "Duplicate name...",
-                                            "The catalog you selected is already mapped. Please select another one.",
-                                            QMessageBox::Ok );
-  return;
- }
-
+    QMessageBox::warning(this, "Duplicate name...",
+                         "The catalog you selected is already mapped. Please select another one.", QMessageBox::Ok);
+    return;
+  }
 
   accept();
 }
 
-
-std::string DialogZeroPointName::getName() const{
+std::string DialogZeroPointName::getName() const {
   return m_name;
 }
 
-
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid

@@ -23,6 +23,8 @@ action_list = [
                      'Computes a grid containing the model photometries'),
     PhosphorosAction(['compute_galactic_correction_coeff_grid', 'CGCCG'], 'PhosphorosComputeGalacticAbsorptionCoefficientGrid',
                      'Computes a grid containing the coefficient for the correction of the galactic absorption'),
+    PhosphorosAction(['compute_filter_variation_coeff_grid', 'CFVCG'], 'PhosphorosComputeFilterVariationCoefficientGrid',
+                     'Computes a grid containing the coefficient for the correction of the filters variation'),
     PhosphorosAction(['compute_photometric_corrections', 'CPC'], 'PhosphorosComputePhotometricCorrections',
                      'Calculates the Photometric Zero Point Corrections'),
     PhosphorosAction(['compute_sed_weights', 'CSW'], 'PhosphorosComputeSedWeight',
@@ -43,6 +45,8 @@ action_list = [
                      'Shows plots comparing the PHZ result with SPECZ'),
     PhosphorosAction(['plot_stacked_pdz', 'PSP'], 'PlotStackedPdfPitAndCrps',
                      'Shows plots comparing the PHZ result with SPECZ'),
+    PhosphorosAction(['plot_flux_model_diff', 'PFM'], 'PhosphorosPlotFluxDiff',
+                     'Shows plots comparing the measured flux with the flux from the best fitted model'),
     PhosphorosAction(['plot_posterior', 'PP'], 'PhosphorosPlotPosterior',
                      'Plots views of a multi-dimensional posterior'),
     PhosphorosAction(['plot_photometry_comparison', 'PPC'], 'PhosphorosPlotPhotometryComparison',
@@ -55,6 +59,8 @@ action_list = [
                      'Adds emission lines to a set of SED templates'),
     PhosphorosAction(['build_reference_sample', 'BRS'], 'PhosphorosBuildReferenceSample',
                      'Builds an NNPZ reference sample from the results of a Phosphoros output catalog'),
+    PhosphorosAction(['build_photometry', 'BPY'], 'PhosphorosBuildPhotometry',
+                     'Build The photometry using the best fitted models from the results of a Phosphoros output catalog'),
     PhosphorosAction(['add_galactic_dust_data', 'AGDD'], 'AddGalDustToCatalog',
                      'Lookup galactical E(B-V) in the Planck dust map and add it as an additional catalog column'),
     PhosphorosAction(['process_output_pdz', 'POP'], 'ProcessPDF',
@@ -65,6 +71,8 @@ action_list = [
                      'Build the Physical Parameter config allowing the redshift computation to output them.'),
     PhosphorosAction(['interpolate_seds', 'IS'], 'InterpolateSED',
                      'Create SEDs interpolated between existing SEDs.'),
+    PhosphorosAction(['extract_pp_pdf', 'EPP'], 'PhosphorosExtractPpPdf',
+                     'Extract 1d/2d pp pdf from the sampling of the full pdf.'),
     
 ]
 

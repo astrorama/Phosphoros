@@ -70,7 +70,7 @@
      <item>
       <widget class="QPushButton" name="btn_planck">
        <property name="text">
-        <string>Download Plack's Dust Map</string>
+        <string>Download Planck's Dust Map</string>
        </property>
       </widget>
      </item>

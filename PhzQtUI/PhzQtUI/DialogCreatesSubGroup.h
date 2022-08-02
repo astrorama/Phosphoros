@@ -1,8 +1,8 @@
 #ifndef DIALOGCREATESUBGROUP_H
 #define DIALOGCREATESUBGROUP_H
 
-#include <memory>
 #include <QDialog>
+#include <memory>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -16,14 +16,14 @@ class DialogCreateSubGroup;
  * @brief This popup allows the user to provide the name of a folder to be
  * created within the provided parent folder.
  */
-class DialogCreateSubGroup: public QDialog {
+class DialogCreateSubGroup : public QDialog {
   Q_OBJECT
 
 public:
   /**
    * @brief Constructor
    */
-  explicit DialogCreateSubGroup(QWidget *parent = 0);
+  explicit DialogCreateSubGroup(QWidget* parent = 0);
 
   /**
    * @brief Destructor
@@ -53,10 +53,10 @@ private slots:
 
 private:
   std::unique_ptr<Ui::DialogCreateSubGroup> ui;
-  std::string m_parent_folder_full;
+  std::string                               m_parent_folder_full;
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
-#endif // DIALOGCREATESUBGROUP_H
+#endif  // DIALOGCREATESUBGROUP_H

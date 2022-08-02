@@ -1,16 +1,16 @@
 #ifndef PHOTOMETRICCORRECTIONHANDLER_H
 #define PHOTOMETRICCORRECTIONHANDLER_H
 
-#include <string>
+#include "PhzDataModel/PhotometricCorrectionMap.h"
 #include <list>
 #include <map>
-#include "PhzDataModel/PhotometricCorrectionMap.h"
+#include <string>
 
-namespace boost{
-namespace program_options{
- class variable_value;
+namespace boost {
+namespace program_options {
+class variable_value;
 }
-}
+}  // namespace boost
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -18,10 +18,8 @@ namespace PhzQtUI {
 /**
  * @brief The PhotometricCorrectionHandler class
  */
-class PhotometricCorrectionHandler
-{
+class PhotometricCorrectionHandler {
 public:
-
   /**
    *  @brief Scan the Photometric Corrections files and returns the list of those
    * having the right filters.
@@ -33,7 +31,8 @@ public:
    * @return the list of file name corresponding to Corrections files with the
    *  same filters as those seleted.
    */
-   static std::list<std::string> getCompatibleCorrectionFiles(std::string catalog,std::list<std::string> selected_filters);
+  static std::list<std::string> getCompatibleCorrectionFiles(std::string            catalog,
+                                                             std::list<std::string> selected_filters);
 
   /**
    * @brief read the PhotometricCorrections out of the file which name is provided.
@@ -44,7 +43,7 @@ public:
    * @return the Photometric Corrections as a map where the keys are the filters
    * and the values the correction.
    */
-   static PhzDataModel::PhotometricCorrectionMap getCorrections(std::string catalog, std::string file);
+  static PhzDataModel::PhotometricCorrectionMap getCorrections(std::string catalog, std::string file);
 
   /**
    * @brief write the PhotometricCorrections onto the file which name is provided.
@@ -55,29 +54,18 @@ public:
    * @param file
    * the name of the file (relative to the PhotometricCorrections folder)
    */
-   static void writeCorrections(std::string catalog,
-                                PhzDataModel::PhotometricCorrectionMap map,
-                                std::string file);
+  static void writeCorrections(std::string catalog, PhzDataModel::PhotometricCorrectionMap map, std::string file);
 
-   /**
-    * Get the photometric corrections computation executable configuration map
-    */
-   static std::map<std::string, boost::program_options::variable_value> GetConfigurationMap(
-     std::map<std::string, boost::program_options::variable_value> run_option,
-     std::string catalog,
-     std::string output_file_name,
-     int iteration_number,
-     double tolerance,
-     std::string method,
-     std::string training_catalog_file,
-     std::string z_column
-   );
-
+  /**
+   * Get the photometric corrections computation executable configuration map
+   */
+  static std::map<std::string, boost::program_options::variable_value>
+  GetConfigurationMap(std::map<std::string, boost::program_options::variable_value> run_option, std::string catalog,
+                      std::string output_file_name, int iteration_number, double tolerance, std::string method,
+                      std::string training_catalog_file, std::string z_column);
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
-#endif // PHOTOMETRICCORRECTIONHANDLER_H
-
-
+#endif  // PHOTOMETRICCORRECTIONHANDLER_H

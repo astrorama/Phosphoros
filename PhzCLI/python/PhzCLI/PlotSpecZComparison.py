@@ -92,7 +92,51 @@ def read_phosphoros_catalog(out_cat, id_col, phz_col, pe_cat):
 
     return phos_cat[cols]
 
+#
+# -------------------------------------------------------------------------------
+#
 
+def read_pp_pdf_catalog(ppp_file):
+    ppp_1d = {}
+    ppp_2d = {}
+    ppp_sample = {}
+    ppp_units = {}
+    ppp_ids={}
+    if (ppp_file and os.path.exists(ppp_file)) : 
+        ppp_cat = tut.read_table(ppp_file)   
+        ppp_2d_name = []
+        ppp_sampling = []
+        for name in ppp_cat.colnames:
+            if name!="ID":
+                processed_name = name.replace("MC_","")
+                if '_' in processed_name:
+                    ppp_2d_name.append(processed_name)
+                    for elem in processed_name.split('_'):
+                        if not elem in ppp_sampling:
+                            ppp_sampling.append(elem)
+                else:
+                    ppp_1d[processed_name] = ppp_cat[name]
+                    if not processed_name in ppp_sampling:
+                            ppp_sampling.append(processed_name)
+
+        hdul = fits.open(ppp_file)
+    
+        for ppp_s in ppp_sampling:
+            
+            name = ('BINS_MC_PDF_' + ppp_s.upper())
+            ppp_sample[ppp_s] =  hdul[name].data['BINS']
+            unit_name = hdul[name].data.columns['BINS'].unit
+            ppp_units[ppp_s] = unit_name
+        
+        for ppp2d in ppp_2d_name:
+            # reshape the array
+            elems = ppp2d.split('_')
+            dim_1 = len(ppp_sample[elems[0]])
+            dim_2 = len(ppp_sample[elems[1]])
+            ppp_2d[ppp2d] = ppp_cat["MC_" + ppp2d].reshape((len(ppp_cat), dim_1, dim_2))
+        ppp_ids = ppp_cat["ID"]
+        logger.info('%d 1D-PDF and %d 2D-PDF physical parameters found', len(ppp_1d), len(ppp_2d))    
+    return ppp_ids, ppp_sample, ppp_units, ppp_1d, ppp_2d
 #
 # -------------------------------------------------------------------------------
 #
@@ -185,10 +229,11 @@ def compute_stats(specz, phz):
     print('--> Median              : ', median)
     print('--> Sigma               : ', sigma)
     print('--> Mad                 : ', mad)
+    print('--> NMad                : ', 1.4826*mad)
     print('--> Outliers            : ', outliersPercent, '%')
     print('--> Sigma (no outliers) : ', sigmaNoOutliers)
 
-    return dataArr, mean, median, sigma, mad, outliersPercent, sigmaNoOutliers, meanNoOutliers
+    return dataArr, mean, median, sigma, mad, 1.4826*mad, outliersPercent, sigmaNoOutliers, meanNoOutliers
 
 
 #
@@ -302,7 +347,7 @@ class SpeczPhotozPlot(object):
 # -------------------------------------------------------------------------------
 #
 
-def displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers,
+def displayHistogram(data, mean, median, mad, nmad, sigma, outliersPercent, sigmaNoOutliers,
                      meanNoOutliers, figsize=None):
     f, ax = plt.subplots(figsize=figsize)
 
@@ -314,8 +359,8 @@ def displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOut
     ax.set_title('Distribution of : (PhotoZ - SpecZ)/(1 + SpecZ)')
 
     # Write information
-    txt = '\n  Mean : %2.5f\n  Median : %2.5f\n  Mad : %2.5f\n  Sigma : %2.5f\n  Outliers : %2.5f%%\n  Sigma(no outliers) : %2.5f\n  Mean((no outliers) : %2.5f ' \
-          % (mean, median, mad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers)
+    txt = '\n  Mean : %2.5f\n  Median : %2.5f\n  Mad : %2.5f\n  NMad : %2.5f\n  Sigma : %2.5f\n  Outliers : %2.5f%%\n  Sigma(no outliers) : %2.5f\n  Mean((no outliers) : %2.5f ' \
+          % (mean, median, mad, nmad, sigma, outliersPercent, sigmaNoOutliers, meanNoOutliers)
     ax.text(ax.get_xlim()[0], ax.get_ylim()[1], txt, fontsize=10, family='sans-serif',
             style='italic', ha='left', va='top', alpha=.5)
 
@@ -389,7 +434,10 @@ class PdfPlot(object):
 
     def _initFigure(self):
         self.fig, self.ax = plt.subplots(figsize=(6, 3))
-        self.fig.canvas.set_window_title(self.parameter + ' 1D PDF')
+        if self.fig.canvas.manager is not None:
+            self.fig.canvas.manager.set_window_title(self.parameter + ' 1D PDF')
+        
+        
         xs = self.bins if self.is_numerical else range(len(self.bins))
         self.lines, = self.ax.plot(xs, [0] * len(xs))
         self.ax.set_xlim(0, max(xs))
@@ -432,6 +480,112 @@ class PdfPlot(object):
     def updateSelectedObject(self, obj_id):
         self.selected_index = np.argwhere(self.catalog['ID'] == obj_id)[0][0]
 
+#
+# -------------------------------------------------------------------------------
+#
+
+class PpPdfPlot(object):
+
+    def _updatePlot(self):
+        if self.selected_index is None:
+            return []
+        self.lines.set_ydata(self.pdf_1d_list[self.selected_index])
+        self.ax.set_title('selected ID: {}'.format(self.ids[self.selected_index]))
+        self.ax.set_ylim(0, max(self.pdf_1d_list[self.selected_index]) * 1.05)
+
+        return [self.ax, self.lines ]
+    
+    def _initFigure(self):
+        self.fig, self.ax = plt.subplots(figsize=(6, 3))
+        if self.fig.canvas.manager is not None:
+            self.fig.canvas.manager.set_window_title(self.pp_name + ' 1D PDF')
+        xs = self.bins 
+        self.lines, = self.ax.plot(xs, [0] * len(xs))
+        self.ax.set_xlim(min(xs), max(xs))
+        self.ax.set_title(' ')
+        if len(self.units)>0:
+            self.ax.set_xlabel(self.units)
+        self.fig.tight_layout()
+        self.fig.canvas.mpl_connect('resize_event', lambda x: self.fig.tight_layout())
+
+
+    def __init__(self, pp_name, ids, bins, units, pdf_1d_list):
+        self.pp_name = pp_name
+        self.ids = ids
+        self.bins = bins
+        self.units = units
+        self.pdf_1d_list = pdf_1d_list
+
+        self._initFigure()
+
+        self.selected_index = None
+        self.anim = animation.FuncAnimation(self.fig, lambda n: self._updatePlot(), interval=100, blit=False, repeat=True)
+
+    def updateSelectedObject(self, obj_id):
+        self.selected_index = np.argwhere(self.ids == obj_id)[0][0]
+        
+
+#
+# -------------------------------------------------------------------------------
+#
+
+class PpPdf2DPlot(object):
+
+    def _updatePlot(self):
+        if self.selected_index is None:
+            return []
+        self.lines.remove()
+        self.lines = self.ax.plot_surface(self.y_2d, self.x_2d,self.pdf_2d_list[self.selected_index], cmap="coolwarm")
+        self.ax.set_title('selected ID: {}'.format(self.ids[self.selected_index]))
+        return [self.ax, self.lines ]
+    
+    def _initFigure(self):
+        self.fig = plt.figure(figsize=(5,5))
+        self.ax = self.fig.add_subplot(111, projection='3d')
+        if self.fig.canvas.manager is not None:
+            self.fig.canvas.manager.set_window_title(self.pp_name + ' 2D PDF')
+        self.ax.view_init(90, -90)
+        self.ax.set_proj_type('ortho')
+        self.ax.set_xlim(min(self.bins_x), max(self.bins_x))
+        self.ax.set_ylim(min(self.bins_y), max(self.bins_y))
+        self.ax.set_title(' ')
+        axis_names = self.pp_name.split('_')
+        if len(self.units_x)>0:
+            self.ax.set_xlabel(axis_names[0] + ' ' + self.units_x)
+        else:
+            self.ax.set_xlabel(axis_names[0]) 
+            
+        if len(self.units_y)>0:
+            self.ax.set_ylabel(axis_names[1] + ' ' + self.units_y)
+        else:
+            self.ax.set_ylabel(axis_names[1]) 
+            
+            
+        zs = np.zeros((len(self.bins_x),len(self.bins_y)))
+        self.lines = self.ax.plot_surface(self.y_2d, self.x_2d,zs, cmap="coolwarm")  
+            
+        self.fig.tight_layout()
+        self.fig.canvas.mpl_connect('resize_event', lambda x: self.fig.tight_layout())
+
+
+    def __init__(self, pp_name, ids, bins_x, bins_y, units_x, units_y, pdf_2d_list):
+        self.pp_name = pp_name
+        self.ids = ids
+        self.bins_x = bins_x
+        self.bins_y = bins_y
+        self.x_2d, self.y_2d = np.meshgrid(self.bins_y, self.bins_x)
+        self.units_x = units_x
+        self.units_y = units_y
+        self.pdf_2d_list = pdf_2d_list
+
+        self._initFigure()
+
+        self.selected_index = None
+        self.anim = animation.FuncAnimation(self.fig, lambda n: self._updatePlot(), interval=100, blit=False, repeat=True)
+
+    def updateSelectedObject(self, obj_id):
+        self.selected_index = np.argwhere(self.ids == obj_id)[0][0]
+        
 
 #
 # -------------------------------------------------------------------------------
@@ -567,6 +721,9 @@ def defineSpecificProgramOptions():
     parser.add_argument('-scol', '--specz-column', type=str, default='ZSPEC',
                         help='Spec-z column name')
     
+    parser.add_argument('-ppcat', '--pppdf-catalog', type=str, required=False,  default='',
+                        help='Catalog file containing the physical parameter pdfs')
+    
     parser.add_argument('-pod', '--phosphoros-output-dir', required=False, type=str,
                         help='Directory to read Phosphoros outputs from')
     parser.add_argument('-pcat', '--phz-catalog', type=str, default=None, help='Photo-z catalog')
@@ -604,7 +761,8 @@ def mainMethod(args):
     specz_cat = read_specz_catalog(args.specz_catalog, args.specz_cat_id, args.specz_column)
 
     phos_cat = read_phosphoros_catalog(args.phz_catalog, args.phz_id, args.phz_column, args.pe_catalog)
-
+    
+   
     # Make sure the comments metadata are only picked from phos_cat, as the
     # bins are stored there. Otherwise, specz_cat may have COMMENT, and phos_cat comments, we end with both,
     # and later methods pick the first over the second
@@ -623,7 +781,7 @@ def mainMethod(args):
 
     specz = catalog['SPECZ']
     phz = catalog['PHZ']
-    data, mean, median, sigma, mad, outliersPercent, sigmaNoOutliers, meanNoOutliers = compute_stats(
+    data, mean, median, sigma, mad, nmad, outliersPercent, sigmaNoOutliers, meanNoOutliers = compute_stats(
         specz, phz)
 
     if args.no_display:
@@ -639,7 +797,7 @@ def mainMethod(args):
         data = data[idx]
 
     fig1 = SpeczPhotozPlot(catalog['ID'], specz, phz, data, figsize=(7, 8), embedded=False)
-    fig2 = displayHistogram(data, mean, median, mad, sigma, outliersPercent, sigmaNoOutliers,
+    fig2 = displayHistogram(data, mean, median, mad, nmad, sigma, outliersPercent, sigmaNoOutliers,
                             meanNoOutliers,
                             figsize=(10, 4))
 
@@ -648,15 +806,47 @@ def mainMethod(args):
         PdfPlot(param, bins, pdf_list, catalog, 'PHZ') for param, bins, pdf_list in pdfs if
         len(bins) > 1
     ]
+    
+    pppdf_file = str(args.pppdf_catalog)
+    if len(pppdf_file)>0 and not pppdf_file.startswith('/'):
+        pppdf_file= os.path.join(args.phosphoros_output_dir, pppdf_file)
+    if len(pppdf_file)==0 and os.path.exists(os.path.join(args.phosphoros_output_dir, 'pp_pdf.fits')):
+        pppdf_file = os.path.join(args.phosphoros_output_dir, 'pp_pdf.fits')   
+    ppp_ids, ppp_sample, ppp_units, ppp_1d, ppp_2d = read_pp_pdf_catalog(pppdf_file)
+
+    pp_1d_pdf_plots = [ 
+        PpPdfPlot(pp_1d_name, ppp_ids, ppp_sample[pp_1d_name], ppp_units[pp_1d_name], ppp_1d[pp_1d_name]) 
+        for pp_1d_name in ppp_1d if len(ppp_sample[pp_1d_name])>1 and ppp_sample[pp_1d_name][0]<ppp_sample[pp_1d_name][-1]]
+    
+    #for pp_2d_name in ppp_2d:        
+        #print(pp_2d_name)
+        #print(ppp_2d[pp_2d_name][0].shape)
+    pp_2d_pdf_plots = [ 
+        PpPdf2DPlot(pp_2d_name, ppp_ids, 
+                    ppp_sample[pp_2d_name.split('_')[0]], 
+                    ppp_sample[pp_2d_name.split('_')[1]], 
+                    ppp_units[pp_2d_name.split('_')[0]], 
+                    ppp_units[pp_2d_name.split('_')[1]], 
+                    ppp_2d[pp_2d_name]) 
+        for pp_2d_name in ppp_2d 
+        if len(ppp_sample[pp_2d_name.split('_')[0]])>1 
+        and len(ppp_sample[pp_2d_name.split('_')[1]])>1
+        and ppp_sample[pp_2d_name.split('_')[0]][0]<ppp_sample[pp_2d_name.split('_')[0]][-1]
+        and ppp_sample[pp_2d_name.split('_')[1]][0]<ppp_sample[pp_2d_name.split('_')[1]][-1]]
+      
+    
+    
+    
+    
 
     samp = None
     if args.samp:
         samp = SampUpdater(args.specz_catalog, args.specz_cat_id,
                            args.phz_catalog, args.phz_id,
                            catalog,
-                           [fig1] + pdf_plots)
+                           [fig1] + pdf_plots + pp_1d_pdf_plots + pp_2d_pdf_plots)
 
-    selector = Selector([fig1, samp] + pdf_plots, catalog)
+    selector = Selector([fig1, samp] + pdf_plots + pp_1d_pdf_plots + pp_2d_pdf_plots, catalog)
 
     try:
         plt.show()

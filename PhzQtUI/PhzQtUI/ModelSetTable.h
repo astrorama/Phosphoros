@@ -1,15 +1,13 @@
 #ifndef MODELSETTABLE_H
 #define MODELSETTABLE_H
 
-
-#include <QTableView>
-#include <memory>
 #include "ModelSetModel.h"
 #include "ParameterRule.h"
+#include <QTableView>
+#include <memory>
 
 namespace Euclid {
 namespace PhzQtUI {
-
 
 /**
  * @brief The ModelSetTable class
@@ -19,13 +17,13 @@ class ModelSetTable : public QTableView {
 
   Q_OBJECT
 public:
-    ModelSetTable(QWidget*& parent);
+  ModelSetTable(QWidget*& parent);
 
-    void load(std::shared_ptr<ModelSetModel> model_set_model_ptr);
+  void load(std::shared_ptr<ModelSetModel> model_set_model_ptr);
 
 private:
 };
 
-}
-}
-#endif // MODELSETTABLE_H
+}  // namespace PhzQtUI
+}  // namespace Euclid
+#endif  // MODELSETTABLE_H

@@ -28,17 +28,12 @@
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE (PdfHandlingConfiguration_test)
+BOOST_AUTO_TEST_SUITE(PdfHandlingConfiguration_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE( example_test ) {
-
-
-}
+BOOST_AUTO_TEST_CASE(example_test) {}
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE_END ()
-
-
+BOOST_AUTO_TEST_SUITE_END()

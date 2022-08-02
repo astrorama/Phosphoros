@@ -1,25 +1,24 @@
 #ifndef PARAMETERRULETABLE_H
 #define PARAMETERRULETABLE_H
 
-#include <QTableView>
-#include <set>
-#include <vector>
 #include "ParameterRule.h"
 #include "ParameterRuleModel.h"
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
+#include <QTableView>
+#include <set>
+#include <vector>
 
 namespace Euclid {
 namespace PhzQtUI {
 
-typedef std::shared_ptr<
-    PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>>DatasetRepo;
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 /**
  * @class ParameterRuleTable
  * @brief A tableView to display the ParameterRuleModel.
  */
-class ParameterRuleTable: public QTableView {
+class ParameterRuleTable : public QTableView {
 public:
   ParameterRuleTable(QWidget*& parent);
 
@@ -32,8 +31,8 @@ public:
    * @param sedRootPath
    * @param redRootPath
    */
-  void loadParameterRules(std::map<int, ParameterRule> init_parameter_rules,
-      DatasetRepo sed_repo, DatasetRepo red_curve_repo);
+  void loadParameterRules(std::map<int, ParameterRule> init_parameter_rules, DatasetRepo sed_repo,
+                          DatasetRepo red_curve_repo);
 
   /**
    * @brief Check if there is a row currently selected.
@@ -118,16 +117,16 @@ public:
    * @brief Expose a ptr the Model of the TableView casted as a ParameterRuleModel
    * @return the ParameterRuleModel
    */
-  ParameterRuleModel *getModel();
+  ParameterRuleModel* getModel();
 
   /**
    * @brief Expose a constant ptr to the Model of the TableView casted as a
    * ParameterRuleModel
    * @return the ParameterRuleModel
    */
-  const ParameterRuleModel *cGetModel() const;
+  const ParameterRuleModel* cGetModel() const;
 };
 
-}
-}
-#endif // PARAMETERRULETABLE_H
+}  // namespace PhzQtUI
+}  // namespace Euclid
+#endif  // PARAMETERRULETABLE_H

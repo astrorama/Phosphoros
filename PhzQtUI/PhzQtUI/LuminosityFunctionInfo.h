@@ -8,51 +8,47 @@
 #ifndef PHZQTUI_PHZQTUI_LUMINOSITYFUNCTIONINFO_H_
 #define PHZQTUI_PHZQTUI_LUMINOSITYFUNCTIONINFO_H_
 
-#include <string>
 #include <QString>
+#include <string>
 
 namespace Euclid {
 namespace PhzQtUI {
 
-class LuminosityFunctionInfo{
+class LuminosityFunctionInfo {
 public:
-
-
-  bool in_mag=true;
-  bool is_custom=false;
-  double alpha{0.};
-  double phi{0.};
-  double m{0.};
-  double l{0.};
+  bool        in_mag    = true;
+  bool        is_custom = false;
+  double      alpha{0.};
+  double      phi{0.};
+  double      m{0.};
+  double      l{0.};
   std::string curve_name{""};
 
-  double z_min;
-  double z_max;
+  double      z_min;
+  double      z_max;
   std::string sedGroupName;
 
-  bool isComplete(){
-    return (is_custom && curve_name.length()>0) || (!is_custom && phi>0.);
+  bool isComplete() {
+    return (is_custom && curve_name.length() > 0) || (!is_custom && phi > 0.);
   }
 
-
-  QString getDescription(){
-    if (is_custom){
+  QString getDescription() {
+    if (is_custom) {
       return "Custom Curve:\n" + QString::fromStdString(curve_name);
     } else {
       QString m_l = "";
-      if (in_mag){
-        m_l= "M*="+QString::number(m,'f', 2);
+      if (in_mag) {
+        m_l = "M*=" + QString::number(m, 'f', 2);
       } else {
-        m_l= "L*="+QString::number(l,'f', 2);
+        m_l = "L*=" + QString::number(l, 'f', 2);
       }
 
-      return "Schechter: a=" +QString::number(alpha,'f', 2) + "\n phi="+QString::number(phi,'f', 2) + " " +m_l;
+      return "Schechter: a=" + QString::number(alpha, 'f', 2) + "\n phi=" + QString::number(phi, 'f', 2) + " " + m_l;
     }
   }
 };
 
-}
-}
-
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
 #endif /* PHZQTUI_PHZQTUI_LUMINOSITYFUNCTIONINFO_H_ */

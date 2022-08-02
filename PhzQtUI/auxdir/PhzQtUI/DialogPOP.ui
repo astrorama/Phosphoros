@@ -154,6 +154,15 @@
           </color>
          </brush>
         </colorrole>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="NoBrush">
+          <color alpha="128">
+           <red>255</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
        </active>
        <inactive>
         <colorrole role="WindowText">
@@ -291,6 +300,15 @@
           </color>
          </brush>
         </colorrole>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="NoBrush">
+          <color alpha="128">
+           <red>255</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
        </inactive>
        <disabled>
         <colorrole role="WindowText">
@@ -423,6 +441,15 @@
          <brush brushstyle="SolidPattern">
           <color alpha="255">
            <red>0</red>
+           <green>0</green>
+           <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="NoBrush">
+          <color alpha="128">
+           <red>255</red>
            <green>0</green>
            <blue>0</blue>
           </color>
@@ -662,7 +689,7 @@
         <item row="0" column="0">
          <widget class="QLabel" name="label_7">
           <property name="text">
-           <string>First mode</string>
+           <string>First Mode</string>
           </property>
          </widget>
         </item>
@@ -704,7 +731,7 @@
         <item row="3" column="1">
          <widget class="QCheckBox" name="cb_02_fited">
           <property name="text">
-           <string>Fited Peak</string>
+           <string>Fitted Peak</string>
           </property>
          </widget>
         </item>
@@ -718,7 +745,7 @@
         <item row="3" column="0">
          <widget class="QCheckBox" name="cb_01_fited">
           <property name="text">
-           <string>Fited Peak</string>
+           <string>Fitted Peak</string>
           </property>
          </widget>
         </item>
@@ -883,6 +910,15 @@
           </color>
          </brush>
         </colorrole>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="NoBrush">
+          <color alpha="128">
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
+          </color>
+         </brush>
+        </colorrole>
        </active>
        <inactive>
         <colorrole role="WindowText">
@@ -1017,6 +1053,15 @@
            <red>0</red>
            <green>0</green>
            <blue>0</blue>
+          </color>
+         </brush>
+        </colorrole>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="NoBrush">
+          <color alpha="128">
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
           </color>
          </brush>
         </colorrole>
@@ -1157,6 +1202,15 @@
           </color>
          </brush>
         </colorrole>
+        <colorrole role="PlaceholderText">
+         <brush brushstyle="NoBrush">
+          <color alpha="128">
+           <red>255</red>
+           <green>255</green>
+           <blue>255</blue>
+          </color>
+         </brush>
+        </colorrole>
        </disabled>
       </palette>
      </property>
@@ -1198,16 +1252,16 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_compute">
+      <widget class="QPushButton" name="btn_close">
        <property name="text">
-        <string>Compute</string>
+        <string>Close</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_close">
+      <widget class="QPushButton" name="btn_compute">
        <property name="text">
-        <string>Close</string>
+        <string>Compute</string>
        </property>
       </widget>
      </item>

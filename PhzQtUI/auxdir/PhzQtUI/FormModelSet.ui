@@ -121,6 +121,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="btn_ToPP">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Computing PDF statistics, residuals between data and best fitted models, plots scatter, PIT and CRPS &lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="text">
          <string>Post Processing</string>
         </property>

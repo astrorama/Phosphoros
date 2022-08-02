@@ -3,15 +3,15 @@
 #include <QString>
 #include <QVector>
 
-int main(int argc, char *argv[])
-{
-    QApplication a(argc, argv);
+int main(int argc, char* argv[]) {
+  QLocale::setDefault(QLocale::c());
+  QApplication a(argc, argv);
 
-    typedef QVector<QString> QStringVector;
-    qRegisterMetaType<QStringVector>("QStringVector");
+  typedef QVector<QString> QStringVector;
+  qRegisterMetaType<QStringVector>("QStringVector");
 
-    Euclid::PhzQtUI::MainWindow w;
-    w.show();
+  Euclid::PhzQtUI::MainWindow w;
+  w.show();
 
-    return a.exec();
+  return a.exec();
 }

@@ -1,13 +1,13 @@
 #ifndef DIALOGSELECTPARAM_H
 #define DIALOGSELECTPARAM_H
 
-#include <set>
-#include <vector>
-#include <string>
-#include <memory>
-#include <QDialog>
 #include "FilterMapping.h"
 #include "PhzQtUI/ModelSet.h"
+#include <QDialog>
+#include <memory>
+#include <set>
+#include <string>
+#include <vector>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -19,14 +19,14 @@ class DialogSelectParam;
 /**
  * @class DialogSelectParam
  */
-class DialogSelectParam: public QDialog {
+class DialogSelectParam : public QDialog {
   Q_OBJECT
 
 public:
   /**
    * @brief Constructor
    */
-  explicit DialogSelectParam(const ModelSet& model, QWidget *parent = 0);
+  explicit DialogSelectParam(const std::set<std::string>& param_list, QWidget* parent = 0);
 
   /**
    * @brief Destructor
@@ -39,7 +39,7 @@ public:
    */
   void setParams(std::set<std::string> selected_param);
 
-  signals:
+signals:
   /**
    * @brief SIGNAL popupClosing: rised when the popup is closed.
    * The argument is the selected param Name.
@@ -60,10 +60,10 @@ private slots:
 
 private:
   std::unique_ptr<Ui::DialogSelectParam> ui;
-  const ModelSet& m_model;
+  const std::set<std::string>&           m_param_list;
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
-#endif // DIALOGSELECTPARAM_H
+#endif  // DIALOGSELECTPARAM_H

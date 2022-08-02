@@ -42,6 +42,9 @@ aux_dir = next(filter(
     os.path.isdir,
     map(lambda p: os.path.join(p, 'EmissionLines'), os.getenv('ELEMENTS_AUX_PATH', '').split(os.pathsep))
 ), None)
+conda_prefix = os.getenv('CONDA_PREFIX', None)
+if aux_dir is None and conda_prefix is not None:
+    aux_dir = os.path.join(conda_prefix, 'share', 'auxdir', 'EmissionLines')
 
 
 def defineSpecificProgramOptions():
@@ -61,7 +64,7 @@ def defineSpecificProgramOptions():
     parser.add_argument('--reference-factor', default=5.91e-6, type=float,
                         help='The luminosity factor between UV and the reference line (default:5.91e-6, use 1.0e13 for LePhare like  lines)')
     parser.add_argument('--sed-dir', required=True, type=str, metavar='DIR',
-                        help='The directory containing the SEDs to add the mission lines on')
+                        help='The directory containing the SEDs to add the emission lines on')
     parser.add_argument('--velocity', default=None, type=float,
                         help='The velocity (in km/s) to compute the FWHM of the lines from (defaults to dirac)')
     parser.add_argument('--no-sed', action='store_true', help='Output only the emission lines')

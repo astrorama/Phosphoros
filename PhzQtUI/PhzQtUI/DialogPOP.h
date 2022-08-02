@@ -1,12 +1,12 @@
 #ifndef DIALOGPOP_H
 #define DIALOGPOP_H
 
-#include <memory>
 #include <QDialog>
-#include <string>
-#include <vector>
 #include <QProcess>
 #include <QTimer>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -15,21 +15,18 @@ namespace Ui {
 class DialogPOP;
 }
 
-
-class DialogPOP: public QDialog {
+class DialogPOP : public QDialog {
   Q_OBJECT
 public:
-
   /**
    * @brief Constructor
    */
-  explicit DialogPOP(QWidget *parent = 0);
+  explicit DialogPOP(QWidget* parent = 0);
 
   /**
    * @brief Destructor
    */
   ~DialogPOP();
-
 
   void setFolder(std::string output_folder);
 
@@ -52,14 +49,13 @@ private slots:
 
 private:
   std::unique_ptr<Ui::DialogPOP> ui;
-  std::string m_folder;
-  QProcess *m_P;
-  QTimer *m_timer;
-  bool m_processing=false;
-
+  std::string                    m_folder;
+  QProcess*                      m_P;
+  QTimer*                        m_timer;
+  bool                           m_processing = false;
 };
 
-}
-}
+}  // namespace PhzQtUI
+}  // namespace Euclid
 
-#endif // DIALOGPOP_H
+#endif  // DIALOGPOP_H

@@ -126,11 +126,12 @@ def stackPdfFromBinInRef(pdf_data, reference_values, stack_bins):
     stack_bins = np.array(stack_bins)
     
     ref_map = np.zeros([len(pdf_data[0]),len(stack_bins)-1])
+  
     for index, ref_value in enumerate(reference_values):
         index_bellow = stack_bins[stack_bins<ref_value] 
         if len(index_bellow)>0 and len(index_bellow)<len(stack_bins):
             ref_map[:,len(index_bellow)-1] += np.nan_to_num(pdf_data[index]/np.sum(pdf_data[index]))
-    return ref_map    
+    return ref_map   
     
 def stackedShiftedPdf(pdf_data, pdf_bins, point_estimates, reference_values, stack_bins):
     """Stack 1D-PDF in bins. Each object is attributed to a bin based on its point-estimate value, PDFs are shifted to be centered on the reference value 
@@ -312,8 +313,8 @@ def plotPdfMap(data_map, pdf_map_bins, stack_bins, fractions, colors = ['r','dar
     """
     if len(title)>0:
         plt.title(title)
-    
-    cs = plt.imshow(data_map,origin='lower',
+    print(data_map)
+    cs = plt.imshow(data_map+1e-15,origin='lower',
                     extent=(0,stack_bins[-1], pdf_map_bins[0],pdf_map_bins[-1]),
                     aspect='auto',**kwargs)
     
