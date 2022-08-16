@@ -129,11 +129,7 @@ def read_pp_pdf_catalog(ppp_file):
             ppp_units[ppp_s] = unit_name
         
         for ppp2d in ppp_2d_name:
-            # reshape the array
-            elems = ppp2d.split('_')
-            dim_1 = len(ppp_sample[elems[0]])
-            dim_2 = len(ppp_sample[elems[1]])
-            ppp_2d[ppp2d] = ppp_cat["MC_" + ppp2d].reshape((len(ppp_cat), dim_1, dim_2))
+            ppp_2d[ppp2d] = ppp_cat["MC_" + ppp2d]
         ppp_ids = ppp_cat["ID"]
         logger.info('%d 1D-PDF and %d 2D-PDF physical parameters found', len(ppp_1d), len(ppp_2d))    
     return ppp_ids, ppp_sample, ppp_units, ppp_1d, ppp_2d
@@ -169,7 +165,7 @@ def read_pdfs(catalog, out_dir):
 
     def read(parameter):
         if parameter + '-1D-PDF' in catalog.colnames:
-            print('    ' + parameter + ': Using catalog column ' + parameter + '-1D-PDF')
+            #print('    ' + parameter + ': Using catalog column ' + parameter + '-1D-PDF')
 
             key_comment = 'COMMENT'
             if key_comment not in catalog.meta.keys():
@@ -555,7 +551,7 @@ class PpPdf2DPlot(object):
         else:
             self.ax.set_xlabel(axis_names[0]) 
             
-        if len(self.units_y)>0:
+        if self.units_y and len(self.units_y)>0:
             self.ax.set_ylabel(axis_names[1] + ' ' + self.units_y)
         else:
             self.ax.set_ylabel(axis_names[1]) 
@@ -574,8 +570,8 @@ class PpPdf2DPlot(object):
         self.bins_x = bins_x
         self.bins_y = bins_y
         self.x_2d, self.y_2d = np.meshgrid(self.bins_y, self.bins_x)
-        self.units_x = units_x
-        self.units_y = units_y
+        self.units_x = units_x if units_x is not None else ""
+        self.units_y = units_y if units_y is not None else ""
         self.pdf_2d_list = pdf_2d_list
 
         self._initFigure()
