@@ -263,7 +263,7 @@ void DialogPpPdf::on_btn_save_clicked() {
               << QString::fromStdString(pdfs) << "--output-pdf-file"
               << QString::fromStdString(m_result_folder + "/pp_pdf.fits");
 
-    logger.debug() << prog.toStdString() << " " << arguments.join(" ").toStdString();
+    logger.info() << prog.toStdString() << " " << arguments.join(" ").toStdString();
 
     m_P = new QProcess(this);
     m_P->setProcessChannelMode(QProcess::MergedChannels);
