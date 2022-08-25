@@ -25,8 +25,8 @@ Note: the issue number refer to SDC-CH internal tracking.
 
 ### Changed
 - Update the default values in the compute zero-point correction popup. Reported in https://redmine.isdc.unige.ch/issues/26634
-- Chnge the warning message displayed when one compute zero-point corrections with a photometric band having only missing values. https://redmine.isdc.unige.ch/issues/26634
-- update the default output folder name when the input catalog contains '.'. https://redmine.isdc.unige.ch/issues/26646
+- Change the warning message displayed when one compute zero-point corrections with a photometric band having only missing values. https://redmine.isdc.unige.ch/issues/26634
+- Update the default output folder name when the input catalog contains '.'. https://redmine.isdc.unige.ch/issues/26646
 - Change the way the PP are extracted from the SEDs to speed  up the interface. https://redmine.isdc.unige.ch/issues/26860
 - Change the default value of the luminosity sampling into the GUI. https://redmine.isdc.unige.ch/issues/26995
     
