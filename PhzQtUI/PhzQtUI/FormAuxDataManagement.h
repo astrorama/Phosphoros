@@ -41,6 +41,11 @@ public:
                        DatasetRepo redenig_curves_repository, DatasetRepo luminosity_repository);
   void loadManagementPage(int index = 0);
 
+signals:
+
+  void lockNavigation(int);
+  void unlockNavigation();
+
 private slots:
 
   void sedProcessStarted();

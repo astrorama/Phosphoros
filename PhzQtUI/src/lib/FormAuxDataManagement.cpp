@@ -35,6 +35,7 @@ static Elements::Logging logger = Elements::Logging::getLogger("FormAuxDataManag
 FormAuxDataManagement::FormAuxDataManagement(QWidget* parent) : QWidget(parent), ui(new Ui::FormAuxDataManagement) {
   ui->setupUi(this);
   m_planck_file = FileUtils::getAuxRootPath() + "/GalacticDustMap/PlanckEbv.fits";
+  ui->InfoPannel->setVisible(false);
 }
 
 FormAuxDataManagement::~FormAuxDataManagement() {}
@@ -198,8 +199,8 @@ void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
 
     auto    aux_path = FileUtils::getAuxRootPath();
     QString command  = QString::fromStdString("PhosphorosAddEmissionLines --suffix _lpel --reference-factor 1.0e13 "
-                                               "--uv-range 2100,2500 --emission-lines LePhare_lines.txt --sed-dir " +
-                                              aux_path) +
+                                             "--uv-range 2100,2500 --emission-lines LePhare_lines.txt --sed-dir " +
+                                             aux_path) +
                       QDir::separator() + QString::fromStdString("SEDs") + QDir::separator() + group;
 
     logger.info() << "Executing :" << command.toStdString();
@@ -621,6 +622,14 @@ void FormAuxDataManagement::on_btn_import_luminosity_clicked() {
 }
 
 void FormAuxDataManagement::on_bt_reloadDP_clicked() {
+  ui->bt_reloadDP->setText("Reloading...");
+  ui->l_message->setText(
+      "Checking remote repository for the last Data Pack. Download it and check for local conflicting changes.");
+  ui->bt_reloadDP->setEnabled(false);
+  ui->InfoPannel->setVisible(true);
+  ui->tab_Management->setVisible(false);
+  ui->widget_2->setVisible(false);
+  lockNavigation(1);
   m_dataPackHandler.reset(new DataPackHandler(this));
   connect(m_dataPackHandler.get(), SIGNAL(completed()), this, SLOT(reloadAuxData()));
   m_dataPackHandler->check(true);
@@ -631,6 +640,12 @@ void FormAuxDataManagement::reloadAuxData() {
   copyingSEDFinished(true, {});
   copyingRedFinished(true, {});
   copyingLumFinished(true, {});
+  ui->bt_reloadDP->setText("Reload Last Data Pack");
+  ui->bt_reloadDP->setEnabled(true);
+  ui->InfoPannel->setVisible(false);
+  ui->tab_Management->setVisible(true);
+  ui->widget_2->setVisible(true);
+  unlockNavigation();
 }
 
 void FormAuxDataManagement::on_btn_sun_sed_clicked() {

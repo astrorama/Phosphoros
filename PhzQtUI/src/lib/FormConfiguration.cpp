@@ -79,6 +79,9 @@ void FormConfiguration::loadOptionPage(std::shared_ptr<OptionModel> option_model
                                        m_option_model_ptr->getReddeningRepo(), m_option_model_ptr->getLuminosityRepo());
   ui->widget_aux_Data->loadManagementPage(0);
 
+  connect(ui->widget_aux_Data, SIGNAL(lockNavigation(int)), this, SLOT(startEdition(int)));
+  connect(ui->widget_aux_Data, SIGNAL(unlockNavigation()), this, SLOT(endEdition()));
+
   ui->cb_logLevel->setCurrentIndex(ui->cb_logLevel->findText(m_option_model_ptr->getLogLevel()));
 
   loadGeneralValues();

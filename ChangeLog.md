@@ -8,8 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Note: the issue number refer to SDC-CH internal tracking.
 
 ## [Unreleased]
+
+### Added
+- Lock the navigation and add a message while the app is reloading the DataPack. https://redmine.isdc.unige.ch/issues/27412
+
 ### Changed
 - Change the format of the Changelog
+- Speedup the opening of the app by removing unecessary checks
 
 ### Fixed
 - Fix slicing of the model grid when we have less filters available that modelled. https://redmine.isdc.unige.ch/issues/27364
