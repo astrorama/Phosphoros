@@ -54,7 +54,6 @@ void FormPostProcessing::on_btn_exit_clicked() {
 void FormPostProcessing::loadPostProcessingPage(std::shared_ptr<SurveyModel> survey_model_ptr) {
   logger.info() << "Load the PostProcessing Page";
   m_survey_model_ptr = survey_model_ptr;
-  updateSelection(true);
 }
 
 void FormPostProcessing::loadCbCatalog(std::string selected) {
