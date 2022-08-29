@@ -283,13 +283,38 @@ void FormAuxDataManagement::sedProcessStarted() {
   }
 }
 
+void FormAuxDataManagement::handleDataException(std::string message) {
+  if (message.rfind("Qualified name can not be inserted in the map.", 0) == 0) {
+    std::string msg_part = message.replace(0, 61, "");
+    std::string name     = msg_part.substr(0, msg_part.find(":") - 5);
+    std::string path     = msg_part.substr(msg_part.find(":") + 1);
+    path                 = path.substr(0, path.find_last_of("/"));
+
+    QString text = QString::fromStdString(
+        std::string("Conflict in the auxiliary data: 2 files contain a dataset with the same name.\n\n"
+                    "Dataset name : \n") +
+        name + "\n\nPath containing the files : \n" + path + "\n\n" +
+        "Please remove one of the files and re-launch Phosphoros.");
+    QMessageBox::critical(this, "Error while loading the Auxiliary Data...", text, QMessageBox::Abort);
+  } else {
+    QString text = QString::fromStdString(std::string("An error occured  while loading the Auxiliary Data.\n "
+                                                      "Error : ") +
+                                          message);
+    QMessageBox::critical(this, "Error while loading the Auxiliary Data...", text, QMessageBox::Abort);
+  }
+}
+
 void FormAuxDataManagement::sedProcessfinished(int, QProcess::ExitStatus) {
   // reload the provider and the model
-  std::unique_ptr<XYDataset::FileParser>         sed_file_parser{new XYDataset::AsciiParser{}};
-  std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(
-      new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser)});
-  m_seds_repository->resetProvider(std::move(sed_provider));
-
+  try {
+    std::unique_ptr<XYDataset::FileParser>         sed_file_parser{new XYDataset::AsciiParser{}};
+    std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(
+        new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser)});
+    m_seds_repository->resetProvider(std::move(sed_provider));
+  } catch (Elements::Exception& e) {
+    handleDataException(e.what());
+    exit(0);
+  }
   displaySED();
 
   ui->labelMessage->setText("Processing of SEDs completed.");
@@ -299,10 +324,15 @@ void FormAuxDataManagement::copyingFilterFinished(bool success, QVector<QString>
   if (success) {
     logger.info() << "files modified ";
     // reset repo
-    std::unique_ptr<XYDataset::FileParser>         filter_file_parser{new XYDataset::AsciiParser{}};
-    std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(
-        new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true), std::move(filter_file_parser)});
-    m_filter_repository->resetProvider(std::move(filter_provider));
+    try {
+      std::unique_ptr<XYDataset::FileParser>         filter_file_parser{new XYDataset::AsciiParser{}};
+      std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(
+          new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true), std::move(filter_file_parser)});
+      m_filter_repository->resetProvider(std::move(filter_provider));
+    } catch (Elements::Exception& e) {
+      handleDataException(e.what());
+      exit(0);
+    }
     displayFilter();
   } else {
     logger.warn() << "Modification of the files failed";
@@ -315,10 +345,15 @@ void FormAuxDataManagement::copyingSEDFinished(bool success, QVector<QString>) {
 
     logger.info() << "files modified ";
     // reload the provider and the model
-    std::unique_ptr<XYDataset::FileParser>         sed_file_parser{new XYDataset::AsciiParser{}};
-    std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(
-        new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser)});
-    m_seds_repository->resetProvider(std::move(sed_provider));
+    try {
+      std::unique_ptr<XYDataset::FileParser>         sed_file_parser{new XYDataset::AsciiParser{}};
+      std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(
+          new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser)});
+      m_seds_repository->resetProvider(std::move(sed_provider));
+    } catch (Elements::Exception& e) {
+      handleDataException(e.what());
+      exit(0);
+    }
     displaySED();
   } else {
     logger.warn() << "Modification of the files failed";
@@ -329,10 +364,15 @@ void FormAuxDataManagement::copyingRedFinished(bool success, QVector<QString>) {
   if (success) {
     logger.info() << "files modified ";
     // reload the provider and the model
-    std::unique_ptr<XYDataset::FileParser>         red_file_parser{new XYDataset::AsciiParser{}};
-    std::unique_ptr<XYDataset::FileSystemProvider> red_provider(
-        new XYDataset::FileSystemProvider{FileUtils::getRedCurveRootPath(true), std::move(red_file_parser)});
-    m_redenig_curves_repository->resetProvider(std::move(red_provider));
+    try {
+      std::unique_ptr<XYDataset::FileParser>         red_file_parser{new XYDataset::AsciiParser{}};
+      std::unique_ptr<XYDataset::FileSystemProvider> red_provider(
+          new XYDataset::FileSystemProvider{FileUtils::getRedCurveRootPath(true), std::move(red_file_parser)});
+      m_redenig_curves_repository->resetProvider(std::move(red_provider));
+    } catch (Elements::Exception& e) {
+      handleDataException(e.what());
+      exit(0);
+    }
     displayRed();
   } else {
     logger.warn() << "Modification of the files failed";
@@ -343,10 +383,16 @@ void FormAuxDataManagement::copyingLumFinished(bool success, QVector<QString>) {
   if (success) {
     logger.info() << "files modified ";
     // reload the provider and the model
-    std::unique_ptr<XYDataset::FileParser>         lum_file_parser{new XYDataset::AsciiParser{}};
-    std::unique_ptr<XYDataset::FileSystemProvider> lum_provider(new XYDataset::FileSystemProvider{
-        FileUtils::getLuminosityFunctionCurveRootPath(true), std::move(lum_file_parser)});
-    m_luminosity_repository->resetProvider(std::move(lum_provider));
+
+    try {
+      std::unique_ptr<XYDataset::FileParser>         lum_file_parser{new XYDataset::AsciiParser{}};
+      std::unique_ptr<XYDataset::FileSystemProvider> lum_provider(new XYDataset::FileSystemProvider{
+          FileUtils::getLuminosityFunctionCurveRootPath(true), std::move(lum_file_parser)});
+      m_luminosity_repository->resetProvider(std::move(lum_provider));
+    } catch (Elements::Exception& e) {
+      handleDataException(e.what());
+      exit(0);
+    }
     displayLum();
   } else {
     logger.warn() << "Modification of the files failed";

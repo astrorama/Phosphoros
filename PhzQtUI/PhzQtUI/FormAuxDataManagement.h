@@ -115,6 +115,8 @@ private:
                               std::vector<std::unique_ptr<MessageButton>>& btn_vector, int index);
 
   void addButtonsToSedItem(QStandardItem* item, SedTreeModel* treeModel_sed);
+
+  void handleDataException(std::string message);
 };
 
 }  // namespace PhzQtUI

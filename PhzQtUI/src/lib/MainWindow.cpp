@@ -1,4 +1,5 @@
 #include "PhzQtUI/MainWindow.h"
+#include "ElementsKernel/Exception.h"
 #include "FileUtils.h"
 #include "PreferencesUtils.h"
 #include "XYDataset/AsciiParser.h"
@@ -102,33 +103,58 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 MainWindow::~MainWindow() {}
 
 void MainWindow::loadAuxData() {
-  std::unique_ptr<XYDataset::FileParser>         filter_file_parser{new XYDataset::AsciiParser{}};
-  std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(
-      new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true), std::move(filter_file_parser)});
-  m_filter_repository.reset(
-      new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(filter_provider)));
-  m_filter_repository->reload();
+  try {
+    std::unique_ptr<XYDataset::FileParser>         filter_file_parser{new XYDataset::AsciiParser{}};
+    std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(
+        new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true), std::move(filter_file_parser)});
+    m_filter_repository.reset(
+        new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(filter_provider)));
+    m_filter_repository->reload();
 
-  std::unique_ptr<XYDataset::FileParser>         sed_file_parser{new XYDataset::AsciiParser{}};
-  std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(
-      new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser)});
-  m_seds_repository.reset(
-      new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(sed_provider)));
-  m_seds_repository->reload();
+    std::unique_ptr<XYDataset::FileParser>         sed_file_parser{new XYDataset::AsciiParser{}};
+    std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(
+        new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser)});
+    m_seds_repository.reset(
+        new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(sed_provider)));
+    m_seds_repository->reload();
 
-  std::unique_ptr<XYDataset::FileParser>         reddening_file_parser{new XYDataset::AsciiParser{}};
-  std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(
-      new XYDataset::FileSystemProvider{FileUtils::getRedCurveRootPath(true), std::move(reddening_file_parser)});
-  m_redenig_curves_repository.reset(
-      new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(red_curve_provider)});
-  m_redenig_curves_repository->reload();
+    std::unique_ptr<XYDataset::FileParser>         reddening_file_parser{new XYDataset::AsciiParser{}};
+    std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(
+        new XYDataset::FileSystemProvider{FileUtils::getRedCurveRootPath(true), std::move(reddening_file_parser)});
+    m_redenig_curves_repository.reset(
+        new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(red_curve_provider)});
+    m_redenig_curves_repository->reload();
 
-  std::unique_ptr<XYDataset::FileParser>         luminosity_file_parser{new XYDataset::AsciiParser{}};
-  std::unique_ptr<XYDataset::FileSystemProvider> luminosity_curve_provider(new XYDataset::FileSystemProvider{
-      FileUtils::getLuminosityFunctionCurveRootPath(true), std::move(luminosity_file_parser)});
-  m_luminosity_repository.reset(
-      new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(luminosity_curve_provider)});
-  m_luminosity_repository->reload();
+    std::unique_ptr<XYDataset::FileParser>         luminosity_file_parser{new XYDataset::AsciiParser{}};
+    std::unique_ptr<XYDataset::FileSystemProvider> luminosity_curve_provider(new XYDataset::FileSystemProvider{
+        FileUtils::getLuminosityFunctionCurveRootPath(true), std::move(luminosity_file_parser)});
+    m_luminosity_repository.reset(
+        new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(luminosity_curve_provider)});
+    m_luminosity_repository->reload();
+  } catch (Elements::Exception& e) {
+    std::string msg = e.what();
+    if (msg.rfind("Qualified name can not be inserted in the map.", 0) == 0) {
+
+      std::string msg_part = msg.replace(0, 61, "");
+      std::string name     = msg_part.substr(0, msg_part.find(":") - 5);
+      std::string path     = msg_part.substr(msg_part.find(":") + 1);
+      path                 = path.substr(0, path.find_last_of("/"));
+
+      QString text = QString::fromStdString(
+          std::string("Conflict in the auxiliary data: 2 files contain a dataset with the same name.\n\n"
+                      "Dataset name : \n") +
+          name + "\n\nPath containing the files : \n" + path + "\n\n" +
+          "Please remove one of the files and re-launch Phosphoros.");
+      QMessageBox::critical(this, "Error while loading the Auxiliary Data...", text, QMessageBox::Abort);
+    } else {
+      QString text = QString::fromStdString(std::string("An error occured  while loading the Auxiliary Data.\n "
+                                                        "Error : ") +
+                                            msg);
+      QMessageBox::critical(this, "Error while loading the Auxiliary Data...", text, QMessageBox::Abort);
+    }
+
+    exit(0);
+  }
 
   m_option_model_ptr->loadOption(m_filter_repository, m_seds_repository, m_redenig_curves_repository,
                                  m_luminosity_repository);
