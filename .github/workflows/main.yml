@@ -40,14 +40,14 @@ jobs:
         uses: actions/checkout@v3
       - name: Get package name and version
         id: package-version
-        uses: astrorama/actions/elements-project@v3
+        uses: astrorama/actions/elements-project@v3.3
       - name: Install dependencies
-        uses: astrorama/actions/setup-dependencies@v3
+        uses: astrorama/actions/setup-dependencies@v3.3
         with:
           dependency-list: .github/workflows/dependencies.txt
       - name: Build
         id: build
-        uses: astrorama/actions/elements-build-rpm@v3
+        uses: astrorama/actions/elements-build-rpm@v3.3
       - name: Upload RPM to GitHub
         uses: actions/upload-artifact@v3
         with:
@@ -55,7 +55,7 @@ jobs:
           path: ${{ steps.build.outputs.rpm-dir }}/*.rpm
           retention-days: 15
       - name: Upload RPM to repository
-        uses: astrorama/actions/upload-rpm@v3
+        uses: astrorama/actions/upload-rpm@v3.3
         if: ${{ github.repository_owner == 'astrorama' }}
         env:
           REPOSITORY_USER: ${{ secrets.REPOSITORY_USER }}
