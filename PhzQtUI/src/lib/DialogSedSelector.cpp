@@ -31,7 +31,7 @@ void DialogSedSelector::setSed(std::string sed_names) {
   ui->treeView_sed->resizeColumnToContents(0);
 
   if (m_single_sed) {
-    ui->treeView_sed->expandAll();
+    ui->treeView_sed->collapseAll();
     connect(treeModel_sed, SIGNAL(itemChanged(QStandardItem*)), treeModel_sed,
             SLOT(onItemChangedSingleLeaf(QStandardItem*)));
   } else {

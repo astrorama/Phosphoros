@@ -15,6 +15,7 @@ Note: the issue number refer to SDC-CH internal tracking.
 ### Changed
 - Change the format of the Changelog
 - Speedup the opening of the app by removing unecessary checks
+- SED selector dialog starts with collapsed group (instead of expended). https://redmine.isdc.unige.ch/issues/27838
 
 ### Fixed
 - Fix slicing of the model grid when we have less filters available that modelled. https://redmine.isdc.unige.ch/issues/27364
