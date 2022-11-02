@@ -9,7 +9,7 @@ Note: the issue number refer to SDC-CH internal tracking.
 
 ## [Unreleased]
 
-## [1.3.2] 2022-11-02
+## [1.4.1] 2022-11-02
 
 ### Added
 - Lock the navigation and add a message while the app is reloading the DataPack. https://redmine.isdc.unige.ch/issues/27412
