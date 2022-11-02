@@ -19,7 +19,7 @@ Note: the issue number refer to SDC-CH internal tracking.
 ### Fixed
 - Fix slicing of the model grid when we have less filters available that modelled. https://redmine.isdc.unige.ch/issues/27364
 - Add a message when 2 Dataset files conflict. https://redmine.isdc.unige.ch/issues/27413
-
+- Fix PhosphorosPlotPhotometryComparison executable by adding missing arguments in the config. https://redmine.isdc.unige.ch/issues/27871
 
 ## [1.3.1] 2022-08-16
 

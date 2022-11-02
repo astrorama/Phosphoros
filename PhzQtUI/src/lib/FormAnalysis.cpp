@@ -40,9 +40,7 @@
 #include "ui_FormAnalysis.h"
 
 #include "PhzQtUI/DialogSelectParam.h"
-
 #include "PhzUITools/CatalogColumnReader.h"
-#include "PhzUITools/ConfigurationWriter.h"
 
 #include "PhzDataModel/PhzModel.h"
 #include "PhzUtils/Multithreading.h"
@@ -52,12 +50,13 @@
 #include "DefaultOptionsCompleter.h"
 #include "PhzConfiguration/ComputeSedWeightConfig.h"
 #include "PhzExecutables/ComputeSedWeight.h"
-
 #include "PhzDataModel/DoubleGrid.h"
 #include "PhzDataModel/PhotometryGridInfo.h"
 #include "PhzDataModel/serialization/PhotometryGridInfo.h"
 #include "PhzQtUI/DialogFilterSelector.h"
 #include "PhzQtUI/SedParamUtils.h"
+#include "PhzUITools/ConfigurationWriter.h"
+#include "GridContainer/serialize.h"
 #include <CCfits/CCfits>
 
 namespace Euclid {

@@ -47,8 +47,10 @@ def defineSpecificProgramOptions():
 
     parser = argparse.ArgumentParser()
     
-    parser.add_argument('--source-id', type=int, required=True,
+    parser.add_argument('--source-id', type=str, required=True,
                 help='The ID of the source to create the plot for')
+    parser.add_argument('--source-catalog-id-column', type=str, required=False, default="OBJECT_ID",
+                help='The name of the ID column in the source-catalog')
     parser.add_argument('--filter-mapping-file', type=str, required=True,
                 help='The file containing the photometry mapping of the catalog columns')
     parser.add_argument('--best-model-catalog', type=str, required=True,
@@ -57,6 +59,10 @@ def defineSpecificProgramOptions():
                 help='The file containing the grid with the model photometries')
     parser.add_argument('--source-catalog', type=str, required=True,
                 help='The file containing the catalog with the source photometries')
+    parser.add_argument('--normalization-filter', type=str, required=True,
+                help='The Filter for which the normalization is done')
+    parser.add_argument('--normalization-solar-sed', type=str, required=True,
+                help='Solar SED @10pc used as a reference for Models normalization (name of the SED without extension')
 
     return parser
 
@@ -74,7 +80,7 @@ def mainMethod(args):
     filter_mapping = di.parseFilterMapping(args.filter_mapping_file)
     filter_info = [di.getFilterInfo(f) for f in filter_mapping.keys()]
     
-    model = di.getBestFittedModelInfo(args.source_id, args.best_model_catalog, args.model_grid_file)
+    model = di.getBestFittedModelInfo(args.source_id, args.best_model_catalog, args.model_grid_file, args.normalization_filter, args.normalization_solar_sed)
     
     # Create the figure and the axis 
     fig, ax_phot = plt.subplots()
@@ -109,7 +115,7 @@ def mainMethod(args):
         table = Table.read(args.source_catalog)
     except:
         table = tut.read_table(args.source_catalog)
-    row = next(r for r in table if r['ID']==args.source_id)
+    row = next(r for r in table if r[args.source_catalog_id_column]==args.source_id)
     for f in filter_info:
         f_c, e_c = filter_mapping[f.name]
         ax_phot.errorbar([f.mean], [row[f_c]], yerr=[row[e_c]], fmt='o', color=f.color)

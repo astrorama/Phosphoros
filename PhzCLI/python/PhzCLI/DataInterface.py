@@ -89,7 +89,7 @@ def parseFilterMapping(filename):
     mapping = {}
     for l in lines:
         l_data = l[:l.find('#')].strip().split()
-        if len(l_data) == 3:
+        if len(l_data) >= 3:
             mapping[l_data[0]] = (l_data[1], l_data[2])
     return mapping
 
@@ -190,7 +190,7 @@ def getModelPhotometry(grid, sed, red_curve, ebv, z):
     return phot
 
 
-def getBestFittedModelInfo(source_id, catalog, grid):
+def getBestFittedModelInfo(source_id, catalog, grid, normalization_filter, normalization_solar_sed):
     
     class ModelInfo(object):
         pass
@@ -204,7 +204,7 @@ def getBestFittedModelInfo(source_id, catalog, grid):
     except:
         table = Table.read(catalog, format='ascii')
     
-    row = next(r for r in table if r['ID']==source_id)
+    row = next(r for r in table if str(r['ID'])==source_id)
     model.sed = row['SED'].strip()
     model.red_curve = row['ReddeningCurve'].strip()
     model.ebv = row['E(B-V)']
@@ -228,6 +228,12 @@ def getBestFittedModelInfo(source_id, catalog, grid):
     cmd.append(str(model.ebv))
     cmd.append('--z-value')
     cmd.append(str(model.z))
+    cmd.append('--normalization-filter')
+    cmd.append(normalization_filter)
+    cmd.append('--normalization-solar-sed')
+    cmd.append(normalization_solar_sed)
+    
+    
     lines = _runCmdHelper(cmd).splitlines()
     i = next(i for i,l in enumerate(lines) if l == 'Data:')
     lines = lines[i+1:-1]
