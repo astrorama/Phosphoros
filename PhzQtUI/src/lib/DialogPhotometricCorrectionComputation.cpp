@@ -207,7 +207,9 @@ void DialogPhotometricCorrectionComputation::on_btn_TrainingCatalog_clicked() {
 void DialogPhotometricCorrectionComputation::setRunEnability() {
   bool run_ok = true;
 
-  if (!boost::filesystem::exists(m_dust_map_file)) {
+  if (m_run_option.find("dust-column-density-column-name") != m_run_option.end() &&
+      m_run_option.at("dust-column-density-column-name").as<std::string>() == "PLANCK_GAL_EBV" &&
+      !boost::filesystem::exists(m_dust_map_file)) {
     QMessageBox::warning(this, "Missing Dust map file...",
                          "The file containing the Milky Way dust map is missing (" +
                              QString::fromStdString(m_dust_map_file) +
@@ -479,9 +481,9 @@ void DialogPhotometricCorrectionComputation::on_btn_conf_clicked() {
 
   int  max_iter_number = ui->txt_Iteration->text().toInt();
   auto config_map      = PhotometricCorrectionHandler::GetConfigurationMap(
-           m_run_option, ui->txt_survey->text().toStdString(), ui->txt_FileName->text().toStdString(), max_iter_number,
-           FormUtils::parseToDouble(ui->txt_Tolerence->text()), ui->cb_SelectionMethod->currentText().toStdString(),
-           ui->txt_catalog->text().toStdString(), ui->cb_SpectroColumn->currentText().toStdString());
+      m_run_option, ui->txt_survey->text().toStdString(), ui->txt_FileName->text().toStdString(), max_iter_number,
+      FormUtils::parseToDouble(ui->txt_Tolerence->text()), ui->cb_SelectionMethod->currentText().toStdString(),
+      ui->txt_catalog->text().toStdString(), ui->cb_SpectroColumn->currentText().toStdString());
 
   completeWithDefaults<PhzConfiguration::ComputePhotometricCorrectionsConfig>(config_map);
   std::vector<std::string> correction = {"PDF-sample-number",
@@ -522,7 +524,7 @@ void DialogPhotometricCorrectionComputation::on_btn_conf_clicked() {
       auto        column_reader    = PhzUITools::CatalogColumnReader(path);
       auto        column_from_file = column_reader.getColumnNames();
       if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
-        std::string                                                   path = ui->txt_catalog->text().toStdString();
+        path = ui->txt_catalog->text().toStdString();
         std::map<std::string, boost::program_options::variable_value> add_column_options_map{};
         add_column_options_map["planck-dust-map"].value() = boost::any(m_dust_map_file);
         add_column_options_map["galatic-ebv-col"].value() = boost::any(std::string("PLANCK_GAL_EBV"));
