@@ -27,7 +27,7 @@ import sys
 if sys.version_info[0] < 3:
     from future_builtins import *
 
-import py.test
+import pytest
 import GalacticDustMap.GalacticDustMap as GalacticDustMap
 import numpy as np
 import math as math

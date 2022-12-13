@@ -99,7 +99,7 @@ void FormConfiguration::loadOptionPage(std::shared_ptr<OptionModel> option_model
   connect(ui->sb_thread, SIGNAL(valueChanged(int)), m_option_model_ptr.get(), SLOT(setThread(int)));
 
   connect(ui->gb_memory, SIGNAL(clicked(bool)), m_option_model_ptr.get(), SLOT(setCapMemory(bool)));
-  connect(ui->sb_memory, SIGNAL(valueChanged(double)), m_option_model_ptr.get(), SLOT(setMaxMemory(bool)));
+  connect(ui->sb_memory, SIGNAL(valueChanged(double)), m_option_model_ptr.get(), SLOT(setMaxMemory(double)));
 
   connect(ui->txt_hubble_param, SIGNAL(textEdited(const QString&)), m_option_model_ptr.get(),
           SLOT(setHubble(const QString&)));
