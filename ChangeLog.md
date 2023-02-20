@@ -9,6 +9,27 @@ Note: the issue number refer to SDC-CH internal tracking.
 
 ## [Unreleased]
 
+## [1.5.2] 2023-01-27
+
+### Fixed
+- Fix a bug in Alexandria which was causing crash when only physical parameters with 1 char lenght name where defined. https://redmine.isdc.unige.ch/issues/28352
+
+### Changed
+- Change the reference for Alexandria 2.28.2 (Elements 6.1.2)
+
+## [1.5.1] 2023-01-26
+
+### Fixed
+- Fix memory limit management in GUI. https://redmine.isdc.unige.ch/issues/28139
+- Fix the way Phosphoros BRS clean the reference sample folder with option --reference-sample-overwrite: Do not delete file with other extension than .npy. https://redmine.isdc.unige.ch/issues/28172
+
+
+## [1.5.0] 2022-11-29
+
+
+### Changed
+- Change the reference for Alexandria 2.28.0 (Elements 6.1.1)
+
 ## [1.4.0] 2022-11-02
 
 ### Added
