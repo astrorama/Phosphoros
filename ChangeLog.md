@@ -10,7 +10,7 @@ Note: the issue number refer to SDC-CH internal tracking.
 ## [Unreleased]
 
 ### Fixed
-- Fix a bug in the Id columns format when the type is string. This change rises the memory footprint when sampling the results. https://redmine.isdc.unige.ch/issues/28519
+- Fix a bug in the Id columns format when the type is string. This change rises the memory footprint when sampling the results. Can be overcome by changing the chunk size or using an numeric (long) column for the OBJECT_ID https://redmine.isdc.unige.ch/issues/28519
 
 
 ## [1.5.2] 2023-01-27
