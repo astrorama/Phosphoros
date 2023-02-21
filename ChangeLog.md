@@ -9,6 +9,10 @@ Note: the issue number refer to SDC-CH internal tracking.
 
 ## [Unreleased]
 
+### Fixed
+- Fix a bug in the Id columns format when the type is string. This change rises the memory footprint when sampling the results. https://redmine.isdc.unige.ch/issues/28519
+
+
 ## [1.5.2] 2023-01-27
 
 ### Fixed
@@ -25,7 +29,6 @@ Note: the issue number refer to SDC-CH internal tracking.
 
 
 ## [1.5.0] 2022-11-29
-
 
 ### Changed
 - Change the reference for Alexandria 2.28.0 (Elements 6.1.1)
