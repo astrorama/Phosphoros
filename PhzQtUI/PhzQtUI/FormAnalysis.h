@@ -233,10 +233,6 @@ private:
   std::string                    m_planck_file = "";
   std::string                    m_planck_url =
       "https://lambda.gsfc.nasa.gov/data/foregrounds/EBV/lambda_meisner_finkbeiner_2015_dust_map.fits";
-  bool m_is_loading=false;
-  std::tuple<std::string, std::string, bool> m_cache_compatible_model_grid{"","",false};
-  std::tuple<std::string, std::string, bool> m_cache_compatible_galactic_grid{"","",false};
-  std::tuple<std::string, std::string, bool> m_cache_compatible_shift_grid{"","",false};
 };
 
 }  // namespace PhzQtUI

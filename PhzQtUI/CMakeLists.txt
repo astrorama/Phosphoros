@@ -67,8 +67,7 @@ elements_add_unit_test(ParameterRule_test tests/src/ParameterRule_test.cpp
                        LINK_LIBRARIES PhzQtUI TYPE Boost)
 elements_add_unit_test(ModelSet_test tests/src/ModelSet_test.cpp
                        LINK_LIBRARIES PhzQtUI TYPE Boost)
-elements_add_unit_test(SedParamUtils_test tests/src/SedParamUtils_test.cpp
-                       LINK_LIBRARIES PhzQtUI TYPE Boost)
+
 
 elements_add_unit_test(FilterMapping_test tests/src/FilterMapping_test.cpp
                        LINK_LIBRARIES PhzQtUI TYPE Boost)

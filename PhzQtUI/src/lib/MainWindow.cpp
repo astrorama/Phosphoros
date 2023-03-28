@@ -1,6 +1,5 @@
 #include "PhzQtUI/MainWindow.h"
 #include "ElementsKernel/Exception.h"
-#include "ElementsKernel/Logging.h"
 #include "FileUtils.h"
 #include "PreferencesUtils.h"
 #include "XYDataset/AsciiParser.h"
@@ -10,7 +9,6 @@
 #include <QMessageBox>
 #include <fstream>
 #include <stdio.h>
-#include <chrono>
 
 #include "PhzQtUI/DataPackHandler.h"
 
@@ -18,11 +16,10 @@
 
 namespace Euclid {
 namespace PhzQtUI {
-static Elements::Logging main_logger = Elements::Logging::getLogger("MainWindow");
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
-  main_logger.debug()<<"start loading";
   QString title = QString::fromStdString(THIS_PROJECT_NAME_STRING + " " + THIS_PROJECT_VERSION_STRING);
+
   setWindowTitle(title);
 
   ui->setupUi(this);
@@ -32,11 +29,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
   //  ui->page_layout->setSpacing(0);
   //  ui->page_layout->setContentsMargins(0,0,0,0);
   //  this->setStyleSheet("background-color: green");
-  ui->Lb_warning_time->setText("");
+
   QPixmap pixmap(":/logoPhUI.png");
   ui->image_label->setTopMargin(20);
   ui->image_label->setPixmap(pixmap);
-  main_logger.debug()<<"UI setup done";
 
   connect(this, SIGNAL(changeMainStackedWidgetIndex(int)), ui->mainStackedWidget, SLOT(setCurrentIndex(int)));
 
@@ -72,8 +68,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   connect(ui->widget_Analysis, SIGNAL(navigateToNewCatalog(std::string)), SLOT(navigateToNewCatalog(std::string)));
 
-
-  main_logger.debug()<<"Button wiring done";
   auto      root_path = QString::fromStdString(FileUtils::getRootPath(false));
   QFileInfo info(root_path);
   if (!info.exists()) {
@@ -95,10 +89,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
   /*  DataPack handling */
   m_dataPackHandler.reset(new DataPackHandler(this));
   connect(m_dataPackHandler.get(), SIGNAL(completed()), this, SLOT(loadAuxData()));
-  main_logger.debug()<<"REady to check data pack";
   m_dataPackHandler->check(false);
-
-
 
   std::string sun_sed = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
   if (sun_sed == "") {
@@ -107,15 +98,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
                          "Please navigate to Configuration/Aux. Data/SEDs and select it.",
                          QMessageBox::Ok);
   }
-
-
-  main_logger.debug()<<"loading done";
 }
 
 MainWindow::~MainWindow() {}
 
 void MainWindow::loadAuxData() {
-	  main_logger.debug()<<"Loading data";
   try {
     std::unique_ptr<XYDataset::FileParser>         filter_file_parser{new XYDataset::AsciiParser{}};
     std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(
@@ -144,7 +131,6 @@ void MainWindow::loadAuxData() {
     m_luminosity_repository.reset(
         new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(luminosity_curve_provider)});
     m_luminosity_repository->reload();
-    main_logger.debug()<<"Loading data done";
   } catch (Elements::Exception& e) {
     std::string msg = e.what();
     if (msg.rfind("Qualified name can not be inserted in the map.", 0) == 0) {
@@ -180,47 +166,20 @@ void MainWindow::loadAuxData() {
   ui->btn_HomeToOption->setEnabled(true);
   ui->btn_HomeToPP->setEnabled(true);
 
-
   resetRepo();
-  ui->Lb_warning_time->setText("Think to purge grid data you do not use anymore (see 'Catalog Setup')");
-
 }
 
 void MainWindow::resetRepo() {
-  auto start = std::chrono::high_resolution_clock::now();
-  main_logger.debug()<<"Start reset repo";
   m_survey_model_ptr->loadSurvey();
 
-  auto stop = std::chrono::high_resolution_clock::now();
-  auto duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000000;
-  main_logger.debug()<<"Survey loaded "<< duration << "[s]";
-  start = stop;
-
   ui->widget_Catalog->loadMappingPage(m_survey_model_ptr, m_filter_repository, "");
-  stop = std::chrono::high_resolution_clock::now();
-  duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000000;
-  main_logger.debug()<<"Catalog Page loaded "<< duration << "[s]";
-  start = stop;
 
   m_model_set_model_ptr->loadSets();
   ui->widget_ModelSet->loadSetPage(m_model_set_model_ptr, m_seds_repository, m_redenig_curves_repository);
-  stop = std::chrono::high_resolution_clock::now();
-  duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000000;
-  main_logger.debug()<<"Model Page loaded "<< duration << "[s]";
-  start = stop;
 
   ui->widget_Analysis->loadAnalysisPage(m_survey_model_ptr, m_model_set_model_ptr, m_filter_repository,
                                         m_luminosity_repository);
-  stop = std::chrono::high_resolution_clock::now();
-  duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000000;
-  main_logger.debug()<<"Analyse Page loaded "<< duration << "[s]";
-  start = stop;
-
   ui->widget_postprocessing->loadPostProcessingPage(m_survey_model_ptr);
-  stop = std::chrono::high_resolution_clock::now();
-  duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000000;
-  main_logger.debug()<<"Post Processing Page loaded "<< duration << "[s]";
-  start = stop;
 }
 
 //- Home Page
