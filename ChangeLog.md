@@ -9,6 +9,23 @@ Note: the issue number refer to SDC-CH internal tracking.
 
 ## [Unreleased]
 
+
+## [1.5.4] 2023-03-01
+### Changed
+- Change the reference for Alexandria back to 2.28.3 (Elements 6.1.2) This fix back the bug 28352
+
+### Fixed
+- Fix a bug in the sampling of the PDF. https://redmine.isdc.unige.ch/issues/28579
+
+## [1.5.3] 2023-02-22
+### Changed
+- Change the reference for Alexandria back to 2.28.0 (Elements 6.1.1) (For Euclid Pipeline's reason. This temporary reintroduce the bug 28352)
+
+### Fixed
+- Fix a bug in the Id columns format when the type is string. This change rises the memory footprint when sampling the results. Can be overcome by changing the chunk size or using an numeric (long) column for the OBJECT_ID https://redmine.isdc.unige.ch/issues/28519
+- Fix a bug: ComputeRedshift executable was not creating the output file if empty. https://redmine.isdc.unige.ch/issues/28536
+
+
 ## [1.5.2] 2023-01-27
 
 ### Fixed
@@ -25,7 +42,6 @@ Note: the issue number refer to SDC-CH internal tracking.
 
 
 ## [1.5.0] 2022-11-29
-
 
 ### Changed
 - Change the reference for Alexandria 2.28.0 (Elements 6.1.1)
