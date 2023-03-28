@@ -9,6 +9,20 @@ Note: the issue number refer to SDC-CH internal tracking.
 
 ## [Unreleased]
 
+## [1.6.0] 2023-03-28
+### Changed
+- Add the possibility to define PP with $pp= A*L0 + B + C*LOG(D*L)$ (Where C and D param are new) The code reading files is backward compatible.  https://redmine.isdc.unige.ch/issues/28755
+- Add a button which delete the IntermediateData grids (for saving disk space) https://redmine.isdc.unige.ch/issues/28796
+
+## [1.5.3] 2023-02-22
+### Changed
+- Change the reference for Alexandria back to 2.28.0 (Elements 6.1.1) (For Euclid Pipeline's reason. This temporary reintroduce the bug 28352)
+
+### Fixed
+- Fix a bug in the Id columns format when the type is string. This change rises the memory footprint when sampling the results. Can be overcome by changing the chunk size or using an numeric (long) column for the OBJECT_ID https://redmine.isdc.unige.ch/issues/28519
+- Fix a bug: ComputeRedshift executable was not creating the output file if empty. https://redmine.isdc.unige.ch/issues/28536
+
+
 
 ## [1.5.4] 2023-03-01
 ### Changed
