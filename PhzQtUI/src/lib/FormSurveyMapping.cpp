@@ -26,6 +26,7 @@
 #include "PhzQtUI/filecopyer.h"
 
 #include <QtCore/qthread.h>
+#include <filesystem>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -172,6 +173,7 @@ void FormSurveyMapping::setFilterMappingInEdition() {
   ui->btn_MapNew->setEnabled(false);
   ui->btn_MapDuplicate->setEnabled(false);
   ui->btn_map_delete->setEnabled(false);
+  ui->btn_purgeGrids->setEnabled(false);
   ui->btn_MapCancel->setEnabled(true);
   ui->btn_MapSave->setEnabled(true);
 
@@ -199,6 +201,7 @@ void FormSurveyMapping::setFilterMappingInView() {
   ui->btn_MapNew->setEnabled(true);
   ui->btn_MapDuplicate->setEnabled(has_mapping_selected);
   ui->btn_map_delete->setEnabled(has_mapping_selected);
+  ui->btn_purgeGrids->setEnabled(has_mapping_selected);
   ui->btn_MapCancel->setEnabled(false);
   ui->btn_MapSave->setEnabled(false);
 
@@ -554,6 +557,74 @@ void FormSurveyMapping::on_btn_map_delete_clicked() {
       }
     }
   }
+}
+
+
+void FormSurveyMapping::on_btn_purgeGrids_clicked() {
+	 const SurveyFilterMapping& selected_survey = m_survey_model_ptr->getSelectedSurvey();
+	  int                        row             = m_survey_model_ptr->getSelectedRow();
+	  if (row >= 0) {
+	    std::string catalog_name      = selected_survey.getName();
+	    std::string intermediate_path = FileUtils::getIntermediaryProductRootPath(false, catalog_name);
+	    std::vector<std::string> sub_folders {"ModelGrids","LuminosityModelGrids","GalacticCorrectionCoefficientGrids","FilterVariationCoefficientGrids"};
+
+	    std::vector<int> content{0,0,0,0};
+	    std::vector<long> size{0,0,0,0};
+	    std::vector<std::string> size_str{"0 B","0 B","0 B","0 B"};
+
+	    auto cont_iter = content.begin();
+	    auto size_iter = size.begin();
+	    auto size_str_iter = size_str.begin();
+	    for (auto folder_iter = sub_folders.begin(); folder_iter != sub_folders.end(); ++folder_iter){
+	    	auto path = intermediate_path+ "/"+*folder_iter;
+	    	int count = 0;
+	    	if (std::filesystem::exists(path)){
+				for (auto& obj : std::filesystem::directory_iterator(path)) {
+					 if (!std::filesystem::is_directory(obj)) {
+						 (*size_iter) +=std::filesystem::file_size(obj);
+					 }
+					 ++count;
+				}
+				(*cont_iter)=count;
+
+				int i{};
+				double mantissa = *size_iter;
+				for (; mantissa >= 1024.; mantissa /= 1024., ++i) { }
+				mantissa = std::round(mantissa);
+				(*size_str_iter)= std::to_string(int(mantissa)) + " KMGTPE"[i] + "B";
+
+	    	}
+	    	++cont_iter;
+	    	++size_iter;
+	    	++size_str_iter;
+	    }
+
+
+
+	    if (QMessageBox::question(
+	            this, "Confirm deletion...",
+	            "Do you really want to delete the Grids computed for the Catalog Type '" + QString::fromStdString(catalog_name) +
+	                "' ?\n \n"
+	                "This action will also DELETE all the Grid intermediate products stored in '" +
+	                QString::fromStdString(intermediate_path) +
+	                "':\n"
+					" - "+QString::fromStdString(sub_folders[0])+" : "+ QString::number(content[0])+ " files ("+QString::fromStdString(size_str[0])+"),\n"
+					" - "+QString::fromStdString(sub_folders[1])+" : "+ QString::number(content[1])+ " files ("+QString::fromStdString(size_str[1])+"),\n"
+					" - "+QString::fromStdString(sub_folders[2])+" : "+ QString::number(content[2])+ " files ("+QString::fromStdString(size_str[2])+"),\n"
+					" - "+QString::fromStdString(sub_folders[3])+" : "+ QString::number(content[3])+ " files ("+QString::fromStdString(size_str[3])+").\n"
+					"\n"
+	                "\n(You will be able to recompute them if you need them again)",
+	            QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+
+	      bool success = true;
+	      // The intermediate folders
+	      success &= FileUtils::removeDir(QString::fromStdString(intermediate_path+"/"+sub_folders[0]));
+	      success &= FileUtils::removeDir(QString::fromStdString(intermediate_path+"/"+sub_folders[1]));
+	      success &= FileUtils::removeDir(QString::fromStdString(intermediate_path+"/"+sub_folders[2]));
+	      success &= FileUtils::removeDir(QString::fromStdString(intermediate_path+"/"+sub_folders[3]));
+
+	    }
+	  }
 }
 
 void FormSurveyMapping::on_btn_MapCancel_clicked() {

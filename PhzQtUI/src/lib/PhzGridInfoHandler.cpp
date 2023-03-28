@@ -26,6 +26,8 @@
 #include "PhzQtUI/PhzGridInfoHandler.h"
 #include "PreferencesUtils.h"
 #include "XYDataset/QualifiedName.h"
+#include <chrono>
+
 
 namespace po = boost::program_options;
 
@@ -38,7 +40,8 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
                                                     const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes,
                                                     const std::list<std::string>& selected_filters,
                                                     const std::string igm_type, const std::string luminosity_filter) {
-
+  logger.debug()<<"Checking compatibility for grid in file "<< file_path.toStdString();
+  auto start = std::chrono::high_resolution_clock::now();
   try {  // If a file cannot be opened or is ill formated: just skip it!
     // We directly use the boost archive, because we just need the grid info
     // from the beginning of the file. Reading the full file whould be very
@@ -48,6 +51,10 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
     std::ifstream                    in{file_path.toStdString()};
     boost::archive::text_iarchive    bia{in};
     bia >> grid_info;
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000000;
+  	logger.debug()<<"Grid info loaded "<< duration << "[s]";
+  	start = stop;
 
     // Check the IGM type compatibility
     if (igm_type != grid_info.igm_method) {
@@ -61,6 +68,10 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
       //  grid_info.luminosity_filter_name.qualifiedName() <<  ")";
       return false;
     }
+    stop = std::chrono::high_resolution_clock::now();
+    duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000000;
+  	logger.debug()<<"IGM and Luminosity filter checked "<< duration << "[s]";
+  	start = stop;
 
     // check the filters
     std::size_t number_found = 0;
@@ -76,6 +87,10 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
       //  number_found <<  ")";
       return false;
     }
+    stop = std::chrono::high_resolution_clock::now();
+    duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000000;
+	logger.debug()<<"Filter checked "<< duration << "[s]";
+	start = stop;
 
     // check the axis
     if (grid_info.region_axes_map.size() != axes.size()) {
@@ -189,6 +204,11 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
         break;
       }
     }
+
+    stop = std::chrono::high_resolution_clock::now();
+    duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000000;
+	logger.debug()<<"Axis checked "<< duration << "[s]";
+	start = stop;
 
     if (axes.size() != found) {
       //  logger.info() << "Incompatible region.";

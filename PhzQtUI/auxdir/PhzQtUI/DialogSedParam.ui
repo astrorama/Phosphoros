@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>610</width>
-    <height>555</height>
+    <width>845</width>
+    <height>554</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -93,7 +93,7 @@
      <item>
       <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>Parameters are of the form  P = A*L/L☉ + B [Units]</string>
+        <string>Parameters are of the form  P = A*L/L☉ + B + C*LOG10(D*L/L☉) [Units]</string>
        </property>
       </widget>
      </item>
@@ -133,7 +133,7 @@
      <item>
       <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>*L/L☉ +</string>
+        <string>* L/L☉ +</string>
        </property>
       </widget>
      </item>
@@ -141,9 +141,29 @@
       <widget class="QLineEdit" name="le_B"/>
      </item>
      <item>
+      <widget class="QLabel" name="label_8">
+       <property name="text">
+        <string>+</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="le_C"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_9">
+       <property name="text">
+        <string>* LOG10(</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="le_D"/>
+     </item>
+     <item>
       <widget class="QLabel" name="label_6">
        <property name="text">
-        <string>[</string>
+        <string>* L/L☉) [</string>
        </property>
       </widget>
      </item>
