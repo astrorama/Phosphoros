@@ -1,6 +1,7 @@
 #ifndef MODELSET_H
 #define MODELSET_H
 
+#include "PhzQtUI/DatasetRepository.h"
 #include "ParameterRule.h"
 #include "PhzDataModel/PhzModel.h"
 #include "PhzQtUI/Range.h"
@@ -12,12 +13,16 @@
 
 namespace boost {
 namespace program_options {
+
 class variable_value;
 }
 }  // namespace boost
 
 namespace Euclid {
 namespace PhzQtUI {
+
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
+
 /**
  * @brief The ModelSet class
  */
@@ -171,9 +176,9 @@ public:
   /**
    * @brief compute the ModelAxeTuple corresponding to this ModelSet
    */
-  std::map<std::string, PhzDataModel::ModelAxesTuple> getAxesTuple() const;
+ const std::map<std::string, PhzDataModel::ModelAxesTuple>& getAxesTuple(DatasetRepo sed_repo, DatasetRepo red_repo);
 
-  std::vector<std::string> getSeds() const;
+  std::vector<std::string> getSeds(DatasetRepo sed_repo, DatasetRepo red_repo);
 
 private:
   std::string                  m_name;
@@ -183,6 +188,7 @@ private:
   std::set<double>             m_z_values{};
   std::vector<Range>           m_ebv_ranges{};
   std::set<double>             m_ebv_values{};
+  std::map<std::string, PhzDataModel::ModelAxesTuple> m_axes_tuple{};
 };
 
 }  // namespace PhzQtUI

@@ -14,6 +14,10 @@ Note: the issue number refer to SDC-CH internal tracking.
 - Add the possibility to define PP with $pp= A*L0 + B + C*LOG(D*L)$ (Where C and D param are new) The code reading files is backward compatible.  https://redmine.isdc.unige.ch/issues/28755
 - Add a button which delete the IntermediateData grids (for saving disk space) https://redmine.isdc.unige.ch/issues/28796
 
+### Fixed
+- Refactor the GUI in order to add loading message and speed up the navigation between the pages by avoiding reloading the AuxiliaryData. https://redmine.isdc.unige.ch/issues/28808
+
+
 ## [1.5.3] 2023-02-22
 ### Changed
 - Change the reference for Alexandria back to 2.28.0 (Elements 6.1.1) (For Euclid Pipeline's reason. This temporary reintroduce the bug 28352)

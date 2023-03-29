@@ -49,7 +49,10 @@ public:
   explicit FormAnalysis(QWidget* parent = 0);
   ~FormAnalysis();
   void loadAnalysisPage(std::shared_ptr<SurveyModel>   survey_model_ptr,
-                        std::shared_ptr<ModelSetModel> model_set_model_ptr, DatasetRepo filter_repository,
+                        std::shared_ptr<ModelSetModel> model_set_model_ptr,
+						DatasetRepo sed_repository,
+						DatasetRepo redenig_curves_repository,
+						DatasetRepo filter_repository,
                         DatasetRepo luminosity_repository);
 
   void updateSelection();
@@ -226,8 +229,11 @@ private:
   bool                   m_httpRequestAborted = false;
   QNetworkReply*         m_reply              = nullptr;
 
+  DatasetRepo                    m_sed_repository;
+  DatasetRepo                    m_redenig_curves_repository;
   DatasetRepo                    m_filter_repository;
   DatasetRepo                    m_luminosity_repository;
+
   std::shared_ptr<SurveyModel>   m_survey_model_ptr;
   std::shared_ptr<ModelSetModel> m_model_set_model_ptr;
   std::string                    m_planck_file = "";

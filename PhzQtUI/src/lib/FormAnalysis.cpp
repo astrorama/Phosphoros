@@ -73,19 +73,37 @@ FormAnalysis::FormAnalysis(QWidget* parent) : QWidget(parent), ui(new Ui::FormAn
 
 FormAnalysis::~FormAnalysis() {}
 
+
+static std::string getAxisDescription(const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes) {
+	std::string results = "";
+	for (const auto& item : axes) {
+		results+="Region name ='"+item.first+"', Card(Z) ="+ std::to_string(std::get<0>(item.second).size())
+			                                    +", Card(EBV) ="+ std::to_string(std::get<1>(item.second).size())
+			                                    +", Card(RedCurve) ="+ std::to_string(std::get<2>(item.second).size())
+			                                    +", Card(SED) ="+ std::to_string(std::get<3>(item.second).size())
+												+".\n";
+	}
+	return results;
+}
+
+
 ///////////////////////////////////////////////////
 //  Initial data load
 void FormAnalysis::loadAnalysisPage(std::shared_ptr<SurveyModel>   survey_model_ptr,
-                                    std::shared_ptr<ModelSetModel> model_set_model_ptr, DatasetRepo filter_repository,
+                                    std::shared_ptr<ModelSetModel> model_set_model_ptr,
+									DatasetRepo sed_repository,
+									DatasetRepo redenig_curves_repository,
+									DatasetRepo filter_repository,
                                     DatasetRepo luminosity_repository) {
   m_survey_model_ptr      = survey_model_ptr;
   m_model_set_model_ptr   = model_set_model_ptr;
+  m_sed_repository        = sed_repository;
+  m_redenig_curves_repository = redenig_curves_repository;
   m_filter_repository     = filter_repository;
   m_luminosity_repository = luminosity_repository;
 
-  logger.info() << "Load the Analysis Page";
-
   updateSelection();
+
 }
 
 void FormAnalysis::on_btn_lum_filter_clicked() {
@@ -101,32 +119,37 @@ void FormAnalysis::setLumFilter(std::string new_filter) {
   PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                                       ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityFilter",
                                       new_filter);
-  updateGridSelection();
+  if (!m_is_loading) {
+	  updateGridSelection();
+  }
 }
 
 void FormAnalysis::updateSelection() {
+  logger.debug() << "Load the Analysis Page";
+  auto start = std::chrono::high_resolution_clock::now();
+  /// COMBO BOX MODEL  ////
+  ////////////////////////
+
+  bool has_changed_model=false;
   // Disconnect the combobox event
   disconnect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString&)), 0, 0);
-
   // if needed: Fill the Parameter Space Combobox and set its index
-  if (m_model_set_model_ptr->doNeedReload()) {
+  if (ui->cb_AnalysisModel->count()==0 || m_model_set_model_ptr->doNeedReload()) {
     ui->cb_AnalysisModel->clear();
     logger.info() << "Found " << m_model_set_model_ptr->getModelSetList().size() << " Parameter Space in the provider";
     for (auto& model_name : m_model_set_model_ptr->getModelSetList()) {
       ui->cb_AnalysisModel->addItem(model_name);
     }
+    has_changed_model |= true;
   }
-
   // select the right item
-
-  QString selected_model_name = "";
-  if (m_model_set_model_ptr->doNeedReload() ||
-      ui->cb_AnalysisModel->currentText().toStdString() != m_model_set_model_ptr->getSelectedModelSet().getName()) {
+  auto target_model_name = QString::fromStdString(m_model_set_model_ptr->getSelectedModelSet().getName());
+  if (ui->cb_AnalysisModel->currentText() != target_model_name) {
+	  has_changed_model |=  true;
     bool found = false;
     for (int i = 0; i < ui->cb_AnalysisModel->count(); i++) {
-      if (ui->cb_AnalysisModel->itemText(i).toStdString() == m_model_set_model_ptr->getSelectedModelSet().getName()) {
+      if (ui->cb_AnalysisModel->itemText(i) == target_model_name) {
         ui->cb_AnalysisModel->setCurrentIndex(i);
-        selected_model_name = ui->cb_AnalysisModel->itemText(i);
         found               = true;
         break;
       }
@@ -134,21 +157,23 @@ void FormAnalysis::updateSelection() {
 
     if (!found && ui->cb_AnalysisModel->count() > 0) {
       ui->cb_AnalysisModel->setCurrentIndex(0);
-      selected_model_name = ui->cb_AnalysisModel->itemText(0);
     }
   }
-
   m_model_set_model_ptr->reloaded();
-
   // reconnect the combobox event
   connect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString&)),
           SLOT(on_cb_AnalysisModel_currentIndexChanged(const QString&)));
 
+  /// COMBO BOX CATALOG  ////
+  //////////////////////////
+
+  bool has_changed_catalog=false;
   // Disconnect the combobox event
   disconnect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString&)), 0, 0);
 
   // if needed: Fill the Parameter Space Combobox and set its index
-  if (m_survey_model_ptr->doNeedReload()) {
+  if (ui->cb_AnalysisSurvey->count()==0 || m_survey_model_ptr->doNeedReload()) {
+	has_changed_catalog |=  true;
     ui->cb_AnalysisSurvey->clear();
     logger.info() << "Found " << m_survey_model_ptr->getSurveyList().size() << " Catalogs types in the provider";
     for (auto& survey_name : m_survey_model_ptr->getSurveyList()) {
@@ -156,16 +181,14 @@ void FormAnalysis::updateSelection() {
     }
   }
 
-  auto    saved_catalog        = m_survey_model_ptr->getSelectedSurvey();
-  QString selected_survey_name = "";
-  if (m_survey_model_ptr->doNeedReload() ||
-      ui->cb_AnalysisSurvey->currentText().toStdString() != saved_catalog.getName()) {
+  auto target_catalog_name = QString::fromStdString(m_survey_model_ptr->getSelectedSurvey().getName());
+  if (ui->cb_AnalysisSurvey->currentText() != target_catalog_name) {
+	 has_changed_catalog |=  true;
     // select the right item
     bool found = false;
     for (int i = 0; i < ui->cb_AnalysisSurvey->count(); i++) {
-      if (ui->cb_AnalysisSurvey->itemText(i).toStdString() == saved_catalog.getName()) {
+      if (ui->cb_AnalysisSurvey->itemText(i) == target_catalog_name) {
         ui->cb_AnalysisSurvey->setCurrentIndex(i);
-        selected_survey_name = ui->cb_AnalysisSurvey->itemText(i);
         found                = true;
         break;
       }
@@ -173,7 +196,6 @@ void FormAnalysis::updateSelection() {
 
     if (!found && ui->cb_AnalysisSurvey->count() > 0) {
       ui->cb_AnalysisSurvey->setCurrentIndex(0);
-      selected_survey_name = ui->cb_AnalysisSurvey->itemText(0);
     }
   }
 
@@ -182,13 +204,16 @@ void FormAnalysis::updateSelection() {
   connect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString&)),
           SLOT(on_cb_AnalysisSurvey_currentIndexChanged(const QString&)));
 
+  /// LUMINOSITY FILTER  ////
+  //////////////////////////
+
   // set the Luminosity filter
   std::string lum_filter =
       PreferencesUtils::getUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                                           ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityFilter");
-
+  m_is_loading=true;
   if (lum_filter != "") {
-    ui->lbl_lum_filter->setText(QString::fromStdString(lum_filter));
+	  setLumFilter(lum_filter);
   } else {
     // use first filter with r as default value (TODO update with full name);
     for (auto& filter_name : m_filter_repository->getContent()) {
@@ -198,56 +223,97 @@ void FormAnalysis::updateSelection() {
       }
     }
   }
+  m_is_loading=false;
 
-  if (selected_survey_name != "") {
-    on_cb_AnalysisSurvey_currentIndexChanged(selected_survey_name);
-  }
+  if (ui->cb_AnalysisSurvey->currentText() != "" && has_changed_catalog) {
+    on_cb_AnalysisSurvey_currentIndexChanged(ui->cb_AnalysisSurvey->currentText());
+  } else if (ui->cb_AnalysisModel->currentText() != "" && has_changed_model) {
+    on_cb_AnalysisModel_currentIndexChanged(ui->cb_AnalysisModel->currentText());
+}
+
+  auto stop = std::chrono::high_resolution_clock::now();
+  auto duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+  logger.info() << "Analysis Page Loaded (survey = "<<ui->cb_AnalysisSurvey->currentText().toStdString()<<
+		            " changed="<<has_changed_catalog<<
+					", model ="<<ui->cb_AnalysisModel->currentText().toStdString()<<" changed="<<has_changed_model<<")  "
+					<< duration <<"[ms]";
 }
 
 ///////////////////////////////////////////////////
 //  Handle controls enability
 
 void FormAnalysis::updateGridSelection() {
+  auto start = std::chrono::high_resolution_clock::now();
+  logger.info() << "Entering updateGridSelection";
   try {
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
-    auto axis = selected_model.getAxesTuple();
-    logger.info() << "Expected filter " << ui->lbl_lum_filter->text().toStdString();
+    auto axis = selected_model.getAxesTuple(m_sed_repository, m_redenig_curves_repository);
+    logger.debug() << "updateGridSelection => selected_model content :" << getAxisDescription(axis);
+    auto stop = std::chrono::high_resolution_clock::now();
+	auto duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+	logger.debug()<<"updateGridSelection => get Axis "<< duration << "[ms]";
+	start=stop;
 
-    auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
-        m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
-        ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(), PhotometryGrid);
+    const auto& survey_name = m_survey_model_ptr->getSelectedSurvey().getName();
+    stop = std::chrono::high_resolution_clock::now();
+    duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+    logger.debug()<<"updateGridSelection => Get name "<< duration << "[ms]";
+    start=stop;
+
+    auto igm =  ui->cb_igm->currentText().toStdString();
+    stop = std::chrono::high_resolution_clock::now();
+    duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+    logger.debug()<<"updateGridSelection => Get IGM "<< duration << "[ms]";
+    start=stop;
+
+    auto lum_filter = ui->lbl_lum_filter->text().toStdString();
+    logger.debug() << "Luminosity filter for the Model : " << lum_filter;
+
+    stop = std::chrono::high_resolution_clock::now();
+    duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+    logger.debug()<<"updateGridSelection => Info collected "<< duration << "[ms]";
+    start=stop;
+
+    auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(survey_name, axis, getSelectedFilters(), igm, lum_filter, PhotometryGrid);
+    stop = std::chrono::high_resolution_clock::now();
+    duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+    logger.debug()<<"updateGridSelection => files loaded "<< duration << "[ms]";
 
    	m_is_loading=true;
     ui->cb_CompatibleGrid->clear();
-    m_is_loading=false;
     bool added = false;
     for (auto& file : possible_files) {
       ui->cb_CompatibleGrid->addItem(QString::fromStdString(file));
       added = true;
     }
-
     if (!added) {
       ui->cb_CompatibleGrid->addItem(QString::fromStdString("Grid_" + selected_model.getName() + "_") +
                                      ui->cb_igm->currentText() + ".txt");
     }
-
     ui->cb_CompatibleGrid->addItem("<Enter a new name>");
+    m_is_loading=false;
+    ui->cb_CompatibleGrid->setCurrentIndex(0);
+
   } catch (Elements::Exception&) {
     if (ui->cb_AnalysisModel->currentIndex() > -1) {
       ui->cb_AnalysisModel->removeItem(ui->cb_AnalysisModel->currentIndex());
     }
   }
+  auto final_stop = std::chrono::high_resolution_clock::now();
+  auto  final_duration=(std::chrono::duration_cast<std::chrono::microseconds>(final_stop - start)).count()/1000;
+  logger.debug()<<"updateGridSelection completed "<< final_duration << "[ms]";
 
-  logger.info() << "updateGridSelection completed";
 }
+
+
 
 bool FormAnalysis::checkCompatibleModelGrid(std::string file_name) {
   auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
   auto model_name = selected_model.getName();
 
   if (std::get<0>(m_cache_compatible_model_grid)==model_name && std::get<1>(m_cache_compatible_model_grid)==file_name){
-	return std::get<2>(m_cache_compatible_model_grid);
+	  return std::get<2>(m_cache_compatible_model_grid);
   }
 
   QFileInfo info(QString::fromStdString(
@@ -259,7 +325,9 @@ bool FormAnalysis::checkCompatibleModelGrid(std::string file_name) {
     return false;
   } else {
 
-    auto  axis           = selected_model.getAxesTuple();
+    auto  axis           = selected_model.getAxesTuple(m_sed_repository, m_redenig_curves_repository);
+    logger.debug() << "checkCompatibleModelGrid => selected_model content :" << getAxisDescription(axis);
+
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
          ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(),
@@ -293,14 +361,15 @@ bool FormAnalysis::checkCompatibleGalacticGrid(std::string file_name) {
 	logger.debug()<<"checkCompatibleGalacticGrid => No cache, need to actually check the file "<< duration << "[ms]";
 	start = stop;
 
-    auto  axis           = selected_model.getAxesTuple();
+    auto  axis           = selected_model.getAxesTuple(m_sed_repository, m_redenig_curves_repository);
+    logger.debug() << "checkCompatibleGalacticGrid => selected_model content :" << getAxisDescription(axis);
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
          ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(),
          GalacticReddeningCorrectionGrid);
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
-	logger.debug()<<"checkCompatibleGalacticGrid => File checked "<< duration << "[ms]";
+	logger.debug()<<"checkCompatibleGalacticGrid => Files checked "<<possible_files.size()<<" compatible files "<< duration << "[ms]";
 	start = stop;
     bool valid = (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
     m_cache_compatible_galactic_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, valid};
@@ -327,7 +396,8 @@ bool FormAnalysis::checkCompatibleFilterShiftGrid(std::string file_name) {
     return false;
   } else {
 
-    auto  axis           = selected_model.getAxesTuple();
+    auto  axis           = selected_model.getAxesTuple(m_sed_repository, m_redenig_curves_repository);
+    logger.debug() << "checkCompatibleFilterShiftGrid => selected_model content :" << getAxisDescription(axis);
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
          ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(), FilterShiftCorrectionGrid);
@@ -342,7 +412,8 @@ void FormAnalysis::updateGalCorrGridSelection() {
   try {
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
-    auto axis           = selected_model.getAxesTuple();
+    auto axis           = selected_model.getAxesTuple(m_sed_repository, m_redenig_curves_repository);
+    logger.debug() << "updateGalCorrGridSelection => selected_model content :" << getAxisDescription(axis);
     auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
         m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
         ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(),
@@ -369,7 +440,8 @@ void FormAnalysis::updateFilterShiftGridSelection() {
   try {
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
-    auto axis           = selected_model.getAxesTuple();
+    auto axis           = selected_model.getAxesTuple(m_sed_repository, m_redenig_curves_repository);
+    logger.debug() << "updateFilterShiftGridSelection => selected_model content :" << getAxisDescription(axis);
     auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
         m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
         ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(), FilterShiftCorrectionGrid);
@@ -645,7 +717,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
       }
     }
 
-    lum_prior_compatible = prior_info.isCompatibleWithParameterSpace(z_min, z_max, selected_model.getSeds());
+    lum_prior_compatible = prior_info.isCompatibleWithParameterSpace(z_min, z_max, selected_model.getSeds(m_sed_repository, m_redenig_curves_repository));
   }
 
   ui->btn_confLuminosityPrior->setEnabled(grid_name_exists);
@@ -1049,7 +1121,8 @@ bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
     try {
       auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
       auto  igm            = ui->cb_igm->currentText().toStdString();
-      auto  axis           = selected_model.getAxesTuple();
+      auto  axis           = selected_model.getAxesTuple(m_sed_repository, m_redenig_curves_repository);
+      logger.debug() << "checkSedWeightFile => selected_model content :" << getAxisDescription(axis);
 
       std::string file_name = info.absoluteFilePath().toStdString();
       int         hdu_count = 0;
@@ -1544,6 +1617,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(const QString& selec
 
   SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
 
+  /// UPDATE THE SET OF FILTERS IN THE FILTER SELECTION GRID ////
   QStandardItemModel* grid_model = new QStandardItemModel();
   grid_model->setColumnCount(1);
 
@@ -1558,6 +1632,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(const QString& selec
     grid_model->appendRow(items);
   }
 
+  disconnect(grid_model, SIGNAL(itemChanged(QStandardItem*)), 0, 0);
   ui->tableView_filter->setModel(grid_model);
   connect(grid_model, SIGNAL(itemChanged(QStandardItem*)), SLOT(onFilterSelectionItemChanged(QStandardItem*)));
 
@@ -1741,6 +1816,9 @@ void FormAnalysis::on_btn_RunGrid_clicked() {
     std::unique_ptr<DialogGridGeneration> dialog(new DialogGridGeneration());
     dialog->setValues(FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(), ".txt"), config_map);
     if (dialog->exec()) {
+      m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
+      m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
+      m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
       adjustGridsButtons(true);
       setComputeCorrectionEnable();
 
@@ -1821,6 +1899,9 @@ void FormAnalysis::on_btn_RunGalCorrGrid_clicked() {
       dialog->setValues(FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ".txt"),
                         config_map);
       if (dialog->exec()) {
+    	m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
+    	m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
+    	m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
         adjustGridsButtons(true);
         setComputeCorrectionEnable();
       }
@@ -1880,6 +1961,9 @@ void FormAnalysis::on_btn_RunShiftGrid_clicked() {
       std::unique_ptr<DialogFilterShiftGridGeneration> dialog(new DialogFilterShiftGridGeneration());
       dialog->setValues(FileUtils::addExt(ui->cb_CompatibleShiftGrid->currentText().toStdString(), ".txt"), config_map);
       if (dialog->exec()) {
+    	m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
+    	m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
+    	m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
         adjustGridsButtons(true);
         setComputeCorrectionEnable();
       }
@@ -1989,7 +2073,7 @@ void FormAnalysis::on_cb_sedweight_clicked() {
 
 void FormAnalysis::on_btn_confLuminosityPrior_clicked() {
   std::unique_ptr<DialogLuminosityPrior> dialog(
-      new DialogLuminosityPrior(ui->lbl_lum_filter->text().toStdString(), m_luminosity_repository));
+      new DialogLuminosityPrior(ui->lbl_lum_filter->text().toStdString(), m_luminosity_repository, m_sed_repository, m_redenig_curves_repository));
 
   std::string model_grid = ui->cb_CompatibleGrid->currentText().toStdString();
 
@@ -2364,7 +2448,7 @@ void FormAnalysis::on_btn_pp_clicked() {
   m_progress_dialog->setValue(0);
   m_progress_dialog->setWindowModality(Qt::WindowModal);
   connect(m_sed_param, SIGNAL(progress(size_t, size_t)), this, SLOT(updatePpProgress(size_t, size_t)));
-  m_sed_param->listAvailableParam(m_model_set_model_ptr->getSelectedModelSet());
+  m_sed_param->listAvailableParam(m_model_set_model_ptr->getSelectedModelSet(), m_sed_repository, m_redenig_curves_repository);
 }
 
 std::set<std::string> FormAnalysis::getPPListFromConfig() {
@@ -2489,9 +2573,9 @@ void FormAnalysis::on_btn_GetConfigAnalysis_clicked() {
             return;
           }
 
-          logger.info() << "Preparing the progress dialog ";
+          logger.debug() << "Preparing the progress dialog ";
           if (m_progress_dialog) {
-            logger.info() << "Cleaning the progress dialog ";
+            logger.debug() << "Cleaning the progress dialog ";
             delete m_progress_dialog;
             m_progress_dialog = 0;
           }
@@ -2501,10 +2585,10 @@ void FormAnalysis::on_btn_GetConfigAnalysis_clicked() {
           m_progress_dialog->setLabelText(tr("Downloading Planck dust map"));
           m_progress_dialog->setWindowModality(Qt::WindowModal);
 
-          logger.info() << "Connecting  the progress dialog ";
+          logger.debug() << "Connecting  the progress dialog ";
           connect(m_progress_dialog, SIGNAL(canceled()), this, SLOT(cancelDownloadPlanck()));
 
-          logger.info() << "Getting the reply ";
+          logger.debug() << "Getting the reply ";
           m_reply = m_network_manager->get(QNetworkRequest(url));
           connect(m_reply, SIGNAL(readyRead()), this, SLOT(httpReadyPlanckRead()));
           connect(m_reply, SIGNAL(downloadProgress(qint64, qint64)), this,

@@ -42,7 +42,7 @@ public:
   /// Selection ///
   void            selectModelSet(int row);
   void            selectModelSet(QString name);
-  const ModelSet& getSelectedModelSet() const;
+  ModelSet&       getSelectedModelSet();
   int             getSelectedRow() const;
 
   /// Creation / deletion / edition ///

@@ -106,6 +106,7 @@ void FormModelSet::loadSetPage(std::shared_ptr<ModelSetModel> model_set_model_pt
   ui->cb_selSpace->clear();
   auto current_selection = m_model_set_model_ptr->getSelectedModelSet().getName();
   int  index             = 0;
+  m_diconnect_cb = true;
   for (auto& model_name : m_model_set_model_ptr->getModelSetList()) {
     ui->cb_selSpace->addItem(model_name);
     if (current_selection == model_name.toStdString()) {
@@ -113,7 +114,7 @@ void FormModelSet::loadSetPage(std::shared_ptr<ModelSetModel> model_set_model_pt
     }
     ++index;
   }
-
+  m_diconnect_cb = false;
   updateSelection();
   setModelInView();
 }
@@ -249,7 +250,7 @@ void FormModelSet::on_btn_SetSave_clicked() {
   }
 
   try {
-    m_model_set_model_ptr->getSelectedModelSet().getAxesTuple();
+    m_model_set_model_ptr->getSelectedModelSet().getAxesTuple(m_seds_repository, m_redenig_curves_repository);
   } catch (Elements::Exception& except) {
     QMessageBox::warning(this, "Overlapping Regions...", except.what(), QMessageBox::Ok);
     return;

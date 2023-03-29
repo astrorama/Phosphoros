@@ -10,6 +10,7 @@
 #include "PhzConfiguration/ParameterSpaceConfig.h"
 #include "PhzDataModel/PhotometryGrid.h"
 #include "PhzQtUI/ModelSet.h"
+#include "PhzDataModel/PhzModel.h"
 
 namespace po = boost::program_options;
 namespace Euclid {
@@ -73,17 +74,89 @@ std::map<std::string, po::variable_value> ModelSet::getConfigOptions() const {
   return options;
 }
 
-std::map<std::string, PhzDataModel::ModelAxesTuple> ModelSet::getAxesTuple() const {
-  auto options = getConfigOptions();
-  completeWithDefaults<PhzConfiguration::ParameterSpaceConfig>(options);
 
-  long  config_manager_id = Configuration::getUniqueManagerId();
-  auto& config_manager    = Configuration::ConfigManager::getInstance(config_manager_id);
-  config_manager.registerConfiguration<PhzConfiguration::ParameterSpaceConfig>();
-  config_manager.closeRegistration();
-  config_manager.initialize(options);
+static std::vector<XYDataset::QualifiedName> getList(DatasetRepo repo, const DatasetSelection& selection) {
+	std::vector<XYDataset::QualifiedName> selected{};
+	std::unordered_set<XYDataset::QualifiedName> exclude_set{};
+	for (auto& name : selection.getExclusions()) {
+	  exclude_set.emplace(name);
+	}
 
-  return config_manager.getConfiguration<PhzConfiguration::ParameterSpaceConfig>().getParameterSpaceRegions();
+	for (auto& group_name : selection.getGroupes()) {
+		XYDataset::QualifiedName group_item{group_name} ;
+	  for (auto& name : repo->getContent(group_item)) {
+		if (exclude_set.find(name) == exclude_set.end()) {
+		  exclude_set.emplace(name);
+		  selected.push_back(name);
+		}
+	  }
+	}
+
+	for (auto& name : selection.getIsolated()) {
+	  if (exclude_set.find(name) == exclude_set.end()) {
+		exclude_set.emplace(name);
+		selected.emplace_back(name);
+	  }
+	}
+
+	return selected;
+}
+
+
+
+const std::map<std::string, PhzDataModel::ModelAxesTuple>& ModelSet::getAxesTuple(DatasetRepo sed_repo, DatasetRepo red_repo) {
+	if (m_axes_tuple.size()==0) {
+
+		std::map<std::string, PhzDataModel::ModelAxesTuple> result{};
+		for (auto& param_rule : getParameterRules()) {
+			const auto& name = param_rule.second.getName();
+
+			std::vector<double> z_list{};
+			for (double z : param_rule.second.getRedshiftValues()) {
+				z_list.push_back(z);
+			}
+			for (const auto& range : param_rule.second.getZRanges()) {
+				for (size_t index=0; index<(range.getMax()-range.getMin())/range.getStep() +1; index++){
+					z_list.push_back(range.getMin()+index*range.getStep());
+				}
+			}
+			std::sort(z_list.begin(), z_list.end());
+
+			std::vector<double> ebv_list{};
+			for (double ebv : param_rule.second.getEbvValues()) {
+				ebv_list.push_back(ebv);
+			}
+			for (const auto& range : param_rule.second.getEbvRanges()) {
+				for (size_t index=0; index<(range.getMax()-range.getMin())/range.getStep() +1; index++){
+					ebv_list.push_back(range.getMin()+index*range.getStep());
+				}
+			}
+			std::sort(ebv_list.begin(), ebv_list.end());
+
+			auto sed_list = getList(sed_repo, param_rule.second.getSedSelection());
+			auto red_list = getList(red_repo, param_rule.second.getRedCurveSelection());
+
+			auto axe_tuple = PhzDataModel::createAxesTuple(z_list, ebv_list, red_list, sed_list);
+			result.emplace(name,axe_tuple);
+		}
+		m_axes_tuple = result;
+
+
+/*
+	  PhzDataModel::createAxesTuple
+
+	  auto options = getConfigOptions();
+	  completeWithDefaults<PhzConfiguration::ParameterSpaceConfig>(options);
+
+	  long  config_manager_id = Configuration::getUniqueManagerId();
+	  auto& config_manager    = Configuration::ConfigManager::getInstance(config_manager_id);
+	  config_manager.registerConfiguration<PhzConfiguration::ParameterSpaceConfig>();
+	  config_manager.closeRegistration();
+	  config_manager.initialize(options);
+	  m_axes_tuple = config_manager.getConfiguration<PhzConfiguration::ParameterSpaceConfig>().getParameterSpaceRegions();
+	*/}
+
+  return m_axes_tuple;
 }
 
 ModelSet ModelSet::deserialize(QDomDocument& doc, ModelSet& model) {
@@ -512,8 +585,8 @@ std::vector<ReturnType> getCompleteList(const std::map<std::string, PhzDataModel
   return all_item;
 }
 
-std::vector<std::string> ModelSet::getSeds() const {
-  auto tuples = getAxesTuple();
+std::vector<std::string> ModelSet::getSeds(DatasetRepo sed_repo, DatasetRepo red_repo) {
+  auto tuples = getAxesTuple(sed_repo, red_repo);
 
   auto seds = getCompleteList<XYDataset::QualifiedName, PhzDataModel::ModelParameter::SED>(tuples);
 

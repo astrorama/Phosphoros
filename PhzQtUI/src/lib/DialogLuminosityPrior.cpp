@@ -37,10 +37,16 @@ namespace po = boost::program_options;
 
 static Elements::Logging dialog_logger = Elements::Logging::getLogger("DialogLuminosityPrior");
 
-DialogLuminosityPrior::DialogLuminosityPrior(std::string filter, DatasetRepo luminosity_repository, QWidget* parent)
+DialogLuminosityPrior::DialogLuminosityPrior(std::string filter,
+											 DatasetRepo luminosity_repository,
+											 DatasetRepo sed_repository,
+											 DatasetRepo red_curve_repository,
+											 QWidget* parent)
     : QDialog(parent), ui(new Ui::DialogLuminosityPrior) {
   m_filter                = filter;
   m_luminosity_repository = luminosity_repository;
+  m_sed_repository = sed_repository;
+  m_red_curve_repository = red_curve_repository;
   ui->setupUi(this);
   ui->frame_Luminosity->setStyleSheet("background-color: white ");
   m_z_min = 0.;
@@ -100,7 +106,7 @@ void DialogLuminosityPrior::on_btn_new_clicked() {
 
   // ...with a single group containing all the SEDs...
   std::vector<std::string> seds{};
-  for (auto& item : m_model.getSeds()) {
+  for (auto& item : m_model.getSeds(m_sed_repository, m_red_curve_repository)) {
     seds.push_back({item});
   }
 
@@ -299,7 +305,7 @@ void DialogLuminosityPrior::on_btn_group_clicked() {
   size_t               row       = row_index.row();
   std::string          name      = row_index.sibling(row, 1).data().toString().toStdString();
   auto                 info      = m_prior_configs[name];
-  auto                 sed_diff  = info.isCompatibleWithSeds(m_model.getSeds());
+  auto                 sed_diff  = info.isCompatibleWithSeds(m_model.getSeds(m_sed_repository, m_red_curve_repository));
   dialog->setDiff(sed_diff.first, sed_diff.second);
   connect(dialog.get(), SIGNAL(popupClosing(std::vector<LuminosityPriorConfig::SedGroup>)), this,
           SLOT(groupPopupClosing(std::vector<LuminosityPriorConfig::SedGroup>)));
@@ -458,7 +464,7 @@ void DialogLuminosityPrior::loadMainGrid() {
   for (auto& config_pair : m_prior_configs) {
 
     bool                  z_ok           = config_pair.second.isCompatibleWithZ(m_z_min, m_z_max);
-    auto                  sed_diff       = config_pair.second.isCompatibleWithSeds(m_model.getSeds());
+    auto                  sed_diff       = config_pair.second.isCompatibleWithSeds(m_model.getSeds(m_sed_repository, m_red_curve_repository));
     bool                  param_space_ok = z_ok && sed_diff.first.size() == 0 && sed_diff.second.size() == 0;
     QList<QStandardItem*> items;
 
@@ -639,7 +645,7 @@ void DialogLuminosityPrior::updateInfo(LuminosityPriorConfig& info) {
 
 void DialogLuminosityPrior::updatePriorRow(QModelIndex& index, const size_t& row, const LuminosityPriorConfig& info) {
 
-  bool param_space_ok = info.isCompatibleWithParameterSpace(m_z_min, m_z_max, m_model.getSeds());
+  bool param_space_ok = info.isCompatibleWithParameterSpace(m_z_min, m_z_max, m_model.getSeds(m_sed_repository, m_red_curve_repository));
 
   if (param_space_ok) {
     ui->table_priors->model()->setData(index.sibling(row, 5), "");

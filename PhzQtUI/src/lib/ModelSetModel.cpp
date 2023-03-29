@@ -96,7 +96,7 @@ void ModelSetModel::selectModelSet(QString name) {
   selectModelSet(selected_row);
 }
 
-const ModelSet& ModelSetModel::getSelectedModelSet() const {
+ModelSet& ModelSetModel::getSelectedModelSet() {
   return m_edited_modelSet;
 }
 
