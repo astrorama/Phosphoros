@@ -23,7 +23,7 @@ SedTreeModel::SedTreeModel(DatasetRepo repository, QObject* parent)
 std::string SedTreeModel::getGroupName(XYDataset::QualifiedName qualified_name) {
   auto        separator  = QString(QDir::separator()).toStdString();
   std::string group_name = FileUtils::removeExt(qualified_name.qualifiedName(), qualified_name.datasetName());
-  if (group_name[group_name.length() - 1] == separator[0]) {
+  if (group_name.length()>0 && group_name[group_name.length() - 1] == separator[0]) {
     group_name = group_name.substr(0, group_name.length() - 1);
   }
   return group_name;
