@@ -140,21 +140,7 @@ const std::map<std::string, PhzDataModel::ModelAxesTuple>& ModelSet::getAxesTupl
 			result.emplace(name,axe_tuple);
 		}
 		m_axes_tuple = result;
-
-
-/*
-	  PhzDataModel::createAxesTuple
-
-	  auto options = getConfigOptions();
-	  completeWithDefaults<PhzConfiguration::ParameterSpaceConfig>(options);
-
-	  long  config_manager_id = Configuration::getUniqueManagerId();
-	  auto& config_manager    = Configuration::ConfigManager::getInstance(config_manager_id);
-	  config_manager.registerConfiguration<PhzConfiguration::ParameterSpaceConfig>();
-	  config_manager.closeRegistration();
-	  config_manager.initialize(options);
-	  m_axes_tuple = config_manager.getConfiguration<PhzConfiguration::ParameterSpaceConfig>().getParameterSpaceRegions();
-	*/}
+  }
 
   return m_axes_tuple;
 }
