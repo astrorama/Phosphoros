@@ -246,38 +246,7 @@ long long ParameterRule::getModelNumber(DatasetRepo sed_repository, DatasetRepo 
 	 		 ebv_number += (range.getMax()-range.getMin())/range.getStep() +1;
 	 	  }
 	  m_model_number = sed_number_map * red_number_map * z_number * ebv_number;
-	/*
-    bool is_zero = false;
-    auto options = getConfigOptions("");
 
-    is_zero |= m_sed_selection.isEmpty();
-    is_zero |= m_red_curve_selection.isEmpty();
-    is_zero |= m_redshift_ranges.size() == 0 && m_redshift_values.size() == 0;
-    is_zero |= m_ebv_ranges.size() == 0 && m_ebv_values.size() == 0;
-
-    if (is_zero) {
-      m_model_number = 0;
-    } else {
-      options["sed-root-path"].value()             = boost::any(FileUtils::getSedRootPath(false));
-      options["reddening-curve-root-path"].value() = boost::any(FileUtils::getRedCurveRootPath(false));
-      completeWithDefaults<PhzConfiguration::ParameterSpaceConfig>(options);
-      long  config_manager_id = Configuration::getUniqueManagerId();
-      auto& config_manager    = Configuration::ConfigManager::getInstance(config_manager_id);
-
-      try {
-        config_manager.registerConfiguration<PhzConfiguration::ParameterSpaceConfig>();
-        config_manager.closeRegistration();
-        config_manager.initialize(options);
-
-        m_model_number =
-            config_manager.getConfiguration<PhzConfiguration::SedConfig>().getSedList().at("").size() *
-            config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getReddeningCurveList().at("").size() *
-            config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getEbvList().at("").size() *
-            config_manager.getConfiguration<PhzConfiguration::RedshiftConfig>().getZList().at("").size();
-      } catch (Elements::Exception&) {
-        m_model_number = 0;
-      }
-    }*/
   }
   return m_model_number;
 }
@@ -296,40 +265,7 @@ long long ParameterRule::getModelNumber(DatasetRepo sed_repository, DatasetRepo 
 			ebv_number += (range.getMax()-range.getMin())/range.getStep() +1;
 	}
 	return sed_number_map * red_number_map * z_number * ebv_number;
-	/*
-	bool is_zero = false;
-  is_zero |= m_sed_selection.isEmpty();
-  is_zero |= m_red_curve_selection.isEmpty();
-  is_zero |= m_redshift_ranges.size() == 0 && m_redshift_values.size() == 0;
-  is_zero |= m_ebv_ranges.size() == 0 && m_ebv_values.size() == 0;
-  if (is_zero) {
-    return 0;
-  } else {
-    long long number                             = 0;
-    auto      options                            = getConfigOptions("");
-    options["sed-root-path"].value()             = boost::any(FileUtils::getSedRootPath(false));
-    options["reddening-curve-root-path"].value() = boost::any(FileUtils::getRedCurveRootPath(false));
-    completeWithDefaults<PhzConfiguration::ParameterSpaceConfig>(options);
-    long  config_manager_id = Configuration::getUniqueManagerId();
-    auto& config_manager    = Configuration::ConfigManager::getInstance(config_manager_id);
 
-    try {
-      config_manager.registerConfiguration<PhzConfiguration::ParameterSpaceConfig>();
-      config_manager.closeRegistration();
-      config_manager.initialize(options);
-      number =
-          config_manager.getConfiguration<PhzConfiguration::SedConfig>().getSedList().at("").size() *
-          config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getReddeningCurveList().at("").size() *
-          config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getEbvList().at("").size() *
-          config_manager.getConfiguration<PhzConfiguration::RedshiftConfig>().getZList().at("").size();
-    } catch (Elements::Exception&) {
-      number = 0;
-    }
-
-    return number;
-  }
-
-  */
 }
 
 const std::set<double>& ParameterRule::getEbvValues() const {
