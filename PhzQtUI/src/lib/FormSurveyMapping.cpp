@@ -26,7 +26,7 @@
 #include "PhzQtUI/filecopyer.h"
 
 #include <QtCore/qthread.h>
-#include <filesystem>
+#include <boost/filesystem.hpp>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -578,10 +578,10 @@ void FormSurveyMapping::on_btn_purgeGrids_clicked() {
 	    for (auto folder_iter = sub_folders.begin(); folder_iter != sub_folders.end(); ++folder_iter){
 	    	auto path = intermediate_path+ "/"+*folder_iter;
 	    	int count = 0;
-	    	if (std::filesystem::exists(path)){
-				for (auto& obj : std::filesystem::directory_iterator(path)) {
-					 if (!std::filesystem::is_directory(obj)) {
-						 (*size_iter) +=std::filesystem::file_size(obj);
+	    	if (boost::filesystem::exists(path)){
+				for (auto& obj : boost::filesystem::directory_iterator(path)) {
+					 if (!boost::filesystem::is_directory(obj)) {
+						 (*size_iter) +=boost::filesystem::file_size(obj);
 					 }
 					 ++count;
 				}
