@@ -32,7 +32,7 @@ public:
    * @brief
    *  The default constructor is only here to allow the usage of ModelSet in lists.
    */
-  ModelSet();
+  ModelSet(DatasetRepo sed_repo, DatasetRepo red_repo);
 
   /**
    * @brief
@@ -41,7 +41,12 @@ public:
    * @param root_path
    * The folder into which the storing file will be created.
    */
-  explicit ModelSet(std::string root_path);
+   ModelSet(DatasetRepo sed_repo, DatasetRepo red_repo, std::string root_path);
+
+   ModelSet ( ModelSet && ) = default;
+   ModelSet(const ModelSet &)  = default;
+   ModelSet& operator=(const ModelSet &)  = default;
+   ModelSet& operator=(ModelSet &&)  = default;
 
   /**
    * @brief get Model Number
@@ -130,7 +135,7 @@ public:
    * The folder containing the persisted SurveyFilterMapping;
    * @return
    */
-  static std::map<int, ModelSet> loadModelSetsFromFolder(std::string root_path);
+  static std::map<int, ModelSet> loadModelSetsFromFolder(DatasetRepo sed_repo, DatasetRepo red_repo, std::string root_path);
 
   /**
    * @brief load a ModelSet from a xml file
@@ -138,7 +143,7 @@ public:
    * @param root_path
    * @return the ModelSet.
    */
-  static ModelSet loadModelSetFromFile(std::string file_name, std::string root_path);
+  static ModelSet loadModelSetFromFile(DatasetRepo sed_repo, DatasetRepo red_repo, std::string file_name, std::string root_path);
 
   /**
    * @brief Delete the current ModelSet by erasing the file it was persisted in.
@@ -176,9 +181,9 @@ public:
   /**
    * @brief compute the ModelAxeTuple corresponding to this ModelSet
    */
- const std::map<std::string, PhzDataModel::ModelAxesTuple>& getAxesTuple(DatasetRepo sed_repo, DatasetRepo red_repo);
+ const std::map<std::string, PhzDataModel::ModelAxesTuple>& getAxesTuple();
 
-  std::vector<std::string> getSeds(DatasetRepo sed_repo, DatasetRepo red_repo);
+  std::vector<std::string> getSeds();
 
 private:
   std::string                  m_name;
@@ -189,6 +194,8 @@ private:
   std::vector<Range>           m_ebv_ranges{};
   std::set<double>             m_ebv_values{};
   std::map<std::string, PhzDataModel::ModelAxesTuple> m_axes_tuple{};
+  DatasetRepo m_sed_repo;
+  DatasetRepo m_red_repo;
 };
 
 }  // namespace PhzQtUI

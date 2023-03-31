@@ -16,11 +16,12 @@ namespace po = boost::program_options;
 namespace Euclid {
 namespace PhzQtUI {
 
-ModelSet::ModelSet() {}
+ModelSet::ModelSet(DatasetRepo sed_repo, DatasetRepo red_repo): m_sed_repo{sed_repo}, m_red_repo{red_repo}{}
 
-ModelSet::ModelSet(std::string root_path) : m_root_path(root_path) {}
+ModelSet::ModelSet(DatasetRepo sed_repo, DatasetRepo red_repo, std::string root_path) :
+		m_root_path(root_path), m_sed_repo{sed_repo}, m_red_repo{red_repo}{}
 
-std::map<int, ModelSet> ModelSet::loadModelSetsFromFolder(std::string root_path) {
+std::map<int, ModelSet> ModelSet::loadModelSetsFromFolder(DatasetRepo sed_repo, DatasetRepo red_repo,std::string root_path) {
 
   QDir root_dir(QString::fromStdString(root_path));
 
@@ -30,8 +31,7 @@ std::map<int, ModelSet> ModelSet::loadModelSetsFromFolder(std::string root_path)
   int         count     = 0;
   foreach (const QString& fileName, fileNames) {
     try {
-      auto set   = PhzQtUI::ModelSet::loadModelSetFromFile(fileName.toStdString(), root_path);
-      map[count] = set;
+      map.emplace(count, PhzQtUI::ModelSet::loadModelSetFromFile(sed_repo, red_repo, fileName.toStdString(), root_path));
       ++count;
     } catch (...) {
     }  // if a file do not open correctly: just skip it...
@@ -43,7 +43,7 @@ std::map<int, ModelSet> ModelSet::loadModelSetsFromFolder(std::string root_path)
 long long ModelSet::getModelNumber(bool recompute) {
   long long result = 0;
   for (auto it = m_parameter_rules.begin(); it != m_parameter_rules.end(); ++it) {
-    result += it->second.getModelNumber(recompute);
+    result += it->second.getModelNumber(m_sed_repo, m_red_repo, recompute);
   }
 
   return result;
@@ -52,7 +52,7 @@ long long ModelSet::getModelNumber(bool recompute) {
 long long ModelSet::getModelNumber() const {
   long long result = 0;
   for (auto it = m_parameter_rules.begin(); it != m_parameter_rules.end(); ++it) {
-    result += it->second.getModelNumber();
+    result += it->second.getModelNumber(m_sed_repo, m_red_repo);
   }
 
   return result;
@@ -104,44 +104,40 @@ static std::vector<XYDataset::QualifiedName> getList(DatasetRepo repo, const Dat
 
 
 
-const std::map<std::string, PhzDataModel::ModelAxesTuple>& ModelSet::getAxesTuple(DatasetRepo sed_repo, DatasetRepo red_repo) {
-	if (m_axes_tuple.size()==0) {
+const std::map<std::string, PhzDataModel::ModelAxesTuple>& ModelSet::getAxesTuple() {
+	std::map<std::string, PhzDataModel::ModelAxesTuple> result{};
+	for (auto& param_rule : getParameterRules()) {
+		const auto& name = param_rule.second.getName();
 
-		std::map<std::string, PhzDataModel::ModelAxesTuple> result{};
-		for (auto& param_rule : getParameterRules()) {
-			const auto& name = param_rule.second.getName();
-
-			std::vector<double> z_list{};
-			for (double z : param_rule.second.getRedshiftValues()) {
-				z_list.push_back(z);
-			}
-			for (const auto& range : param_rule.second.getZRanges()) {
-				for (size_t index=0; index<(range.getMax()-range.getMin())/range.getStep() +1; index++){
-					z_list.push_back(range.getMin()+index*range.getStep());
-				}
-			}
-			std::sort(z_list.begin(), z_list.end());
-
-			std::vector<double> ebv_list{};
-			for (double ebv : param_rule.second.getEbvValues()) {
-				ebv_list.push_back(ebv);
-			}
-			for (const auto& range : param_rule.second.getEbvRanges()) {
-				for (size_t index=0; index<(range.getMax()-range.getMin())/range.getStep() +1; index++){
-					ebv_list.push_back(range.getMin()+index*range.getStep());
-				}
-			}
-			std::sort(ebv_list.begin(), ebv_list.end());
-
-			auto sed_list = getList(sed_repo, param_rule.second.getSedSelection());
-			auto red_list = getList(red_repo, param_rule.second.getRedCurveSelection());
-
-			auto axe_tuple = PhzDataModel::createAxesTuple(z_list, ebv_list, red_list, sed_list);
-			result.emplace(name,axe_tuple);
+		std::vector<double> z_list{};
+		for (double z : param_rule.second.getRedshiftValues()) {
+			z_list.push_back(z);
 		}
-		m_axes_tuple = result;
-  }
+		for (const auto& range : param_rule.second.getZRanges()) {
+			for (size_t index=0; index<(range.getMax()-range.getMin())/range.getStep() +1; index++){
+				z_list.push_back(range.getMin()+index*range.getStep());
+			}
+		}
+		std::sort(z_list.begin(), z_list.end());
 
+		std::vector<double> ebv_list{};
+		for (double ebv : param_rule.second.getEbvValues()) {
+			ebv_list.push_back(ebv);
+		}
+		for (const auto& range : param_rule.second.getEbvRanges()) {
+			for (size_t index=0; index<(range.getMax()-range.getMin())/range.getStep() +1; index++){
+				ebv_list.push_back(range.getMin()+index*range.getStep());
+			}
+		}
+		std::sort(ebv_list.begin(), ebv_list.end());
+
+		auto sed_list = getList(m_sed_repo, param_rule.second.getSedSelection());
+		auto red_list = getList(m_red_repo, param_rule.second.getRedCurveSelection());
+
+		auto axe_tuple = PhzDataModel::createAxesTuple(z_list, ebv_list, red_list, sed_list);
+		result.emplace(name,axe_tuple);
+	}
+	m_axes_tuple = result;
   return m_axes_tuple;
 }
 
@@ -406,7 +402,7 @@ QDomDocument ModelSet::serialize() {
     auto&       rule      = rule_pair.second;
     QDomElement rule_node = doc.createElement("ParameterRule");
     rule_node.setAttribute("Name", QString::fromStdString(rule.getName()));
-    rule_node.setAttribute("ModelNumber", QString::number(rule.getModelNumber()));
+    rule_node.setAttribute("ModelNumber", QString::number(rule.getModelNumber(m_sed_repo, m_red_repo)));
 
     QDomElement ebv_values_node = doc.createElement("EbvValues");
     for (auto& value : rule.getEbvValues()) {
@@ -504,9 +500,9 @@ QDomDocument ModelSet::serialize() {
   return doc;
 }
 
-ModelSet ModelSet::loadModelSetFromFile(std::string fileName, std::string root_path) {
+ModelSet ModelSet::loadModelSetFromFile(DatasetRepo sed_repo, DatasetRepo red_repo, std::string fileName, std::string root_path) {
 
-  ModelSet model(root_path);
+  ModelSet model(sed_repo, red_repo, root_path);
   model.setName(FileUtils::removeExt(fileName, ".xml"));
 
   QDomDocument doc("ParameterSpace");
@@ -571,8 +567,8 @@ std::vector<ReturnType> getCompleteList(const std::map<std::string, PhzDataModel
   return all_item;
 }
 
-std::vector<std::string> ModelSet::getSeds(DatasetRepo sed_repo, DatasetRepo red_repo) {
-  auto tuples = getAxesTuple(sed_repo, red_repo);
+std::vector<std::string> ModelSet::getSeds() {
+  auto tuples = getAxesTuple();
 
   auto seds = getCompleteList<XYDataset::QualifiedName, PhzDataModel::ModelParameter::SED>(tuples);
 

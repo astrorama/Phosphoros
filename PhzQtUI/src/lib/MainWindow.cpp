@@ -149,6 +149,9 @@ void MainWindow::loadAuxData() {
     m_redenig_curves_repository->reload();
 
 
+    m_model_set_model_ptr = std::shared_ptr<ModelSetModel>{new ModelSetModel{m_seds_repository, m_redenig_curves_repository}};
+
+
 	ui->Lb_warning_time->setText("Loading the Luminosity Functions...");
 	qApp->processEvents();
     std::unique_ptr<XYDataset::FileParser>         luminosity_file_parser{new XYDataset::AsciiParser{}};

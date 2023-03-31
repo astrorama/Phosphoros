@@ -248,7 +248,7 @@ void FormAnalysis::updateGridSelection() {
   try {
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
-    auto axis = selected_model.getAxesTuple(m_sed_repository, m_redenig_curves_repository);
+    auto axis = selected_model.getAxesTuple();
     logger.debug() << "updateGridSelection => selected_model content :" << getAxisDescription(axis);
     auto stop = std::chrono::high_resolution_clock::now();
 	auto duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
@@ -325,7 +325,7 @@ bool FormAnalysis::checkCompatibleModelGrid(std::string file_name) {
     return false;
   } else {
 
-    auto  axis           = selected_model.getAxesTuple(m_sed_repository, m_redenig_curves_repository);
+    auto  axis           = selected_model.getAxesTuple();
     logger.debug() << "checkCompatibleModelGrid => selected_model content :" << getAxisDescription(axis);
 
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
@@ -361,7 +361,7 @@ bool FormAnalysis::checkCompatibleGalacticGrid(std::string file_name) {
 	logger.debug()<<"checkCompatibleGalacticGrid => No cache, need to actually check the file "<< duration << "[ms]";
 	start = stop;
 
-    auto  axis           = selected_model.getAxesTuple(m_sed_repository, m_redenig_curves_repository);
+    auto  axis           = selected_model.getAxesTuple();
     logger.debug() << "checkCompatibleGalacticGrid => selected_model content :" << getAxisDescription(axis);
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
@@ -396,7 +396,7 @@ bool FormAnalysis::checkCompatibleFilterShiftGrid(std::string file_name) {
     return false;
   } else {
 
-    auto  axis           = selected_model.getAxesTuple(m_sed_repository, m_redenig_curves_repository);
+    auto  axis           = selected_model.getAxesTuple();
     logger.debug() << "checkCompatibleFilterShiftGrid => selected_model content :" << getAxisDescription(axis);
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
@@ -412,7 +412,7 @@ void FormAnalysis::updateGalCorrGridSelection() {
   try {
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
-    auto axis           = selected_model.getAxesTuple(m_sed_repository, m_redenig_curves_repository);
+    auto axis           = selected_model.getAxesTuple();
     logger.debug() << "updateGalCorrGridSelection => selected_model content :" << getAxisDescription(axis);
     auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
         m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
@@ -440,7 +440,7 @@ void FormAnalysis::updateFilterShiftGridSelection() {
   try {
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
-    auto axis           = selected_model.getAxesTuple(m_sed_repository, m_redenig_curves_repository);
+    auto axis           = selected_model.getAxesTuple();
     logger.debug() << "updateFilterShiftGridSelection => selected_model content :" << getAxisDescription(axis);
     auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
         m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
@@ -717,7 +717,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
       }
     }
 
-    lum_prior_compatible = prior_info.isCompatibleWithParameterSpace(z_min, z_max, selected_model.getSeds(m_sed_repository, m_redenig_curves_repository));
+    lum_prior_compatible = prior_info.isCompatibleWithParameterSpace(z_min, z_max, selected_model.getSeds());
   }
 
   ui->btn_confLuminosityPrior->setEnabled(grid_name_exists);
@@ -1121,7 +1121,7 @@ bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
     try {
       auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
       auto  igm            = ui->cb_igm->currentText().toStdString();
-      auto  axis           = selected_model.getAxesTuple(m_sed_repository, m_redenig_curves_repository);
+      auto  axis           = selected_model.getAxesTuple();
       logger.debug() << "checkSedWeightFile => selected_model content :" << getAxisDescription(axis);
 
       std::string file_name = info.absoluteFilePath().toStdString();

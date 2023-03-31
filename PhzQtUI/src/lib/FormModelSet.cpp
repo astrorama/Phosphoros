@@ -9,6 +9,7 @@
 #include "ElementsKernel/Exception.h"
 #include "ElementsKernel/Logging.h"
 #include "PreferencesUtils.h"
+#include <chrono>
 
 namespace po = boost::program_options;
 
@@ -250,7 +251,7 @@ void FormModelSet::on_btn_SetSave_clicked() {
   }
 
   try {
-    m_model_set_model_ptr->getSelectedModelSet().getAxesTuple(m_seds_repository, m_redenig_curves_repository);
+    m_model_set_model_ptr->getSelectedModelSet().getAxesTuple();
   } catch (Elements::Exception& except) {
     QMessageBox::warning(this, "Overlapping Regions...", except.what(), QMessageBox::Ok);
     return;

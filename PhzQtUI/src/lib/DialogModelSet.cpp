@@ -1,6 +1,7 @@
 
 #include "PhzQtUI/DialogModelSet.h"
 #include "ElementsKernel/Exception.h"
+#include "ElementsKernel/Logging.h"
 #include "FileUtils.h"
 #include "FormUtils.h"
 #include "PhzQtUI/DataSetTreeModel.h"
@@ -21,11 +22,14 @@
 #include "XYDataset/FileSystemProvider.h"
 
 #include <QProgressDialog>
+#include <chrono>
 
 using namespace std;
 
 namespace Euclid {
 namespace PhzQtUI {
+
+static Elements::Logging logger = Elements::Logging::getLogger("DialogModelSet");
 
 void DialogModelSet::loadSeds() {
   DataSetTreeModel* treeModel_sed = new DataSetTreeModel(m_seds_repository);
@@ -352,7 +356,7 @@ void DialogModelSet::on_buttonBox_accepted() {
   try {
     m_rules[m_ref].setRedshiftValues(std::move(new_z_values));
     m_rules[m_ref].setZRanges(std::move(new_z_ranges));
-    m_rules[m_ref].getModelNumber(true);
+    m_rules[m_ref].getModelNumber(m_seds_repository, m_redenig_curves_repository, true);
     m_rules[m_ref].getRedshiftRangeString();
   } catch (const Elements::Exception& e) {
     QMessageBox::warning(this, "Error while setting redshift ranges...", e.what(), QMessageBox::Ok);
@@ -386,7 +390,7 @@ void DialogModelSet::on_buttonBox_accepted() {
   try {
     m_rules[m_ref].setEbvValues(std::move(new_ebv_values));
     m_rules[m_ref].setEbvRanges(std::move(new_ebv_ranges));
-    m_rules[m_ref].getModelNumber(true);
+    m_rules[m_ref].getModelNumber(m_seds_repository, m_redenig_curves_repository, true);
     m_rules[m_ref].getEbvRangeString();
   } catch (const Elements::Exception& e) {
     QMessageBox::warning(this, "Error while setting E(B-V) ranges...", e.what(), QMessageBox::Ok);
@@ -403,7 +407,8 @@ void DialogModelSet::on_buttonBox_accepted() {
   // Reddeing Curves
   m_rules[m_ref].setRedCurveSelection(std::move(red_curve_selection));
 
-  m_rules[m_ref].getModelNumber(true);
+  m_rules[m_ref].getModelNumber(m_seds_repository, m_redenig_curves_repository, true);
+
   this->popupClosing(m_ref, m_rules[m_ref], true);
   this->close();
 }

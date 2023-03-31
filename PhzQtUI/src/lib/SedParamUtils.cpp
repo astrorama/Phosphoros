@@ -156,7 +156,7 @@ void SedParamUtils::listAvailableParam(ModelSet& model, DatasetRepo sed_repo, Da
   std::map<std::string, std::string> params{};
   bool                               firstSED = true;
 
-  auto sed_list = model.getSeds(sed_repo, red_repo);
+  auto sed_list = model.getSeds();
   m_total       = sed_list.size();
   m_progress    = 0;
   for (auto& sed : sed_list) {

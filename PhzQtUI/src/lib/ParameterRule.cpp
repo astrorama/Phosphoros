@@ -63,7 +63,9 @@ std::pair<long, long> ParameterRule::getSedNumber(DatasetRepo seds_repository) c
 }
 
 std::pair<long, long> ParameterRule::getSelectionNumbers(DatasetSelection selection, DatasetRepo repository) const {
-  auto full_list = repository->getContent();
+  std::vector<XYDataset::QualifiedName> empty{};
+  const std::vector<XYDataset::QualifiedName>&  full_list = repository!=nullptr ? repository->getContent() : empty;
+
 
   std::set<XYDataset::QualifiedName> selected_items{};
 
@@ -107,7 +109,7 @@ std::pair<long, long> ParameterRule::getSelectionNumbers(DatasetSelection select
 
   long total = 0;
   if (selection.hasMultipleGroups()) {
-    total = repository->getContent().size();
+    total = full_list.size();
   } else {
     if (selection.getIsolated().size() == 1) {
       total = 1;
@@ -228,9 +230,23 @@ ParameterRule::getConfigOptions(std::string region) const {
   return options;
 }
 
-long long ParameterRule::getModelNumber(bool recompute) {
+long long ParameterRule::getModelNumber(DatasetRepo sed_repository, DatasetRepo redenig_curves_repository, bool recompute) {
 
   if (m_model_number < 0 || recompute) {
+	  long long sed_number_map = getSedNumber(sed_repository).first;
+	  long long red_number_map = getRedCurveNumber(redenig_curves_repository).first;
+
+	  long long z_number = getRedshiftValues().size();
+	  for (const auto& range : getZRanges()) {
+		z_number += (range.getMax()-range.getMin())/range.getStep() +1;
+	  }
+
+	  long long ebv_number = getEbvValues().size();
+	 	  for (const auto& range : getEbvRanges()) {
+	 		 ebv_number += (range.getMax()-range.getMin())/range.getStep() +1;
+	 	  }
+	  m_model_number = sed_number_map * red_number_map * z_number * ebv_number;
+	/*
     bool is_zero = false;
     auto options = getConfigOptions("");
 
@@ -261,13 +277,27 @@ long long ParameterRule::getModelNumber(bool recompute) {
       } catch (Elements::Exception&) {
         m_model_number = 0;
       }
-    }
+    }*/
   }
   return m_model_number;
 }
 
-long long ParameterRule::getModelNumber() const {
-  bool is_zero = false;
+long long ParameterRule::getModelNumber(DatasetRepo sed_repository, DatasetRepo redenig_curves_repository) const {
+	long long sed_number_map = getSedNumber(sed_repository).first;
+	long long red_number_map = getRedCurveNumber(redenig_curves_repository).first;
+
+	long long z_number = getRedshiftValues().size();
+		for (const auto& range : getZRanges()) {
+			z_number += (range.getMax()-range.getMin())/range.getStep() +1;
+	}
+
+	long long ebv_number = getEbvValues().size();
+		for (const auto& range : getEbvRanges()) {
+			ebv_number += (range.getMax()-range.getMin())/range.getStep() +1;
+	}
+	return sed_number_map * red_number_map * z_number * ebv_number;
+	/*
+	bool is_zero = false;
   is_zero |= m_sed_selection.isEmpty();
   is_zero |= m_red_curve_selection.isEmpty();
   is_zero |= m_redshift_ranges.size() == 0 && m_redshift_values.size() == 0;
@@ -298,6 +328,8 @@ long long ParameterRule::getModelNumber() const {
 
     return number;
   }
+
+  */
 }
 
 const std::set<double>& ParameterRule::getEbvValues() const {
