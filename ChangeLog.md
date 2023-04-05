@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Note: the issue number refer to SDC-CH internal tracking.
 
 ## [Unreleased]
+### Changed
+- Add a Phosphoros tool (FMG) to convert fits representation of the Model Grids to the Phosphoros format https://redmine.isdc.unige.ch/issues/28788
 
 ## [1.6.0] 2023-03-28
 ### Changed

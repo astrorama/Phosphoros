@@ -39,6 +39,8 @@ action_list = [
                      'Browses the available reddening curves'),
     PhosphorosAction(['display_model_grid', 'DMG'], 'PhosphorosDisplayModelGrid',
                      'Browses through a grid containing model photometries'),
+    PhosphorosAction(['fits_to_model_grid', 'FMG'], 'FitsToModelGridConvertion',
+                     'Convert back a .fits containing model photometries into a grid in a format which can be used by Phosphoros'),
     PhosphorosAction(['compute_model_sed', 'CMS'], 'PhosphorosComputeModelSed',
                      'Displays the reddened, redshifted SED data'),
     PhosphorosAction(['plot_specz_comparison', 'PSC'], 'PhosphorosPlotSpecZComparison',
