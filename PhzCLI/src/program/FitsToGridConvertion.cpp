@@ -52,13 +52,12 @@
 
 
 using namespace Euclid;
-using namespace Euclid::Configuration;
 using namespace Euclid::PhzConfiguration;
 namespace po = boost::program_options;
 
 static Elements::Logging logger = Elements::Logging::getLogger("FitsToGridConvertion");
 
-static long config_manager_id = getUniqueManagerId();
+static long config_manager_id = Euclid::Configuration::getUniqueManagerId();
 
 std::shared_ptr<std::vector<std::string>> buildFilterPointer(const std::vector<Euclid::XYDataset::QualifiedName>& filter_list_in){
     std::vector<std::string> filter_list{};
@@ -125,14 +124,14 @@ bool matchingRow(const Euclid::Table::Table& data, size_t row_index, double z, d
 class FitsToGridConvertion : public Elements::Program {
 
   po::options_description defineSpecificProgramOptions() override {
-    auto& config_manager = ConfigManager::getInstance(config_manager_id);
+    auto& config_manager = Euclid::Configuration::ConfigManager::getInstance(config_manager_id);
     config_manager.registerConfiguration<PhzCLI::FitsToGridConfig>();
     return config_manager.closeRegistration();
   }
 
   Elements::ExitCode mainMethod(std::map<std::string, po::variable_value>& args) override {
 
-    auto& config_manager = ConfigManager::getInstance(config_manager_id);
+    auto& config_manager = Euclid::Configuration::ConfigManager::getInstance(config_manager_id);
     config_manager.initialize(args);
 
     logger.info() << "Build the empty grid";
@@ -142,11 +141,11 @@ class FitsToGridConvertion : public Elements::Program {
 
 
     logger.info() << "Check the input table";
-    checkInputColumns(config_manager.getConfiguration<Configuration::CatalogConfig>().getColumnInfo(), filters_ptr);
+    checkInputColumns(config_manager.getConfiguration<Euclid::Configuration::CatalogConfig>().getColumnInfo(), filters_ptr);
 
 
     logger.info() << "Get the SED and Reddening curve info";
-    auto table_reader = config_manager.getConfiguration<Configuration::CatalogConfig>().getTableReader();
+    auto table_reader = config_manager.getConfiguration<Euclid::Configuration::CatalogConfig>().getTableReader();
     auto comments = table_reader->getComment();
 	// Create dictionary to convert axis values to index
 	std::vector<std::string> result;
