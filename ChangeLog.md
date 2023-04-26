@@ -9,6 +9,8 @@ Note: the issue number refer to SDC-CH internal tracking.
 
 ## [Unreleased]
 ### Changed
+## [1.6.2] 2023-04-26
+- Add the display of the Solar luminosity based SED scaling when displaying SED in "PhosphorosComputeModelSed" https://redmine.isdc.unige.ch/issues/28993
 - Add a Phosphoros tool (FMG) to convert fits representation of the Model Grids to the Phosphoros format https://redmine.isdc.unige.ch/issues/28788
 
 ## [1.6.0] 2023-03-28
