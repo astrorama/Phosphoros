@@ -208,7 +208,7 @@ void DialogSedParam::on_btn_save_clicked() {
           keys.push_back(model->item(i, 0)->text().toStdString());
           params.push_back(model->item(i, 0)->text().toStdString() + "=" +
         		  model->item(i, 1)->text().toStdString() + "*L+" +
-				  model->item(i, 2)->text().toStdString() +
+				  model->item(i, 2)->text().toStdString() + "+" +
 				  model->item(i, 3)->text().toStdString() + "*LOG("+
 				  model->item(i, 4)->text().toStdString() + "*L)"+
 				  "[" + model->item(i, 5)->text().toStdString() + "]");

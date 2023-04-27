@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Note: the issue number refer to SDC-CH internal tracking.
 
 ## [Unreleased]
+### Fixed
+- Fix a bug in the GUI when saving a PP with Log part https://redmine.isdc.unige.ch/issues/28996
+
 ### Changed
 ## [1.6.2] 2023-04-26
 - Add the display of the Solar luminosity based SED scaling when displaying SED in "PhosphorosComputeModelSed" https://redmine.isdc.unige.ch/issues/28993
