@@ -162,14 +162,20 @@ bool ModelSetModel::isInEdition() {
 }
 
 bool ModelSetModel::saveSelected() {
-  logger.info() << "Saving the selected Model '" << m_edited_modelSet.getName() << "'.";
+
   bool pre_tests = checkUniqueName(QString::fromStdString(m_edited_modelSet.getName()), m_selected_row);
 
   if (pre_tests) {
-    m_edited_modelSet.saveModelSet(m_edited_modelSet.getName());
-    this->setItem(m_selected_row, 0, new QStandardItem(QString::fromStdString(m_edited_modelSet.getName())));
+	auto old_name = m_set_list.find(m_selected_index)->second.getName();
+	auto new_name =  m_edited_modelSet.getName();
+	logger.info() << "Model old name '" << old_name <<
+			         "' saved to new name '" <<  new_name << "'";
+    m_edited_modelSet.saveModelSet(old_name);
+
+    this->setItem(m_selected_row, 0, new QStandardItem(QString::fromStdString(new_name)));
     this->setItem(m_selected_row, 1, new QStandardItem(QString::number(m_edited_modelSet.getModelNumber(true))));
-    m_set_list.emplace(m_selected_index, m_edited_modelSet);
+    m_set_list.find(m_selected_index)->second = m_edited_modelSet;
+
     m_in_edition  = false;
     m_need_reload = true;
     return true;
@@ -221,8 +227,9 @@ bool ModelSetModel::doNeedReload() const {
 }
 
 void ModelSetModel::reloaded() {
-  m_need_reload = false;
+   m_need_reload = false;
 }
+
 
 }  // namespace PhzQtUI
 }  // namespace Euclid

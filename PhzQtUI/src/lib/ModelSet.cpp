@@ -11,10 +11,14 @@
 #include "PhzDataModel/PhotometryGrid.h"
 #include "PhzQtUI/ModelSet.h"
 #include "PhzDataModel/PhzModel.h"
+#include "ElementsKernel/Logging.h"
 
 namespace po = boost::program_options;
 namespace Euclid {
 namespace PhzQtUI {
+
+
+static Elements::Logging logger = Elements::Logging::getLogger("ModelSet");
 
 ModelSet::ModelSet(DatasetRepo sed_repo, DatasetRepo red_repo): m_sed_repo{sed_repo}, m_red_repo{red_repo}{}
 
@@ -536,6 +540,7 @@ void ModelSet::saveModelSet(std::string oldName) {
 
   stream << xml;
   file.close();
+  logger.debug() << "model saved in file :" << (QString::fromStdString(m_root_path) + QDir::separator() + QString::fromStdString(getName() + ".xml")).toStdString();
 }
 
 std::string ModelSet::getName() const {

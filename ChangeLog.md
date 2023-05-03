@@ -9,6 +9,7 @@ Note: the issue number refer to SDC-CH internal tracking.
 
 ## [Unreleased]
 ### Fixed
+- Fix a bug in the refreshing of the parameter space page after saving a new or a re-nomed parameter sapace. https://redmine.astro.unige.ch/issues/29020
 - Fix a bug in the GUI when saving a PP with Log part https://redmine.isdc.unige.ch/issues/28996
 
 ### Changed
