@@ -375,9 +375,9 @@ void DialogPhotometricCorrectionComputation::lumFinished() {
   auto message = m_future_lum_watcher.result();
   if (message.length() == 0) {
     if (m_sed_config.size() > 0) {
-      m_future_sed_watcher.setFuture(QtConcurrent::run(this, &DialogPhotometricCorrectionComputation::runSedFunction));
+      m_future_sed_watcher.setFuture(QtConcurrent::run(&DialogPhotometricCorrectionComputation::runSedFunction, this));
     } else {
-      m_future_watcher.setFuture(QtConcurrent::run(this, &DialogPhotometricCorrectionComputation::runFunction));
+      m_future_watcher.setFuture(QtConcurrent::run(&DialogPhotometricCorrectionComputation::runFunction, this));
     }
   } else {
     m_computing = false;
@@ -390,7 +390,7 @@ void DialogPhotometricCorrectionComputation::lumFinished() {
 void DialogPhotometricCorrectionComputation::sedFinished() {
   auto message = m_future_sed_watcher.result();
   if (message.length() == 0) {
-    m_future_watcher.setFuture(QtConcurrent::run(this, &DialogPhotometricCorrectionComputation::runFunction));
+    m_future_watcher.setFuture(QtConcurrent::run(&DialogPhotometricCorrectionComputation::runFunction, this));
   } else {
     m_computing = false;
     this->ui->bt_Cancel->setEnabled(true);
@@ -471,9 +471,9 @@ void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
 
   disablePage();
   if (m_sed_config.size() > 0) {
-    m_future_sed_watcher.setFuture(QtConcurrent::run(this, &DialogPhotometricCorrectionComputation::runSedFunction));
+    m_future_sed_watcher.setFuture(QtConcurrent::run(&DialogPhotometricCorrectionComputation::runSedFunction, this));
   } else {
-    m_future_watcher.setFuture(QtConcurrent::run(this, &DialogPhotometricCorrectionComputation::runFunction));
+    m_future_watcher.setFuture(QtConcurrent::run(&DialogPhotometricCorrectionComputation::runFunction, this));
   }
 }
 

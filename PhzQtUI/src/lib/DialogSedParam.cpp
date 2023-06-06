@@ -31,6 +31,7 @@ DialogSedParam::DialogSedParam(DatasetRepo sed_repository, QWidget* parent)
   m_sed_repository = sed_repository;
 
   m_P = new QProcess;
+  m_P->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
 
   connect(m_P, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processingFinished(int, QProcess::ExitStatus)));
 }
@@ -266,19 +267,19 @@ void DialogSedParam::on_btn_save_clicked() {
 
   keys.unique();
   if (params.size() == keys.size()) {
-    QStringList s3;
-    s3 << QString::fromStdString("--file") << QString::fromStdString(m_file_path);
-    s3 << QString::fromStdString("--remove-key") << QString::fromStdString("PARAMETER");
+    QStringList arguments;
+    arguments << QString::fromStdString("--file") << QString::fromStdString(m_file_path);
+    arguments << QString::fromStdString("--remove-key") << QString::fromStdString("PARAMETER");
     for (const auto& param : params) {
-      s3 << QString::fromStdString("--add-argument") << QString::fromStdString("\"PARAMETER:" + param + "\"");
+    	arguments << QString::fromStdString("--add-argument") << QString::fromStdString("\"PARAMETER:" + param + "\"");
     }
 
-    QString cmd = QString("SedHeaderHandler ") + s3.join(" ");
+    QString cmd = QString("SedHeaderHandler");
 
-    logger.info() << "Processing cmd:" << cmd.toStdString();
+    logger.info() << "Processing cmd:" << "SedHeaderHandler " << arguments.join(" ").toStdString();
 
-    m_P->setReadChannelMode(QProcess::MergedChannels);
-    m_P->start(cmd);
+    m_P->setProcessChannelMode(QProcess::MergedChannels);
+    m_P->start(cmd, arguments);
 
     ui->btn_cancel->setEnabled(false);
     ui->btn_save->setEnabled(false);

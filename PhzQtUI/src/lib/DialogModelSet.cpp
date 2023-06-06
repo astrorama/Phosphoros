@@ -119,14 +119,15 @@ void DialogModelSet::addEmissionLineButtonClicked(const QString& group) {
     lineAdder->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
 
     auto    aux_path = FileUtils::getAuxRootPath();
-    QString command  = QString::fromStdString("PhosphorosAddEmissionLines --sed-dir " + aux_path) + QDir::separator() +
-                      QString::fromStdString("SEDs") + QDir::separator() + group;
+    QString command  = QString::fromStdString("PhosphorosAddEmissionLines");
+    QStringList arguments;
+    arguments << "--sed-dir" <<  QString::fromStdString(aux_path) + QDir::separator() + QString::fromStdString("SEDs") + QDir::separator() + group;
 
     connect(lineAdder, SIGNAL(finished(int, QProcess::ExitStatus)), this,
             SLOT(sedProcessfinished(int, QProcess::ExitStatus)));
     connect(lineAdder, SIGNAL(started()), this, SLOT(sedProcessStarted()));
 
-    lineAdder->start(command);
+    lineAdder->start(command, arguments);
   } else {
     ui->labelMessage->setText("");
   }

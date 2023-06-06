@@ -24,34 +24,36 @@ if(ELEMENTS_HIDE_WARNINGS)
 endif()
 
 
-find_package(Qt5 COMPONENTS Core Concurrent Gui Widgets Xml Network REQUIRED)
+find_package(Qt6 REQUIRED COMPONENTS Core Network Gui Widgets Concurrent Xml)
 
 elements_expand_sources(PhUI_SRCS src/lib/*.cpp)
 elements_expand_sources(PhUI_HEADERS PhzQtUI/*.h)
 elements_expand_sources(PhUI_FORMS auxdir/PhzQtUI/*.ui)
 elements_expand_sources(PhUI_RESOURCES auxdir/PhzQtUI/*.qrc)
 
-qt5_wrap_cpp(PhUI_HEADERS_MOC ${PhUI_HEADERS} OPTIONS -nn)
-qt5_wrap_ui(PhUI_FORMS_HEADERS ${PhUI_FORMS})
-qt5_add_resources(PhUI_RESOURCES_RCC ${PhUI_RESOURCES})
+
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/auxdir/PhzQtUI)
+
+qt_standard_project_setup() #QT6 replacement for the following lines
+
 
 add_definitions(
-        ${Qt5Core_DEFINITIONS} ${Qt5Concurrent_DEFINITIONS}
-        ${Qt5Gui_DEFINITIONS} ${Qt5Widgets_DEFINITIONS}
-        ${Qt5Xml_DEFINITIONS}  ${Qt5Network_DEFINITIONS})
+        ${Qt6Core_DEFINITIONS} ${QtConcurrent_DEFINITIONS}
+        ${Qt6Gui_DEFINITIONS} ${QtWidgets_DEFINITIONS}
+        ${Qt6Xml_DEFINITIONS}  ${QtNetwork_DEFINITIONS})
 
 elements_add_library(PhzQtUI ${PhUI_SRCS} ${PhUI_HEADERS_MOC} ${PhUI_FORMS_HEADERS} ${PhUI_RESOURCES_RCC}
                      LINK_LIBRARIES
                         ElementsKernel XYDataset PhzConfiguration PhzPhotometricCorrection
                         PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzUtils PhzGalacticCorrection PhzFilterVariation PhzExecutables
-                        Qt5::Core Qt5::Network Qt5::Gui Qt5::Widgets Qt5::Xml 
+                        Qt6::Core Qt6::Network Qt6::Gui Qt6::Widgets Qt6::Xml Qt6::Concurrent
                      INCLUDE_DIRS
                         ElementsKernel XYDataset PhzConfiguration PhzPhotometricCorrection PhzModeling
                         PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzGalacticCorrection PhzFilterVariation
-                        "${Qt5Core_INCLUDE_DIRS}" "${Qt5Concurrent_INCLUDE_DIRS}"
-                        "${Qt5Network_INCLUDE_DIRS}"
-                        "${Qt5Gui_INCLUDE_DIRS}" "${Qt5Widgets_INCLUDE_DIRS}"
-                        "${Qt5Xml_INCLUDE_DIRS}"
+                        "${QtCore_INCLUDE_DIRS}" "${QtConcurrent_INCLUDE_DIRS}"
+                        "${QtNetwork_INCLUDE_DIRS}"
+                        "${QtGui_INCLUDE_DIRS}" "${QtWidgets_INCLUDE_DIRS}"
+                        "${QtXml_INCLUDE_DIRS}"
                      PUBLIC_HEADERS PhzQtUI)
 
 elements_add_executable(PhosphorosUI src/program/Main.cpp

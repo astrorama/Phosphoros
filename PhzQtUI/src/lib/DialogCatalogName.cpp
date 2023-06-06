@@ -5,7 +5,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 
 using namespace std;
 
@@ -15,8 +15,8 @@ namespace PhzQtUI {
 DialogCatalogName::DialogCatalogName(QWidget* parent) : QDialog(parent), ui(new Ui::DialogCatalogName) {
   ui->setupUi(this);
 
-  QRegExp rx("[\\w\\s]+");
-  ui->txt_name->setValidator(new QRegExpValidator(rx));
+  QRegularExpression rx("[\\w\\s]+");
+  ui->txt_name->setValidator(new QRegularExpressionValidator(rx));
 }
 
 DialogCatalogName::~DialogCatalogName() {}

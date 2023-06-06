@@ -145,10 +145,10 @@ void FormPostProcessing::updateSelection(bool force_reload_cb) {
     connect(button3, SIGNAL(clicked(bool)), signalMapper_three, SLOT(map()));
   }
 
-  connect(signalMapper_one, SIGNAL(mapped(int)), this, SLOT(computePdfStat(int)));
-  connect(signalMapper_two, SIGNAL(mapped(int)), this, SLOT(plotResiduals(int)));
-  connect(signalMapper_three, SIGNAL(mapped(int)), this, SLOT(plotZVsZref(int)));
-  connect(signalMapper_pp, SIGNAL(mapped(int)), this, SLOT(computePpPdf(int)));
+  connect(signalMapper_one, SIGNAL(mappedInt(int)), this, SLOT(computePdfStat(int)));
+  connect(signalMapper_two, SIGNAL(mappedInt(int)), this, SLOT(plotResiduals(int)));
+  connect(signalMapper_three, SIGNAL(mappedInt(int)), this, SLOT(plotZVsZref(int)));
+  connect(signalMapper_pp, SIGNAL(mappedInt(int)), this, SLOT(computePpPdf(int)));
 }
 
 void FormPostProcessing::on_cb_catalog_currentIndexChanged(const QString&) {

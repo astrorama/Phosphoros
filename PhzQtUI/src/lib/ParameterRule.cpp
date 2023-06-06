@@ -153,7 +153,7 @@ std::string ParameterRule::getEbvStringValueList() const {
 }
 
 std::set<double> ParameterRule::parseValueList(const std::string& list) {
-  auto             tokens = QString::fromStdString(list).split(",", QString::SkipEmptyParts);
+  auto             tokens = QString::fromStdString(list).split(",", Qt::SkipEmptyParts);
   std::set<double> result{};
   for (auto& token : tokens) {
     bool   ok;

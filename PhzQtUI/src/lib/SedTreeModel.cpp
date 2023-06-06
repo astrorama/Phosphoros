@@ -65,7 +65,7 @@ void SedTreeModel::load(bool selectable, bool onlyLeaves) {
       QStandardItem* item = new QStandardItem(QString::fromStdString(group_qualifiedName.datasetName()));
       item->setBackground(QBrush(QColor(230, 230, 230)));
       item->setCheckable(selectable && !onlyLeaves);
-      item->setTristate(selectable && !onlyLeaves);
+      item->setAutoTristate(selectable && !onlyLeaves);
 
       QStandardItem* item_void  = new QStandardItem("");
       QStandardItem* item_void2 = new QStandardItem("");

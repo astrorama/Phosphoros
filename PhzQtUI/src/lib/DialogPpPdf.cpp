@@ -54,6 +54,7 @@ void DialogPpPdf::setFolder(std::string result_folder) {
 
   logger.info() << prog.toStdString() << " " << arguments.join(" ").toStdString();
   m_P = new QProcess(this);
+  m_P->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
   m_P->setProcessChannelMode(QProcess::MergedChannels);
   connect(m_P, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processingFinished(int, QProcess::ExitStatus)));
   m_processing = true;

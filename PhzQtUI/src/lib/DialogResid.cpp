@@ -103,25 +103,25 @@ void DialogResid::on_btn_compute_clicked() {
   qApp->processEvents();
 
   m_P = new QProcess(this);
+  m_P->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
 
   connect(m_P, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processingFinished(int, QProcess::ExitStatus)));
 
-  QString cmd = "";
+  QString cmd = QString("PhosphorosPlotFluxDiff");
 
-  QStringList s3;
-  s3 << QString::fromStdString("--result-dir") << QString::fromStdString(m_folder)
+  QStringList arguments;
+  arguments << QString::fromStdString("--result-dir") << QString::fromStdString(m_folder)
      << QString::fromStdString("--intermediate-product-dir")
      << QString::fromStdString(FileUtils::getIntermediaryProductRootPath(false, ""))
      << QString::fromStdString("--z-limit") << QString::number(ui->sp_z_lim_frac->value() / 100.0)
      << QString::fromStdString("--vertical-sigma-limit") << QString::number(ui->dsp_sigma->value())
      << QString::fromStdString("--sliding-mean-sampling") << QString::number(ui->sb_sm_bins->value());
 
-  cmd = QString("PhosphorosPlotFluxDiff ") + s3.join(" ");
 
-  logger.info() << "Processing cmd:" << cmd.toStdString();
+  logger.info() << "Processing cmd:" << "PhosphorosPlotFluxDiff " << arguments.join(" ").toStdString();
 
-  m_P->setReadChannelMode(QProcess::MergedChannels);
-  m_P->start(cmd);
+  m_P->setProcessChannelMode(QProcess::MergedChannels);
+  m_P->start(cmd, arguments);
 
   m_timer = new QTimer(this);
   connect(m_timer, SIGNAL(timeout()), this, SLOT(updateOutCons()));
