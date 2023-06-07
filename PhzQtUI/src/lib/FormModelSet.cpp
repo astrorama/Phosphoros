@@ -120,7 +120,7 @@ void FormModelSet::loadSetPage(std::shared_ptr<ModelSetModel> model_set_model_pt
   setModelInView();
 }
 
-void FormModelSet::on_cb_selSpace_currentIndexChanged(const QString&) {
+void FormModelSet::on_cb_selSpace_currentIndexChanged(int) {
   if (!m_diconnect_cb) {
     m_model_set_model_ptr->selectModelSet(ui->cb_selSpace->currentText());
     updateSelection();

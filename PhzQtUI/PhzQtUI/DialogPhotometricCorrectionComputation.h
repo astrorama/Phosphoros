@@ -89,12 +89,12 @@ private slots:
    * @brief SLOT trigger the refresh of the run button after a change in
    * the specZ column.
    */
-  void on_cb_SpectroColumn_currentIndexChanged(const QString&);
+  void on_cb_SpectroColumn_currentIndexChanged(int);
 
   /**
    * @brief SLOT trigger the refresh of the default name.
    */
-  void on_cb_SelectionMethod_currentIndexChanged(const QString&);
+  void on_cb_SelectionMethod_currentTextChanged(const QString&);
 
   /**
    * @brief SLOT trigger the refresh of the run button after a change in

@@ -40,7 +40,7 @@ FormSurveyMapping::FormSurveyMapping(QWidget* parent) : QWidget(parent), ui(new 
 
 FormSurveyMapping::~FormSurveyMapping() {}
 
-void FormSurveyMapping::on_cb_catalog_type_currentIndexChanged(const QString&) {
+void FormSurveyMapping::on_cb_catalog_type_currentIndexChanged(int) {
   if (!m_diconnect_cb) {
     logger.info() << "Selected Catalog changed to:" << ui->cb_catalog_type->currentText().toStdString();
     m_survey_model_ptr->selectSurvey(ui->cb_catalog_type->currentText());
@@ -550,8 +550,7 @@ void FormSurveyMapping::on_btn_map_delete_clicked() {
         // The xml file
         m_survey_model_ptr->deletSelected();
         updateSelection(true);
-        on_cb_catalog_type_currentIndexChanged(
-            QString::fromStdString(m_survey_model_ptr->getSelectedSurvey().getName()));
+        on_cb_catalog_type_currentIndexChanged(-1);
         fillControlsWithSelected();
         setFilterMappingInView();
       }
@@ -636,7 +635,7 @@ void FormSurveyMapping::on_btn_MapCancel_clicked() {
     FileUtils::removeDir(QString::fromStdString(catalog_path));
     m_survey_model_ptr->deletSelected();
     loadCatalogCB(m_survey_model_ptr->getSelectedSurvey().getName());
-    on_cb_catalog_type_currentIndexChanged(QString::fromStdString(m_survey_model_ptr->getSelectedSurvey().getName()));
+    on_cb_catalog_type_currentIndexChanged(-1);
 
   } else {
     m_survey_model_ptr->cancelSelected();

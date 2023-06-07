@@ -34,8 +34,7 @@ elements_expand_sources(PhUI_RESOURCES auxdir/PhzQtUI/*.qrc)
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/auxdir/PhzQtUI)
 
-qt_standard_project_setup() #QT6 replacement for the following lines
-
+qt_standard_project_setup() 
 
 add_definitions(
         ${Qt6Core_DEFINITIONS} ${QtConcurrent_DEFINITIONS}
@@ -54,7 +53,10 @@ elements_add_library(PhzQtUI ${PhUI_SRCS} ${PhUI_HEADERS_MOC} ${PhUI_FORMS_HEADE
                         "${QtNetwork_INCLUDE_DIRS}"
                         "${QtGui_INCLUDE_DIRS}" "${QtWidgets_INCLUDE_DIRS}"
                         "${QtXml_INCLUDE_DIRS}"
+       
                      PUBLIC_HEADERS PhzQtUI)
+
+qt_add_resources(PhzQtUI "images" PREFIX "/" BASE ${CMAKE_CURRENT_SOURCE_DIR}/auxdir/PhzQtUI/ FILES ${CMAKE_CURRENT_SOURCE_DIR}/auxdir/PhzQtUI/logoPhUI.png)
 
 elements_add_executable(PhosphorosUI src/program/Main.cpp
                         LINK_LIBRARIES PhzQtUI XYDataset PhzConfiguration PhzPhotometricCorrection PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzGalacticCorrection PhzFilterVariation)

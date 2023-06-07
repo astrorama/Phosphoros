@@ -85,9 +85,9 @@ private slots:
 
   void on_btn_editCorrections_clicked();
 
-  void on_cb_AnalysisCorrection_currentIndexChanged(const QString& arg1);
+  void on_cb_AnalysisCorrection_currentIndexChanged(int);
 
-  void on_cb_AnalysisSurvey_currentIndexChanged(const QString& arg1);
+  void on_cb_AnalysisSurvey_currentIndexChanged(int);
 
   void onFilterSelectionItemChanged(QStandardItem*);
 
@@ -95,14 +95,14 @@ private slots:
 
   void on_btn_lum_filter_clicked();
 
-  void on_cb_AnalysisModel_currentIndexChanged(const QString&);
+  void on_cb_AnalysisModel_currentIndexChanged(int);
 
-  void on_cbb_pdf_out_currentIndexChanged(const QString&);
+  void on_cbb_pdf_out_currentIndexChanged(int);
 
   void on_cb_pdf_z_stateChanged(int);
   void on_cb_likelihood_pdf_z_stateChanged(int);
 
-  void on_cb_igm_currentIndexChanged(const QString&);
+  void on_cb_igm_currentIndexChanged(int);
 
   void on_cb_CompatibleGrid_currentTextChanged(const QString&);
   void on_btn_GetConfigGrid_clicked();
@@ -144,7 +144,7 @@ private slots:
 
   void on_btn_confLuminosityPrior_clicked();
 
-  void on_cb_luminosityPrior_2_currentIndexChanged(const QString&);
+  void on_cb_luminosityPrior_2_currentIndexChanged(int);
 
   void on_rb_luminosityPrior_toggled(bool);
   void on_rb_volumePrior_toggled(bool);

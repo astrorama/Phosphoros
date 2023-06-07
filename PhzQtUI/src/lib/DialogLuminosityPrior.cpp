@@ -283,7 +283,7 @@ void DialogLuminosityPrior::on_btn_cancel_clicked() {
   m_new = false;
 }
 
-void DialogLuminosityPrior::on_cb_unit_currentIndexChanged(const QString&) {
+void DialogLuminosityPrior::on_cb_unit_currentIndexChanged(int) {
   bool is_mag = ui->cb_unit->currentIndex() == 0;
 
   // swap the luminosity function from MAG to FLUX or conversly

@@ -151,7 +151,7 @@ void FormPostProcessing::updateSelection(bool force_reload_cb) {
   connect(signalMapper_pp, SIGNAL(mappedInt(int)), this, SLOT(computePpPdf(int)));
 }
 
-void FormPostProcessing::on_cb_catalog_currentIndexChanged(const QString&) {
+void FormPostProcessing::on_cb_catalog_currentIndexChanged(int) {
   if (!m_disconnect_cb) {
     logger.info() << "Selected Catalog changed to:" << ui->cb_catalog->currentText().toStdString();
     m_survey_model_ptr->selectSurvey(ui->cb_catalog->currentText());

@@ -133,7 +133,7 @@ private slots:
   /**
    * @brief SLOT raised when the MAGNITUDE/FLUX combobox is changed.
    */
-  void on_cb_unit_currentIndexChanged(const QString&);
+  void on_cb_unit_currentIndexChanged(int);
 
   /**
    * @brief SLOT raised when the groups management button is clicked.

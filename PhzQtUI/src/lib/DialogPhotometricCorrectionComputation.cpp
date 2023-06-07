@@ -235,12 +235,12 @@ void DialogPhotometricCorrectionComputation::setRunEnability() {
   ui->btn_conf->setEnabled(run_ok);
 }
 
-void DialogPhotometricCorrectionComputation::on_cb_SelectionMethod_currentIndexChanged(const QString& method) {
+void DialogPhotometricCorrectionComputation::on_cb_SelectionMethod_currentTextChanged(const QString& method) {
   QString default_file_name = ui->txt_Model->text() + "_" + method;
   ui->txt_FileName->setText(default_file_name);
 }
 
-void DialogPhotometricCorrectionComputation::on_cb_SpectroColumn_currentIndexChanged(const QString&) {
+void DialogPhotometricCorrectionComputation::on_cb_SpectroColumn_currentIndexChanged(int) {
   setRunEnability();
 }
 

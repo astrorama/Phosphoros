@@ -132,7 +132,7 @@ void FormAnalysis::updateSelection() {
 
   bool has_changed_model=false;
   // Disconnect the combobox event
-  disconnect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString&)), 0, 0);
+  disconnect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(int)), 0, 0);
   // if needed: Fill the Parameter Space Combobox and set its index
   if (ui->cb_AnalysisModel->count()==0 || m_model_set_model_ptr->doNeedReload()) {
     ui->cb_AnalysisModel->clear();
@@ -161,15 +161,15 @@ void FormAnalysis::updateSelection() {
   }
   m_model_set_model_ptr->reloaded();
   // reconnect the combobox event
-  connect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString&)),
-          SLOT(on_cb_AnalysisModel_currentIndexChanged(const QString&)));
+  connect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(int)),
+          SLOT(on_cb_AnalysisModel_currentIndexChanged(int)));
 
   /// COMBO BOX CATALOG  ////
   //////////////////////////
 
   bool has_changed_catalog=false;
   // Disconnect the combobox event
-  disconnect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString&)), 0, 0);
+  disconnect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(int)), 0, 0);
 
   // if needed: Fill the Parameter Space Combobox and set its index
   if (ui->cb_AnalysisSurvey->count()==0 || m_survey_model_ptr->doNeedReload()) {
@@ -201,8 +201,8 @@ void FormAnalysis::updateSelection() {
 
   m_survey_model_ptr->reloaded();
   // reconnect the combobox event
-  connect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString&)),
-          SLOT(on_cb_AnalysisSurvey_currentIndexChanged(const QString&)));
+  connect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(int)),
+          SLOT(on_cb_AnalysisSurvey_currentIndexChanged(int)));
 
   /// LUMINOSITY FILTER  ////
   //////////////////////////
@@ -226,9 +226,9 @@ void FormAnalysis::updateSelection() {
   m_is_loading=false;
 
   if (ui->cb_AnalysisSurvey->currentText() != "" && has_changed_catalog) {
-    on_cb_AnalysisSurvey_currentIndexChanged(ui->cb_AnalysisSurvey->currentText());
+    on_cb_AnalysisSurvey_currentIndexChanged(-1);
   } else if (ui->cb_AnalysisModel->currentText() != "" && has_changed_model) {
-    on_cb_AnalysisModel_currentIndexChanged(ui->cb_AnalysisModel->currentText());
+    on_cb_AnalysisModel_currentIndexChanged(-1);
 }
 
   auto stop = std::chrono::high_resolution_clock::now();
@@ -1608,8 +1608,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 // User interaction
 
 //  1. Survey and Model
-void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(const QString& selectedName) {
-
+void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(int) {
+ const QString selectedName = ui->cb_AnalysisSurvey->currentText();
 
   logger.info() << "The selected index of the Catalog ComboBox has changed. New selected item:"
                 << selectedName.toStdString();
@@ -1722,7 +1722,8 @@ int countCompleteList(const std::map<std::string, PhzDataModel::ModelAxesTuple>&
   return all_item.size();
 }
 
-void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(const QString& model_name) {
+void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(int) {
+  QString model_name = ui->cb_AnalysisModel->currentText();
   logger.info() << "The selected index of the Parameter Space ComboBox has changed. New selected item:"
                 << model_name.toStdString();
   m_model_set_model_ptr->selectModelSet(model_name);
@@ -1735,7 +1736,7 @@ void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(const QString& model_
   getPPListFromConfig();
 }
 
-void FormAnalysis::on_cb_igm_currentIndexChanged(const QString&) {
+void FormAnalysis::on_cb_igm_currentIndexChanged(int) {
   updateGridSelection();
   updateGalCorrGridSelection();
   updateFilterShiftGridSelection();
@@ -1978,7 +1979,7 @@ void FormAnalysis::on_gb_corrections_clicked() {
   setComputeCorrectionEnable();
 }
 
-void FormAnalysis::on_cb_AnalysisCorrection_currentIndexChanged(const QString&) {
+void FormAnalysis::on_cb_AnalysisCorrection_currentIndexChanged(int) {
   setRunAnnalysisEnable(true);
 }
 
@@ -2161,7 +2162,7 @@ void FormAnalysis::loadLuminosityPriors() {
   }
 }
 
-void FormAnalysis::on_cb_luminosityPrior_2_currentIndexChanged(const QString&) {
+void FormAnalysis::on_cb_luminosityPrior_2_currentIndexChanged(int) {
   PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                                       ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPriorName",
                                       ui->cb_luminosityPrior_2->currentText().toStdString());
@@ -2506,7 +2507,7 @@ void FormAnalysis::on_btn_BrowseOutput_clicked() {
   }
 }
 
-void FormAnalysis::on_cbb_pdf_out_currentIndexChanged(const QString&) {}
+void FormAnalysis::on_cbb_pdf_out_currentIndexChanged(int) {}
 
 void FormAnalysis::on_cb_pdf_z_stateChanged(int) {}
 

@@ -6,6 +6,7 @@
 #include "XYDataset/AsciiParser.h"
 #include "ui_MainWindow.h"
 #include <QDir>
+#include <QDirIterator>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <fstream>
@@ -38,6 +39,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
   ui->image_label->setTopMargin(20);
   ui->image_label->setPixmap(pixmap);
   main_logger.debug()<<"UI setup done";
+
+  // DEBUG: List the resources
+  // main_logger.info()<<"Resources in ':' ";
+  // QDirIterator it(":", QDirIterator::Subdirectories);
+  // while (it.hasNext()) {
+  //	  main_logger.info()<< it.next().toStdString();
+  // }
+
 
   connect(this, SIGNAL(changeMainStackedWidgetIndex(int)), ui->mainStackedWidget, SLOT(setCurrentIndex(int)));
 
