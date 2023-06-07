@@ -15,8 +15,6 @@
 #include "PhzQtUI/MessageButton.h"
 #include "PhzQtUI/SedParamUtils.h"
 #include "ui_DialogSedParam.h"
-#include "PhzExecutables/BuildPPConfig.h"
-#include "PhzDataModel/PPConfig.h"
 
 using namespace std;
 
@@ -48,53 +46,79 @@ void DialogSedParam::setSed(const XYDataset::QualifiedName& sed) {
   auto        string_params = QString::fromStdString(m_sed_repository->getProvider()->getParameter(sed, keyword));
 
   QStandardItemModel* grid_model = new QStandardItemModel();
-  grid_model->setColumnCount(7);
+  grid_model->setColumnCount(4);
   grid_model->setHeaderData(0, Qt::Horizontal, tr("Name"));
   grid_model->setHeaderData(1, Qt::Horizontal, tr("A"));
   grid_model->setHeaderData(2, Qt::Horizontal, tr("B"));
-  grid_model->setHeaderData(3, Qt::Horizontal, tr("C"));
-  grid_model->setHeaderData(4, Qt::Horizontal, tr("D"));
-  grid_model->setHeaderData(5, Qt::Horizontal, tr("Units"));
-  grid_model->setHeaderData(6, Qt::Horizontal, tr(""));
+  grid_model->setHeaderData(2, Qt::Horizontal, tr("Units"));
+  grid_model->setHeaderData(3, Qt::Horizontal, tr(""));
+
+  auto params = string_params.split(";");
 
   std::vector<MessageButton*> message_buttons;
+  for (auto param : params) {
+    if (param.contains("=")) {
+      QList<QStandardItem*> items;
+      auto                  bits = param.split("=");
+      QStandardItem*        item = new QStandardItem(bits[0]);
+      items.push_back(item);
+      auto param_bits = bits[1].split("[");
 
-  PhzExecutables::BuildPPConfig parser{};
-  std::map<std::string, PhzDataModel::PPConfig> param_map = parser.getParamMap(string_params.toStdString());
-  for (auto const& param_iter : param_map) {
-	  QList<QStandardItem*> items;
-	  QStandardItem*        item = new QStandardItem(QString::fromStdString(param_iter.first));
-	  items.push_back(item);
-	  QStandardItem* itemA = new QStandardItem(QString::number(param_iter.second.getA()));
-	  items.push_back(itemA);
-	  QStandardItem* itemB = new QStandardItem(QString::number(param_iter.second.getB()));
-	  items.push_back(itemB);
-	  QStandardItem* itemC = new QStandardItem(QString::number(param_iter.second.getC()));
-	  items.push_back(itemC);
-	  QStandardItem* itemD = new QStandardItem(QString::number(param_iter.second.getD()));
-	  items.push_back(itemD);
-	  QStandardItem* uItem = new QStandardItem(QString::fromStdString(param_iter.second.getUnit()));
-	  items.push_back(uItem);
-	  QStandardItem* itemAct = new QStandardItem("");
-	  items.push_back(itemAct);
-      MessageButton* delButton = new MessageButton(QString::fromStdString(param_iter.first), "Remove");
-	  message_buttons.push_back(delButton);
+      if (param_bits[0].contains("+")) {
+        auto sub_bits = param_bits[0].split("+");
+        if (sub_bits[0].contains("*L")) {
+          QStandardItem* item2 = new QStandardItem(sub_bits[0].replace("*L", ""));
+          items.push_back(item2);
+          QStandardItem* item3 = new QStandardItem(sub_bits[1]);
+          items.push_back(item3);
+        } else {
+          QStandardItem* item2 = new QStandardItem(sub_bits[1].replace("*L", ""));
+          items.push_back(item2);
+          QStandardItem* item3 = new QStandardItem(sub_bits[0]);
+          items.push_back(item3);
+        }
+      } else if (param_bits[0].contains("*L")) {
+        QStandardItem* item2 = new QStandardItem(param_bits[0].replace("*L", ""));
+        items.push_back(item2);
+        QStandardItem* item3 = new QStandardItem(QString::number(0));
+        items.push_back(item3);
+      } else {
+        QStandardItem* item2 = new QStandardItem(QString::number(0));
+        items.push_back(item2);
+        QStandardItem* item3 = new QStandardItem(param_bits[0]);
+        items.push_back(item3);
+      }
+
+      if (param_bits.size() > 0) {
+        auto           unit_bit = param_bits[1].split("]");
+        QStandardItem* item4    = new QStandardItem(unit_bit[0]);
+        items.push_back(item4);
+      } else {
+        QStandardItem* item4 = new QStandardItem("");
+        items.push_back(item4);
+      }
+
+      QStandardItem* item5 = new QStandardItem("");
+      items.push_back(item5);
+
+      MessageButton* delButton = new MessageButton(bits[0], "Remove");
+      message_buttons.push_back(delButton);
+
       connect(delButton, SIGNAL(MessageButtonClicked(const QString&)), this, SLOT(delParamClicked(const QString&)));
 
-	  grid_model->appendRow(items);
+      grid_model->appendRow(items);
+    }
   }
 
   ui->table_param->setModel(grid_model);
 
   for (int counter = 0; counter < grid_model->rowCount(); ++counter) {
-    auto item_btn = grid_model->index(counter, 6);
+    auto item_btn = grid_model->index(counter, 4);
     ui->table_param->setIndexWidget(item_btn, message_buttons[counter]);
   }
 
   ui->le_A->setText("0");
   ui->le_B->setText("0");
-  ui->le_C->setText("0");
-  ui->le_D->setText("0");
   ui->le_unit->setText("");
 }
 
@@ -115,53 +139,27 @@ void DialogSedParam::on_btn_new_clicked() {
     if (ok) {
       ui->le_B->text().toDouble(&ok);
       if (ok) {
-    	ui->le_C->text().toDouble(&ok);
-    	if (ok) {
-    	  ui->le_D->text().toDouble(&ok);
-    	  if (ok) {
-    	    QList<QStandardItem*> items;
-			QStandardItem*        item = new QStandardItem(ui->le_new_name->text());
-			items.push_back(item);
-			QStandardItem* item2 = new QStandardItem(ui->le_A->text());
-			items.push_back(item2);
-			QStandardItem* item3 = new QStandardItem(ui->le_B->text());
-			items.push_back(item3);
-			QStandardItem* item4 = new QStandardItem(ui->le_C->text());
-			items.push_back(item4);
-			QStandardItem* item5 = new QStandardItem(ui->le_D->text());
-			items.push_back(item5);
-			QStandardItem* item6 = new QStandardItem(ui->le_unit->text());
-			items.push_back(item6);
-			QStandardItem* item7 = new QStandardItem("");
-			items.push_back(item7);
-			MessageButton* delButton = new MessageButton(ui->le_new_name->text(), "Remove");
-			connect(delButton, SIGNAL(MessageButtonClicked(const QString&)), this, SLOT(delParamClicked(const QString&)));
-			auto model = static_cast<QStandardItemModel*>(ui->table_param->model());
-			model->appendRow(items);
-			ui->table_param->setIndexWidget(model->index(model->rowCount() - 1, 6), delButton);
+        QList<QStandardItem*> items;
+        QStandardItem*        item = new QStandardItem(ui->le_new_name->text());
+        items.push_back(item);
+        QStandardItem* item2 = new QStandardItem(ui->le_A->text());
+        items.push_back(item2);
+        QStandardItem* item3 = new QStandardItem(ui->le_B->text());
+        items.push_back(item3);
+        QStandardItem* item4 = new QStandardItem(ui->le_unit->text());
+        items.push_back(item4);
+        QStandardItem* item5 = new QStandardItem("");
+        items.push_back(item5);
+        MessageButton* delButton = new MessageButton(ui->le_new_name->text(), "Remove");
+        connect(delButton, SIGNAL(MessageButtonClicked(const QString&)), this, SLOT(delParamClicked(const QString&)));
+        auto model = static_cast<QStandardItemModel*>(ui->table_param->model());
+        model->appendRow(items);
+        ui->table_param->setIndexWidget(model->index(model->rowCount() - 1, 4), delButton);
 
-			ui->le_new_name->setText("");
-			ui->le_A->setText("0");
-			ui->le_B->setText("0");
-			ui->le_C->setText("0");
-			ui->le_D->setText("0");
-			ui->le_unit->setText("");
-    	  } else {
-            QMessageBox msgBox;
-			msgBox.setText("Unaccepted input.");
-			msgBox.setInformativeText("D value (" + ui->le_D->text() + ") must be a number!");
-			msgBox.setStandardButtons(QMessageBox::Ok);
-			msgBox.setDefaultButton(QMessageBox::Ok);
-			msgBox.exec();
-		  }
-    	} else {
-		  QMessageBox msgBox;
-		  msgBox.setText("Unaccepted input.");
-		  msgBox.setInformativeText("C value (" + ui->le_C->text() + ") must be a number!");
-		  msgBox.setStandardButtons(QMessageBox::Ok);
-		  msgBox.setDefaultButton(QMessageBox::Ok);
-		  msgBox.exec();
-	    }
+        ui->le_new_name->setText("");
+        ui->le_A->setText("0");
+        ui->le_B->setText("0");
+        ui->le_unit->setText("");
       } else {
         QMessageBox msgBox;
         msgBox.setText("Unaccepted input.");
@@ -202,10 +200,7 @@ void DialogSedParam::on_btn_save_clicked() {
       if (ok) {
         model->item(i, 2)->text().toDouble(&ok);
         if (ok) {
-          model->item(i, 3)->text().toDouble(&ok);
-          if (ok) {
-            model->item(i, 4)->text().toDouble(&ok);
-            if (ok) {
+
           keys.push_back(model->item(i, 0)->text().toStdString());
           params.push_back(model->item(i, 0)->text().toStdString() + "=" +
         		  model->item(i, 1)->text().toStdString() + "*L+" +
