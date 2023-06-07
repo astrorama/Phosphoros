@@ -139,7 +139,8 @@ void FormConfiguration::on_btn_saveGeneral_clicked() {
 void FormConfiguration::on_btn_browseCat_clicked() {
   QFileDialog dialog(this);
   dialog.selectFile(m_option_model_ptr->getCatPath());
-  dialog.setFileMode(QFileDialog::DirectoryOnly);
+  dialog.setFileMode(QFileDialog::Directory);
+  dialog.setOptions(QFileDialog::ShowDirsOnly);
   if (dialog.exec()) {
     startEdition(0);
     setGeneralControlEdition(true);
@@ -154,7 +155,8 @@ void FormConfiguration::on_btn_browseCat_clicked() {
 void FormConfiguration::on_btn_browseAux_clicked() {
   QFileDialog dialog(this);
   dialog.selectFile(m_option_model_ptr->getAuxPath());
-  dialog.setFileMode(QFileDialog::DirectoryOnly);
+  dialog.setFileMode(QFileDialog::Directory);
+  dialog.setOptions(QFileDialog::ShowDirsOnly);
   if (dialog.exec()) {
     startEdition(0);
     setGeneralControlEdition(true);
@@ -169,7 +171,8 @@ void FormConfiguration::on_btn_browseAux_clicked() {
 void FormConfiguration::on_btn_browseInter_clicked() {
   QFileDialog dialog(this);
   dialog.selectFile(m_option_model_ptr->getInterPath());
-  dialog.setFileMode(QFileDialog::DirectoryOnly);
+  dialog.setFileMode(QFileDialog::Directory);
+  dialog.setOptions(QFileDialog::ShowDirsOnly);
   if (dialog.exec()) {
     startEdition(0);
     setGeneralControlEdition(true);
@@ -184,7 +187,8 @@ void FormConfiguration::on_btn_browseInter_clicked() {
 void FormConfiguration::on_btn_browseRes_clicked() {
   QFileDialog dialog(this);
   dialog.selectFile(m_option_model_ptr->getResPath());
-  dialog.setFileMode(QFileDialog::DirectoryOnly);
+  dialog.setFileMode(QFileDialog::Directory);
+  dialog.setOptions(QFileDialog::ShowDirsOnly);
   if (dialog.exec()) {
     startEdition(0);
     setGeneralControlEdition(true);

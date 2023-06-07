@@ -11,7 +11,8 @@ namespace PhzQtUI {
 
 static Elements::Logging logger = Elements::Logging::getLogger("ModelSetModel");
 
-ModelSetModel::ModelSetModel() : QStandardItemModel() {}
+ModelSetModel::ModelSetModel(DatasetRepo sed_repo, DatasetRepo red_repo) : QStandardItemModel(),
+		m_sed_repo{sed_repo},m_red_repo{red_repo}, m_edited_modelSet{m_sed_repo, m_red_repo}{}
 
 const QString ModelSetModel::getValue(int row, int column) const {
   return this->item(row, column)->text();
@@ -49,7 +50,7 @@ std::string ModelSetModel::getDuplicateName(std::string name) const {
 }
 
 void ModelSetModel::loadSets() {
-  m_set_list = ModelSet::loadModelSetsFromFolder(FileUtils::getModelRootPath(true));
+  m_set_list = ModelSet::loadModelSetsFromFolder(m_sed_repo, m_red_repo, FileUtils::getModelRootPath(true));
 
   this->setColumnCount(3);
   this->setRowCount(m_set_list.size());
@@ -75,12 +76,13 @@ void ModelSetModel::selectModelSet(int row) {
   if (row >= 0 && row < static_cast<int>(m_set_list.size())) {
     m_selected_row    = row;
     m_selected_index  = getValue(row, 2).toInt();
-    m_edited_modelSet = m_set_list[m_selected_index];
+    const auto& current_model = m_set_list.find(m_selected_index)->second;
+    m_edited_modelSet = ModelSet{current_model};
     PreferencesUtils::setUserPreference("_global_selection_", "parameter_space", m_edited_modelSet.getName());
   } else {
     m_selected_row    = -1;
     m_selected_index  = -1;
-    m_edited_modelSet = ModelSet();
+    m_edited_modelSet = ModelSet(m_sed_repo, m_red_repo);
   }
   m_in_edition = false;
 }
@@ -96,7 +98,7 @@ void ModelSetModel::selectModelSet(QString name) {
   selectModelSet(selected_row);
 }
 
-const ModelSet& ModelSetModel::getSelectedModelSet() const {
+ModelSet& ModelSetModel::getSelectedModelSet() {
   return m_edited_modelSet;
 }
 
@@ -116,19 +118,23 @@ void ModelSetModel::newModelSet(bool duplicate_from_selected) {
 
   QString text_1      = "New_Parameter_Space";
   QString text_2      = "0";
-  m_set_list[max_ref] = ModelSet(FileUtils::getModelRootPath(true));
-  m_set_list[max_ref].setParameterRules(std::map<int, ParameterRule>{});
+  auto model_set = ModelSet(m_sed_repo, m_red_repo, FileUtils::getModelRootPath(true));
+  model_set.setParameterRules(std::map<int, ParameterRule>{});
+
+
   if (duplicate_from_selected) {
     text_1 = QString::fromStdString(getDuplicateName(m_edited_modelSet.getName()));
     text_2 = QString::number(m_edited_modelSet.getModelNumber(false));
-    m_set_list[max_ref].setParameterRules(m_edited_modelSet.getParameterRules());
+    model_set.setParameterRules(m_edited_modelSet.getParameterRules());
 
-    m_set_list[max_ref].setZRange(m_edited_modelSet.getZRanges());
-    m_set_list[max_ref].setZValues(m_edited_modelSet.getZValues());
-    m_set_list[max_ref].setEbvRange(m_edited_modelSet.getEbvRanges());
-    m_set_list[max_ref].setEbvValues(m_edited_modelSet.getEbvValues());
+    model_set.setZRange(m_edited_modelSet.getZRanges());
+    model_set.setZValues(m_edited_modelSet.getZValues());
+    model_set.setEbvRange(m_edited_modelSet.getEbvRanges());
+    model_set.setEbvValues(m_edited_modelSet.getEbvValues());
   }
-  m_set_list[max_ref].setName(text_1.toStdString());
+  model_set.setName(text_1.toStdString());
+
+  m_set_list.emplace(max_ref, model_set);
 
   QList<QStandardItem*> items;
   items.push_back(new QStandardItem(text_1));
@@ -156,14 +162,20 @@ bool ModelSetModel::isInEdition() {
 }
 
 bool ModelSetModel::saveSelected() {
-  logger.info() << "Saving the selected Model '" << m_edited_modelSet.getName() << "'.";
+
   bool pre_tests = checkUniqueName(QString::fromStdString(m_edited_modelSet.getName()), m_selected_row);
 
   if (pre_tests) {
-    m_set_list[m_selected_index] = m_edited_modelSet;
-    m_set_list[m_selected_index].saveModelSet(m_set_list[m_selected_index].getName());
-    this->setItem(m_selected_row, 0, new QStandardItem(QString::fromStdString(m_edited_modelSet.getName())));
+	auto old_name = m_set_list.find(m_selected_index)->second.getName();
+	auto new_name =  m_edited_modelSet.getName();
+	logger.info() << "Model old name '" << old_name <<
+			         "' saved to new name '" <<  new_name << "'";
+    m_edited_modelSet.saveModelSet(old_name);
+
+    this->setItem(m_selected_row, 0, new QStandardItem(QString::fromStdString(new_name)));
     this->setItem(m_selected_row, 1, new QStandardItem(QString::number(m_edited_modelSet.getModelNumber(true))));
+    m_set_list.find(m_selected_index)->second = m_edited_modelSet;
+
     m_in_edition  = false;
     m_need_reload = true;
     return true;
@@ -174,7 +186,9 @@ bool ModelSetModel::saveSelected() {
 
 void ModelSetModel::cancelSelected() {
   logger.info() << "Cancel edition on the selected Model '" << m_edited_modelSet.getName() << "'.";
-  m_edited_modelSet = m_set_list[m_selected_index];
+
+  const auto& edited_model = m_set_list.find(m_selected_index)->second;
+  m_edited_modelSet = ModelSet{edited_model};
   m_in_edition      = false;
 }
 
@@ -213,8 +227,9 @@ bool ModelSetModel::doNeedReload() const {
 }
 
 void ModelSetModel::reloaded() {
-  m_need_reload = false;
+   m_need_reload = false;
 }
+
 
 }  // namespace PhzQtUI
 }  // namespace Euclid

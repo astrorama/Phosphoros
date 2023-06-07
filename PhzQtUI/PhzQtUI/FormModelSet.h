@@ -59,7 +59,7 @@ private slots:
   void on_btn_conf_z_clicked();
   void on_btn_conf_ebv_clicked();
 
-  void on_cb_selSpace_currentIndexChanged(const QString&);
+  void on_cb_selSpace_currentIndexChanged(int);
 
   void rulesSelectionChanged(QModelIndex, QModelIndex);
 

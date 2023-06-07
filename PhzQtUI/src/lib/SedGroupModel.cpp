@@ -2,6 +2,7 @@
 #include "PhzQtUI/SedGroupModel.h"
 #include "XYDataset/QualifiedName.h"
 #include <QMimeData>
+#include <QIODevice>
 #include <set>
 
 namespace Euclid {

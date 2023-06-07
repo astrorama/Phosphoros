@@ -199,6 +199,7 @@ void DialogPSC::on_btn_compute_clicked() {
   qApp->processEvents();
 
   m_P = new QProcess(this);
+  m_P->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
 
   connect(m_P, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processingFinished(int, QProcess::ExitStatus)));
 
@@ -214,28 +215,26 @@ void DialogPSC::on_btn_compute_clicked() {
     }
   }
 
-  QString cmd = "";
+  QString cmd = QString("PhosphorosPlotSpecZComparison");
+  QStringList arguments;
   if (ui->gb_scater->isChecked()) {
-    QStringList s3;
-    s3 << QString::fromStdString("--phosphoros-output-dir") << QString::fromStdString(m_folder)
+
+    arguments << QString::fromStdString("--phosphoros-output-dir") << QString::fromStdString(m_folder)
        << QString::fromStdString("--phz-column") << QString::fromStdString(point_estimate_column)
        << QString::fromStdString("--specz-catalog") << ui->le_path->text() << QString::fromStdString("--specz-cat-id")
        << ui->cdd_ref_id_col->currentText() << QString::fromStdString("--specz-column")
        << ui->cbb_ref_z_col->currentText() << QString::fromStdString("--samp");
 
     if (point_estimate_file.length() > 0) {
-      s3 << QString::fromStdString("--pe-catalog") << QString::fromStdString(point_estimate_file);
+      arguments << QString::fromStdString("--pe-catalog") << QString::fromStdString(point_estimate_file);
     }
 
     if (ui->cb_no_plot->checkState() != Qt::Unchecked) {
-      s3 << QString::fromStdString("--no-display");
+      arguments << QString::fromStdString("--no-display");
     }
 
-    cmd = QString("PhosphorosPlotSpecZComparison ") + s3.join(" ");
-
   } else {
-    QStringList s3;
-    s3 << QString::fromStdString("--pdz-catalog-file") << QString::fromStdString(m_folder + "/phz_cat.fits")
+    arguments << QString::fromStdString("--pdz-catalog-file") << QString::fromStdString(m_folder + "/phz_cat.fits")
        << QString::fromStdString("--refz-catalog-file") << ui->le_path->text() << QString::fromStdString("--pdz-col-pe")
        << QString::fromStdString(point_estimate_column) << QString::fromStdString("--pdz-col-pdf")
        << ui->cbb_pdf_col->currentText()
@@ -247,49 +246,47 @@ void DialogPSC::on_btn_compute_clicked() {
        << QString::fromStdString("--stacked-point-estimate") << ui->cb_pe_type->currentText();
 
     if (point_estimate_file.length() > 0) {
-      s3 << QString::fromStdString("--pe-catalog-file") << QString::fromStdString(point_estimate_file);
+      arguments << QString::fromStdString("--pe-catalog-file") << QString::fromStdString(point_estimate_file);
     }
 
     if (ui->cb_st_ref->checkState() != Qt::Checked) {
-      s3 << QString::fromStdString("--ref-plot") << QString::fromStdString("False");
+    	arguments << QString::fromStdString("--ref-plot") << QString::fromStdString("False");
     }
     if (ui->cb_ref_nb_plot->checkState() != Qt::Checked) {
-      s3 << QString::fromStdString("--ref-bin-plot") << QString::fromStdString("False");
+    	arguments << QString::fromStdString("--ref-bin-plot") << QString::fromStdString("False");
     }
     if (ui->cb_ref_bias_plot->checkState() != Qt::Checked) {
-      s3 << QString::fromStdString("--ref-bias-plot") << QString::fromStdString("False");
+    	arguments << QString::fromStdString("--ref-bias-plot") << QString::fromStdString("False");
     }
     if (ui->cb_ref_frac_plot->checkState() != Qt::Checked) {
-      s3 << QString::fromStdString("--ref-frac-plot") << QString::fromStdString("False");
+    	arguments << QString::fromStdString("--ref-frac-plot") << QString::fromStdString("False");
     }
 
     if (ui->cb_st_shift->checkState() != Qt::Checked) {
-      s3 << QString::fromStdString("--shift-plot") << QString::fromStdString("False");
+    	arguments << QString::fromStdString("--shift-plot") << QString::fromStdString("False");
     }
     if (ui->cb_shift_nb_plot->checkState() != Qt::Checked) {
-      s3 << QString::fromStdString("--shift-bin-plot") << QString::fromStdString("False");
+    	arguments << QString::fromStdString("--shift-bin-plot") << QString::fromStdString("False");
     }
     if (ui->cb_bias_nb_plot->checkState() != Qt::Checked) {
-      s3 << QString::fromStdString("--shift-bias-plot") << QString::fromStdString("False");
+    	arguments << QString::fromStdString("--shift-bias-plot") << QString::fromStdString("False");
     }
     if (ui->cb_frac_nb_plot->checkState() != Qt::Checked) {
-      s3 << QString::fromStdString("--shift-frac-plot") << QString::fromStdString("False");
+    	arguments << QString::fromStdString("--shift-frac-plot") << QString::fromStdString("False");
     }
 
     if (ui->cb_pit->checkState() != Qt::Checked) {
-      s3 << QString::fromStdString("--pit-plot") << QString::fromStdString("False");
+    	arguments << QString::fromStdString("--pit-plot") << QString::fromStdString("False");
     }
 
     if (ui->cb_crps->checkState() != Qt::Checked) {
-      s3 << QString::fromStdString("--crps-plot") << QString::fromStdString("False");
+    	arguments << QString::fromStdString("--crps-plot") << QString::fromStdString("False");
     }
-
-    cmd = QString("PlotStackedPdfPitAndCrps ") + s3.join(" ");
   }
-  logger.info() << "Processing cmd:" << cmd.toStdString();
+  logger.info() << "Processing cmd:" << arguments.join(" ").toStdString();
 
-  m_P->setReadChannelMode(QProcess::MergedChannels);
-  m_P->start(cmd);
+  m_P->setProcessChannelMode(QProcess::MergedChannels);
+  m_P->start(cmd, arguments);
 
   m_timer = new QTimer(this);
   connect(m_timer, SIGNAL(timeout()), this, SLOT(updateOutCons()));

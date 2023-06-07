@@ -6,7 +6,6 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
-#include <QRegExpValidator>
 #include <QString>
 #include <QTextStream>
 #include <algorithm>

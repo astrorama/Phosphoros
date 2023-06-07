@@ -74,7 +74,7 @@ private:
   DatasetRepo                      m_luminosity_repository;
   std::shared_ptr<OptionModel>     m_option_model_ptr{new OptionModel};
   std::shared_ptr<SurveyModel>     m_survey_model_ptr{new SurveyModel};
-  std::shared_ptr<ModelSetModel>   m_model_set_model_ptr{new ModelSetModel};
+  std::shared_ptr<ModelSetModel>   m_model_set_model_ptr=nullptr;
   std::unique_ptr<DataPackHandler> m_dataPackHandler;
 };
 

@@ -49,7 +49,11 @@ public:
   /**
    * @brief Constructor
    */
-  explicit DialogLuminosityPrior(std::string filter, DatasetRepo luminosity_repository, QWidget* parent = 0);
+  explicit DialogLuminosityPrior(std::string filter,
+						   	     DatasetRepo luminosity_repository,
+							     DatasetRepo sed_repository,
+							     DatasetRepo red_curve_repository,
+							     QWidget* parent = 0);
   /**
    * @brief Destructor
    */
@@ -129,7 +133,7 @@ private slots:
   /**
    * @brief SLOT raised when the MAGNITUDE/FLUX combobox is changed.
    */
-  void on_cb_unit_currentIndexChanged(const QString&);
+  void on_cb_unit_currentIndexChanged(int);
 
   /**
    * @brief SLOT raised when the groups management button is clicked.
@@ -189,6 +193,8 @@ private:
   std::unique_ptr<Ui::DialogLuminosityPrior> ui;
   std::string                                m_filter;
   DatasetRepo                                m_luminosity_repository;
+  DatasetRepo                                m_sed_repository;
+  DatasetRepo                                m_red_curve_repository;
   QString                                    m_config_folder;
 
   QString m_grid_folder;

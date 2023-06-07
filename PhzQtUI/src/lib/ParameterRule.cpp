@@ -63,7 +63,9 @@ std::pair<long, long> ParameterRule::getSedNumber(DatasetRepo seds_repository) c
 }
 
 std::pair<long, long> ParameterRule::getSelectionNumbers(DatasetSelection selection, DatasetRepo repository) const {
-  auto full_list = repository->getContent();
+  std::vector<XYDataset::QualifiedName> empty{};
+  const std::vector<XYDataset::QualifiedName>&  full_list = repository!=nullptr ? repository->getContent() : empty;
+
 
   std::set<XYDataset::QualifiedName> selected_items{};
 
@@ -107,7 +109,7 @@ std::pair<long, long> ParameterRule::getSelectionNumbers(DatasetSelection select
 
   long total = 0;
   if (selection.hasMultipleGroups()) {
-    total = repository->getContent().size();
+    total = full_list.size();
   } else {
     if (selection.getIsolated().size() == 1) {
       total = 1;
@@ -151,7 +153,7 @@ std::string ParameterRule::getEbvStringValueList() const {
 }
 
 std::set<double> ParameterRule::parseValueList(const std::string& list) {
-  auto             tokens = QString::fromStdString(list).split(",", QString::SkipEmptyParts);
+  auto             tokens = QString::fromStdString(list).split(",", Qt::SkipEmptyParts);
   std::set<double> result{};
   for (auto& token : tokens) {
     bool   ok;
@@ -228,76 +230,42 @@ ParameterRule::getConfigOptions(std::string region) const {
   return options;
 }
 
-long long ParameterRule::getModelNumber(bool recompute) {
+long long ParameterRule::getModelNumber(DatasetRepo sed_repository, DatasetRepo redenig_curves_repository, bool recompute) {
 
   if (m_model_number < 0 || recompute) {
-    bool is_zero = false;
-    auto options = getConfigOptions("");
+	  long long sed_number_map = getSedNumber(sed_repository).first;
+	  long long red_number_map = getRedCurveNumber(redenig_curves_repository).first;
 
-    is_zero |= m_sed_selection.isEmpty();
-    is_zero |= m_red_curve_selection.isEmpty();
-    is_zero |= m_redshift_ranges.size() == 0 && m_redshift_values.size() == 0;
-    is_zero |= m_ebv_ranges.size() == 0 && m_ebv_values.size() == 0;
+	  long long z_number = getRedshiftValues().size();
+	  for (const auto& range : getZRanges()) {
+		z_number += (range.getMax()-range.getMin())/range.getStep() +1;
+	  }
 
-    if (is_zero) {
-      m_model_number = 0;
-    } else {
-      options["sed-root-path"].value()             = boost::any(FileUtils::getSedRootPath(false));
-      options["reddening-curve-root-path"].value() = boost::any(FileUtils::getRedCurveRootPath(false));
-      completeWithDefaults<PhzConfiguration::ParameterSpaceConfig>(options);
-      long  config_manager_id = Configuration::getUniqueManagerId();
-      auto& config_manager    = Configuration::ConfigManager::getInstance(config_manager_id);
+	  long long ebv_number = getEbvValues().size();
+	 	  for (const auto& range : getEbvRanges()) {
+	 		 ebv_number += (range.getMax()-range.getMin())/range.getStep() +1;
+	 	  }
+	  m_model_number = sed_number_map * red_number_map * z_number * ebv_number;
 
-      try {
-        config_manager.registerConfiguration<PhzConfiguration::ParameterSpaceConfig>();
-        config_manager.closeRegistration();
-        config_manager.initialize(options);
-
-        m_model_number =
-            config_manager.getConfiguration<PhzConfiguration::SedConfig>().getSedList().at("").size() *
-            config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getReddeningCurveList().at("").size() *
-            config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getEbvList().at("").size() *
-            config_manager.getConfiguration<PhzConfiguration::RedshiftConfig>().getZList().at("").size();
-      } catch (Elements::Exception&) {
-        m_model_number = 0;
-      }
-    }
   }
   return m_model_number;
 }
 
-long long ParameterRule::getModelNumber() const {
-  bool is_zero = false;
-  is_zero |= m_sed_selection.isEmpty();
-  is_zero |= m_red_curve_selection.isEmpty();
-  is_zero |= m_redshift_ranges.size() == 0 && m_redshift_values.size() == 0;
-  is_zero |= m_ebv_ranges.size() == 0 && m_ebv_values.size() == 0;
-  if (is_zero) {
-    return 0;
-  } else {
-    long long number                             = 0;
-    auto      options                            = getConfigOptions("");
-    options["sed-root-path"].value()             = boost::any(FileUtils::getSedRootPath(false));
-    options["reddening-curve-root-path"].value() = boost::any(FileUtils::getRedCurveRootPath(false));
-    completeWithDefaults<PhzConfiguration::ParameterSpaceConfig>(options);
-    long  config_manager_id = Configuration::getUniqueManagerId();
-    auto& config_manager    = Configuration::ConfigManager::getInstance(config_manager_id);
+long long ParameterRule::getModelNumber(DatasetRepo sed_repository, DatasetRepo redenig_curves_repository) const {
+	long long sed_number_map = getSedNumber(sed_repository).first;
+	long long red_number_map = getRedCurveNumber(redenig_curves_repository).first;
 
-    try {
-      config_manager.registerConfiguration<PhzConfiguration::ParameterSpaceConfig>();
-      config_manager.closeRegistration();
-      config_manager.initialize(options);
-      number =
-          config_manager.getConfiguration<PhzConfiguration::SedConfig>().getSedList().at("").size() *
-          config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getReddeningCurveList().at("").size() *
-          config_manager.getConfiguration<PhzConfiguration::ReddeningConfig>().getEbvList().at("").size() *
-          config_manager.getConfiguration<PhzConfiguration::RedshiftConfig>().getZList().at("").size();
-    } catch (Elements::Exception&) {
-      number = 0;
-    }
+	long long z_number = getRedshiftValues().size();
+		for (const auto& range : getZRanges()) {
+			z_number += (range.getMax()-range.getMin())/range.getStep() +1;
+	}
 
-    return number;
-  }
+	long long ebv_number = getEbvValues().size();
+		for (const auto& range : getEbvRanges()) {
+			ebv_number += (range.getMax()-range.getMin())/range.getStep() +1;
+	}
+	return sed_number_map * red_number_map * z_number * ebv_number;
+
 }
 
 const std::set<double>& ParameterRule::getEbvValues() const {
