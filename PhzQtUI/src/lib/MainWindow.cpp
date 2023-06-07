@@ -1,5 +1,6 @@
 #include "PhzQtUI/MainWindow.h"
 #include "ElementsKernel/Exception.h"
+#include "ElementsKernel/Logging.h"
 #include "FileUtils.h"
 #include "PreferencesUtils.h"
 #include "XYDataset/AsciiParser.h"
@@ -16,10 +17,11 @@
 
 namespace Euclid {
 namespace PhzQtUI {
+static Elements::Logging main_logger = Elements::Logging::getLogger("MainWindow");
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+  main_logger.debug()<<"start loading";
   QString title = QString::fromStdString(THIS_PROJECT_NAME_STRING + " " + THIS_PROJECT_VERSION_STRING);
-
   setWindowTitle(title);
 
   ui->setupUi(this);
@@ -29,10 +31,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
   //  ui->page_layout->setSpacing(0);
   //  ui->page_layout->setContentsMargins(0,0,0,0);
   //  this->setStyleSheet("background-color: green");
-
+  ui->Lb_warning_time->setText("");
   QPixmap pixmap(":/logoPhUI.png");
   ui->image_label->setTopMargin(20);
   ui->image_label->setPixmap(pixmap);
+  main_logger.debug()<<"UI setup done";
 
   connect(this, SIGNAL(changeMainStackedWidgetIndex(int)), ui->mainStackedWidget, SLOT(setCurrentIndex(int)));
 
@@ -68,6 +71,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
   connect(ui->widget_Analysis, SIGNAL(navigateToNewCatalog(std::string)), SLOT(navigateToNewCatalog(std::string)));
 
+
+  main_logger.debug()<<"Button wiring done";
   auto      root_path = QString::fromStdString(FileUtils::getRootPath(false));
   QFileInfo info(root_path);
   if (!info.exists()) {
@@ -91,6 +96,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(m_dataPackHandler.get(), SIGNAL(completed()), this, SLOT(loadAuxData()));
   m_dataPackHandler->check(false);
 
+
+
   std::string sun_sed = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
   if (sun_sed == "") {
     QMessageBox::warning(this, "Missing Solar SED...",
@@ -98,6 +105,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
                          "Please navigate to Configuration/Aux. Data/SEDs and select it.",
                          QMessageBox::Ok);
   }
+
+
+  main_logger.debug()<<"loading done";
 }
 
 MainWindow::~MainWindow() {}

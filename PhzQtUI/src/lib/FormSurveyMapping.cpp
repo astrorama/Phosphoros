@@ -172,6 +172,7 @@ void FormSurveyMapping::setFilterMappingInEdition() {
   ui->btn_MapNew->setEnabled(false);
   ui->btn_MapDuplicate->setEnabled(false);
   ui->btn_map_delete->setEnabled(false);
+  ui->btn_purgeGrids->setEnabled(false);
   ui->btn_MapCancel->setEnabled(true);
   ui->btn_MapSave->setEnabled(true);
 
@@ -199,6 +200,7 @@ void FormSurveyMapping::setFilterMappingInView() {
   ui->btn_MapNew->setEnabled(true);
   ui->btn_MapDuplicate->setEnabled(has_mapping_selected);
   ui->btn_map_delete->setEnabled(has_mapping_selected);
+  ui->btn_purgeGrids->setEnabled(has_mapping_selected);
   ui->btn_MapCancel->setEnabled(false);
   ui->btn_MapSave->setEnabled(false);
 

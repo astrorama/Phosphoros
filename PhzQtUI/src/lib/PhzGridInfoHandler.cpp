@@ -26,6 +26,8 @@
 #include "PhzQtUI/PhzGridInfoHandler.h"
 #include "PreferencesUtils.h"
 #include "XYDataset/QualifiedName.h"
+#include <chrono>
+
 
 namespace po = boost::program_options;
 
@@ -38,7 +40,8 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
                                                     const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes,
                                                     const std::list<std::string>& selected_filters,
                                                     const std::string igm_type, const std::string luminosity_filter) {
-
+  logger.debug()<<"Checking compatibility for grid in file "<< file_path.toStdString();
+  auto start = std::chrono::high_resolution_clock::now();
   try {  // If a file cannot be opened or is ill formated: just skip it!
     // We directly use the boost archive, because we just need the grid info
     // from the beginning of the file. Reading the full file whould be very

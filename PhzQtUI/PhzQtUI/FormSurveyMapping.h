@@ -73,6 +73,8 @@ private slots:
 
   void on_btn_map_delete_clicked();
 
+  void on_btn_purgeGrids_clicked();
+
   void on_btn_MapCancel_clicked();
 
   void on_btn_MapSave_clicked();

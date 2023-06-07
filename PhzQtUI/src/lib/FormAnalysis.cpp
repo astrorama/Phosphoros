@@ -58,6 +58,7 @@
 #include "PhzUITools/ConfigurationWriter.h"
 #include "GridContainer/serialize.h"
 #include <CCfits/CCfits>
+#include <chrono>
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -216,6 +217,7 @@ void FormAnalysis::updateGridSelection() {
         m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
         ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(), PhotometryGrid);
 
+   	m_is_loading=true;
     ui->cb_CompatibleGrid->clear();
     bool added = false;
     for (auto& file : possible_files) {
@@ -243,29 +245,44 @@ bool FormAnalysis::checkCompatibleModelGrid(std::string file_name) {
                  QDir::separator() + QString::fromStdString(file_name));
 
   if (!info.exists()) {
+	m_cache_compatible_model_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, false};
     return false;
   } else {
 
-    auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
     auto  axis           = selected_model.getAxesTuple();
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
          ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(),
          GalacticReddeningCorrectionGrid);
-    return (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
+    bool valid = (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
+    m_cache_compatible_model_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, valid};
+    return valid;
   }
 }
 
 bool FormAnalysis::checkCompatibleGalacticGrid(std::string file_name) {
+  auto start = std::chrono::high_resolution_clock::now();
+  logger.debug()<<"checkCompatibleGalacticGrid for file "<< file_name;
+  auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
+  auto model_name = selected_model.getName();
+
+  if (std::get<0>(m_cache_compatible_galactic_grid)==model_name && std::get<1>(m_cache_compatible_galactic_grid)==file_name){
+ 	return std::get<2>(m_cache_compatible_galactic_grid);
+  }
+
   QFileInfo info(QString::fromStdString(FileUtils::getGalacticCorrectionGridRootPath(
                      true, ui->cb_AnalysisSurvey->currentText().toStdString())) +
                  QDir::separator() + QString::fromStdString(file_name));
 
   if (!info.exists()) {
+	m_cache_compatible_galactic_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, false};
     return false;
   } else {
+	auto stop = std::chrono::high_resolution_clock::now();
+	auto duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+	logger.debug()<<"checkCompatibleGalacticGrid => No cache, need to actually check the file "<< duration << "[ms]";
+	start = stop;
 
-    auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
     auto  axis           = selected_model.getAxesTuple();
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
@@ -275,7 +292,14 @@ bool FormAnalysis::checkCompatibleGalacticGrid(std::string file_name) {
   }
 }
 
+
 bool FormAnalysis::checkCompatibleFilterShiftGrid(std::string file_name) {
+  auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
+  auto model_name = selected_model.getName();
+
+  if (std::get<0>(m_cache_compatible_shift_grid)==model_name && std::get<1>(m_cache_compatible_shift_grid)==file_name){
+ 	return std::get<2>(m_cache_compatible_shift_grid);
+  }
 
   QString full_name = QString::fromStdString(FileUtils::getFilterShiftGridRootPath(
                           true, ui->cb_AnalysisSurvey->currentText().toStdString())) +
@@ -283,17 +307,18 @@ bool FormAnalysis::checkCompatibleFilterShiftGrid(std::string file_name) {
   QFileInfo info(full_name);
 
   if (!info.exists()) {
-
+	m_cache_compatible_shift_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, false};
     return false;
   } else {
 
-    auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
     auto  axis           = selected_model.getAxesTuple();
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
          ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(), FilterShiftCorrectionGrid);
-    //  logger.info()<< "checkCompatibleFilterShiftGrid : there are " << possible_files.size() << " compatible file ";
-    return (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
+    //  logger.debug()<< "checkCompatibleFilterShiftGrid : there are " << possible_files.size() << " compatible file ";
+    bool valid = (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
+    m_cache_compatible_shift_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, valid};
+    return valid;
   }
 }
 
@@ -481,14 +506,39 @@ void FormAnalysis::adjustGridsButtons(bool enabled) {
 }
 
 void FormAnalysis::setComputeCorrectionEnable() {
+  auto start = std::chrono::high_resolution_clock::now();
+  logger.debug()<< "Enter setComputeCorrectionEnable";
   bool name_exists               = checkGridSelection(true, false);
+  auto stop = std::chrono::high_resolution_clock::now();
+  auto duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+  logger.debug()<<"setComputeCorrectionEnable => checkGridSelection "<< duration << "[ms]";
+  start = stop;
+
   bool gal_corr_needed           = !ui->rb_gc_off->isChecked();
   bool grid_gal_corr_name_exists = checkGalacticGridSelection(true, false);
-  bool grid_gal_ok = checkCompatibleGalacticGrid(ui->cb_CompatibleGalCorrGrid->currentText().toStdString());
+  stop = std::chrono::high_resolution_clock::now();
+  duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+  logger.debug()<<"setComputeCorrectionEnable => checkGalacticGridSelection "<< duration << "[ms]";
+  start = stop;
+
+  bool grid_gal_ok               = checkCompatibleGalacticGrid(ui->cb_CompatibleGalCorrGrid->currentText().toStdString());
+  stop = std::chrono::high_resolution_clock::now();
+  duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+  logger.debug()<<"setComputeCorrectionEnable => checkCompatibleGalacticGrid "<< duration << "[ms]";
+  start = stop;
 
   bool filter_shift_grid_needed      = m_survey_model_ptr->getSelectedSurvey().getDefineFilterShift();
   bool grid_filter_shift_name_exists = checkFilterShiftGridSelection(true, false);
-  bool grid_filter_shift_ok = checkCompatibleFilterShiftGrid(ui->cb_CompatibleShiftGrid->currentText().toStdString());
+  stop = std::chrono::high_resolution_clock::now();
+  duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+  logger.debug()<<"setComputeCorrectionEnable => checkFilterShiftGridSelection "<< duration << "[ms]";
+  start = stop;
+
+  bool grid_filter_shift_ok          = checkCompatibleFilterShiftGrid(ui->cb_CompatibleShiftGrid->currentText().toStdString());
+  stop = std::chrono::high_resolution_clock::now();
+  duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+  logger.debug()<<"setComputeCorrectionEnable => checkCompatibleFilterShiftGrid "<< duration << "[ms]";
+  start = stop;
 
   ui->btn_computeCorrections->setEnabled(
       name_exists && (!gal_corr_needed || (grid_gal_corr_name_exists && grid_gal_ok)) &&
@@ -510,6 +560,10 @@ void FormAnalysis::setComputeCorrectionEnable() {
   }
 
   ui->btn_computeCorrections->setToolTip(tool_tip);
+  stop = std::chrono::high_resolution_clock::now();
+  duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+  logger.debug()<<"Exit setComputeCorrectionEnable "<< duration << "[ms]";
+
 }
 
 void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
@@ -1527,10 +1581,15 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(const QString& selec
   }
 
   setupAlgo();
+
   updateGridSelection();
+
   updateGalCorrGridSelection();
+
   updateFilterShiftGridSelection();
+
   loadLuminosityPriors();
+
   updateCorrectionSelection();
 
   // set the correction file
@@ -1599,21 +1658,24 @@ void FormAnalysis::onFilterSelectionItemChanged(QStandardItem*) {
 
 //  2. Photometry Grid
 void FormAnalysis::on_cb_CompatibleGrid_currentTextChanged(const QString&) {
-  std::string grid_name = ui->cb_CompatibleGrid->currentText().toStdString();
-  size_t      index     = grid_name.find_last_of("/\\");
-  if (index != string::npos) {
-    grid_name = grid_name.substr(index + 1);
-  }
+	if (!m_is_loading){
+	  std::string grid_name = ui->cb_CompatibleGrid->currentText().toStdString();
+	  size_t      index     = grid_name.find_last_of("/\\");
+	  if (index != string::npos) {
+		grid_name = grid_name.substr(index + 1);
+	  }
 
-  index = grid_name.find_last_of(".");
-  if (index != string::npos) {
-    grid_name = grid_name.substr(0, index);
-  }
-  ui->cb_CompatibleGalCorrGrid->setItemText(ui->cb_CompatibleGalCorrGrid->currentIndex(),
-                                            QString::fromStdString(grid_name + "_MW_Param.txt"));
-  adjustGridsButtons(true);
-  setComputeCorrectionEnable();
-  setRunAnnalysisEnable(true);
+	  index = grid_name.find_last_of(".");
+	  if (index != string::npos) {
+		grid_name = grid_name.substr(0, index);
+	  }
+	  ui->cb_CompatibleGalCorrGrid->setItemText(ui->cb_CompatibleGalCorrGrid->currentIndex(),
+												QString::fromStdString(grid_name + "_MW_Param.txt"));
+	  adjustGridsButtons(true);
+	  setComputeCorrectionEnable();
+	  setRunAnnalysisEnable(true);
+
+	}
 }
 
 void FormAnalysis::on_btn_GetConfigGrid_clicked() {
@@ -2308,7 +2370,7 @@ std::set<std::string> FormAnalysis::getPPListFromConfig() {
 }
 
 void FormAnalysis::update_pp_selection(std::vector<std::string> params) {
-
+  logger.info() << "update_pp_selection with "<<params.size()<<" params" ;
   ui->btn_pp->setText(QString::fromStdString("Select Parameters (") + QString::number(params.size()) +
                       QString::fromStdString(")"));
 
