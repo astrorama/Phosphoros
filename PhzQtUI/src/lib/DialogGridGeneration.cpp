@@ -124,7 +124,7 @@ void DialogGridGeneration::runFinished() {
 }
 
 void DialogGridGeneration::run() {
-  m_future_watcher.setFuture(QtConcurrent::run(this, &DialogGridGeneration::runFunction));
+  m_future_watcher.setFuture(QtConcurrent::run(&DialogGridGeneration::runFunction, this));
 }
 
 }  // namespace PhzQtUI

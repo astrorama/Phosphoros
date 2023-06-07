@@ -180,7 +180,7 @@ void DialogGalCorrGridGeneration::runFinished() {
 }
 
 void DialogGalCorrGridGeneration::run() {
-  m_future_watcher.setFuture(QtConcurrent::run(this, &DialogGalCorrGridGeneration::runFunction));
+  m_future_watcher.setFuture(QtConcurrent::run(&DialogGalCorrGridGeneration::runFunction, this));
 }
 
 }  // namespace PhzQtUI

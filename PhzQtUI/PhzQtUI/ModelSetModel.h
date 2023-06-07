@@ -1,6 +1,7 @@
 #ifndef MODELSETMODEL_H
 #define MODELSETMODEL_H
 
+#include "PhzQtUI/DatasetRepository.h"
 #include "ModelSet.h"
 #include "PhzQtUI/ModelSetModel.h"
 #include <QStandardItemModel>
@@ -13,6 +14,8 @@
 namespace Euclid {
 namespace PhzQtUI {
 
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
+
 /**
  * @brief The ModelSetModel class
  * This class provide a Model to be used in TableView.
@@ -22,7 +25,7 @@ class ModelSetModel : public QStandardItemModel {
   Q_OBJECT
 
 public:
-  ModelSetModel();
+  ModelSetModel(DatasetRepo sed_repo, DatasetRepo red_repo);
   virtual ~ModelSetModel() = default;
 
   /**
@@ -42,7 +45,7 @@ public:
   /// Selection ///
   void            selectModelSet(int row);
   void            selectModelSet(QString name);
-  const ModelSet& getSelectedModelSet() const;
+  ModelSet&       getSelectedModelSet();
   int             getSelectedRow() const;
 
   /// Creation / deletion / edition ///
@@ -70,6 +73,8 @@ private:
   bool                    m_need_reload    = true;
   int                     m_selected_row   = -1;
   int                     m_selected_index = -1;
+  DatasetRepo m_sed_repo;
+  DatasetRepo m_red_repo;
   ModelSet                m_edited_modelSet;
   std::map<int, ModelSet> m_set_list;
 

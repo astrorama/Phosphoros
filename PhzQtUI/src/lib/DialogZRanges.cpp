@@ -26,12 +26,12 @@ DialogZRanges::~DialogZRanges() {}
 
 void DialogZRanges::refresh() {
   // cleaning
-  size_t i = 0;
+  size_t ind = 0;
   for (auto child : ui->frame_z->children()) {
-    if (i > 0) {
+    if (ind > 0) {
       delete child;
     }
-    ++i;
+    ++ind;
   }
 
   for (size_t i = 0; i < m_zs.size(); ++i) {

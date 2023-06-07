@@ -48,19 +48,27 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
     std::ifstream                    in{file_path.toStdString()};
     boost::archive::text_iarchive    bia{in};
     bia >> grid_info;
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+  	logger.debug()<<"Grid info loaded "<< duration << "[ms]";
+  	start = stop;
 
     // Check the IGM type compatibility
     if (igm_type != grid_info.igm_method) {
-      //  logger.info() << "Incompatible IGM. (Expected: "<< igm_type << " found " << grid_info.igm_method <<  ")";
+      logger.debug() << "Incompatible IGM. (Expected: "<< igm_type << " found " << grid_info.igm_method <<  ")";
       return false;
     }
 
     // Check the Luminosity filter compatibility
     if (luminosity_filter != grid_info.luminosity_filter_name.qualifiedName()) {
-      //  logger.info() << "Incompatible Luminosity filter. (Expected: "<< luminosity_filter << " found " <<
-      //  grid_info.luminosity_filter_name.qualifiedName() <<  ")";
+        logger.debug() << "Incompatible Luminosity filter. (Expected: "<< luminosity_filter << " found " <<
+        grid_info.luminosity_filter_name.qualifiedName() <<  ")";
       return false;
     }
+    stop = std::chrono::high_resolution_clock::now();
+    duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+  	logger.debug()<<"IGM and Luminosity filter checked "<< duration << "[ms]";
+  	start = stop;
 
     // check the filters
     std::size_t number_found = 0;
@@ -72,15 +80,19 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
     }
 
     if (selected_filters.size() != number_found) {
-      //  logger.info() << "Incompatible Filter number. (Expected: "<< selected_filters.size() << " found " <<
-      //  number_found <<  ")";
+        logger.debug() << "Incompatible Filter number. (Expected: "<< selected_filters.size() << " found " <<
+        number_found <<  ")";
       return false;
     }
+    stop = std::chrono::high_resolution_clock::now();
+    duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+	logger.debug()<<"Filter checked "<< duration << "[ms]";
+	start = stop;
 
     // check the axis
     if (grid_info.region_axes_map.size() != axes.size()) {
-      //  logger.info() << "Incompatible region number. (Expected: "<< grid_info.region_axes_map.size() << " found " <<
-      //  axes.size() <<  ")";
+        logger.debug() << "Incompatible region number. (Expected: "<< grid_info.region_axes_map.size() << " found " <<
+        axes.size() <<  ")";
       return false;
     }
 
@@ -93,6 +105,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
         auto& sed_axis_file      = std::get<PhzDataModel::ModelParameter::SED>(file_axe.second);
         auto& sed_axis_requested = std::get<PhzDataModel::ModelParameter::SED>(current_axe.second);
         if (sed_axis_file.size() != sed_axis_requested.size()) {
+          logger.debug() << "Incompatible SED number in the region " << sed_axis_file.size() << " requested : " << sed_axis_requested.size();
           continue;
         }
 
@@ -104,6 +117,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
         }
 
         if (!all_found) {
+          logger.debug() << "Incompatible SED values in the region";
           continue;
         }
 
@@ -111,6 +125,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
         auto& red_axis_file      = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(file_axe.second);
         auto& red_axis_requested = std::get<PhzDataModel::ModelParameter::REDDENING_CURVE>(current_axe.second);
         if (red_axis_file.size() != red_axis_requested.size()) {
+          logger.debug() << "Incompatible RED number in the region";
           continue;
         }
         all_found = true;
@@ -121,6 +136,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
         }
 
         if (!all_found) {
+          logger.debug() << "Incompatible RED value in the region";
           continue;
         }
 
@@ -135,6 +151,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
         }
 
         if (z_axis_file.size() != z_axis_requested.size()) {
+          logger.debug() << "Incompatible Z number in the region";
           continue;
         }
 
@@ -152,6 +169,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
         }
 
         if (!match) {
+          logger.debug() << "Incompatible Z value in the region";
           continue;
         }
 
@@ -166,6 +184,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
         }
 
         if (ebv_axis_file.size() != ebv_axis_requested.size()) {
+          logger.debug() << "Incompatible ebv number in the region";
           continue;
         }
 
@@ -182,6 +201,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
         }
 
         if (!match) {
+          logger.debug() << "Incompatible ebv value in the region";
           continue;
         }
 
@@ -190,8 +210,13 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
       }
     }
 
+    stop = std::chrono::high_resolution_clock::now();
+    duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+	logger.debug()<<"Axis checked for "<<file_path.toStdString()<<" "<< duration << "[ms]";
+	start = stop;
+
     if (axes.size() != found) {
-      //  logger.info() << "Incompatible region.";
+        logger.debug() << "Incompatible region.";
 
       return false;
     }
@@ -208,7 +233,7 @@ PhzGridInfoHandler::getCompatibleGridFile(std::string                           
                                           const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes,
                                           const std::list<std::string>& selected_filters, std::string igm_type,
                                           const std::string luminosity_filter, GridType grid_type) {
-
+  auto start = std::chrono::high_resolution_clock::now();
   std::string rootPath = FileUtils::getPhotmetricGridRootPath(true, catalog);
   if (grid_type == GalacticReddeningCorrectionGrid) {
     rootPath = FileUtils::getGalacticCorrectionGridRootPath(true, catalog);
@@ -220,15 +245,24 @@ PhzGridInfoHandler::getCompatibleGridFile(std::string                           
 
     QDir        root_qdir(QString::fromStdString(rootPath));
     QStringList fileNames = root_qdir.entryList(QDir::Files | QDir::NoDotAndDotDot);
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+    logger.debug()<<"getCompatibleGridFile => Got the files in  "<<rootPath<<" total: "<<fileNames.size()<<" "<< duration << "[ms]";
+    start = stop;
 
     foreach (const QString& fileName, fileNames) {
       auto file_path = root_qdir.absoluteFilePath(fileName);
-      //  logger.info() << "Checking parameter compatibility for file :" << file_path.toStdString();
+      logger.debug() << "Checking parameter compatibility for file :" << file_path.toStdString();
       if (checkGridFileCompatibility(file_path, axes, selected_filters, igm_type, luminosity_filter)) {
-        //  logger.info() << "File accepted :" << file_path.toStdString();
+        logger.debug() << "File accepted :" << file_path.toStdString();
         list.push_back(fileName.toStdString());
       }
     }
+
+    stop = std::chrono::high_resolution_clock::now();
+    duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+    logger.debug()<<"getCompatibleGridFile => Checked the files total compatible : "<<list.size()<<" "<< duration << "[ms]";
+    start = stop;
   }
   return list;
 }

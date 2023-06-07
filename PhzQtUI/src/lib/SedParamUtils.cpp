@@ -23,6 +23,8 @@
 
 namespace Euclid {
 namespace PhzQtUI {
+
+
 static Elements::Logging logger = Elements::Logging::getLogger("SedParamUtils");
 
 SedParamUtils::SedParamUtils() {}
@@ -150,14 +152,14 @@ std::set<std::string> SedParamUtils::getList() {
   return m_list;
 }
 
-void SedParamUtils::listAvailableParam(const ModelSet& model) {
+void SedParamUtils::listAvailableParam(ModelSet& model, DatasetRepo sed_repo, DatasetRepo red_repo) {
   std::map<std::string, std::string> params{};
   bool                               firstSED = true;
 
   auto sed_list = model.getSeds();
   m_total       = sed_list.size();
   m_progress    = 0;
-  for (auto& sed : model.getSeds()) {
+  for (auto& sed : sed_list) {
     auto file_name = SedParamUtils::getFile(sed);
     auto sed_param = SedParamUtils::getParameterList(file_name);
     logger.info() << "SED NAME : " << sed << " FILE NAME : " << file_name;

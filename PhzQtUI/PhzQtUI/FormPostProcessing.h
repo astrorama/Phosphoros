@@ -47,7 +47,7 @@ private slots:
   void on_btn_ToModel_clicked();
   void on_btn_exit_clicked();
 
-  void on_cb_catalog_currentIndexChanged(const QString&);
+  void on_cb_catalog_currentIndexChanged(int);
 
   void computePdfStat(int);
   void plotZVsZref(int);

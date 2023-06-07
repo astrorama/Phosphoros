@@ -166,7 +166,7 @@ void DialogFilterShiftGridGeneration::runFinished() {
 }
 
 void DialogFilterShiftGridGeneration::run() {
-  m_future_watcher.setFuture(QtConcurrent::run(this, &DialogFilterShiftGridGeneration::runFunction));
+  m_future_watcher.setFuture(QtConcurrent::run(&DialogFilterShiftGridGeneration::runFunction, this));
 }
 
 }  // namespace PhzQtUI

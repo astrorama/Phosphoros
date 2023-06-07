@@ -37,14 +37,21 @@ namespace po = boost::program_options;
 
 static Elements::Logging dialog_logger = Elements::Logging::getLogger("DialogLuminosityPrior");
 
-DialogLuminosityPrior::DialogLuminosityPrior(std::string filter, DatasetRepo luminosity_repository, QWidget* parent)
-    : QDialog(parent), ui(new Ui::DialogLuminosityPrior) {
+DialogLuminosityPrior::DialogLuminosityPrior(std::string filter,
+											 DatasetRepo luminosity_repository,
+											 DatasetRepo sed_repository,
+											 DatasetRepo red_curve_repository,
+											 QWidget* parent)
+    : QDialog(parent), ui(new Ui::DialogLuminosityPrior), m_model{sed_repository, red_curve_repository} {
   m_filter                = filter;
   m_luminosity_repository = luminosity_repository;
+  m_sed_repository = sed_repository;
+  m_red_curve_repository = red_curve_repository;
   ui->setupUi(this);
   ui->frame_Luminosity->setStyleSheet("background-color: white ");
   m_z_min = 0.;
   m_z_max = 3000.;
+
   ui->lb_filter->setText(QString::fromStdString(m_filter));
 }
 
@@ -276,7 +283,7 @@ void DialogLuminosityPrior::on_btn_cancel_clicked() {
   m_new = false;
 }
 
-void DialogLuminosityPrior::on_cb_unit_currentIndexChanged(const QString&) {
+void DialogLuminosityPrior::on_cb_unit_currentIndexChanged(int) {
   bool is_mag = ui->cb_unit->currentIndex() == 0;
 
   // swap the luminosity function from MAG to FLUX or conversly

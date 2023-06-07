@@ -5,10 +5,13 @@
 #include "XYDataset/AsciiParser.h"
 #include "ui_MainWindow.h"
 #include <QDir>
+#include <QDirIterator>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <fstream>
 #include <stdio.h>
+#include <chrono>
+#include <QApplication>
 
 #include "PhzQtUI/DataPackHandler.h"
 
@@ -33,6 +36,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
   QPixmap pixmap(":/logoPhUI.png");
   ui->image_label->setTopMargin(20);
   ui->image_label->setPixmap(pixmap);
+
+  // DEBUG: List the resources
+  // main_logger.info()<<"Resources in ':' ";
+  // QDirIterator it(":", QDirIterator::Subdirectories);
+  // while (it.hasNext()) {
+  //	  main_logger.info()<< it.next().toStdString();
+  // }
+
 
   connect(this, SIGNAL(changeMainStackedWidgetIndex(int)), ui->mainStackedWidget, SLOT(setCurrentIndex(int)));
 
@@ -89,6 +100,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
   /*  DataPack handling */
   m_dataPackHandler.reset(new DataPackHandler(this));
   connect(m_dataPackHandler.get(), SIGNAL(completed()), this, SLOT(loadAuxData()));
+  main_logger.debug()<<"Ready to check data pack";
   m_dataPackHandler->check(false);
 
   std::string sun_sed = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
@@ -103,7 +115,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 MainWindow::~MainWindow() {}
 
 void MainWindow::loadAuxData() {
+  main_logger.info()<<"Loading data";
   try {
+
+	ui->Lb_warning_time->setText("Loading the Filters...");
+	qApp->processEvents();
     std::unique_ptr<XYDataset::FileParser>         filter_file_parser{new XYDataset::AsciiParser{}};
     std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(
         new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true), std::move(filter_file_parser)});
@@ -111,6 +127,9 @@ void MainWindow::loadAuxData() {
         new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(filter_provider)));
     m_filter_repository->reload();
 
+
+	ui->Lb_warning_time->setText("Loading the SEDs...");
+	qApp->processEvents();
     std::unique_ptr<XYDataset::FileParser>         sed_file_parser{new XYDataset::AsciiParser{}};
     std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(
         new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser)});
@@ -118,6 +137,9 @@ void MainWindow::loadAuxData() {
         new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(sed_provider)));
     m_seds_repository->reload();
 
+
+	ui->Lb_warning_time->setText("Loading the Reddening Curves...");
+	qApp->processEvents();
     std::unique_ptr<XYDataset::FileParser>         reddening_file_parser{new XYDataset::AsciiParser{}};
     std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(
         new XYDataset::FileSystemProvider{FileUtils::getRedCurveRootPath(true), std::move(reddening_file_parser)});
@@ -125,12 +147,21 @@ void MainWindow::loadAuxData() {
         new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(red_curve_provider)});
     m_redenig_curves_repository->reload();
 
+
+    m_model_set_model_ptr = std::shared_ptr<ModelSetModel>{new ModelSetModel{m_seds_repository, m_redenig_curves_repository}};
+
+
+	ui->Lb_warning_time->setText("Loading the Luminosity Functions...");
+	qApp->processEvents();
     std::unique_ptr<XYDataset::FileParser>         luminosity_file_parser{new XYDataset::AsciiParser{}};
     std::unique_ptr<XYDataset::FileSystemProvider> luminosity_curve_provider(new XYDataset::FileSystemProvider{
         FileUtils::getLuminosityFunctionCurveRootPath(true), std::move(luminosity_file_parser)});
     m_luminosity_repository.reset(
         new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(luminosity_curve_provider)});
     m_luminosity_repository->reload();
+    main_logger.info()<<"Loading data done";
+	ui->Lb_warning_time->setText("");
+	qApp->processEvents();
   } catch (Elements::Exception& e) {
     std::string msg = e.what();
     if (msg.rfind("Qualified name can not be inserted in the map.", 0) == 0) {
@@ -156,6 +187,10 @@ void MainWindow::loadAuxData() {
     exit(0);
   }
 
+  ui->Lb_warning_time->setText("Loading the Pages...");
+  qApp->processEvents();
+  resetRepo();
+
   m_option_model_ptr->loadOption(m_filter_repository, m_seds_repository, m_redenig_curves_repository,
                                  m_luminosity_repository);
   ui->widget_configuration->loadOptionPage(m_option_model_ptr);
@@ -166,20 +201,47 @@ void MainWindow::loadAuxData() {
   ui->btn_HomeToOption->setEnabled(true);
   ui->btn_HomeToPP->setEnabled(true);
 
-  resetRepo();
+  ui->Lb_warning_time->setStyleSheet("font-weight: normal; color: #888888");
+  ui->Lb_warning_time->setText("TIP: To save disk space, purge grid data you do not use anymore (see 'Catalog Setup')");
+
+
 }
 
 void MainWindow::resetRepo() {
+  auto start = std::chrono::high_resolution_clock::now();
+  main_logger.info()<<"Start reset repo";
   m_survey_model_ptr->loadSurvey();
 
+  auto stop = std::chrono::high_resolution_clock::now();
+  auto duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+  main_logger.info()<<"Survey loaded "<< duration << "[ms]";
+  start = stop;
+
   ui->widget_Catalog->loadMappingPage(m_survey_model_ptr, m_filter_repository, "");
+  stop = std::chrono::high_resolution_clock::now();
+  duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+  main_logger.info()<<"Catalog Page loaded "<< duration << "[ms]";
+  start = stop;
 
   m_model_set_model_ptr->loadSets();
   ui->widget_ModelSet->loadSetPage(m_model_set_model_ptr, m_seds_repository, m_redenig_curves_repository);
+  stop = std::chrono::high_resolution_clock::now();
+  duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+  main_logger.info()<<"Model Page loaded "<< duration << "[ms]";
+  start = stop;
 
-  ui->widget_Analysis->loadAnalysisPage(m_survey_model_ptr, m_model_set_model_ptr, m_filter_repository,
-                                        m_luminosity_repository);
+  ui->widget_Analysis->loadAnalysisPage(m_survey_model_ptr, m_model_set_model_ptr, m_seds_repository, m_redenig_curves_repository,
+		                                m_filter_repository,  m_luminosity_repository);
+  stop = std::chrono::high_resolution_clock::now();
+  duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+  main_logger.info()<<"Analyse Page loaded "<< duration << "[ms]";
+  start = stop;
+
   ui->widget_postprocessing->loadPostProcessingPage(m_survey_model_ptr);
+  stop = std::chrono::high_resolution_clock::now();
+  duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
+  main_logger.debug()<<"Post Processing Page loaded "<< duration << "[ms]";
+  start = stop;
 }
 
 //- Home Page
