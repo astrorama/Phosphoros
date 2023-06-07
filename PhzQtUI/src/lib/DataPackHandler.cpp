@@ -33,26 +33,21 @@ void DataPackHandler::check(bool force) {
 
   // Run the process reading the versions
   auto get_version_process = new QProcess;
-  QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-  get_version_process->setProcessEnvironment(env);
   connect(get_version_process, SIGNAL(finished(int, QProcess::ExitStatus)), this,
           SLOT(getDPVersionFinished(int, QProcess::ExitStatus)));
   connect(get_version_process, SIGNAL(errorOccurred(QProcess::ProcessError)), this,
           SLOT(getDPVersionError(QProcess::ProcessError)));
 
-  QStringList arguments;
-  arguments
-      /*dbg <<"UDP"<< QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001") */
-      <<"UDP"<< QString::fromStdString("--output-version-match") << QString::fromStdString(m_version_file);
+  QStringList s3;
+  s3
+      /*dbg << QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001") */
+      << QString::fromStdString("--output-version-match") << QString::fromStdString(m_version_file);
 
-  const QString& command = QString("Phosphoros");
-
-
-  get_version_process->start(command, arguments);
+  const QString& command = QString("Phosphoros UDP ") + s3.join(" ");
+  get_version_process->start(command);
 }
 
 void DataPackHandler::getDPVersionFinished(int, QProcess::ExitStatus) {
-
   std::ifstream f(m_version_file.c_str());
   if (f.good()) {
     boost::property_tree::ptree loadPtreeRoot;
@@ -79,22 +74,19 @@ void DataPackHandler::getDPVersionFinished(int, QProcess::ExitStatus) {
 
       // Run the process for importing data and log conflicts
       auto get_conflict_process = new QProcess;
-      QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-
-      get_conflict_process->setProcessEnvironment(env);
       connect(get_conflict_process, SIGNAL(finished(int, QProcess::ExitStatus)), this,
               SLOT(getConflictFinished(int, QProcess::ExitStatus)));
 
-      QStringList arguments;
-      arguments
-          /*dbg   <<"UDP"<< QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001") */
-          <<"UDP"<< QString::fromStdString("--force") << QString::fromStdString("True") << QString::fromStdString("--download")
+      QStringList s3;
+      s3
+          /*dbg   << QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001") */
+          << QString::fromStdString("--force") << QString::fromStdString("True") << QString::fromStdString("--download")
           << QString::fromStdString("True") << QString::fromStdString("--temp-folder")
           << QString::fromStdString(m_temp_folder) << QString::fromStdString("--output-conflict")
           << QString::fromStdString(m_conflict_file);
 
-      const QString& command = QString("Phosphoros");
-      get_conflict_process->start(command, arguments);
+      const QString& command = QString("Phosphoros UDP ") + s3.join(" ");
+      get_conflict_process->start(command);
     } else {
       // User cancel the import
       completed();
@@ -126,22 +118,22 @@ void DataPackHandler::getConflictFinished(int, QProcess::ExitStatus) {
     if (popUp->exec() == QDialog::Accepted) {
       // Lanch the resolution process
       auto get_resolution_process = new QProcess;
-      QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-      get_resolution_process->setProcessEnvironment(env);
       connect(get_resolution_process, SIGNAL(finished(int, QProcess::ExitStatus)), this,
               SLOT(getResolutionFinished(int, QProcess::ExitStatus)));
 
-      QStringList arguments;
-      arguments
-          /*dbg  <<"UDP"<< QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001") */
-	  <<"UDP"<< QString::fromStdString("--force") << QString::fromStdString("True") << QString::fromStdString("--download")
+      QStringList s3;
+      s3
+          /*dbg  << QString::fromStdString("--repo-url") << QString::fromStdString("http://localhost:8001") */
+          << QString::fromStdString("--force") << QString::fromStdString("True") << QString::fromStdString("--download")
           << QString::fromStdString("True") << QString::fromStdString("--temp-folder")
           << QString::fromStdString(m_temp_folder) << QString::fromStdString("--conflict-resolution")
           << QString::fromStdString(m_resolution_file);
 
-      const QString& command = QString("Phosphoros");
+      const QString& command = QString("Phosphoros UDP ") + s3.join(" ");
 
-      get_resolution_process->start(command, arguments);
+      logger.info() << "Running :" << command.toStdString();
+
+      get_resolution_process->start(command);
     } else {
       // Popup closed in another way
       completed();

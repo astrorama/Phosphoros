@@ -41,7 +41,6 @@ private:
   std::string m_conflict_file;
   std::string m_resolution_file;
   bool        m_force;
-
 };
 
 }  // namespace PhzQtUI

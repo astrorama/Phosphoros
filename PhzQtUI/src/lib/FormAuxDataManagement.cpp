@@ -176,40 +176,40 @@ void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
   }
 
   msgBox.exec();
-  QString command = QString::fromStdString("PhosphorosAddEmissionLines");
-  auto    aux_path = FileUtils::getAuxRootPath();
+
   if (msgBox.clickedButton() == phosButton) {
-    QProcess* process = new QProcess();
-    process->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
-    QStringList arguments;
-    arguments << "--sed-dir"
-    		  << QString::fromStdString(aux_path) + QDir::separator() + QString::fromStdString("SEDs") + QDir::separator() + group;
+    QProcess* lineAdder = new QProcess();
+    lineAdder->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
 
-    logger.info() << "Executing :" << command.toStdString() << " " << arguments.join(" ").toStdString();
+    auto aux_path = FileUtils::getAuxRootPath();
 
-    connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), this,
+    QString command = QString::fromStdString("PhosphorosAddEmissionLines --sed-dir " + aux_path) + QDir::separator() +
+                      QString::fromStdString("SEDs") + QDir::separator() + group;
+
+    logger.info() << "Executing :" << command.toStdString();
+
+    connect(lineAdder, SIGNAL(finished(int, QProcess::ExitStatus)), this,
             SLOT(sedProcessfinished(int, QProcess::ExitStatus)));
-    connect(process, SIGNAL(started()), this, SLOT(sedProcessStarted()));
+    connect(lineAdder, SIGNAL(started()), this, SLOT(sedProcessStarted()));
 
-    process->start(command, arguments);
+    lineAdder->start(command);
   } else if (msgBox.clickedButton() == lePhareButton) {
-    QProcess* process = new QProcess();
-    process->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
-    QStringList arguments;
-    arguments << "--suffix" << "_lpel"
-    		  << "--reference-factor" << "1.0e13"
-              << "--uv-range" << "2100,2500"
-			  << "--emission-lines" << "LePhare_lines.txt"
-			  << "--sed-dir" << QString::fromStdString(aux_path) + QDir::separator() + QString::fromStdString("SEDs") + QDir::separator() + group;
+    QProcess* lineAdder = new QProcess();
+    lineAdder->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
 
+    auto    aux_path = FileUtils::getAuxRootPath();
+    QString command  = QString::fromStdString("PhosphorosAddEmissionLines --suffix _lpel --reference-factor 1.0e13 "
+                                             "--uv-range 2100,2500 --emission-lines LePhare_lines.txt --sed-dir " +
+                                             aux_path) +
+                      QDir::separator() + QString::fromStdString("SEDs") + QDir::separator() + group;
 
-    logger.info() << "Executing :" << command.toStdString() << " " << arguments.join(" ").toStdString();
+    logger.info() << "Executing :" << command.toStdString();
 
-    connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), this,
+    connect(lineAdder, SIGNAL(finished(int, QProcess::ExitStatus)), this,
             SLOT(sedProcessfinished(int, QProcess::ExitStatus)));
-    connect(process, SIGNAL(started()), this, SLOT(sedProcessStarted()));
+    connect(lineAdder, SIGNAL(started()), this, SLOT(sedProcessStarted()));
 
-    process->start(command, arguments);
+    lineAdder->start(command);
   } else {
     ui->labelMessage->setText("");
   }

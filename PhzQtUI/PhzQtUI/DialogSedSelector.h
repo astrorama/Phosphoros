@@ -63,8 +63,8 @@ private slots:
 
 private:
   std::unique_ptr<Ui::DialogSedSelector> ui;
-  bool                                   m_single_sed;
   DatasetRepo                            m_sed_repository;
+  bool                                   m_single_sed;
 };
 
 }  // namespace PhzQtUI

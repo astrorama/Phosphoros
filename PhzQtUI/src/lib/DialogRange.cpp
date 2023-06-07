@@ -9,8 +9,8 @@
 #include <QDir>
 #include <QDoubleValidator>
 #include <QMessageBox>
+#include <QProcess>
 #include <QStandardItemModel>
-#include <QRegularExpressionValidator>
 
 #include "PhzQtUI/GridButton.h"
 #include "PhzQtUI/MessageButton.h"
@@ -27,8 +27,8 @@ namespace PhzQtUI {
 
 DialogRange::DialogRange(QWidget* parent) : QDialog(parent), ui(new Ui::DialogRange) {
   ui->setupUi(this);
-  QRegularExpression rx("(\\s*(\\d+|\\d+\\.\\d*)\\s*(,|$))*");
-  ui->txt_values->setValidator(new QRegularExpressionValidator(rx));
+  QRegExp rx("(\\s*(\\d+|\\d+\\.\\d*)\\s*(,|$))*");
+  ui->txt_values->setValidator(new QRegExpValidator(rx));
 }
 
 void DialogRange::setData(std::vector<Range> ranges, std::set<double> values, bool redshift) {

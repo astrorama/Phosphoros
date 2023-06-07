@@ -6,7 +6,6 @@
 #include <map>
 #include <set>
 #include <string>
-#include "PhzQtUI/DatasetRepository.h"
 
 /**
  * @brief The SedParamUtils class
@@ -15,8 +14,6 @@
 namespace Euclid {
 namespace PhzQtUI {
 
-typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
-
 class SedParamUtils : public QObject {
   Q_OBJECT
 public:
@@ -24,7 +21,7 @@ public:
 
   virtual ~SedParamUtils() = default;
 
-  void listAvailableParam(ModelSet& model, DatasetRepo sed_repo, DatasetRepo red_repo);
+  void listAvailableParam(const ModelSet& model);
 
   std::set<std::string> getList();
 

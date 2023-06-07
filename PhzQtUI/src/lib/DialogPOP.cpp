@@ -187,19 +187,19 @@ void DialogPOP::on_btn_compute_clicked() {
   // excluded-output-columns excluded
 
   m_P = new QProcess;
-  m_P->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
 
   connect(m_P, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processingFinished(int, QProcess::ExitStatus)));
 
-  QStringList arguments;
-  arguments << QString::fromStdString("--input-cat") << QString::fromStdString((basepath / "phz_cat.fits").string())
+  QStringList s3;
+  s3 << QString::fromStdString("--input-cat") << QString::fromStdString((basepath / "phz_cat.fits").string())
      << QString::fromStdString("--output-cat")
      << QString::fromStdString((basepath / (ui->cbb_columns->currentText().toStdString() + "_Statistic.fits")).string())
      << QString::fromStdString("--pdf-column") << ui->cbb_columns->currentText();
 
-  m_P->setProcessChannelMode(QProcess::MergedChannels);
-  const QString& command = QString("ProcessPDF");
-  m_P->start(command, arguments);
+  m_P->setReadChannelMode(QProcess::MergedChannels);
+  const QString& command = QString("ProcessPDF ") + s3.join(" ");
+  logger.info(command.toStdString());
+  m_P->start(command);
 
   m_timer = new QTimer(this);
   connect(m_timer, SIGNAL(timeout()), this, SLOT(updateOutCons()));

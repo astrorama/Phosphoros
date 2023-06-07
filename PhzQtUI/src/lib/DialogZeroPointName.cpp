@@ -5,7 +5,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
-#include <QRegularExpressionValidator>
+#include <QRegExpValidator>
 
 using namespace std;
 
@@ -15,8 +15,8 @@ namespace PhzQtUI {
 DialogZeroPointName::DialogZeroPointName(QWidget* parent) : QDialog(parent), ui(new Ui::DialogZeroPointName) {
   ui->setupUi(this);
 
-  QRegularExpression rx("[\\w\\s]+");
-  ui->txt_name->setValidator(new QRegularExpressionValidator(rx));
+  QRegExp rx("[\\w\\s]+");
+  ui->txt_name->setValidator(new QRegExpValidator(rx));
 }
 
 DialogZeroPointName::~DialogZeroPointName() {}

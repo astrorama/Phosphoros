@@ -56,20 +56,6 @@ public:
     return m_content;
   }
 
-  /**
-   * @brief Get the (cached copy of the) content of the provider.
-   * @return A vector of qualified name representing the provider content.
-   */
-  const std::vector<XYDataset::QualifiedName> getContent(const XYDataset::QualifiedName& group) const {
-	std::vector<XYDataset::QualifiedName> list{};
-	for (const auto& sed : m_content) {
-	  if(sed.belongsInGroup(group)) {
-		  list.push_back(sed);
-	  }
-	}
-	return list;
-  }
-
 private:
   T                                     m_provider;
   std::vector<XYDataset::QualifiedName> m_content;

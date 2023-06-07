@@ -7,34 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Note: the issue number refer to SDC-CH internal tracking.
 
-## [1.7.0] 2023-06-07
-### Fixed
-- Fix a bug in the refreshing of the parameter space page after saving a new or a re-nomed parameter sapace. https://redmine.astro.unige.ch/issues/29020
-- Fix a bug in the GUI when saving a PP with Log part https://redmine.isdc.unige.ch/issues/28996
-- Switch to QT6
-
-## [1.6.2] 2023-04-26
-### Changed
-- Add the display of the Solar luminosity based SED scaling when displaying SED in "PhosphorosComputeModelSed" https://redmine.isdc.unige.ch/issues/28993
-- Add a Phosphoros tool (FMG) to convert fits representation of the Model Grids to the Phosphoros format https://redmine.isdc.unige.ch/issues/28788
-
-## [1.6.0] 2023-03-28
-### Changed
-- Add the possibility to define PP with $pp= A*L0 + B + C*LOG(D*L)$ (Where C and D param are new) The code reading files is backward compatible.  https://redmine.isdc.unige.ch/issues/28755
-- Add a button which delete the IntermediateData grids (for saving disk space) https://redmine.isdc.unige.ch/issues/28796
-
-### Fixed
-- Refactor the GUI in order to add loading message and speed up the navigation between the pages by avoiding reloading the AuxiliaryData. https://redmine.isdc.unige.ch/issues/28808
-
-
-## [1.5.3] 2023-02-22
-### Changed
-- Change the reference for Alexandria back to 2.28.0 (Elements 6.1.1) (For Euclid Pipeline's reason. This temporary reintroduce the bug 28352)
-
-### Fixed
-- Fix a bug in the Id columns format when the type is string. This change rises the memory footprint when sampling the results. Can be overcome by changing the chunk size or using an numeric (long) column for the OBJECT_ID https://redmine.isdc.unige.ch/issues/28519
-- Fix a bug: ComputeRedshift executable was not creating the output file if empty. https://redmine.isdc.unige.ch/issues/28536
-
+## [Unreleased]
 
 
 ## [1.5.4] 2023-03-01

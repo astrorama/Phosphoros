@@ -8,7 +8,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QProcess>
-#include <QRegularExpressionValidator>
+#include <QRegExpValidator>
 #include <QTextStream>
 
 using namespace std;
@@ -21,8 +21,8 @@ static Elements::Logging logger = Elements::Logging::getLogger("DialogAddGalEbv"
 DialogAddGalEbv::DialogAddGalEbv(QWidget* parent) : QDialog(parent), ui(new Ui::DialogAddGalEbv) {
   ui->setupUi(this);
 
-  QRegularExpression rx("[\\w\\s]+");
-  ui->txt_name->setValidator(new QRegularExpressionValidator(rx));
+  QRegExp rx("[\\w\\s]+");
+  ui->txt_name->setValidator(new QRegExpValidator(rx));
   ui->label_process->setText(QString::fromStdString(""));
 
   connect(m_process, SIGNAL(finished(int, QProcess::ExitStatus)), this,
@@ -77,17 +77,16 @@ void DialogAddGalEbv::on_btn_create_clicked() {
     ui->btn_create->setEnabled(false);
 
     // Call the python code
-    std::string program = "AddGalDustToCatalog";
-    QStringList arguments;
-    arguments <<  "--planck-dust-map" << QString::fromStdString(m_dust_map_file)
-              <<  "--galatic-ebv-col" << "PLANCK_GAL_EBV"
-			  <<  "--input-catalog"   << QString::fromStdString(m_input_name)
-              <<  "--output-catalog"  << QString::fromStdString(m_name)
-			  <<  "--ra"              << QString::fromStdString(m_ra_col)
-			  <<  "--dec"             << QString::fromStdString(m_dec_col);
+    std::string program = "AddGalDustToCatalog --planck-dust-map \"" + m_dust_map_file +
+                          "\" --galatic-ebv-col PLANCK_GAL_EBV --input-catalog \"" + m_input_name +
+                          "\" --output-catalog \"" + m_name + "\" --ra " + m_ra_col + " --dec " + m_dec_col;
+    std::string command = "";
 
-    m_process->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
-    m_process->start(QString::fromStdString(program), arguments);
+    logger.info("Calling :" + program + " " + command);
+    QStringList params;
+    params << QString::fromStdString(command);
+
+    m_process->start(QString::fromStdString(program));
 
   } else {
     return;

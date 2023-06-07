@@ -29,8 +29,6 @@ elements_add_executable(PhosphorosDisplayModelGrid src/program/DisplayModelGrid.
                      LINK_LIBRARIES ElementsKernel Boost PhzCLI)
 elements_add_executable(CreateFlatGridPrior src/program/CreateFlatGridPrior.cpp
                      LINK_LIBRARIES ElementsKernel PhzCLI)
-elements_add_executable(FitsToModelGridConvertion src/program/FitsToGridConvertion.cpp
-                     LINK_LIBRARIES ElementsKernel Boost PhzCLI)
 
 elements_install_conf_files()
 

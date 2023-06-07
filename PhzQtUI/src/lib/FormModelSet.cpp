@@ -9,7 +9,6 @@
 #include "ElementsKernel/Exception.h"
 #include "ElementsKernel/Logging.h"
 #include "PreferencesUtils.h"
-#include <chrono>
 
 namespace po = boost::program_options;
 
@@ -107,7 +106,6 @@ void FormModelSet::loadSetPage(std::shared_ptr<ModelSetModel> model_set_model_pt
   ui->cb_selSpace->clear();
   auto current_selection = m_model_set_model_ptr->getSelectedModelSet().getName();
   int  index             = 0;
-  m_diconnect_cb = true;
   for (auto& model_name : m_model_set_model_ptr->getModelSetList()) {
     ui->cb_selSpace->addItem(model_name);
     if (current_selection == model_name.toStdString()) {
@@ -115,12 +113,12 @@ void FormModelSet::loadSetPage(std::shared_ptr<ModelSetModel> model_set_model_pt
     }
     ++index;
   }
-  m_diconnect_cb = false;
+
   updateSelection();
   setModelInView();
 }
 
-void FormModelSet::on_cb_selSpace_currentIndexChanged(int) {
+void FormModelSet::on_cb_selSpace_currentIndexChanged(const QString&) {
   if (!m_diconnect_cb) {
     m_model_set_model_ptr->selectModelSet(ui->cb_selSpace->currentText());
     updateSelection();

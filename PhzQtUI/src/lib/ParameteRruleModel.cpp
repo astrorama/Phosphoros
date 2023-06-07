@@ -62,7 +62,7 @@ std::list<QString> ParameterRuleModel::getItemsRepresentation(ParameterRule& rul
   list.push_back(QString::fromStdString(getRedGroupName(rule) + " (" + getRedStatus(rule) + ")"));
   list.push_back(QString::fromStdString(rule.getEbvRangeString()));
   list.push_back(QString::fromStdString(rule.getRedshiftRangeString()));
-  list.push_back(QString::number(rule.getModelNumber(m_sed_repo, m_red_curve_repo)));
+  list.push_back(QString::number(rule.getModelNumber()));
   list.push_back(QString::number(id));
 
   return list;
@@ -97,28 +97,28 @@ void ParameterRuleModel::setRedshiftRanges(std::vector<Range> z_ranges, int row)
   int ref = getValue(row, 6).toInt();
   m_parameter_rules[ref].setZRanges(std::move(z_ranges));
   this->item(row, 4)->setText(QString::fromStdString(m_parameter_rules[ref].getRedshiftRangeString()));
-  this->item(row, 5)->setText(QString::number(m_parameter_rules[ref].getModelNumber(m_sed_repo, m_red_curve_repo, true)));
+  this->item(row, 5)->setText(QString::number(m_parameter_rules[ref].getModelNumber(true)));
 }
 
 void ParameterRuleModel::setEbvRanges(std::vector<Range> ebv_ranges, int row) {
   int ref = getValue(row, 6).toInt();
   m_parameter_rules[ref].setEbvRanges(std::move(ebv_ranges));
   this->item(row, 3)->setText(QString::fromStdString(m_parameter_rules[ref].getEbvRangeString()));
-  this->item(row, 5)->setText(QString::number(m_parameter_rules[ref].getModelNumber(m_sed_repo, m_red_curve_repo, true)));
+  this->item(row, 5)->setText(QString::number(m_parameter_rules[ref].getModelNumber(true)));
 }
 
 void ParameterRuleModel::setEbvValues(std::set<double> values, int row) {
   int ref = getValue(row, 6).toInt();
   m_parameter_rules[ref].setEbvValues(values);
   this->item(row, 3)->setText(QString::fromStdString(m_parameter_rules[ref].getEbvRangeString()));
-  this->item(row, 5)->setText(QString::number(m_parameter_rules[ref].getModelNumber(m_sed_repo, m_red_curve_repo, true)));
+  this->item(row, 5)->setText(QString::number(m_parameter_rules[ref].getModelNumber(true)));
 }
 
 void ParameterRuleModel::setRedshiftValues(std::set<double> values, int row) {
   int ref = getValue(row, 6).toInt();
   m_parameter_rules[ref].setRedshiftValues(values);
   this->item(row, 4)->setText(QString::fromStdString(m_parameter_rules[ref].getRedshiftRangeString()));
-  this->item(row, 5)->setText(QString::number(m_parameter_rules[ref].getModelNumber(m_sed_repo, m_red_curve_repo, true)));
+  this->item(row, 5)->setText(QString::number(m_parameter_rules[ref].getModelNumber(true)));
 }
 
 void ParameterRuleModel::setSeds(DatasetSelection state_selection, int row) {

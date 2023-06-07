@@ -7,10 +7,8 @@
 #include "ElementsKernel/Real.h"  // isEqual
 #include "PhzQtUI/ModelSet.h"
 #include <boost/test/unit_test.hpp>  // Gives access to the unit test framework.
-#include "PhzQtUI/DatasetRepository.h"
 
 using namespace Euclid::PhzQtUI;
-typedef std::shared_ptr<Euclid::PhzQtUI::DatasetRepository<std::unique_ptr<Euclid::XYDataset::FileSystemProvider>>> DatasetRepo;
 
 struct ModelSet_Fixture {
   std::string ref_name        = "Parameter_space_config_name";
@@ -25,8 +23,6 @@ struct ModelSet_Fixture {
 
   DatasetSelection ref_red_selection{};
   DatasetSelection ref_sed_selection{};
-  DatasetRepo sed_repo = nullptr;
-  DatasetRepo red_repo = nullptr;
 
   ModelSet_Fixture() {
 
@@ -53,7 +49,7 @@ struct ModelSet_Fixture {
 BOOST_AUTO_TEST_SUITE(ModelSet_test)
 
 BOOST_FIXTURE_TEST_CASE(setter_test, ModelSet_Fixture) {
-  auto modelSet = ModelSet{sed_repo, red_repo};
+  auto modelSet = ModelSet{};
   modelSet.setName(ref_name);
 
   std::map<int, ParameterRule> ref_map{std::make_pair(0, ref_rule_1)};
@@ -64,12 +60,11 @@ BOOST_FIXTURE_TEST_CASE(setter_test, ModelSet_Fixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(serialize_test, ModelSet_Fixture) {
-  auto modelSet = ModelSet{sed_repo, red_repo};
+  auto modelSet = ModelSet{};
   modelSet.setName(ref_name);
-  BOOST_CHECK_EQUAL(1,1);
+
   std::map<int, ParameterRule> ref_map{std::make_pair(0, ref_rule_1)};
   modelSet.setParameterRules(ref_map);
-  BOOST_CHECK_EQUAL(1,1);
 
   auto        doc       = modelSet.serialize();
   QDomElement root_node = doc.documentElement();

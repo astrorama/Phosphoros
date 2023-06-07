@@ -67,7 +67,7 @@ void DataSetTreeModel::load(bool selectable, bool onlyLeaves) {
       QStandardItem* item = new QStandardItem(QString::fromStdString(group_qualifiedName.datasetName()));
       item->setBackground(QBrush(QColor(230, 230, 230)));
       item->setCheckable(selectable && !onlyLeaves);
-      item->setAutoTristate(selectable && !onlyLeaves);
+      item->setTristate(selectable && !onlyLeaves);
 
       QStandardItem* item_void = new QStandardItem("");
       if (parent_group.length() > 0) {

@@ -95,7 +95,7 @@ private slots:
 
   void on_txt_UpperLimit_textEdited(const QString& text);
 
-  void on_cb_catalog_type_currentIndexChanged(int);
+  void on_cb_catalog_type_currentIndexChanged(const QString&);
 
   void on_btn_prop_err_clicked();
 

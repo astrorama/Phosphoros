@@ -164,9 +164,9 @@ void DialogRunAnalysis::on_btn_cancel_clicked() {
 
 void DialogRunAnalysis::run() {
   if (needSedWeights()) {
-    m_future_sed_watcher.setFuture(QtConcurrent::run(&DialogRunAnalysis::runSedFunction, this));
+    m_future_sed_watcher.setFuture(QtConcurrent::run(this, &DialogRunAnalysis::runSedFunction));
   } else {
-    m_future_watcher.setFuture(QtConcurrent::run(&DialogRunAnalysis::runFunction, this));
+    m_future_watcher.setFuture(QtConcurrent::run(this, &DialogRunAnalysis::runFunction));
   }
 }
 
@@ -175,7 +175,7 @@ void DialogRunAnalysis::sedFinished() {
   auto message = m_future_sed_watcher.result();
   if (message.length() == 0) {
 
-    m_future_watcher.setFuture(QtConcurrent::run(&DialogRunAnalysis::runFunction, this));
+    m_future_watcher.setFuture(QtConcurrent::run(this, &DialogRunAnalysis::runFunction));
 
   } else {
     QMessageBox::warning(this, "Error in the computation...", QString::fromStdString(message), QMessageBox::Close);

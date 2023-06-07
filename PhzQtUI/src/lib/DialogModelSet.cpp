@@ -1,7 +1,6 @@
 
 #include "PhzQtUI/DialogModelSet.h"
 #include "ElementsKernel/Exception.h"
-#include "ElementsKernel/Logging.h"
 #include "FileUtils.h"
 #include "FormUtils.h"
 #include "PhzQtUI/DataSetTreeModel.h"
@@ -22,14 +21,11 @@
 #include "XYDataset/FileSystemProvider.h"
 
 #include <QProgressDialog>
-#include <chrono>
 
 using namespace std;
 
 namespace Euclid {
 namespace PhzQtUI {
-
-static Elements::Logging logger = Elements::Logging::getLogger("DialogModelSet");
 
 void DialogModelSet::loadSeds() {
   DataSetTreeModel* treeModel_sed = new DataSetTreeModel(m_seds_repository);
@@ -119,15 +115,14 @@ void DialogModelSet::addEmissionLineButtonClicked(const QString& group) {
     lineAdder->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
 
     auto    aux_path = FileUtils::getAuxRootPath();
-    QString command  = QString::fromStdString("PhosphorosAddEmissionLines");
-    QStringList arguments;
-    arguments << "--sed-dir" <<  QString::fromStdString(aux_path) + QDir::separator() + QString::fromStdString("SEDs") + QDir::separator() + group;
+    QString command  = QString::fromStdString("PhosphorosAddEmissionLines --sed-dir " + aux_path) + QDir::separator() +
+                      QString::fromStdString("SEDs") + QDir::separator() + group;
 
     connect(lineAdder, SIGNAL(finished(int, QProcess::ExitStatus)), this,
             SLOT(sedProcessfinished(int, QProcess::ExitStatus)));
     connect(lineAdder, SIGNAL(started()), this, SLOT(sedProcessStarted()));
 
-    lineAdder->start(command, arguments);
+    lineAdder->start(command);
   } else {
     ui->labelMessage->setText("");
   }
@@ -357,7 +352,7 @@ void DialogModelSet::on_buttonBox_accepted() {
   try {
     m_rules[m_ref].setRedshiftValues(std::move(new_z_values));
     m_rules[m_ref].setZRanges(std::move(new_z_ranges));
-    m_rules[m_ref].getModelNumber(m_seds_repository, m_redenig_curves_repository, true);
+    m_rules[m_ref].getModelNumber(true);
     m_rules[m_ref].getRedshiftRangeString();
   } catch (const Elements::Exception& e) {
     QMessageBox::warning(this, "Error while setting redshift ranges...", e.what(), QMessageBox::Ok);
@@ -391,7 +386,7 @@ void DialogModelSet::on_buttonBox_accepted() {
   try {
     m_rules[m_ref].setEbvValues(std::move(new_ebv_values));
     m_rules[m_ref].setEbvRanges(std::move(new_ebv_ranges));
-    m_rules[m_ref].getModelNumber(m_seds_repository, m_redenig_curves_repository, true);
+    m_rules[m_ref].getModelNumber(true);
     m_rules[m_ref].getEbvRangeString();
   } catch (const Elements::Exception& e) {
     QMessageBox::warning(this, "Error while setting E(B-V) ranges...", e.what(), QMessageBox::Ok);
@@ -408,8 +403,7 @@ void DialogModelSet::on_buttonBox_accepted() {
   // Reddeing Curves
   m_rules[m_ref].setRedCurveSelection(std::move(red_curve_selection));
 
-  m_rules[m_ref].getModelNumber(m_seds_repository, m_redenig_curves_repository, true);
-
+  m_rules[m_ref].getModelNumber(true);
   this->popupClosing(m_ref, m_rules[m_ref], true);
   this->close();
 }

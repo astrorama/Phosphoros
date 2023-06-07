@@ -17,6 +17,7 @@
 #include "ui_DialogInterpolateSed.h"
 #include <QComboBox>
 #include <QDirIterator>
+#include <QRegExpValidator>
 #include <QSpacerItem>
 #include <QSpinBox>
 #include <QStandardItem>
@@ -197,9 +198,9 @@ void DialogInterpolateSed::on_btn_create_clicked() {
 
   bool copy_seds = ui->cb_cp->isChecked();
 
-  QString     program = "Phosphoros";
+  QString     program = "Phosphoros IS";
   QStringList arguments;
-  arguments << "IS" << "--sed-dir" << sed_folder << "--out-dir" << folder_name << "--seds" << seds.join(",") << "--numbers"
+  arguments << "--sed-dir" << sed_folder << "--out-dir" << folder_name << "--seds" << seds.join(",") << "--numbers"
             << numbers.join(",");
 
   if (!copy_seds) {
@@ -208,13 +209,12 @@ void DialogInterpolateSed::on_btn_create_clicked() {
   }
 
   m_is = new QProcess;
-  QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-  m_is->setProcessEnvironment(env);
 
   connect(m_is, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processingFinished(int, QProcess::ExitStatus)));
 
-
-  m_is->start(program, arguments);
+  const QString& command = QString("Phosphoros IS ") + arguments.join(" ");
+  logger.info("running: " + command.toStdString());
+  m_is->start(command);
 
   ui->btn_cancel->setEnabled(false);
   ui->btn_create->setEnabled(false);

@@ -68,9 +68,9 @@ public:
    * @brief get Model Number
    * @return the cardinality of models which can be build from the ParameterRule
    */
-  long long getModelNumber(DatasetRepo sed_repository, DatasetRepo redenig_curves_repository, bool recompute = false);
+  long long getModelNumber(bool recompute = false);
 
-  long long getModelNumber(DatasetRepo sed_repository, DatasetRepo redenig_curves_repository) const;
+  long long getModelNumber() const;
 
   /**
    * @brief Get a string representing the E(B-V) range
