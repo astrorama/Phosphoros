@@ -7,13 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Note: the issue number refer to SDC-CH internal tracking.
 
-## [Unreleased]
+## [1.8.0] 2023-06-08
 ### Fixed
+- Fix the PP based on luminosity by providing the unreddedned luminosity https://redmine.astro.unige.ch/issues/29197
 - Fix a bug in the refreshing of the parameter space page after saving a new or a re-nomed parameter sapace. https://redmine.astro.unige.ch/issues/29020
 - Fix a bug in the GUI when saving a PP with Log part https://redmine.isdc.unige.ch/issues/28996
 
-### Changed
+## [1.7.0] 
+QT6 -  due to release constraints no proper release for now
+
 ## [1.6.2] 2023-04-26
+### Changed
 - Add the display of the Solar luminosity based SED scaling when displaying SED in "PhosphorosComputeModelSed" https://redmine.isdc.unige.ch/issues/28993
 - Add a Phosphoros tool (FMG) to convert fits representation of the Model Grids to the Phosphoros format https://redmine.isdc.unige.ch/issues/28788
 
