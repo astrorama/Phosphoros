@@ -53,7 +53,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
     bia >> grid_info;
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
-  	logger.debug()<<"Grid info loaded "<< duration << "[ms]";
+  	logger.info()<<"Grid info loaded "<< duration << "[ms]";
   	start = stop;
 
     // Check the IGM type compatibility
@@ -70,7 +70,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
     }
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
-  	logger.debug()<<"IGM and Luminosity filter checked "<< duration << "[ms]";
+  	logger.info()<<"IGM and Luminosity filter checked "<< duration << "[ms]";
   	start = stop;
 
     // check the filters
@@ -89,7 +89,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
     }
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
-	logger.debug()<<"Filter checked "<< duration << "[ms]";
+	logger.info()<<"Filter checked "<< duration << "[ms]";
 	start = stop;
 
     // check the axis
@@ -100,9 +100,15 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
     }
 
     size_t found = 0;
+    
     for (auto& current_axe : axes) {
       for (auto& file_axe : grid_info.region_axes_map) {
-
+        if (current_axe.first!=file_axe.first){
+            continue;
+        }
+        
+        logger.debug() << "Checking region " << current_axe.first ;
+        
         // SED
 
         auto& sed_axis_file      = std::get<PhzDataModel::ModelParameter::SED>(file_axe.second);
@@ -143,71 +149,49 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
           continue;
         }
 
-        std::vector<double> z_axis_file;
-        for (double value : std::get<PhzDataModel::ModelParameter::Z>(file_axe.second)) {
-          z_axis_file.push_back(value);
+        size_t found_z = 0;
+        double max_diff = 0.000001;
+        
+        if (std::get<PhzDataModel::ModelParameter::Z>(file_axe.second).size()!= std::get<PhzDataModel::ModelParameter::Z>(current_axe.second).size()) {
+           logger.debug() <<  "Incompatible Z number in the region " << std::get<PhzDataModel::ModelParameter::Z>(file_axe.second).size() << "-" <<  std::get<PhzDataModel::ModelParameter::Z>(current_axe.second).size();
+           continue;
         }
-
-        std::vector<double> z_axis_requested;
-        for (double value : std::get<PhzDataModel::ModelParameter::Z>(current_axe.second)) {
-          z_axis_requested.push_back(value);
+        
+        for (double value_file : std::get<PhzDataModel::ModelParameter::Z>(file_axe.second)) {
+            for (double value_current : std::get<PhzDataModel::ModelParameter::Z>(current_axe.second)) {
+                if (std::abs(value_file-value_current)<max_diff) {
+                    found_z+=1;
+                    break;
+                }
+            }
         }
-
-        if (z_axis_file.size() != z_axis_requested.size()) {
-          logger.debug() << "Incompatible Z number in the region";
+        
+        if (found_z != std::get<PhzDataModel::ModelParameter::Z>(file_axe.second).size()) {
+          logger.debug() << "Incompatible Z value in the region: found " << found_z << " expected " << std::get<PhzDataModel::ModelParameter::Z>(file_axe.second).size();
           continue;
         }
-
-        std::sort(z_axis_file.begin(), z_axis_file.end());
-        std::sort(z_axis_requested.begin(), z_axis_requested.end());
-
-        bool match     = true;
-        auto z_file_it = z_axis_file.begin();
-        for (auto& z_requested : z_axis_requested) {
-          if (std::fabs(*z_file_it - z_requested) > 1E-10) {
-            match = false;
-            break;
-          }
-          ++z_file_it;
+        
+        size_t found_ebv = 0;
+        
+        if (std::get<PhzDataModel::ModelParameter::EBV>(file_axe.second).size()!= std::get<PhzDataModel::ModelParameter::EBV>(current_axe.second).size()) {
+           logger.debug() <<  "Incompatible EBV number in the region " << std::get<PhzDataModel::ModelParameter::EBV>(file_axe.second).size() << "-" <<  std::get<PhzDataModel::ModelParameter::EBV>(current_axe.second).size();
+           continue;
         }
-
-        if (!match) {
-          logger.debug() << "Incompatible Z value in the region";
+        
+        for (double value_file : std::get<PhzDataModel::ModelParameter::EBV>(file_axe.second)) {
+            for (double value_current : std::get<PhzDataModel::ModelParameter::EBV>(current_axe.second)) {
+                if (std::abs(value_file-value_current)<max_diff) {
+                    found_ebv+=1;
+                    break;
+                }
+            }
+        }
+        
+        if (found_ebv != std::get<PhzDataModel::ModelParameter::EBV>(file_axe.second).size()) {
+          logger.debug() << "Incompatible EBV value in the region";
           continue;
         }
-
-        std::vector<double> ebv_axis_file;
-        for (double value : std::get<PhzDataModel::ModelParameter::EBV>(file_axe.second)) {
-          ebv_axis_file.push_back(value);
-        }
-
-        std::vector<double> ebv_axis_requested;
-        for (double value : std::get<PhzDataModel::ModelParameter::EBV>(current_axe.second)) {
-          ebv_axis_requested.push_back(value);
-        }
-
-        if (ebv_axis_file.size() != ebv_axis_requested.size()) {
-          logger.debug() << "Incompatible ebv number in the region";
-          continue;
-        }
-
-        std::sort(ebv_axis_file.begin(), ebv_axis_file.end());
-        std::sort(ebv_axis_requested.begin(), ebv_axis_requested.end());
-
-        auto ebv_file_it = ebv_axis_file.begin();
-        for (auto& ebv_requested : ebv_axis_requested) {
-          if (std::fabs(*ebv_file_it - ebv_requested) > 1E-10) {
-            match = false;
-            break;
-          }
-          ++ebv_file_it;
-        }
-
-        if (!match) {
-          logger.debug() << "Incompatible ebv value in the region";
-          continue;
-        }
-
+        
         ++found;
         break;
       }
@@ -215,7 +199,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
 
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
-	logger.debug()<<"Axis checked for "<<file_path.toStdString()<<" "<< duration << "[ms]";
+	logger.info()<<"Axis checked for "<<file_path.toStdString()<<" "<< duration << "[ms]";
 	start = stop;
 
     if (axes.size() != found) {
@@ -234,8 +218,10 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
 std::list<std::string>
 PhzGridInfoHandler::getCompatibleGridFile(std::string                                                catalog,
                                           const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes,
-                                          const std::list<std::string>& selected_filters, std::string igm_type,
-                                          const std::string luminosity_filter, GridType grid_type) {
+                                          const std::list<std::string>& selected_filters, 
+                                          std::string igm_type,
+                                          const std::string luminosity_filter, 
+                                          GridType grid_type) {
   auto start = std::chrono::high_resolution_clock::now();
   std::string rootPath = FileUtils::getPhotmetricGridRootPath(true, catalog);
   if (grid_type == GalacticReddeningCorrectionGrid) {

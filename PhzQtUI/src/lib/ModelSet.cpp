@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <iostream>
+#include <cmath>
 
 #include "Configuration/ConfigManager.h"
 #include "Configuration/Utils.h"
@@ -106,7 +107,13 @@ static std::vector<XYDataset::QualifiedName> getList(DatasetRepo repo, const Dat
 	return selected;
 }
 
-
+bool in_list(std::vector<double> list, double value, double tolerance){
+    bool result = false;
+    for (auto& v_l : list) {
+        result |= std::abs(v_l-value)<tolerance;
+    }
+    return result;
+}
 
 const std::map<std::string, PhzDataModel::ModelAxesTuple>& ModelSet::getAxesTuple() {
 	std::map<std::string, PhzDataModel::ModelAxesTuple> result{};
@@ -117,10 +124,15 @@ const std::map<std::string, PhzDataModel::ModelAxesTuple>& ModelSet::getAxesTupl
 		for (double z : param_rule.second.getRedshiftValues()) {
 			z_list.push_back(z);
 		}
+		
 		for (const auto& range : param_rule.second.getZRanges()) {
-			for (size_t index=0; index<(range.getMax()-range.getMin())/range.getStep() +1; index++){
-				z_list.push_back(range.getMin()+index*range.getStep());
+			for (size_t index=0; index<std::round((range.getMax()-range.getMin())/range.getStep()+1); index++){
+			    double val = range.getMin()+index*range.getStep();
+			    if (!in_list(z_list,val, 0.000001)) {
+				    z_list.push_back(val);
+				}
 			}
+			
 		}
 		std::sort(z_list.begin(), z_list.end());
 
@@ -129,8 +141,11 @@ const std::map<std::string, PhzDataModel::ModelAxesTuple>& ModelSet::getAxesTupl
 			ebv_list.push_back(ebv);
 		}
 		for (const auto& range : param_rule.second.getEbvRanges()) {
-			for (size_t index=0; index<(range.getMax()-range.getMin())/range.getStep() +1; index++){
-				ebv_list.push_back(range.getMin()+index*range.getStep());
+			for (size_t index=0; index<std::round((range.getMax()-range.getMin())/range.getStep() +1); index++){
+			    double val = range.getMin()+index*range.getStep();
+			    if (!in_list(ebv_list,val, 0.000001)) {
+				    ebv_list.push_back(range.getMin()+index*range.getStep());
+			    }
 			}
 		}
 		std::sort(ebv_list.begin(), ebv_list.end());

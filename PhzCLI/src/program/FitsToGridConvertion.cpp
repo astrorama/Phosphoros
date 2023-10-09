@@ -29,6 +29,7 @@
 #include <map>
 #include <string>
 #include <cstdlib>
+#include <cstdint>
 #include <boost/algorithm/string.hpp>
 
 #include <ElementsKernel/ProgramHeaders.h>

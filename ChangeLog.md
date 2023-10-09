@@ -7,11 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Note: the issue number refer to SDC-CH internal tracking.
 
-## [1.7.0] 2023-06-07
+## [1.8.4] 2023-09-05
 ### Fixed
+ - Fix a regression in the grid comparison preventing the GUI to use newly generated MW grid. https://redmine.astro.unige.ch/issues/29732
+
+## [1.8.3] 2023-09-04
+### Fixed
+ - remove Alexandria use of deprecated class preventing build on libcxx>=1.16, old libcxx version had to be removed as it was not allowing Conda compilation
+
+## [1.8.0] 2023-06-08
+### Fixed
+- Fix the PP based on luminosity by providing the unreddedned luminosity https://redmine.astro.unige.ch/issues/29197
 - Fix a bug in the refreshing of the parameter space page after saving a new or a re-nomed parameter sapace. https://redmine.astro.unige.ch/issues/29020
 - Fix a bug in the GUI when saving a PP with Log part https://redmine.isdc.unige.ch/issues/28996
 - Switch to QT6
+
+## [1.7.0] 
+QT6 -  due to release constraints no proper release for now
 
 ## [1.6.2] 2023-04-26
 ### Changed
