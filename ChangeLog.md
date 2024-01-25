@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Note: the issue number refer to SDC-CH internal tracking.
+
+## [1.8.5] 2024-01-25
+### Changed
+ - Add the Scaling (luminosity) grid to the output when export of the full grid is requested
+ 
 ## [1.8.4] 2023-09-05
 ### Fixed
  - Fix a regression in the grid comparison preventing the GUI to use newly generated MW grid. https://redmine.astro.unige.ch/issues/29732
