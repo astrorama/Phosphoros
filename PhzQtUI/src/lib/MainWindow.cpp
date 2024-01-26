@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <chrono>
 #include <QApplication>
-#include <memory_resource>
 
 #include "PhzQtUI/DataPackHandler.h"
 
