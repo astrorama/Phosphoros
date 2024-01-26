@@ -1,3 +1,4 @@
+#include <fstream> 
 #include "PhzQtUI/DialogPhotometricCorrectionComputation.h"
 #include "FileUtils.h"
 #include "PhzQtUI/PhotometricCorrectionHandler.h"
