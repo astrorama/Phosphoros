@@ -32,9 +32,6 @@ jobs:
       matrix:
         os-type: [fedora]
         os-version: ${{ fromJson(needs.get_fedora_releases.outputs.stable) }}
-        include:
-          - os-type: rockylinux
-            os-version: 9
     container: ${{ matrix.os-type }}:${{ matrix.os-version }}
     steps:
       - name: Checkout
