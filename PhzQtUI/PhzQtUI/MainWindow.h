@@ -7,6 +7,7 @@
 #include <QProcess>
 #include <map>
 #include <memory>
+#include <experimental/memory_resource>
 
 #include "PhzQtUI/DataPackHandler.h"
 #include "PhzQtUI/ModelSetModel.h"
