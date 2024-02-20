@@ -204,7 +204,7 @@
         <x>0</x>
         <y>0</y>
         <width>942</width>
-        <height>768</height>
+        <height>770</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -216,7 +216,7 @@
           </font>
          </property>
          <property name="currentIndex">
-          <number>5</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="page">
           <property name="geometry">
@@ -224,7 +224,7 @@
             <x>0</x>
             <y>0</y>
             <width>930</width>
-            <height>528</height>
+            <height>536</height>
            </rect>
           </property>
           <attribute name="label">
@@ -410,6 +410,54 @@
                 </property>
                </widget>
               </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_38">
+                <item>
+                 <widget class="QLabel" name="label_34">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <property name="text">
+                   <string>Milky Way Reddening curve:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="cb_MWRC">
+                  <property name="font">
+                   <font>
+                    <pointsize>11</pointsize>
+                   </font>
+                  </property>
+                  <item>
+                   <property name="text">
+                    <string>Gordon+2023</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Fitzpatrick 1999</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_28">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
              </layout>
             </widget>
            </item>
@@ -434,7 +482,7 @@
             <x>0</x>
             <y>0</y>
             <width>930</width>
-            <height>528</height>
+            <height>536</height>
            </rect>
           </property>
           <attribute name="label">
@@ -807,7 +855,7 @@
             <x>0</x>
             <y>0</y>
             <width>930</width>
-            <height>528</height>
+            <height>536</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1041,7 +1089,7 @@
             <x>0</x>
             <y>0</y>
             <width>930</width>
-            <height>528</height>
+            <height>536</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1056,7 +1104,6 @@
              <property name="font">
               <font>
                <pointsize>11</pointsize>
-               <weight>50</weight>
                <bold>false</bold>
               </font>
              </property>
@@ -1194,7 +1241,7 @@
             <x>0</x>
             <y>0</y>
             <width>930</width>
-            <height>528</height>
+            <height>536</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1367,8 +1414,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>932</width>
-            <height>710</height>
+            <width>933</width>
+            <height>704</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1386,7 +1433,6 @@
                    <property name="font">
                     <font>
                      <pointsize>11</pointsize>
-                     <weight>50</weight>
                      <bold>false</bold>
                     </font>
                    </property>

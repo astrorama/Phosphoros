@@ -177,6 +177,8 @@ class EmissionLinesAdder(object):
         self.emission_lines = emission_lines
         self.no_sed = no_sed
         if velocity is None:
+            
+            logger.info('Using Dirac')
             self.handler = EmissionLinesAdder.Dirac()
         else:
             self.handler = EmissionLinesAdder.Gaussian(velocity)

@@ -1018,17 +1018,38 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
   std::string catalog_type = ui->cb_AnalysisSurvey->currentText().toStdString();
   std::string lum_filter   = ui->lbl_lum_filter->text().toStdString();
   std::string igm          = ui->cb_igm->currentText().toStdString();
+  std::string mwrc         = ui->cb_MWRC->currentText().toStdString();
 
+
+  QFileInfo g23_curve_info(QString::fromStdString(FileUtils::getRedCurveRootPath(false)) + QDir::separator() +
+                           QString::fromStdString("Gordon23") + QDir::separator() + QString::fromStdString("G23.dat"));
   QFileInfo f99_curve_info(QString::fromStdString(FileUtils::getRedCurveRootPath(false)) + QDir::separator() +
                            QString::fromStdString("F99") + QDir::separator() + QString::fromStdString("F99_3.1.dat"));
-  if (!f99_curve_info.exists()) {
-    QMessageBox::warning(
-        this, "Missing Reddening curve...",
-        "The Milky Way reddening curve stored by default in <ReddeningCurves>/F99/F99_3.1.dat is missing. "
-        "This computation need it, please provide it and try again.",
-        QMessageBox::Ok);
-    return {};
+
+
+
+  std::string mwrc_arg = "Gordon23/G23";
+  if (mwrc=="Fitzpatrick 1999") {
+	  if (!f99_curve_info.exists()) {
+	      QMessageBox::warning(
+	          this, "Missing Reddening curve...",
+	          "The Milky Way reddening curve stored by default in <ReddeningCurves>/F99/F99_3.1.dat is missing. "
+	          "This computation need it, please provide it and try again. (You may try to reload the last data pack)",
+	          QMessageBox::Ok);
+	      return {};
+	  }
+	  mwrc_arg = "F99/F99_3.1";
+  } else {
+	  if (!g23_curve_info.exists()) {
+	      QMessageBox::warning(
+	          this, "Missing Reddening curve...",
+	          "The Milky Way reddening curve stored by default in <ReddeningCurves>/Gordon23/G23.dat is missing. "
+	          "This computation need it, please provide it and try again. (You may try to reload the last data pack)",
+	          QMessageBox::Ok);
+	      return {};
+	   }
   }
+
 
   std::map<std::string, boost::program_options::variable_value> options_map =
       FileUtils::getPathConfiguration(false, true, true, false);
@@ -1050,8 +1071,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
     options_map[pair.first] = pair.second;
   }
 
-  std::string f99                                       = "F99/F99_3.1";
-  options_map["milky-way-reddening-curve-name"].value() = boost::any(f99);
+  options_map["milky-way-reddening-curve-name"].value() = boost::any(mwrc_arg);
   auto global_options                                   = PreferencesUtils::getThreadConfigurations();
   for (auto& pair : global_options) {
     options_map[pair.first] = pair.second;
@@ -1076,14 +1096,18 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getF
   std::string grid_name        = ui->cb_CompatibleGrid->currentText().toStdString();
   std::string output_grid_name = FileUtils::addExt(ui->cb_CompatibleShiftGrid->currentText().toStdString(), ".txt");
   std::string survey_name      = ui->cb_AnalysisSurvey->currentText().toStdString();
-  std::string f99              = "F99/F99_3.1";
+  std::string mwrc         = ui->cb_MWRC->currentText().toStdString();
+  std::string mwrc_arg = "Gordon23/G23";
+  if (mwrc=="Fitzpatrick 1999") {
+ 	  mwrc_arg = "F99/F99_3.1";
+  }
   std::string text_format      = "TEXT";
 
   options_map["filter-variation-min-shift"].value()     = boost::any(min_value);
   options_map["filter-variation-max-shift"].value()     = boost::any(max_value);
   options_map["filter-variation-shift-samples"].value() = boost::any(sample_number);
 
-  options_map["milky-way-reddening-curve-name"].value() = boost::any(f99);
+  options_map["milky-way-reddening-curve-name"].value() = boost::any(mwrc_arg);
 
   auto global_options = PreferencesUtils::getCosmologyConfigurations();
   for (auto& pair : global_options) {

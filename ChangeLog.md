@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Note: the issue number refer to SDC-CH internal tracking.
 
+## [1.9.0] 2025-02-08
+### Changed
+ - New MW reddening curve (Gordon 2023) with control allowing the user to choose the curve. https://redmine.isdc.unige.ch/issues/30744
+
+## [1.8.5] 2024-01-25
+### Changed
+ - Add the Scaling (luminosity) grid to the output when export of the full grid is requested. https://redmine.astro.unige.ch/issues/30687
+ 
 ## [1.8.4] 2023-09-05
 ### Fixed
  - Fix a regression in the grid comparison preventing the GUI to use newly generated MW grid. https://redmine.astro.unige.ch/issues/29732
