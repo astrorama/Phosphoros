@@ -97,24 +97,19 @@ private slots:
 
   void on_cb_AnalysisModel_currentIndexChanged(const QString&);
 
-  void on_cbb_pdf_out_currentIndexChanged(const QString&);
-
-  void on_cb_pdf_z_stateChanged(int);
-  void on_cb_likelihood_pdf_z_stateChanged(int);
-
   void on_cb_igm_currentIndexChanged(const QString&);
 
   void on_cb_CompatibleGrid_currentTextChanged(const QString&);
   void on_btn_GetConfigGrid_clicked();
-  void on_btn_RunGrid_clicked();
 
   void on_cb_CompatibleGalCorrGrid_currentTextChanged(const QString&);
   void on_btn_GetGalCorrConfigGrid_clicked();
-  void on_btn_RunGalCorrGrid_clicked();
 
   void on_cb_CompatibleShiftGrid_currentTextChanged(const QString&);
   void on_btn_GetShiftConfigGrid_clicked();
-  void on_btn_RunShiftGrid_clicked();
+
+  void on_rb_fixZTol_toggled(bool);
+  void on_rb_scaleZTol_toggled(bool);
 
   void on_rb_gc_off_clicked();
   void on_rb_gc_col_clicked();
@@ -178,6 +173,10 @@ private:
   std::list<std::string>            getExcludedFilters();
   std::list<FilterMapping>          getSelectedFilterMapping();
 
+  bool BuildModelGrid(const std::list<float>& zs);
+  bool BuildMwCorrGrid();
+  bool BuildFilterShiftGrid();
+
   void setupAlgo();
 
   void updateCopiedColumns(std::list<std::string> new_columns);
@@ -196,13 +195,15 @@ private:
   void updateGalCorrGridSelection();
   void updateFilterShiftGridSelection();
 
+  void cleanTempGrids();
+
   bool checkGridSelection(bool addFileCheck, bool acceptNewFile);
   bool checkCompatibleModelGrid(std::string file_name);
   bool checkGalacticGridSelection(bool addFileCheck, bool acceptNewFile);
   bool checkCompatibleGalacticGrid(std::string file_name);
   bool checkFilterShiftGridSelection(bool addFileCheck, bool acceptNewFile);
   bool checkCompatibleFilterShiftGrid(std::string file_name);
-  std::map<std::string, boost::program_options::variable_value> getGridConfiguration();
+  std::map<std::string, boost::program_options::variable_value> getGridConfiguration(const std::list<float>& zs);
   std::map<std::string, boost::program_options::variable_value> getGalacticCorrectionGridConfiguration();
   std::map<std::string, boost::program_options::variable_value> getFilterShiftGridConfiguration();
 

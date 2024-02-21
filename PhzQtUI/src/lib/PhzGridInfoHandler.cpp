@@ -259,12 +259,12 @@ PhzGridInfoHandler::getCompatibleGridFile(std::string                           
 std::map<std::string, boost::program_options::variable_value>
 PhzGridInfoHandler::GetConfigurationMap(std::string catalog, std::string output_file, ModelSet model,
                                         const std::list<std::string>& selected_filters, std::string luminosity_filter,
-                                        std::string igm_type) {
+                                        std::string igm_type, const std::list<float>& zs) {
 
   std::map<std::string, boost::program_options::variable_value> options_map =
       FileUtils::getPathConfiguration(false, true, true, false);
 
-  auto model_option = model.getConfigOptions();
+  auto model_option = model.getConfigOptions(zs);
   for (auto& pair : model_option) {
     options_map[pair.first] = pair.second;
   }

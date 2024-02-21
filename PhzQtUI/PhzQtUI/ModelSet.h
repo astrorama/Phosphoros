@@ -174,7 +174,7 @@ public:
    *
    * @return the configuration map
    */
-  std::map<std::string, boost::program_options::variable_value> getConfigOptions() const;
+  std::map<std::string, boost::program_options::variable_value> getConfigOptions(const std::list<float>& zs) const;
 
   std::map<std::string, boost::program_options::variable_value> getModelNameConfigOptions() const;
 

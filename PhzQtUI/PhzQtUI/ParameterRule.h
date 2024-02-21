@@ -9,6 +9,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <list>
 
 namespace boost {
 namespace program_options {
@@ -131,7 +132,7 @@ public:
    */
   void setZRanges(std::vector<Range> z_ranges);
 
-  std::map<std::string, boost::program_options::variable_value> getConfigOptions(std::string region) const;
+  std::map<std::string, boost::program_options::variable_value> getConfigOptions(std::string region, const std::list<float>& zs) const;
 
   void setRedCurveSelection(DatasetSelection red_curve_selection);
   void setSedSelection(DatasetSelection sed_selection);

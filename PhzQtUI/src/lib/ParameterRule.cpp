@@ -167,7 +167,7 @@ std::set<double> ParameterRule::parseValueList(const std::string& list) {
 }
 
 std::map<std::string, boost::program_options::variable_value>
-ParameterRule::getConfigOptions(std::string region) const {
+ParameterRule::getConfigOptions(std::string region, const std::list<float>& zs) const {
   std::string postfix = "";
   if (region.length() > 0) {
     postfix = "-" + region;
@@ -195,20 +195,28 @@ ParameterRule::getConfigOptions(std::string region) const {
     options["reddening-curve-exclude" + postfix].value() = boost::any(m_red_curve_selection.getExclusions());
   }
 
-  vector<string> z_range_vector;
-  for (auto& range : m_redshift_ranges) {
-    z_range_vector.push_back(range.getConfigStringRepresentation());
-  }
-  if (z_range_vector.size() > 0) {
-    options["z-range" + postfix].value() = boost::any(z_range_vector);
-  }
+  if (zs.size()>0){
+	  vector<string> z_value_vector;
+	  for (auto& value : zs) {
+		    z_value_vector.push_back(std::to_string(value));
+	  }
+	  options["z-value" + postfix].value() = boost::any(z_value_vector);
+  } else {
+	  vector<string> z_range_vector;
+	  for (auto& range : m_redshift_ranges) {
+	    z_range_vector.push_back(range.getConfigStringRepresentation());
+	  }
+	  if (z_range_vector.size() > 0) {
+	    options["z-range" + postfix].value() = boost::any(z_range_vector);
+	  }
 
-  vector<string> z_value_vector;
-  for (auto& value : m_redshift_values) {
-    z_value_vector.push_back(nonLocalizedString(value));
-  }
-  if (z_value_vector.size() > 0) {
-    options["z-value" + postfix].value() = boost::any(z_value_vector);
+	  vector<string> z_value_vector;
+	  for (auto& value : m_redshift_values) {
+	    z_value_vector.push_back(nonLocalizedString(value));
+	  }
+	  if (z_value_vector.size() > 0) {
+	    options["z-value" + postfix].value() = boost::any(z_value_vector);
+	  }
   }
 
   vector<string> ebv_range_vector;
@@ -278,7 +286,7 @@ void ParameterRule::setEbvValues(std::set<double> values) {
 
 const std::string ParameterRule::getEbvRangeString() const {
   bool is_zero = false;
-  auto options = getConfigOptions("");
+  auto options = getConfigOptions("", {});
 
   is_zero |= m_red_curve_selection.isEmpty();
   is_zero |= m_ebv_ranges.size() == 0 && m_ebv_values.size() == 0;
@@ -302,7 +310,7 @@ const std::string ParameterRule::getEbvRangeString() const {
 
 const std::string ParameterRule::getRedshiftRangeString() const {
   bool is_zero = false;
-  auto options = getConfigOptions("");
+  auto options = getConfigOptions("", {});
   is_zero |= m_redshift_ranges.size() == 0 && m_redshift_values.size() == 0;
 
   if (is_zero) {

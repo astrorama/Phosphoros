@@ -68,10 +68,10 @@ std::map<std::string, boost::program_options::variable_value> ModelSet::getModel
   options["parameter-space-model-name"].value() = boost::any(getName());
   return options;
 }
-std::map<std::string, po::variable_value> ModelSet::getConfigOptions() const {
+std::map<std::string, po::variable_value> ModelSet::getConfigOptions(const std::list<float>& zs) const {
   std::map<std::string, po::variable_value> options;
   for (auto& param_rule : getParameterRules()) {
-    for (auto& option : param_rule.second.getConfigOptions(param_rule.second.getName())) {
+    for (auto& option : param_rule.second.getConfigOptions(param_rule.second.getName(), zs)) {
       options[option.first] = option.second;
     }
   }

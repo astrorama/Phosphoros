@@ -58,7 +58,7 @@ public:
   static std::map<std::string, boost::program_options::variable_value>
   GetConfigurationMap(std::string catalog, std::string output_file, ModelSet model,
                       const std::list<std::string>& selected_filters, std::string luminosity_filter,
-                      std::string igm_type);
+                      std::string igm_type, const std::list<float>& zs);
 };
 
 }  // namespace PhzQtUI
