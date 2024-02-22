@@ -2788,6 +2788,38 @@ void FormAnalysis::get_config_run_second_part() {
   dialog.setOption(QFileDialog::DontUseNativeDialog);
   dialog.setLabelText(QFileDialog::Accept, "Select Folder");
   if (dialog.exec()) {
+
+	std::list<float> zs{};
+	if (ui->gb_fix_z->isChecked()) {
+
+		std::string  new_grid_name =  ui->cb_CompatibleGrid->currentText().toStdString();
+
+		if (!new_grid_name.rfind("TEMP_", 0) == 0) {
+		    new_grid_name = "TEMP_" + new_grid_name;
+		}
+
+		ui->cb_CompatibleGrid->setItemText(ui->cb_CompatibleGrid->currentIndex(),QString::fromStdString(new_grid_name));
+
+		std::unique_ptr<DialogExtractZ> dialogZ(new DialogExtractZ());
+		int start = 0;
+		if (ui->cb_skip->isChecked()) {
+		    start = ui->sb_skip->value();
+		}
+		int max_num=-1;
+		if (ui->cb_process_limit->isChecked()) {
+		    max_num = ui->sb_process_limit->value();
+		}
+
+		dialogZ->setData(ui->txt_inputCatalog->text().toStdString(), ui->cb_z_col->currentText().toStdString(), start, max_num, ui->dsb_fix_z_tol->value(), ui->rb_scaleZTol->isChecked());
+		if (dialogZ->exec()) {
+		    zs = dialogZ->getRedshiftList();
+		} else {
+		    cleanTempGrids(false);
+		  return;
+		}
+
+	}
+
     auto selected_folder = dialog.selectedFiles()[0];
 
     QString cr{"\n\n"};
@@ -2795,7 +2827,6 @@ void FormAnalysis::get_config_run_second_part() {
 
     // Model Grid
     auto grid_model_file_name  = selected_folder + QString::fromStdString("/ModelGrid.CMG.conf");
-    std::list<float> zs{};
     auto grid_model_config_map = getGridConfiguration(zs); // TODO replace by the z list if needed
     PhzUITools::ConfigurationWriter::writeConfiguration(grid_model_config_map, grid_model_file_name.toStdString());
     command += QString::fromStdString("Phosphoros CMG --config-file ") + grid_model_file_name + cr;
@@ -2883,6 +2914,8 @@ void FormAnalysis::get_config_run_second_part() {
                                           ui->cb_AnalysisCorrection->currentText().toStdString());
     }
   }
+
+  cleanTempGrids(false);
 }
 
 void FormAnalysis::on_btn_RunAnalysis_clicked() {
@@ -3166,7 +3199,7 @@ void FormAnalysis::run_analysis_second_part() {
   cleanTempGrids();
 }
 
-void FormAnalysis::cleanTempGrids(){
+void FormAnalysis::cleanTempGrids(bool test_files){
 	std::string model_grid = ui->cb_CompatibleGrid->currentText().toStdString();
 	std::string mw_grid = ui->cb_CompatibleGalCorrGrid->currentText().toStdString();
 	std::string fv_grid = ui->cb_CompatibleShiftGrid->currentText().toStdString();
@@ -3183,7 +3216,7 @@ void FormAnalysis::cleanTempGrids(){
 	QFile mwg_info(QString::fromStdString( FileUtils::getGalacticCorrectionGridRootPath(false,survey_name)) + QDir::separator() + QString::fromStdString(mw_grid));
     QFile fvg_info(QString::fromStdString( FileUtils::getFilterShiftGridRootPath(false, survey_name)) + QDir::separator() + QString::fromStdString(fv_grid));
 
-	if ( mg_info.exists() || mwg_info.exists() || fvg_info.exists()) {
+	if ( test_files && (mg_info.exists() || mwg_info.exists() || fvg_info.exists())) {
 		if (QMessageBox::warning(this, "Temporary grid deletion...",
 			 					"Temporary grids have been produced for this run. "
 			 					"Unless you want to rerun with the same sources it is better to delete them. "

@@ -195,7 +195,7 @@ private:
   void updateGalCorrGridSelection();
   void updateFilterShiftGridSelection();
 
-  void cleanTempGrids();
+  void cleanTempGrids(bool test_files=true);
 
   bool checkGridSelection(bool addFileCheck, bool acceptNewFile);
   bool checkCompatibleModelGrid(std::string file_name);
