@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Note: the issue number refer to SDC-CH internal tracking.
+## [2.0.0]
+### Changed
+ - Track PhosphorosCore 2.0.0
+ - New tool (EZL) to collect distinct redshift values from a catalog. https://redmine.isdc.unige.ch/issues/30818
+ - GUI refactoring. Simplification of the activations rules obtained bypostponing the grid generation and building 
+   a grid with redshift values taken from the catalog when working at fixed redshift.https://redmine.isdc.unige.ch/issues/30820 
+
+### Fixed
+ - In the Physical Parameter selection popup force the grid to use all the available width.
+
 ## [1.9.0] 2025-02-08
 ### Changed
  - New MW reddening curve (Gordon 2023) with control allowing the user to choose the curve. https://redmine.isdc.unige.ch/issues/30744

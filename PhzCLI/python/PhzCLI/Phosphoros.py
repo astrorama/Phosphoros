@@ -75,7 +75,8 @@ action_list = [
                      'Create SEDs interpolated between existing SEDs.'),
     PhosphorosAction(['extract_pp_pdf', 'EPP'], 'PhosphorosExtractPpPdf',
                      'Extract 1d/2d pp pdf from the sampling of the full pdf.'),
-    
+    PhosphorosAction(['extract_z_list', 'EZL'], 'PhosphorosExtractZList',
+                     'Extract A list of redshift from a catalog file.'),
 ]
 
 def printHelp():
