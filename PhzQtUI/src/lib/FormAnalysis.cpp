@@ -232,6 +232,26 @@ void FormAnalysis::updateSelection() {
       }
     }
   }
+
+  // set the Luminosity filter
+    std::string lum_pp_filter =
+        PreferencesUtils::getUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                                            ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPpFilter");
+    m_is_loading=true;
+    if (lum_pp_filter != "") {
+  	  setPpLumFilter(lum_pp_filter);
+    } else  if (lum_filter != "") {
+    	// use the Lum Filter
+  	  setPpLumFilter(lum_filter);
+    } else {
+      // use first filter with r as default value (TODO update with full name);
+      for (auto& filter_name : m_filter_repository->getContent()) {
+        if (filter_name.datasetName().find("r") != std::string::npos) {
+        	setPpLumFilter(filter_name.qualifiedName());
+          break;
+        }
+      }
+    }
   m_is_loading=false;
 
   if (ui->cb_AnalysisSurvey->currentText() != "" && has_changed_catalog) {
@@ -279,12 +299,16 @@ void FormAnalysis::updateGridSelection() {
     auto lum_filter = ui->lbl_lum_filter->text().toStdString();
     logger.debug() << "Luminosity filter for the Model : " << lum_filter;
 
+
+    auto lum_pp_filter = ui->lbl_lum_pp_filter->text().toStdString();
+    logger.debug() << "PP Luminosity filter for the Model : " << lum_pp_filter;
+
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
     logger.debug()<<"updateGridSelection => Info collected "<< duration << "[ms]";
     start=stop;
 
-    auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(survey_name, axis, getSelectedFilters(), igm, lum_filter, PhotometryGrid);
+    auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(survey_name, axis, getSelectedFilters(), igm, lum_filter, lum_pp_filter, PhotometryGrid);
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
     logger.debug()<<"updateGridSelection => files loaded "<< duration << "[ms]";
@@ -339,7 +363,9 @@ bool FormAnalysis::checkCompatibleModelGrid(std::string file_name) {
 
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
-         ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(),
+         ui->cb_igm->currentText().toStdString(),
+		 ui->lbl_lum_filter->text().toStdString(),
+		 ui->lbl_lum_pp_filter->text().toStdString(),
          GalacticReddeningCorrectionGrid);
     bool valid = (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
     m_cache_compatible_model_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, valid};
@@ -374,7 +400,9 @@ bool FormAnalysis::checkCompatibleGalacticGrid(std::string file_name) {
     logger.debug() << "checkCompatibleGalacticGrid => selected_model content :" << getAxisDescription(axis);
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
-         ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(),
+         ui->cb_igm->currentText().toStdString(),
+		 ui->lbl_lum_filter->text().toStdString(),
+		 ui->lbl_lum_pp_filter->text().toStdString(),
          GalacticReddeningCorrectionGrid);
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
@@ -409,7 +437,10 @@ bool FormAnalysis::checkCompatibleFilterShiftGrid(std::string file_name) {
     logger.debug() << "checkCompatibleFilterShiftGrid => selected_model content :" << getAxisDescription(axis);
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
-         ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(), FilterShiftCorrectionGrid);
+         ui->cb_igm->currentText().toStdString(),
+		 ui->lbl_lum_filter->text().toStdString(),
+		 ui->lbl_lum_pp_filter->text().toStdString(),
+		 FilterShiftCorrectionGrid);
     //  logger.debug()<< "checkCompatibleFilterShiftGrid : there are " << possible_files.size() << " compatible file ";
     bool valid = (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
     m_cache_compatible_shift_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, valid};
@@ -425,7 +456,9 @@ void FormAnalysis::updateGalCorrGridSelection() {
     logger.debug() << "updateGalCorrGridSelection => selected_model content :" << getAxisDescription(axis);
     auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
         m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
-        ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(),
+        ui->cb_igm->currentText().toStdString(),
+		ui->lbl_lum_filter->text().toStdString(),
+		ui->lbl_lum_pp_filter->text().toStdString(),
         GalacticReddeningCorrectionGrid);
 
     ui->cb_CompatibleGalCorrGrid->clear();
@@ -453,7 +486,8 @@ void FormAnalysis::updateFilterShiftGridSelection() {
     logger.debug() << "updateFilterShiftGridSelection => selected_model content :" << getAxisDescription(axis);
     auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
         m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
-        ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(), FilterShiftCorrectionGrid);
+        ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(),
+		ui->lbl_lum_pp_filter->text().toStdString(), FilterShiftCorrectionGrid);
 
     ui->cb_CompatibleShiftGrid->clear();
     bool added = false;
@@ -773,11 +807,30 @@ void FormAnalysis::setLumFilter(std::string new_filter) {
   }
 }
 
+void FormAnalysis::setPpLumFilter(std::string new_filter) {
+  ui->lbl_lum_pp_filter->setText(QString::fromStdString(new_filter));
+
+  PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                                      ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPpFilter",
+                                      new_filter);
+  if (!m_is_loading) {
+	  updateGridSelection();
+  }
+}
+
 // Open the DialogFilterSelector popup for selecting the luminosity filter
 void FormAnalysis::on_btn_lum_filter_clicked() {
   std::unique_ptr<DialogFilterSelector> dialog(new DialogFilterSelector(m_filter_repository));
   dialog->setFilter(ui->lbl_lum_filter->text().toStdString());
   connect(dialog.get(), SIGNAL(popupClosing(std::string)), SLOT(setLumFilter(std::string)));
+  dialog->exec();
+}
+
+// Open the DialogFilterSelector popup for selecting the luminosity filter for PP
+void FormAnalysis::on_btn_lum_pp_filter_clicked() {
+  std::unique_ptr<DialogFilterSelector> dialog(new DialogFilterSelector(m_filter_repository));
+  dialog->setFilter(ui->lbl_lum_pp_filter->text().toStdString());
+  connect(dialog.get(), SIGNAL(popupClosing(std::string)), SLOT(setPpLumFilter(std::string)));
   dialog->exec();
 }
 
@@ -1976,7 +2029,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 
   auto config = PhzGridInfoHandler::GetConfigurationMap(
       ui->cb_AnalysisSurvey->currentText().toStdString(), file_name, selected_model, getFilters(),
-      ui->lbl_lum_filter->text().toStdString(), ui->cb_igm->currentText().toStdString(), zs);
+      ui->lbl_lum_filter->text().toStdString(), ui->lbl_lum_pp_filter->text().toStdString(), ui->cb_igm->currentText().toStdString(), zs);
 
   auto cosmo_conf = PreferencesUtils::getCosmologyConfigurations();
   for (auto& pair : cosmo_conf) {
@@ -1996,6 +2049,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
   std::string grid_name    = ui->cb_CompatibleGrid->currentText().toStdString();
   std::string catalog_type = ui->cb_AnalysisSurvey->currentText().toStdString();
   std::string lum_filter   = ui->lbl_lum_filter->text().toStdString();
+  std::string lum_pp_filter= ui->lbl_lum_pp_filter->text().toStdString();
   std::string igm          = ui->cb_igm->currentText().toStdString();
   std::string mwrc         = ui->cb_MWRC->currentText().toStdString();
 
@@ -2041,6 +2095,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 
   options_map["model-grid-file"].value()         = boost::any(grid_name);
   options_map["normalization-filter"].value()    = boost::any(lum_filter);
+  options_map["normalization-pp-filter"].value() = boost::any(lum_pp_filter);
   std::string sun_sed                            = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
   options_map["normalization-solar-sed"].value() = boost::any(sun_sed);
   options_map["igm-absorption-type"].value()     = boost::any(igm);
@@ -2106,6 +2161,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getF
 
   std::string lum_filter                         = ui->lbl_lum_filter->text().toStdString();
   options_map["normalization-filter"].value()    = boost::any(lum_filter);
+  std::string lum_pp_filter                      = ui->lbl_lum_pp_filter->text().toStdString();
+  options_map["normalization-pp-filter"].value() = boost::any(lum_pp_filter);
   std::string sun_sed                            = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
   options_map["normalization-solar-sed"].value() = boost::any(sun_sed);
   options_map["igm-absorption-type"].value()     = boost::any(igm);
@@ -2598,6 +2655,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   std::string lum_filter                         = ui->lbl_lum_filter->text().toStdString();
   options_map["normalization-filter"].value()    = boost::any(lum_filter);
+  std::string lum_pp_filter                      = ui->lbl_lum_pp_filter->text().toStdString();
+  options_map["normalization-pp-filter"].value() = boost::any(lum_pp_filter);
   std::string sun_sed                            = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
   options_map["normalization-solar-sed"].value() = boost::any(sun_sed);
 
