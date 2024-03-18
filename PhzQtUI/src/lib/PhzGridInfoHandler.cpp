@@ -70,6 +70,14 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
         grid_info.luminosity_filter_name.qualifiedName() <<  ")";
       return false;
     }
+
+    // Check the PP Luminosity filter compatibility
+    if (luminosity_pp_filter != grid_info.luminosity_pp_filter_name.qualifiedName()) {
+ 	   logger.debug() << "Incompatible PP Luminosity filter. (Expected: "<< luminosity_pp_filter << " found " <<
+ 	   grid_info.luminosity_pp_filter_name.qualifiedName() <<  ")";
+	   return false;
+    }
+
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
   	logger.info()<<"IGM and Luminosity filter checked "<< duration << "[ms]";

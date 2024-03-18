@@ -798,6 +798,9 @@ void FormAnalysis::on_rb_scaleZTol_toggled(bool on){
 // Set the luminosity filter on DialogFilterSelector popup closing
 void FormAnalysis::setLumFilter(std::string new_filter) {
   ui->lbl_lum_filter->setText(QString::fromStdString(new_filter));
+  m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
+  m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
+  m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
 
   PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                                       ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityFilter",
@@ -809,6 +812,9 @@ void FormAnalysis::setLumFilter(std::string new_filter) {
 
 void FormAnalysis::setPpLumFilter(std::string new_filter) {
   ui->lbl_lum_pp_filter->setText(QString::fromStdString(new_filter));
+  m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
+  m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
+  m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
 
   PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                                       ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPpFilter",
@@ -1169,7 +1175,7 @@ void FormAnalysis::on_gb_corrections_clicked() {
 void FormAnalysis::on_btn_computeCorrections_clicked() {
  // Build the Model Grid if needed
   std::list<float> zs{};
-   if (!checkGridSelection(true, false)) {
+   if (!checkGridSelection(true, false) || !checkCompatibleModelGrid(ui->cb_CompatibleGrid->currentText().toStdString())) {
 	 if (!BuildModelGrid(zs)) {
 	   return;
 	 }
@@ -3130,7 +3136,7 @@ void FormAnalysis::run_analysis_second_part() {
 
   // Build the Model Grid if needed
 
-    if (!checkGridSelection(true, false)) {
+    if (!checkGridSelection(true, false) || !checkCompatibleModelGrid(ui->cb_CompatibleGrid->currentText().toStdString())) {
  	 if (!BuildModelGrid(zs)) {
  		cleanTempGrids();
  		return;
@@ -3267,6 +3273,8 @@ void FormAnalysis::cleanTempGrids(bool test_files){
 	if (model_grid.rfind("TEMP_", 0) == 0) {
 		std::string new_grid_name = model_grid.substr(5);
 		ui->cb_CompatibleGrid->setItemText(ui->cb_CompatibleGrid->currentIndex(),QString::fromStdString(new_grid_name));
+	} else {
+		return;
 	}
 
 	// check if the files exists
