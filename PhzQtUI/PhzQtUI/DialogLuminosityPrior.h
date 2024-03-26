@@ -186,6 +186,8 @@ private:
 
   void loadGrid();
 
+  void handleDensity(bool in_edition, bool read_only);
+
   bool validateInput(const size_t& current_index);
   void updateInfo(LuminosityPriorConfig& info);
   void updatePriorRow(QModelIndex& index, const size_t& row, const LuminosityPriorConfig& info);
