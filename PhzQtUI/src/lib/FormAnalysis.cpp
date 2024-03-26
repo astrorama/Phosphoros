@@ -273,7 +273,7 @@ void FormAnalysis::updateSelection() {
 
 void FormAnalysis::updateGridSelection() {
   auto start = std::chrono::high_resolution_clock::now();
-  logger.info() << "Entering updateGridSelection";
+  logger.debug() << "Entering updateGridSelection";
   try {
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
@@ -354,6 +354,7 @@ bool FormAnalysis::checkCompatibleModelGrid(std::string file_name) {
                  QDir::separator() + QString::fromStdString(file_name));
 
   if (!info.exists()) {
+	logger.debug() << "checkCompatibleModelGrid: no grid with this name";
 	m_cache_compatible_model_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, false};
     return false;
   } else {
@@ -362,11 +363,16 @@ bool FormAnalysis::checkCompatibleModelGrid(std::string file_name) {
     logger.debug() << "checkCompatibleModelGrid => selected_model content :" << getAxisDescription(axis);
 
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
-         m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
+         m_survey_model_ptr->getSelectedSurvey().getName(),
+		 axis,
+		 getSelectedFilters(),
          ui->cb_igm->currentText().toStdString(),
 		 ui->lbl_lum_filter->text().toStdString(),
 		 ui->lbl_lum_pp_filter->text().toStdString(),
-         GalacticReddeningCorrectionGrid);
+		 PhotometryGrid);
+
+    logger.debug() << "possible_files "<<possible_files.size();
+
     bool valid = (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
     m_cache_compatible_model_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, valid};
     return valid;
@@ -3135,13 +3141,12 @@ void FormAnalysis::run_analysis_second_part() {
   }
 
   // Build the Model Grid if needed
-
-    if (!checkGridSelection(true, false) || !checkCompatibleModelGrid(ui->cb_CompatibleGrid->currentText().toStdString())) {
+  if (!checkGridSelection(true, false) || !checkCompatibleModelGrid(ui->cb_CompatibleGrid->currentText().toStdString())) {
  	 if (!BuildModelGrid(zs)) {
  		cleanTempGrids();
  		return;
  	 }
-    }
+   }
 
    // Build MW correction grid if needed
    bool need_gal_correction       = !ui->rb_gc_off->isChecked();

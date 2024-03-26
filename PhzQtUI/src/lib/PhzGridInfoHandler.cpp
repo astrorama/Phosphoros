@@ -55,7 +55,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
     bia >> grid_info;
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
-  	logger.info()<<"Grid info loaded "<< duration << "[ms]";
+  	logger.debug()<<"Grid info loaded "<< duration << "[ms]";
   	start = stop;
 
     // Check the IGM type compatibility
@@ -80,7 +80,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
 
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
-  	logger.info()<<"IGM and Luminosity filter checked "<< duration << "[ms]";
+  	logger.debug()<<"IGM and Luminosity filter checked "<< duration << "[ms]";
   	start = stop;
 
     // check the filters
@@ -99,7 +99,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
     }
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
-	logger.info()<<"Filter checked "<< duration << "[ms]";
+	logger.debug()<<"Filter checked "<< duration << "[ms]";
 	start = stop;
 
     // check the axis
@@ -209,7 +209,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
 
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
-	logger.info()<<"Axis checked for "<<file_path.toStdString()<<" "<< duration << "[ms]";
+	logger.debug()<<"Axis checked for "<<file_path.toStdString()<<" "<< duration << "[ms]";
 	start = stop;
 
     if (axes.size() != found) {
@@ -217,7 +217,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
 
       return false;
     }
-
+    logger.debug() << "return true.";
     return true;
   } catch (...) {
     logger.warn() << "Wrong format for the grid file " << file_path.toStdString();
