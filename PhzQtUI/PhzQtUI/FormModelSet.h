@@ -59,6 +59,10 @@ private slots:
   void on_btn_conf_z_clicked();
   void on_btn_conf_ebv_clicked();
 
+  void on_rb_ST_Filter_toggled(bool);
+  void on_rb_ST_Fixed_toggled(bool);
+  void on_sb_ST_Fixed_Value_valueChanged(double);
+
   void on_cb_selSpace_currentIndexChanged(const QString&);
 
   void rulesSelectionChanged(QModelIndex, QModelIndex);
@@ -102,6 +106,7 @@ private:
   DatasetRepo                    m_seds_repository;
   DatasetRepo                    m_redenig_curves_repository;
   bool                           m_diconnect_cb = false;
+  bool                           m_updating = false;
 };
 
 }  // namespace PhzQtUI

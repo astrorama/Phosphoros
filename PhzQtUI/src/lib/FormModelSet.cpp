@@ -25,12 +25,24 @@ FormModelSet::FormModelSet(QWidget* parent) : QWidget(parent), ui(new Ui::FormMo
 FormModelSet::~FormModelSet() {}
 
 void FormModelSet::updateSelection() {
-
+  m_updating=true;
   if (m_model_set_model_ptr->getSelectedRow() >= 0) {
     logger.info() << "Update page for parameter space " << m_model_set_model_ptr->getSelectedModelSet().getName();
     // valid selection
     const ModelSet& selected_model = m_model_set_model_ptr->getSelectedModelSet();
     ui->txt_SetName->setText(QString::fromStdString(selected_model.getName()));
+    if (selected_model.isFilter()) {
+    	ui->rb_ST_Filter->setChecked(true);
+    } else {
+    	ui->rb_ST_Fixed->setChecked(true);
+    	ui->sb_ST_Fixed_Value->setValue(selected_model.getNormValue());
+    }
+
+
+    ui->rb_ST_Filter->setEnabled(true);
+    ui->rb_ST_Fixed->setEnabled(true);
+    ui->sb_ST_Fixed_Value->setEnabled(ui->rb_ST_Fixed->isChecked());
+
 
     if (ui->tableView_ParameterRule->selectionModel() != NULL) {
       disconnect(ui->tableView_ParameterRule->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)), 0,
@@ -49,6 +61,11 @@ void FormModelSet::updateSelection() {
   } else {
     // Not a valid selection
 
+
+	ui->rb_ST_Filter->setEnabled(false);
+	ui->rb_ST_Fixed->setEnabled(false);
+	ui->sb_ST_Fixed_Value->setEnabled(false);
+
     ui->txt_SetName->clear();
     if (ui->tableView_ParameterRule->selectionModel() != NULL) {
       disconnect(ui->tableView_ParameterRule->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)), 0,
@@ -60,6 +77,7 @@ void FormModelSet::updateSelection() {
     connect(ui->tableView_ParameterRule->selectionModel(), SIGNAL(currentRowChanged(QModelIndex, QModelIndex)),
             SLOT(rulesSelectionChanged(QModelIndex, QModelIndex)));
   }
+  m_updating = false;
 }
 
 void FormModelSet::redshiftRangePopupClosing(std::vector<Range> ranges, std::set<double> values) {
@@ -95,6 +113,7 @@ void FormModelSet::on_btn_conf_ebv_clicked() {
 
   popUp->exec();
 }
+
 
 void FormModelSet::loadSetPage(std::shared_ptr<ModelSetModel> model_set_model_ptr, DatasetRepo seds_repository,
                                DatasetRepo redenig_curves_repository) {
@@ -135,6 +154,9 @@ void FormModelSet::setModelInEdition() {
   ui->btn_SetDelete->setEnabled(false);
   ui->btn_SetCancel->setEnabled(true);
   ui->btn_SetSave->setEnabled(true);
+  ui->rb_ST_Filter->setEnabled(true);
+  ui->rb_ST_Fixed->setEnabled(true);
+  ui->sb_ST_Fixed_Value->setEnabled(ui->rb_ST_Fixed->isChecked());
   ui->txt_SetName->setEnabled(m_model_set_model_ptr->getSelectedRow() >= 0);
   ui->btn_new_region->setEnabled(m_model_set_model_ptr->getSelectedRow() >= 0);
   ui->btn_open_region->setEnabled(ui->tableView_ParameterRule->hasSelectedPArameterRule());
@@ -238,6 +260,32 @@ void FormModelSet::on_txt_SetName_textEdited(const QString& text) {
   m_model_set_model_ptr->setNameToSelected(text);
 
   setModelInEdition();
+}
+
+
+
+void FormModelSet::on_rb_ST_Filter_toggled(bool on) {
+	if (!m_updating && on){
+	  setModelInEdition();
+	  m_model_set_model_ptr->setIsFilterToSelected(true);
+	  ui->sb_ST_Fixed_Value->setEnabled(false);
+	}
+}
+void FormModelSet::on_rb_ST_Fixed_toggled(bool on) {
+	if (!m_updating && on){
+	  setModelInEdition();
+	  m_model_set_model_ptr->setIsFilterToSelected(false);
+      m_model_set_model_ptr->setNormValueToSelected(ui->sb_ST_Fixed_Value->value());
+	  ui->sb_ST_Fixed_Value->setEnabled(true);
+	}
+}
+
+
+void FormModelSet::on_sb_ST_Fixed_Value_valueChanged(double val){
+	if (!m_updating) {
+	  setModelInEdition();
+      m_model_set_model_ptr->setNormValueToSelected(val);
+	}
 }
 
 void FormModelSet::on_btn_SetSave_clicked() {

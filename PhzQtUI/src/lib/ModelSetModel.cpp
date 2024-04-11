@@ -126,6 +126,8 @@ void ModelSetModel::newModelSet(bool duplicate_from_selected) {
     text_1 = QString::fromStdString(getDuplicateName(m_edited_modelSet.getName()));
     text_2 = QString::number(m_edited_modelSet.getModelNumber(false));
     model_set.setParameterRules(m_edited_modelSet.getParameterRules());
+    model_set.setIsFilter(m_edited_modelSet.isFilter());
+    model_set.setNormValue(m_edited_modelSet.getNormValue());
 
     model_set.setZRange(m_edited_modelSet.getZRanges());
     model_set.setZValues(m_edited_modelSet.getZValues());
@@ -202,6 +204,16 @@ const std::vector<QString> ModelSetModel::getModelSetList() const {
 
 void ModelSetModel::setNameToSelected(const QString& value) {
   m_edited_modelSet.setName(value.toStdString());
+  m_in_edition = true;
+}
+
+void ModelSetModel::setIsFilterToSelected(bool value) {
+  m_edited_modelSet.setIsFilter(value);
+  m_in_edition = true;
+}
+
+void ModelSetModel::setNormValueToSelected(double value) {
+  m_edited_modelSet.setNormValue(value);
   m_in_edition = true;
 }
 
