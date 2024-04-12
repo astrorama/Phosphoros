@@ -13,6 +13,7 @@ Note: the issue number refer to SDC-CH internal tracking.
 
 ### Fixed
  - Bug causing the GUI to ask for grid destruction after each run, not only fixed redshift. https://redmine.isdc.unige.ch/issues/31012
+ - Bug causing the GUI to lose the parameter space selection. https://redmine.isdc.unige.ch/issues/31081
 
 ## [2.0.0] 2024-03-13
 ### Changed
