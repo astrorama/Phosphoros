@@ -29,7 +29,18 @@ void FormModelSet::updateSelection() {
   if (m_model_set_model_ptr->getSelectedRow() >= 0) {
     logger.info() << "Update page for parameter space " << m_model_set_model_ptr->getSelectedModelSet().getName();
     // valid selection
+
     const ModelSet& selected_model = m_model_set_model_ptr->getSelectedModelSet();
+
+
+    if (QString::fromStdString(selected_model.getName())!= ui->cb_selSpace->currentText()){
+    	logger.info() << "Update the combobox from " << ui->cb_selSpace->currentText().toStdString() << " to " << selected_model.getName() ;
+    	m_diconnect_cb = true;
+    	int index = ui->cb_selSpace->findText(QString::fromStdString(selected_model.getName()));
+    	ui->cb_selSpace->setCurrentIndex(index);
+    	m_diconnect_cb = false;
+    }
+
     ui->txt_SetName->setText(QString::fromStdString(selected_model.getName()));
     if (selected_model.isFilter()) {
     	ui->rb_ST_Filter->setChecked(true);
@@ -123,10 +134,10 @@ void FormModelSet::loadSetPage(std::shared_ptr<ModelSetModel> model_set_model_pt
   m_seds_repository           = seds_repository;
   m_redenig_curves_repository = redenig_curves_repository;
 
+  m_diconnect_cb = true;
   ui->cb_selSpace->clear();
   auto current_selection = m_model_set_model_ptr->getSelectedModelSet().getName();
   int  index             = 0;
-  m_diconnect_cb = true;
   for (auto& model_name : m_model_set_model_ptr->getModelSetList()) {
     ui->cb_selSpace->addItem(model_name);
     if (current_selection == model_name.toStdString()) {
@@ -263,7 +274,6 @@ void FormModelSet::on_txt_SetName_textEdited(const QString& text) {
 }
 
 
-
 void FormModelSet::on_rb_ST_Filter_toggled(bool on) {
 	if (!m_updating && on){
 	  setModelInEdition();
@@ -271,6 +281,7 @@ void FormModelSet::on_rb_ST_Filter_toggled(bool on) {
 	  ui->sb_ST_Fixed_Value->setEnabled(false);
 	}
 }
+
 void FormModelSet::on_rb_ST_Fixed_toggled(bool on) {
 	if (!m_updating && on){
 	  setModelInEdition();
