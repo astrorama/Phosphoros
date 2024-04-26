@@ -6,12 +6,21 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Note: the issue number refer to SDC-CH internal tracking.
+## [2.0.1] Not released
+### Changed
+ - Add another luminosity filter so we can have different normalization for the Lum prior and the PP computation. https://redmine.isdc.unige.ch/issues/31007
+ - Add external SED normalization. https://redmine.isdc.unige.ch/issues/31069
+
+### Fixed
+ - Bug causing the GUI to ask for grid destruction after each run, not only fixed redshift. https://redmine.isdc.unige.ch/issues/31012
+ - Bug causing the GUI to lose the parameter space selection. https://redmine.isdc.unige.ch/issues/31081
+
 ## [2.0.0] 2024-03-13
 ### Changed
  - Track PhosphorosCore 2.0.0
  - New tool (EZL) to collect distinct redshift values from a catalog. https://redmine.isdc.unige.ch/issues/30818
  - GUI refactoring. Simplification of the activations rules obtained by postponing the grid generation and building 
-   a grid with redshift values taken from the catalog when working at fixed redshift.https://redmine.isdc.unige.ch/issues/30820 
+   a grid with redshift values taken from the catalog when working at fixed redshift. https://redmine.isdc.unige.ch/issues/30820 
 
 ### Fixed
  - In the Physical Parameter selection popup force the grid to use all the available width.

@@ -25,8 +25,10 @@ class PhzGridInfoHandler {
 public:
   static bool checkGridFileCompatibility(QString                                                    file_path,
                                          const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes,
-                                         const std::list<std::string>& selected_filters, const std::string igm_type,
-                                         const std::string luminosity_filter);
+                                         const std::list<std::string>& selected_filters,
+										 const std::string igm_type,
+                                         const std::string luminosity_filter,
+                                         const std::string luminosity_pp_filter);
 
   /**
    * @brief Get the name of the file containing a grid with the same axes and
@@ -41,7 +43,9 @@ public:
   static std::list<std::string> getCompatibleGridFile(std::string catalog,
                                                       const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes,
                                                       const std::list<std::string>& selected_filters,
-                                                      std::string igm_type, const std::string luminosity_filter,
+                                                      std::string igm_type,
+													  const std::string luminosity_filter,
+													  const std::string luminosity_pp_filter,
                                                       GridType grid_type = PhotometryGrid);
 
   /**
@@ -57,7 +61,9 @@ public:
    */
   static std::map<std::string, boost::program_options::variable_value>
   GetConfigurationMap(std::string catalog, std::string output_file, ModelSet model,
-                      const std::list<std::string>& selected_filters, std::string luminosity_filter,
+                      const std::list<std::string>& selected_filters,
+					  std::string luminosity_filter,
+					  std::string luminosity_pp_filter,
                       std::string igm_type, const std::list<float>& zs);
 };
 

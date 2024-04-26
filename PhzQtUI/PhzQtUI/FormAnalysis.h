@@ -95,6 +95,8 @@ private slots:
 
   void on_btn_lum_filter_clicked();
 
+  void on_btn_lum_pp_filter_clicked();
+
   void on_cb_AnalysisModel_currentIndexChanged(const QString&);
 
   void on_cb_igm_currentIndexChanged(const QString&);
@@ -154,6 +156,7 @@ private slots:
 
   void setNzFilters(std::string b_filter, std::string i_filter);
   void setLumFilter(std::string new_filter);
+  void setPpLumFilter(std::string new_filter);
 
   void on_rb_best_scaling_toggled(bool);
   void on_rb_sample_scaling_toggled(bool);

@@ -52,7 +52,7 @@ public:
    * @param config The configuration of the engine which is in charge of
    * computing the grid.
    */
-  void setValues(std::string grid_name, const std::map<std::string, boost::program_options::variable_value>& config);
+  void setValues(std::string grid_name, const std::map<std::string, boost::program_options::variable_value>& config, double pp_norm);
 
 private slots:
 
@@ -88,6 +88,7 @@ private:
   std::map<std::string, boost::program_options::variable_value> m_config;
   std::unique_ptr<Ui::DialogFilterShiftGridGeneration>          ui;
   std::unique_ptr<QTimer>                                       m_timer;
+  double                                                        m_pp_norm;
 };
 
 }  // namespace PhzQtUI

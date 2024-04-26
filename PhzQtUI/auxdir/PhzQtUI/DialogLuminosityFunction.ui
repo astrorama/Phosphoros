@@ -358,7 +358,7 @@
         <item>
          <widget class="QLabel" name="lb_curve">
           <property name="text">
-           <string>TextLabel</string>
+           <string>Choose a curve</string>
           </property>
          </widget>
         </item>

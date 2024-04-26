@@ -232,6 +232,26 @@ void FormAnalysis::updateSelection() {
       }
     }
   }
+
+  // set the Luminosity filter
+    std::string lum_pp_filter =
+        PreferencesUtils::getUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                                            ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPpFilter");
+    m_is_loading=true;
+    if (lum_pp_filter != "") {
+  	  setPpLumFilter(lum_pp_filter);
+    } else  if (lum_filter != "") {
+    	// use the Lum Filter
+  	  setPpLumFilter(lum_filter);
+    } else {
+      // use first filter with r as default value (TODO update with full name);
+      for (auto& filter_name : m_filter_repository->getContent()) {
+        if (filter_name.datasetName().find("r") != std::string::npos) {
+        	setPpLumFilter(filter_name.qualifiedName());
+          break;
+        }
+      }
+    }
   m_is_loading=false;
 
   if (ui->cb_AnalysisSurvey->currentText() != "" && has_changed_catalog) {
@@ -253,7 +273,7 @@ void FormAnalysis::updateSelection() {
 
 void FormAnalysis::updateGridSelection() {
   auto start = std::chrono::high_resolution_clock::now();
-  logger.info() << "Entering updateGridSelection";
+  logger.debug() << "Entering updateGridSelection";
   try {
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
@@ -279,12 +299,16 @@ void FormAnalysis::updateGridSelection() {
     auto lum_filter = ui->lbl_lum_filter->text().toStdString();
     logger.debug() << "Luminosity filter for the Model : " << lum_filter;
 
+
+    auto lum_pp_filter = ui->lbl_lum_pp_filter->text().toStdString();
+    logger.debug() << "PP Luminosity filter for the Model : " << lum_pp_filter;
+
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
     logger.debug()<<"updateGridSelection => Info collected "<< duration << "[ms]";
     start=stop;
 
-    auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(survey_name, axis, getSelectedFilters(), igm, lum_filter, PhotometryGrid);
+    auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(survey_name, axis, getSelectedFilters(), igm, lum_filter, lum_pp_filter, PhotometryGrid);
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
     logger.debug()<<"updateGridSelection => files loaded "<< duration << "[ms]";
@@ -330,6 +354,7 @@ bool FormAnalysis::checkCompatibleModelGrid(std::string file_name) {
                  QDir::separator() + QString::fromStdString(file_name));
 
   if (!info.exists()) {
+	logger.debug() << "checkCompatibleModelGrid: no grid with this name";
 	m_cache_compatible_model_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, false};
     return false;
   } else {
@@ -338,9 +363,16 @@ bool FormAnalysis::checkCompatibleModelGrid(std::string file_name) {
     logger.debug() << "checkCompatibleModelGrid => selected_model content :" << getAxisDescription(axis);
 
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
-         m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
-         ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(),
-         GalacticReddeningCorrectionGrid);
+         m_survey_model_ptr->getSelectedSurvey().getName(),
+		 axis,
+		 getSelectedFilters(),
+         ui->cb_igm->currentText().toStdString(),
+		 ui->lbl_lum_filter->text().toStdString(),
+		 ui->lbl_lum_pp_filter->text().toStdString(),
+		 PhotometryGrid);
+
+    logger.debug() << "possible_files "<<possible_files.size();
+
     bool valid = (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
     m_cache_compatible_model_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, valid};
     return valid;
@@ -374,7 +406,9 @@ bool FormAnalysis::checkCompatibleGalacticGrid(std::string file_name) {
     logger.debug() << "checkCompatibleGalacticGrid => selected_model content :" << getAxisDescription(axis);
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
-         ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(),
+         ui->cb_igm->currentText().toStdString(),
+		 ui->lbl_lum_filter->text().toStdString(),
+		 ui->lbl_lum_pp_filter->text().toStdString(),
          GalacticReddeningCorrectionGrid);
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
@@ -409,7 +443,10 @@ bool FormAnalysis::checkCompatibleFilterShiftGrid(std::string file_name) {
     logger.debug() << "checkCompatibleFilterShiftGrid => selected_model content :" << getAxisDescription(axis);
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
-         ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(), FilterShiftCorrectionGrid);
+         ui->cb_igm->currentText().toStdString(),
+		 ui->lbl_lum_filter->text().toStdString(),
+		 ui->lbl_lum_pp_filter->text().toStdString(),
+		 FilterShiftCorrectionGrid);
     //  logger.debug()<< "checkCompatibleFilterShiftGrid : there are " << possible_files.size() << " compatible file ";
     bool valid = (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
     m_cache_compatible_shift_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, valid};
@@ -425,7 +462,9 @@ void FormAnalysis::updateGalCorrGridSelection() {
     logger.debug() << "updateGalCorrGridSelection => selected_model content :" << getAxisDescription(axis);
     auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
         m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
-        ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(),
+        ui->cb_igm->currentText().toStdString(),
+		ui->lbl_lum_filter->text().toStdString(),
+		ui->lbl_lum_pp_filter->text().toStdString(),
         GalacticReddeningCorrectionGrid);
 
     ui->cb_CompatibleGalCorrGrid->clear();
@@ -453,7 +492,8 @@ void FormAnalysis::updateFilterShiftGridSelection() {
     logger.debug() << "updateFilterShiftGridSelection => selected_model content :" << getAxisDescription(axis);
     auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
         m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
-        ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(), FilterShiftCorrectionGrid);
+        ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(),
+		ui->lbl_lum_pp_filter->text().toStdString(), FilterShiftCorrectionGrid);
 
     ui->cb_CompatibleShiftGrid->clear();
     bool added = false;
@@ -764,9 +804,26 @@ void FormAnalysis::on_rb_scaleZTol_toggled(bool on){
 // Set the luminosity filter on DialogFilterSelector popup closing
 void FormAnalysis::setLumFilter(std::string new_filter) {
   ui->lbl_lum_filter->setText(QString::fromStdString(new_filter));
+  m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
+  m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
+  m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
 
   PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                                       ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityFilter",
+                                      new_filter);
+  if (!m_is_loading) {
+	  updateGridSelection();
+  }
+}
+
+void FormAnalysis::setPpLumFilter(std::string new_filter) {
+  ui->lbl_lum_pp_filter->setText(QString::fromStdString(new_filter));
+  m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
+  m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
+  m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
+
+  PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
+                                      ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPpFilter",
                                       new_filter);
   if (!m_is_loading) {
 	  updateGridSelection();
@@ -778,6 +835,14 @@ void FormAnalysis::on_btn_lum_filter_clicked() {
   std::unique_ptr<DialogFilterSelector> dialog(new DialogFilterSelector(m_filter_repository));
   dialog->setFilter(ui->lbl_lum_filter->text().toStdString());
   connect(dialog.get(), SIGNAL(popupClosing(std::string)), SLOT(setLumFilter(std::string)));
+  dialog->exec();
+}
+
+// Open the DialogFilterSelector popup for selecting the luminosity filter for PP
+void FormAnalysis::on_btn_lum_pp_filter_clicked() {
+  std::unique_ptr<DialogFilterSelector> dialog(new DialogFilterSelector(m_filter_repository));
+  dialog->setFilter(ui->lbl_lum_pp_filter->text().toStdString());
+  connect(dialog.get(), SIGNAL(popupClosing(std::string)), SLOT(setPpLumFilter(std::string)));
   dialog->exec();
 }
 
@@ -1116,7 +1181,7 @@ void FormAnalysis::on_gb_corrections_clicked() {
 void FormAnalysis::on_btn_computeCorrections_clicked() {
  // Build the Model Grid if needed
   std::list<float> zs{};
-   if (!checkGridSelection(true, false)) {
+   if (!checkGridSelection(true, false) || !checkCompatibleModelGrid(ui->cb_CompatibleGrid->currentText().toStdString())) {
 	 if (!BuildModelGrid(zs)) {
 	   return;
 	 }
@@ -1761,7 +1826,8 @@ bool FormAnalysis::BuildModelGrid(const std::list<float>& zs){
 
 	    auto                                  config_map = getGridConfiguration(zs);
 	    std::unique_ptr<DialogGridGeneration> dialog(new DialogGridGeneration());
-	    dialog->setValues(FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(), ".txt"), config_map);
+	    dialog->setValues(FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(), ".txt"), config_map,
+	    m_model_set_model_ptr->getSelectedModelSet().getNormValue());
 	    if (dialog->exec()) {
 	      m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
 	      m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
@@ -1798,7 +1864,7 @@ bool FormAnalysis::BuildMwCorrGrid(){
 		if (config_map.size() > 0) {
 			std::unique_ptr<DialogGalCorrGridGeneration> dialog(new DialogGalCorrGridGeneration());
 			dialog->setValues(FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ".txt"),
-			config_map);
+			config_map, m_model_set_model_ptr->getSelectedModelSet().getNormValue());
 			if (dialog->exec()) {
 				m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
 				m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
@@ -1835,7 +1901,7 @@ bool FormAnalysis::BuildFilterShiftGrid(){
 		if (config_map.size() > 0) {
 
 		  std::unique_ptr<DialogFilterShiftGridGeneration> dialog(new DialogFilterShiftGridGeneration());
-		  dialog->setValues(FileUtils::addExt(ui->cb_CompatibleShiftGrid->currentText().toStdString(), ".txt"), config_map);
+		  dialog->setValues(FileUtils::addExt(ui->cb_CompatibleShiftGrid->currentText().toStdString(), ".txt"), config_map, m_model_set_model_ptr->getSelectedModelSet().getNormValue());
 		  if (dialog->exec()) {
 		      m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
 			  m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
@@ -1976,7 +2042,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 
   auto config = PhzGridInfoHandler::GetConfigurationMap(
       ui->cb_AnalysisSurvey->currentText().toStdString(), file_name, selected_model, getFilters(),
-      ui->lbl_lum_filter->text().toStdString(), ui->cb_igm->currentText().toStdString(), zs);
+      ui->lbl_lum_filter->text().toStdString(), ui->lbl_lum_pp_filter->text().toStdString(), ui->cb_igm->currentText().toStdString(), zs);
 
   auto cosmo_conf = PreferencesUtils::getCosmologyConfigurations();
   for (auto& pair : cosmo_conf) {
@@ -1996,6 +2062,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
   std::string grid_name    = ui->cb_CompatibleGrid->currentText().toStdString();
   std::string catalog_type = ui->cb_AnalysisSurvey->currentText().toStdString();
   std::string lum_filter   = ui->lbl_lum_filter->text().toStdString();
+  std::string lum_pp_filter= ui->lbl_lum_pp_filter->text().toStdString();
   std::string igm          = ui->cb_igm->currentText().toStdString();
   std::string mwrc         = ui->cb_MWRC->currentText().toStdString();
 
@@ -2041,6 +2108,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 
   options_map["model-grid-file"].value()         = boost::any(grid_name);
   options_map["normalization-filter"].value()    = boost::any(lum_filter);
+  options_map["normalization-pp-filter"].value() = boost::any(lum_pp_filter);
   std::string sun_sed                            = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
   options_map["normalization-solar-sed"].value() = boost::any(sun_sed);
   options_map["igm-absorption-type"].value()     = boost::any(igm);
@@ -2106,6 +2174,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getF
 
   std::string lum_filter                         = ui->lbl_lum_filter->text().toStdString();
   options_map["normalization-filter"].value()    = boost::any(lum_filter);
+  std::string lum_pp_filter                      = ui->lbl_lum_pp_filter->text().toStdString();
+  options_map["normalization-pp-filter"].value() = boost::any(lum_pp_filter);
   std::string sun_sed                            = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
   options_map["normalization-solar-sed"].value() = boost::any(sun_sed);
   options_map["igm-absorption-type"].value()     = boost::any(igm);
@@ -2598,6 +2668,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   std::string lum_filter                         = ui->lbl_lum_filter->text().toStdString();
   options_map["normalization-filter"].value()    = boost::any(lum_filter);
+  std::string lum_pp_filter                      = ui->lbl_lum_pp_filter->text().toStdString();
+  options_map["normalization-pp-filter"].value() = boost::any(lum_pp_filter);
   std::string sun_sed                            = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
   options_map["normalization-solar-sed"].value() = boost::any(sun_sed);
 
@@ -3070,13 +3142,12 @@ void FormAnalysis::run_analysis_second_part() {
   }
 
   // Build the Model Grid if needed
-
-    if (!checkGridSelection(true, false)) {
+  if (!checkGridSelection(true, false) || !checkCompatibleModelGrid(ui->cb_CompatibleGrid->currentText().toStdString())) {
  	 if (!BuildModelGrid(zs)) {
  		cleanTempGrids();
  		return;
  	 }
-    }
+   }
 
    // Build MW correction grid if needed
    bool need_gal_correction       = !ui->rb_gc_off->isChecked();
@@ -3208,6 +3279,8 @@ void FormAnalysis::cleanTempGrids(bool test_files){
 	if (model_grid.rfind("TEMP_", 0) == 0) {
 		std::string new_grid_name = model_grid.substr(5);
 		ui->cb_CompatibleGrid->setItemText(ui->cb_CompatibleGrid->currentIndex(),QString::fromStdString(new_grid_name));
+	} else {
+		return;
 	}
 
 	// check if the files exists

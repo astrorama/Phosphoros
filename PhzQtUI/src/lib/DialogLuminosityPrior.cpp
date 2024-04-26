@@ -82,9 +82,11 @@ void DialogLuminosityPrior::priorSelectionChanged(QModelIndex new_index, QModelI
 
   // Update the UI by setting the value for the selected prior
   auto config = m_prior_configs.at(name);
+  dialog_logger.info()<<"Config "<<config.getDensity();
   ui->txt_name->setText(QString::fromStdString(config.getName()));
 
   ui->cb_unit->setCurrentIndex(0);
+  ui->cb_ft->setCurrentIndex(0);
 
   clearGrid();
   m_groups          = config.getSedGRoups();
@@ -95,6 +97,13 @@ void DialogLuminosityPrior::priorSelectionChanged(QModelIndex new_index, QModelI
   if (!config.getInMag()) {
     ui->cb_unit->setCurrentIndex(1);
   }
+
+  if (!config.getDensity()) {
+      ui->cb_ft->setCurrentIndex(1);
+  } else {
+      ui->cb_ft->setCurrentIndex(0);
+  }
+
   manageBtnEnability(false, false, true);
 }
 
@@ -203,6 +212,7 @@ void DialogLuminosityPrior::on_btn_delete_clicked() {
   } else {  //  or Clear the controls from the current information
     ui->txt_name->setText("");
     ui->cb_unit->setCurrentIndex(0);
+    ui->cb_ft->setCurrentIndex(0);
   }
 
   // end edition in the controls
@@ -236,6 +246,9 @@ void DialogLuminosityPrior::on_btn_save_clicked() {
   updateInfo(info);
 
   updatePriorRow(row_index, row, info);
+
+  info.setDensity(ui->cb_ft->currentIndex()==0);
+
 
   m_prior_configs.erase(name);
 
@@ -347,6 +360,8 @@ void DialogLuminosityPrior::groupPopupClosing(std::vector<LuminosityPriorConfig:
 
   clearGrid();
   loadGrid();
+
+  handleDensity(true, false);
 }
 
 void DialogLuminosityPrior::on_btn_z_clicked() {
@@ -391,6 +406,8 @@ void DialogLuminosityPrior::zPopupClosing(std::vector<double> zs) {
 
   clearGrid();
   loadGrid();
+
+  handleDensity(true, false);
 }
 
 void DialogLuminosityPrior::onGridButtonClicked(size_t x, size_t y) {
@@ -402,6 +419,7 @@ void DialogLuminosityPrior::onGridButtonClicked(size_t x, size_t y) {
 }
 
 void DialogLuminosityPrior::luminosityFunctionPopupClosing(LuminosityFunctionInfo info, size_t x, size_t y) {
+
   m_luminosityInfos[x][y] = info;
 
   auto layoutItem = ui->gl_Luminosity->itemAtPosition(y + 1, x + 1);
@@ -413,6 +431,11 @@ void DialogLuminosityPrior::luminosityFunctionPopupClosing(LuminosityFunctionInf
     layoutItem->widget()->setStyleSheet("background-color: red ");
     static_cast<GridButton*>(layoutItem->widget()->children()[1])->setText("To be defined");
   }
+
+
+  handleDensity(true, false);
+
+
 }
 
 void DialogLuminosityPrior::on_btn_close_clicked() {
@@ -434,6 +457,7 @@ void DialogLuminosityPrior::manageBtnEnability(bool in_edition, bool read_only, 
   ui->table_priors->setEnabled(!read_only && !in_edition);
   ui->txt_name->setEnabled(!read_only && in_edition);
   ui->cb_unit->setEnabled(!read_only && in_edition);
+  handleDensity(in_edition, read_only);
   ui->btn_group->setEnabled(!read_only && in_edition);
   ui->btn_z->setEnabled(!read_only && in_edition);
 
@@ -442,6 +466,26 @@ void DialogLuminosityPrior::manageBtnEnability(bool in_edition, bool read_only, 
   for (auto button : m_grid_buttons) {
     button->setEnabled(in_edition);
   }
+}
+
+
+void DialogLuminosityPrior::handleDensity(bool in_edition, bool read_only) {
+    QItemSelectionModel* select    = ui->table_priors->selectionModel();
+	if (select->hasSelection()) {
+		ui->cb_ft->setEnabled(!read_only && in_edition);
+		for (auto& info_row : m_luminosityInfos) {
+			for (auto&  info : info_row) {
+				if (not info.is_custom) {
+					ui->cb_ft->setCurrentIndex(0);
+					ui->cb_ft->setEnabled(false);
+				}
+			}
+		}
+	} else {
+		ui->cb_ft->setEnabled(false);
+
+	}
+
 }
 
 void DialogLuminosityPrior::manageBtnEnability(bool in_edition, bool read_only) {
@@ -682,6 +726,8 @@ void DialogLuminosityPrior::luminosityFunctionsPopupClosing(std::vector<std::vec
   m_luminosityInfos = infos;
   clearGrid();
   loadGrid();
+
+  handleDensity(true, false);
 }
 
 }  // namespace PhzQtUI

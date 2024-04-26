@@ -39,7 +39,9 @@ static Elements::Logging logger = Elements::Logging::getLogger("PhzGridInfoHandl
 bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
                                                     const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes,
                                                     const std::list<std::string>& selected_filters,
-                                                    const std::string igm_type, const std::string luminosity_filter) {
+                                                    const std::string igm_type,
+													const std::string luminosity_filter,
+													const std::string luminosity_pp_filter) {
   logger.debug()<<"Checking compatibility for grid in file "<< file_path.toStdString();
   auto start = std::chrono::high_resolution_clock::now();
   try {  // If a file cannot be opened or is ill formated: just skip it!
@@ -53,7 +55,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
     bia >> grid_info;
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
-  	logger.info()<<"Grid info loaded "<< duration << "[ms]";
+  	logger.debug()<<"Grid info loaded "<< duration << "[ms]";
   	start = stop;
 
     // Check the IGM type compatibility
@@ -68,9 +70,17 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
         grid_info.luminosity_filter_name.qualifiedName() <<  ")";
       return false;
     }
+
+    // Check the PP Luminosity filter compatibility
+    if (luminosity_pp_filter != grid_info.luminosity_pp_filter_name.qualifiedName()) {
+ 	   logger.debug() << "Incompatible PP Luminosity filter. (Expected: "<< luminosity_pp_filter << " found " <<
+ 	   grid_info.luminosity_pp_filter_name.qualifiedName() <<  ")";
+	   return false;
+    }
+
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
-  	logger.info()<<"IGM and Luminosity filter checked "<< duration << "[ms]";
+  	logger.debug()<<"IGM and Luminosity filter checked "<< duration << "[ms]";
   	start = stop;
 
     // check the filters
@@ -89,7 +99,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
     }
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
-	logger.info()<<"Filter checked "<< duration << "[ms]";
+	logger.debug()<<"Filter checked "<< duration << "[ms]";
 	start = stop;
 
     // check the axis
@@ -199,7 +209,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
 
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
-	logger.info()<<"Axis checked for "<<file_path.toStdString()<<" "<< duration << "[ms]";
+	logger.debug()<<"Axis checked for "<<file_path.toStdString()<<" "<< duration << "[ms]";
 	start = stop;
 
     if (axes.size() != found) {
@@ -207,7 +217,7 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
 
       return false;
     }
-
+    logger.debug() << "return true.";
     return true;
   } catch (...) {
     logger.warn() << "Wrong format for the grid file " << file_path.toStdString();
@@ -221,6 +231,7 @@ PhzGridInfoHandler::getCompatibleGridFile(std::string                           
                                           const std::list<std::string>& selected_filters, 
                                           std::string igm_type,
                                           const std::string luminosity_filter, 
+                                          const std::string luminosity_pp_filter,
                                           GridType grid_type) {
   auto start = std::chrono::high_resolution_clock::now();
   std::string rootPath = FileUtils::getPhotmetricGridRootPath(true, catalog);
@@ -242,7 +253,7 @@ PhzGridInfoHandler::getCompatibleGridFile(std::string                           
     foreach (const QString& fileName, fileNames) {
       auto file_path = root_qdir.absoluteFilePath(fileName);
       logger.debug() << "Checking parameter compatibility for file :" << file_path.toStdString();
-      if (checkGridFileCompatibility(file_path, axes, selected_filters, igm_type, luminosity_filter)) {
+      if (checkGridFileCompatibility(file_path, axes, selected_filters, igm_type, luminosity_filter, luminosity_pp_filter)) {
         logger.debug() << "File accepted :" << file_path.toStdString();
         list.push_back(fileName.toStdString());
       }
@@ -258,7 +269,9 @@ PhzGridInfoHandler::getCompatibleGridFile(std::string                           
 
 std::map<std::string, boost::program_options::variable_value>
 PhzGridInfoHandler::GetConfigurationMap(std::string catalog, std::string output_file, ModelSet model,
-                                        const std::list<std::string>& selected_filters, std::string luminosity_filter,
+                                        const std::list<std::string>& selected_filters,
+										std::string luminosity_filter,
+										std::string luminosity_pp_filter,
                                         std::string igm_type, const std::list<float>& zs) {
 
   std::map<std::string, boost::program_options::variable_value> options_map =
@@ -275,6 +288,7 @@ PhzGridInfoHandler::GetConfigurationMap(std::string catalog, std::string output_
   }
 
   options_map["normalization-filter"].value()    = boost::any(luminosity_filter);
+  options_map["normalization-pp-filter"].value()    = boost::any(luminosity_pp_filter);
   std::string sun_sed                            = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
   options_map["normalization-solar-sed"].value() = boost::any(sun_sed);
   options_map["catalog-type"].value()            = boost::any(catalog);

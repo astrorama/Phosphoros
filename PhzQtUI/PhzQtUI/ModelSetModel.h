@@ -64,6 +64,8 @@ public:
 
 public slots:
   void setNameToSelected(const QString& value);
+  void setIsFilterToSelected(bool value);
+  void setNormValueToSelected(double value);
   void setGlobalRedshiftRangeToSelected(const std::vector<Range>& ranges, const std::set<double>& values);
   void setGlobalEbvRangeToSelected(const std::vector<Range>& ranges, const std::set<double>& values);
   void setParameterRulesToSelected(const std::map<int, ParameterRule>& value);

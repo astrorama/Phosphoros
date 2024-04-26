@@ -69,6 +69,12 @@ public:
    */
   void setName(std::string name);
 
+  bool isFilter() const;
+  void setIsFilter(bool new_is_filter);
+
+  double getNormValue() const;
+  void setNormValue(double new_value);
+
   /**
    * @brief set the Z ranges.
    * @param the Z ranges.
@@ -189,6 +195,8 @@ private:
   std::string                  m_name;
   std::map<int, ParameterRule> m_parameter_rules{};
   std::string                  m_root_path;
+  bool						   m_is_filter;
+  double                       m_norm_value;
   std::vector<Range>           m_z_ranges{};
   std::set<double>             m_z_values{};
   std::vector<Range>           m_ebv_ranges{};

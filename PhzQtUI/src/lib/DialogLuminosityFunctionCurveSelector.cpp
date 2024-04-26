@@ -28,6 +28,7 @@ void DialogLuminosityFunctionCurveSelector::setCurve(std::string curve_name) {
   treeModel_curve->setEnabled(true);
   ui->treeView_filter->setModel(treeModel_curve);
   ui->treeView_filter->expandAll();
+  ui->treeView_filter->resizeColumnToContents(0);
 
   connect(treeModel_curve, SIGNAL(itemChanged(QStandardItem*)), treeModel_curve,
           SLOT(onItemChangedSingleLeaf(QStandardItem*)));
