@@ -83,9 +83,10 @@ DialogGalCorrGridGeneration::DialogGalCorrGridGeneration(QWidget* parent)
 DialogGalCorrGridGeneration::~DialogGalCorrGridGeneration() {}
 
 void DialogGalCorrGridGeneration::setValues(
-    std::string grid_name, const std::map<std::string, boost::program_options::variable_value>& config) {
+    std::string grid_name, const std::map<std::string, boost::program_options::variable_value>& config, double pp_norm) {
   ui->label_name->setText(QString::fromStdString(grid_name));
   m_config = config;
+  m_pp_norm = pp_norm;
 }
 
 std::string DialogGalCorrGridGeneration::runFunction() {
@@ -142,7 +143,7 @@ std::string DialogGalCorrGridGeneration::runFunction() {
     };
 
     PhzGalacticCorrection::GalacticCorrectionSingleGridCreator grid_creator{
-        sed_provider, reddening_provider, filter_provider, igm_abs_func, normalizer_functor, normalizer_pp_functor, miky_way_reddening_curve};
+        sed_provider, reddening_provider, filter_provider, igm_abs_func, normalizer_functor, normalizer_pp_functor, m_pp_norm, miky_way_reddening_curve};
     size_t already_done = 0;
 
     for (auto& grid_pair : model_phot_grid.region_axes_map) {

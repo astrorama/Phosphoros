@@ -1826,7 +1826,8 @@ bool FormAnalysis::BuildModelGrid(const std::list<float>& zs){
 
 	    auto                                  config_map = getGridConfiguration(zs);
 	    std::unique_ptr<DialogGridGeneration> dialog(new DialogGridGeneration());
-	    dialog->setValues(FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(), ".txt"), config_map);
+	    dialog->setValues(FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(), ".txt"), config_map,
+	    m_model_set_model_ptr->getSelectedModelSet().getNormValue());
 	    if (dialog->exec()) {
 	      m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
 	      m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
@@ -1863,7 +1864,7 @@ bool FormAnalysis::BuildMwCorrGrid(){
 		if (config_map.size() > 0) {
 			std::unique_ptr<DialogGalCorrGridGeneration> dialog(new DialogGalCorrGridGeneration());
 			dialog->setValues(FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ".txt"),
-			config_map);
+			config_map, m_model_set_model_ptr->getSelectedModelSet().getNormValue());
 			if (dialog->exec()) {
 				m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
 				m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
@@ -1900,7 +1901,7 @@ bool FormAnalysis::BuildFilterShiftGrid(){
 		if (config_map.size() > 0) {
 
 		  std::unique_ptr<DialogFilterShiftGridGeneration> dialog(new DialogFilterShiftGridGeneration());
-		  dialog->setValues(FileUtils::addExt(ui->cb_CompatibleShiftGrid->currentText().toStdString(), ".txt"), config_map);
+		  dialog->setValues(FileUtils::addExt(ui->cb_CompatibleShiftGrid->currentText().toStdString(), ".txt"), config_map, m_model_set_model_ptr->getSelectedModelSet().getNormValue());
 		  if (dialog->exec()) {
 		      m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
 			  m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
