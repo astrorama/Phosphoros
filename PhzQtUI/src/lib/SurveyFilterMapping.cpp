@@ -288,6 +288,7 @@ void SurveyFilterMapping::ReadFilters() {
     std::ifstream in{mapping_path.toStdString()};
     std::string   line;
     while (std::getline(in, line)) {
+      line = boost::regex_replace(line, boost::regex("[' ']{2,}"), " ");
       boost::trim(line);
       if (line[0] == '#') {
         if (!header_found) {

@@ -10,6 +10,8 @@ Note: the issue number refer to SDC-CH internal tracking.
 ### Changed
  - Add another luminosity filter so we can have different normalization for the Lum prior and the PP computation. https://redmine.isdc.unige.ch/issues/31007
  - Add external SED normalization. https://redmine.isdc.unige.ch/issues/31069
+ - Ensure filter_mapping file can have multiple spaces (code change also in Alexandria). https://redmine.isdc.unige.ch/issues/31493
+ - Change the Phosphoros POP command such that if the output file is ommited, the stats collumns are appened to the input catalog. https://redmine.isdc.unige.ch/issues/31511
 
 ### Fixed
  - Bug causing the GUI to ask for grid destruction after each run, not only fixed redshift. https://redmine.isdc.unige.ch/issues/31012
