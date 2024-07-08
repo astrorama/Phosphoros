@@ -223,8 +223,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>406</width>
-            <height>205</height>
+            <width>930</width>
+            <height>499</height>
            </rect>
           </property>
           <attribute name="label">
@@ -515,6 +515,11 @@
                 <item>
                  <property name="text">
                   <string>INOUE</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>INOUECGM</string>
                  </property>
                 </item>
                 <item>
