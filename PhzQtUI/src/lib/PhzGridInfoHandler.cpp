@@ -36,10 +36,14 @@ namespace PhzQtUI {
 
 static Elements::Logging logger = Elements::Logging::getLogger("PhzGridInfoHandler");
 
-bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
+bool PhzGridInfoHandler::checkGridFileCompatibility(const QString      file_path,
                                                     const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes,
                                                     const std::list<std::string>& selected_filters,
                                                     const std::string igm_type,
+										            bool              igm_cgm,
+										            double            igm_cgm_param_A,
+										            double            igm_cgm_param_a,
+										            double            igm_cgm_param_c, 
 													const std::string luminosity_filter,
 													const std::string luminosity_pp_filter) {
   logger.debug()<<"Checking compatibility for grid in file "<< file_path.toStdString();
@@ -63,6 +67,31 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
       logger.debug() << "Incompatible IGM. (Expected: "<< igm_type << " found " << grid_info.igm_method <<  ")";
       return false;
     }
+
+    // Check the IGM type compatibility
+    if (igm_cgm != grid_info.cgm) {
+      logger.debug() << "Incompatible IGM-CGM. (Expected: "<< igm_cgm << " found " << grid_info.cgm <<  ")";
+      return false;
+    }
+    
+    if (igm_cgm) {
+        // Check the IGM-CGM parameters compatibility
+        if (igm_cgm_param_A != grid_info.cgm_A) {
+          logger.debug() << "Incompatible IGM parameter. (Expected: "<< igm_cgm_param_A << " found " << grid_info.cgm_A <<  ")";
+          return false;
+        }
+            
+        if (igm_cgm_param_a != grid_info.cgm_a) {
+          logger.debug() << "Incompatible IGM. (Expected: "<< igm_cgm_param_a << " found " << grid_info.cgm_a <<  ")";
+          return false;
+        }
+        
+        if (igm_cgm_param_c != grid_info.cgm_c) {
+          logger.debug() << "Incompatible IGM. (Expected: "<< igm_cgm_param_c << " found " << grid_info.cgm_c <<  ")";
+          return false;
+        }
+    }
+   
 
     // Check the Luminosity filter compatibility
     if (luminosity_filter != grid_info.luminosity_filter_name.qualifiedName()) {
@@ -226,13 +255,17 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(QString file_path,
 }
 
 std::list<std::string>
-PhzGridInfoHandler::getCompatibleGridFile(std::string                                                catalog,
+PhzGridInfoHandler::getCompatibleGridFile(const std::string  catalog,
                                           const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes,
                                           const std::list<std::string>& selected_filters, 
-                                          std::string igm_type,
+                                          const std::string igm_type,
+										  bool              igm_cgm,
+										  double            igm_cgm_param_A,
+									      double            igm_cgm_param_a,
+										  double            igm_cgm_param_c, 
                                           const std::string luminosity_filter, 
                                           const std::string luminosity_pp_filter,
-                                          GridType grid_type) {
+                                          const GridType grid_type) {
   auto start = std::chrono::high_resolution_clock::now();
   std::string rootPath = FileUtils::getPhotmetricGridRootPath(true, catalog);
   if (grid_type == GalacticReddeningCorrectionGrid) {
@@ -253,7 +286,7 @@ PhzGridInfoHandler::getCompatibleGridFile(std::string                           
     foreach (const QString& fileName, fileNames) {
       auto file_path = root_qdir.absoluteFilePath(fileName);
       logger.debug() << "Checking parameter compatibility for file :" << file_path.toStdString();
-      if (checkGridFileCompatibility(file_path, axes, selected_filters, igm_type, luminosity_filter, luminosity_pp_filter)) {
+      if (checkGridFileCompatibility(file_path, axes, selected_filters, igm_type, igm_cgm, igm_cgm_param_A, igm_cgm_param_a, igm_cgm_param_c, luminosity_filter, luminosity_pp_filter)) {
         logger.debug() << "File accepted :" << file_path.toStdString();
         list.push_back(fileName.toStdString());
       }
@@ -268,11 +301,18 @@ PhzGridInfoHandler::getCompatibleGridFile(std::string                           
 }
 
 std::map<std::string, boost::program_options::variable_value>
-PhzGridInfoHandler::GetConfigurationMap(std::string catalog, std::string output_file, ModelSet model,
+PhzGridInfoHandler::GetConfigurationMap(const std::string catalog, 
+                                        const std::string output_file, 
+                                        const ModelSet    model,
                                         const std::list<std::string>& selected_filters,
-										std::string luminosity_filter,
-										std::string luminosity_pp_filter,
-                                        std::string igm_type, const std::list<float>& zs) {
+					                    const std::string luminosity_filter,
+					                    const std::string luminosity_pp_filter,
+                                        const std::string igm_type,
+					                    bool              igm_cgm,
+					                    double            igm_cgm_param_A,
+					                    double            igm_cgm_param_a,
+					                    double            igm_cgm_param_c,  
+                                        const std::list<float>& zs) {
 
   std::map<std::string, boost::program_options::variable_value> options_map =
       FileUtils::getPathConfiguration(false, true, true, false);
@@ -301,7 +341,14 @@ PhzGridInfoHandler::GetConfigurationMap(std::string catalog, std::string output_
   }
   options_map["filter-name"].value()         = boost::any(filter_add_vector);
   options_map["igm-absorption-type"].value() = boost::any(igm_type);
-
+  if (igm_cgm && igm_type!="OFF"){
+      std::string yes="YES";
+      options_map["igm-absorption-add-cgm"].value() = boost::any(yes);
+      options_map["igm-absorption-cgm-A"].value() = boost::any(igm_cgm_param_A);
+      options_map["igm-absorption-cgm-a"].value() = boost::any(igm_cgm_param_a);
+      options_map["igm-absorption-cgm-c"].value() = boost::any(igm_cgm_param_c);
+  }
+  
   return options_map;
 }
 

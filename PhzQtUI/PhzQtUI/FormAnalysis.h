@@ -73,6 +73,8 @@ signals:
 
 private slots:
 
+  void on_btn_CGM_conf_clicked();
+  
   void on_btn_ToOption_clicked();
 
   void on_btn_ToCatalog_clicked();
@@ -163,6 +165,7 @@ private slots:
 
   void on_cb_process_limit_stateChanged(int);
   void on_cb_skip_stateChanged(int);
+  void on_cb_CGM_IGM_stateChanged(int);
 
   void httpReadyPlanckRead();
   void cancelDownloadPlanck();
@@ -199,6 +202,8 @@ private:
   void updateFilterShiftGridSelection();
 
   void cleanTempGrids(bool test_files=true);
+  
+  void saveIgmToPref();
 
   bool checkGridSelection(bool addFileCheck, bool acceptNewFile);
   bool checkCompatibleModelGrid(std::string file_name);
@@ -232,6 +237,10 @@ private:
   QFile*                 m_downloaded_file    = nullptr;
   bool                   m_httpRequestAborted = false;
   QNetworkReply*         m_reply              = nullptr;
+  
+  double m_IGM_CGM_param_A = 4.92919285;
+  double m_IGM_CGM_param_a = 0.76313514;
+  double m_IGM_CGM_param_c = 17.54936014;
 
   DatasetRepo                    m_sed_repository;
   DatasetRepo                    m_redenig_curves_repository;

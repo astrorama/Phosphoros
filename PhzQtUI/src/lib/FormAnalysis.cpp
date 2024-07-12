@@ -33,6 +33,7 @@
 #include "PhzQtUI/DialogZeroPointName.h"
 #include "PhzQtUI/DialogExtractZ.h"
 #include "PhzQtUI/FormAnalysis.h"
+#include "PhzQtUI/DialogCGMConfig.h"
 #include "PhzQtUI/ModelSet.h"
 #include "PhzQtUI/PhotometricCorrectionHandler.h"
 #include "PhzQtUI/PhzGridInfoHandler.h"
@@ -291,6 +292,8 @@ void FormAnalysis::updateGridSelection() {
     start=stop;
 
     auto igm =  ui->cb_igm->currentText().toStdString();
+    auto igm_cgm = ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked;
+    
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
     logger.debug()<<"updateGridSelection => Get IGM "<< duration << "[ms]";
@@ -308,7 +311,7 @@ void FormAnalysis::updateGridSelection() {
     logger.debug()<<"updateGridSelection => Info collected "<< duration << "[ms]";
     start=stop;
 
-    auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(survey_name, axis, getSelectedFilters(), igm, lum_filter, lum_pp_filter, PhotometryGrid);
+    auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(survey_name, axis, getSelectedFilters(), igm, igm_cgm, m_IGM_CGM_param_A, m_IGM_CGM_param_a, m_IGM_CGM_param_c, lum_filter, lum_pp_filter, PhotometryGrid);
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
     logger.debug()<<"updateGridSelection => files loaded "<< duration << "[ms]";
@@ -321,8 +324,13 @@ void FormAnalysis::updateGridSelection() {
       added = true;
     }
     if (!added) {
+      QString CGM_test="";
+      if (igm_cgm && igm!="OFF") {
+          CGM_test="_CGM";
+      }
+      
       ui->cb_CompatibleGrid->addItem(QString::fromStdString("Grid_" + selected_model.getName() + "_") +
-                                     ui->cb_igm->currentText() + ".txt");
+                                     ui->cb_igm->currentText() + CGM_test + ".txt");
     }
     ui->cb_CompatibleGrid->addItem("<Enter a new name>");
     m_is_loading=false;
@@ -367,6 +375,10 @@ bool FormAnalysis::checkCompatibleModelGrid(std::string file_name) {
 		 axis,
 		 getSelectedFilters(),
          ui->cb_igm->currentText().toStdString(),
+         ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked,
+         m_IGM_CGM_param_A,
+         m_IGM_CGM_param_a,
+         m_IGM_CGM_param_c,
 		 ui->lbl_lum_filter->text().toStdString(),
 		 ui->lbl_lum_pp_filter->text().toStdString(),
 		 PhotometryGrid);
@@ -407,6 +419,10 @@ bool FormAnalysis::checkCompatibleGalacticGrid(std::string file_name) {
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
          ui->cb_igm->currentText().toStdString(),
+         ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked,
+         m_IGM_CGM_param_A,
+         m_IGM_CGM_param_a,
+         m_IGM_CGM_param_c,
 		 ui->lbl_lum_filter->text().toStdString(),
 		 ui->lbl_lum_pp_filter->text().toStdString(),
          GalacticReddeningCorrectionGrid);
@@ -444,6 +460,10 @@ bool FormAnalysis::checkCompatibleFilterShiftGrid(std::string file_name) {
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
          ui->cb_igm->currentText().toStdString(),
+         ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked,
+         m_IGM_CGM_param_A,
+         m_IGM_CGM_param_a,
+         m_IGM_CGM_param_c,
 		 ui->lbl_lum_filter->text().toStdString(),
 		 ui->lbl_lum_pp_filter->text().toStdString(),
 		 FilterShiftCorrectionGrid);
@@ -457,12 +477,18 @@ bool FormAnalysis::checkCompatibleFilterShiftGrid(std::string file_name) {
 void FormAnalysis::updateGalCorrGridSelection() {
   try {
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
-
+    
     auto axis           = selected_model.getAxesTuple();
+    bool igm_cgm = ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked;
+    auto igm = ui->cb_igm->currentText().toStdString();
     logger.debug() << "updateGalCorrGridSelection => selected_model content :" << getAxisDescription(axis);
     auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
         m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
-        ui->cb_igm->currentText().toStdString(),
+        igm,
+        igm_cgm,
+        m_IGM_CGM_param_A,
+        m_IGM_CGM_param_a,
+        m_IGM_CGM_param_c,
 		ui->lbl_lum_filter->text().toStdString(),
 		ui->lbl_lum_pp_filter->text().toStdString(),
         GalacticReddeningCorrectionGrid);
@@ -475,8 +501,12 @@ void FormAnalysis::updateGalCorrGridSelection() {
     }
 
     if (!added) {
+      QString CGM_test="";
+      if (igm_cgm && igm!="OFF") {
+          CGM_test="_CGM";
+      }
       ui->cb_CompatibleGalCorrGrid->addItem(QString::fromStdString("Grid_" + selected_model.getName() + "_") +
-                                            ui->cb_igm->currentText() + "_MW_Param.txt");
+                                            ui->cb_igm->currentText() + CGM_test + "_MW_Param.txt");
     }
 
     ui->cb_CompatibleGalCorrGrid->addItem("<Enter a new name>");
@@ -489,11 +519,21 @@ void FormAnalysis::updateFilterShiftGridSelection() {
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
     auto axis           = selected_model.getAxesTuple();
+    bool igm_cgm = ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked;
+    auto igm = ui->cb_igm->currentText().toStdString();
     logger.debug() << "updateFilterShiftGridSelection => selected_model content :" << getAxisDescription(axis);
     auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
-        m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
-        ui->cb_igm->currentText().toStdString(), ui->lbl_lum_filter->text().toStdString(),
-		ui->lbl_lum_pp_filter->text().toStdString(), FilterShiftCorrectionGrid);
+        m_survey_model_ptr->getSelectedSurvey().getName(), 
+        axis, 
+        getSelectedFilters(),
+        igm, 
+        igm_cgm,
+        m_IGM_CGM_param_A,
+        m_IGM_CGM_param_a,
+        m_IGM_CGM_param_c,
+        ui->lbl_lum_filter->text().toStdString(),
+		ui->lbl_lum_pp_filter->text().toStdString(), 
+		FilterShiftCorrectionGrid);
 
     ui->cb_CompatibleShiftGrid->clear();
     bool added = false;
@@ -503,8 +543,12 @@ void FormAnalysis::updateFilterShiftGridSelection() {
     }
 
     if (!added) {
+      QString CGM_test="";
+      if (igm_cgm && igm!="OFF") {
+          CGM_test="_CGM";
+      }
       ui->cb_CompatibleShiftGrid->addItem(QString::fromStdString("Grid_" + selected_model.getName() + "_") +
-                                          ui->cb_igm->currentText() + "_FS_Param.txt");
+                                          ui->cb_igm->currentText() + CGM_test + "_FS_Param.txt");
     }
 
     ui->cb_CompatibleShiftGrid->addItem("<Enter a new name>");
@@ -710,6 +754,14 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(const QString& selec
       }
     }
   }
+  if (PreferencesUtils::getUserPreference(selected_survey.getName(), "IGM-CGM")=="true") {
+      ui->cb_CGM_IGM->setCheckState(Qt::CheckState::Checked); 
+      m_IGM_CGM_param_A = std::stod(PreferencesUtils::getUserPreference(selected_survey.getName(), "IGM-CGM-PARAM-AU"));
+      m_IGM_CGM_param_a = std::stod(PreferencesUtils::getUserPreference(selected_survey.getName(), "IGM-CGM-PARAM-AL"));
+      m_IGM_CGM_param_c = std::stod(PreferencesUtils::getUserPreference(selected_survey.getName(), "IGM-CGM-PARAM-C"));
+  } else {
+     ui->cb_CGM_IGM->setCheckState(Qt::CheckState::Unchecked); 
+  }
 
   setupAlgo();
   updateGridSelection();
@@ -846,8 +898,28 @@ void FormAnalysis::on_btn_lum_pp_filter_clicked() {
   dialog->exec();
 }
 
+void FormAnalysis::on_btn_CGM_conf_clicked(){
+  std::unique_ptr<DialogCGMConfig> dialog(new DialogCGMConfig());
+  dialog->setValues(m_IGM_CGM_param_A, m_IGM_CGM_param_a, m_IGM_CGM_param_c);
+  if (dialog->exec()) {
+      m_IGM_CGM_param_A = dialog->get_A_param();
+      m_IGM_CGM_param_a = dialog->get_a_param();
+      m_IGM_CGM_param_c = dialog->get_c_param();
+  }
+}
+
 // Push the change in the IGM to the grids
+void FormAnalysis::on_cb_CGM_IGM_stateChanged(int) {
+  updateGridSelection();
+  updateGalCorrGridSelection();
+  updateFilterShiftGridSelection();
+}
+
+
 void FormAnalysis::on_cb_igm_currentIndexChanged(const QString&) {
+  bool ctrl_enabled = ui->cb_igm->currentText().toStdString()!="OFF";
+  ui->cb_CGM_IGM->setEnabled(ctrl_enabled);
+  ui->btn_CGM_conf->setEnabled(ctrl_enabled);
   updateGridSelection();
   updateGalCorrGridSelection();
   updateFilterShiftGridSelection();
@@ -908,6 +980,23 @@ void FormAnalysis::on_cb_CompatibleGrid_currentTextChanged(const QString&) {
 	}
 }
 
+
+void FormAnalysis::saveIgmToPref(){
+     PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "IGM",
+                                          ui->cb_igm->currentText().toStdString());
+     std::string igm_cgm_state="false";
+     if ( ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked) {
+         igm_cgm_state="true";
+     }
+     PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "IGM-CGM", igm_cgm_state);    
+     PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "IGM-CGM-PARAM-AU",
+                                          std::to_string(m_IGM_CGM_param_A));     
+     PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "IGM-CGM-PARAM-AL",
+                                          std::to_string(m_IGM_CGM_param_a));     
+     PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "IGM-CGM-PARAM-C",
+                                          std::to_string(m_IGM_CGM_param_c));
+}
+
 // Generate the config for the model grid
 void FormAnalysis::on_btn_GetConfigGrid_clicked() {
   if (!checkGridSelection(true, true)) {
@@ -928,8 +1017,8 @@ void FormAnalysis::on_btn_GetConfigGrid_clicked() {
       auto config_map = getGridConfiguration(zs);
       PhzUITools::ConfigurationWriter::writeConfiguration(config_map, fileName.toStdString());
 
-      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "IGM",
-                                          ui->cb_igm->currentText().toStdString());
+      saveIgmToPref();
+      
     }
   }
 }
@@ -1833,8 +1922,8 @@ bool FormAnalysis::BuildModelGrid(const std::list<float>& zs){
 	      m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
 	      m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
 
-	      PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "IGM",
-	                                          ui->cb_igm->currentText().toStdString());
+	      saveIgmToPref();
+	      
 	      return true; // build succeed
 	    } else {
 	    	 return false; // build failed
@@ -2041,8 +2130,17 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
   auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
   auto config = PhzGridInfoHandler::GetConfigurationMap(
-      ui->cb_AnalysisSurvey->currentText().toStdString(), file_name, selected_model, getFilters(),
-      ui->lbl_lum_filter->text().toStdString(), ui->lbl_lum_pp_filter->text().toStdString(), ui->cb_igm->currentText().toStdString(), zs);
+                            ui->cb_AnalysisSurvey->currentText().toStdString(), 
+                            file_name, selected_model, 
+                            getFilters(),
+                            ui->lbl_lum_filter->text().toStdString(), 
+                            ui->lbl_lum_pp_filter->text().toStdString(), 
+                            ui->cb_igm->currentText().toStdString(), 
+                            ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked,
+                            m_IGM_CGM_param_A,
+                            m_IGM_CGM_param_a,
+                            m_IGM_CGM_param_c,
+                            zs);
 
   auto cosmo_conf = PreferencesUtils::getCosmologyConfigurations();
   for (auto& pair : cosmo_conf) {
@@ -2064,6 +2162,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
   std::string lum_filter   = ui->lbl_lum_filter->text().toStdString();
   std::string lum_pp_filter= ui->lbl_lum_pp_filter->text().toStdString();
   std::string igm          = ui->cb_igm->currentText().toStdString();
+  bool        igm_cgm      = ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked;
   std::string mwrc         = ui->cb_MWRC->currentText().toStdString();
 
 
@@ -2112,6 +2211,13 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
   std::string sun_sed                            = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
   options_map["normalization-solar-sed"].value() = boost::any(sun_sed);
   options_map["igm-absorption-type"].value()     = boost::any(igm);
+  if (igm_cgm && igm!="OFF"){
+      std::string yes="YES";
+      options_map["igm-absorption-add-cgm"].value() = boost::any(yes);
+      options_map["igm-absorption-cgm-A"].value() = boost::any(m_IGM_CGM_param_A);
+      options_map["igm-absorption-cgm-a"].value() = boost::any(m_IGM_CGM_param_a);
+      options_map["igm-absorption-cgm-c"].value() = boost::any(m_IGM_CGM_param_c);
+  }
 
   auto cosmo_conf = PreferencesUtils::getCosmologyConfigurations();
   for (auto& pair : cosmo_conf) {
@@ -2140,6 +2246,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getF
   double      max_value        = ui->sp_samp_max->value();
   int         sample_number    = ui->sp_samp_num->value();
   std::string igm              = ui->cb_igm->currentText().toStdString();
+  bool        igm_cgm          = ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked;
   std::string grid_name        = ui->cb_CompatibleGrid->currentText().toStdString();
   std::string output_grid_name = FileUtils::addExt(ui->cb_CompatibleShiftGrid->currentText().toStdString(), ".txt");
   std::string survey_name      = ui->cb_AnalysisSurvey->currentText().toStdString();
@@ -2179,6 +2286,14 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getF
   std::string sun_sed                            = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
   options_map["normalization-solar-sed"].value() = boost::any(sun_sed);
   options_map["igm-absorption-type"].value()     = boost::any(igm);
+  if (igm_cgm && igm!="OFF"){
+      std::string yes="YES";
+      options_map["igm-absorption-add-cgm"].value() = boost::any(yes);
+      options_map["igm-absorption-cgm-A"].value() = boost::any(m_IGM_CGM_param_A);
+      options_map["igm-absorption-cgm-a"].value() = boost::any(m_IGM_CGM_param_a);
+      options_map["igm-absorption-cgm-c"].value() = boost::any(m_IGM_CGM_param_c);
+  }
+  
   options_map["model-grid-file"].value()         = boost::any(grid_name);
   options_map["output-filter-variation-coefficient-grid"].value()        = boost::any(output_grid_name);
   options_map["output-filter-variation-coefficient-grid-format"].value() = boost::any(text_format);
@@ -2193,7 +2308,6 @@ bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
     logger.info() << "A file with the same name exists " << sed_weight_file_name << " checking if compatible...";
     try {
       auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
-      auto  igm            = ui->cb_igm->currentText().toStdString();
       auto  axis           = selected_model.getAxesTuple();
       logger.debug() << "checkSedWeightFile => selected_model content :" << getAxisDescription(axis);
 
@@ -2979,8 +3093,7 @@ void FormAnalysis::get_config_run_second_part() {
     file.close();
 
     saveCopiedColumnToCatalog();
-    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "IGM",
-                                        ui->cb_igm->currentText().toStdString());
+    saveIgmToPref();
     if (ui->gb_corrections->isChecked()) {
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "Correction",
                                           ui->cb_AnalysisCorrection->currentText().toStdString());
@@ -3257,8 +3370,7 @@ void FormAnalysis::run_analysis_second_part() {
   dialog->setValues(out_dir, config_map, config_sed_weight);
   if (dialog->exec()) {
     saveCopiedColumnToCatalog();
-    PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "IGM",
-                                        ui->cb_igm->currentText().toStdString());
+    saveIgmToPref();
 
     if (ui->gb_corrections->isChecked()) {
       PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(), "Correction",

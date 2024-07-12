@@ -223,8 +223,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>499</height>
+            <width>406</width>
+            <height>205</height>
            </rect>
           </property>
           <attribute name="label">
@@ -519,14 +519,36 @@
                 </item>
                 <item>
                  <property name="text">
-                  <string>INOUECGM</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
                   <string>OFF</string>
                  </property>
                 </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="cb_CGM_IGM">
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; text-decoration: underline;&quot;&gt;CGM correction to the IGM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;CGM smooths the Lyα cut-off in high redshift objects (z&amp;gt;6). It mimics the presence of Lyα emission line in the  source.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Add CGM</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btn_CGM_conf">
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>CGM config</string>
+                </property>
                </widget>
               </item>
               <item>
