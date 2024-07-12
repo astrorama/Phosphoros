@@ -532,7 +532,7 @@
                  </font>
                 </property>
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; text-decoration: underline;&quot;&gt;CGM correction to the IGM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;CGM smooths the Lyα cut-off in high redshift objects (z&amp;gt;6). It mimics the presence of Lyα emission line in the  source.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; text-decoration: underline;&quot;&gt;CGM correction to the IGM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span &gt;CGM correction smooths the Lyman-break in high redshift objects (z&amp;gt;6). It mimics the damped Lya absorption caused by neutral hydrogen high column density in the CGM.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="text">
                  <string>Add CGM</string>

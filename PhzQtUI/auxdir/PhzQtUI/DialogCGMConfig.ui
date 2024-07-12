@@ -29,7 +29,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Sigmoid Parameters:</string>
+      <string>Sigmoid Parameters (log10(n_HI(z)) = A/(1+exp[-a(z-6.0)]) +c):</string>
      </property>
     </widget>
    </item>
