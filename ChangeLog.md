@@ -6,12 +6,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Note: the issue number refer to SDC-CH internal tracking.
-## [2.0.1] Not released
+## [2.0.1] 2024-07-15
 ### Changed
  - Add another luminosity filter so we can have different normalization for the Lum prior and the PP computation. https://redmine.isdc.unige.ch/issues/31007
  - Add external SED normalization. https://redmine.isdc.unige.ch/issues/31069
  - Ensure filter_mapping file can have multiple spaces (code change also in Alexandria). https://redmine.isdc.unige.ch/issues/31493
  - Change the Phosphoros POP command such that if the output file is ommited, the stats collumns are appened to the input catalog. https://redmine.isdc.unige.ch/issues/31511
+ - Change the prior effectiveness. https://redmine.isdc.unige.ch/issues/31087
+ - Add CGM absorption at redshift>6, Update the GUI to allow the users to choose CGM parameters. https://redmine.isdc.unige.ch/issues/31680
 
 ### Fixed
  - Bug causing the GUI to ask for grid destruction after each run, not only fixed redshift. https://redmine.isdc.unige.ch/issues/31012
