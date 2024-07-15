@@ -21,7 +21,6 @@
        <property name="font">
         <font>
          <pointsize>17</pointsize>
-         <weight>75</weight>
          <bold>true</bold>
         </font>
        </property>
@@ -67,7 +66,11 @@
     </widget>
    </item>
    <item>
-    <widget class="QTableView" name="table_param"/>
+    <widget class="QTableView" name="table_param">
+     <attribute name="horizontalHeaderStretchLastSection">
+      <bool>true</bool>
+     </attribute>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_4">

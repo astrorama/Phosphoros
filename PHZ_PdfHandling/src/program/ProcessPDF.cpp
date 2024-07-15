@@ -44,6 +44,7 @@
 #include <CCfits/CCfits>
 #include <SourceCatalog/Source.h>
 #include <regex>
+#include <cstdio>
 
 using namespace Euclid;
 using namespace Euclid::Configuration;
@@ -122,48 +123,67 @@ public:
     auto input_col = reader.getInfo();
 
     logger.info("# Create The output file");
-    auto writer = FitsWriter(config_manager.getConfiguration<PdfHandlingConfiguration>().getOutputCatalogName(), true);
+    auto output_name = config_manager.getConfiguration<PdfHandlingConfiguration>().getOutputCatalogName();
+    if (output_name==config_manager.getConfiguration<PdfHandlingConfiguration>().getInputCatalogName()){
+        logger.info("# Processing in-place "); 
+        output_name= "./temp.fits";
+    }
+    auto writer = FitsWriter(output_name, true);
 
     logger.info("# Process the data");
 
     std::string prefix = config_manager.getConfiguration<PdfHandlingConfiguration>().getOutputColumnsPrefix();
-
+    
+    
+    logger.info("# Define Output file columns");
+    
     std::vector<ColumnInfo::info_type> info_full_list{
-        ColumnInfo::info_type(prefix + "SOURCE_ID", typeid(std::string), "", "Unique ID"),
-        ColumnInfo::info_type(prefix + "MEDIAN", typeid(double), "", "median"),
-        ColumnInfo::info_type(prefix + "MIN_70", typeid(double), "", "bottom bound of the smallest 70% interval"),
-        ColumnInfo::info_type(prefix + "MAX_70", typeid(double), "", "top bound of the smallest 70% interval"),
-        ColumnInfo::info_type(prefix + "MIN_90", typeid(double), "", "bottom bound of the smallest 90% interval"),
-        ColumnInfo::info_type(prefix + "MAX_90", typeid(double), "", "top bound of the smallest 90% interval"),
-        ColumnInfo::info_type(prefix + "MIN_95", typeid(double), "", "bottom bound of the smallest 95% interval"),
-        ColumnInfo::info_type(prefix + "MAX_95", typeid(double), "", "top bound of the smallest 95% interval"),
-        ColumnInfo::info_type(prefix + "MED_CENTER_MIN_70", typeid(double), "",
-                              "bottom bound of the median centered 70% interval"),
-        ColumnInfo::info_type(prefix + "MED_CENTER_MAX_70", typeid(double), "",
-                              "top bound of the median centered 70% interval"),
-        ColumnInfo::info_type(prefix + "MED_CENTER_MIN_90", typeid(double), "",
-                              "bottom bound of the median centered 90% interval"),
-        ColumnInfo::info_type(prefix + "MED_CENTER_MAX_90", typeid(double), "",
-                              "top bound of the median centered 90% interval"),
-        ColumnInfo::info_type(prefix + "MED_CENTER_MIN_95", typeid(double), "",
-                              "bottom bound of the median centered 95% interval"),
-        ColumnInfo::info_type(prefix + "MED_CENTER_MAX_95", typeid(double), "",
-                              "top bound of the median centered 95% interval"),
-        ColumnInfo::info_type(prefix + "PHZ_MODE_1_SAMP", typeid(double), "",
-                              "Position of the highest sample of the first PDF mode"),
-        ColumnInfo::info_type(prefix + "PHZ_MODE_1_MEAN", typeid(double), "", "Mean of the first PDF mode"),
-        ColumnInfo::info_type(prefix + "PHZ_MODE_1_FIT", typeid(double), "",
-                              " Position of the interpolated max of the first PDF mode"),
-        ColumnInfo::info_type(prefix + "PHZ_MODE_1_AREA", typeid(double), "", "Area of the first PDF mode"),
-        ColumnInfo::info_type(prefix + "PHZ_MODE_2_SAMP", typeid(double), "",
-                              "Position of the highest sample of the second PDF mode"),
-        ColumnInfo::info_type(prefix + "PHZ_MODE_2_MEAN", typeid(double), "", "Mean of the second PDF mode"),
-        ColumnInfo::info_type(prefix + "PHZ_MODE_2_FIT", typeid(double), "",
-                              " Position of the interpolated max of the second PDF mode"),
-        ColumnInfo::info_type(prefix + "PHZ_MODE_2_AREA", typeid(double), "", "Area of the second PDF mode")};
-
+        ColumnInfo::info_type(prefix + "SOURCE_ID", typeid(std::string), "", "Unique ID")
+    };
+    
+    if  (output_name== "./temp.fits") {
+        info_full_list =  std::vector<ColumnInfo::info_type> {};
+        for (size_t index=0; index<input_col.size();++index){
+            info_full_list.push_back(input_col.getDescription(index));
+        }
+    }
+    
+    
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "MEDIAN", typeid(double), "", "median"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "MIN_70", typeid(double), "", "bottom bound of the smallest 70% interval"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "MAX_70", typeid(double), "", "top bound of the smallest 70% interval"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "MIN_90", typeid(double), "", "bottom bound of the smallest 90% interval"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "MAX_90", typeid(double), "", "top bound of the smallest 90% interval"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "MIN_95", typeid(double), "", "bottom bound of the smallest 95% interval"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "MAX_95", typeid(double), "", "top bound of the smallest 95% interval"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "MED_CENTER_MIN_70", typeid(double), "",
+                              "bottom bound of the median centered 70% interval"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "MED_CENTER_MAX_70", typeid(double), "",
+                              "top bound of the median centered 70% interval"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "MED_CENTER_MIN_90", typeid(double), "",
+                              "bottom bound of the median centered 90% interval"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "MED_CENTER_MAX_90", typeid(double), "",
+                              "top bound of the median centered 90% interval"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "MED_CENTER_MIN_95", typeid(double), "",
+                              "bottom bound of the median centered 95% interval"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "MED_CENTER_MAX_95", typeid(double), "",
+                              "top bound of the median centered 95% interval"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "PHZ_MODE_1_SAMP", typeid(double), "",
+                              "Position of the highest sample of the first PDF mode"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "PHZ_MODE_1_MEAN", typeid(double), "", "Mean of the first PDF mode"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "PHZ_MODE_1_FIT", typeid(double), "",
+                              " Position of the interpolated max of the first PDF mode"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "PHZ_MODE_1_AREA", typeid(double), "", "Area of the first PDF mode"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "PHZ_MODE_2_SAMP", typeid(double), "",
+                              "Position of the highest sample of the second PDF mode"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "PHZ_MODE_2_MEAN", typeid(double), "", "Mean of the second PDF mode"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "PHZ_MODE_2_FIT", typeid(double), "",
+                              " Position of the interpolated max of the second PDF mode"));
+    info_full_list.push_back(ColumnInfo::info_type(prefix + "PHZ_MODE_2_AREA", typeid(double), "", "Area of the second PDF mode"));
+        
     std::vector<ColumnInfo::info_type> info_list{};
     std::map<int, bool>                display_column_map{};
+    
 
     auto excluded_list = config_manager.getConfiguration<PdfHandlingConfiguration>().getExcludedOutputColumns();
     for (size_t col_index = 0; col_index < info_full_list.size(); ++col_index) {
@@ -224,29 +244,37 @@ public:
             modes = MathUtils::extractNHighestModes(
                 full_pdf, config_manager.getConfiguration<PdfHandlingConfiguration>().getMergeRatio(), 2);
           }
+          
+           std::vector<Row::cell_type> full_values0{id_str};
+           if  (output_name== "./temp.fits") {
+                full_values0 =  std::vector<Row::cell_type>{};
+                for (auto& cell : row) {
+                    full_values0.push_back(cell);
+                }
+            }
+          
 
-          std::vector<Row::cell_type> full_values0{id_str,
-                                                   med,
-                                                   range_70.first,
-                                                   range_70.second,
-                                                   range_90.first,
-                                                   range_90.second,
-                                                   range_95.first,
-                                                   range_95.second,
-                                                   med_c_range_70.first,
-                                                   med_c_range_70.second,
-                                                   med_c_range_90.first,
-                                                   med_c_range_90.second,
-                                                   med_c_range_95.first,
-                                                   med_c_range_95.second,
-                                                   modes[0].getHighestSamplePosition(),
-                                                   modes[0].getMeanPosition(),
-                                                   modes[0].getInterpolatedMaxPosition(),
-                                                   modes[0].getModeArea(),
-                                                   modes[1].getHighestSamplePosition(),
-                                                   modes[1].getMeanPosition(),
-                                                   modes[1].getInterpolatedMaxPosition(),
-                                                   modes[1].getModeArea()};
+         full_values0.push_back(med);
+         full_values0.push_back(range_70.first);
+         full_values0.push_back(range_70.second);
+         full_values0.push_back(range_90.first);
+         full_values0.push_back(range_90.second);
+         full_values0.push_back(range_95.first);
+         full_values0.push_back(range_95.second);
+         full_values0.push_back(med_c_range_70.first);
+         full_values0.push_back(med_c_range_70.second);
+         full_values0.push_back(med_c_range_90.first);
+         full_values0.push_back(med_c_range_90.second);
+         full_values0.push_back(med_c_range_95.first);
+         full_values0.push_back(med_c_range_95.second);
+         full_values0.push_back(modes[0].getHighestSamplePosition());
+         full_values0.push_back(modes[0].getMeanPosition());
+         full_values0.push_back(modes[0].getInterpolatedMaxPosition());
+         full_values0.push_back(modes[0].getModeArea());
+         full_values0.push_back(modes[1].getHighestSamplePosition());
+         full_values0.push_back(modes[1].getMeanPosition());
+         full_values0.push_back(modes[1].getInterpolatedMaxPosition());
+         full_values0.push_back(modes[1].getModeArea());
 
           std::vector<Row::cell_type> values0{};
           for (size_t col_index = 0; col_index < full_values0.size(); ++col_index) {
@@ -267,7 +295,15 @@ public:
 
       writer.addData(table);
     }
-
+    
+    writer.~FitsWriter(); //Ensure the file has been writen completelly
+    
+    if  (output_name== "./temp.fits") {
+        logger.info("# replacing the input file");
+        std::remove(config_manager.getConfiguration<PdfHandlingConfiguration>().getInputCatalogName().c_str()); 
+        std::rename("./temp.fits", config_manager.getConfiguration<PdfHandlingConfiguration>().getInputCatalogName().c_str());
+        
+    }
     logger.info("#");
     logger.info("# Exiting mainMethod()");
     logger.info("#");

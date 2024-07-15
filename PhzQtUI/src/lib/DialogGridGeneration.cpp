@@ -51,10 +51,13 @@ DialogGridGeneration::DialogGridGeneration(QWidget* parent) : QDialog(parent), u
 
 DialogGridGeneration::~DialogGridGeneration() {}
 
-void DialogGridGeneration::setValues(std::string                                                          grid_name,
-                                     const std::map<std::string, boost::program_options::variable_value>& config) {
+void DialogGridGeneration::setValues(std::string grid_name,
+                                     const std::map<std::string, 
+                                     boost::program_options::variable_value>& config,
+                                     double pp_norm) {
   ui->label_name->setText(QString::fromStdString(grid_name));
   m_config = config;
+  m_pp_norm = pp_norm;
 }
 
 std::string DialogGridGeneration::runFunction() {
@@ -74,13 +77,18 @@ std::string DialogGridGeneration::runFunction() {
 
     auto lum_filter_name =
         config_manager.template getConfiguration<ModelNormalizationConfig>().getNormalizationFilter();
+    auto lum_pp_filter_name =
+        config_manager.template getConfiguration<ModelNormalizationConfig>().getPpNormalizationFilter();
     auto sun_sed_name = config_manager.getConfiguration<ModelNormalizationConfig>().getReferenceSolarSed();
     auto normalizer_functor =
         Euclid::PhzModeling::NormalizationFunctorFactory::NormalizationFunctorFactory::GetFunction(
             filter_provider, lum_filter_name, sed_provider, sun_sed_name);
+    auto normalizer_pp_functor =
+    	Euclid::PhzModeling::NormalizationFunctorFactory::NormalizationFunctorFactory::GetFunction(
+                        filter_provider, lum_pp_filter_name, sed_provider, sun_sed_name);
 
     Euclid::PhzModeling::SparseGridCreator creator{sed_provider, reddening_provider, filter_provider, igm_abs_func,
-                                                   normalizer_functor};
+                                                   normalizer_functor, normalizer_pp_functor, m_pp_norm};
 
     auto monitor_function = [this](size_t step, size_t total) {
       int value = (step * 100) / total;

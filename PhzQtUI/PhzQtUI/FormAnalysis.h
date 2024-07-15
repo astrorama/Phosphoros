@@ -73,6 +73,8 @@ signals:
 
 private slots:
 
+  void on_btn_CGM_conf_clicked();
+  
   void on_btn_ToOption_clicked();
 
   void on_btn_ToCatalog_clicked();
@@ -85,9 +87,9 @@ private slots:
 
   void on_btn_editCorrections_clicked();
 
-  void on_cb_AnalysisCorrection_currentIndexChanged(int);
+  void on_cb_AnalysisCorrection_currentIndexChanged(const QString& arg1);
 
-  void on_cb_AnalysisSurvey_currentIndexChanged(int);
+  void on_cb_AnalysisSurvey_currentIndexChanged(const QString& arg1);
 
   void onFilterSelectionItemChanged(QStandardItem*);
 
@@ -95,26 +97,23 @@ private slots:
 
   void on_btn_lum_filter_clicked();
 
-  void on_cb_AnalysisModel_currentIndexChanged(int);
+  void on_btn_lum_pp_filter_clicked();
 
-  void on_cbb_pdf_out_currentIndexChanged(int);
+  void on_cb_AnalysisModel_currentIndexChanged(const QString&);
 
-  void on_cb_pdf_z_stateChanged(int);
-  void on_cb_likelihood_pdf_z_stateChanged(int);
-
-  void on_cb_igm_currentIndexChanged(int);
+  void on_cb_igm_currentIndexChanged(const QString&);
 
   void on_cb_CompatibleGrid_currentTextChanged(const QString&);
   void on_btn_GetConfigGrid_clicked();
-  void on_btn_RunGrid_clicked();
 
   void on_cb_CompatibleGalCorrGrid_currentTextChanged(const QString&);
   void on_btn_GetGalCorrConfigGrid_clicked();
-  void on_btn_RunGalCorrGrid_clicked();
 
   void on_cb_CompatibleShiftGrid_currentTextChanged(const QString&);
   void on_btn_GetShiftConfigGrid_clicked();
-  void on_btn_RunShiftGrid_clicked();
+
+  void on_rb_fixZTol_toggled(bool);
+  void on_rb_scaleZTol_toggled(bool);
 
   void on_rb_gc_off_clicked();
   void on_rb_gc_col_clicked();
@@ -144,7 +143,7 @@ private slots:
 
   void on_btn_confLuminosityPrior_clicked();
 
-  void on_cb_luminosityPrior_2_currentIndexChanged(int);
+  void on_cb_luminosityPrior_2_currentIndexChanged(const QString&);
 
   void on_rb_luminosityPrior_toggled(bool);
   void on_rb_volumePrior_toggled(bool);
@@ -159,12 +158,14 @@ private slots:
 
   void setNzFilters(std::string b_filter, std::string i_filter);
   void setLumFilter(std::string new_filter);
+  void setPpLumFilter(std::string new_filter);
 
   void on_rb_best_scaling_toggled(bool);
   void on_rb_sample_scaling_toggled(bool);
 
   void on_cb_process_limit_stateChanged(int);
   void on_cb_skip_stateChanged(int);
+  void on_cb_CGM_IGM_stateChanged(int);
 
   void httpReadyPlanckRead();
   void cancelDownloadPlanck();
@@ -177,6 +178,10 @@ private:
   std::list<std::string>            getSelectedFilters();
   std::list<std::string>            getExcludedFilters();
   std::list<FilterMapping>          getSelectedFilterMapping();
+
+  bool BuildModelGrid(const std::list<float>& zs);
+  bool BuildMwCorrGrid();
+  bool BuildFilterShiftGrid();
 
   void setupAlgo();
 
@@ -196,13 +201,17 @@ private:
   void updateGalCorrGridSelection();
   void updateFilterShiftGridSelection();
 
+  void cleanTempGrids(bool test_files=true);
+  
+  void saveIgmToPref();
+
   bool checkGridSelection(bool addFileCheck, bool acceptNewFile);
   bool checkCompatibleModelGrid(std::string file_name);
   bool checkGalacticGridSelection(bool addFileCheck, bool acceptNewFile);
   bool checkCompatibleGalacticGrid(std::string file_name);
   bool checkFilterShiftGridSelection(bool addFileCheck, bool acceptNewFile);
   bool checkCompatibleFilterShiftGrid(std::string file_name);
-  std::map<std::string, boost::program_options::variable_value> getGridConfiguration();
+  std::map<std::string, boost::program_options::variable_value> getGridConfiguration(const std::list<float>& zs);
   std::map<std::string, boost::program_options::variable_value> getGalacticCorrectionGridConfiguration();
   std::map<std::string, boost::program_options::variable_value> getFilterShiftGridConfiguration();
 
@@ -228,6 +237,10 @@ private:
   QFile*                 m_downloaded_file    = nullptr;
   bool                   m_httpRequestAborted = false;
   QNetworkReply*         m_reply              = nullptr;
+  
+  double m_IGM_CGM_param_A = 4.92919285;
+  double m_IGM_CGM_param_a = 0.76313514;
+  double m_IGM_CGM_param_c = 17.54936014;
 
   DatasetRepo                    m_sed_repository;
   DatasetRepo                    m_redenig_curves_repository;

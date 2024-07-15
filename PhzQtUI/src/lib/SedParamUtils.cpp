@@ -200,9 +200,9 @@ void SedParamUtils::listAvailableParam(ModelSet& model, DatasetRepo sed_repo, Da
 }
 
 bool SedParamUtils::createPPConfig(const ModelSet& model, std::set<std::string> params, std::string out_path) {
-
+  auto zs = std::list<float>{};
   logger.info() << " createPPConfig " << out_path;
-  auto                     options = model.getConfigOptions();
+  auto                     options = model.getConfigOptions(zs);
   std::vector<std::string> v_params{};
   for (auto& p : params) {
     v_params.push_back(p);

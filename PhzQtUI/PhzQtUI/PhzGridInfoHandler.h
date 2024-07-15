@@ -23,10 +23,16 @@ enum GridType { PhotometryGrid = 1, GalacticReddeningCorrectionGrid = 2, FilterS
  */
 class PhzGridInfoHandler {
 public:
-  static bool checkGridFileCompatibility(QString                                                    file_path,
+  static bool checkGridFileCompatibility(const QString     file_path,
                                          const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes,
-                                         const std::list<std::string>& selected_filters, const std::string igm_type,
-                                         const std::string luminosity_filter);
+                                         const std::list<std::string>& selected_filters,
+										 const std::string igm_type,
+										 bool              igm_cgm,
+										 double            igm_cgm_param_A,
+										 double            igm_cgm_param_a,
+										 double            igm_cgm_param_c, 
+                                         const std::string luminosity_filter,
+                                         const std::string luminosity_pp_filter);
 
   /**
    * @brief Get the name of the file containing a grid with the same axes and
@@ -38,11 +44,17 @@ public:
    *
    * @param igm_type The type of inter-galactic medium absorption.
    */
-  static std::list<std::string> getCompatibleGridFile(std::string catalog,
+  static std::list<std::string> getCompatibleGridFile(const std::string catalog,
                                                       const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes,
                                                       const std::list<std::string>& selected_filters,
-                                                      std::string igm_type, const std::string luminosity_filter,
-                                                      GridType grid_type = PhotometryGrid);
+                                                      const std::string igm_type,
+										              bool              igm_cgm,
+										              double            igm_cgm_param_A,
+										              double            igm_cgm_param_a,
+										              double            igm_cgm_param_c, 
+													  const std::string luminosity_filter,
+													  const std::string luminosity_pp_filter,
+                                                      const GridType grid_type = PhotometryGrid);
 
   /**
    * @breif Build a boost configuration map out of the selected parameters.
@@ -56,9 +68,18 @@ public:
    * @param igm_type The type of inter-galactic medium absorption.
    */
   static std::map<std::string, boost::program_options::variable_value>
-  GetConfigurationMap(std::string catalog, std::string output_file, ModelSet model,
-                      const std::list<std::string>& selected_filters, std::string luminosity_filter,
-                      std::string igm_type);
+  GetConfigurationMap(const std::string catalog, 
+                      const std::string output_file, 
+                      const ModelSet model,
+                      const std::list<std::string>& selected_filters,
+					  const std::string luminosity_filter,
+					  const std::string luminosity_pp_filter,
+                      const std::string igm_type,
+					  bool              igm_cgm,
+					  double            igm_cgm_param_A,
+					  double            igm_cgm_param_a,
+					  double            igm_cgm_param_c,  
+                      const std::list<float>& zs);
 };
 
 }  // namespace PhzQtUI

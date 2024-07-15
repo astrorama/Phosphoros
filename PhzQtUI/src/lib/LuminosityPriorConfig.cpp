@@ -11,11 +11,13 @@
 
 #include "FileUtils.h"
 #include "PhzQtUI/LuminosityPriorConfig.h"
+#include "ElementsKernel/Logging.h"
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
 namespace Euclid {
 namespace PhzQtUI {
+static Elements::Logging logger = Elements::Logging::getLogger("LuminosityPriorConfig");
 
 std::string LuminosityPriorConfig::getName() const {
   return m_name;
@@ -29,6 +31,13 @@ bool LuminosityPriorConfig::getInMag() const {
 }
 void LuminosityPriorConfig::setInMag(bool in_mag) {
   m_in_mag = std::move(in_mag);
+}
+
+bool LuminosityPriorConfig::getDensity() const {
+  return m_density;
+}
+void LuminosityPriorConfig::setDensity(bool in_volume) {
+	m_density = std::move(in_volume);
 }
 
 std::vector<LuminosityPriorConfig::SedGroup> LuminosityPriorConfig::getSedGRoups() const {
@@ -45,11 +54,20 @@ void LuminosityPriorConfig::setZs(std::vector<double> zs) {
   m_zs = std::move(zs);
 }
 
+bool LuminosityPriorConfig::hasSchechter() const {
+	bool has_schechter = false;
+	for (auto lum_function : m_luminosity_function_list ) {
+		has_schechter |= !lum_function.is_custom;
+	}
+	return has_schechter;
+}
+
 std::vector<LuminosityFunctionInfo> LuminosityPriorConfig::getLuminosityFunctionList() const {
   return m_luminosity_function_list;
 }
 void LuminosityPriorConfig::setLuminosityFunctionList(std::vector<LuminosityFunctionInfo> functions) {
   m_luminosity_function_list = std::move(functions);
+  setDensity(hasSchechter());
 }
 
 std::vector<std::vector<LuminosityFunctionInfo>> LuminosityPriorConfig::getLuminosityFunctionArray() const {
@@ -124,6 +142,7 @@ LuminosityPriorConfig LuminosityPriorConfig::deserialize(QDomDocument& doc) {
 
   QDomElement root_node = doc.documentElement();
   config.setInMag(root_node.attribute("InMag").toStdString() != "0");
+  config.setDensity(root_node.attribute("DensityInVolume").toStdString() != "0");
 
   auto groups_node = root_node.firstChildElement("SedGroups");
   auto group_list  = groups_node.childNodes();
@@ -194,6 +213,9 @@ QDomDocument LuminosityPriorConfig::serialize() const {
   root.setAttribute("InMag", QString::fromStdString(std::to_string(m_in_mag)));
   doc.appendChild(root);
 
+  root.setAttribute("DensityInVolume", QString::fromStdString(std::to_string(m_density)));
+  doc.appendChild(root);
+
   QDomElement groups_node = doc.createElement("SedGroups");
   root.appendChild(groups_node);
 
@@ -257,6 +279,12 @@ std::map<std::string, boost::program_options::variable_value> LuminosityPriorCon
   auto options = getBasicConfigOptions();
 
   options["luminosity-prior"].value() = boost::any(std::string("YES"));
+
+  if (m_density || hasSchechter()) {
+	  options["luminosity-prior-per-mpc3"].value() = boost::any(std::string("YES"));
+  } else {
+	  options["luminosity-prior-per-mpc3"].value() = boost::any(std::string("NO"));
+  }
 
   for (auto& group : m_sed_groups) {
     std::string name = group.first;
