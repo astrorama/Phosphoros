@@ -216,19 +216,156 @@
           </font>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>6</number>
          </property>
-         <widget class="QWidget" name="page">
+         <widget class="QWidget" name="page_0">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>406</width>
+            <height>205</height>
+           </rect>
+          </property>
+          <attribute name="label">
+           <string>1. Computation Type</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_m1">
+           <item>
+            <widget class="QGroupBox" name="gb_fix_z">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <kerning>true</kerning>
+              </font>
+             </property>
+             <property name="title">
+              <string>Fix redshift from input catalog:</string>
+             </property>
+             <property name="flat">
+              <bool>false</bool>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+             <property name="checked">
+              <bool>false</bool>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_14">
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_40">
+                <item>
+                 <widget class="QLabel" name="label_35">
+                  <property name="text">
+                   <string>Input catalog fixed redshift column</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="cb_z_col">
+                  <property name="editable">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_29">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_41">
+                <item>
+                 <widget class="QLabel" name="label_36">
+                  <property name="text">
+                   <string>Redshift tolerance</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QDoubleSpinBox" name="dsb_fix_z_tol">
+                  <property name="decimals">
+                   <number>4</number>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.000100000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>0.001000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_30">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="rb_fixZTol">
+                <property name="text">
+                 <string>Fixed tolerance</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="rb_scaleZTol">
+                <property name="text">
+                 <string>Scale tolerance with (1+z)</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_8">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="page_1">
           <property name="geometry">
            <rect>
             <x>0</x>
             <y>0</y>
             <width>930</width>
-            <height>536</height>
+            <height>499</height>
            </rect>
           </property>
           <attribute name="label">
-           <string>1. Luminosity Filter and Extrinsic Absorption</string>
+           <string>2. Luminosity Filter and Extrinsic Absorption</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_5">
            <item>
@@ -239,7 +376,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Absolute Luminosity Filter (Filter used to normalize the models / Luminosity prior filter):</string>
+              <string>Absolute Luminosity Filter (Filter used to normalize the models / compute luminosity used in Luminosity prior):</string>
              </property>
             </widget>
            </item>
@@ -273,6 +410,62 @@
               </item>
               <item>
                <spacer name="horizontalSpacer_17">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_37">
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Absolute Luminosity Filter for Physical Parameters determination:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QWidget" name="widget_3" native="true">
+             <layout class="QHBoxLayout" name="horizontalLayout_39">
+              <item>
+               <widget class="QLabel" name="lbl_lum_pp_filter">
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                  <italic>true</italic>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>TextLabel</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btn_lum_pp_filter">
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Select Filter</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_31">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
@@ -329,6 +522,33 @@
                   <string>OFF</string>
                  </property>
                 </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="cb_CGM_IGM">
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; text-decoration: underline;&quot;&gt;CGM correction to the IGM&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span &gt;CGM correction smooths the Lyman-break in high redshift objects (z&amp;gt;6). It mimics the damped Lya absorption caused by neutral hydrogen high column density in the CGM.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Add CGM</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btn_CGM_conf">
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>CGM config</string>
+                </property>
                </widget>
               </item>
               <item>
@@ -481,12 +701,12 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>536</height>
+            <width>768</width>
+            <height>272</height>
            </rect>
           </property>
           <attribute name="label">
-           <string>2. Grids Generation</string>
+           <string>3. Grids Definition</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_12">
            <item>
@@ -538,25 +758,6 @@
                </item>
               </layout>
              </item>
-             <item>
-              <layout class="QVBoxLayout" name="verticalLayout_17">
-               <item>
-                <widget class="QPushButton" name="btn_RunGrid">
-                 <property name="font">
-                  <font>
-                   <pointsize>11</pointsize>
-                  </font>
-                 </property>
-                 <property name="toolTip">
-                  <string/>
-                 </property>
-                 <property name="text">
-                  <string>(Re)-Generate the Grid</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
             </layout>
            </item>
            <item>
@@ -603,25 +804,6 @@
                  </property>
                  <property name="text">
                   <string>Save Config. File</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <layout class="QVBoxLayout" name="verticalLayout_26">
-               <item>
-                <widget class="QPushButton" name="btn_RunGalCorrGrid">
-                 <property name="font">
-                  <font>
-                   <pointsize>11</pointsize>
-                  </font>
-                 </property>
-                 <property name="toolTip">
-                  <string/>
-                 </property>
-                 <property name="text">
-                  <string>(Re)-Generate the Grid</string>
                  </property>
                 </widget>
                </item>
@@ -813,25 +995,6 @@
                </item>
               </layout>
              </item>
-             <item>
-              <layout class="QVBoxLayout" name="verticalLayout_33">
-               <item>
-                <widget class="QPushButton" name="btn_RunShiftGrid">
-                 <property name="font">
-                  <font>
-                   <pointsize>11</pointsize>
-                  </font>
-                 </property>
-                 <property name="toolTip">
-                  <string/>
-                 </property>
-                 <property name="text">
-                  <string>(Re)-Generate the Grid</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
             </layout>
            </item>
            <item>
@@ -854,12 +1017,12 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>536</height>
+            <width>573</width>
+            <height>237</height>
            </rect>
           </property>
           <attribute name="label">
-           <string>3. Prior</string>
+           <string>4. Prior</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
@@ -988,6 +1151,9 @@
                <property name="text">
                 <string>Volume Prior</string>
                </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
               </widget>
              </item>
              <item>
@@ -1088,12 +1254,12 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>536</height>
+            <width>486</width>
+            <height>169</height>
            </rect>
           </property>
           <attribute name="label">
-           <string>4. Photometric Zero-Point Corrections</string>
+           <string>5. Photometric Zero-Point Corrections</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_11">
            <item>
@@ -1240,12 +1406,12 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>536</height>
+            <width>554</width>
+            <height>184</height>
            </rect>
           </property>
           <attribute name="label">
-           <string>5. Algorithm</string>
+           <string>6. Algorithm</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_10">
            <item>
@@ -1415,11 +1581,11 @@
             <x>0</x>
             <y>0</y>
             <width>933</width>
-            <height>704</height>
+            <height>621</height>
            </rect>
           </property>
           <attribute name="label">
-           <string>6. Input /Output</string>
+           <string>7. Input /Output</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout">
            <item>
@@ -1591,51 +1757,6 @@
                   </spacer>
                  </item>
                 </layout>
-               </item>
-               <item>
-                <widget class="QGroupBox" name="gb_fix_z">
-                 <property name="font">
-                  <font>
-                   <pointsize>11</pointsize>
-                   <kerning>true</kerning>
-                  </font>
-                 </property>
-                 <property name="title">
-                  <string>Fix redshift from input catalog:</string>
-                 </property>
-                 <property name="flat">
-                  <bool>false</bool>
-                 </property>
-                 <property name="checkable">
-                  <bool>true</bool>
-                 </property>
-                 <property name="checked">
-                  <bool>false</bool>
-                 </property>
-                 <layout class="QHBoxLayout" name="horizontalLayout_8">
-                  <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_7">
-                    <item>
-                     <widget class="QLabel" name="label_6">
-                      <property name="text">
-                       <string>Input catalog fixed redshift column</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QComboBox" name="cb_z_col">
-                      <property name="enabled">
-                       <bool>false</bool>
-                      </property>
-                      <property name="editable">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                    </item>
-                   </layout>
-                  </item>
-                 </layout>
-                </widget>
                </item>
                <item>
                 <spacer name="verticalSpacer_4">

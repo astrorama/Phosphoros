@@ -33,6 +33,9 @@ public:
   bool getInMag() const;
   void setInMag(bool in_mag);
 
+  bool getDensity() const;
+  void setDensity(bool in_volume);
+
   std::vector<SedGroup> getSedGRoups() const;
   void                  setSedGroups(std::vector<SedGroup> sed_groups);
 
@@ -41,6 +44,8 @@ public:
 
   std::vector<LuminosityFunctionInfo> getLuminosityFunctionList() const;
   void                                setLuminosityFunctionList(std::vector<LuminosityFunctionInfo> functions);
+
+  bool hasSchechter() const;
 
   std::vector<std::vector<LuminosityFunctionInfo>> getLuminosityFunctionArray() const;
 
@@ -64,6 +69,7 @@ public:
 private:
   std::string                         m_name;
   bool                                m_in_mag = true;
+  bool                                m_density = true;
   std::vector<SedGroup>               m_sed_groups;
   std::vector<double>                 m_zs;
   std::vector<LuminosityFunctionInfo> m_luminosity_function_list{};

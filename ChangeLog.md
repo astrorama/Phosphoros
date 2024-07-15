@@ -7,7 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Note: the issue number refer to SDC-CH internal tracking.
 
-## [1.9.0] 2025-02-08
+## [2.0.1] 2024-07-15
+### Changed
+ - Add another luminosity filter so we can have different normalization for the Lum prior and the PP computation. https://redmine.isdc.unige.ch/issues/31007
+ - Add external SED normalization. https://redmine.isdc.unige.ch/issues/31069
+ - Ensure filter_mapping file can have multiple spaces (code change also in Alexandria). https://redmine.isdc.unige.ch/issues/31493
+ - Change the Phosphoros POP command such that if the output file is ommited, the stats collumns are appened to the input catalog. https://redmine.isdc.unige.ch/issues/31511
+ - Change the prior effectiveness. https://redmine.isdc.unige.ch/issues/31087
+ - Add CGM absorption at redshift>6, Update the GUI to allow the users to choose CGM parameters. https://redmine.isdc.unige.ch/issues/31680
+
+### Fixed
+ - Bug causing the GUI to ask for grid destruction after each run, not only fixed redshift. https://redmine.isdc.unige.ch/issues/31012
+ - Bug causing the GUI to lose the parameter space selection. https://redmine.isdc.unige.ch/issues/31081
+
+## [2.0.0] 2024-03-13
+### Changed
+ - Track PhosphorosCore 2.0.0
+ - New tool (EZL) to collect distinct redshift values from a catalog. https://redmine.isdc.unige.ch/issues/30818
+ - GUI refactoring. Simplification of the activations rules obtained by postponing the grid generation and building 
+   a grid with redshift values taken from the catalog when working at fixed redshift. https://redmine.isdc.unige.ch/issues/30820 
+
+### Fixed
+ - In the Physical Parameter selection popup force the grid to use all the available width.
+
+## [1.9.0] 2024-02-08
 ### Changed
  - New MW reddening curve (Gordon 2023) with control allowing the user to choose the curve. https://redmine.isdc.unige.ch/issues/30744
 

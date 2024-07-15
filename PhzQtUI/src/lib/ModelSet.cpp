@@ -68,10 +68,13 @@ std::map<std::string, boost::program_options::variable_value> ModelSet::getModel
   options["parameter-space-model-name"].value() = boost::any(getName());
   return options;
 }
-std::map<std::string, po::variable_value> ModelSet::getConfigOptions() const {
+std::map<std::string, po::variable_value> ModelSet::getConfigOptions(const std::list<float>& zs) const {
   std::map<std::string, po::variable_value> options;
+  if (!isFilter()) {
+	  options["normalization-pp-value"].value() = boost::any(getNormValue());
+  }
   for (auto& param_rule : getParameterRules()) {
-    for (auto& option : param_rule.second.getConfigOptions(param_rule.second.getName())) {
+    for (auto& option : param_rule.second.getConfigOptions(param_rule.second.getName(), zs)) {
       options[option.first] = option.second;
     }
   }
@@ -163,6 +166,8 @@ const std::map<std::string, PhzDataModel::ModelAxesTuple>& ModelSet::getAxesTupl
 ModelSet ModelSet::deserialize(QDomDocument& doc, ModelSet& model) {
   QDomElement root_node = doc.documentElement();
   model.setName(root_node.attribute("Name").toStdString());
+  model.setIsFilter(root_node.attribute("IsFilter").toStdString()=="1");
+  model.setNormValue(std::stod(root_node.attribute("NormalizationValue").toStdString()));
 
   /* Global Z & EBV */
   auto global_z_node = root_node.firstChildElement("GlobalRedshift");
@@ -375,6 +380,12 @@ QDomDocument ModelSet::serialize() {
   QDomDocument doc("ParameterSpace");
   QDomElement  root = doc.createElement("ParameterSpace");
   root.setAttribute("Name", QString::fromStdString(getName()));
+  int f_value=0;
+  if (isFilter()) {
+	  f_value=1;
+  }
+  root.setAttribute("IsFilter", QString::number(f_value));
+  root.setAttribute("NormalizationValue", QString::number(getNormValue()));
   doc.appendChild(root);
 
   QDomElement gb_redshift_Node        = doc.createElement("GlobalRedshift");
@@ -663,6 +674,26 @@ void ModelSet::setEbvValues(std::set<double> ebv_values) {
  */
 const std::set<double>& ModelSet::getEbvValues() const {
   return m_ebv_values;
+}
+
+
+bool ModelSet::isFilter() const {
+	return m_is_filter;
+}
+
+void ModelSet::setIsFilter(bool new_is_filter) {
+	m_is_filter = new_is_filter;
+}
+
+double ModelSet::getNormValue() const {
+	if (m_is_filter) {
+		return 0;
+	} else {
+		return m_norm_value;
+	}
+}
+void ModelSet::setNormValue(double new_value) {
+	m_norm_value = new_value;
 }
 
 }  // namespace PhzQtUI

@@ -71,7 +71,7 @@ auto PdfHandlingConfiguration::getProgramOptions() -> std::map<std::string, Opti
 
            }},
           {"Output options",
-           {{OUTPUT_CATALOG.c_str(), po::value<std::string>(), "Name of the .FITS output catalog"},
+           {{OUTPUT_CATALOG.c_str(), po::value<std::string>()->default_value(""), "Name of the .FITS output catalog, if not set or if equal to input-cat add the columns to the input cat and override it "},
             {OUT_COLUMN_PREFIX.c_str(), po::value<std::string>()->default_value(""),
              "Prefix for the output column, by default no prefix is added"},
             {EXCLUD_COLUMN.c_str(), po::value<std::string>()->default_value(""),
@@ -99,6 +99,9 @@ void PdfHandlingConfiguration::initialize(const UserValues& args) {
   m_pdf_col = args.find(PDF_COLUMN_NAME)->second.as<std::string>();
 
   m_output_cat_name   = args.find(OUTPUT_CATALOG)->second.as<std::string>();
+  if (m_output_cat_name==""){
+      m_output_cat_name = m_input_cat_name;
+  }
   m_output_col_prefix = args.find(OUT_COLUMN_PREFIX)->second.as<std::string>();
 
   m_chunk_size  = args.find(CHUNK_SIZE)->second.as<uint>();
