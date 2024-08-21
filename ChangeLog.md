@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Note: the issue number refer to SDC-CH internal tracking.
+## [2.0.1] 
+### Changed
+ - Change where the Generic Prior are stored from Auxiliary Data to Intermediate result. https://redmine.isdc.unige.ch/issues/31880
+
 ## [2.0.1] 2024-07-15
 ### Changed
  - Add another luminosity filter so we can have different normalization for the Lum prior and the PP computation. https://redmine.isdc.unige.ch/issues/31007

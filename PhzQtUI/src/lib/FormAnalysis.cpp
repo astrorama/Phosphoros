@@ -2301,7 +2301,8 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getF
 }
 
 bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
-  std::string folder = FileUtils::getSedPriorRootPath();
+  auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+  std::string folder = FileUtils::getSedPriorRootPath(survey_name);
   QFileInfo   info(QString::fromStdString(folder) + QDir::separator() + QString::fromStdString(sed_weight_file_name));
   if (info.exists()) {
 
@@ -2323,7 +2324,6 @@ bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
         sed_weight_grids.emplace_back(GridContainer::gridFitsImport<PhzDataModel::DoubleGrid>(file_name, i));
       }
 
-      std::string survey_name     = ui->cb_AnalysisSurvey->currentText().toStdString();
       std::string model_grid_file = FileUtils::getPhotmetricGridRootPath(true, survey_name) + "/" +
                                     ui->cb_CompatibleGrid->currentText().toStdString();
 

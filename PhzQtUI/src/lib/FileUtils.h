@@ -300,7 +300,7 @@ public:
    */
   static std::string getFilterShiftGridRootPath(bool check, const std::string& catalog_type);
 
-  static std::string getSedPriorRootPath();
+  static std::string getSedPriorRootPath(const std::string& catalog_type);
 
   static void buildDirectories();
 
