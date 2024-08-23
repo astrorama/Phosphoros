@@ -58,7 +58,7 @@ def defineSpecificProgramOptions():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--emission-lines', default='Ha_lines.txt', type=str, metavar='FILE',
-                        help='The emission lines file (default: Ha_lines.txt, use LePhare_lines.txt for LePhare like lines)')
+                        help='The emission lines file (default: Ha_lines.txt, use LePhare_lines.txt for LePhare like lines), local file will be prefered over defult file installed along the code')
     parser.add_argument('--uv-range', default=(1500.0, 2800.0), type=wavelengthRange,
                         help='The beginning of the UV range to integrate (default: 1500.0,2800.0 Angstrom, use  2100,2500 for LePhare like lines)' )
     parser.add_argument('--reference-factor', default=5.91e-6, type=float,
@@ -77,8 +77,15 @@ def defineSpecificProgramOptions():
 
 
 def readEmissionLinesFromFile(emission_lines_file):
-    if "/" not in emission_lines_file and aux_dir:
-        emission_lines_file = os.path.join(aux_dir, emission_lines_file)
+    if emission_lines_file[0]=='/':
+        # Absolute path: nothing to do 
+        pass
+    elif os.path.isfile(emission_lines_file):
+        #local file exists : nothin to do
+        pass
+    elif aux_dir:
+       # try to read the file from aux dir 
+       emission_lines_file = os.path.join(aux_dir, emission_lines_file)
 
     logger.info('Reading emission lines from ' + emission_lines_file)
     return table.Table.read(emission_lines_file, format='ascii')
