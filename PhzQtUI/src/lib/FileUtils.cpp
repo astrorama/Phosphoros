@@ -526,9 +526,8 @@ std::string FileUtils::getFilterShiftGridRootPath(bool check, const std::string&
   return "";
 }
 
-std::string FileUtils::getSedPriorRootPath() {
-  QString path = QString::fromStdString(readPath()["AuxiliaryData"]) + QDir::separator() + "GenericPriors" +
-                 QDir::separator() + "SedWeight";
+std::string FileUtils::getSedPriorRootPath(const std::string& catalog_type) {
+  QString path = QString::fromStdString(FileUtils::getIntermediaryProductRootPath(true, catalog_type)) + QDir::separator() +"GenericPriors" + QDir::separator() + "SedWeight";
   QFileInfo info(path);
   return info.absoluteFilePath().toStdString();
 }
