@@ -63,7 +63,7 @@ private slots:
   void on_rb_ST_Fixed_toggled(bool);
   void on_sb_ST_Fixed_Value_valueChanged(double);
 
-  void on_cb_selSpace_currentIndexChanged(const QString&);
+  void on_cb_selSpace_currentIndexChanged(int);
 
   void rulesSelectionChanged(QModelIndex, QModelIndex);
 

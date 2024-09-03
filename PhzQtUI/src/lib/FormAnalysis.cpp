@@ -142,7 +142,7 @@ void FormAnalysis::updateSelection() {
 
   bool has_changed_model=false;
   // Disconnect the combobox event
-  disconnect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString&)), 0, 0);
+  disconnect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(int)), 0, 0);
   // if needed: Fill the Parameter Space Combobox and set its index
   if (ui->cb_AnalysisModel->count()==0 || m_model_set_model_ptr->doNeedReload()) {
     ui->cb_AnalysisModel->clear();
@@ -171,15 +171,15 @@ void FormAnalysis::updateSelection() {
   }
   m_model_set_model_ptr->reloaded();
   // reconnect the combobox event
-  connect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(const QString&)),
-          SLOT(on_cb_AnalysisModel_currentIndexChanged(const QString&)));
+  connect(ui->cb_AnalysisModel, SIGNAL(currentIndexChanged(int)),
+          SLOT(on_cb_AnalysisModel_currentIndexChanged(int)));
 
   /// COMBO BOX CATALOG  ////
   //////////////////////////
 
   bool has_changed_catalog=false;
   // Disconnect the combobox event
-  disconnect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString&)), 0, 0);
+  disconnect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(int)), 0, 0);
 
   // if needed: Fill the Parameter Space Combobox and set its index
   if (ui->cb_AnalysisSurvey->count()==0 || m_survey_model_ptr->doNeedReload()) {
@@ -211,8 +211,8 @@ void FormAnalysis::updateSelection() {
 
   m_survey_model_ptr->reloaded();
   // reconnect the combobox event
-  connect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(const QString&)),
-          SLOT(on_cb_AnalysisSurvey_currentIndexChanged(const QString&)));
+  connect(ui->cb_AnalysisSurvey, SIGNAL(currentIndexChanged(int)),
+          SLOT(on_cb_AnalysisSurvey_currentIndexChanged(int)));
 
   /// LUMINOSITY FILTER  ////
   //////////////////////////
@@ -256,9 +256,9 @@ void FormAnalysis::updateSelection() {
   m_is_loading=false;
 
   if (ui->cb_AnalysisSurvey->currentText() != "" && has_changed_catalog) {
-    on_cb_AnalysisSurvey_currentIndexChanged(ui->cb_AnalysisSurvey->currentText());
+    on_cb_AnalysisSurvey_currentIndexChanged(ui->cb_AnalysisSurvey->currentIndex());
   } else if (ui->cb_AnalysisModel->currentText() != "" && has_changed_model) {
-    on_cb_AnalysisModel_currentIndexChanged(ui->cb_AnalysisModel->currentText());
+    on_cb_AnalysisModel_currentIndexChanged(ui->cb_AnalysisModel->currentIndex());
 }
 
   auto stop = std::chrono::high_resolution_clock::now();
@@ -691,9 +691,9 @@ void FormAnalysis::on_btn_exit_clicked() {
 ///////////////////   User Interaction: Catalog & Model selection       //////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(const QString& selectedName) {
+void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(int selected_index ) {
 
-
+  const QString& selectedName = ui->cb_AnalysisSurvey->itemText(selected_index);
   logger.info() << "The selected index of the Catalog ComboBox has changed. New selected item:"
                 << selectedName.toStdString();
   m_survey_model_ptr->selectSurvey(selectedName);
@@ -795,7 +795,9 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(const QString& selec
   getPPListFromConfig();
 }
 
-void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(const QString& model_name) {
+void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(int selected_index ) {
+
+  const QString& model_name = ui->cb_AnalysisModel->itemText(selected_index);
   logger.info() << "The selected index of the Parameter Space ComboBox has changed. New selected item:"
                 << model_name.toStdString();
   m_model_set_model_ptr->selectModelSet(model_name);
@@ -916,7 +918,7 @@ void FormAnalysis::on_cb_CGM_IGM_stateChanged(int) {
 }
 
 
-void FormAnalysis::on_cb_igm_currentIndexChanged(const QString&) {
+void FormAnalysis::on_cb_igm_currentIndexChanged(int) {
   bool ctrl_enabled = ui->cb_igm->currentText().toStdString()!="OFF";
   ui->cb_CGM_IGM->setEnabled(ctrl_enabled);
   ui->btn_CGM_conf->setEnabled(ctrl_enabled);
@@ -1246,7 +1248,7 @@ void FormAnalysis::on_btn_confLuminosityPrior_clicked() {
 }
 
 // Change the luminosity prior selection
-void FormAnalysis::on_cb_luminosityPrior_2_currentIndexChanged(const QString&) {
+void FormAnalysis::on_cb_luminosityPrior_2_currentIndexChanged(int) {
   PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                                       ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPriorName",
                                       ui->cb_luminosityPrior_2->currentText().toStdString());
@@ -1337,7 +1339,7 @@ void FormAnalysis::onCorrectionComputed(const QString& new_file_name) {
 }
 
 // Handle the change in the Correction CB
-void FormAnalysis::on_cb_AnalysisCorrection_currentIndexChanged(const QString&) {
+void FormAnalysis::on_cb_AnalysisCorrection_currentIndexChanged(int) {
   setRunAnnalysisEnable(true);
 }
 
