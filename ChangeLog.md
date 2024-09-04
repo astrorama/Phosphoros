@@ -12,6 +12,7 @@ Note: the issue number refer to SDC-CH internal tracking.
 
 ### Changed
  - Remove the default value for the volume type in the luminosity prior. https://redmine.isdc.unige.ch/issues/31984
+ - Remove grid computation in the GUI when configuring the Luminosity Prior. https://redmine.isdc.unige.ch/issues/31994
 
 ## [2.0.4] 2024-09-02
 ### Fixed

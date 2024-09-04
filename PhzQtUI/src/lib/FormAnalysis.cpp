@@ -1202,16 +1202,10 @@ void FormAnalysis::on_btn_conf_Nz_clicked() {
 
 // open the DialogLuminosityPrior popup
 void FormAnalysis::on_btn_confLuminosityPrior_clicked() {
-  std::list<float> zs{};
-  if (!checkGridSelection(true, false)) {
-	 if (! BuildModelGrid(zs)) {
-	   return;
-	 }
-  }
+
   std::unique_ptr<DialogLuminosityPrior> dialog(
       new DialogLuminosityPrior(ui->lbl_lum_filter->text().toStdString(), m_luminosity_repository, m_sed_repository, m_redenig_curves_repository));
 
-  std::string model_grid = ui->cb_CompatibleGrid->currentText().toStdString();
 
   auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
 
@@ -1242,7 +1236,7 @@ void FormAnalysis::on_btn_confLuminosityPrior_clicked() {
     }
   }
 
-  dialog->loadData(selected_model, survey_name, model_grid, z_min, z_max);
+  dialog->loadData(selected_model, survey_name, z_min, z_max);
   dialog->exec();
   loadLuminosityPriors();
 }
