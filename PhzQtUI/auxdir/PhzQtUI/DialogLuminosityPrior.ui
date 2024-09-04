@@ -259,7 +259,7 @@
            <widget class="QComboBox" name="cb_ft">
             <item>
              <property name="text">
-              <string>Per Volume (1/mpc³)</string>
+              <string>Per Volume (1/Mpc³)</string>
              </property>
             </item>
             <item>
