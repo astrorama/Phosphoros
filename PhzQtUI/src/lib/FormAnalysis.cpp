@@ -20,6 +20,7 @@
 #include "ElementsKernel/Logging.h"
 
 #include "FileUtils.h"
+#include "PhzQtUI/gridHelper.h"
 #include "PhzQtUI/DialogAddGalEbv.h"
 #include "PhzQtUI/DialogFilterShiftGridGeneration.h"
 #include "PhzQtUI/DialogGalCorrGridGeneration.h"
@@ -347,132 +348,6 @@ void FormAnalysis::updateGridSelection() {
 
 }
 
-
-
-bool FormAnalysis::checkCompatibleModelGrid(std::string file_name) {
-  auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
-  auto model_name = selected_model.getName();
-
-  if (std::get<0>(m_cache_compatible_model_grid)==model_name && std::get<1>(m_cache_compatible_model_grid)==file_name){
-	  return std::get<2>(m_cache_compatible_model_grid);
-  }
-
-  QFileInfo info(QString::fromStdString(
-                     FileUtils::getPhotmetricGridRootPath(true, ui->cb_AnalysisSurvey->currentText().toStdString())) +
-                 QDir::separator() + QString::fromStdString(file_name));
-
-  if (!info.exists()) {
-	logger.debug() << "checkCompatibleModelGrid: no grid with this name";
-	m_cache_compatible_model_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, false};
-    return false;
-  } else {
-
-    auto  axis           = selected_model.getAxesTuple();
-    logger.debug() << "checkCompatibleModelGrid => selected_model content :" << getAxisDescription(axis);
-
-    auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
-         m_survey_model_ptr->getSelectedSurvey().getName(),
-		 axis,
-		 getSelectedFilters(),
-         ui->cb_igm->currentText().toStdString(),
-         ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked,
-         m_IGM_CGM_param_A,
-         m_IGM_CGM_param_a,
-         m_IGM_CGM_param_c,
-		 ui->lbl_lum_filter->text().toStdString(),
-		 ui->lbl_lum_pp_filter->text().toStdString(),
-		 PhotometryGrid);
-
-    logger.debug() << "possible_files "<<possible_files.size();
-
-    bool valid = (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
-    m_cache_compatible_model_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, valid};
-    return valid;
-  }
-}
-
-bool FormAnalysis::checkCompatibleGalacticGrid(std::string file_name) {
-  auto start = std::chrono::high_resolution_clock::now();
-  logger.debug()<<"checkCompatibleGalacticGrid for file "<< file_name;
-  auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
-  auto model_name = selected_model.getName();
-
-  if (std::get<0>(m_cache_compatible_galactic_grid)==model_name && std::get<1>(m_cache_compatible_galactic_grid)==file_name){
- 	return std::get<2>(m_cache_compatible_galactic_grid);
-  }
-
-  QFileInfo info(QString::fromStdString(FileUtils::getGalacticCorrectionGridRootPath(
-                     true, ui->cb_AnalysisSurvey->currentText().toStdString())) +
-                 QDir::separator() + QString::fromStdString(file_name));
-
-  if (!info.exists()) {
-	m_cache_compatible_galactic_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, false};
-    return false;
-  } else {
-	auto stop = std::chrono::high_resolution_clock::now();
-	auto duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
-	logger.debug()<<"checkCompatibleGalacticGrid => No cache, need to actually check the file "<< duration << "[ms]";
-	start = stop;
-
-    auto  axis           = selected_model.getAxesTuple();
-    logger.debug() << "checkCompatibleGalacticGrid => selected_model content :" << getAxisDescription(axis);
-    auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
-         m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
-         ui->cb_igm->currentText().toStdString(),
-         ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked,
-         m_IGM_CGM_param_A,
-         m_IGM_CGM_param_a,
-         m_IGM_CGM_param_c,
-		 ui->lbl_lum_filter->text().toStdString(),
-		 ui->lbl_lum_pp_filter->text().toStdString(),
-         GalacticReddeningCorrectionGrid);
-    stop = std::chrono::high_resolution_clock::now();
-    duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
-	logger.debug()<<"checkCompatibleGalacticGrid => Files checked "<<possible_files.size()<<" compatible files "<< duration << "[ms]";
-	start = stop;
-    bool valid = (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
-    m_cache_compatible_galactic_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, valid};
-    return valid;
-  }
-}
-
-
-bool FormAnalysis::checkCompatibleFilterShiftGrid(std::string file_name) {
-  auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
-  auto model_name = selected_model.getName();
-
-  if (std::get<0>(m_cache_compatible_shift_grid)==model_name && std::get<1>(m_cache_compatible_shift_grid)==file_name){
- 	return std::get<2>(m_cache_compatible_shift_grid);
-  }
-
-  QString full_name = QString::fromStdString(FileUtils::getFilterShiftGridRootPath(
-                          true, ui->cb_AnalysisSurvey->currentText().toStdString())) +
-                      QDir::separator() + QString::fromStdString(file_name);
-  QFileInfo info(full_name);
-
-  if (!info.exists()) {
-	m_cache_compatible_shift_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, false};
-    return false;
-  } else {
-
-    auto  axis           = selected_model.getAxesTuple();
-    logger.debug() << "checkCompatibleFilterShiftGrid => selected_model content :" << getAxisDescription(axis);
-    auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
-         m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
-         ui->cb_igm->currentText().toStdString(),
-         ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked,
-         m_IGM_CGM_param_A,
-         m_IGM_CGM_param_a,
-         m_IGM_CGM_param_c,
-		 ui->lbl_lum_filter->text().toStdString(),
-		 ui->lbl_lum_pp_filter->text().toStdString(),
-		 FilterShiftCorrectionGrid);
-    //  logger.debug()<< "checkCompatibleFilterShiftGrid : there are " << possible_files.size() << " compatible file ";
-    bool valid = (std::find(possible_files.begin(), possible_files.end(), file_name) != possible_files.end());
-    m_cache_compatible_shift_grid =  std::tuple<std::string, std::string, bool>{model_name, file_name, valid};
-    return valid;
-  }
-}
 
 void FormAnalysis::updateGalCorrGridSelection() {
   try {
@@ -858,9 +733,9 @@ void FormAnalysis::on_rb_scaleZTol_toggled(bool on){
 // Set the luminosity filter on DialogFilterSelector popup closing
 void FormAnalysis::setLumFilter(std::string new_filter) {
   ui->lbl_lum_filter->setText(QString::fromStdString(new_filter));
-  m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
-  m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
-  m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
+  m_gridHelper.m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
+  m_gridHelper.m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
+  m_gridHelper.m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
 
   PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                                       ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityFilter",
@@ -872,9 +747,9 @@ void FormAnalysis::setLumFilter(std::string new_filter) {
 
 void FormAnalysis::setPpLumFilter(std::string new_filter) {
   ui->lbl_lum_pp_filter->setText(QString::fromStdString(new_filter));
-  m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
-  m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
-  m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
+  m_gridHelper.m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
+  m_gridHelper.m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
+  m_gridHelper.m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
 
   PreferencesUtils::setUserPreference(ui->cb_AnalysisSurvey->currentText().toStdString(),
                                       ui->cb_AnalysisModel->currentText().toStdString() + "_LuminosityPpFilter",
@@ -1001,7 +876,7 @@ void FormAnalysis::saveIgmToPref(){
 
 // Generate the config for the model grid
 void FormAnalysis::on_btn_GetConfigGrid_clicked() {
-  if (!checkGridSelection(true, true)) {
+  if (!gridHelper::checkGridSelection(true, true, ui->cb_CompatibleGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString())) {
     QMessageBox::warning(
         this, "Unavailable name...",
         "It is not possible to save the Grid under the name you have provided. Please enter a new name.",
@@ -1034,7 +909,7 @@ void FormAnalysis::on_cb_CompatibleGalCorrGrid_currentTextChanged(const QString&
 
 // Generate the config for the MW Correction grid
 void FormAnalysis::on_btn_GetGalCorrConfigGrid_clicked() {
-  if (!checkGalacticGridSelection(true, true)) {
+  if (!gridHelper::checkGalacticGridSelection(true, true, ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString())) {
     QMessageBox::warning(this, "Unavailable name...",
                          "It is not possible to save the Galactic Correction Grid under the name you have provided. "
                          "Please enter a new name.",
@@ -1065,7 +940,7 @@ void FormAnalysis::on_cb_CompatibleShiftGrid_currentTextChanged(const QString&) 
 
 // Generate the config for the Filter Variation grid
 void FormAnalysis::on_btn_GetShiftConfigGrid_clicked() {
-  if (!checkFilterShiftGridSelection(true, true)) {
+  if (!gridHelper::checkFilterShiftGridSelection(true, true, ui->cb_CompatibleShiftGrid->currentText().toStdString(),  ui->cb_AnalysisSurvey->currentText().toStdString())) {
     QMessageBox::warning(this, "Unavailable name...",
                          "It is not possible to save the Filter Variation Coefficients Grid under the name you have "
                          "provided. Please enter a new name.",
@@ -1266,7 +1141,20 @@ void FormAnalysis::on_gb_corrections_clicked() {
 void FormAnalysis::on_btn_computeCorrections_clicked() {
  // Build the Model Grid if needed
   std::list<float> zs{};
-   if (!checkGridSelection(true, false) || !checkCompatibleModelGrid(ui->cb_CompatibleGrid->currentText().toStdString())) {
+  auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+  
+  auto grid_info_object = GridInfoObject{
+         getSelectedFilters(), 
+         ui->cb_igm->currentText().toStdString(),
+         ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked,
+         m_IGM_CGM_param_A,
+         m_IGM_CGM_param_a,
+         m_IGM_CGM_param_c,
+		 ui->lbl_lum_filter->text().toStdString(),
+		 ui->lbl_lum_pp_filter->text().toStdString()};
+  
+   if (!gridHelper::checkGridSelection(true, false, ui->cb_CompatibleGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString()) || 
+       !m_gridHelper.checkCompatibleModelGrid(ui->cb_CompatibleGrid->currentText().toStdString(), m_model_set_model_ptr->getSelectedModelSet(), survey_name, grid_info_object)) {
 	 if (!BuildModelGrid(zs)) {
 	   return;
 	 }
@@ -1274,8 +1162,9 @@ void FormAnalysis::on_btn_computeCorrections_clicked() {
 
   // Build MW correction grid if needed
   bool need_gal_correction       = !ui->rb_gc_off->isChecked();
-  bool has_gal_corr_grid         = checkGalacticGridSelection(true, false);
-  if (need_gal_correction && (!has_gal_corr_grid || !checkCompatibleGalacticGrid(ui->cb_CompatibleGalCorrGrid->currentText().toStdString()))){
+  bool has_gal_corr_grid         = gridHelper::checkGalacticGridSelection(true, false, ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString());
+  if (need_gal_correction && (!has_gal_corr_grid || 
+      !m_gridHelper.checkCompatibleGalacticGrid(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), m_model_set_model_ptr->getSelectedModelSet(), survey_name, grid_info_object))){
 	  if (!BuildMwCorrGrid()) {
 		   return;
 		 }
@@ -1283,14 +1172,14 @@ void FormAnalysis::on_btn_computeCorrections_clicked() {
 
   // build filter shift grid if needed
   bool need_filter_shift_grid    = m_survey_model_ptr->getSelectedSurvey().getDefineFilterShift();
-  bool has_filter_shift_grid     = checkFilterShiftGridSelection(true, false);
-  if (need_filter_shift_grid && (!has_filter_shift_grid || !checkCompatibleFilterShiftGrid(ui->cb_CompatibleShiftGrid->currentText().toStdString()))) {
+  bool has_filter_shift_grid     = gridHelper::checkFilterShiftGridSelection(true, false, ui->cb_CompatibleShiftGrid->currentText().toStdString(),  ui->cb_AnalysisSurvey->currentText().toStdString());
+  if (need_filter_shift_grid && (!has_filter_shift_grid || 
+      !m_gridHelper.checkCompatibleFilterShiftGrid(ui->cb_CompatibleShiftGrid->currentText().toStdString(), m_model_set_model_ptr->getSelectedModelSet(), survey_name, grid_info_object))) {
 	  if (!BuildFilterShiftGrid()) {
 		 return;
 	  }
   }
 
-  auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
 
   SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
 
@@ -1579,7 +1468,7 @@ void FormAnalysis::updateCorrectionSelection() {
 void FormAnalysis::adjustGridsButtons(bool enabled) {
 
   // Model grid Get config button
-  bool model_grid_name_ok = checkGridSelection(false, true);
+  bool model_grid_name_ok = gridHelper::checkGridSelection(false, true, ui->cb_CompatibleGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString());
 
   ui->btn_GetConfigGrid->setEnabled(enabled && model_grid_name_ok);
 
@@ -1597,7 +1486,7 @@ void FormAnalysis::adjustGridsButtons(bool enabled) {
   ui->btn_GetConfigGrid->setToolTip(tool_tip);
 
   // MW reddening grid Get config button
-  bool mw_grid_name_ok  = checkGalacticGridSelection(false, true);
+  bool mw_grid_name_ok  = gridHelper::checkGalacticGridSelection(false, true, ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString());
   bool needed           = !ui->rb_gc_off->isChecked();
   ui->cb_CompatibleGalCorrGrid->setEnabled(needed && enabled);
   ui->btn_GetGalCorrConfigGrid->setEnabled(needed && enabled && mw_grid_name_ok);
@@ -1618,7 +1507,7 @@ void FormAnalysis::adjustGridsButtons(bool enabled) {
 
   // Filter Shift grid Get config button
   auto& curr_catalog = m_survey_model_ptr->getSelectedSurvey();
-  bool fs_grid_name_ok = checkFilterShiftGridSelection(false, true);
+  bool fs_grid_name_ok = gridHelper::checkFilterShiftGridSelection(false, true, ui->cb_CompatibleShiftGrid->currentText().toStdString(),  ui->cb_AnalysisSurvey->currentText().toStdString());
   needed             = curr_catalog.getDefineFilterShift();
   ui->cb_CompatibleShiftGrid->setEnabled(needed && enabled);
   ui->btn_GetShiftConfigGrid->setEnabled(needed && enabled && fs_grid_name_ok);
@@ -1642,11 +1531,11 @@ void FormAnalysis::adjustGridsButtons(bool enabled) {
 
 
 void FormAnalysis::setComputeCorrectionEnable() {
-  bool model_grid_name_exists        = checkGridSelection(false, true);
+  bool model_grid_name_exists        = gridHelper::checkGridSelection(false, true, ui->cb_CompatibleGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString());
   bool gal_corr_needed               = !ui->rb_gc_off->isChecked();
-  bool grid_gal_corr_name_exists     = checkGalacticGridSelection(false, true);
+  bool grid_gal_corr_name_exists     = gridHelper::checkGalacticGridSelection(false, true, ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString());
   bool filter_shift_grid_needed      = m_survey_model_ptr->getSelectedSurvey().getDefineFilterShift();
-  bool grid_filter_shift_name_exists = checkFilterShiftGridSelection(false, true);
+  bool grid_filter_shift_name_exists = gridHelper::checkFilterShiftGridSelection(false, true, ui->cb_CompatibleShiftGrid->currentText().toStdString(),  ui->cb_AnalysisSurvey->currentText().toStdString());
 
   ui->btn_computeCorrections->setEnabled(
                   model_grid_name_exists &&
@@ -1691,13 +1580,13 @@ void FormAnalysis::setComputeCorrectionEnable() {
 
 void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
 
-  bool grid_name_ok     = checkGridSelection(false, true);
+  bool grid_name_ok     = gridHelper::checkGridSelection(false, true, ui->cb_CompatibleGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString());
 
   bool need_gal_correction       = !ui->rb_gc_off->isChecked();
-  bool grid_gal_corr_name_ok     = checkGalacticGridSelection(false, true);
+  bool grid_gal_corr_name_ok     = gridHelper::checkGalacticGridSelection(false, true, ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString());
 
   bool filter_shift_grid_needed      = m_survey_model_ptr->getSelectedSurvey().getDefineFilterShift();
-  bool grid_filter_shift_name_ok     = checkFilterShiftGridSelection(false, true);
+  bool grid_filter_shift_name_ok     = gridHelper::checkFilterShiftGridSelection(false, true, ui->cb_CompatibleShiftGrid->currentText().toStdString(),  ui->cb_AnalysisSurvey->currentText().toStdString());
 
   bool correction_ok =
       !ui->gb_corrections->isChecked() || ui->cb_AnalysisCorrection->currentText().toStdString().length() > 0;
@@ -1892,7 +1781,7 @@ void FormAnalysis::setRunAnnalysisEnable(bool enabled) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool FormAnalysis::BuildModelGrid(const std::list<float>& zs){
-	if (!checkGridSelection(true, true)) {
+	if (!gridHelper::checkGridSelection(true, true, ui->cb_CompatibleGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString())) {
 	    QMessageBox::warning(
 	        this, "Unavailable name...",
 	        "It is not possible to save the Grid under the name you have provided. Please enter a new name.",
@@ -1900,7 +1789,7 @@ bool FormAnalysis::BuildModelGrid(const std::list<float>& zs){
 	    return false; // grid not generated
 	  } else {
 
-	    if (checkGridSelection(true, false)) {
+	    if (gridHelper::checkGridSelection(true, false, ui->cb_CompatibleGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString())) {
 	      if (QMessageBox::warning(this, "Override existing file...",
 	                               "A Model Grid file with the very same name as the one you provided already exist. "
 	                               "Do you want to replace it?",
@@ -1914,9 +1803,9 @@ bool FormAnalysis::BuildModelGrid(const std::list<float>& zs){
 	    dialog->setValues(FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(), ".txt"), config_map,
 	    m_model_set_model_ptr->getSelectedModelSet().getNormValue());
 	    if (dialog->exec()) {
-	      m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
-	      m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
-	      m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
+	      m_gridHelper.m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
+	      m_gridHelper.m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
+	      m_gridHelper.m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
 
 	      saveIgmToPref();
 	      
@@ -1928,14 +1817,14 @@ bool FormAnalysis::BuildModelGrid(const std::list<float>& zs){
 }
 
 bool FormAnalysis::BuildMwCorrGrid(){
-	if (!checkGalacticGridSelection(true, true)) {
+	if (!gridHelper::checkGalacticGridSelection(true, true, ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString())) {
 			QMessageBox::warning(this, "Unavailable name...",
 			"It is not possible to save the Galactic Correction Grid under the name you have provided. "
 			"Please enter a new name.",
 			QMessageBox::Ok);
 		return false; // grid not generated
 	} else {
-		if (checkGalacticGridSelection(true, false)) {
+		if (gridHelper::checkGalacticGridSelection(true, false, ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString())) {
 			if (QMessageBox::warning(
 					this, "Override existing file...",
 					"A Galactic Correction Grid file with the very same name as the one you provided already exist. "
@@ -1951,9 +1840,9 @@ bool FormAnalysis::BuildMwCorrGrid(){
 			dialog->setValues(FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ".txt"),
 			config_map, m_model_set_model_ptr->getSelectedModelSet().getNormValue());
 			if (dialog->exec()) {
-				m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
-				m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
-				m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
+				m_gridHelper.m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
+				m_gridHelper.m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
+				m_gridHelper.m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
 				return true; // build succeed
 			} else {
 				return false; // build failed
@@ -1965,14 +1854,14 @@ bool FormAnalysis::BuildMwCorrGrid(){
 }
 
 bool FormAnalysis::BuildFilterShiftGrid(){
-	if (!checkFilterShiftGridSelection(true, true)) {
+	if (!gridHelper::checkFilterShiftGridSelection(true, true, ui->cb_CompatibleShiftGrid->currentText().toStdString(),  ui->cb_AnalysisSurvey->currentText().toStdString())) {
 						 QMessageBox::warning(this, "Unavailable name...",
 						 "It is not possible to save the Filter Variation Coefficients Grid under the name you have "
 						 "provided. Please enter a new name.",
 						 QMessageBox::Ok);
 		return false; // grid not generated
 	} else {
-		if (checkFilterShiftGridSelection(true, false)) {
+		if (gridHelper::checkFilterShiftGridSelection(true, false, ui->cb_CompatibleShiftGrid->currentText().toStdString(),  ui->cb_AnalysisSurvey->currentText().toStdString())) {
 		  if (QMessageBox::warning(this, "Override existing file...",
 								   "A Filter Variation Coefficients  Grid file with the very same name as the one you "
 								   "provided already exist. "
@@ -1988,9 +1877,9 @@ bool FormAnalysis::BuildFilterShiftGrid(){
 		  std::unique_ptr<DialogFilterShiftGridGeneration> dialog(new DialogFilterShiftGridGeneration());
 		  dialog->setValues(FileUtils::addExt(ui->cb_CompatibleShiftGrid->currentText().toStdString(), ".txt"), config_map, m_model_set_model_ptr->getSelectedModelSet().getNormValue());
 		  if (dialog->exec()) {
-		      m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
-			  m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
-			  m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
+		      m_gridHelper.m_cache_compatible_model_grid = std::tuple<std::string, std::string, bool>{"","",false};
+			  m_gridHelper.m_cache_compatible_galactic_grid= std::tuple<std::string, std::string, bool>{"","",false};
+			  m_gridHelper.m_cache_compatible_shift_grid= std::tuple<std::string, std::string, bool>{"","",false};
 			  return true; // build succeed
 		  } else {
 		      return false; // build failed
@@ -2057,67 +1946,6 @@ std::list<FilterMapping> FormAnalysis::getSelectedFilterMapping() {
   }
 
   return list;
-}
-
-bool FormAnalysis::checkGridSelection(bool addFileCheck, bool acceptNewFile) {
-  std::string file_name = ui->cb_CompatibleGrid->currentText().toStdString();
-
-  if (file_name.compare("<Enter a new name>") == 0) {
-    return false;
-  }
-
-  if (!addFileCheck) {
-    return true;
-  }
-
-  QFileInfo info(QString::fromStdString(
-                     FileUtils::getPhotmetricGridRootPath(false, ui->cb_AnalysisSurvey->currentText().toStdString())) +
-                 QDir::separator() + QString::fromStdString(file_name));
-  return acceptNewFile || (info.exists());
-}
-
-bool FormAnalysis::checkGalacticGridSelection(bool addFileCheck, bool acceptNewFile) {
-  std::string file_name = ui->cb_CompatibleGalCorrGrid->currentText().toStdString();
-
-  if (file_name.compare("<Enter a new name>") == 0) {
-    return false;
-  }
-
-  if (file_name.compare("") == 0) {
-    return false;
-  }
-
-  if (!addFileCheck) {
-    return true;
-  }
-
-  QFileInfo info(QString::fromStdString(FileUtils::getGalacticCorrectionGridRootPath(
-                     true, ui->cb_AnalysisSurvey->currentText().toStdString())) +
-                 QDir::separator() + QString::fromStdString(file_name));
-
-  return acceptNewFile || info.exists();
-}
-
-bool FormAnalysis::checkFilterShiftGridSelection(bool addFileCheck, bool acceptNewFile) {
-  std::string file_name = ui->cb_CompatibleShiftGrid->currentText().toStdString();
-
-  if (file_name.compare("<Enter a new name>") == 0) {
-    return false;
-  }
-
-  if (file_name.compare("") == 0) {
-    return false;
-  }
-
-  if (!addFileCheck) {
-    return true;
-  }
-
-  QFileInfo info(QString::fromStdString(
-                     FileUtils::getFilterShiftGridRootPath(true, ui->cb_AnalysisSurvey->currentText().toStdString())) +
-                 QDir::separator() + QString::fromStdString(file_name));
-
-  return acceptNewFile || info.exists();
 }
 
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getGridConfiguration(const std::list<float>& zs) {
@@ -3249,9 +3077,22 @@ void FormAnalysis::run_analysis_second_part() {
 	  }
 
   }
+  
+  auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
+  
+  auto grid_info_object = GridInfoObject{
+         getSelectedFilters(), 
+         ui->cb_igm->currentText().toStdString(),
+         ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked,
+         m_IGM_CGM_param_A,
+         m_IGM_CGM_param_a,
+         m_IGM_CGM_param_c,
+		 ui->lbl_lum_filter->text().toStdString(),
+		 ui->lbl_lum_pp_filter->text().toStdString()};
 
   // Build the Model Grid if needed
-  if (!checkGridSelection(true, false) || !checkCompatibleModelGrid(ui->cb_CompatibleGrid->currentText().toStdString())) {
+  if (!gridHelper::checkGridSelection(true, false, ui->cb_CompatibleGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString()) || 
+      !m_gridHelper.checkCompatibleModelGrid(ui->cb_CompatibleGrid->currentText().toStdString(), m_model_set_model_ptr->getSelectedModelSet(), survey_name, grid_info_object)) {
  	 if (!BuildModelGrid(zs)) {
  		cleanTempGrids();
  		return;
@@ -3260,8 +3101,9 @@ void FormAnalysis::run_analysis_second_part() {
 
    // Build MW correction grid if needed
    bool need_gal_correction       = !ui->rb_gc_off->isChecked();
-   bool has_gal_corr_grid         = checkGalacticGridSelection(true, false);
-   if (need_gal_correction && (!has_gal_corr_grid || !checkCompatibleGalacticGrid(ui->cb_CompatibleGalCorrGrid->currentText().toStdString()))){
+   bool has_gal_corr_grid         = gridHelper::checkGalacticGridSelection(true, false, ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString());
+   if (need_gal_correction && (!has_gal_corr_grid || 
+      !m_gridHelper.checkCompatibleGalacticGrid(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), m_model_set_model_ptr->getSelectedModelSet(), survey_name, grid_info_object))){
  	  if (!BuildMwCorrGrid()) {
  		 cleanTempGrids();
  		 return;
@@ -3270,8 +3112,9 @@ void FormAnalysis::run_analysis_second_part() {
 
    // build filter shift grid if needed
    bool need_filter_shift_grid    = m_survey_model_ptr->getSelectedSurvey().getDefineFilterShift();
-   bool has_filter_shift_grid     = checkFilterShiftGridSelection(true, false);
-   if (need_filter_shift_grid && (!has_filter_shift_grid || !checkCompatibleFilterShiftGrid(ui->cb_CompatibleShiftGrid->currentText().toStdString()))) {
+   bool has_filter_shift_grid     = gridHelper::checkFilterShiftGridSelection(true, false, ui->cb_CompatibleShiftGrid->currentText().toStdString(),  ui->cb_AnalysisSurvey->currentText().toStdString());
+   if (need_filter_shift_grid && (!has_filter_shift_grid || 
+      !m_gridHelper.checkCompatibleFilterShiftGrid(ui->cb_CompatibleShiftGrid->currentText().toStdString(), m_model_set_model_ptr->getSelectedModelSet(), survey_name, grid_info_object))) {
  	  if (!BuildFilterShiftGrid()) {
  		 cleanTempGrids();
  		 return;
@@ -3298,7 +3141,6 @@ void FormAnalysis::run_analysis_second_part() {
       if (dialog->exec()) {
         // new catalog contains the GAL_EBV column
 
-        auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
         auto input_catalog_file =
             FileUtils::removeStart(dialog->getOutputName(), FileUtils::getCatalogRootPath(false, survey_name) +
                                                                 QString(QDir::separator()).toStdString());
