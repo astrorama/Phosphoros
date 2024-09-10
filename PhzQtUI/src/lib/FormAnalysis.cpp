@@ -83,17 +83,7 @@ FormAnalysis::~FormAnalysis() {}
 //////////////////////////////          Helper function        ////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-static std::string getAxisDescription(const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes) {
-	std::string results = "";
-	for (const auto& item : axes) {
-		results+="Region name ='"+item.first+"', Card(Z) ="+ std::to_string(std::get<0>(item.second).size())
-			                                    +", Card(EBV) ="+ std::to_string(std::get<1>(item.second).size())
-			                                    +", Card(RedCurve) ="+ std::to_string(std::get<2>(item.second).size())
-			                                    +", Card(SED) ="+ std::to_string(std::get<3>(item.second).size())
-												+".\n";
-	}
-	return results;
-}
+
 
 void FormAnalysis::setToolBoxButtonColor(QToolBox* toolBox, int index, QColor color) {
   int i = 0;
@@ -280,7 +270,6 @@ void FormAnalysis::updateGridSelection() {
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
     auto axis = selected_model.getAxesTuple();
-    logger.debug() << "updateGridSelection => selected_model content :" << getAxisDescription(axis);
     auto stop = std::chrono::high_resolution_clock::now();
 	auto duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
 	logger.debug()<<"updateGridSelection => get Axis "<< duration << "[ms]";
@@ -356,7 +345,6 @@ void FormAnalysis::updateGalCorrGridSelection() {
     auto axis           = selected_model.getAxesTuple();
     bool igm_cgm = ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked;
     auto igm = ui->cb_igm->currentText().toStdString();
-    logger.debug() << "updateGalCorrGridSelection => selected_model content :" << getAxisDescription(axis);
     auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
         m_survey_model_ptr->getSelectedSurvey().getName(), axis, getSelectedFilters(),
         igm,
@@ -396,7 +384,6 @@ void FormAnalysis::updateFilterShiftGridSelection() {
     auto axis           = selected_model.getAxesTuple();
     bool igm_cgm = ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked;
     auto igm = ui->cb_igm->currentText().toStdString();
-    logger.debug() << "updateFilterShiftGridSelection => selected_model content :" << getAxisDescription(axis);
     auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(
         m_survey_model_ptr->getSelectedSurvey().getName(), 
         axis, 
@@ -2134,7 +2121,6 @@ bool FormAnalysis::checkSedWeightFile(std::string sed_weight_file_name) {
     try {
       auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
       auto  axis           = selected_model.getAxesTuple();
-      logger.debug() << "checkSedWeightFile => selected_model content :" << getAxisDescription(axis);
 
       std::string file_name = info.absoluteFilePath().toStdString();
       int         hdu_count = 0;

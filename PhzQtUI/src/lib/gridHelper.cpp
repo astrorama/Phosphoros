@@ -23,6 +23,19 @@ namespace PhzQtUI {
 
 static Elements::Logging logger = Elements::Logging::getLogger("gridHelper");
 
+static std::string getAxisDescription(const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes) {
+	std::string results = "";
+	for (const auto& item : axes) {
+		results+="Region name ='"+item.first+"', Card(Z) ="+ std::to_string(std::get<0>(item.second).size())
+			                                    +", Card(EBV) ="+ std::to_string(std::get<1>(item.second).size())
+			                                    +", Card(RedCurve) ="+ std::to_string(std::get<2>(item.second).size())
+			                                    +", Card(SED) ="+ std::to_string(std::get<3>(item.second).size())
+												+".\n";
+	}
+	return results;
+}
+
+
 gridHelper::gridHelper() {}
 
 bool gridHelper::checkGridSelection(bool addFileCheck, bool acceptNewFile, std::string file_name, std::string survey_name) {
