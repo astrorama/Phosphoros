@@ -180,10 +180,6 @@ private:
   std::list<std::string>            getExcludedFilters();
   std::list<FilterMapping>          getSelectedFilterMapping();
 
-  bool BuildModelGrid(const std::list<float>& zs);
-  bool BuildMwCorrGrid();
-  bool BuildFilterShiftGrid();
-
   void setupAlgo();
 
   void updateCopiedColumns(std::list<std::string> new_columns);

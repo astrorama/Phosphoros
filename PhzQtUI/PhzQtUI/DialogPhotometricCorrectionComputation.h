@@ -2,6 +2,8 @@
 #define DIALOGPHOTOMETRICCORRECTIONCOMPUTATION_H
 
 #include "PhzQtUI/FilterMapping.h"
+#include "PhzQtUI/gridHelper.h"
+#include "ModelSet.h"
 #include <QDialog>
 #include <QFutureWatcher>
 #include <list>
@@ -33,7 +35,7 @@ public:
   /**
    * @brief Constructor
    */
-  explicit DialogPhotometricCorrectionComputation(QWidget* parent = 0);
+   DialogPhotometricCorrectionComputation(const std::list<float>& zs, ModelSet& selected_model, gridHelper& grid_helper_instance, GridInfoObject& grid_info_object, QWidget* parent = 0);
 
   /**
    * @brief Destructor
@@ -63,11 +65,32 @@ public:
    * constructing the survey: it is proposed as a default value for the
    * training catalog.
    */
-  void setData(std::string survey, std::string id_column, std::string model, std::string grid,
-               std::list<FilterMapping> selected_filters, std::list<std::string> excluded_filters,
-               std::string default_z_column, std::map<std::string, boost::program_options::variable_value> run_option,
-               const std::map<std::string, boost::program_options::variable_value>& sed_config, double non_detection,
-               std::string dust_map_file, std::string ra_col = "", std::string dec_col = "");
+  void setData(std::string survey, 
+               std::string id_column, 
+               std::string model,
+               std::string grid,
+               std::list<FilterMapping> selected_filters, 
+               std::list<std::string> excluded_filters,
+               std::string default_z_column, 
+               std::map<std::string, boost::program_options::variable_value> run_option,
+               const std::map<std::string, boost::program_options::variable_value>& sed_config, 
+               double non_detection,
+               std::string dust_map_file, 
+               std::string ra_col = "", 
+               std::string dec_col = "");
+               
+  void setGridData(std::string corr_file_name, 
+                std::string filter_grid_file, 
+                std::string mwrc, 
+                double min_value, 
+                double max_value, 
+                int sample_number,
+                bool need_main_grid_computation,
+                bool need_corr_grid_computation, 
+                bool need_filter_grid_computation,
+                bool need_gal_correction,
+                bool need_filter_shift_grid
+                );
 
 signals:
   /**
@@ -144,10 +167,28 @@ private:
   std::string                                                   m_dust_map_file;
   std::string                                                   m_ra_col;
   std::string                                                   m_dec_col;
+  std::string                                                   m_survey_name;
   std::map<std::string, boost::program_options::variable_value> m_run_option;
   std::map<std::string, boost::program_options::variable_value> m_sed_config;
   double                                                        m_non_detection;
   bool                                                          m_computing = false;
+  const std::list<float>&                                       m_zs;
+  ModelSet&                                                     m_selected_model;
+  gridHelper&                                                   m_grid_helper;
+  GridInfoObject&                                               m_grid_info_object;
+  std::string                                                   m_grid_file_name;
+  std::string                                                   m_corr_file_name;
+  std::string                                                   m_filter_grid_file; 
+  std::string                                                   m_mwrc;
+  double                                                        m_min_value; 
+  double                                                        m_max_value; 
+  int                                                           m_sample_number;
+  bool                                                          m_need_main_grid_computation = false;
+  bool                                                          m_need_corr_grid_computation = false;
+  bool                                                          m_need_filter_grid_computation = false;
+  bool                                                          m_need_gal_correction= false;
+  bool                                                          m_need_filter_shift_grid= false;
+  
   void                                                          disablePage();
   void                                                          enablePage();
   std::string                                                   runFunction();
