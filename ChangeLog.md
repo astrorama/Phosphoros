@@ -6,7 +6,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Note: the issue number refer to SDC-CH internal tracking.
-## [2.0.4] 2024-09-03
+## [2.0.5] 2024-09-13
+### Fixed
+ - Fix the spelling in the GUI (mpc³=>Mpc³). https://redmine.isdc.unige.ch/issues/31985
+
+### Changed
+ - Remove the default value for the volume type in the luminosity prior. https://redmine.isdc.unige.ch/issues/31984
+ - Remove grid computation in the GUI when configuring the Luminosity Prior. https://redmine.isdc.unige.ch/issues/31994
+ - Remove grid computation in the GUI when comfiguring the Zero point correction. https://redmine.isdc.unige.ch/issues/31994
+ - Add a log when the PP computation failed. https://redmine.isdc.unige.ch/issues/32030
+
+## [2.0.4] 2024-09-02
 ### Fixed
  - In the GUI, replace the currentIndexChanged which was deprecated.
 

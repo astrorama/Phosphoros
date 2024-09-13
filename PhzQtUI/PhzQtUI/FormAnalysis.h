@@ -19,6 +19,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include "PhzQtUI/gridHelper.h"
 
 namespace boost {
 namespace program_options {
@@ -179,10 +180,6 @@ private:
   std::list<std::string>            getExcludedFilters();
   std::list<FilterMapping>          getSelectedFilterMapping();
 
-  bool BuildModelGrid(const std::list<float>& zs);
-  bool BuildMwCorrGrid();
-  bool BuildFilterShiftGrid();
-
   void setupAlgo();
 
   void updateCopiedColumns(std::list<std::string> new_columns);
@@ -205,11 +202,8 @@ private:
   
   void saveIgmToPref();
 
-  bool checkGridSelection(bool addFileCheck, bool acceptNewFile);
   bool checkCompatibleModelGrid(std::string file_name);
-  bool checkGalacticGridSelection(bool addFileCheck, bool acceptNewFile);
   bool checkCompatibleGalacticGrid(std::string file_name);
-  bool checkFilterShiftGridSelection(bool addFileCheck, bool acceptNewFile);
   bool checkCompatibleFilterShiftGrid(std::string file_name);
   std::map<std::string, boost::program_options::variable_value> getGridConfiguration(const std::list<float>& zs);
   std::map<std::string, boost::program_options::variable_value> getGalacticCorrectionGridConfiguration();
@@ -253,9 +247,7 @@ private:
   std::string                    m_planck_url =
       "https://lambda.gsfc.nasa.gov/data/foregrounds/EBV/lambda_meisner_finkbeiner_2015_dust_map.fits";
   bool m_is_loading=false;
-  std::tuple<std::string, std::string, bool> m_cache_compatible_model_grid{"","",false};
-  std::tuple<std::string, std::string, bool> m_cache_compatible_galactic_grid{"","",false};
-  std::tuple<std::string, std::string, bool> m_cache_compatible_shift_grid{"","",false};
+  gridHelper m_gridHelper{};
 };
 
 }  // namespace PhzQtUI

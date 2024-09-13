@@ -55,8 +55,8 @@ namespace Euclid {
 namespace PhzQtUI {
 static Elements::Logging logger = Elements::Logging::getLogger("DialogPhotometricCorrectionComputation");
 
-DialogPhotometricCorrectionComputation::DialogPhotometricCorrectionComputation(QWidget* parent)
-    : QDialog(parent), ui(new Ui::DialogPhotometricCorrectionComputation) {
+DialogPhotometricCorrectionComputation::DialogPhotometricCorrectionComputation(const std::list<float>& zs, ModelSet& selected_model, gridHelper& grid_helper_instance, GridInfoObject& grid_info_object,QWidget* parent)
+    : m_zs{zs}, m_selected_model{selected_model}, m_grid_helper{grid_helper_instance}, m_grid_info_object{grid_info_object}, QDialog(parent), ui(new Ui::DialogPhotometricCorrectionComputation) {
   ui->setupUi(this);
   m_non_detection = 0.;
   ui->txt_Iteration->setValidator(new QIntValidator(1, 1000, this));
@@ -89,8 +89,14 @@ void DialogPhotometricCorrectionComputation::setData(
   m_ra_col           = ra_col;
   m_dec_col          = dec_col;
   ui->txt_survey->setText(QString::fromStdString(survey));
+  m_survey_name=survey;
   ui->txt_Model->setText(QString::fromStdString(model));
   ui->txt_grid->setText(QString::fromStdString(grid));
+  m_grid_file_name = grid;
+  ui->lbl_gal_grid->setText(QString::fromStdString(""));
+  ui->txt_gal_grid->setText(QString::fromStdString(""));
+  ui->lbl_filter_grid->setText(QString::fromStdString(""));
+  ui->txt_filter_grid->setText(QString::fromStdString(""));
 
   QStandardItemModel* grid_model = new QStandardItemModel();
   grid_model->setColumnCount(1);
@@ -108,6 +114,41 @@ void DialogPhotometricCorrectionComputation::setData(
   ui->txt_FileName->setText(QString::fromStdString(default_file_name));
 
   logger.info() << "ra_col = " << m_ra_col << " dec_col = " << m_dec_col;
+}
+
+
+void DialogPhotometricCorrectionComputation::setGridData(std::string corr_file_name, 
+                std::string filter_grid_file, 
+                std::string mwrc, 
+                double min_value, 
+                double max_value, 
+                int sample_number,
+                bool need_main_grid_computation,
+                bool need_corr_grid_computation, 
+                bool need_filter_grid_computation,
+                bool need_gal_correction,
+                bool need_filter_shift_grid) {
+  
+  m_corr_file_name = corr_file_name;
+  m_filter_grid_file = filter_grid_file; 
+  m_mwrc = mwrc;
+  m_min_value = min_value; 
+  m_max_value = max_value; 
+  m_sample_number = sample_number;
+  m_need_main_grid_computation = need_main_grid_computation;
+  m_need_corr_grid_computation = need_corr_grid_computation;
+  m_need_filter_grid_computation = need_filter_grid_computation;
+  m_need_gal_correction= need_gal_correction;
+  m_need_filter_shift_grid= need_filter_shift_grid;  
+     
+  if (m_need_gal_correction) {
+    ui->lbl_gal_grid->setText(QString::fromStdString("Galactic Corr. Grid :"));
+    ui->txt_gal_grid->setText(QString::fromStdString(corr_file_name));
+  }
+  if (m_need_filter_shift_grid) {
+    ui->lbl_filter_grid->setText(QString::fromStdString("Filter Shift Grid :"));
+    ui->txt_filter_grid->setText(QString::fromStdString(m_filter_grid_file));
+  }        
 }
 
 bool DialogPhotometricCorrectionComputation::loadTestCatalog(QString file_name, bool with_warning) {
@@ -293,6 +334,8 @@ void DialogPhotometricCorrectionComputation::enablePage() {
 
 std::string DialogPhotometricCorrectionComputation::runFunction() {
 
+
+
   try {
 
     int max_iter_number = ui->txt_Iteration->text().toInt();
@@ -434,6 +477,20 @@ void DialogPhotometricCorrectionComputation::reject() {
 }
 
 void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
+    if (m_need_main_grid_computation && !m_grid_helper.BuildModelGrid(m_zs, m_grid_file_name, m_selected_model, m_survey_name, m_grid_info_object, this)) {
+        return;
+    }
+
+    if (m_need_gal_correction && m_need_corr_grid_computation && !m_grid_helper.BuildMwCorrGrid(m_corr_file_name, m_selected_model, m_survey_name, m_grid_info_object, m_grid_file_name, m_mwrc, this)) {
+        return;
+    }
+
+    if (m_need_filter_shift_grid && m_need_filter_grid_computation && !m_grid_helper.BuildFilterShiftGrid(m_filter_grid_file, m_selected_model, m_survey_name, m_grid_info_object, m_grid_file_name, m_mwrc, m_min_value, m_max_value, m_sample_number, this)) {
+        return;
+    }
+
+
+
   if (m_run_option.find("dust-column-density-column-name") != m_run_option.end() &&
       m_run_option.at("dust-column-density-column-name").as<std::string>() == "PLANCK_GAL_EBV") {
 
@@ -480,14 +537,86 @@ void DialogPhotometricCorrectionComputation::on_bt_Run_clicked() {
 
 void DialogPhotometricCorrectionComputation::on_btn_conf_clicked() {
 
-  int  max_iter_number = ui->txt_Iteration->text().toInt();
-  auto config_map      = PhotometricCorrectionHandler::GetConfigurationMap(
-      m_run_option, ui->txt_survey->text().toStdString(), ui->txt_FileName->text().toStdString(), max_iter_number,
-      FormUtils::parseToDouble(ui->txt_Tolerence->text()), ui->cb_SelectionMethod->currentText().toStdString(),
-      ui->txt_catalog->text().toStdString(), ui->cb_SpectroColumn->currentText().toStdString());
+  // get a folder to save the config
+  QFileDialog dialog(this);
+  dialog.setFileMode(QFileDialog::Directory);
+  dialog.setDirectory(QString::fromStdString(FileUtils::getRootPath(true)) + "config");
+  dialog.setOption(QFileDialog::DontUseNativeDialog);
+  dialog.setLabelText(QFileDialog::Accept, "Select Folder");
+  if (dialog.exec()) {
+        auto selected_folder = dialog.selectedFiles()[0];
+      
+        QString cr{"\n\n"};
+        QString command{""};
 
-  completeWithDefaults<PhzConfiguration::ComputePhotometricCorrectionsConfig>(config_map);
-  std::vector<std::string> correction = {"PDF-sample-number",
+        // Model Grid
+        auto grid_model_file_name  = selected_folder + QString::fromStdString("/ModelGrid.CMG.conf");
+        auto grid_model_config_map = gridHelper::getGridConfiguration(m_zs, m_selected_model, m_survey_name, m_grid_info_object, m_grid_file_name);
+                                                                                        
+        PhzUITools::ConfigurationWriter::writeConfiguration(grid_model_config_map, grid_model_file_name.toStdString());
+        command += QString::fromStdString("Phosphoros CMG --config-file ") + grid_model_file_name + cr;
+
+        // GalCorr Grid
+        if (m_need_gal_correction) {
+          auto grid_galactic_corr_file_name = selected_folder + QString::fromStdString("/GalacticCorrGrid.CGCCG.conf");
+          auto galactic_corr_config_map     = gridHelper::getGalacticCorrectionGridConfiguration(this,
+                                                                          m_survey_name, 
+                                                                          m_grid_info_object, 
+                                                                          m_grid_file_name,
+                                                                          m_corr_file_name,
+                                                                          m_mwrc);
+          PhzUITools::ConfigurationWriter::writeConfiguration(galactic_corr_config_map,
+                                                              grid_galactic_corr_file_name.toStdString());
+          command += QString::fromStdString("Phosphoros CGCCG --config-file ") + grid_galactic_corr_file_name + cr;
+        }
+
+        // FilterShift Grid
+        if (m_need_filter_shift_grid) {
+          auto filter_shift_corr_file_name =
+              selected_folder + QString::fromStdString("/FilterVariationCoefficientGrid.CFVCG.conf");
+          auto filter_shift_config_map = gridHelper::getFilterShiftGridConfiguration(m_min_value, m_max_value, m_sample_number, m_grid_info_object, m_grid_file_name, m_filter_grid_file, m_survey_name, m_mwrc);
+          PhzUITools::ConfigurationWriter::writeConfiguration(filter_shift_config_map,
+                                                              filter_shift_corr_file_name.toStdString());
+          command += QString::fromStdString("Phosphoros CFVCG --config-file ") + filter_shift_corr_file_name + cr;
+        } 
+       
+        if (m_sed_config.size() > 0) {
+          completeWithDefaults<PhzConfiguration::ComputeSedWeightConfig>(m_sed_config);
+          auto sed_file_name = selected_folder + QString::fromStdString("/FilterVariationCoefficientGrid.CSW.conf"); 
+          PhzUITools::ConfigurationWriter::writeConfiguration(m_sed_config, sed_file_name.toStdString());
+          command += QString::fromStdString("Phosphoros CSW --config-file ") + sed_file_name + cr;
+        }
+        
+        if (m_run_option.find("dust-column-density-column-name") != m_run_option.end() && m_run_option.at("dust-column-density-column-name").as<std::string>() == "PLANCK_GAL_EBV") {
+            std::string path             = ui->txt_catalog->text().toStdString();
+            auto        column_reader    = PhzUITools::CatalogColumnReader(path);
+            auto        column_from_file = column_reader.getColumnNames();
+            if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
+                path = ui->txt_catalog->text().toStdString();
+                std::map<std::string, boost::program_options::variable_value> add_column_options_map{};
+                add_column_options_map["planck-dust-map"].value() = boost::any(m_dust_map_file);
+                add_column_options_map["galatic-ebv-col"].value() = boost::any(std::string("PLANCK_GAL_EBV"));
+                add_column_options_map["input-catalog"].value()   = boost::any(path);
+                add_column_options_map["ra"].value()              = boost::any(m_ra_col);
+                add_column_options_map["dec"].value()             = boost::any(m_dec_col);
+                add_column_options_map["output-catalog"].value()  = boost::any(path);
+                auto lookup_planck_file_name                      = selected_folder + QString::fromStdString("/AddPlackDustColumnDensity.AGDD.conf"); 
+
+                PhzUITools::ConfigurationWriter::writeConfiguration(add_column_options_map, lookup_planck_file_name.toStdString());
+                command += QString::fromStdString("Phosphoros AGDD --config-file ") + lookup_planck_file_name + cr;
+            }
+        }
+        
+        // Prepare CPC config
+
+        int  max_iter_number = ui->txt_Iteration->text().toInt();
+        auto config_map      = PhotometricCorrectionHandler::GetConfigurationMap(
+        m_run_option, ui->txt_survey->text().toStdString(), ui->txt_FileName->text().toStdString(), max_iter_number,
+        FormUtils::parseToDouble(ui->txt_Tolerence->text()), ui->cb_SelectionMethod->currentText().toStdString(),
+        ui->txt_catalog->text().toStdString(), ui->cb_SpectroColumn->currentText().toStdString());
+
+        completeWithDefaults<PhzConfiguration::ComputePhotometricCorrectionsConfig>(config_map);
+        std::vector<std::string> correction = {"PDF-sample-number",
                                          "create-output-best-likelihood-model",
                                          "create-output-best-model",
                                          "enable-photometric-correction",
@@ -499,62 +628,27 @@ void DialogPhotometricCorrectionComputation::on_btn_conf_clicked() {
                                          "photometric-correction-file",
                                          "phz-output-dir"};
 
-  for (const auto& value : correction) {
-    config_map.erase(value);
-  }
+        for (const auto& value : correction) {
+            config_map.erase(value);
+        }
+        
+        auto cpcfile_name = selected_folder + QString::fromStdString("/ComputeZeroPointCorrection.CPC.conf"); 
 
-  QString filter = "Config (*.CPC.conf)";
-  QString fileName =
-      QFileDialog::getSaveFileName(this, tr("Save Configuration File"),
-                                   QString::fromStdString(FileUtils::getRootPath(true)) + "config", filter, &filter);
-  if (fileName.length() > 0) {
+        PhzUITools::ConfigurationWriter::writeConfiguration(config_map, cpcfile_name.toStdString());
+        command += QString::fromStdString("Phosphoros CPC --config-file ") + cpcfile_name;
 
-    QString cr{"\n\n"};
-    QString command{""};
-
-    if (!fileName.endsWith(".CPC.conf", Qt::CaseInsensitive)) {
-      fileName = fileName + ".CPC.conf";
+        // command file
+        auto cmd_file_name = selected_folder + QString::fromStdString("/Command.cmd"); 
+        std::ofstream file;
+        file.open(cmd_file_name.toStdString());
+        file << command.toStdString();
+        file.close();
     }
+ }
 
-    PhzUITools::ConfigurationWriter::writeConfiguration(config_map, fileName.toStdString());
-    command += QString::fromStdString("Phosphoros CPC --config-file ") + fileName;
 
-    if (m_run_option.find("dust-column-density-column-name") != m_run_option.end() &&
-        m_run_option.at("dust-column-density-column-name").as<std::string>() == "PLANCK_GAL_EBV") {
-      std::string path             = ui->txt_catalog->text().toStdString();
-      auto        column_reader    = PhzUITools::CatalogColumnReader(path);
-      auto        column_from_file = column_reader.getColumnNames();
-      if (column_from_file.find("PLANCK_GAL_EBV") == column_from_file.end()) {
-        path = ui->txt_catalog->text().toStdString();
-        std::map<std::string, boost::program_options::variable_value> add_column_options_map{};
-        add_column_options_map["planck-dust-map"].value() = boost::any(m_dust_map_file);
-        add_column_options_map["galatic-ebv-col"].value() = boost::any(std::string("PLANCK_GAL_EBV"));
-        add_column_options_map["input-catalog"].value()   = boost::any(path);
-        add_column_options_map["ra"].value()              = boost::any(m_ra_col);
-        add_column_options_map["dec"].value()             = boost::any(m_dec_col);
-        add_column_options_map["output-catalog"].value()  = boost::any(path);
-        auto lookup_planck_file_name                      = fileName.replace(".CPC.conf", ".AGDD.conf");
 
-        PhzUITools::ConfigurationWriter::writeConfiguration(add_column_options_map,
-                                                            lookup_planck_file_name.toStdString());
-        command = QString::fromStdString("Phosphoros AGDD --config-file ") + lookup_planck_file_name + cr + command;
-      }
-    }
-    if (m_sed_config.size() > 0) {
-      completeWithDefaults<PhzConfiguration::ComputeSedWeightConfig>(m_sed_config);
-      auto sed_file_name = fileName.replace(".CPC.conf", ".CSW.conf").replace(".AGDD.conf", ".CSW.conf");
-      PhzUITools::ConfigurationWriter::writeConfiguration(m_sed_config, sed_file_name.toStdString());
-      command = QString::fromStdString("Phosphoros CSW --config-file ") + sed_file_name + cr + command;
-    }
 
-    auto cmd_file_name =
-        fileName.replace(".CPC.conf", ".cmd").replace(".AGDD.conf", ".cmd").replace(".CSW.conf", ".cmd");
-    std::ofstream file;
-    file.open(cmd_file_name.toStdString());
-    file << command.toStdString();
-    file.close();
-  }
-}
 
 }  // namespace PhzQtUI
 }  // namespace Euclid

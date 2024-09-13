@@ -68,7 +68,7 @@ public:
    * @param z_max The maximal value of the redshift (also contained in the model)
    *
    */
-  void loadData(ModelSet model, std::string survey_name, std::string model_grid, double z_min, double z_max);
+  void loadData(ModelSet model, std::string survey_name, double z_min, double z_max);
 
   /*
    * @brief called for updating the progress bar
@@ -204,8 +204,6 @@ private:
   ModelSet m_model;
 
   std::string m_survey_name;
-
-  std::string m_model_grid_name;
 
   double m_z_min;
 

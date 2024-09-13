@@ -57,13 +57,12 @@ DialogLuminosityPrior::DialogLuminosityPrior(std::string filter,
 
 DialogLuminosityPrior::~DialogLuminosityPrior() {}
 
-void DialogLuminosityPrior::loadData(ModelSet model, std::string survey_name, std::string model_grid, double z_min,
+void DialogLuminosityPrior::loadData(ModelSet model, std::string survey_name, double z_min,
                                      double z_max) {
   m_config_folder = QString::fromStdString(FileUtils::getGUILuminosityPriorConfig(true, survey_name, model.getName()));
   m_prior_configs = LuminosityPriorConfig::readFolder(m_config_folder.toStdString());
   m_model         = std::move(model);
   m_survey_name   = survey_name;
-  m_model_grid_name = model_grid;
   m_z_min           = z_min;
   m_z_max           = z_max;
 
