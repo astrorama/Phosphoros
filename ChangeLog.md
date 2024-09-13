@@ -10,11 +10,11 @@ Note: the issue number refer to SDC-CH internal tracking.
 ### Fixed
  - Fix the spelling in the GUI (mpc³=>Mpc³). https://redmine.isdc.unige.ch/issues/31985
 
-
 ### Changed
  - Remove the default value for the volume type in the luminosity prior. https://redmine.isdc.unige.ch/issues/31984
  - Remove grid computation in the GUI when configuring the Luminosity Prior. https://redmine.isdc.unige.ch/issues/31994
  - Remove grid computation in the GUI when comfiguring the Zero point correction. https://redmine.isdc.unige.ch/issues/31994
+ - Add a log when the PP computation failed. https://redmine.isdc.unige.ch/issues/32030
 
 ## [2.0.4] 2024-09-02
 ### Fixed
