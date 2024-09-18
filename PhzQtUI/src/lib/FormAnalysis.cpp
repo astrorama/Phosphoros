@@ -2648,7 +2648,7 @@ void FormAnalysis::get_config_run_second_part() {
         SurveyFilterMapping selected_survey = m_survey_model_ptr->getSelectedSurvey();
         std::map<std::string, boost::program_options::variable_value> add_column_options_map{};
         add_column_options_map["planck-dust-map"].value() = boost::any(m_planck_file);
-        add_column_options_map["galatic-ebv-col"].value() = boost::any(std::string("PLANCK_GAL_EBV"));
+        add_column_options_map["galactic-ebv-col"].value() = boost::any(std::string("PLANCK_GAL_EBV"));
         add_column_options_map["input-catalog"].value()   = boost::any(path);
         add_column_options_map["ra"].value()              = boost::any(selected_survey.getRaColumn());
         add_column_options_map["dec"].value()             = boost::any(selected_survey.getDecColumn());

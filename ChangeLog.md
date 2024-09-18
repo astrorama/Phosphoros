@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Note: the issue number refer to SDC-CH internal tracking.
 ## [2.0.6]
+### Fixed
+ - Fix the spelling galatic-ebv-col=>galactic-ebv-col. https://redmine.isdc.unige.ch/issues/32057
+
 ### Changed
  - Change the EZL program to export config file compatible list. https://redmine.isdc.unige.ch/issues/32054
 

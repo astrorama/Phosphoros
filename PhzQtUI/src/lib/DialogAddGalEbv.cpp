@@ -78,7 +78,7 @@ void DialogAddGalEbv::on_btn_create_clicked() {
 
     // Call the python code
     std::string program = "AddGalDustToCatalog --planck-dust-map \"" + m_dust_map_file +
-                          "\" --galatic-ebv-col PLANCK_GAL_EBV --input-catalog \"" + m_input_name +
+                          "\" --galactic-ebv-col PLANCK_GAL_EBV --input-catalog \"" + m_input_name +
                           "\" --output-catalog \"" + m_name + "\" --ra " + m_ra_col + " --dec " + m_dec_col;
     std::string command = "";
 

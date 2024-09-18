@@ -595,7 +595,7 @@ void DialogPhotometricCorrectionComputation::on_btn_conf_clicked() {
                 path = ui->txt_catalog->text().toStdString();
                 std::map<std::string, boost::program_options::variable_value> add_column_options_map{};
                 add_column_options_map["planck-dust-map"].value() = boost::any(m_dust_map_file);
-                add_column_options_map["galatic-ebv-col"].value() = boost::any(std::string("PLANCK_GAL_EBV"));
+                add_column_options_map["galactic-ebv-col"].value() = boost::any(std::string("PLANCK_GAL_EBV"));
                 add_column_options_map["input-catalog"].value()   = boost::any(path);
                 add_column_options_map["ra"].value()              = boost::any(m_ra_col);
                 add_column_options_map["dec"].value()             = boost::any(m_dec_col);
