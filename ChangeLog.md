@@ -12,6 +12,7 @@ Note: the issue number refer to SDC-CH internal tracking.
 
 ### Changed
  - Change the EZL program to export config file compatible list. https://redmine.isdc.unige.ch/issues/32054
+ - Add a message when the error recomputation param do not match the sources photometries. https://redmine.isdc.unige.ch/issues/32074
 
 ## [2.0.5]
 ### Fixed
