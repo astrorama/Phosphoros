@@ -42,6 +42,12 @@ except ImportError:
 logger = Logging.getLogger('PhosphorosPlotSpecZComparison')
 
 
+def trim_column(col):
+    if str(col.dtype)[0]=='S' or str(col.dtype)[1]=='S': # S9 or <S9
+        return np.char.strip(col).astype(str)
+    else:
+        return col
+
 #
 # -------------------------------------------------------------------------------
 #
@@ -57,6 +63,7 @@ def read_specz_catalog(filename, id_col, specz_col):
             'ERROR : Spec-z catalog does not have column with name {}'.format(specz_col))
     if not specz_col == 'SPECZ':
         specz_cat.rename_column(specz_col, 'SPECZ')
+    specz_cat['ID'] = trim_column(specz_cat['ID'])
     return specz_cat[['ID', 'SPECZ']]
 
 
@@ -90,6 +97,7 @@ def read_phosphoros_catalog(out_cat, id_col, phz_col, pe_cat):
         if col.endswith('-1D-PDF'):
             cols.append(col)
 
+    phos_cat['ID'] = trim_column(phos_cat['ID'])
     return phos_cat[cols]
 
 #

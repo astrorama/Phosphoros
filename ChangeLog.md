@@ -9,6 +9,7 @@ Note: the issue number refer to SDC-CH internal tracking.
 ## [2.0.6]
 ### Fixed
  - Fix the spelling galatic-ebv-col=>galactic-ebv-col. https://redmine.isdc.unige.ch/issues/32057
+ - Fix a problem in PlotSpecZComparison for string's ID columns. https://redmine.isdc.unige.ch/issues/32411
 
 ### Changed
  - Change the EZL program to export config file compatible list. https://redmine.isdc.unige.ch/issues/32054
