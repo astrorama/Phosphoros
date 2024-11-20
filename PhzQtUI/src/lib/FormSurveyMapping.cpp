@@ -525,7 +525,7 @@ void FormSurveyMapping::on_btn_map_delete_clicked() {
 
     if (QMessageBox::question(
             this, "Confirm deletion...",
-            "Do you really want to delete the Catalog Type '" + QString::fromStdString(catalog_name) +
+            "Do you really want to delete the Catalog Directory '" + QString::fromStdString(catalog_name) +
                 "' ?\n \n"
                 "!!! WARNING !!!\n"
                 "This action will also DELETE :\n"

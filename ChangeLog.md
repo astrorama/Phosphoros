@@ -10,8 +10,11 @@ Note: the issue number refer to SDC-CH internal tracking.
 ### Fixed
  - Fix the spelling galatic-ebv-col=>galactic-ebv-col. https://redmine.isdc.unige.ch/issues/32057
  - Fix a problem in PlotSpecZComparison for string's ID columns. https://redmine.isdc.unige.ch/issues/32411
+ - Add a check to ensure filter order. https://redmine.isdc.unige.ch/issues/32460
+ - Change the wording to avoid confusion between catalog and folder. https://redmine.isdc.unige.ch/issues/32410
 
 ### Changed
+ - Switch to PhosphorosCore 2.1.6
  - Change the EZL program to export config file compatible list. https://redmine.isdc.unige.ch/issues/32054
  - Add a message when the error recomputation param do not match the sources photometries. https://redmine.isdc.unige.ch/issues/32074
 
