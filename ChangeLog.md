@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Note: the issue number refer to SDC-CH internal tracking.
+## [2.0.7]
+
 ## [2.0.6] 2024-11-22
 ### Fixed
  - Fix the spelling galatic-ebv-col=>galactic-ebv-col. https://redmine.isdc.unige.ch/issues/32057
