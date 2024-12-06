@@ -1152,7 +1152,7 @@ void FormAnalysis::on_btn_computeCorrections_clicked() {
   bool has_gal_corr_grid         = gridHelper::checkGalacticGridSelection(true, false, ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString());
   
   std::string mwrc             = ui->cb_MWRC->currentText().toStdString();
-  std::string corr_file_name = FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(), ".txt");
+  std::string gal_corr_file_name = FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ".txt");
   if (need_gal_correction && (!has_gal_corr_grid || 
       !m_gridHelper.checkCompatibleGalacticGrid(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), m_model_set_model_ptr->getSelectedModelSet(), survey_name, grid_info_object))){
          need_corr_grid_computation = true;
@@ -1200,7 +1200,7 @@ void FormAnalysis::on_btn_computeCorrections_clicked() {
                  ui->cb_AnalysisModel->currentText().toStdString(), main_file_name,
                  getSelectedFilterMapping(), getExcludedFilters(), selected_survey.getRefZColumn(), config_map,
                  config_sed_weight, selected_survey.getNonDetection(), m_planck_file, ra_col, dec_col);
-  popup->setGridData(corr_file_name, filter_grid_file, mwrc, min_value, max_value, sample_number, need_main_grid_computation, need_corr_grid_computation, need_filter_grid_computation, need_gal_correction, need_filter_shift_grid);
+  popup->setGridData(gal_corr_file_name, filter_grid_file, mwrc, min_value, max_value, sample_number, need_main_grid_computation, need_corr_grid_computation, need_filter_grid_computation, need_gal_correction, need_filter_shift_grid);
 
   connect(popup.get(), SIGNAL(correctionComputed(const QString&)), SLOT(onCorrectionComputed(const QString&)));
   popup->exec();
@@ -2875,10 +2875,10 @@ void FormAnalysis::run_analysis_second_part() {
    bool has_gal_corr_grid         = gridHelper::checkGalacticGridSelection(true, false, ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString());
    
    std::string mwrc             = ui->cb_MWRC->currentText().toStdString();
-   std::string corr_file_name = FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(), ".txt");
+   std::string gal_corr_file_name = FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ".txt");
    if (need_gal_correction && (!has_gal_corr_grid || 
       !m_gridHelper.checkCompatibleGalacticGrid(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), m_model_set_model_ptr->getSelectedModelSet(), survey_name, grid_info_object))){
- 	  if (!m_gridHelper.BuildMwCorrGrid(corr_file_name,   m_model_set_model_ptr->getSelectedModelSet(), survey_name, grid_info_object, main_file_name, mwrc, this)) {
+ 	  if (!m_gridHelper.BuildMwCorrGrid(gal_corr_file_name,   m_model_set_model_ptr->getSelectedModelSet(), survey_name, grid_info_object, main_file_name, mwrc, this)) {
  		 cleanTempGrids();
  		 return;
  		 }
