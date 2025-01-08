@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Note: the issue number refer to SDC-CH internal tracking.
 ## [2.0.7]
+### Fixed
+ - Fix the name of the galactic correction grid name when generated through the GUI. https://redmine.isdc.unige.ch/issues/32422
+ - Fix the configuration file for CPC. https://redmine.isdc.unige.ch/issues/32508
 
 ## [2.0.6] 2024-11-22
 ### Fixed

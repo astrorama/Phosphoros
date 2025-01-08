@@ -626,7 +626,9 @@ void DialogPhotometricCorrectionComputation::on_btn_conf_clicked() {
                                          "output-pdf-format",
                                          "output-pdf-normalized",
                                          "photometric-correction-file",
-                                         "phz-output-dir"};
+                                         "phz-output-dir",
+                                         "output-corrected-photometry",
+                                         "copy-columns"};
 
         for (const auto& value : correction) {
             config_map.erase(value);
