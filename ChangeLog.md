@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Note: the issue number refer to SDC-CH internal tracking.
-## [2.0.7]
+## [2.0.7] 2025-01-10
 ### Fixed
  - Fix the name of the galactic correction grid name when generated through the GUI. https://redmine.isdc.unige.ch/issues/32422
  - Fix the configuration file for CPC. https://redmine.isdc.unige.ch/issues/32508
