@@ -58,6 +58,9 @@ void OptionModel::loadOption(DatasetRepo filter_repository, DatasetRepo seds_rep
   m_loglevel_saved  = QString::fromStdString(PreferencesUtils::getLogLevel());
   m_loglevel_edited = m_loglevel_saved;
 
+  m_GridFormat_saved  = QString::fromStdString(PreferencesUtils::getGridFormat());
+  m_GridFormat_edited = m_GridFormat_saved;
+  
   m_buffer_size_saved  = PreferencesUtils::getBufferSize();
   m_buffer_size_edited = m_buffer_size_saved;
 
@@ -134,6 +137,11 @@ QString OptionModel::getLogLevel() {
   return m_loglevel_edited;
 }
 
+QString OptionModel::getGridFormat() {
+  return m_GridFormat_edited;
+}
+
+
 size_t OptionModel::getBufferSize() {
   return m_buffer_size_edited;
 }
@@ -182,6 +190,7 @@ void OptionModel::save() {
     m_max_memory_saved = m_max_memory_edited;
 
     m_loglevel_saved = m_loglevel_edited;
+    m_GridFormat_saved = m_GridFormat_edited;
 
     std::map<std::string, std::string> map{};
     map.insert(std::make_pair("LastUsed", FileUtils::getLastUsedPath()));
@@ -205,6 +214,7 @@ void OptionModel::save() {
 
     PreferencesUtils::setBufferSize(m_buffer_size_saved);
     PreferencesUtils::setLogLevel(m_loglevel_saved.toStdString());
+    PreferencesUtils::setGridFormat(m_GridFormat_saved.toStdString());
 
     std::unique_ptr<XYDataset::FileParser>         filter_file_parser{new XYDataset::AsciiParser{}};
     std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(
@@ -247,6 +257,7 @@ void OptionModel::cancel() {
     m_cap_memory_edited      = m_cap_memory_saved;
     m_max_memory_edited      = m_max_memory_saved;
     m_loglevel_edited        = m_loglevel_saved;
+    m_GridFormat_edited      = m_GridFormat_saved;
     m_buffer_size_edited     = m_buffer_size_saved;
     m_global_edition         = false;
   }
@@ -328,6 +339,11 @@ void OptionModel::setCapMemory(bool custom) {
 void OptionModel::setLogLevel(QString new_log_level) {
   m_global_edition  = true;
   m_loglevel_edited = new_log_level;
+}
+
+void OptionModel::setGridFormat(QString new_grid_format) {
+  m_global_edition  = true;
+  m_GridFormat_edited = new_grid_format;
 }
 
 void OptionModel::setBufferSize(int new_buffer_size) {

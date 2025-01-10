@@ -125,6 +125,8 @@ private slots:
   void on_sb_memory_valueChanged(double value);
 
   void on_cb_logLevel_currentIndexChanged(int index);
+  
+  void on_cb_grid_type_currentIndexChanged(int index);
 
   /**
    * @brief SLOT Raised when the user cancel the cosmology edition

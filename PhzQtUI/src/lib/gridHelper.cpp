@@ -246,7 +246,8 @@ std::map<std::string, boost::program_options::variable_value> gridHelper::getGri
     for (auto& pair : cosmo_conf) {
         config[pair.first] = pair.second;
     }
-    std::string text_format                    = "TEXT";
+    std::string tex_suffix = ".txt";
+    std::string text_format                    =(FileUtils::ends_with(file_name, tex_suffix))? "TEXT":"BINARY";
     config["output-model-grid-format"].value() = boost::any(text_format);
     return config;
 }
@@ -295,7 +296,8 @@ std::map<std::string, boost::program_options::variable_value> gridHelper::getGal
       options_map["catalog-type"].value()                                = boost::any(catalog_type);
       options_map["output-galactic-correction-coefficient-grid"].value() = boost::any(file_name);
 
-      std::string text_format                                                   = "TEXT";
+      std::string tex_suffix = ".txt";
+      std::string text_format                    =(FileUtils::ends_with(file_name, tex_suffix))? "TEXT":"BINARY";
       options_map["output-galactic-correction-coefficient-grid-format"].value() = boost::any(text_format);
 
       options_map["model-grid-file"].value()         = boost::any(grid_name);
@@ -347,7 +349,7 @@ std::map<std::string, boost::program_options::variable_value> gridHelper::getFil
   if (mwrc=="Fitzpatrick 1999") {
  	  mwrc_arg = "F99/F99_3.1";
   }
-  std::string text_format      = "TEXT";
+
   options_map["filter-variation-min-shift"].value()     = boost::any(min_value);
   options_map["filter-variation-max-shift"].value()     = boost::any(max_value);
   options_map["filter-variation-shift-samples"].value() = boost::any(sample_number);
@@ -383,6 +385,8 @@ std::map<std::string, boost::program_options::variable_value> gridHelper::getFil
   
   options_map["model-grid-file"].value()         = boost::any(grid_name);
   options_map["output-filter-variation-coefficient-grid"].value()        = boost::any(output_grid_name);
+  std::string tex_suffix = ".txt";
+  std::string text_format                    =(FileUtils::ends_with(output_grid_name, tex_suffix))? "TEXT":"BINARY";
   options_map["output-filter-variation-coefficient-grid-format"].value() = boost::any(text_format);
   return options_map;
 }

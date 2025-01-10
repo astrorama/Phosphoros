@@ -38,6 +38,7 @@ public:
   double  getMaxMemory();
   size_t  getBufferSize();
   QString getLogLevel();
+  QString getGridFormat();
   double  getHubble();
   double  getOmegaM();
   double  getOmegaLambda();
@@ -85,6 +86,8 @@ public slots:
   void setMaxMemory(double max_memory);
 
   void setLogLevel(QString new_log_level);
+  
+  void setGridFormat(QString new_log_level);
 
   void setBufferSize(int buffer_size);
 
@@ -134,6 +137,8 @@ private:
   size_t  m_buffer_size_edited;
   QString m_loglevel_saved;
   QString m_loglevel_edited;
+  QString m_GridFormat_saved;
+  QString m_GridFormat_edited;
   double  m_hubble_saved;
   double  m_hubble_edited;
   double  m_omega_m_saved;

@@ -262,6 +262,8 @@ void FormAnalysis::updateSelection() {
 //  Handle controls enability
 
 void FormAnalysis::updateGridSelection() {
+
+  std::string grid_ext = PreferencesUtils::getGridFormat();
   auto start = std::chrono::high_resolution_clock::now();
   logger.debug() << "Entering updateGridSelection";
   try {
@@ -318,7 +320,7 @@ void FormAnalysis::updateGridSelection() {
       }
       
       ui->cb_CompatibleGrid->addItem(QString::fromStdString("Grid_" + selected_model.getName() + "_") +
-                                     ui->cb_igm->currentText() + CGM_test + ".txt");
+                                     ui->cb_igm->currentText() + CGM_test + QString::fromStdString(grid_ext));
     }
     ui->cb_CompatibleGrid->addItem("<Enter a new name>");
     m_is_loading=false;
@@ -337,6 +339,8 @@ void FormAnalysis::updateGridSelection() {
 
 
 void FormAnalysis::updateGalCorrGridSelection() {
+
+  std::string grid_ext = PreferencesUtils::getGridFormat();
   try {
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
     
@@ -367,7 +371,7 @@ void FormAnalysis::updateGalCorrGridSelection() {
           CGM_test="_CGM";
       }
       ui->cb_CompatibleGalCorrGrid->addItem(QString::fromStdString("Grid_" + selected_model.getName() + "_") +
-                                            ui->cb_igm->currentText() + CGM_test + "_MW_Param.txt");
+                                            ui->cb_igm->currentText() + CGM_test + "_MW_Param"+QString::fromStdString(grid_ext));
     }
 
     ui->cb_CompatibleGalCorrGrid->addItem("<Enter a new name>");
@@ -376,6 +380,8 @@ void FormAnalysis::updateGalCorrGridSelection() {
 }
 
 void FormAnalysis::updateFilterShiftGridSelection() {
+
+  std::string grid_ext = PreferencesUtils::getGridFormat();
   try {
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
 
@@ -408,7 +414,7 @@ void FormAnalysis::updateFilterShiftGridSelection() {
           CGM_test="_CGM";
       }
       ui->cb_CompatibleShiftGrid->addItem(QString::fromStdString("Grid_" + selected_model.getName() + "_") +
-                                          ui->cb_igm->currentText() + CGM_test + "_FS_Param.txt");
+                                          ui->cb_igm->currentText() + CGM_test + "_FS_Param"+QString::fromStdString(grid_ext));
     }
 
     ui->cb_CompatibleShiftGrid->addItem("<Enter a new name>");
@@ -808,6 +814,8 @@ void FormAnalysis::on_rb_gc_planck_clicked() {
 
 // Change the name of the Model Grid
 void FormAnalysis::on_cb_CompatibleGrid_currentTextChanged(const QString&) {
+
+    std::string grid_ext = PreferencesUtils::getGridFormat();
 	if (!m_is_loading){
 	  std::string grid_name = ui->cb_CompatibleGrid->currentText().toStdString();
 	  size_t      index     = grid_name.find_last_of("/\\");
@@ -822,12 +830,12 @@ void FormAnalysis::on_cb_CompatibleGrid_currentTextChanged(const QString&) {
 
 	  if (!ui->rb_gc_off->isChecked()) {
 		  ui->cb_CompatibleGalCorrGrid->setItemText(ui->cb_CompatibleGalCorrGrid->currentIndex(),
-		  												QString::fromStdString(grid_name + "_MW_Param.txt"));
+		  												QString::fromStdString(grid_name + "_MW_Param"+grid_ext));
 	  }
 
 	  if (m_survey_model_ptr->getSelectedSurvey().getDefineFilterShift()) {
 		  ui->cb_CompatibleShiftGrid->setItemText(ui->cb_CompatibleShiftGrid->currentIndex(),
-		  												QString::fromStdString(grid_name + "_FS_Param.txt"));
+		  												QString::fromStdString(grid_name + "_FS_Param"+grid_ext));
 	  }
 
 
@@ -1121,6 +1129,8 @@ void FormAnalysis::on_gb_corrections_clicked() {
 // Open the DialogPhotometricCorrectionComputation popup
 void FormAnalysis::on_btn_computeCorrections_clicked() {
 
+  std::string grid_ext = PreferencesUtils::getGridFormat();
+
   bool need_main_grid_computation = false;
   bool need_corr_grid_computation = false;
   bool need_filter_grid_computation = false;
@@ -1141,7 +1151,7 @@ void FormAnalysis::on_btn_computeCorrections_clicked() {
   
   
   
-   std::string main_file_name = FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(), ".txt");
+   std::string main_file_name = FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(), grid_ext);
    if (!gridHelper::checkGridSelection(true, false, ui->cb_CompatibleGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString()) || 
        !m_gridHelper.checkCompatibleModelGrid(ui->cb_CompatibleGrid->currentText().toStdString(), m_model_set_model_ptr->getSelectedModelSet(), survey_name, grid_info_object)) {
 	 need_main_grid_computation=true;
@@ -1152,7 +1162,7 @@ void FormAnalysis::on_btn_computeCorrections_clicked() {
   bool has_gal_corr_grid         = gridHelper::checkGalacticGridSelection(true, false, ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString());
   
   std::string mwrc             = ui->cb_MWRC->currentText().toStdString();
-  std::string gal_corr_file_name = FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ".txt");
+  std::string gal_corr_file_name = FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), grid_ext);
   if (need_gal_correction && (!has_gal_corr_grid || 
       !m_gridHelper.checkCompatibleGalacticGrid(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), m_model_set_model_ptr->getSelectedModelSet(), survey_name, grid_info_object))){
          need_corr_grid_computation = true;
@@ -1161,7 +1171,7 @@ void FormAnalysis::on_btn_computeCorrections_clicked() {
   // build filter shift grid if needed
   bool need_filter_shift_grid    = m_survey_model_ptr->getSelectedSurvey().getDefineFilterShift();
   bool has_filter_shift_grid     = gridHelper::checkFilterShiftGridSelection(true, false, ui->cb_CompatibleShiftGrid->currentText().toStdString(),  ui->cb_AnalysisSurvey->currentText().toStdString());
-  std::string filter_grid_file = FileUtils::addExt(ui->cb_CompatibleShiftGrid->currentText().toStdString(), ".txt");
+  std::string filter_grid_file = FileUtils::addExt(ui->cb_CompatibleShiftGrid->currentText().toStdString(),grid_ext);
   double      min_value        = ui->sp_samp_min->value();
   double      max_value        = ui->sp_samp_max->value();
   int         sample_number    = ui->sp_samp_num->value();
@@ -1827,7 +1837,8 @@ std::list<FilterMapping> FormAnalysis::getSelectedFilterMapping() {
 }
 
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getGridConfiguration(const std::list<float>& zs) {
-    std::string file_name = FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(), ".txt");
+    std::string grid_ext = PreferencesUtils::getGridFormat();
+    std::string file_name = FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(), grid_ext);
     auto& selected_model = m_model_set_model_ptr->getSelectedModelSet();
     auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
     auto grid_info_object = GridInfoObject{
@@ -1846,6 +1857,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 }
 
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getGalacticCorrectionGridConfiguration() {
+    std::string grid_ext = PreferencesUtils::getGridFormat();
     std::string catalog_type = ui->cb_AnalysisSurvey->currentText().toStdString();
     auto grid_info_object = GridInfoObject{
          getSelectedFilters(), 
@@ -1857,7 +1869,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 	     ui->lbl_lum_filter->text().toStdString(),
 	     ui->lbl_lum_pp_filter->text().toStdString()};
     std::string grid_name    = ui->cb_CompatibleGrid->currentText().toStdString();
-    std::string file_name = FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ".txt");
+    std::string file_name = FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), grid_ext);
     std::string mwrc         = ui->cb_MWRC->currentText().toStdString();
 
     auto options_map = gridHelper::getGalacticCorrectionGridConfiguration(this,
@@ -1871,6 +1883,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
 }
 
 std::map<std::string, boost::program_options::variable_value> FormAnalysis::getFilterShiftGridConfiguration() {
+    std::string grid_ext = PreferencesUtils::getGridFormat();
     double      min_value        = ui->sp_samp_min->value();
     double      max_value        = ui->sp_samp_max->value();
     int         sample_number    = ui->sp_samp_num->value();
@@ -1885,7 +1898,7 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getF
 	     ui->lbl_lum_pp_filter->text().toStdString()};
 
     std::string grid_name        = ui->cb_CompatibleGrid->currentText().toStdString();
-    std::string output_grid_name = FileUtils::addExt(ui->cb_CompatibleShiftGrid->currentText().toStdString(), ".txt");		
+    std::string output_grid_name = FileUtils::addExt(ui->cb_CompatibleShiftGrid->currentText().toStdString(), grid_ext);		
     std::string survey_name      = ui->cb_AnalysisSurvey->currentText().toStdString();
     std::string mwrc             = ui->cb_MWRC->currentText().toStdString(); 
     auto options_map = gridHelper::getFilterShiftGridConfiguration(min_value, max_value, sample_number, grid_info_object, grid_name, output_grid_name, survey_name, mwrc);
@@ -2858,12 +2871,13 @@ void FormAnalysis::run_analysis_second_part() {
 		 ui->lbl_lum_filter->text().toStdString(),
 		 ui->lbl_lum_pp_filter->text().toStdString()};
 
-  std::string main_file_name = FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(), ".txt");
+  std::string grid_ext = PreferencesUtils::getGridFormat();
+  std::string main_file_name = FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(), grid_ext);
   // Build the Model Grid if needed
   if (!gridHelper::checkGridSelection(true, false, ui->cb_CompatibleGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString()) || 
       !m_gridHelper.checkCompatibleModelGrid(ui->cb_CompatibleGrid->currentText().toStdString(), m_model_set_model_ptr->getSelectedModelSet(), survey_name, grid_info_object)) {
  	 if (!m_gridHelper.BuildModelGrid(zs, main_file_name, m_model_set_model_ptr->getSelectedModelSet(), survey_name, grid_info_object, this)) {
- 	    ui->cb_CompatibleGrid->setItemText(ui->cb_CompatibleGrid->currentIndex(), QString::fromStdString(FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(), ".txt")));
+ 	    ui->cb_CompatibleGrid->setItemText(ui->cb_CompatibleGrid->currentIndex(), QString::fromStdString(FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(), grid_ext)));
  	    saveIgmToPref(); 
  		cleanTempGrids();
  		return;
@@ -2875,7 +2889,7 @@ void FormAnalysis::run_analysis_second_part() {
    bool has_gal_corr_grid         = gridHelper::checkGalacticGridSelection(true, false, ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ui->cb_AnalysisSurvey->currentText().toStdString());
    
    std::string mwrc             = ui->cb_MWRC->currentText().toStdString();
-   std::string gal_corr_file_name = FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), ".txt");
+   std::string gal_corr_file_name = FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), grid_ext);
    if (need_gal_correction && (!has_gal_corr_grid || 
       !m_gridHelper.checkCompatibleGalacticGrid(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), m_model_set_model_ptr->getSelectedModelSet(), survey_name, grid_info_object))){
  	  if (!m_gridHelper.BuildMwCorrGrid(gal_corr_file_name,   m_model_set_model_ptr->getSelectedModelSet(), survey_name, grid_info_object, main_file_name, mwrc, this)) {
@@ -2887,7 +2901,7 @@ void FormAnalysis::run_analysis_second_part() {
    // build filter shift grid if needed
    bool need_filter_shift_grid    = m_survey_model_ptr->getSelectedSurvey().getDefineFilterShift();
    bool has_filter_shift_grid     = gridHelper::checkFilterShiftGridSelection(true, false, ui->cb_CompatibleShiftGrid->currentText().toStdString(),  ui->cb_AnalysisSurvey->currentText().toStdString());
-   std::string filter_grid_file = FileUtils::addExt(ui->cb_CompatibleShiftGrid->currentText().toStdString(), ".txt");
+   std::string filter_grid_file = FileUtils::addExt(ui->cb_CompatibleShiftGrid->currentText().toStdString(), grid_ext);
    double      min_value        = ui->sp_samp_min->value();
    double      max_value        = ui->sp_samp_max->value();
    int         sample_number    = ui->sp_samp_num->value();

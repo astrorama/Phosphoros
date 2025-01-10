@@ -52,11 +52,20 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(const QString      file_path
     // We directly use the boost archive, because we just need the grid info
     // from the beginning of the file. Reading the full file whould be very
     // slow
-
+    std::string file_name = file_path.toStdString();
     PhzDataModel::PhotometryGridInfo grid_info;
-    std::ifstream                    in{file_path.toStdString()};
-    boost::archive::text_iarchive    bia{in};
-    bia >> grid_info;
+    std::ifstream                    in{file_name};
+    std::string tex_suffix = ".txt";
+    if (FileUtils::ends_with(file_name, tex_suffix)) {
+       boost::archive::text_iarchive    bia{in};
+       bia >> grid_info;
+    } else {
+       boost::archive::binary_iarchive   bia{in};
+       bia >> grid_info;
+    }
+
+    
+ 
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
   	logger.debug()<<"Grid info loaded "<< duration << "[ms]";

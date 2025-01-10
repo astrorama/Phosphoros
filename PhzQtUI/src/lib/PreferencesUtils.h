@@ -41,6 +41,10 @@ public:
   static std::string getLogLevel();
 
   static void setLogLevel(std::string value);
+  
+  static std::string getGridFormat();
+  
+  static void setGridFormat(std::string value);
 
   static int getBufferSize();
 

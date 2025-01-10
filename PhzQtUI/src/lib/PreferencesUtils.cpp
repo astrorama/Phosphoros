@@ -150,6 +150,19 @@ void PreferencesUtils::setLogLevel(std::string value) {
   setUserPreference("_global_preferences_", "Log-Level", value);
 }
 
+std::string PreferencesUtils::getGridFormat() {
+  auto value = getUserPreference("_global_preferences_", "Grid-Format");
+  if (value.length() == 0) {
+    return ".txt";
+  } else {
+    return value;
+  }
+}
+
+void PreferencesUtils::setGridFormat(std::string value) {
+  setUserPreference("_global_preferences_", "Grid-Format", value);
+}
+
 int PreferencesUtils::getBufferSize() {
   auto value = getUserPreference("_global_preferences_", "Buffer-Size");
   if (value.length() == 0) {

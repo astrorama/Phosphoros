@@ -11,6 +11,9 @@ Note: the issue number refer to SDC-CH internal tracking.
  - Fix the name of the galactic correction grid name when generated through the GUI. https://redmine.isdc.unige.ch/issues/32422
  - Fix the configuration file for CPC. https://redmine.isdc.unige.ch/issues/32508
 
+### Changed
+ - Add the possibility to choose the grid file format in the GUI. https://redmine.isdc.unige.ch/issues/32507?
+
 ## [2.0.6] 2024-11-22
 ### Fixed
  - Fix the spelling galatic-ebv-col=>galactic-ebv-col. https://redmine.isdc.unige.ch/issues/32057
