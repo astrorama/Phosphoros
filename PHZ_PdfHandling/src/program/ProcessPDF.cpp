@@ -121,6 +121,7 @@ public:
     logger.info("# Open The input file");
     auto reader    = FitsReader(config_manager.getConfiguration<PdfHandlingConfiguration>().getInputCatalogName());
     auto input_col = reader.getInfo();
+    auto id_col_info = input_col.getDescription(id_col_name);
 
     logger.info("# Create The output file");
     auto output_name = config_manager.getConfiguration<PdfHandlingConfiguration>().getOutputCatalogName();
@@ -138,7 +139,7 @@ public:
     logger.info("# Define Output file columns");
     
     std::vector<ColumnInfo::info_type> info_full_list{
-        ColumnInfo::info_type(prefix + "SOURCE_ID", typeid(std::string), "", "Unique ID")
+        ColumnInfo::info_type(prefix + "SOURCE_ID", id_col_info.type, "", "Unique ID")
     };
     
     if  (output_name== "./temp.fits") {
@@ -245,7 +246,7 @@ public:
                 full_pdf, config_manager.getConfiguration<PdfHandlingConfiguration>().getMergeRatio(), 2);
           }
           
-           std::vector<Row::cell_type> full_values0{id_str};
+           std::vector<Row::cell_type> full_values0{id};
            if  (output_name== "./temp.fits") {
                 full_values0 =  std::vector<Row::cell_type>{};
                 for (auto& cell : row) {
