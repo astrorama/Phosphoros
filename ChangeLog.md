@@ -9,6 +9,7 @@ Note: the issue number refer to SDC-CH internal tracking.
 ## [2.0.8]
 ### Fixed
  - Fix the type of the output ID column in the ProcessPDF tool. https://redmine.isdc.unige.ch/issues/32706
+ - Ensure the BPPC remove existing output file instead of appening to it. https://redmine.isdc.unige.ch/issues/32767
 
 ## [2.0.7] 2025-01-10
 ### Fixed
