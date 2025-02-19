@@ -10,6 +10,10 @@ Note: the issue number refer to SDC-CH internal tracking.
 ### Fixed
  - Fix the type of the output ID column in the ProcessPDF tool. https://redmine.isdc.unige.ch/issues/32706
  - Ensure the BPPC remove existing output file instead of appening to it. https://redmine.isdc.unige.ch/issues/32767
+ 
+### Changed
+ - Add an error when the PhysicalParameterConfigFile is missing or not readable. https://redmine.isdc.unige.ch/issues/32959
+ - Add the log of the posterior to the sampled output. https://redmine.isdc.unige.ch/issues/32957
 
 ## [2.0.7] 2025-01-10
 ### Fixed
