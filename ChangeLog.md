@@ -6,7 +6,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Note: the issue number refer to SDC-CH internal tracking.
-## [2.0.8]
+## [2.0.9] unrelised
+
+## [2.0.8] 2025-01-19
 ### Fixed
  - Fix the type of the output ID column in the ProcessPDF tool. https://redmine.isdc.unige.ch/issues/32706
  - Ensure the BPPC remove existing output file instead of appening to it. https://redmine.isdc.unige.ch/issues/32767
