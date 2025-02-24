@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Note: the issue number refer to SDC-CH internal tracking.
+
+## [2.0.10] 2025-02-24
+ - Output the integral of the posterior
+
 ## [2.0.9] 2025-02-21
  - Fix the sampling of the PDF when we sample the Scal factor 
 
