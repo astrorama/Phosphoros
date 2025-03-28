@@ -61,6 +61,9 @@ elements_add_executable(PhosphorosUI src/program/Main.cpp
 elements_add_unit_test(QtUI_FileUtils_test tests/src/QtUI_FileUtils_test.cpp
                        LINK_LIBRARIES PhzQtUI TYPE Boost)
 
+elements_add_unit_test(QtUI_ColumnUtils_test tests/src/QtUI_ColumnUtils_test.cpp
+                       LINK_LIBRARIES PhzQtUI TYPE Boost)
+                       
 elements_add_unit_test(Range_test tests/src/Range_test.cpp
                        LINK_LIBRARIES PhzQtUI TYPE Boost)
 elements_add_unit_test(ParameterRule_test tests/src/ParameterRule_test.cpp

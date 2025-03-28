@@ -14,6 +14,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include "PhzQtUI/ColumnUtils.h"
 
 namespace Euclid {
 namespace PhzQtUI {
@@ -64,6 +65,8 @@ private slots:
   void filter_model_changed(QStandardItem*);
 
   void filterMappingSelectionChanged(const QItemSelection&, const QItemSelection&);
+  
+  void filterGridCurrentChanged(int currentRow, int previousRow);
 
   void filterEditionPopupClosing(std::vector<std::string>);
 
@@ -129,6 +132,7 @@ private:
 
   std::vector<std::string>   getGridFiltersNames() const;
   std::vector<FilterMapping> getMappingFromGrid() const;
+  ColumnUtils m_columnUtils{{}};
 };
 
 }  // namespace PhzQtUI

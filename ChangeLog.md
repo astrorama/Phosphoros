@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Note: the issue number refer to SDC-CH internal tracking.
 
+## [2.0.11] unreleased
+- GUI predict the column to match a filter, drop down display relevant columns first. https://redmine.isdc.unige.ch/issues/32407
+
+
 ## [2.0.10] 2025-02-24
  - Output the integral of the posterior
 

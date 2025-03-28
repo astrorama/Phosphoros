@@ -10,6 +10,7 @@
 #include "PhzUITools/CatalogColumnReader.h"
 
 #include "FileUtils.h"
+#include "PhzQtUI/ColumnUtils.h"
 #include "PhzQtUI/DialogCatalogName.h"
 #include "PhzQtUI/DialogFilterMapping.h"
 #include "PhzQtUI/FilterModel.h"
@@ -72,6 +73,8 @@ void FormSurveyMapping::updateSelection(bool force_reload_cb) {
   setFilterMappingInView();
 }
 
+
+
 std::set<std::string> FormSurveyMapping::getFilteredColumns() {
   const SurveyFilterMapping& selected_survey = m_survey_model_ptr->getSelectedSurvey();
   auto                       full_list       = std::set<std::string>{selected_survey.getColumnList()};
@@ -86,6 +89,8 @@ std::set<std::string> FormSurveyMapping::getFilteredColumns() {
 
 void FormSurveyMapping::fillControlsWithSelected() {
   const SurveyFilterMapping& selected_survey = m_survey_model_ptr->getSelectedSurvey();
+  
+  m_columnUtils.changeColumnList(getFilteredColumns());
 
   m_default_survey = selected_survey.getDefaultCatalogFile();
   ui->tb_df->setText(QString::fromStdString(m_default_survey));
@@ -106,6 +111,7 @@ void FormSurveyMapping::fillControlsWithSelected() {
   if (ui->table_Filter->model() != NULL) {
     disconnect(ui->table_Filter->model(), SIGNAL(itemChanged(QStandardItem*)), 0, 0);
   }
+  
 
   if (ui->table_Filter->selectionModel() != NULL) {
     disconnect(ui->table_Filter->selectionModel(),
@@ -114,15 +120,15 @@ void FormSurveyMapping::fillControlsWithSelected() {
 
   FilterModel* filter_model = new FilterModel(FileUtils::getFilterRootPath(false));
   filter_model->setFilters(selected_survey.getFilters());
-  ui->table_Filter->setItemDelegateForColumn(1, new FilterMappingItemDelegate(getFilteredColumns()));
-  ui->table_Filter->setItemDelegateForColumn(2, new FilterMappingItemDelegate(getFilteredColumns()));
+  ui->table_Filter->setItemDelegateForColumn(1, new FilterMappingItemDelegate(m_columnUtils.getOrderedList("",ColumnUtils::Category::FLUX)));
+  ui->table_Filter->setItemDelegateForColumn(2, new FilterMappingItemDelegate(m_columnUtils.getOrderedList("",ColumnUtils::Category::ERROR)));
 
   ui->table_Filter->setItemDelegateForColumn(4, new NumberItemDelegate());
   ui->table_Filter->setItemDelegateForColumn(5, new NumberItemDelegate());
   ui->table_Filter->setItemDelegateForColumn(6, new NumberItemDelegate());
   ui->table_Filter->setItemDelegateForColumn(7, new NumberItemDelegate());
   ui->table_Filter->setItemDelegateForColumn(8, new BoolItemDelegate());
-  ui->table_Filter->setItemDelegateForColumn(9, new FilterMappingItemDelegate(getFilteredColumns(), "NONE"));
+  ui->table_Filter->setItemDelegateForColumn(9, new FilterMappingItemDelegate(m_columnUtils.getOrderedList("",ColumnUtils::Category::SHIFT), "NONE"));
 
   ui->table_Filter->setModel(filter_model);
   ui->table_Filter->setColumnHidden(3, true);
@@ -138,6 +144,7 @@ void FormSurveyMapping::fillControlsWithSelected() {
   ui->btn_prop_err->setEnabled(ui->table_Filter->selectionModel()->hasSelection());
 
   connect(ui->table_Filter->model(), SIGNAL(itemChanged(QStandardItem*)), SLOT(filter_model_changed(QStandardItem*)));
+  
   connect(ui->table_Filter->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
           SLOT(filterMappingSelectionChanged(const QItemSelection&, const QItemSelection&)));
 }
@@ -293,6 +300,8 @@ void FormSurveyMapping::loadColumnFromFile(std::string path) {
   m_column_from_file = column_reader.getColumnNames();
   m_survey_model_ptr->setColumnListToSelected(m_column_from_file);
   m_survey_model_ptr->setDefaultCatalogToSelected(QString::fromStdString(path));
+  
+  m_columnUtils.changeColumnList(getFilteredColumns());
 
   auto current_id_text   = ui->cb_SourceId->currentText();
   auto current_ra_text   = ui->cb_Ra->currentText();
@@ -426,10 +435,10 @@ void FormSurveyMapping::on_btn_exit_clicked() {
 void FormSurveyMapping::copyingFinished(bool s, QVector<QString> path) {
   if (s) {
     logger.info() << "file copied to " << path[0].toStdString();
-    loadColumnFromFile(path[0].toStdString());
-    ui->table_Filter->setItemDelegateForColumn(1, new FilterMappingItemDelegate(getFilteredColumns()));
-    ui->table_Filter->setItemDelegateForColumn(2, new FilterMappingItemDelegate(getFilteredColumns()));
-    ui->table_Filter->setItemDelegateForColumn(9, new FilterMappingItemDelegate(getFilteredColumns(), "NONE"));
+    loadColumnFromFile(path[0].toStdString());  
+    ui->table_Filter->setItemDelegateForColumn(1, new FilterMappingItemDelegate(m_columnUtils.getOrderedList("",ColumnUtils::Category::FLUX)));
+    ui->table_Filter->setItemDelegateForColumn(2, new FilterMappingItemDelegate(m_columnUtils.getOrderedList("",ColumnUtils::Category::ERROR)));
+    ui->table_Filter->setItemDelegateForColumn(9, new FilterMappingItemDelegate(m_columnUtils.getOrderedList("",ColumnUtils::Category::SHIFT), "NONE"));
     m_default_survey = path[0].toStdString();
     m_survey_model_ptr->setDefaultCatalogToSelected(QString::fromStdString(m_default_survey));
     m_survey_model_ptr->setColumnListToSelected(m_column_from_file);
@@ -668,7 +677,18 @@ void FormSurveyMapping::on_btn_MapSave_clicked() {
   }
 }
 
-void FormSurveyMapping::filterMappingSelectionChanged(const QItemSelection&, const QItemSelection&) {
+void FormSurveyMapping::filterGridCurrentChanged(int currentRow, int previousRow) {
+// not used as the filterMappingSelectionChanged event is call too late
+    if (currentRow!=previousRow){
+        FilterModel*    model     = static_cast<FilterModel*>(ui->table_Filter->model());
+        QString     filter_file   = QString::fromStdString(model->getFilter(currentRow).getFilterFile());
+        ui->table_Filter->setItemDelegateForColumn(1, new FilterMappingItemDelegate(m_columnUtils.getOrderedList(filter_file,ColumnUtils::Category::FLUX)));
+        ui->table_Filter->setItemDelegateForColumn(2, new FilterMappingItemDelegate(m_columnUtils.getOrderedList(filter_file,ColumnUtils::Category::ERROR)));
+        ui->table_Filter->setItemDelegateForColumn(9, new FilterMappingItemDelegate(m_columnUtils.getOrderedList(filter_file,ColumnUtils::Category::SHIFT), "NONE"));
+    }
+}
+
+void FormSurveyMapping::filterMappingSelectionChanged(const QItemSelection& current, const QItemSelection& previous) {
   ui->btn_prop_err->setEnabled(ui->table_Filter->selectionModel()->hasSelection());
 }
 
@@ -682,7 +702,9 @@ void FormSurveyMapping::on_btn_ImportColumn_clicked() {
   if (dialog.exec()) {
     QStringList fileNames = dialog.selectedFiles();
     loadColumnFromFile(fileNames[0].toStdString());
-    ui->table_Filter->setItemDelegate(new FilterMappingItemDelegate(m_column_from_file));
+    ui->table_Filter->setItemDelegateForColumn(1, new FilterMappingItemDelegate(m_columnUtils.getOrderedList("",ColumnUtils::Category::FLUX)));
+    ui->table_Filter->setItemDelegateForColumn(2, new FilterMappingItemDelegate(m_columnUtils.getOrderedList("",ColumnUtils::Category::ERROR)));
+    ui->table_Filter->setItemDelegateForColumn(9, new FilterMappingItemDelegate(m_columnUtils.getOrderedList("",ColumnUtils::Category::SHIFT), "NONE"));
     m_default_survey = fileNames[0].toStdString();
     ui->tb_df->setText(QString::fromStdString(m_default_survey));
     m_survey_model_ptr->setDefaultCatalogToSelected(QString::fromStdString(m_default_survey));
@@ -759,6 +781,14 @@ void FormSurveyMapping::filterEditionPopupClosing(std::vector<std::string> filte
   for (auto& new_filter : filters) {
     FilterMapping new_filter_mapping{};
     new_filter_mapping.setFilterFile(new_filter);
+    if (m_columnUtils.hasData()){
+        new_filter_mapping.setFluxColumn(m_columnUtils.getOrderedList(QString::fromStdString(new_filter),ColumnUtils::Category::FLUX)[0].toStdString());
+        new_filter_mapping.setErrorColumn(m_columnUtils.getOrderedList(QString::fromStdString(new_filter),ColumnUtils::Category::ERROR)[0].toStdString());
+        
+        if (m_survey_model_ptr->getSelectedSurvey().getDefineFilterShift()) {
+            new_filter_mapping.setShiftColumn(m_columnUtils.getOrderedList(QString::fromStdString(new_filter),ColumnUtils::Category::SHIFT)[0].toStdString());
+        }
+    }
     new_filters.push_back(new_filter_mapping);
   }
 
@@ -774,9 +804,10 @@ void FormSurveyMapping::filterEditionPopupClosing(std::vector<std::string> filte
 
   m_survey_model_ptr->setFiltersToSelected(new_filters);
 
-  ui->table_Filter->setItemDelegateForColumn(1, new FilterMappingItemDelegate(getFilteredColumns()));
-  ui->table_Filter->setItemDelegateForColumn(2, new FilterMappingItemDelegate(getFilteredColumns()));
-  ui->table_Filter->setItemDelegateForColumn(9, new FilterMappingItemDelegate(getFilteredColumns(), "NONE"));
+  
+  ui->table_Filter->setItemDelegateForColumn(1, new FilterMappingItemDelegate(m_columnUtils.getOrderedList("",ColumnUtils::Category::FLUX)));
+  ui->table_Filter->setItemDelegateForColumn(2, new FilterMappingItemDelegate(m_columnUtils.getOrderedList("",ColumnUtils::Category::ERROR)));
+  ui->table_Filter->setItemDelegateForColumn(9, new FilterMappingItemDelegate(m_columnUtils.getOrderedList("",ColumnUtils::Category::SHIFT), "NONE"));
 
   setFilterMappingInEdition();
 }
