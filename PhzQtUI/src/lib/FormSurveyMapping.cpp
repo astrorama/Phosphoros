@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QTextStream>
 
 #include "ui_FormSurveyMapping.h"
 #include <QtCore/qdebug.h>
@@ -532,28 +533,39 @@ void FormSurveyMapping::on_btn_map_delete_clicked() {
     std::string intermediate_path = FileUtils::getIntermediaryProductRootPath(false, catalog_name);
     std::string result_path       = FileUtils::getResultRootPath(false, catalog_name, "");
 
-    if (QMessageBox::question(
+    auto result = QMessageBox::question(
             this, "Confirm deletion...",
-            "Do you really want to delete the Catalog Directory '" + QString::fromStdString(catalog_name) +
+            "Do you really want to delete the Catalog '" + QString::fromStdString(catalog_name) +
                 "' ?\n \n"
-                "!!! WARNING !!!\n"
-                "This action will also DELETE :\n"
-                "    - The Catalog folder  '" +
-                QString::fromStdString(catalog_path) +
-                "' and its content,\n"
-                "    - All the related intermediate products (Model Grids,...) you may have computed and stored in '" +
+                "!!! WARNING !!!\n\n"
+                "If you click \"Yes\" the catalog '" +
+                QString::fromStdString(catalog_name) + "' will be hidden from the GUI (but corresponding catalog files will not be changed),\n\n"+
+                "If you click \"Yes To All\" the folder '" +
+                QString::fromStdString(catalog_path) + "' (and all the files therein) will be *DELETED*. \n\n"+
+                "In both case all the related intermediate products (Model Grids,...) you may have computed and stored in '" +
                 QString::fromStdString(intermediate_path) +
-                "',\n"
-                "\nHowever related results in the folder '" +
-                QString::fromStdString(result_path) + "' will not be deleted.",
-            QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes) {
+                "' will be deleted,\n"
+                "\nHowever, related results in the folder '" +
+                QString::fromStdString(result_path) + "' will not be deleted. \n\n",
+            QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No);
+            
+      if ( result== QMessageBox::Yes ||  result== QMessageBox::YesToAll ) {
 
       bool success = true;
       // The intermediate folder
       success &= FileUtils::removeDir(QString::fromStdString(intermediate_path));
 
-      // The catalog folder
-      success &= FileUtils::removeDir(QString::fromStdString(catalog_path));
+      // Flag the catalog folder as deleted
+      QString filename = QString::fromStdString(catalog_path) + QDir::separator() + QString::fromStdString("GUI.deleted");
+      QFile file(filename);
+      if (file.open(QIODevice::ReadWrite)) {
+        QTextStream stream(&file);
+        stream << endl;
+     }
+     
+     if (result== QMessageBox::YesToAll) {
+        success &= FileUtils::removeDir(QString::fromStdString(catalog_path));
+      }
 
       if (success) {
         // The xml file

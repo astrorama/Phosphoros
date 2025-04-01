@@ -8,13 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Note: the issue number refer to SDC-CH internal tracking.
 
 ## [2.0.11] unreleased
+### Changed
 - GUI predict the column to match a filter, drop down display relevant columns first. https://redmine.isdc.unige.ch/issues/32407
+- GUI offers choice to delete or not the Catalog folder. https://redmine.isdc.unige.ch/issues/32398
 
 
 ## [2.0.10] 2025-02-24
+### Changed
  - Output the integral of the posterior
 
 ## [2.0.9] 2025-02-21
+### Fixed
  - Fix the sampling of the PDF when we sample the Scal factor 
 
 ## [2.0.8] 2025-01-19
