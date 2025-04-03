@@ -8,9 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Note: the issue number refer to SDC-CH internal tracking.
 
 ## [2.0.11] unreleased
-### Changed
-- GUI predict the column to match a filter, drop down display relevant columns first. https://redmine.isdc.unige.ch/issues/32407
-- GUI offers choice to delete or not the Catalog folder. https://redmine.isdc.unige.ch/issues/32398
+### Changed 2025-04-04
+ - Switch to PhosphorosCore 2.1.11
+ - GUI predict the column to match a filter, drop down display relevant columns first. https://redmine.isdc.unige.ch/issues/32407
+ - GUI offers choice to delete or not the Catalog folder. https://redmine.isdc.unige.ch/issues/32398
+
+### Fixed
+ - Fix the tool extracting the redshift and the function getting the index for the fixed redshift. 
 
 
 ## [2.0.10] 2025-02-24
