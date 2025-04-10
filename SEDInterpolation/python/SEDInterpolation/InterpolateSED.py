@@ -52,7 +52,13 @@ def defineSpecificProgramOptions():
     parser.add_argument('--numbers', type=str,  required=True,
                         help='List of comma separated non-negative integer indicating the number of SED to be computed between each input SEDs. The number of integer must be one less that the number of SED')
     parser.add_argument('--out-dir', type=str,  required=True,
-                        help='Folder (relative to sed-dir) into which SEDs will be saved. If the folder exists it will be cleared.')                    
+                        help='Folder (relative to sed-dir) into which SEDs will be saved. If the folder exists it will be cleared.')   
+                        
+    parser.add_argument('--normalization-filter', type=str,  required=True,  
+                         help='Path of the file containing the Filter for which the normalization is done for Luminosity computation') 
+    parser.add_argument('--normalization-solar-sed', type=str,  required=True,  
+                         help='Path of the file containing the Solar SED @10pc used as a reference for Models normalization') 
+                    
                                          
     parser.add_argument('--copy-sed', default="True", type=str,
                         help='If true copy the original SEDs into the output folder (True /False Default: True)' )
@@ -62,6 +68,27 @@ def defineSpecificProgramOptions():
 
 
     return parser
+    
+def compute_flux(sed, filter_transmission):
+    new_sampling = get_sampling(sed, filter_transmission)
+    resampled_sed = resample(sed, new_sampling)
+    resampled_filter = resample(filter_transmission, new_sampling)
+    
+    
+    x = resampled_sed['Wave']
+    y = resampled_sed['Flux']*resampled_filter['Flux']
+    return np.trapz(y, x);
+        
+def do_normalise_sed(sed, current_norm, target_norm):
+    normalized_sed = table.Table()
+    normalized_sed['Wave']=sed.columns[0]
+    normalized_sed['Flux']=sed.columns[1]*target_norm/current_norm
+    return normalized_sed
+    
+def normaliseSED(sed, solar_sed, filter_transmission):
+    solar_flux = compute_flux(solar_sed, filter_transmission)
+    sed_flux = compute_flux(sed, filter_transmission)
+    return do_normalise_sed(sed, sed_flux, solar_flux)
 
 def getSedDir(sed_dir):
     """Check the SED directory exists
@@ -355,7 +382,7 @@ def build_name(name_1, name_2, idx, total):
     
     return number_1 + "_" + clean_name(name_1) + "_+_" + number_2 + "_" + clean_name(name_2)+".sed"
 
-def interpolate(sed_dir, sed_list, sed_number, interpolate_pp, out_dir) :
+def interpolate(sed_dir, sed_list, sed_number, interpolate_pp, solar_sed, normalisation_filter, out_dir) :
     """ Create the interpolated SEDs 
     
     Parameters:
@@ -371,8 +398,8 @@ def interpolate(sed_dir, sed_list, sed_number, interpolate_pp, out_dir) :
         path_sed_2 = os.path.join(sed_dir, sed_list[index + 1])  
         interpolate_num  = sed_number[index]
         
-        sed_1_table = table.Table.read(path_sed_1, format='ascii')
-        sed_2_table = table.Table.read(path_sed_2, format='ascii')
+        sed_1_table = normaliseSED(table.Table.read(path_sed_1, format='ascii'),solar_sed, normalisation_filter)
+        sed_2_table = normaliseSED(table.Table.read(path_sed_2, format='ascii'),solar_sed, normalisation_filter)
         
         pp_1 = []
         pp_2 = []
@@ -445,13 +472,16 @@ def mainMethod(args):
     interp_number = [int(bite) for bite in args.numbers.split(',')]    
     if len(interp_number)!=sed_number-1:
         raise ValueError("numbers must have one elements less than seds")
+        
+    solar_sed =  table.Table.read(args.normalization_solar_sed, format='ascii')
+    normalisation_filter = table.Table.read(args.normalization_filter, format='ascii')
     
     prepareOutFolder(out_dir)
     
     if args.copy_sed.lower() == "true":
         copy_seds(out_dir, sed_dir, sed_list) 
         
-    interpolate(sed_dir, sed_list, interp_number, args.interpolate_pp.lower() == "true", out_dir)   
+    interpolate(sed_dir, sed_list, interp_number, args.interpolate_pp.lower() == "true", solar_sed, normalisation_filter, out_dir)   
     
     createOrder(out_dir, sed_list, interp_number,args.copy_sed.lower() == "true")          
   
