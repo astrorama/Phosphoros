@@ -78,7 +78,7 @@ def compute_flux(sed, filter_transmission):
     
     
     x = resampled_sed['Wave']
-    y = resampled_sed['Flux']*resampled_filter['Flux']
+    y = np.nan_to_num(resampled_sed['Flux']*resampled_filter['Flux'])
     return np.trapz(y, x);
         
 def do_normalise_sed(sed, current_norm, target_norm):
@@ -90,6 +90,7 @@ def do_normalise_sed(sed, current_norm, target_norm):
 def normaliseSED(sed, solar_sed, filter_transmission):
     solar_flux = compute_flux(solar_sed, filter_transmission)
     sed_flux = compute_flux(sed, filter_transmission)
+    print(f'Normalization of a SED with current norm {sed_flux} to target norm {solar_flux}')
     return do_normalise_sed(sed, sed_flux, solar_flux)
 
 def getSedDir(sed_dir):

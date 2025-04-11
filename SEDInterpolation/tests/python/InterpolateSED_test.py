@@ -60,6 +60,15 @@ class InterpolateSEDTestCase(unittest.TestCase):
          
         # THEN
         assert math.isclose(flux, 7.5)
+        
+        fl['col2']=[np.nan,  np.nan,  3,  4,  5,  6,  7]
+        
+        # WHEN
+        flux = InterpolateSED.compute_flux(fl, ft)
+         
+        # THEN
+        assert math.isclose(flux, 7.5)
+            
             
     
     def testDo_normalise_sed(self):
