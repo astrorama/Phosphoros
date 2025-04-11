@@ -31,7 +31,7 @@ public:
   /**
    * @brief Constructor
    */
-  explicit DialogInterpolateSed(DatasetRepo sed_repo, QWidget* parent = 0);
+  explicit DialogInterpolateSed(DatasetRepo sed_repo, DatasetRepo filter_repo, QString solar_sed, QWidget* parent = 0);
 
   /**
    * @brief Destructor
@@ -42,9 +42,11 @@ private slots:
 
   void on_btn_plus_clicked();
   void on_btn_rma_clicked();
+  void on_btn_filterSelection_clicked();
   void sedPopupClosing(std::vector<std::string>);
 
   void onDelButtonClicked(const QString&);
+  void setLumFilter(std::string );
 
   /**
    * @brief SLOT on_btn_create_clicked
@@ -63,8 +65,11 @@ private:
 
   QFrame*     createControls(bool first, bool del, std::string sed);
   DatasetRepo m_seds_repository;
+  DatasetRepo m_filter_repo;
   QStringList m_sed_list{};
   QProcess*   m_is = nullptr;
+  QString     m_solar_sed;
+  QString     m_ref_filter;
 };
 
 }  // namespace PhzQtUI

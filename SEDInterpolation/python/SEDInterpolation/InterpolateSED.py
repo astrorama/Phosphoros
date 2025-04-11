@@ -47,6 +47,8 @@ def defineSpecificProgramOptions():
     parser = argparse.ArgumentParser()
     parser.add_argument('--sed-dir', required=True, type=str, metavar='DIR',
                         help='The directory containing the SEDs')
+    parser.add_argument('--filter-dir', required=False, type=str,
+                        help='The directory containing the Filters')
     parser.add_argument('--seds', type=str,  required=True,
                         help='List of comma separated SEDs files (relative to sed-dir), at least 2 SED must be provided')
     parser.add_argument('--numbers', type=str,  required=True,
@@ -55,9 +57,9 @@ def defineSpecificProgramOptions():
                         help='Folder (relative to sed-dir) into which SEDs will be saved. If the folder exists it will be cleared.')   
                         
     parser.add_argument('--normalization-filter', type=str,  required=True,  
-                         help='Path of the file containing the Filter for which the normalization is done for Luminosity computation') 
+                         help='Path of the file (absolute or relative to filter-dir) containing the Filter for which the normalization is done for Luminosity computation') 
     parser.add_argument('--normalization-solar-sed', type=str,  required=True,  
-                         help='Path of the file containing the Solar SED @10pc used as a reference for Models normalization') 
+                         help='Path of the file (absolute or relative to sed-dir) containing the Solar SED @10pc used as a reference for Models normalization') 
                     
                                          
     parser.add_argument('--copy-sed', default="True", type=str,
@@ -104,7 +106,16 @@ def getSedDir(sed_dir):
             logger.error(sed_dir + ' is not a directory')
             exit(1)
         return sed_dir
-    logger.error('Unknown SED directory ' + sed_dir)
+    logger.error('Unknown SEDs directory ' + sed_dir)
+    exit(1)
+    
+def getFilterDir(filter_dir):
+    if os.path.exists(filter_dir):
+        if not os.path.isdir(filter_dir):
+            logger.error(filter_dir + ' is not a directory')
+            exit(1)
+        return filter_dir
+    logger.error('Unknown Filters directory ' + filter_dir)
     exit(1)
     
 def prepareOutFolder(out_dir):
@@ -392,6 +403,8 @@ def interpolate(sed_dir, sed_list, sed_number, interpolate_pp, solar_sed, normal
     interpolate_pp (bool): switch allowing to interpolate PP
     out_dir (str): path of the folder where to write the interpolated SEDs
     """
+    
+    
     for index in range(len(sed_number)):
         logger.info('Interpolation between SED %s and %s', sed_list[index],  sed_list[index+1] )  
         path_sed_1 = os.path.join(sed_dir, sed_list[index])   
@@ -454,7 +467,18 @@ def createOrder(out_dir, sed_list, interp_number, add_originals):
         f.write(sed+"\n")
     f.close()
 
-        
+def findPath(guess):
+    if os.path.exists(guess):     
+        return guess
+    else:
+        incomplet_file = guess.split('/')[-1]
+        folder = '/'.join(guess.split('/')[:-1])
+        for file in os.listdir(folder):
+           if file.startswith(incomplet_file):
+               logger.info(f'Path {guess} has been completed to {os.path.join(folder,file)}') 
+               return os.path.join(folder,file)
+        raise ValueError(f"Unable to find a file matching {guess}") 
+         
 
 def mainMethod(args):
     sed_dir = getSedDir(args.sed_dir)
@@ -473,8 +497,20 @@ def mainMethod(args):
     if len(interp_number)!=sed_number-1:
         raise ValueError("numbers must have one elements less than seds")
         
-    solar_sed =  table.Table.read(args.normalization_solar_sed, format='ascii')
-    normalisation_filter = table.Table.read(args.normalization_filter, format='ascii')
+    norm_sed_path = args.normalization_solar_sed
+    if norm_sed_path[0]!='/':
+        norm_sed_path=os.path.join(sed_dir,norm_sed_path)
+    norm_sed_path = findPath(norm_sed_path)
+    solar_sed =  table.Table.read(norm_sed_path, format='ascii')
+        
+    filter_path=args.normalization_filter
+    if filter_path[0]!='/':
+        filter_dir = getFilterDir(args.filter_dir)
+        if filter_dir=="":
+            raise ValueError("filter-dir must be provided when the normalization-filter is not an absolute path")
+        filter_path=os.path.join(filter_dir,filter_path)   
+    filter_path = findPath(filter_path)
+    normalisation_filter = table.Table.read(filter_path, format='ascii')
     
     prepareOutFolder(out_dir)
     
