@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Note: the issue number refer to SDC-CH internal tracking.
 
-## [2.0.12] Unreleased
+## [2.0.13] 2025-05-23
+# Fixed
+ - Upodate PIT plot computation to speed it up and adapt to numpy and scipy interface change. https://redmine.astro.unige.ch/issues/33735
+
+## [2.0.12] 2025-04-11
 ## Changed
  - Normalize SED before interpolation. https://redmine.isdc.unige.ch/issues/33488
 
