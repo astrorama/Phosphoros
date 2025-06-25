@@ -6,13 +6,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Note: the issue number refer to SDC-CH internal tracking.
+## [2.0.14] 2025-06-25
+### Fixed
+ - Fix a conceptual bug preventing to sample the output when working at fixed redshift. https://redmine.astro.unige.ch/issues/33888
+ 
+### Changed
+ - Remouve un-necessary log when computing the PP config
+ 
 
 ## [2.0.13] 2025-05-23
-# Fixed
+### Fixed
  - Upodate PIT plot computation to speed it up and adapt to numpy and scipy interface change. https://redmine.astro.unige.ch/issues/33735
 
 ## [2.0.12] 2025-04-11
-## Changed
+### Changed
  - Normalize SED before interpolation. https://redmine.isdc.unige.ch/issues/33488
 
 ## [2.0.11] 2025-04-04
