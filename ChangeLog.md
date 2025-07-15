@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Note: the issue number refer to SDC-CH internal tracking.
+## [2.0.15] 2025-07-15
+### Fixed
+ - Remove the protection agains old Boost version whic, with CMake evolution was removing Reference Samble tools 
+
 ## [2.0.14] 2025-06-25
 ### Fixed
  - Fix a conceptual bug preventing to sample the output when working at fixed redshift. https://redmine.astro.unige.ch/issues/33888
