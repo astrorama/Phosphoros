@@ -6,21 +6,26 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Note: the issue number refer to SDC-CH internal tracking.
+## [2.0.16] 2026-01-09
+### Changed
+ - Switch to PhosphorosCore 2.1.14
+ - Add the skip/max clipping of input catalog for CPC. https://redmine.isdc.unige.ch/issues/36125
+
 ## [2.0.15] 2025-07-15
 ### Fixed
- - Remove the protection agains old Boost version whic, with CMake evolution was removing Reference Samble tools 
+ - Remove the protection against old Boost version which, with CMake evolution was removing Reference Sample tools 
 
 ## [2.0.14] 2025-06-25
 ### Fixed
  - Fix a conceptual bug preventing to sample the output when working at fixed redshift. https://redmine.astro.unige.ch/issues/33888
  
 ### Changed
- - Remouve un-necessary log when computing the PP config
+ - Remove un-necessary log when computing the PP config
  
 
 ## [2.0.13] 2025-05-23
 ### Fixed
- - Upodate PIT plot computation to speed it up and adapt to numpy and scipy interface change. https://redmine.astro.unige.ch/issues/33735
+ - Update PIT plot computation to speed it up and adapt to numpy and scipy interface change. https://redmine.astro.unige.ch/issues/33735
 
 ## [2.0.12] 2025-04-11
 ### Changed
