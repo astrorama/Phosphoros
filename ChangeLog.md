@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Note: the issue number refer to SDC-CH internal tracking.
+## [2.0.17]
+### Changed
+ - Add exception when the Generic Prior File or the POP input cat is missing. https://redmine.isdc.unige.ch/issues/36133
+
+
 ## [2.0.16] 2026-01-09
 ### Changed
  - Switch to PhosphorosCore 2.1.14
