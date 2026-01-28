@@ -77,14 +77,10 @@ void DialogAddGalEbv::on_btn_create_clicked() {
     ui->btn_create->setEnabled(false);
 
     // Call the python code
-    std::string program = "AddGalDustToCatalog";
-    QStringList arguments;
-    arguments <<  "--planck-dust-map" << QString::fromStdString(m_dust_map_file)
-              <<  "--galatic-ebv-col" << "PLANCK_GAL_EBV"
-			  <<  "--input-catalog"   << QString::fromStdString(m_input_name)
-              <<  "--output-catalog"  << QString::fromStdString(m_name)
-			  <<  "--ra"              << QString::fromStdString(m_ra_col)
-			  <<  "--dec"             << QString::fromStdString(m_dec_col);
+    std::string program = "AddGalDustToCatalog --planck-dust-map \"" + m_dust_map_file +
+                          "\" --galactic-ebv-col PLANCK_GAL_EBV --input-catalog \"" + m_input_name +
+                          "\" --output-catalog \"" + m_name + "\" --ra " + m_ra_col + " --dec " + m_dec_col;
+    std::string command = "";
 
     m_process->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
     m_process->start(QString::fromStdString(program), arguments);

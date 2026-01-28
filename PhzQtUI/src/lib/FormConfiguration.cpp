@@ -60,6 +60,8 @@ void FormConfiguration::loadGeneralValues() {
   ui->sb_memory->setValue(m_option_model_ptr->getMaxMemory());
   ui->sb_buffer->setValue(m_option_model_ptr->getBufferSize());
   checkDirectories();
+  ui->cb_logLevel->setCurrentIndex(ui->cb_logLevel->findText(m_option_model_ptr->getLogLevel()));
+  ui->cb_grid_type->setCurrentIndex(ui->cb_grid_type->findText(m_option_model_ptr->getGridFormat()));
 }
 
 void FormConfiguration::loadCosmoValues() {
@@ -81,8 +83,6 @@ void FormConfiguration::loadOptionPage(std::shared_ptr<OptionModel> option_model
 
   connect(ui->widget_aux_Data, SIGNAL(lockNavigation(int)), this, SLOT(startEdition(int)));
   connect(ui->widget_aux_Data, SIGNAL(unlockNavigation()), this, SLOT(endEdition()));
-
-  ui->cb_logLevel->setCurrentIndex(ui->cb_logLevel->findText(m_option_model_ptr->getLogLevel()));
 
   loadGeneralValues();
   loadCosmoValues();
@@ -232,6 +232,14 @@ void FormConfiguration::on_cb_logLevel_currentIndexChanged(int index) {
   }
 }
 
+void FormConfiguration::on_cb_grid_type_currentIndexChanged(int index) {
+  if (ui->cb_grid_type->currentText() != m_option_model_ptr->getGridFormat()) {
+    startEdition(0);
+    m_option_model_ptr->setGridFormat(ui->cb_grid_type->currentText());
+    setGeneralControlEdition(true);
+  }
+}
+
 void FormConfiguration::on_sb_buffer_valueChanged(int i) {
   if (m_option_model_ptr->getBufferSize() != i) {
     startEdition(0);
@@ -261,6 +269,10 @@ void FormConfiguration::on_btn_default_clicked() {
 
   m_option_model_ptr->setBufferSize(5000);
   ui->sb_buffer->setValue(5000);
+  
+  ui->cb_logLevel->setCurrentIndex(ui->cb_logLevel->findText("INFO"));
+  ui->cb_grid_type->setCurrentIndex(ui->cb_grid_type->findText(".txt"));
+
   checkDirectories();
 }
 

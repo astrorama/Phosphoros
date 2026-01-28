@@ -19,6 +19,7 @@
 """ test module for the InterpolateSED"""
 
 import unittest
+import math
 import numpy as np
 import astropy.table as table
 from SEDInterpolation import InterpolateSED
@@ -35,7 +36,58 @@ class InterpolateSEDTestCase(unittest.TestCase):
     def tearDown(self):
         unittest.TestCase.tearDown(self)
    
-    ####################################     
+    ####################################   
+    def testCompute_flux(self):
+        # HAVING
+        ft=table.Table();
+        ft['col1']=[0,0.5,1.0,1.5,2.0,2.5,3.0]
+        ft['col2']=[0,  0,  0,  1,  1,  1,  0]
+        
+        fl=table.Table();
+        fl['col1']=[0,0.5,1.0,1.5,2.0,2.5,3.0]
+        fl['col2']=[1,  1,  1,  1,  1,  1,  1]
+        
+        # WHEN
+        flux = InterpolateSED.compute_flux(fl, ft)
+         
+        # THEN
+        assert math.isclose(flux, 1.5)
+        
+        fl['col2']=[1,  2,  3,  4,  5,  6,  7]
+        
+        # WHEN
+        flux = InterpolateSED.compute_flux(fl, ft)
+         
+        # THEN
+        assert math.isclose(flux, 7.5)
+        
+        fl['col2']=[np.nan,  np.nan,  3,  4,  5,  6,  7]
+        
+        # WHEN
+        flux = InterpolateSED.compute_flux(fl, ft)
+         
+        # THEN
+        assert math.isclose(flux, 7.5)
+            
+            
+    
+    def testDo_normalise_sed(self):
+        # HAVING
+        t=table.Table();
+        sampling = [1,2,3,4,5,6,7,8,9,10]
+        t['col1']=sampling
+        t['col2']=[7,14,0,28,49,56,70,21,35,42]
+        
+        # WHEN
+        normalised = InterpolateSED.do_normalise_sed(t,7,3)
+         
+        # THEN
+        expected = [3,6,0,12,21,24,30,9,15,18]
+        
+        for index in range(len(expected)):
+            assert normalised['Wave'][index]==sampling[index]
+            assert normalised['Flux'][index]==expected[index]
+        
         
     def testFormatPP(self):
         # WHEN

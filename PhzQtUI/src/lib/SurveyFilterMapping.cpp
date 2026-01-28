@@ -139,13 +139,22 @@ const std::map<std::string, std::string>& SurveyFilterMapping::getCopiedColumns(
 }
 
 std::vector<std::string> SurveyFilterMapping::getAvailableCatalogs() {
+ logger.info()<<"Loading the Catalogs... ";
   auto                     cat_root_path = FileUtils::getCatalogRootPath(true, "");
   std::vector<std::string> all_dirs{};
   QDirIterator directories(QString::fromStdString(cat_root_path), QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot,
                            QDirIterator::NoIteratorFlags);
   while (directories.hasNext()) {
     directories.next();
-    all_dirs.push_back(directories.fileName().toStdString());
+    
+    auto deleted_path = QString::fromStdString(cat_root_path) + QDir::separator() + directories.fileName() + QDir::separator() + QString::fromStdString("GUI.deleted");
+    QFileInfo deleted(deleted_path);
+    if (!deleted.exists()) {
+       all_dirs.push_back(directories.fileName().toStdString());
+       
+    } else {
+       logger.info()<<"Catalog "<<directories.fileName().toStdString()<< " is marked as deleted and thus not loaded.";
+    }
   }
 
   return all_dirs;

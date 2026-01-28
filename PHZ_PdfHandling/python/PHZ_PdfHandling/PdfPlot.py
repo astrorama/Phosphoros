@@ -7,10 +7,48 @@ Script to plot PDZ versus spec-z
 import numpy as np
 import scipy.integrate as integrate
 from scipy.optimize import curve_fit
-
+import scipy 
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
+
+def versionValid(min_version, current_version):
+    min_v_bit = min_version.split('.')
+    current_version_bit = current_version.split('.')
+    if int(min_v_bit[0])>int(current_version_bit[0]):
+        return False
+    elif int(min_v_bit[0])<int(current_version_bit[0]):
+        return True
+    elif int(min_v_bit[1])>int(current_version_bit[1]):
+        return False
+    elif int(min_v_bit[1])<int(current_version_bit[1]):
+        return True
+    elif int(min_v_bit[2])>int(current_version_bit[2]):
+        return False
+    else :
+        return True
+
+###################################
+## from numpy 2.0 trapz has been renamed to trapezoid
+if versionValid('2.0.0', np.__version__):
+    def trapezoid(ys,xs):
+        return np.trapezoid(ys,xs)
+
+else:
+     def trapezoid(ys,xs):
+        return np.trapz(ys,xs)
+###################################
+## from scipy 1.7.0 integrate.simps has been renamed to integrate.simpson
+if versionValid('1.7.0',scipy.__version__):
+    def simpson(ys,xs):
+        return integrate.simpson(ys,xs)
+
+else:
+     def simpson(ys,xs):
+        return integrate.simps(ys,xs)
+
+###################################
+
 
 # Point estimate determination
 
@@ -42,7 +80,7 @@ def getMeanPointEstimate(pdf_bins, pdf_data):
     array: list of mean value (in the sampling axis) of the object's 1D-PDF
     
     """
-    return integrate.simps(np.multiply(pdf_bins,pdf_data), pdf_bins)/integrate.simps(pdf_data,  pdf_bins)
+    return simpson(np.multiply(pdf_bins,pdf_data), pdf_bins)/simpson(pdf_data,  pdf_bins)
     
 def getMedianPointEstimate(pdf_bins, pdf_data):
     """For each  object, return the median value of the 1D-PDF
@@ -206,28 +244,34 @@ def computePitAndCrps(pdf_data, pdf_bins, reference_values, progress_callback=No
     total = len(reference_values)
     pits = np.zeros(total)
     crps = np.zeros(total)
+    samples = np.dot(np.ones((pdf_data.shape[0],1)),np.reshape(pdf_bins,(1,pdf_data.shape[1])))
+    cumul_data = np.zeros(pdf_data.shape)
+    for index in range(1,pdf_data.shape[1]):
+        cumul_data[:,index]= cumul_data[:,index-1]+0.5*(pdf_data[:,index-1]+pdf_data[:,index])/(samples[:,index]-samples[:,index-1])
+
     for index, ref_value in enumerate(reference_values):
         current_bin = np.array(pdf_bins)
         current_data = np.array(pdf_data[index])
-        current_cumul_data =  [integrate.simps(pdf_data[index][:i], pdf_bins[:i]) if i>0 else 0 for i in range(len(pdf_bins))] / integrate.simps(pdf_data[index], pdf_bins)
+        current_cumul_data = cumul_data[index]
         if not ref_value in current_bin:
             current_bin = np.concatenate((current_bin,[ref_value]))
             current_bin.sort()
             current_data = np.interp(current_bin, pdf_bins, current_data)
             current_cumul_data = np.interp(current_bin, pdf_bins, current_cumul_data)
-        current_data = current_data / integrate.simps(current_data, current_bin)
+        current_data = current_data / trapezoid(current_data, current_bin)
         index_cut = np.argwhere(current_bin==ref_value)[0][0]
         if index_cut > 0:
-            pits[index] = integrate.simps(current_data[:index_cut], current_bin[:index_cut]) 
+            pits[index] = trapezoid(current_data[:index_cut], current_bin[:index_cut]) 
             if index_cut < len(current_bin)-1:
-                crps[index] = integrate.simps(np.square(current_cumul_data[:index_cut]), current_bin[:index_cut]) + integrate.simps(np.square(current_cumul_data[index_cut:] -1), current_bin[index_cut:])
+                crps[index] = trapezoid(np.square(current_cumul_data[:index_cut]), current_bin[:index_cut]) + trapezoid(np.square(current_cumul_data[index_cut:] -1), current_bin[index_cut:])
             else:
-                crps[index] = integrate.simps(np.square(current_cumul_data), current_bin) 
+                crps[index] = trapezoid(np.square(current_cumul_data), current_bin) 
         else:
-            crps[index] =  integrate.simps(np.square(current_cumul_data -1), current_bin)
+            crps[index] = trapezoid(np.square(current_cumul_data -1), current_bin)
+            
         if progress_callback is not None:
             progress_callback(index,total)
-    return pits, crps    
+    return pits, crps   
     
 # Nuber of sources per bin
 def getSourcesPerBin(data_map):

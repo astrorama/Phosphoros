@@ -138,7 +138,7 @@ void FormAuxDataManagement::loadManagementPage(int index) {
 }
 
 void FormAuxDataManagement::on_btn_interp_clicked() {
-  std::unique_ptr<DialogInterpolateSed> dialog(new DialogInterpolateSed(m_seds_repository, this));
+  std::unique_ptr<DialogInterpolateSed> dialog(new DialogInterpolateSed(m_seds_repository, m_filter_repository, ui->lbl_sun_sed->text(), this));
   if (dialog->exec()) {
     copyingSEDFinished(true, {});
   }

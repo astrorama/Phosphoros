@@ -6,6 +6,83 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Note: the issue number refer to SDC-CH internal tracking.
+## [2.0.17]
+### Changed
+ - Add exception when the Generic Prior File or the POP input cat is missing. https://redmine.isdc.unige.ch/issues/36133
+
+
+## [2.0.16] 2026-01-09
+### Changed
+ - Switch to PhosphorosCore 2.1.14
+ - Add the skip/max clipping of input catalog for CPC. https://redmine.isdc.unige.ch/issues/36125
+
+## [2.0.15] 2025-07-15
+### Fixed
+ - Remove the protection against old Boost version which, with CMake evolution was removing Reference Sample tools 
+
+## [2.0.14] 2025-06-25
+### Fixed
+ - Fix a conceptual bug preventing to sample the output when working at fixed redshift. https://redmine.astro.unige.ch/issues/33888
+ 
+### Changed
+ - Remove un-necessary log when computing the PP config
+ 
+
+## [2.0.13] 2025-05-23
+### Fixed
+ - Update PIT plot computation to speed it up and adapt to numpy and scipy interface change. https://redmine.astro.unige.ch/issues/33735
+
+## [2.0.12] 2025-04-11
+### Changed
+ - Normalize SED before interpolation. https://redmine.isdc.unige.ch/issues/33488
+
+## [2.0.11] 2025-04-04
+### Changed 
+ - Switch to PhosphorosCore 2.1.11
+ - GUI predict the column to match a filter, drop down display relevant columns first. https://redmine.isdc.unige.ch/issues/32407
+ - GUI offers choice to delete or not the Catalog folder. https://redmine.isdc.unige.ch/issues/32398
+
+### Fixed
+ - Fix the tool extracting the redshift and the function getting the index for the fixed redshift. 
+
+
+## [2.0.10] 2025-02-24
+### Changed
+ - Output the integral of the posterior
+
+## [2.0.9] 2025-02-21
+### Fixed
+ - Fix the sampling of the PDF when we sample the Scal factor 
+
+## [2.0.8] 2025-01-19
+### Fixed
+ - Fix the type of the output ID column in the ProcessPDF tool. https://redmine.isdc.unige.ch/issues/32706
+ - Ensure the BPPC remove existing output file instead of appening to it. https://redmine.isdc.unige.ch/issues/32767
+ 
+### Changed
+ - Add an error when the PhysicalParameterConfigFile is missing or not readable. https://redmine.isdc.unige.ch/issues/32959
+ - Add the log of the posterior to the sampled output. https://redmine.isdc.unige.ch/issues/32957
+
+## [2.0.7] 2025-01-10
+### Fixed
+ - Fix the name of the galactic correction grid name when generated through the GUI. https://redmine.isdc.unige.ch/issues/32422
+ - Fix the configuration file for CPC. https://redmine.isdc.unige.ch/issues/32508
+
+### Changed
+ - Add the possibility to choose the grid file format in the GUI. https://redmine.isdc.unige.ch/issues/32507?
+
+## [2.0.6] 2024-11-22
+### Fixed
+ - Fix the spelling galatic-ebv-col=>galactic-ebv-col. https://redmine.isdc.unige.ch/issues/32057
+ - Fix a problem in PlotSpecZComparison for string's ID columns. https://redmine.isdc.unige.ch/issues/32411
+ - Add a check to ensure filter order. https://redmine.isdc.unige.ch/issues/32460
+ - Change the wording to avoid confusion between catalog and folder. https://redmine.isdc.unige.ch/issues/32410
+
+### Changed
+ - Switch to PhosphorosCore 2.1.6
+ - Change the EZL program to export config file compatible list. https://redmine.isdc.unige.ch/issues/32054
+ - Add a message when the error recomputation param do not match the sources photometries. https://redmine.isdc.unige.ch/issues/32074
+
 ## [2.0.5] 2024-09-13
 ### Fixed
  - Fix the spelling in the GUI (mpc³=>Mpc³). https://redmine.isdc.unige.ch/issues/31985

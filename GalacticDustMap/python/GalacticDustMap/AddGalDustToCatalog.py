@@ -62,7 +62,7 @@ def defineSpecificProgramOptions():
     parser.add_argument('--output-catalog', type=str, help='Output catalog filename')
     parser.add_argument('--ra', type=str, help='Right Acsension column in the catalog (Degrees)')
     parser.add_argument('--dec', type=str, help='Declination column in the catalog (Degres)')
-    parser.add_argument('--galatic-ebv-col', type=str, 
+    parser.add_argument('--galactic-ebv-col', type=str, 
                         help='Name of the column to be added to the output catalog'\
                         ' (Optional) by default use "GAL_EBV".',
                         default='GAL_EBV')
@@ -120,7 +120,7 @@ def mainMethod(args):
     # Get the galactic E(B-V) from the map
     logger.info('Get the galactic E(B-V) from the Map')
     ebv = GalacticDustMap.GalacticDustMap.ebv_planck(map_data, ra, dec)
-    input_cat[args.galatic_ebv_col] = ebv
+    input_cat[args.galactic_ebv_col] = ebv
     
     # Write down the output catalog
     if os.path.exists(out_file):

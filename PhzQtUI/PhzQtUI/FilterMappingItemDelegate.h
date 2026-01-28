@@ -2,7 +2,9 @@
 #define PHZQTUI_FILTERMAPPINGITEMDELEGATE_H
 
 #include <QItemDelegate>
+#include <QString>
 #include <set>
+#include <vector>
 #include <string>
 
 namespace Euclid {
@@ -21,6 +23,14 @@ public:
    * @param parent Parent object into which the edition take place.
    */
   FilterMappingItemDelegate(std::set<std::string> columns, std::string default_value = "", QObject* parent = 0);
+  
+  
+  /**
+   * @brief constructor
+   * @param columns List of the available column to be proposed in the dropdown.
+   * @param parent Parent object into which the edition take place.
+   */
+  FilterMappingItemDelegate(std::vector<QString> columns, std::string default_value = "", QObject* parent = 0);
 
   /**
    * @brief Create the editable dropdown and fill the options with the columns.
@@ -42,7 +52,7 @@ signals:
   void editionStarting() const;
 
 private:
-  std::set<std::string> m_columns;
+  std::vector<std::string> m_columns;
   std::string           m_default;
 };
 

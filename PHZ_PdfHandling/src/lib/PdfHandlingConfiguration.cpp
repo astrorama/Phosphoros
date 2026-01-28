@@ -94,6 +94,11 @@ std::vector<std::string> split(const std::string& s, char delim) {
 
 void PdfHandlingConfiguration::initialize(const UserValues& args) {
   m_input_cat_name = args.find(INPUT_CATALOG)->second.as<std::string>();
+  
+  fs::path filename{m_input_cat_name};
+  if (!fs::exists(filename.string())) {
+          throw Elements::Exception() << "Input file (" << INPUT_CATALOG << " option) does not exist: " << filename;
+  }
 
   m_id_col  = args.find(ID_COLUMN_NAME)->second.as<std::string>();
   m_pdf_col = args.find(PDF_COLUMN_NAME)->second.as<std::string>();

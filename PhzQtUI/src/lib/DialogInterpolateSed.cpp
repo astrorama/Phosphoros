@@ -14,6 +14,7 @@
 #include "FileUtils.h"
 #include "PhzQtUI/DialogInterpolateSed.h"
 #include "PhzQtUI/DialogSedSelector.h"
+#include "PhzQtUI/DialogFilterSelector.h"
 #include "ui_DialogInterpolateSed.h"
 #include <QComboBox>
 #include <QDirIterator>
@@ -31,11 +32,16 @@ namespace PhzQtUI {
 
 static Elements::Logging logger = Elements::Logging::getLogger("DialogInterpolateSed");
 
-DialogInterpolateSed::DialogInterpolateSed(DatasetRepo sed_repo, QWidget* parent)
+DialogInterpolateSed::DialogInterpolateSed(DatasetRepo sed_repo, DatasetRepo filter_repo, QString solar_sed, QWidget* parent)
     : QDialog(parent), ui(new Ui::DialogInterpolateSed) {
   ui->setupUi(this);
   m_seds_repository = sed_repo;
-
+  m_filter_repo = filter_repo;
+  m_solar_sed=solar_sed;
+  
+  ui->lbl_solar_sed->setText(m_solar_sed);
+  ui->lbl_ref_filter->setText("");
+   
   ui->scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   ui->scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
   ui->scrollArea->setWidgetResizable(true);
@@ -138,7 +144,25 @@ void DialogInterpolateSed::on_btn_cancel_clicked() {
 
 void DialogInterpolateSed::on_btn_create_clicked() {
 
+  if (m_solar_sed == "") {
+    QMessageBox::warning(this, tr("SED Interpolation"),
+                         tr("The reference Solar SED is missing.\n"
+                            "Please select a reference filter before opening this popup"),
+                         QMessageBox::Ok, QMessageBox::Ok);
+    return;
+  }
+  
+  if (m_ref_filter == "") {
+    QMessageBox::warning(this, tr("SED Interpolation"),
+                         tr("The reference filter is missing.\n"
+                            "Please select a reference filter"),
+                         QMessageBox::Ok, QMessageBox::Ok);
+    return;
+  }
+    
+
   auto sed_folder  = QString::fromStdString(FileUtils::getSedRootPath(false));
+  auto filter_folder  = QString::fromStdString(FileUtils::getFilterRootPath(false));
   auto folder_name = ui->le_folder->text();
   if (folder_name == "") {
     QMessageBox::warning(this, tr("SED Interpolation"),
@@ -147,6 +171,9 @@ void DialogInterpolateSed::on_btn_create_clicked() {
                          QMessageBox::Ok, QMessageBox::Ok);
     return;
   }
+  
+
+ 
 
   if (QDir(sed_folder + "/" + folder_name).exists()) {
     if (QMessageBox::Cancel == QMessageBox::warning(this, tr("SED Interpolation"),
@@ -186,7 +213,7 @@ void DialogInterpolateSed::on_btn_create_clicked() {
 
   logger.info() << "total new sed =" << total;
 
-  if (total < 2) {
+  if (total < 1) {
     QMessageBox::warning(
         this, tr("SED Interpolation"),
         tr("Your configuration will not generate new SEDs.\n"
@@ -199,13 +226,19 @@ void DialogInterpolateSed::on_btn_create_clicked() {
 
   QString     program = "Phosphoros";
   QStringList arguments;
-  arguments << "IS" << "--sed-dir" << sed_folder << "--out-dir" << folder_name << "--seds" << seds.join(",") << "--numbers"
+  arguments << "--sed-dir" << sed_folder << "--filter-dir"<< filter_folder << "--out-dir" << folder_name << "--seds" << seds.join(",") << "--numbers"
             << numbers.join(",");
 
   if (!copy_seds) {
     arguments << "--copy-sed"
               << "false";
   }
+   
+  arguments << "--normalization-filter"
+            << m_ref_filter
+            << "--normalization-solar-sed"
+            << m_solar_sed;
+  
 
   m_is = new QProcess;
   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -232,6 +265,17 @@ void DialogInterpolateSed::processingFinished(int code, QProcess::ExitStatus sta
     return;
   }
   accept();
+}
+void DialogInterpolateSed::setLumFilter(std::string  new_filter){
+   m_ref_filter=QString::fromStdString(new_filter);
+   ui->lbl_ref_filter->setText(m_ref_filter);
+}
+
+void DialogInterpolateSed::on_btn_filterSelection_clicked(){
+  std::unique_ptr<DialogFilterSelector> dialog(new DialogFilterSelector(m_filter_repo));
+  dialog->setFilter(ui->lbl_ref_filter->text().toStdString());
+  connect(dialog.get(), SIGNAL(popupClosing(std::string)), SLOT(setLumFilter(std::string)));
+  dialog->exec();
 }
 
 }  // namespace PhzQtUI

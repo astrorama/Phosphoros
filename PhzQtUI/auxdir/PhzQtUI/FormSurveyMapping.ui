@@ -160,8 +160,11 @@
            <pointsize>14</pointsize>
           </font>
          </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;* Put only one type of catalog into a Catalog Directory.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="text">
-          <string>Catalog :</string>
+          <string>Catalog Directory* :</string>
          </property>
         </widget>
        </item>

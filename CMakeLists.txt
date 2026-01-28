@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.5)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.25)
 
 
 #---------------------------------------------------------------
@@ -12,4 +12,4 @@ set(CXX_SUGGEST_OVERRIDE ON
 
 # Declare project name and version
 
-elements_project(Phosphoros 2.1 USE PhosphorosCore 2.1.4)
+elements_project(Phosphoros 2.1 USE PhosphorosCore 2.1.15)

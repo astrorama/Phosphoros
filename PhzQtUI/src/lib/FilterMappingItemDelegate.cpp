@@ -1,12 +1,32 @@
 #include "PhzQtUI/FilterMappingItemDelegate.h"
 #include <QComboBox>
+#include "ElementsKernel/Logging.h"
 
 namespace Euclid {
 namespace PhzQtUI {
+static  Elements::Logging logger = Elements::Logging::getLogger("ColumnUtils");
 
 FilterMappingItemDelegate::FilterMappingItemDelegate(std::set<std::string> columns, std::string default_value,
                                                      QObject* parent)
-    : QItemDelegate(parent), m_columns{columns}, m_default{default_value} {}
+    : QItemDelegate(parent), m_default{default_value} {
+    
+    m_columns=std::vector<std::string>();
+    for (auto iter = columns.begin(); iter!=columns.end(); ++iter) {
+        m_columns.push_back(*iter);
+    }
+  }
+
+FilterMappingItemDelegate::FilterMappingItemDelegate(std::vector<QString> columns, std::string default_value,
+                                                     QObject* parent)
+    : QItemDelegate(parent), m_default{default_value} {
+    
+    m_columns=std::vector<std::string>();
+    for (auto iter = columns.begin(); iter!=columns.end(); ++iter) {
+        m_columns.push_back((*iter).toStdString());
+        // logger.info()<<"Adding item "<< (*iter).toStdString();
+    }
+  }
+ 
 
 void FilterMappingItemDelegate::setModelData(QWidget* editor, QAbstractItemModel* model,
                                              const QModelIndex& index) const {
@@ -58,6 +78,7 @@ QWidget* FilterMappingItemDelegate::createEditor(QWidget*           parent, cons
   combo->addItem(QString::fromStdString(m_default));
   for (auto item : m_columns) {
     combo->addItem(QString::fromStdString(item));
+    
   }
 
   return combo;

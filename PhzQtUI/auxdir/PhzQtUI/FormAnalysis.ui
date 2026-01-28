@@ -168,7 +168,7 @@
        <item>
         <widget class="QLabel" name="label_19">
          <property name="text">
-          <string>Catalog :</string>
+          <string>Catalog Directory :</string>
          </property>
         </widget>
        </item>
@@ -223,8 +223,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>406</width>
-            <height>205</height>
+            <width>930</width>
+            <height>499</height>
            </rect>
           </property>
           <attribute name="label">
@@ -701,8 +701,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>768</width>
-            <height>272</height>
+            <width>930</width>
+            <height>499</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1017,8 +1017,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>573</width>
-            <height>237</height>
+            <width>930</width>
+            <height>499</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1254,8 +1254,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>486</width>
-            <height>169</height>
+            <width>930</width>
+            <height>499</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1406,8 +1406,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>554</width>
-            <height>184</height>
+            <width>930</width>
+            <height>499</height>
            </rect>
           </property>
           <attribute name="label">

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>New Catalog</string>
+   <string>New Catalog Directory</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -22,14 +22,14 @@
       </font>
      </property>
      <property name="text">
-      <string>New Catalog </string>
+      <string>New Catalog Directory</string>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Name (will be the name of the folder):</string>
+      <string>Name (folder will be created into Catalogs/):</string>
      </property>
     </widget>
    </item>
