@@ -9,6 +9,7 @@ Note: the issue number refer to SDC-CH internal tracking.
 ## [2.0.17]
 ### Fixed
  - Fix the progress values for ComputeGalacticAbsorptionCoefficientGrid. https://redmine.isdc.unige.ch/issues/32960
+ - Make clear that the name is copied when --copy-parameter is added to AEL. https://redmine.isdc.unige.ch/issues/36122
 
 ### Changed
  - Add exception when the Generic Prior File or the POP input cat is missing. https://redmine.isdc.unige.ch/issues/36133

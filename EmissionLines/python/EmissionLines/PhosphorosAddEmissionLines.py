@@ -26,7 +26,7 @@ Author: nikoapos
 
 from __future__ import division, print_function
 
-
+import re
 import argparse
 import os
 import astropy.table as table
@@ -71,9 +71,21 @@ def defineSpecificProgramOptions():
     parser.add_argument('--suffix', default="_el", type=str,
                         help='Suffix to be added to the directory name to form the output directory')
     parser.add_argument('--copy-parameter', default=True, type=bool,
-                        help='Define if the header containing physical parameters has to be copied into the new SEDs')
+                        help='Define if the header containing name and physical parameters has to be copied into the new SEDs')
 
     return parser
+    
+    
+def getInnerName(file_path):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+    name = ""
+    for line in lines:
+        if m := re.match(r"^#\s*NAME\s*:\s*(\w+)\s*\n$", line):
+            name = m.group(1)
+    return name
+        
+    
 
 
 def readEmissionLinesFromFile(emission_lines_file):
