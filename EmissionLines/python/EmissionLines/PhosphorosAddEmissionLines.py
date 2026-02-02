@@ -70,23 +70,10 @@ def defineSpecificProgramOptions():
     parser.add_argument('--no-sed', action='store_true', help='Output only the emission lines')
     parser.add_argument('--suffix', default="_el", type=str,
                         help='Suffix to be added to the directory name to form the output directory')
-    parser.add_argument('--copy-parameter', default=True, type=bool,
-                        help='Define if the header containing name and physical parameters has to be copied into the new SEDs')
+    parser.add_argument('--copy-parameter', type=bool,
+                        help='IF present, copy the header containing physical parameters has to be copied into the new SEDs')
 
     return parser
-    
-    
-def getInnerName(file_path):
-    with open(file_path, 'r') as file:
-        lines = file.readlines()
-    name = ""
-    for line in lines:
-        if m := re.match(r"^#\s*NAME\s*:\s*(\w+)\s*\n$", line):
-            name = m.group(1)
-    return name
-        
-    
-
 
 def readEmissionLinesFromFile(emission_lines_file):
     if emission_lines_file[0]=='/':
@@ -282,8 +269,9 @@ def mainMethod(args):
             out_sed = adder(sed)
             t = table.Table(rows=out_sed, names=('Wave', 'Flux'))
             t.write(os.path.join(out_dir, sed_file), format='ascii.commented_header')
+            parameters = SedUtils.readXYDatasetKeyword(os.path.join(sed_dir, sed_file))
             if (args.copy_parameter):
                 logger.info('Copy the header from ' + sed_file)
-                parameters = SedUtils.readXYDatasetKeyword(os.path.join(sed_dir, sed_file))
-                parameters.pop('NAME', None)
                 SedUtils.replaceXYDatasetKeyword(os.path.join(out_dir, sed_file), parameters)
+            if 'NAME' in parameters:
+                SedUtils.replaceXYDatasetKeyword(os.path.join(out_dir, sed_file), {'NAME':parameters['NAME']})
