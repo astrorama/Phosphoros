@@ -10,6 +10,7 @@ Note: the issue number refer to SDC-CH internal tracking.
 ### Fixed
  - Fix the progress values for ComputeGalacticAbsorptionCoefficientGrid. https://redmine.isdc.unige.ch/issues/32960
  - Copy the name (if defined in the file header). https://redmine.isdc.unige.ch/issues/36122
+ - Fix the PP computation
 
 ### Changed
  - Add exception when the Generic Prior File or the POP input cat is missing. https://redmine.isdc.unige.ch/issues/36133
