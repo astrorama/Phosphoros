@@ -6,11 +6,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Note: the issue number refer to SDC-CH internal tracking.
+## [2.1.0]
+### Changed
+ - Add ABS MAG computation capability. https://redmine.astro.unige.ch/issues/36956
+
 ## [2.0.17]
 ### Fixed
  - Fix the progress values for ComputeGalacticAbsorptionCoefficientGrid. https://redmine.isdc.unige.ch/issues/32960
  - Copy the name (if defined in the file header). https://redmine.isdc.unige.ch/issues/36122
- - Fix the PP computation
+ - Fix the PP computation. https://redmine.astro.unige.ch/issues/36847
 
 ### Changed
  - Add exception when the Generic Prior File or the POP input cat is missing. https://redmine.isdc.unige.ch/issues/36133
