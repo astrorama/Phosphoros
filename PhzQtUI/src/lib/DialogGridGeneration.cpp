@@ -26,6 +26,7 @@
 #include <QMessageBox>
 #include <QtConcurrent>
 #include <boost/program_options.hpp>
+#include "ElementsKernel/Logging.h"
 
 // #include <future>
 
@@ -33,6 +34,8 @@ using namespace Euclid::PhzConfiguration;
 
 namespace Euclid {
 namespace PhzQtUI {
+
+static Elements::Logging logger = Elements::Logging::getLogger("DialogGridGeneration");
 
 DialogGridGeneration::DialogGridGeneration(QWidget* parent) : QDialog(parent), ui(new Ui::DialogGridGeneration) {
   ui->setupUi(this);
@@ -75,20 +78,25 @@ std::string DialogGridGeneration::runFunction() {
     auto&       igm_abs_func    = config_manager.getConfiguration<IgmConfig>().getIgmAbsorptionFunction();
     auto& cosmology = config_manager.template getConfiguration<CosmologicalParameterConfig>().getCosmologicalParam();
 
-    auto lum_filter_name =
-        config_manager.template getConfiguration<ModelNormalizationConfig>().getNormalizationFilter();
+    auto lum_filter_names =
+        config_manager.template getConfiguration<ModelNormalizationConfig>().getNormalizationFilters();
     auto lum_pp_filter_name =
         config_manager.template getConfiguration<ModelNormalizationConfig>().getPpNormalizationFilter();
     auto sun_sed_name = config_manager.getConfiguration<ModelNormalizationConfig>().getReferenceSolarSed();
-    auto normalizer_functor =
-        Euclid::PhzModeling::NormalizationFunctorFactory::NormalizationFunctorFactory::GetFunction(
+    
+    std::vector<Euclid::PhzModeling::NormalizationFunction> normalizer_functors{};
+    for(auto& lum_filter_name : lum_filter_names) {
+        Euclid::PhzModeling::NormalizationFunction normalizer = Euclid::PhzModeling::NormalizationFunctorFactory::NormalizationFunctorFactory::GetFunction(
             filter_provider, lum_filter_name, sed_provider, sun_sed_name);
+        normalizer_functors.push_back(normalizer);
+    }
+  
     auto normalizer_pp_functor =
     	Euclid::PhzModeling::NormalizationFunctorFactory::NormalizationFunctorFactory::GetFunction(
                         filter_provider, lum_pp_filter_name, sed_provider, sun_sed_name);
 
     Euclid::PhzModeling::SparseGridCreator creator{sed_provider, reddening_provider, filter_provider, igm_abs_func,
-                                                   normalizer_functor, normalizer_pp_functor, m_pp_norm};
+                                                   normalizer_functors, normalizer_pp_functor, m_pp_norm};
 
     auto monitor_function = [this](size_t step, size_t total) {
       int value = (step * 100) / total;
@@ -102,7 +110,8 @@ std::string DialogGridGeneration::runFunction() {
     auto param_space_map = config_manager.getConfiguration<ParameterSpaceConfig>().getParameterSpaceRegions();
     auto filter_list     = config_manager.getConfiguration<FilterConfig>().getFilterList();
 
-    auto result = creator.createGrid(param_space_map, filter_list, cosmology, monitor_function);
+    logger.debug()<<"Create the grid";
+    auto result = creator.createGrid(param_space_map, filter_list, lum_filter_names, cosmology, monitor_function);
 
     auto output = config_manager.getConfiguration<ModelGridOutputConfig>().getOutputFunction();
     output(result);

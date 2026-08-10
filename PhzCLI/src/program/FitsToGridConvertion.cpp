@@ -45,6 +45,7 @@
 #include "PhzConfiguration/IgmConfig.h"
 #include "PhzConfiguration/ParameterSpaceConfig.h"
 #include "Configuration/CatalogConfig.h"
+#include "PhzConfiguration/ModelNormalizationConfig.h"
 
 #include "Configuration/Utils.h"
 
@@ -145,26 +146,28 @@ class FitsToGridConvertion : public Elements::Program {
     checkInputColumns(config_manager.getConfiguration<Euclid::Configuration::CatalogConfig>().getColumnInfo(), filters_ptr);
 
 
+    auto pp_norm_filter = config_manager.getConfiguration<ModelNormalizationConfig>().getPpNormalizationFilter().qualifiedName();
+
     logger.info() << "Get the SED and Reddening curve info";
     auto table_reader = config_manager.getConfiguration<Euclid::Configuration::CatalogConfig>().getTableReader();
     auto comments = table_reader->getComment();
-	// Create dictionary to convert axis values to index
-	std::vector<std::string> result;
-	boost::split(result, comments, boost::is_any_of("[]"));
-	auto sed_list = result[1];
-	std::map<std::string, size_t> sed_dict = buildCommentMap(sed_list);
+    // Create dictionary to convert axis values to index
+    std::vector<std::string> result;
+    boost::split(result, comments, boost::is_any_of("[]"));
+    auto sed_list = result[1];
+    std::map<std::string, size_t> sed_dict = buildCommentMap(sed_list);
 
-	auto red_list = result[3];
-	std::map<std::string, size_t> red_dict = buildCommentMap(red_list);
+    auto red_list = result[3];
+    std::map<std::string, size_t> red_dict = buildCommentMap(red_list);
 
-	logger.info() << "Read the input file";
+    logger.info() << "Read the input file";
     auto data_table = table_reader->read();
 
-	logger.info() << "Fill the grid";
+    logger.info() << "Fill the grid";
     for (auto map_iter = parameter_space.cbegin(); map_iter != parameter_space.cend(); ++map_iter) {
     	const std::string& name = map_iter->first;
 
-    	PhzDataModel::PhotometryGrid grid{map_iter->second, *filters_ptr};
+    	PhzDataModel::PhotometryGrid grid{map_iter->second, *filters_ptr, std::vector<std::string>{pp_norm_filter}};
    	    logger.info() << "Processing grid region " << name ;
 
     	size_t current_row=0;

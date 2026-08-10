@@ -5,6 +5,7 @@
 #include "PhzQtUI/ModelSet.h"
 #include <list>
 #include <map>
+#include <vector>
 #include <string>
 
 namespace boost {
@@ -26,13 +27,14 @@ public:
   static bool checkGridFileCompatibility(const QString     file_path,
                                          const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes,
                                          const std::list<std::string>& selected_filters,
-										 const std::string igm_type,
-										 bool              igm_cgm,
-										 double            igm_cgm_param_A,
-										 double            igm_cgm_param_a,
-										 double            igm_cgm_param_c, 
+					 const std::string igm_type,
+					 bool              igm_cgm,
+					 double            igm_cgm_param_A,
+					 double            igm_cgm_param_a,
+					 double            igm_cgm_param_c, 
                                          const std::string luminosity_filter,
-                                         const std::string luminosity_pp_filter);
+                                         const std::string luminosity_pp_filter,
+                                         const std::vector<XYDataset::QualifiedName> scaling_filter_names={});
 
   /**
    * @brief Get the name of the file containing a grid with the same axes and
@@ -48,13 +50,14 @@ public:
                                                       const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes,
                                                       const std::list<std::string>& selected_filters,
                                                       const std::string igm_type,
-										              bool              igm_cgm,
-										              double            igm_cgm_param_A,
-										              double            igm_cgm_param_a,
-										              double            igm_cgm_param_c, 
-													  const std::string luminosity_filter,
-													  const std::string luminosity_pp_filter,
-                                                      const GridType grid_type = PhotometryGrid);
+					              bool              igm_cgm,
+					              double            igm_cgm_param_A,
+					              double            igm_cgm_param_a,
+					              double            igm_cgm_param_c, 
+						      const std::string luminosity_filter,
+						      const std::string luminosity_pp_filter,
+                                                      const GridType grid_type = PhotometryGrid,
+                                                      const std::vector<XYDataset::QualifiedName> scaling_filter_names={});
 
   /**
    * @breif Build a boost configuration map out of the selected parameters.
@@ -72,13 +75,14 @@ public:
                       const std::string output_file, 
                       const ModelSet model,
                       const std::list<std::string>& selected_filters,
-					  const std::string luminosity_filter,
-					  const std::string luminosity_pp_filter,
+                      const std::string luminosity_filter,
+                      const std::string luminosity_pp_filter,
+                      const std::list<std::string>& abs_mag_selected_filters,
                       const std::string igm_type,
-					  bool              igm_cgm,
-					  double            igm_cgm_param_A,
-					  double            igm_cgm_param_a,
-					  double            igm_cgm_param_c,  
+                      bool              igm_cgm,
+                      double            igm_cgm_param_A,
+                      double            igm_cgm_param_a,
+                      double            igm_cgm_param_c,  
                       const std::list<float>& zs);
 };
 

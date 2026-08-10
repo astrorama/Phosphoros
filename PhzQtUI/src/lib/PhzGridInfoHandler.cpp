@@ -40,12 +40,13 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(const QString      file_path
                                                     const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes,
                                                     const std::list<std::string>& selected_filters,
                                                     const std::string igm_type,
-										            bool              igm_cgm,
-										            double            igm_cgm_param_A,
-										            double            igm_cgm_param_a,
-										            double            igm_cgm_param_c, 
-													const std::string luminosity_filter,
-													const std::string luminosity_pp_filter) {
+                                                    bool              igm_cgm,
+                                                    double            igm_cgm_param_A,
+                                                    double            igm_cgm_param_a,
+                                                    double            igm_cgm_param_c, 
+                                                    const std::string luminosity_filter,
+                                                    const std::string luminosity_pp_filter,
+                                                    const std::vector<XYDataset::QualifiedName> scaling_filter_names) {
   logger.debug()<<"Checking compatibility for grid in file "<< file_path.toStdString();
   auto start = std::chrono::high_resolution_clock::now();
   try {  // If a file cannot be opened or is ill formated: just skip it!
@@ -139,6 +140,20 @@ bool PhzGridInfoHandler::checkGridFileCompatibility(const QString      file_path
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
 	logger.debug()<<"Filter checked "<< duration << "[ms]";
 	start = stop;
+
+    // check the scaling_filter_names
+    for(auto& scaling_filter: scaling_filter_names){
+        logger.info()<<"Checking "<< scaling_filter.qualifiedName() ;
+        auto iter = std::find( grid_info.scaling_filter_names.begin(), grid_info.scaling_filter_names.end(), scaling_filter);
+        if ( iter == grid_info.scaling_filter_names.end()) {
+            logger.debug() << "Missing Scaling Filter. "<< scaling_filter.qualifiedName() << " is not in the grid scaling filters)";
+            return false;
+      } else { 
+       logger.debug() << "Found Filter. "<< (*iter).qualifiedName() << "in the grid scaling filters)";
+         
+      }
+    }
+
 
     // check the axis
     if (grid_info.region_axes_map.size() != axes.size()) {
@@ -268,13 +283,14 @@ PhzGridInfoHandler::getCompatibleGridFile(const std::string  catalog,
                                           const std::map<std::string, PhzDataModel::ModelAxesTuple>& axes,
                                           const std::list<std::string>& selected_filters, 
                                           const std::string igm_type,
-										  bool              igm_cgm,
-										  double            igm_cgm_param_A,
-									      double            igm_cgm_param_a,
-										  double            igm_cgm_param_c, 
+                                          bool  igm_cgm,
+                                          double igm_cgm_param_A,
+                                          double igm_cgm_param_a,
+                                          double igm_cgm_param_c, 
                                           const std::string luminosity_filter, 
                                           const std::string luminosity_pp_filter,
-                                          const GridType grid_type) {
+                                          const GridType grid_type,
+                                          const std::vector<XYDataset::QualifiedName> scaling_filter_names) {
   auto start = std::chrono::high_resolution_clock::now();
   std::string rootPath = FileUtils::getPhotmetricGridRootPath(true, catalog);
   if (grid_type == GalacticReddeningCorrectionGrid) {
@@ -295,7 +311,7 @@ PhzGridInfoHandler::getCompatibleGridFile(const std::string  catalog,
     foreach (const QString& fileName, fileNames) {
       auto file_path = root_qdir.absoluteFilePath(fileName);
       logger.debug() << "Checking parameter compatibility for file :" << file_path.toStdString();
-      if (checkGridFileCompatibility(file_path, axes, selected_filters, igm_type, igm_cgm, igm_cgm_param_A, igm_cgm_param_a, igm_cgm_param_c, luminosity_filter, luminosity_pp_filter)) {
+      if (checkGridFileCompatibility(file_path, axes, selected_filters, igm_type, igm_cgm, igm_cgm_param_A, igm_cgm_param_a, igm_cgm_param_c, luminosity_filter, luminosity_pp_filter, scaling_filter_names)) {
         logger.debug() << "File accepted :" << file_path.toStdString();
         list.push_back(fileName.toStdString());
       }
@@ -314,13 +330,14 @@ PhzGridInfoHandler::GetConfigurationMap(const std::string catalog,
                                         const std::string output_file, 
                                         const ModelSet    model,
                                         const std::list<std::string>& selected_filters,
-					                    const std::string luminosity_filter,
-					                    const std::string luminosity_pp_filter,
+                                        const std::string luminosity_filter,
+                                        const std::string luminosity_pp_filter,
+                                        const std::list<std::string>& abs_mag_selected_filters,
                                         const std::string igm_type,
-					                    bool              igm_cgm,
-					                    double            igm_cgm_param_A,
-					                    double            igm_cgm_param_a,
-					                    double            igm_cgm_param_c,  
+                                        bool              igm_cgm,
+                                        double            igm_cgm_param_A,
+                                        double            igm_cgm_param_a,
+                                        double            igm_cgm_param_c,  
                                         const std::list<float>& zs) {
 
   std::map<std::string, boost::program_options::variable_value> options_map =
@@ -349,6 +366,14 @@ PhzGridInfoHandler::GetConfigurationMap(const std::string catalog,
     filter_add_vector.push_back(filter_item);
   }
   options_map["filter-name"].value()         = boost::any(filter_add_vector);
+  
+  std::vector<std::string> abs_mag_filter_add_vector;
+  for (auto& filter_item : abs_mag_selected_filters) {
+    abs_mag_filter_add_vector.push_back(filter_item);
+  }
+  options_map["abs-mag-filters"].value()     = boost::any(abs_mag_filter_add_vector);
+  
+  
   options_map["igm-absorption-type"].value() = boost::any(igm_type);
   if (igm_cgm && igm_type!="OFF"){
       std::string yes="YES";

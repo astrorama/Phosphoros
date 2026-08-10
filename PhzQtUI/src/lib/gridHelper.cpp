@@ -115,19 +115,28 @@ bool gridHelper::checkCompatibleModelGrid(std::string file_name, ModelSet& selec
   } else {
     auto  axis = selected_model.getAxesTuple();
     logger.debug() << "checkCompatibleModelGrid => selected_model content :" << getAxisDescription(axis);
+ 
+
+   
+    std::vector<XYDataset::QualifiedName> mag_abs_scaling_filter_vector {};
+    for (auto& filter :  grd_info.abs_mag_filter_list) {
+          mag_abs_scaling_filter_vector.push_back(XYDataset::QualifiedName(filter));
+    }
 
     auto  possible_files = PhzGridInfoHandler::getCompatibleGridFile(
          survey_name,
-		 axis,
-		 grd_info.filter_list,
+	 axis,
+	 grd_info.filter_list,
          grd_info.igm,
          grd_info.has_igm_cgm,
          grd_info.IGM_CGM_param_A,
          grd_info.IGM_CGM_param_a,
          grd_info.IGM_CGM_param_c,
-		 grd_info.lum_filter,
-		 grd_info.pp_lum_filter,
-		 PhotometryGrid);
+	 grd_info.lum_filter,
+	 grd_info.pp_lum_filter,
+	 PhotometryGrid,
+	 mag_abs_scaling_filter_vector
+	);
 
     logger.debug() << "possible_files "<<possible_files.size();
 
@@ -235,6 +244,7 @@ std::map<std::string, boost::program_options::variable_value> gridHelper::getGri
                             grd_info.filter_list,
                             grd_info.lum_filter,
                             grd_info.pp_lum_filter,
+                            grd_info.abs_mag_filter_list,
                             grd_info.igm,
                             grd_info.has_igm_cgm,
                             grd_info.IGM_CGM_param_A,

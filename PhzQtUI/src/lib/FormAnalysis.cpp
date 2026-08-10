@@ -33,6 +33,7 @@
 #include "PhzQtUI/DialogExtractZ.h"
 #include "PhzQtUI/FormAnalysis.h"
 #include "PhzQtUI/DialogCGMConfig.h"
+#include "PhzQtUI/DialogAbsMag.h"
 #include "PhzQtUI/ModelSet.h"
 #include "PhzQtUI/PhotometricCorrectionHandler.h"
 #include "PhzQtUI/PhzGridInfoHandler.h"
@@ -74,6 +75,65 @@ FormAnalysis::FormAnalysis(QWidget* parent) : QWidget(parent), ui(new Ui::FormAn
 }
 
 FormAnalysis::~FormAnalysis() {}
+
+
+
+//////////////////////// ABS MAG Stuff /////////////////////////////////////////////
+
+std::list<std::pair<QString, QString>> getMAGListFromPref(std::string survey, std::string param_space){
+  auto mag_list = PreferencesUtils::getUserPreference(survey, param_space + "_MAG");
+
+  auto  mag_list_param = QString::fromStdString(mag_list);
+  std::list<std::pair<QString, QString>> res{};
+  if (mag_list_param.length() > 0) {
+  
+    logger.info() << "Reading the ABS_MAG pref : " << mag_list_param.toStdString();
+    for (auto& part : mag_list_param.split(";")) {
+        auto bits = part.split(":");
+        res.push_back(std::make_pair(bits[0],bits[1]));
+    }
+  }
+  
+  return res;
+}
+
+std::list<std::string> getMAGFilterList(std::string survey, std::string param_space){
+  auto config = getMAGListFromPref(survey, param_space);
+  std::list<std::string> filters{};
+  for(auto& conf : config) {
+      filters.push_back(conf.first.toStdString());
+  } 
+  
+  return filters;
+}
+
+std::vector<std::string> getMAGConfigList(std::string survey, std::string param_space){
+  auto config = getMAGListFromPref(survey, param_space);
+  std::vector<std::string> out_config{};
+  for(auto& conf : config) {
+      out_config.push_back(conf.first.toStdString()+":"+conf.second.toStdString());
+  } 
+  
+  return out_config;
+}
+
+void setMAGListToPref(std::string survey, std::string param_space, std::list<std::pair<QString, QString>> config){
+   QString to_store{};
+   bool first = true;
+   for (auto pair_item : config){
+       if (!first){
+           to_store = to_store+";";
+       } else {
+           first=false;
+       }
+       to_store = to_store+pair_item.first+":"+pair_item.second;
+   }  
+   logger.info() << "Storing the ABS_MAG pref : " << to_store.toStdString();
+   PreferencesUtils::setUserPreference(survey, param_space + "_MAG", to_store.toStdString());
+}
+///////////////////////////////////////////////
+
+
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -242,6 +302,8 @@ void FormAnalysis::updateSelection() {
         }
       }
     }
+    
+  updateAbsMagGrid();
   m_is_loading=false;
 
   if (ui->cb_AnalysisSurvey->currentText() != "" && has_changed_catalog) {
@@ -301,7 +363,13 @@ void FormAnalysis::updateGridSelection() {
     logger.debug()<<"updateGridSelection => Info collected "<< duration << "[ms]";
     start=stop;
 
-    auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(survey_name, axis, getSelectedFilters(), igm, igm_cgm, m_IGM_CGM_param_A, m_IGM_CGM_param_a, m_IGM_CGM_param_c, lum_filter, lum_pp_filter, PhotometryGrid);
+    auto mag_abs_scaling_filter = getMAGFilterList( ui->cb_AnalysisSurvey->currentText().toStdString(), m_model_set_model_ptr->getSelectedModelSet().getName());
+    std::vector<XYDataset::QualifiedName> mag_abs_scaling_filter_vector {};
+    for (auto& filter : mag_abs_scaling_filter) {
+          mag_abs_scaling_filter_vector.push_back(XYDataset::QualifiedName(filter));
+    }
+    
+    auto possible_files = PhzGridInfoHandler::getCompatibleGridFile(survey_name, axis, getSelectedFilters(), igm, igm_cgm, m_IGM_CGM_param_A, m_IGM_CGM_param_a, m_IGM_CGM_param_c, lum_filter, lum_pp_filter, PhotometryGrid, mag_abs_scaling_filter_vector);
     stop = std::chrono::high_resolution_clock::now();
     duration=(std::chrono::duration_cast<std::chrono::microseconds>(stop - start)).count()/1000;
     logger.debug()<<"updateGridSelection => files loaded "<< duration << "[ms]";
@@ -659,6 +727,7 @@ void FormAnalysis::on_cb_AnalysisSurvey_currentIndexChanged(int selected_index )
   setCopiedColumns(selected_survey.getCopiedColumns());
   setRunAnnalysisEnable(true);
   getPPListFromConfig();
+  updateAbsMagGrid();
 }
 
 void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(int selected_index ) {
@@ -674,6 +743,7 @@ void FormAnalysis::on_cb_AnalysisModel_currentIndexChanged(int selected_index ) 
   updateFilterShiftGridSelection();
   loadLuminosityPriors();
   getPPListFromConfig();
+  updateAbsMagGrid();
 }
 
 
@@ -761,6 +831,55 @@ void FormAnalysis::on_btn_lum_pp_filter_clicked() {
   connect(dialog.get(), SIGNAL(popupClosing(std::string)), SLOT(setPpLumFilter(std::string)));
   dialog->exec();
 }
+
+
+
+
+//////////////////////// ABS MAG Stuff /////////////////////////////////////////////
+
+void FormAnalysis::updateAbsMagGrid(){
+  // to be called on setup and/or when the Catalog or Parameter Space are changed
+  
+  QStandardItemModel* grid_model = new QStandardItemModel();
+  grid_model->setColumnCount(2);
+  grid_model->setHeaderData(0, Qt::Horizontal, tr("Filter"));
+  grid_model->setHeaderData(1, Qt::Horizontal, tr("Output ABS MAG Column"));
+  
+  auto res =  getMAGListFromPref(ui->cb_AnalysisSurvey->currentText().toStdString(), ui->cb_AnalysisModel->currentText().toStdString());
+
+  for (auto pair_item : res) {
+    QStandardItem* item_filter = new QStandardItem(pair_item.first);
+    QStandardItem* item_col = new QStandardItem(pair_item.second);
+ 
+    QList<QStandardItem*> items;
+    items.push_back(item_filter);
+    items.push_back(item_col);
+
+    grid_model->appendRow(items);
+  }
+  
+  
+  ui->tbl_AbsMag->setModel(grid_model);
+  QFont font = ui->tbl_AbsMag->horizontalHeader()->font();
+  font.setPointSize(11);
+  ui->tbl_AbsMag->setFont(font);
+  ui->tbl_AbsMag->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+  ui->tbl_AbsMag->setEnabled(false);
+  
+}
+
+void FormAnalysis::on_btn_SelectFilterAbsMag_clicked(){
+    std::unique_ptr<DialogAbsMag> popupAbsMag(new DialogAbsMag());
+    auto abs_mag_conf =  getMAGListFromPref(ui->cb_AnalysisSurvey->currentText().toStdString(), ui->cb_AnalysisModel->currentText().toStdString());
+    popupAbsMag->setData(m_filter_repository, abs_mag_conf);
+    if (popupAbsMag->exec() == QDialog::Accepted) {
+        setMAGListToPref(ui->cb_AnalysisSurvey->currentText().toStdString(), ui->cb_AnalysisModel->currentText().toStdString(), popupAbsMag->getAbsMagConfig());
+        updateAbsMagGrid();
+    }
+}
+
+///////////////////////////////////////////////
+
 
 void FormAnalysis::on_btn_CGM_conf_clicked(){
   std::unique_ptr<DialogCGMConfig> dialog(new DialogCGMConfig());
@@ -1141,13 +1260,14 @@ void FormAnalysis::on_btn_computeCorrections_clicked() {
   
   auto grid_info_object = GridInfoObject{
          getSelectedFilters(), 
+         getMAGFilterList(survey_name, ui->cb_AnalysisModel->currentText().toStdString()),
          ui->cb_igm->currentText().toStdString(),
          ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked,
          m_IGM_CGM_param_A,
          m_IGM_CGM_param_a,
          m_IGM_CGM_param_c,
-		 ui->lbl_lum_filter->text().toStdString(),
-		 ui->lbl_lum_pp_filter->text().toStdString()};
+	 ui->lbl_lum_filter->text().toStdString(),
+	 ui->lbl_lum_pp_filter->text().toStdString()};
   
   
   
@@ -1843,13 +1963,14 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
     auto survey_name = ui->cb_AnalysisSurvey->currentText().toStdString();
     auto grid_info_object = GridInfoObject{
          getSelectedFilters(), 
+         getMAGFilterList(survey_name, selected_model.getName()),
          ui->cb_igm->currentText().toStdString(),
          ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked,
          m_IGM_CGM_param_A,
          m_IGM_CGM_param_a,
          m_IGM_CGM_param_c,
-	     ui->lbl_lum_filter->text().toStdString(),
-	     ui->lbl_lum_pp_filter->text().toStdString()};
+         ui->lbl_lum_filter->text().toStdString(),
+         ui->lbl_lum_pp_filter->text().toStdString()};
     auto config = gridHelper::getGridConfiguration(zs, selected_model, survey_name, grid_info_object, file_name);
                                                                                         
     ui->cb_CompatibleGrid->setItemText(ui->cb_CompatibleGrid->currentIndex(), QString::fromStdString(file_name));
@@ -1861,13 +1982,14 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getG
     std::string catalog_type = ui->cb_AnalysisSurvey->currentText().toStdString();
     auto grid_info_object = GridInfoObject{
          getSelectedFilters(), 
+         getMAGFilterList(catalog_type, m_model_set_model_ptr->getSelectedModelSet().getName()),
          ui->cb_igm->currentText().toStdString(),
          ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked,
          m_IGM_CGM_param_A,
          m_IGM_CGM_param_a,
          m_IGM_CGM_param_c,
-	     ui->lbl_lum_filter->text().toStdString(),
-	     ui->lbl_lum_pp_filter->text().toStdString()};
+	 ui->lbl_lum_filter->text().toStdString(),
+	 ui->lbl_lum_pp_filter->text().toStdString()};
     std::string grid_name    = ui->cb_CompatibleGrid->currentText().toStdString();
     std::string file_name = FileUtils::addExt(ui->cb_CompatibleGalCorrGrid->currentText().toStdString(), grid_ext);
     std::string mwrc         = ui->cb_MWRC->currentText().toStdString();
@@ -1889,13 +2011,14 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getF
     int         sample_number    = ui->sp_samp_num->value();
     auto grid_info_object = GridInfoObject{
          getSelectedFilters(), 
+         getMAGFilterList( ui->cb_AnalysisSurvey->currentText().toStdString(), m_model_set_model_ptr->getSelectedModelSet().getName()),
          ui->cb_igm->currentText().toStdString(),
          ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked,
          m_IGM_CGM_param_A,
          m_IGM_CGM_param_a,
          m_IGM_CGM_param_c,
-	     ui->lbl_lum_filter->text().toStdString(),
-	     ui->lbl_lum_pp_filter->text().toStdString()};
+	 ui->lbl_lum_filter->text().toStdString(),
+	 ui->lbl_lum_pp_filter->text().toStdString()};
 
     std::string grid_name        = ui->cb_CompatibleGrid->currentText().toStdString();
     std::string output_grid_name = FileUtils::addExt(ui->cb_CompatibleShiftGrid->currentText().toStdString(), grid_ext);		
@@ -2394,6 +2517,18 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
 
   std::string corrected_phot                         = ui->cb_corr_phot->currentText().toStdString();
   options_map["output-corrected-photometry"].value() = boost::any(corrected_phot);
+  
+  
+  
+  auto abs_mag_config = getMAGConfigList(survey_name, m_model_set_model_ptr->getSelectedModelSet().getName());
+  
+  logger.info() << "abs_mag_config size "<<abs_mag_config.size();
+  if (abs_mag_config.size()>0) {
+    options_map["abs-mag-out-mapping"].value() = boost::any(abs_mag_config);
+  }
+  
+  
+  
 
   return options_map;
 }
@@ -2863,13 +2998,14 @@ void FormAnalysis::run_analysis_second_part() {
   
   auto grid_info_object = GridInfoObject{
          getSelectedFilters(), 
+         getMAGFilterList(survey_name, ui->cb_AnalysisModel->currentText().toStdString()),
          ui->cb_igm->currentText().toStdString(),
          ui->cb_CGM_IGM->checkState()== Qt::CheckState::Checked,
          m_IGM_CGM_param_A,
          m_IGM_CGM_param_a,
          m_IGM_CGM_param_c,
-		 ui->lbl_lum_filter->text().toStdString(),
-		 ui->lbl_lum_pp_filter->text().toStdString()};
+	 ui->lbl_lum_filter->text().toStdString(),
+	 ui->lbl_lum_pp_filter->text().toStdString()};
 
   std::string grid_ext = PreferencesUtils::getGridFormat();
   std::string main_file_name = FileUtils::addExt(ui->cb_CompatibleGrid->currentText().toStdString(), grid_ext);

@@ -57,6 +57,8 @@ public:
                         DatasetRepo luminosity_repository);
 
   void updateSelection();
+  
+  void updateAbsMagGrid();
 
 signals:
 
@@ -99,6 +101,8 @@ private slots:
   void on_btn_lum_filter_clicked();
 
   void on_btn_lum_pp_filter_clicked();
+  
+  void on_btn_SelectFilterAbsMag_clicked();
 
   void on_cb_AnalysisModel_currentIndexChanged(int selected_index);
 

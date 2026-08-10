@@ -103,13 +103,13 @@ std::string DialogFilterShiftGridGeneration::runFunction() {
         config_manager.template getConfiguration<FilterVariationCoefficientGridOutputConfig>().getOutputFunction();
     auto shift_sampling = config_manager.template getConfiguration<FilterVariationConfig>().getSampling();
     auto cosmology = config_manager.template getConfiguration<CosmologicalParameterConfig>().getCosmologicalParam();
-    auto lum_filter_name = config_manager.getConfiguration<ModelNormalizationConfig>().getNormalizationFilter();
+    auto lum_filter_names = config_manager.getConfiguration<ModelNormalizationConfig>().getNormalizationFilters();
     auto lum_pp_filter_name = config_manager.getConfiguration<ModelNormalizationConfig>().getPpNormalizationFilter();
     auto sun_sed_name    = config_manager.getConfiguration<ModelNormalizationConfig>().getReferenceSolarSed();
 
     auto normalizer_functor =
         Euclid::PhzModeling::NormalizationFunctorFactory::NormalizationFunctorFactory::GetFunction(
-            filter_provider, lum_filter_name, sed_provider, sun_sed_name);
+            filter_provider, lum_filter_names[0], sed_provider, sun_sed_name);
     auto normalizer_pp_functor =
         Euclid::PhzModeling::NormalizationFunctorFactory::NormalizationFunctorFactory::GetFunction(
             filter_provider, lum_pp_filter_name, sed_provider, sun_sed_name);

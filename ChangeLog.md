@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Note: the issue number refer to SDC-CH internal tracking.
 ## [2.1.0]
 ### Changed
- - Add ABS MAG computation capability. https://redmine.astro.unige.ch/issues/36956
+ - Add ABS MAG computation capability. This change e the new code from PhosphorosCore 2.2.0 and break backward compatibility with existing ModelGrids. https://redmine.astro.unige.ch/issues/36956
 
 ## [2.0.17]
 ### Fixed

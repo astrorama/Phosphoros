@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>958</width>
-    <height>962</height>
+    <width>1375</width>
+    <height>1489</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -203,8 +203,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>942</width>
-        <height>770</height>
+        <width>1355</width>
+        <height>1245</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -223,8 +223,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>499</height>
+            <width>1337</width>
+            <height>807</height>
            </rect>
           </property>
           <attribute name="label">
@@ -360,12 +360,12 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>499</height>
+            <width>1564</width>
+            <height>794</height>
            </rect>
           </property>
           <attribute name="label">
-           <string>2. Luminosity Filter and Extrinsic Absorption</string>
+           <string>2. Luminosity, ABS MAG Filters and Extrinsic Absorption</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_5">
            <item>
@@ -479,6 +479,50 @@
               </item>
              </layout>
             </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_8">
+             <item>
+              <widget class="QLabel" name="label_6">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>ABS MAG computation:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_32">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_SelectFilterAbsMag">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Select Filters</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QTableView" name="tbl_AbsMag"/>
            </item>
            <item>
             <widget class="QLabel" name="label_3">
@@ -701,8 +745,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>499</height>
+            <width>1337</width>
+            <height>807</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1017,8 +1061,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>499</height>
+            <width>1337</width>
+            <height>807</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1254,8 +1298,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>499</height>
+            <width>1337</width>
+            <height>807</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1270,6 +1314,7 @@
              <property name="font">
               <font>
                <pointsize>11</pointsize>
+               <weight>50</weight>
                <bold>false</bold>
               </font>
              </property>
@@ -1406,8 +1451,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>499</height>
+            <width>1337</width>
+            <height>807</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1580,8 +1625,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>933</width>
-            <height>621</height>
+            <width>1614</width>
+            <height>805</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1599,6 +1644,7 @@
                    <property name="font">
                     <font>
                      <pointsize>11</pointsize>
+                     <weight>50</weight>
                      <bold>false</bold>
                     </font>
                    </property>
