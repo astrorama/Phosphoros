@@ -46,7 +46,7 @@
 
 #include "PhzDataModel/PhzModel.h"
 #include "PhzUtils/Multithreading.h"
-#include <ctime>
+
 
 #include "Configuration/ConfigManager.h"
 #include "DefaultOptionsCompleter.h"
