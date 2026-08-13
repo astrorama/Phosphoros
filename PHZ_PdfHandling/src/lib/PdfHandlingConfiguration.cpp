@@ -25,10 +25,6 @@
 #include "ElementsKernel/Exception.h"
 #include "ElementsKernel/Logging.h"
 #include <boost/program_options.hpp>
-#include <cstdlib>
-#include <set>
-#include <sstream>
-#include <vector>
 
 #include "Configuration/Configuration.h"
 #include "PHZ_PdfHandling/PdfHandlingConfiguration.h"

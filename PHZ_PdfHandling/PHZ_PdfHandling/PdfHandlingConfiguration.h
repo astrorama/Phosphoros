@@ -26,9 +26,6 @@
 #define _PHZ_PDFHANDLING_PDFHANDLINGCONFIGURATION_H
 
 #include "Configuration/Configuration.h"
-#include <boost/filesystem/operations.hpp>
-#include <cstdlib>
-#include <map>
 #include <string>
 #include <vector>
 
