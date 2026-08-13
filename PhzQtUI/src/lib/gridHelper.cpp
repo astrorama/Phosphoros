@@ -252,10 +252,7 @@ std::map<std::string, boost::program_options::variable_value> gridHelper::getGri
                             grd_info.IGM_CGM_param_c,
                             zs);
 
-    auto cosmo_conf = PreferencesUtils::getCosmologyConfigurations();
-    for (auto& pair : cosmo_conf) {
-        config[pair.first] = pair.second;
-    }
+    
     std::string tex_suffix = ".txt";
     std::string text_format                    =(FileUtils::ends_with(file_name, tex_suffix))? "TEXT":"BINARY";
     config["output-model-grid-format"].value() = boost::any(text_format);
@@ -311,24 +308,6 @@ std::map<std::string, boost::program_options::variable_value> gridHelper::getGal
       options_map["output-galactic-correction-coefficient-grid-format"].value() = boost::any(text_format);
 
       options_map["model-grid-file"].value()         = boost::any(grid_name);
-      options_map["normalization-filter"].value()    = boost::any(grd_info.lum_filter);
-      options_map["normalization-pp-filter"].value() = boost::any(grd_info.pp_lum_filter);
-      std::string sun_sed                            = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
-      options_map["normalization-solar-sed"].value() = boost::any(sun_sed);
-      options_map["igm-absorption-type"].value()     = boost::any(grd_info.igm);
-      
-      if (grd_info.has_igm_cgm && grd_info.igm!="OFF"){
-          std::string yes="YES";
-          options_map["igm-absorption-add-cgm"].value() = boost::any(yes);
-          options_map["igm-absorption-cgm-A"].value() = boost::any(grd_info.IGM_CGM_param_A);
-          options_map["igm-absorption-cgm-a"].value() = boost::any(grd_info.IGM_CGM_param_a);
-          options_map["igm-absorption-cgm-c"].value() = boost::any(grd_info.IGM_CGM_param_c);
-      }
-
-      auto cosmo_conf = PreferencesUtils::getCosmologyConfigurations();
-      for (auto& pair : cosmo_conf) {
-        options_map[pair.first] = pair.second;
-      }
 
       options_map["milky-way-reddening-curve-name"].value() = boost::any(mwrc_arg);
       auto global_options                                   = PreferencesUtils::getThreadConfigurations();
@@ -365,11 +344,7 @@ std::map<std::string, boost::program_options::variable_value> gridHelper::getFil
   options_map["filter-variation-shift-samples"].value() = boost::any(sample_number);
   options_map["milky-way-reddening-curve-name"].value() = boost::any(mwrc_arg);
 
-  auto global_options = PreferencesUtils::getCosmologyConfigurations();
-  for (auto& pair : global_options) {
-    options_map[pair.first] = pair.second;
-  }
-  global_options = PreferencesUtils::getThreadConfigurations();
+  auto global_options = PreferencesUtils::getThreadConfigurations();
   for (auto& pair : global_options) {
     options_map[pair.first] = pair.second;
   }
@@ -380,19 +355,7 @@ std::map<std::string, boost::program_options::variable_value> gridHelper::getFil
   }
 
   options_map["catalog-type"].value() = boost::any(survey_name);
-  options_map["normalization-filter"].value()    = boost::any(grd_info.lum_filter);
-  options_map["normalization-pp-filter"].value() = boost::any(grd_info.pp_lum_filter);
-  std::string sun_sed                            = PreferencesUtils::getUserPreference("AuxData", "SUN_SED");
-  options_map["normalization-solar-sed"].value() = boost::any(sun_sed);
-  options_map["igm-absorption-type"].value()     = boost::any(grd_info.igm);
-  if (grd_info.has_igm_cgm && grd_info.igm!="OFF"){
-      std::string yes="YES";
-      options_map["igm-absorption-add-cgm"].value() = boost::any(yes);
-      options_map["igm-absorption-cgm-A"].value() = boost::any(grd_info.IGM_CGM_param_A);
-      options_map["igm-absorption-cgm-a"].value() = boost::any(grd_info.IGM_CGM_param_a);
-      options_map["igm-absorption-cgm-c"].value() = boost::any(grd_info.IGM_CGM_param_c);
-  }
-  
+
   options_map["model-grid-file"].value()         = boost::any(grid_name);
   options_map["output-filter-variation-coefficient-grid"].value()        = boost::any(output_grid_name);
   std::string tex_suffix = ".txt";

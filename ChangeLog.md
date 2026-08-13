@@ -9,6 +9,8 @@ Note: the issue number refer to SDC-CH internal tracking.
 ## [2.1.0]
 ### Changed
  - Add ABS MAG computation capability. This change e the new code from PhosphorosCore 2.2.0 and break backward compatibility with existing ModelGrids. https://redmine.astro.unige.ch/issues/36956
+ - Update the grid and the config to avoid reset config already set when computing the ModelGrid: https://redmine.astro.unige.ch/issues/36982
+ - Update the DisplaModelGRid to display the new info stored in the Grid Info 
 
 ## [2.0.17]
 ### Fixed

@@ -26,16 +26,13 @@
 #include "Configuration/ConfigManager.h"
 #include "PhzConfiguration/ComputeModelGalacticCorrectionCoefficientConfig.h"
 #include "PhzConfiguration/CorrectionCoefficientGridOutputConfig.h"
-#include "PhzConfiguration/CosmologicalParameterConfig.h"
 #include "PhzConfiguration/FilterProviderConfig.h"
-#include "PhzConfiguration/IgmConfig.h"
 #include "PhzConfiguration/MilkyWayReddeningConfig.h"
 #include "PhzConfiguration/PhotometryGridConfig.h"
 #include "PhzConfiguration/ReddeningProviderConfig.h"
 #include "PhzConfiguration/SedProviderConfig.h"
 #include "PhzGalacticCorrection/GalacticCorrectionFactorSingleGridCreator.h"
 
-#include "PhzConfiguration/ModelNormalizationConfig.h"
 #include "PhzModeling/NormalizationFunctorFactory.h"
 
 // #include <future>
@@ -104,19 +101,19 @@ std::string DialogGalCorrGridGeneration::runFunction() {
         config_manager.template getConfiguration<ReddeningProviderConfig>().getReddeningDatasetProvider();
     const auto& filter_provider =
         config_manager.template getConfiguration<FilterProviderConfig>().getFilterDatasetProvider();
-    auto& igm_abs_func = config_manager.template getConfiguration<IgmConfig>().getIgmAbsorptionFunction();
+    auto& igm_abs_func = config_manager.template getConfiguration<PhotometryGridConfig>().getIgmAbsorptionFunction();
     auto  miky_way_reddening_curve =
         config_manager.template getConfiguration<MilkyWayReddeningConfig>().getMilkyWayReddeningCurve();
     auto output_function =
         config_manager.template getConfiguration<CorrectionCoefficientGridOutputConfig>().getOutputFunction();
 
-    auto& cosmology = config_manager.template getConfiguration<CosmologicalParameterConfig>().getCosmologicalParam();
+    auto& cosmology = config_manager.template getConfiguration<PhotometryGridConfig>().getCosmologicalParam();
 
     auto lum_filter_names =
-        config_manager.template getConfiguration<ModelNormalizationConfig>().getNormalizationFilters();
+        config_manager.template getConfiguration<PhotometryGridConfig>().getNormalizationFilters();
     auto lum_pp_filter_name =
-        config_manager.template getConfiguration<ModelNormalizationConfig>().getPpNormalizationFilter();
-    auto sun_sed_name = config_manager.getConfiguration<ModelNormalizationConfig>().getReferenceSolarSed();
+        config_manager.template getConfiguration<PhotometryGridConfig>().getPpNormalizationFilter();
+    auto sun_sed_name = config_manager.getConfiguration<PhotometryGridConfig>().getReferenceSolarSed();
     auto normalizer_functor =
         Euclid::PhzModeling::NormalizationFunctorFactory::NormalizationFunctorFactory::GetFunction(
             filter_provider, lum_filter_names[0], sed_provider, sun_sed_name);
@@ -143,7 +140,7 @@ std::string DialogGalCorrGridGeneration::runFunction() {
     };
 
     PhzGalacticCorrection::GalacticCorrectionSingleGridCreator grid_creator{
-        sed_provider, reddening_provider, filter_provider, igm_abs_func, normalizer_functor, normalizer_pp_functor, m_pp_norm, miky_way_reddening_curve};
+        sed_provider, reddening_provider, filter_provider, igm_abs_func, normalizer_functor, normalizer_pp_functor, miky_way_reddening_curve};
     size_t already_done = 0;
 
     for (auto& grid_pair : model_phot_grid.region_axes_map) {

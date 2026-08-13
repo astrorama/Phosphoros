@@ -2270,11 +2270,6 @@ std::map<std::string, boost::program_options::variable_value> FormAnalysis::getR
     options_map[pair.first] = pair.second;
   }
 
-  global_options = PreferencesUtils::getCosmologyConfigurations();
-  for (auto& pair : global_options) {
-    options_map[pair.first] = pair.second;
-  }
-
   if (ui->cb_skip->isChecked()) {
     int val                                = ui->sb_skip->value();
     options_map["input-skip-head"].value() = boost::any(val);

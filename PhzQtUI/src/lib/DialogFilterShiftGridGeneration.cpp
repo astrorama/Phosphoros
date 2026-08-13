@@ -11,14 +11,11 @@
 #include "ElementsKernel/ProgramHeaders.h"
 #include "PhzConfiguration/ComputeFilterVariationCoefficientConfig.h"
 #include "PhzConfiguration/ComputeModelGridConfig.h"
-#include "PhzConfiguration/CosmologicalParameterConfig.h"
 #include "PhzConfiguration/FilterConfig.h"
 #include "PhzConfiguration/FilterProviderConfig.h"
 #include "PhzConfiguration/FilterVariationCoefficientGridOutputConfig.h"
 #include "PhzConfiguration/FilterVariationConfig.h"
-#include "PhzConfiguration/IgmConfig.h"
 #include "PhzConfiguration/ModelGridOutputConfig.h"
-#include "PhzConfiguration/ModelNormalizationConfig.h"
 #include "PhzConfiguration/ParameterSpaceConfig.h"
 #include "PhzConfiguration/PhotometryGridConfig.h"
 #include "PhzConfiguration/ReddeningProviderConfig.h"
@@ -98,14 +95,14 @@ std::string DialogFilterShiftGridGeneration::runFunction() {
         config_manager.template getConfiguration<ReddeningProviderConfig>().getReddeningDatasetProvider();
     const auto& filter_provider =
         config_manager.template getConfiguration<FilterProviderConfig>().getFilterDatasetProvider();
-    auto& igm_abs_func = config_manager.template getConfiguration<IgmConfig>().getIgmAbsorptionFunction();
+    auto& igm_abs_func = config_manager.template getConfiguration<PhotometryGridConfig>().getIgmAbsorptionFunction();
     auto  output_function =
         config_manager.template getConfiguration<FilterVariationCoefficientGridOutputConfig>().getOutputFunction();
     auto shift_sampling = config_manager.template getConfiguration<FilterVariationConfig>().getSampling();
-    auto cosmology = config_manager.template getConfiguration<CosmologicalParameterConfig>().getCosmologicalParam();
-    auto lum_filter_names = config_manager.getConfiguration<ModelNormalizationConfig>().getNormalizationFilters();
-    auto lum_pp_filter_name = config_manager.getConfiguration<ModelNormalizationConfig>().getPpNormalizationFilter();
-    auto sun_sed_name    = config_manager.getConfiguration<ModelNormalizationConfig>().getReferenceSolarSed();
+    auto cosmology = config_manager.template getConfiguration<PhotometryGridConfig>().getCosmologicalParam();
+    auto lum_filter_names = config_manager.getConfiguration<PhotometryGridConfig>().getNormalizationFilters();
+    auto lum_pp_filter_name = config_manager.getConfiguration<PhotometryGridConfig>().getPpNormalizationFilter();
+    auto sun_sed_name    = config_manager.getConfiguration<PhotometryGridConfig>().getReferenceSolarSed();
 
     auto normalizer_functor =
         Euclid::PhzModeling::NormalizationFunctorFactory::NormalizationFunctorFactory::GetFunction(
@@ -136,9 +133,8 @@ std::string DialogFilterShiftGridGeneration::runFunction() {
                                                                       filter_provider,
                                                                       igm_abs_func, 
                                                                       normalizer_functor,
-																	  normalizer_pp_functor, 
-																	  m_pp_norm,
-																	  shift_sampling};
+						        	      normalizer_pp_functor, 
+								      shift_sampling};
     size_t                                               already_done = 0;
     for (auto& grid_pair : model_phot_grid.region_axes_map) {
       SparseProgressReporter reporter{monitor_function, already_done, total};

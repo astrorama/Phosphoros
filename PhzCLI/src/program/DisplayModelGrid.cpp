@@ -34,10 +34,33 @@ void printPhotometryInfo(const PhzDataModel::PhotometryGridInfo& grid_info) {
   cout << "Photometry info\n";
   cout << "---------------\n";
   cout << "IGM absorption method: " << grid_info.igm_method << '\n';
+  if (grid_info.cgm) {
+      cout << "CGM is turned on with parameters:"<< '\n';
+      cout << " - A:"<< grid_info.cgm_A << '\n';
+      cout << " - a:"<< grid_info.cgm_a << '\n';
+      cout << " - c:"<< grid_info.cgm_c << '\n';
+  } else {
+      cout << "CGM is turned off"<< '\n';
+  }
+  
   cout << "Photometry filters:\n";
   for (auto& f : grid_info.filter_names) {
     cout << "    " << f << '\n';
   }
+  
+  cout << "Luminosity filter name:"<< grid_info.luminosity_filter_name << '\n';
+  cout << "PP Luminosity filter name:"<< grid_info.luminosity_pp_filter_name << '\n';
+  cout << "Solar SED name:"<< grid_info.solar_sed << '\n';
+  cout << "Filter for ABS MAG :\n";
+  for (auto& f : grid_info.scaling_filter_names) {
+    cout << "    " << f << '\n';
+  }
+  
+  cout << "Cosmology :\n";
+  cout << "     Ωm:"<< grid_info.omega_m << '\n';
+  cout << "     ΩΛ:"<< grid_info.omega_lambda << '\n';
+  cout << "     h0:"<< grid_info.h_0 << '\n';
+  
   cout << '\n';
 }
 
