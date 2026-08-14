@@ -23,7 +23,6 @@
  */
 
 #include "ElementsKernel/Exception.h"
-#include "ElementsKernel/Logging.h"
 #include <boost/program_options.hpp>
 
 #include "Configuration/Configuration.h"
@@ -44,8 +43,6 @@ static const std::string MERGE_RATIO{"merge-ratio"};
 static const std::string MODE_SORTING{"mode_sorting"};
 static const std::string OUT_COLUMN_PREFIX{"output-columns-prefix"};
 static const std::string EXCLUD_COLUMN{"excluded-output-columns"};
-
-static Elements::Logging logger = Elements::Logging::getLogger("PdfHandlingConfig");
 
 PdfHandlingConfiguration::PdfHandlingConfiguration(long manager_id) : Configuration(manager_id) {}
 
