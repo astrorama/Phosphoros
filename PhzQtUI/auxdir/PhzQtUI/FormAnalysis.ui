@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1375</width>
-    <height>1489</height>
+    <width>1666</width>
+    <height>1452</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -203,8 +203,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>1355</width>
-        <height>1245</height>
+        <width>1646</width>
+        <height>1208</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -223,8 +223,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1337</width>
-            <height>807</height>
+            <width>705</width>
+            <height>262</height>
            </rect>
           </property>
           <attribute name="label">
@@ -361,7 +361,7 @@
             <x>0</x>
             <y>0</y>
             <width>1564</width>
-            <height>794</height>
+            <height>750</height>
            </rect>
           </property>
           <attribute name="label">
@@ -745,8 +745,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1337</width>
-            <height>807</height>
+            <width>978</width>
+            <height>375</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1061,8 +1061,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1337</width>
-            <height>807</height>
+            <width>888</width>
+            <height>344</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1298,8 +1298,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1337</width>
-            <height>807</height>
+            <width>680</width>
+            <height>209</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1451,8 +1451,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1337</width>
-            <height>807</height>
+            <width>1133</width>
+            <height>246</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1625,8 +1625,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>1614</width>
-            <height>805</height>
+            <width>1628</width>
+            <height>770</height>
            </rect>
           </property>
           <attribute name="label">
@@ -2448,6 +2448,18 @@
               </widget>
              </item>
              <item>
+              <widget class="QCheckBox" name="cb_gen_posterior">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Output Posterior</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QComboBox" name="cb_multi_out">
                <property name="font">
                 <font>
@@ -2457,11 +2469,6 @@
                <item>
                 <property name="text">
                  <string>Sampling</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Full grid</string>
                 </property>
                </item>
               </widget>
@@ -2514,20 +2521,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_12">
              <item>
-              <layout class="QVBoxLayout" name="verticalLayout_30">
-               <item>
-                <widget class="QCheckBox" name="cb_gen_posterior">
-                 <property name="font">
-                  <font>
-                   <pointsize>11</pointsize>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Output Posterior</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
+              <layout class="QVBoxLayout" name="verticalLayout_30"/>
              </item>
             </layout>
            </item>

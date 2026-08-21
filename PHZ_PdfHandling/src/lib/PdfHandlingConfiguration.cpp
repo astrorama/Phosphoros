@@ -24,6 +24,7 @@
 
 #include "ElementsKernel/Exception.h"
 #include <boost/program_options.hpp>
+#include <boost/filesystem.hpp>
 
 #include "Configuration/Configuration.h"
 #include "PHZ_PdfHandling/PdfHandlingConfiguration.h"
