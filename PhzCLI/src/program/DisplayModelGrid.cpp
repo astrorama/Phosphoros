@@ -161,6 +161,18 @@ void printPhotometry(const PhzDataModel::PhotometryGrid& grid, const tuple<size_
   for (auto iter = phot.begin(); iter != phot.end(); ++iter) {
     cout << iter.filterName() << "\t" << (*iter).flux << '\n';
   }
+  
+  cout << "Diferential normalization \n";
+  bool first=true;
+  for (auto iter = phot.scaling_cbegin(); iter != phot.scaling_cend(); ++iter) {
+    if (first) {
+      cout << "With un-reddened Model on PP filter \t" << (*iter) << '\n';
+      cout << "With reddened Model on first ABS MAG filter\t" << 1.0 << '\n';
+      first=false;
+    } else {
+      cout << "With reddened Model on ABS MAG filter \t" << (*iter) << '\n';
+    }
+  }
   cout << '\n';
 }
 
