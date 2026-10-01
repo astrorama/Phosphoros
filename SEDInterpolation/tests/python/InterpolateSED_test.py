@@ -22,6 +22,7 @@ import unittest
 import math
 import numpy as np
 import astropy.table as table
+from XYDatasetSet import XYDatasetSetTools
 from SEDInterpolation import InterpolateSED
 
 
@@ -39,32 +40,28 @@ class InterpolateSEDTestCase(unittest.TestCase):
     ####################################   
     def testCompute_flux(self):
         # HAVING
-        ft=table.Table();
-        ft['col1']=[0,0.5,1.0,1.5,2.0,2.5,3.0]
-        ft['col2']=[0,  0,  0,  1,  1,  1,  0]
-        
-        fl=table.Table();
-        fl['col1']=[0,0.5,1.0,1.5,2.0,2.5,3.0]
-        fl['col2']=[1,  1,  1,  1,  1,  1,  1]
+        sed=XYDatasetSetTools.XYDataset([0,0.5,1.0,1.5,2.0,2.5,3.0], [1,  1,  1,  1,  1,  1,  1], 'SED')
+        fltr=XYDatasetSetTools.XYDataset([0,0.5,1.0,1.5,2.0,2.5,3.0], [0,  0,  0,  1,  1,  1,  0], 'Filter')
+
         
         # WHEN
-        flux = InterpolateSED.compute_flux(fl, ft)
+        flux = InterpolateSED.compute_flux(sed, fltr)
          
         # THEN
         assert math.isclose(flux, 1.5)
         
-        fl['col2']=[1,  2,  3,  4,  5,  6,  7]
+        sed.y=np.array([1,  2,  3,  4,  5,  6,  7])
         
         # WHEN
-        flux = InterpolateSED.compute_flux(fl, ft)
+        flux = InterpolateSED.compute_flux(sed, fltr)
          
         # THEN
         assert math.isclose(flux, 7.5)
         
-        fl['col2']=[np.nan,  np.nan,  3,  4,  5,  6,  7]
+        sed.y=np.array([np.nan,  np.nan,  3,  4,  5,  6,  7])
         
         # WHEN
-        flux = InterpolateSED.compute_flux(fl, ft)
+        flux = InterpolateSED.compute_flux(sed, fltr)
          
         # THEN
         assert math.isclose(flux, 7.5)
@@ -73,46 +70,44 @@ class InterpolateSEDTestCase(unittest.TestCase):
     
     def testDo_normalise_sed(self):
         # HAVING
-        t=table.Table();
         sampling = [1,2,3,4,5,6,7,8,9,10]
-        t['col1']=sampling
-        t['col2']=[7,14,0,28,49,56,70,21,35,42]
-        
+        sed=XYDatasetSetTools.XYDataset(sampling, [7,14,0,28,49,56,70,21,35,42], 'SED')
+
         # WHEN
-        normalised = InterpolateSED.do_normalise_sed(t,7,3)
+        normalised = InterpolateSED.do_normalise_sed(sed,7,3)
          
         # THEN
         expected = [3,6,0,12,21,24,30,9,15,18]
         
         for index in range(len(expected)):
-            assert normalised['Wave'][index]==sampling[index]
-            assert normalised['Flux'][index]==expected[index]
-        
+            assert normalised.x[index]==sampling[index]
+            assert normalised.y[index]==expected[index]
         
     def testFormatPP(self):
         # WHEN
-        result = InterpolateSED.format_pp("Name", 1.5, 0.2, "U")
+        result = InterpolateSED.format_pp( 1.5, 0.2, "U")
         
         # THEN
-        assert result == "Name=1.5*L+0.2[U]"
+        assert result == "1.5*L+0.2[U]"
         
     def testParsePP(self):
         # HAVING
-         pps=["AGE=0*L+5[GY]","MASS=2*L+0[M0]","TEST=3*L+2[TT]","MASS2 = 2.1 *L + 7 [ M0 ]"]
-         expected_name = ["AGE","MASS","TEST","MASS2"]
+         pps={"AGE":"0*L+5[GY]","MASS":"2*L+0[M0]","TEST":"3*L+2[TT]","MASS2":" 2.1 *L + 7 [ M0 ]"}
          expected_a = [0, 2, 3, 2.1]
          expected_b = [5, 0, 2, 7]
          expected_unit = ["GY", "M0", "TT", "M0"]
          
          # WHEN
-         for index in range(len(pps)):
-            name, A, B, unit = InterpolateSED.parse_pp(pps[index]) 
+         index=0
+         for pp in pps:
+            A, B, unit = InterpolateSED.parse_pp(pps[pp]) 
             
             # THEN
-            assert expected_name[index] == name
             assert expected_a[index] == A
             assert expected_b[index] == B
             assert expected_unit[index] == unit
+            index+=1
+            
 
     def testCleanName(self):
         # HAVING
@@ -132,40 +127,43 @@ class InterpolateSEDTestCase(unittest.TestCase):
         result2 = InterpolateSED.build_name("Name1.sed","Name2.sed", 1, 2)
         
         # THEN
-        assert result1 == "2:3_Name1_+_1:3_Name2.sed"
-        assert result2 == "1:3_Name1_+_2:3_Name2.sed"
+        assert result1 == "2:3_Name1_+_1:3_Name2"
+        assert result2 == "1:3_Name1_+_2:3_Name2"
     
     def testDoInterpolatePp(self):
         # HAVING
-        pp_1=["AGE=0*L+5[GY]","MASS=2*L+0[M0]","TEST=3*L+2[TT]","MASS2=2*L+0[M0]"]
-        pp_2=["AGE=0*L+7[GY]","MASS=4*L+0[M0]","TEST2=5*L+1[TT]","MASS2=2*L+0[M_0]"]
+        pp_1={"AGE":"0*L+5[GY]","MASS":"2*L+0[M0]","TEST":"3*L+2[TT]","MASS2":"2*L+0[M0]"}
+        pp_2={"AGE":"0*L+7[GY]","MASS":"4*L+0[M0]","TEST2":"5*L+1[TT]","MASS2":"2*L+0[M_0]"}
         
         # WHEN
         new_pps = InterpolateSED.do_interpolate_pp(pp_1, pp_2, 0, 3)
          
-        
         # THEN
         assert len(new_pps) == 2
-        assert "AGE=0.0*L+5.5[GY]" in new_pps
-        assert "MASS=2.5*L+0.0[M0]" in new_pps
-         
+        assert "AGE" in new_pps
+        assert new_pps["AGE"]=="0.0*L+5.5[GY]" 
+        assert "MASS" in new_pps
+        assert new_pps["MASS"]=="2.5*L+0.0[M0]" 
          
         # WHEN
         new_pps = InterpolateSED.do_interpolate_pp(pp_1, pp_2, 1, 3)
          
         # THEN
         assert len(new_pps) == 2
-        assert "AGE=0.0*L+6.0[GY]" in new_pps
-        assert "MASS=3.0*L+0.0[M0]" in new_pps
-        
+        assert "AGE" in new_pps
+        assert new_pps["AGE"]=="0.0*L+6.0[GY]" 
+        assert "MASS" in new_pps
+        assert new_pps["MASS"]=="3.0*L+0.0[M0]" 
         
         # WHEN
         new_pps = InterpolateSED.do_interpolate_pp(pp_1, pp_2, 2, 3)
          
         # THEN
         assert len(new_pps) == 2
-        assert "AGE=0.0*L+6.5[GY]" in new_pps
-        assert "MASS=3.5*L+0.0[M0]" in new_pps
+        assert "AGE" in new_pps
+        assert new_pps["AGE"]=="0.0*L+6.5[GY]" 
+        assert "MASS" in new_pps
+        assert new_pps["MASS"]=="3.5*L+0.0[M0]" 
         
     def testDoInterpolateSed(self):
         # HAVING
@@ -173,36 +171,27 @@ class InterpolateSEDTestCase(unittest.TestCase):
         values_1= np.array([1,2,3,4,5,6,7,8,9,10])
         values_2= np.array([100,90,80,70,60,50,40,30,20,10])
         
-        t_1 = table.Table()
-        t_1['Wave']=sampling
-        t_1['Flux']=values_1
-        
-        t_2 = table.Table()
-        t_2['Wave']=sampling
-        t_2['Flux']=values_2
+        t_1 =XYDatasetSetTools.XYDataset(sampling, values_1, 'SED_1')
+        t_2 =XYDatasetSetTools.XYDataset(sampling, values_2, 'SED_2')
+       
         
         # WHEN
         interpolated = InterpolateSED.do_interpolate_sed(t_1, t_2, 0, 3)
         expected = 0.75*values_1+0.25*values_2
         
         # THEN
-        assert np.array_equal(sampling, interpolated['Wave'])
-        assert np.array_equal(expected, interpolated['Flux'])
+        assert np.array_equal(expected, interpolated)
 
     def testGetSampling(self):
         # HAVING
         sampling_1 = np.array([1,2,3,5,7,9.1])
         values_1= np.array([1,2,3,4,5,6])
-        t_1 = table.Table()
-        t_1['Wave']=sampling_1
-        t_1['Flux']=values_1
-        
+        t_1 =XYDatasetSetTools.XYDataset(sampling_1, values_1, 'SED_1')
+
         sampling_2 = np.array([3,4,5,6,7,8,9,10,11,12,13])
         values_2= np.array([1,2,3,4,5,6,7,8,9,10,11])
-        t_2 = table.Table()
-        t_2['Wave']=sampling_2
-        t_2['Flux']=values_2
-        
+        t_2 =XYDatasetSetTools.XYDataset(sampling_2, values_2, 'SED_2')
+
         # WHEN
         (before, common, after) = InterpolateSED.get_sampling(t_1, t_2)
         
@@ -215,57 +204,50 @@ class InterpolateSEDTestCase(unittest.TestCase):
         # HAVING
         sampling_1 = np.array([1,2,3,5,7,9,11])
         values_1 =  np.array([10,20,30,50,70,90,110])
+        t_1 =XYDatasetSetTools.XYDataset(sampling_1, values_1, 'SED_1')
         sampling_2 = np.array([3, 5, 7, 9,11,12, 13,14])
         values_2 =  np.array([30,50,70,90,110,120,130, 140])
+        t_2 =XYDatasetSetTools.XYDataset(sampling_2, values_2, 'SED_2')
         sampling_before = np.array([1,2])
         common = np.array([3,4,5,6,7,8,9,10,11])
         sampling_after = np.array([12,13,14])
-        t_1 = table.Table()
-        t_1['Wave'] = sampling_1
-        t_1['Flux'] = values_1
-        
-        t_2 = table.Table()
-        t_2['Wave'] = sampling_2
-        t_2['Flux'] = values_2
+
         
         # WHEN
         r_1 = InterpolateSED.resample(t_1, [sampling_before, common, sampling_after]) 
         r_2 = InterpolateSED.resample(t_2, [sampling_before, common, sampling_after])   
                 
         # THEN
-        assert np.array_equal(r_1['Wave'], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])
-        assert np.array_equal(r_1['Flux'], [10,20,30,40,50,60,70,80,90,100,110, 0,  0,  0])
+        assert np.array_equal(r_1.x, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])
+        assert np.array_equal(r_1.y, [10,20,30,40,50,60,70,80,90,100,110, 0,  0,  0])
         
-        assert np.array_equal(r_2['Wave'], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])
-        assert np.array_equal(r_2['Flux'], [0, 0,30,40,50,60,70,80,90,100,110,120,130,140])
+        assert np.array_equal(r_2.x, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])
+        assert np.array_equal(r_2.y, [0, 0,30,40,50,60,70,80,90,100,110,120,130,140])
               
     def testResampleEmpty(self):
         # HAVING
-        sampling_1 = np.array([1,2,3,5,7,9,11])
+        sampling = np.array([1,2,3,5,7,9,11])
         values_1 =  np.array([10,20,30,50,70,90,110])
         values_2 =  np.array([1,2,3,5,7,9,11])
         
         sampling_before = np.array([])
         common = np.array([1,2,3,5,7,9,11])
         sampling_after = np.array([])
-        t_1 = table.Table()
-        t_1['Wave'] = sampling_1
-        t_1['Flux'] = values_1
         
-        t_2 = table.Table()
-        t_2['Wave'] = sampling_1
-        t_2['Flux'] = values_2
+        t_1 =XYDatasetSetTools.XYDataset(sampling, values_1, 'SED_1')
+        t_2 =XYDatasetSetTools.XYDataset(sampling, values_2, 'SED_2')
+        
         
         # WHEN
         r_1 = InterpolateSED.resample(t_1, [sampling_before, common, sampling_after]) 
         r_2 = InterpolateSED.resample(t_2, [sampling_before, common, sampling_after])   
         
         # THEN
-        assert np.array_equal(r_1['Wave'], sampling_1)
-        assert np.array_equal(r_1['Flux'], values_1)
+        assert np.array_equal(r_1.x, sampling)
+        assert np.array_equal(r_1.y, values_1)
         
-        assert np.array_equal(r_2['Wave'], sampling_1)
-        assert np.array_equal(r_2['Flux'], values_2)
+        assert np.array_equal(r_2.x, sampling)
+        assert np.array_equal(r_2.y, values_2)
         
         
         

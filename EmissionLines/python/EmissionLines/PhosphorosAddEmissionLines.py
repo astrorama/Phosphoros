@@ -253,7 +253,7 @@ def mainMethod(args):
     out_seds = []
     for sed_name in SED_dict:
         if sed_file=="" or (len(sed_name.split('/'))>1 and sed_name.split('/')[-2]==sed_file):
-            sed = XYDatasetSetTools.readDataset(sed_dir, sed_name)
+            sed = XYDatasetSetTools.readDataset(sed_dir, sed_name, SED_dict)
             out_sed = adder(sed)
             out_sed=sed
             if not args.copy_parameter:
