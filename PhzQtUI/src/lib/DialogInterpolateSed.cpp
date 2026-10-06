@@ -239,7 +239,7 @@ void DialogInterpolateSed::on_btn_create_clicked() {
   bool copy_seds = ui->cb_cp->isChecked();
   bool interp_pp = ui->cb_interpPP->isChecked();
 
-  QString     program = "Phosphoros";
+  QString     program = "InterpolateSED";
   QStringList arguments;
   arguments << "--sed-dir" << sed_folder << "--filter-dir"<< filter_folder << "--out-path" << output_name << "--seds" << seds.join(",") << "--numbers"
             << numbers.join(",");
@@ -264,12 +264,15 @@ void DialogInterpolateSed::on_btn_create_clicked() {
   m_is = new QProcess;
   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
   m_is->setProcessEnvironment(env);
-
+  
   connect(m_is, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processingFinished(int, QProcess::ExitStatus)));
-
+  logger.debug()  << "program =" << program.toStdString();
+  for(auto arg : arguments) {
+    logger.debug()  << "arguments =" << arg.toStdString();
+  }
 
   m_is->start(program, arguments);
-
+  
   ui->btn_cancel->setEnabled(false);
   ui->btn_create->setEnabled(false);
 }
