@@ -6,13 +6,17 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 Note: the issue number refer to SDC-CH internal tracking.
-## [2.1.0]
+## [2.1.1]
+### Changed
+ - Add XYDatasetSet allowing to store multiple SEDs (Filters, ReddeningCurve) in a single file. Part of the change is in PhosphorosCore 2.2.1 but Emission Lines, SED imterpolation and GUI has also been modified. https://redmine.astro.unige.ch/issues/37198
+
+## [2.1.0] 2026-08-21
 ### Changed
  - Add ABS MAG computation capability. This change e the new code from PhosphorosCore 2.2.0 and break backward compatibility with existing ModelGrids. https://redmine.astro.unige.ch/issues/36956
  - Update the grid and the config to avoid reset config already set when computing the ModelGrid: https://redmine.astro.unige.ch/issues/36982
  - Update the DisplaModelGRid to display the new info stored in the Grid Info 
 
-## [2.0.17]
+## [2.0.17] 2026-02-02
 ### Fixed
  - Fix the progress values for ComputeGalacticAbsorptionCoefficientGrid. https://redmine.isdc.unige.ch/issues/32960
  - Copy the name (if defined in the file header). https://redmine.isdc.unige.ch/issues/36122
