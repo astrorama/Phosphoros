@@ -22,8 +22,9 @@ namespace Euclid {
 namespace PhzQtUI {
 class GridInfoObject {
   public:
-    GridInfoObject(std::list<std::string> new_filter_list, std::string new_igm, bool new_has_igm_cgm, double new_IGM_CGM_param_A, double new_IGM_CGM_param_a, double new_IGM_CGM_param_c, std::string new_lum_filter, std::string new_pp_lum_filter){
+    GridInfoObject(std::list<std::string> new_filter_list,  std::list<std::string> new_abs_mag_filter_list, std::string new_igm, bool new_has_igm_cgm, double new_IGM_CGM_param_A, double new_IGM_CGM_param_a, double new_IGM_CGM_param_c, std::string new_lum_filter, std::string new_pp_lum_filter){
        filter_list=new_filter_list;
+       abs_mag_filter_list=new_abs_mag_filter_list;
        igm = new_igm;
        has_igm_cgm = new_has_igm_cgm;
        IGM_CGM_param_A = new_IGM_CGM_param_A;
@@ -33,6 +34,7 @@ class GridInfoObject {
        pp_lum_filter = new_pp_lum_filter;
     }
     std::list<std::string> filter_list;
+    std::list<std::string> abs_mag_filter_list;
     std::string igm;
     bool has_igm_cgm;
     double IGM_CGM_param_A;

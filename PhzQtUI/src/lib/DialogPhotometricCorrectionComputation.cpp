@@ -582,7 +582,7 @@ void DialogPhotometricCorrectionComputation::on_btn_conf_clicked() {
        
         if (m_sed_config.size() > 0) {
           completeWithDefaults<PhzConfiguration::ComputeSedWeightConfig>(m_sed_config);
-          auto sed_file_name = selected_folder + QString::fromStdString("/FilterVariationCoefficientGrid.CSW.conf"); 
+          auto sed_file_name = selected_folder + QString::fromStdString("/SedWeightGrid.CSW.conf"); 
           PhzUITools::ConfigurationWriter::writeConfiguration(m_sed_config, sed_file_name.toStdString());
           command += QString::fromStdString("Phosphoros CSW --config-file ") + sed_file_name + cr;
         }

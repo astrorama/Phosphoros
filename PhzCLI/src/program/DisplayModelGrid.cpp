@@ -34,10 +34,33 @@ void printPhotometryInfo(const PhzDataModel::PhotometryGridInfo& grid_info) {
   cout << "Photometry info\n";
   cout << "---------------\n";
   cout << "IGM absorption method: " << grid_info.igm_method << '\n';
+  if (grid_info.cgm) {
+      cout << "CGM is turned on with parameters:"<< '\n';
+      cout << " - A:"<< grid_info.cgm_A << '\n';
+      cout << " - a:"<< grid_info.cgm_a << '\n';
+      cout << " - c:"<< grid_info.cgm_c << '\n';
+  } else {
+      cout << "CGM is turned off"<< '\n';
+  }
+  
   cout << "Photometry filters:\n";
   for (auto& f : grid_info.filter_names) {
     cout << "    " << f << '\n';
   }
+  
+  cout << "Luminosity filter name:"<< grid_info.luminosity_filter_name << '\n';
+  cout << "PP Luminosity filter name:"<< grid_info.luminosity_pp_filter_name << '\n';
+  cout << "Solar SED name:"<< grid_info.solar_sed << '\n';
+  cout << "Filter for ABS MAG :\n";
+  for (auto& f : grid_info.scaling_filter_names) {
+    cout << "    " << f << '\n';
+  }
+  
+  cout << "Cosmology :\n";
+  cout << "     Ωm:"<< grid_info.omega_m << '\n';
+  cout << "     ΩΛ:"<< grid_info.omega_lambda << '\n';
+  cout << "     h0:"<< grid_info.h_0 << '\n';
+  
   cout << '\n';
 }
 
@@ -137,6 +160,18 @@ void printPhotometry(const PhzDataModel::PhotometryGrid& grid, const tuple<size_
   cout << "\nCell (" << c1 << "," << c2 << "," << c3 << "," << c4 << ") Photometry:\n";
   for (auto iter = phot.begin(); iter != phot.end(); ++iter) {
     cout << iter.filterName() << "\t" << (*iter).flux << '\n';
+  }
+  
+  cout << "Diferential normalization \n";
+  bool first=true;
+  for (auto iter = phot.scaling_cbegin(); iter != phot.scaling_cend(); ++iter) {
+    if (first) {
+      cout << "With un-reddened Model on PP filter \t" << (*iter) << '\n';
+      cout << "With reddened Model on first ABS MAG filter\t" << 1.0 << '\n';
+      first=false;
+    } else {
+      cout << "With reddened Model on ABS MAG filter \t" << (*iter) << '\n';
+    }
   }
   cout << '\n';
 }

@@ -163,21 +163,36 @@ void DialogInterpolateSed::on_btn_create_clicked() {
 
   auto sed_folder  = QString::fromStdString(FileUtils::getSedRootPath(false));
   auto filter_folder  = QString::fromStdString(FileUtils::getFilterRootPath(false));
-  auto folder_name = ui->le_folder->text();
-  if (folder_name == "") {
-    QMessageBox::warning(this, tr("SED Interpolation"),
+  
+  auto output_mode_is_group = ui->cb_output_type->currentText() ==  QString::fromStdString("all SEDs in Set .fits file");
+  
+  auto output_name = ui->le_folder->text();
+  if (output_name == "") {
+    if (output_mode_is_group) {
+          QMessageBox::warning(this, tr("SED Interpolation"),
+                         tr("The output file name is missing.\n"
+                            "Please provide an output file name"),
+                         QMessageBox::Ok, QMessageBox::Ok);
+     } else {
+          QMessageBox::warning(this, tr("SED Interpolation"),
                          tr("The output folder is missing.\n"
                             "Please provide an output folder"),
                          QMessageBox::Ok, QMessageBox::Ok);
+     }
     return;
+  }
+  
+  if (output_mode_is_group && ! FileUtils::ends_with(output_name.toStdString(),".fits")) {
+      logger.warn() << "Output file name has not .fits extension: adding it.";
+      output_name=output_name+".fits";
   }
   
 
  
 
-  if (QDir(sed_folder + "/" + folder_name).exists()) {
+  if (QDir(sed_folder + "/" + output_name).exists()) {
     if (QMessageBox::Cancel == QMessageBox::warning(this, tr("SED Interpolation"),
-                                                    "The output folder \"" + folder_name + "\" exists.\n" +
+                                                    "The output folder \"" + output_name + "\" exists.\n" +
                                                         "It will be cleaned before the run!",
                                                     QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel)) {
       return;
@@ -203,8 +218,7 @@ void DialogInterpolateSed::on_btn_create_clicked() {
       // add the sed
       auto* cb = (*frame_iter)->findChild<QComboBox*>();
       if (cb != nullptr) {
-        seds << QString::fromStdString(
-            FileUtils::getDataSetFilePath(cb->currentText().toStdString(), FileUtils::getSedRootPath(false)));
+        seds << QString::fromStdString(cb->currentText().toStdString());
       } else {
         logger.warn() << "No SED in Frame " << (*frame_iter)->objectName().toStdString();
       }
@@ -223,15 +237,22 @@ void DialogInterpolateSed::on_btn_create_clicked() {
   }
 
   bool copy_seds = ui->cb_cp->isChecked();
+  bool interp_pp = ui->cb_interpPP->isChecked();
 
   QString     program = "Phosphoros";
   QStringList arguments;
-  arguments << "--sed-dir" << sed_folder << "--filter-dir"<< filter_folder << "--out-dir" << folder_name << "--seds" << seds.join(",") << "--numbers"
+  arguments << "--sed-dir" << sed_folder << "--filter-dir"<< filter_folder << "--out-path" << output_name << "--seds" << seds.join(",") << "--numbers"
             << numbers.join(",");
+  if (output_mode_is_group) {
+     arguments << "--out-format" << "set";
+  }
 
   if (!copy_seds) {
-    arguments << "--copy-sed"
-              << "false";
+    arguments << "--copy-sed" << "false";
+  }
+  
+  if (!interp_pp) {
+    arguments << "--copy-sed" << "false";
   }
    
   arguments << "--normalization-filter"

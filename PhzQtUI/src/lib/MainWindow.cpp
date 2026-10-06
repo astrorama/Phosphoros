@@ -4,6 +4,9 @@
 #include "FileUtils.h"
 #include "PreferencesUtils.h"
 #include "XYDataset/AsciiParser.h"
+#include "XYDataset/XYDatasetProvider.h"
+#include "XYDatasetSet/FileSetProvider.h"
+#include "XYDatasetSet/MergeProvider.h"
 #include "ui_MainWindow.h"
 #include <QDir>
 #include <QDirIterator>
@@ -127,49 +130,56 @@ MainWindow::~MainWindow() {}
 void MainWindow::loadAuxData() {
   main_logger.info()<<"Loading data";
   try {
-
 	ui->Lb_warning_time->setText("Loading the Filters...");
+	main_logger.info() << "Loading the Filters...";
 	qApp->processEvents();
-    std::unique_ptr<XYDataset::FileParser>         filter_file_parser{new XYDataset::AsciiParser{}};
-    std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(
-        new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true), std::move(filter_file_parser)});
-    m_filter_repository.reset(
-        new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(filter_provider)));
-    m_filter_repository->reload();
+	auto     filter_file_parser = std::make_unique<XYDataset::AsciiParser>();
+        auto     filter_fs_provider = std::make_unique<XYDataset::FileSystemProvider>(FileUtils::getFilterRootPath(true), std::move(filter_file_parser));
+        auto     filter_set_provider = std::make_unique<XYDatasetSet::FileSetProvider>(FileUtils::getFilterRootPath(true));
+        std::vector<std::unique_ptr<XYDataset::XYDatasetProvider>> filter_provider_vector;
+        filter_provider_vector.push_back(std::move(filter_fs_provider));
+        filter_provider_vector.push_back(std::move(filter_set_provider));
+        auto filter_merge_provider = std::make_unique<XYDatasetSet::MergeProvider>(std::move(filter_provider_vector));
+        m_filter_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::XYDatasetProvider>>(std::move(filter_merge_provider)));
+        m_filter_repository->reload();
 
 
 	ui->Lb_warning_time->setText("Loading the SEDs...");
 	qApp->processEvents();
-    std::unique_ptr<XYDataset::FileParser>         sed_file_parser{new XYDataset::AsciiParser{}};
-    std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(
-        new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser)});
-    m_seds_repository.reset(
-        new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>(std::move(sed_provider)));
-    m_seds_repository->reload();
-
-
+	auto     sed_file_parser = std::make_unique<XYDataset::AsciiParser>();
+        auto     sed_fs_provider = std::make_unique<XYDataset::FileSystemProvider>(FileUtils::getSedRootPath(true), std::move(sed_file_parser));
+        auto     sed_set_provider = std::make_unique<XYDatasetSet::FileSetProvider>(FileUtils::getSedRootPath(true));
+        std::vector<std::unique_ptr<XYDataset::XYDatasetProvider>> sed_provider_vector;
+        sed_provider_vector.push_back(std::move(sed_fs_provider));
+        sed_provider_vector.push_back(std::move(sed_set_provider));
+        auto sed_merge_provider = std::make_unique<XYDatasetSet::MergeProvider>(std::move(sed_provider_vector));
+        m_seds_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::XYDatasetProvider>>(std::move(sed_merge_provider)));
+        m_seds_repository->reload();
+       
+	
 	ui->Lb_warning_time->setText("Loading the Reddening Curves...");
 	qApp->processEvents();
-    std::unique_ptr<XYDataset::FileParser>         reddening_file_parser{new XYDataset::AsciiParser{}};
-    std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(
-        new XYDataset::FileSystemProvider{FileUtils::getRedCurveRootPath(true), std::move(reddening_file_parser)});
-    m_redenig_curves_repository.reset(
-        new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(red_curve_provider)});
-    m_redenig_curves_repository->reload();
+	auto     reddening_file_parser = std::make_unique<XYDataset::AsciiParser>();
+        auto     reddening_fs_provider = std::make_unique<XYDataset::FileSystemProvider>(FileUtils::getRedCurveRootPath(true), std::move(reddening_file_parser));
+        auto     reddening_set_provider = std::make_unique<XYDatasetSet::FileSetProvider>(FileUtils::getRedCurveRootPath(true));
+        std::vector<std::unique_ptr<XYDataset::XYDatasetProvider>> reddening_provider_vector;
+        reddening_provider_vector.push_back(std::move(reddening_fs_provider));
+        reddening_provider_vector.push_back(std::move(reddening_set_provider));
+        auto reddening_merge_provider = std::make_unique<XYDatasetSet::MergeProvider>(std::move(reddening_provider_vector));
+        m_redenig_curves_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::XYDatasetProvider>>(std::move(reddening_merge_provider)));
+        m_redenig_curves_repository->reload();
+        
 
-
-    m_model_set_model_ptr = std::shared_ptr<ModelSetModel>{new ModelSetModel{m_seds_repository, m_redenig_curves_repository}};
+        m_model_set_model_ptr = std::shared_ptr<ModelSetModel>{new ModelSetModel{m_seds_repository, m_redenig_curves_repository}};
 
 
 	ui->Lb_warning_time->setText("Loading the Luminosity Functions...");
 	qApp->processEvents();
-    std::unique_ptr<XYDataset::FileParser>         luminosity_file_parser{new XYDataset::AsciiParser{}};
-    std::unique_ptr<XYDataset::FileSystemProvider> luminosity_curve_provider(new XYDataset::FileSystemProvider{
-        FileUtils::getLuminosityFunctionCurveRootPath(true), std::move(luminosity_file_parser)});
-    m_luminosity_repository.reset(
-        new DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>{std::move(luminosity_curve_provider)});
-    m_luminosity_repository->reload();
-    main_logger.info()<<"Loading data done";
+        std::unique_ptr<XYDataset::FileParser>         luminosity_file_parser{new XYDataset::AsciiParser{}};
+        std::unique_ptr<XYDataset::FileSystemProvider> luminosity_curve_provider(new XYDataset::FileSystemProvider{FileUtils::getLuminosityFunctionCurveRootPath(true), std::move(luminosity_file_parser)});
+        m_luminosity_repository.reset(new DatasetRepository<std::unique_ptr<XYDataset::XYDatasetProvider>>(std::move(luminosity_curve_provider)));
+        m_luminosity_repository->reload();
+        main_logger.info()<<"Loading data done";
 	ui->Lb_warning_time->setText("");
 	qApp->processEvents();
   } catch (Elements::Exception& e) {

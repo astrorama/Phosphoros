@@ -2,7 +2,7 @@
 #define DIALOGINTERPOLATESED_H
 
 #include "PhzQtUI/DatasetRepository.h"
-#include "XYDataset/FileSystemProvider.h"
+#include "XYDataset/XYDatasetProvider.h"
 #include <QDialog>
 #include <QFrame>
 #include <QProcess>
@@ -20,7 +20,7 @@ namespace Ui {
 class DialogInterpolateSed;
 }
 
-typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::XYDatasetProvider>>> DatasetRepo;
 /**
  * @class DialogInterpolateSed
 

@@ -5,7 +5,10 @@
 #include "PhzUtils/Multithreading.h"
 #include "PreferencesUtils.h"
 #include "XYDataset/AsciiParser.h"
+#include "XYDataset/XYDatasetProvider.h"
 #include "XYDataset/FileSystemProvider.h"
+#include "XYDatasetSet/FileSetProvider.h"
+#include "XYDatasetSet/MergeProvider.h"
 #include <QString>
 #include <map>
 
@@ -215,22 +218,38 @@ void OptionModel::save() {
     PreferencesUtils::setBufferSize(m_buffer_size_saved);
     PreferencesUtils::setLogLevel(m_loglevel_saved.toStdString());
     PreferencesUtils::setGridFormat(m_GridFormat_saved.toStdString());
+    
+    auto     filter_file_parser = std::make_unique<XYDataset::AsciiParser>();
+    auto     filter_fs_provider = std::make_unique<XYDataset::FileSystemProvider>(FileUtils::getFilterRootPath(true), std::move(filter_file_parser));
+    auto     filter_set_provider = std::make_unique<XYDatasetSet::FileSetProvider>(FileUtils::getFilterRootPath(true));
+    std::vector<std::unique_ptr<XYDataset::XYDatasetProvider>> filter_provider_vector;
+    filter_provider_vector.push_back(std::move(filter_fs_provider));
+    filter_provider_vector.push_back(std::move(filter_set_provider));
+    auto filter_merge_provider = std::make_unique<XYDatasetSet::MergeProvider>(std::move(filter_provider_vector));
+    m_filter_repository->resetProvider(std::move(filter_merge_provider));
 
-    std::unique_ptr<XYDataset::FileParser>         filter_file_parser{new XYDataset::AsciiParser{}};
-    std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(
-        new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true), std::move(filter_file_parser)});
-    m_filter_repository->resetProvider(std::move(filter_provider));
-    std::unique_ptr<XYDataset::FileParser>         sed_file_parser{new XYDataset::AsciiParser{}};
-    std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(
-        new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser)});
-    m_seds_repository->resetProvider(std::move(sed_provider));
-    std::unique_ptr<XYDataset::FileParser>         reddening_file_parser{new XYDataset::AsciiParser{}};
-    std::unique_ptr<XYDataset::FileSystemProvider> red_curve_provider(
-        new XYDataset::FileSystemProvider{FileUtils::getRedCurveRootPath(true), std::move(reddening_file_parser)});
-    m_redenig_curves_repository->resetProvider(std::move(red_curve_provider));
+    auto     sed_file_parser = std::make_unique<XYDataset::AsciiParser>();
+    auto     sed_fs_provider = std::make_unique<XYDataset::FileSystemProvider>(FileUtils::getSedRootPath(true), std::move(sed_file_parser));
+    auto     sed_set_provider = std::make_unique<XYDatasetSet::FileSetProvider>(FileUtils::getSedRootPath(true));
+    std::vector<std::unique_ptr<XYDataset::XYDatasetProvider>> sed_provider_vector;
+    sed_provider_vector.push_back(std::move(sed_fs_provider));
+    sed_provider_vector.push_back(std::move(sed_set_provider));
+    auto sed_merge_provider = std::make_unique<XYDatasetSet::MergeProvider>(std::move(sed_provider_vector));
+    m_seds_repository->resetProvider(std::move(sed_merge_provider));
+   
+    auto     reddening_file_parser = std::make_unique<XYDataset::AsciiParser>();
+    auto     reddening_fs_provider = std::make_unique<XYDataset::FileSystemProvider>(FileUtils::getRedCurveRootPath(true), std::move(reddening_file_parser));
+    auto     reddening_set_provider = std::make_unique<XYDatasetSet::FileSetProvider>(FileUtils::getRedCurveRootPath(true));
+    std::vector<std::unique_ptr<XYDataset::XYDatasetProvider>> reddening_provider_vector;
+    reddening_provider_vector.push_back(std::move(reddening_fs_provider));
+    reddening_provider_vector.push_back(std::move(reddening_set_provider));
+    auto reddening_merge_provider = std::make_unique<XYDatasetSet::MergeProvider>(std::move(reddening_provider_vector));
+    m_redenig_curves_repository->resetProvider(std::move(reddening_merge_provider));
+
     std::unique_ptr<XYDataset::FileParser>         luminosity_file_parser{new XYDataset::AsciiParser{}};
     std::unique_ptr<XYDataset::FileSystemProvider> luminosity_curve_provider(new XYDataset::FileSystemProvider{
         FileUtils::getLuminosityFunctionCurveRootPath(true), std::move(luminosity_file_parser)});
+        
     m_luminosity_repository->resetProvider(std::move(luminosity_curve_provider));
     m_global_edition = false;
     repoReloaded(-1);

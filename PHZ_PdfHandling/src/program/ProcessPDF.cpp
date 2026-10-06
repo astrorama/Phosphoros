@@ -22,11 +22,6 @@
  * @author fdubath
  */
 
-#include <map>
-#include <string>
-#include <utility>
-#include <vector>
-
 #include "Configuration/ConfigManager.h"
 #include "Configuration/Utils.h"
 #include "ElementsKernel/Exception.h"
@@ -37,14 +32,11 @@
 #include "PhzConfiguration/RedshiftConfig.h"
 #include "Table/FitsReader.h"
 #include "Table/FitsWriter.h"
-#include "XYDataset/XYDataset.h"
 #include <boost/program_options.hpp>
-#include <cmath>
 
 #include <CCfits/CCfits>
 #include <SourceCatalog/Source.h>
 #include <regex>
-#include <cstdio>
 
 using namespace Euclid;
 using namespace Euclid::Configuration;

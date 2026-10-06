@@ -1,0 +1,12 @@
+S0_A_0
+Sa_A_0
+Sa_A_1
+Sb_A_0
+Sb_A_1
+Sc_A_0
+Sc_A_1
+Sc_A_2
+Sd_A_0
+Sd_A_1
+Sd_A_2
+Sdm_A_0

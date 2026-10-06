@@ -4,6 +4,7 @@
 #include "PhzQtUI/DatasetRepository.h"
 #include "ModelSet.h"
 #include "PhzQtUI/ModelSetModel.h"
+#include "XYDataset/XYDatasetProvider.h"
 #include <QStandardItemModel>
 #include <map>
 #include <memory>
@@ -14,7 +15,7 @@
 namespace Euclid {
 namespace PhzQtUI {
 
-typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::XYDatasetProvider>>> DatasetRepo;
 
 /**
  * @brief The ModelSetModel class

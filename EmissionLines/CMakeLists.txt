@@ -14,6 +14,7 @@ elements_subdir(EmissionLines)
 #         elements_depends_on_subdirs(ElementsKernel)
 #===============================================================================
 elements_depends_on_subdirs(ElementsKernel)
+elements_depends_on_subdirs(XYDatasetSet)
 
 #===============================================================================
 # Add the find_package macro (a pure CMake command) here to locate the 

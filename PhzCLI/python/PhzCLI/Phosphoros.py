@@ -76,7 +76,11 @@ action_list = [
     PhosphorosAction(['extract_pp_pdf', 'EPP'], 'PhosphorosExtractPpPdf',
                      'Extract 1d/2d pp pdf from the sampling of the full pdf.'),
     PhosphorosAction(['extract_z_list', 'EZL'], 'PhosphorosExtractZList',
-                     'Extract A list of redshift from a catalog file.'),
+                     'Extract A list of redshift from a catalog file.'),           
+    PhosphorosAction(['build_datset_set', 'BDS'], 'PHZ_BuildXYDatasetSet',
+                     'Store multiple SEDs, Filters or ReddeningCurves in a single .fits file. Resample the wavelength if not the same between the different datasets.'),        
+    PhosphorosAction(['split_datset_set', 'SDS'], 'PHZ_SplitXYDatasetSet',
+                     'Extract idividual SEDs, Filters or ReddeningCurves from a set .fits file.'),
 ]
 
 def printHelp():

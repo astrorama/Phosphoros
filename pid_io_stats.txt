@@ -1,0 +1,70 @@
+Linux 6.8.9-100.fc38.x86_64 (fedora) 	12/03/2024 	_x86_64_	(16 CPU)
+
+04:55:23 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:24 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:25 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:26 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:27 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:28 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:29 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:30 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:31 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:32 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:33 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:34 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:35 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:36 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:37 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:38 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:39 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:40 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:41 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:42 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:43 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:44 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:45 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:46 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:47 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:48 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:49 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:50 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:51 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:52 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:53 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:54 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+04:55:55 PM   UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
+
+
+Average:      UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command

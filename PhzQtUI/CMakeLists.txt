@@ -15,6 +15,7 @@ elements_depends_on_subdirs(PhzExecutables)
 elements_depends_on_subdirs(PhzGalacticCorrection)
 elements_depends_on_subdirs(PhzFilterVariation)
 elements_depends_on_subdirs(EmissionLines)
+elements_depends_on_subdirs(XYDatasetSet)
 
 if(ELEMENTS_HIDE_WARNINGS)
   if(UNIX)
@@ -44,16 +45,15 @@ add_definitions(
 elements_add_library(PhzQtUI ${PhUI_SRCS} ${PhUI_HEADERS_MOC} ${PhUI_FORMS_HEADERS} ${PhUI_RESOURCES_RCC}
                      LINK_LIBRARIES
                         ElementsKernel XYDataset PhzConfiguration PhzPhotometricCorrection
-                        PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzUtils PhzGalacticCorrection PhzFilterVariation PhzExecutables
+                        PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzUtils PhzGalacticCorrection PhzFilterVariation PhzExecutables XYDatasetSet
                         Qt6::Core Qt6::Network Qt6::Gui Qt6::Widgets Qt6::Xml Qt6::Concurrent
                      INCLUDE_DIRS
                         ElementsKernel XYDataset PhzConfiguration PhzPhotometricCorrection PhzModeling
-                        PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzGalacticCorrection PhzFilterVariation
+                        PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzGalacticCorrection PhzFilterVariation XYDatasetSet
                         "${QtCore_INCLUDE_DIRS}" "${QtConcurrent_INCLUDE_DIRS}"
                         "${QtNetwork_INCLUDE_DIRS}"
                         "${QtGui_INCLUDE_DIRS}" "${QtWidgets_INCLUDE_DIRS}"
                         "${QtXml_INCLUDE_DIRS}"
-       
                      PUBLIC_HEADERS PhzQtUI)
 
 qt_add_resources(PhzQtUI "images" PREFIX "/" BASE ${CMAKE_CURRENT_SOURCE_DIR}/auxdir/PhzQtUI/ FILES ${CMAKE_CURRENT_SOURCE_DIR}/auxdir/PhzQtUI/logoPhUI.png)

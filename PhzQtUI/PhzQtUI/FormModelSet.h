@@ -4,7 +4,7 @@
 #include "ParameterRule.h"
 #include "PhzQtUI/DatasetRepository.h"
 #include "PhzQtUI/ModelSetModel.h"
-#include "XYDataset/FileSystemProvider.h"
+#include "XYDataset/XYDatasetProvider.h"
 #include <QModelIndex>
 #include <QWidget>
 #include <memory>
@@ -18,7 +18,7 @@ namespace Ui {
 class FormModelSet;
 }
 
-typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::XYDatasetProvider>>> DatasetRepo;
 
 /**
  * @brief The FormModelSet class

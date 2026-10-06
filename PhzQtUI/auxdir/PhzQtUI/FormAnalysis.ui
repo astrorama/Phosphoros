@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>Euclid::PhzQtUI::FormAnalysis</class>
  <widget class="QWidget" name="Euclid::PhzQtUI::FormAnalysis">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>958</width>
-    <height>962</height>
-   </rect>
-  </property>
   <property name="minimumSize">
    <size>
     <width>0</width>
@@ -203,8 +195,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>942</width>
-        <height>770</height>
+        <width>826</width>
+        <height>454</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -223,8 +215,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>499</height>
+            <width>795</width>
+            <height>190</height>
            </rect>
           </property>
           <attribute name="label">
@@ -360,12 +352,12 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>499</height>
+            <width>795</width>
+            <height>534</height>
            </rect>
           </property>
           <attribute name="label">
-           <string>2. Luminosity Filter and Extrinsic Absorption</string>
+           <string>2. Luminosity, ABS MAG Filters and Extrinsic Absorption</string>
           </attribute>
           <layout class="QVBoxLayout" name="verticalLayout_5">
            <item>
@@ -479,6 +471,50 @@
               </item>
              </layout>
             </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_8">
+             <item>
+              <widget class="QLabel" name="label_6">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>ABS MAG computation:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_32">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_SelectFilterAbsMag">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Select Filters</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QTableView" name="tbl_AbsMag"/>
            </item>
            <item>
             <widget class="QLabel" name="label_3">
@@ -701,8 +737,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>499</height>
+            <width>795</width>
+            <height>249</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1017,8 +1053,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>499</height>
+            <width>795</width>
+            <height>228</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1254,8 +1290,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>499</height>
+            <width>808</width>
+            <height>170</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1270,6 +1306,7 @@
              <property name="font">
               <font>
                <pointsize>11</pointsize>
+               <weight>50</weight>
                <bold>false</bold>
               </font>
              </property>
@@ -1406,8 +1443,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>930</width>
-            <height>499</height>
+            <width>795</width>
+            <height>174</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1580,8 +1617,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>933</width>
-            <height>621</height>
+            <width>887</width>
+            <height>529</height>
            </rect>
           </property>
           <attribute name="label">
@@ -1599,6 +1636,7 @@
                    <property name="font">
                     <font>
                      <pointsize>11</pointsize>
+                     <weight>50</weight>
                      <bold>false</bold>
                     </font>
                    </property>
@@ -2402,6 +2440,18 @@
               </widget>
              </item>
              <item>
+              <widget class="QCheckBox" name="cb_gen_posterior">
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="text">
+                <string>Output Posterior</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QComboBox" name="cb_multi_out">
                <property name="font">
                 <font>
@@ -2411,11 +2461,6 @@
                <item>
                 <property name="text">
                  <string>Sampling</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Full grid</string>
                 </property>
                </item>
               </widget>
@@ -2468,20 +2513,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_12">
              <item>
-              <layout class="QVBoxLayout" name="verticalLayout_30">
-               <item>
-                <widget class="QCheckBox" name="cb_gen_posterior">
-                 <property name="font">
-                  <font>
-                   <pointsize>11</pointsize>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>Output Posterior</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
+              <layout class="QVBoxLayout" name="verticalLayout_30"/>
              </item>
             </layout>
            </item>

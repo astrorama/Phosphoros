@@ -8,9 +8,11 @@
 #include "PhzQtUI/ModelSet.h"
 #include <boost/test/unit_test.hpp>  // Gives access to the unit test framework.
 #include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/FileSystemProvider.h"
+#include "XYDataset/XYDatasetProvider.h"
 
 using namespace Euclid::PhzQtUI;
-typedef std::shared_ptr<Euclid::PhzQtUI::DatasetRepository<std::unique_ptr<Euclid::XYDataset::FileSystemProvider>>> DatasetRepo;
+typedef std::shared_ptr<Euclid::PhzQtUI::DatasetRepository<std::unique_ptr<Euclid::XYDataset::XYDatasetProvider>>> DatasetRepo;
 
 struct ModelSet_Fixture {
   std::string ref_name        = "Parameter_space_config_name";

@@ -24,15 +24,15 @@ Created on: 23/06/2021
 Author: dubathf
 """
 
-from __future__ import division, print_function
 
 import argparse
 import os
+import copy
 import astropy.table as table
 import numpy as np
 import shutil
 import ElementsKernel.Logging as log
-from EmissionLines import SedUtils
+from XYDatasetSet import XYDatasetSetTools
 
 logger = log.getLogger('InterpolateSED')
 
@@ -53,13 +53,16 @@ def defineSpecificProgramOptions():
                         help='List of comma separated SEDs files (relative to sed-dir), at least 2 SED must be provided')
     parser.add_argument('--numbers', type=str,  required=True,
                         help='List of comma separated non-negative integer indicating the number of SED to be computed between each input SEDs. The number of integer must be one less that the number of SED')
-    parser.add_argument('--out-dir', type=str,  required=True,
-                        help='Folder (relative to sed-dir) into which SEDs will be saved. If the folder exists it will be cleared.')   
+    parser.add_argument('--out-path', type=str,  required=True,
+                        help='Folder (relative to sed-dir) or .fits name (depending on the "out-format") into which SEDs will be saved. If the folder/file exists it will be cleared/overwrited.')  
+                        
+    parser.add_argument('--out-format', default="individual", type=str,
+                        help='Select between individual SED files ("individual") or in a set .fits file ("set"). Default is "individual"')
                         
     parser.add_argument('--normalization-filter', type=str,  required=True,  
-                         help='Path of the file (absolute or relative to filter-dir) containing the Filter for which the normalization is done for Luminosity computation') 
+                         help='(Qualified) Name of the Filter for which the normalization is done for Luminosity computation') 
     parser.add_argument('--normalization-solar-sed', type=str,  required=True,  
-                         help='Path of the file (absolute or relative to sed-dir) containing the Solar SED @10pc used as a reference for Models normalization') 
+                         help='(Qualified) Name of the Solar SED @10pc used as a reference for Models normalization') 
                     
                                          
     parser.add_argument('--copy-sed', default="True", type=str,
@@ -75,22 +78,17 @@ def compute_flux(sed, filter_transmission):
     new_sampling = get_sampling(sed, filter_transmission)
     resampled_sed = resample(sed, new_sampling)
     resampled_filter = resample(filter_transmission, new_sampling)
-    
-    
-    x = resampled_sed['Wave']
-    y = np.nan_to_num(resampled_sed['Flux']*resampled_filter['Flux'])
+    x = resampled_sed.x
+    y = np.nan_to_num(resampled_sed.y*resampled_filter.y)
     return np.trapz(y, x);
         
 def do_normalise_sed(sed, current_norm, target_norm):
-    normalized_sed = table.Table()
-    normalized_sed['Wave']=sed.columns[0]
-    normalized_sed['Flux']=sed.columns[1]*target_norm/current_norm
-    return normalized_sed
+    sed.y = sed.y*target_norm/current_norm
+    return sed
     
 def normaliseSED(sed, solar_sed, filter_transmission):
     solar_flux = compute_flux(solar_sed, filter_transmission)
     sed_flux = compute_flux(sed, filter_transmission)
-    print(f'Normalization of a SED with current norm {sed_flux} to target norm {solar_flux}')
     return do_normalise_sed(sed, sed_flux, solar_flux)
 
 def getSedDir(sed_dir):
@@ -139,39 +137,19 @@ def prepareOutFolder(out_dir):
                     shutil.rmtree(file_path)
             except Exception as e:
                 logger.info('Failed to delete %s. Reason: %s' % (file_path, e))
-        
-def copy_seds(out_dir, sed_dir, seds):
-    """Copy the SEDs from one directory to the other
-    
-    Parameters: 
-    out_dir (str): The path of the destination directory
-    sed_dir (str): The path of the origin directory
-    seds (list(str)): The list of SED to be copied (path relative to sed_dir)
-    """
-    logger.info('Copy original SEDs into the output folder')  
-    for sed in seds:
-        in_sed_path = os.path.join(sed_dir, sed)
-        if '/' in sed:
-            sed = sed.split("/")[-1]
-        out_sed_path = os.path.join(out_dir, sed)
-        shutil.copyfile(in_sed_path, out_sed_path)
 
 
-def get_sampling(table_1, table_2):
+def get_sampling(sed_1, sed_2):
     """ Compute the common sampling (keep the existing sampling for the part non 
     overlapping and the sampling with the highest number of knots for the overlaping part)
-    
-    Parameters: 
-    table_1 (astropy.table): Table containing as first column the SED sampling wavelength
-    table_2 (astropy.table): Table containing as first column the SED sampling wavelength
     
     Returns:
     before (list): sampling bellow the common part
     common_part (list): sampling of the overlaping part
     after (list)]: sampling above the common part
     """
-    sample_1 = np.array(table_1.columns[0])
-    sample_2 = np.array(table_2.columns[0])
+    sample_1 = sed_1.x
+    sample_2 = sed_2.x
     
     common_start = max(sample_1[0],sample_2[0])
     common_end = min(sample_1[-1],sample_2[-1])
@@ -198,53 +176,52 @@ def get_sampling(table_1, table_2):
     return [before, common_part, after]
 
 
-def resample(table_1, sampling):
+def resample(sed, sampling):
     """ Resample the SED according to the new set of sample
     
     Parameters: 
-    table_1 (astropy.table): Table containing as first column the SED sampling wavelength and as second the SED values
+    sed: XYDataset
     sampling ([before (list),common_part (list),after (list)]: new sampling 
     
     Returns:
-    astropy.table: table containg the resampled SED
+    XYDataset: table containg the resampled SED
     """
     before = np.zeros(len(sampling[0]))
     start = 0
-    if len(sampling[0])>0 and table_1.columns[0][0] == sampling[0][0]:
-        before = table_1.columns[1][0:len(sampling[0])]
+    if len(sampling[0])>0 and sed.x[0] == sampling[0][0]:
+        before = sed.y[0:len(sampling[0])]
         start = len(sampling[0])
-    
+        
     after =  np.zeros(len(sampling[2]))
-    end = len(table_1)
-    if len(sampling[2]) >0 and table_1.columns[0][-1] == sampling[2][-1]:
-        after = table_1.columns[1][-len(sampling[2]):]
-        end = len(table_1)-len(sampling[2])
+    end = len(sed.x)
+    
+    if len(sampling[2]) >0 and sed.x[-1] == sampling[2][-1]:
+        after = sed.y[-len(sampling[2]):]
+        end = len(sed.x)-len(sampling[2])
   
-    common_current_sampling =  table_1.columns[0][start:end]
-    common_current_values =  table_1.columns[1][start:end]
+    common_current_sampling = sed.x[start:end]
+    common_current_values =  sed.y[start:end]
     
     common_new = np.interp(sampling[1], common_current_sampling, common_current_values)
     
     total_sampling = np.concatenate((sampling[0], sampling[1], sampling[2]), axis=None)
     total_values = np.concatenate((before,common_new, after), axis=None)
     
-    t=table.Table()
-    t['Wave']=total_sampling
-    t['Flux']=total_values
-    return t
+    sed.x = total_sampling
+    sed.y = total_values
+    return sed
   
 def parse_pp(pp):
     """ Parse the string encoding the Physical parameters
     
     Parameters: 
-    pp (str): Input string of the form NAME=A*L0+B[UNIT]
+    pp (str): Input string of the form A*L+B+C*LOG(D*L)[UNIT]
+   
     
     Returns:
     (str,float, float, str): name, A, B, unit
     
     """
-    name = (pp.split("=")[0]).strip()
-    pp = pp.split("=")[1]
     unit = ""
     u_bits = pp.split("[")
     if len(u_bits)==2:
@@ -253,51 +230,65 @@ def parse_pp(pp):
 
     A=0.0
     B=0.0
+    C=0.0
+    D=0.0
     num_bits = pp.split("+")
     for bit in num_bits:
-        if "*L" in bit:
-          A = float(bit.replace("*L",""))
+        if "LOG" in bit:
+            cd_bit = bit.split('LOG')
+            if len(cd_bit)!=2:
+                logger.info(f'The parameter "{pp}" is not well formated')
+            else:
+                C = float(cd_bit[0].replace("*",""))
+                D = float(cd_bit[1].replace("L","").replace("*","").replace("(","").replace(")",""))
+        elif "L" in bit:
+            A = float(bit.replace("L","").replace("*",""))
         else:
-          B=float(bit)
-    return name, A, B, unit
+            B=float(bit)
+    return A, B, C, D, unit
 
-def format_pp(name, A, B, unit):
+def format_pp(A, B, C, D, unit):
     """ Convert the PP into the normalized string used to store it
     
     Parameters:
-    name (str): Parameter name
     A (float): Term proportional to the luminosity
     B (float): constant term
+    C (float): mult. factor of the log term
+    D (float): mult factor in the log term
     unit (str): PP unit
     
     Returns:
     str: the formated string
     """
-    return name + "="+str(A)+"*L+"+str(B)+"["+unit+"]"
+    if C==0.0:
+        return str(A)+"*L+"+str(B)+"["+unit+"]"
+    else:
+        return str(A)+"*L+"+str(B)+"+"+str(C)+"*LOG("+str(D)+"*L)["+unit+"]"
+        
     
     
 def do_interpolate_pp(pp_1, pp_2, idx, total):
     """Interpolate the common PP (common mean same name and same unit)
     
     Parameters:
-    pp_1 (list(str)): List of the PP of the first SED
-    pp_2 (list(str)): List of the PP of the second SED
+    pp_1  PP of the first SED
+    pp_2  PP of the second SED
     idx (int): Index of the interpolated SEDs
     total(int): total number of SED to be created between the 2 existing SEDs 
     
     Returns:
     list(str): the list of interpolates PP
     """
-    # pp_i is a list of "<Name>=<number1 = A>*L+<number2 = B>[<unit>]"
+    # pp_i is a dict of "<Name>:<number1 = A>*L+<number2 = B>[<unit>]"
     pp1_dict = {}
     for pp in pp_1:
-        name, A, B, unit = parse_pp(pp)
-        pp1_dict[name]={"A":A, "B":B, "unit": unit}
+        A, B, C, D, unit = parse_pp(pp_1[pp])
+        pp1_dict[pp]={"A":A, "B":B, "C":C, "D":D, "unit": unit}
         
     pp2_dict = {}
     for pp in pp_2:
-        name, A, B, unit = parse_pp(pp)
-        pp2_dict[name]={"A":A, "B":B, "unit": unit}
+        A, B, C, D, unit = parse_pp(pp_2[pp])
+        pp2_dict[pp]={"A":A, "B":B, "C":C, "D":D, "unit": unit}
          
     compatible_pp={}
     for name_1 in pp1_dict:
@@ -310,41 +301,28 @@ def do_interpolate_pp(pp_1, pp_2, idx, total):
     
     frac_1 = (total - idx)/(total+1.0)
     frac_2 = (idx+1)/(total+1.0)
-    
-    
-    new_pp = []
+
+    new_pp = {}
     for pp in compatible_pp:
         new_A = frac_1*compatible_pp[pp][0]['A'] + frac_2*compatible_pp[pp][1]['A']
         new_B = frac_1*compatible_pp[pp][0]['B'] + frac_2*compatible_pp[pp][1]['B']
+        new_C = frac_1*compatible_pp[pp][0]['C'] + frac_2*compatible_pp[pp][1]['C']
+        new_D = frac_1*compatible_pp[pp][0]['D'] + frac_2*compatible_pp[pp][1]['D']
         new_unit = compatible_pp[pp][0]['unit']
-        new_pp.append(format_pp(pp, new_A, new_B, new_unit))
+        new_pp[pp] = format_pp(new_A, new_B, new_C, new_D, new_unit)
     
     return new_pp
     
 
-def do_interpolate_sed(table_1, table_2, idx, total):
+def do_interpolate_sed(sed_1, sed_2, idx, total):
     """Interpolate the SED between the 2 provided SEDs (which must have the same sampling)
-    
-    Parameters:
-    table_1 (astropy.table): Table containing the first SED
-    table_2 (astropy.table): Table containing the second SED
-    idx (int): Index of the interpolated SEDs
-    total(int): total number of SED to be created between the 2 existing SEDs 
-    
-    Returns:
-    astropy.table: table containg the interpolated SED
     """
     frac_1 = (total - idx)/(total+1.0)
     frac_2 = (idx+1)/(total+1.0)
     
-    sampling = table_1['Wave']
-    
-    values = frac_1*table_1['Flux'] + frac_2*table_2['Flux'] 
-    
-    t=table.Table()
-    t['Wave']=sampling
-    t['Flux']=values
-    return t
+    values = frac_1*sed_1.y + frac_2*sed_2.y
+
+    return values
 
  
 def clean_name(name):
@@ -392,104 +370,61 @@ def build_name(name_1, name_2, idx, total):
     number_1 = str(total - idx)+":"+str(total+1)
     number_2 = str(idx+1)+":"+str(total+1)
     
-    return number_1 + "_" + clean_name(name_1) + "_+_" + number_2 + "_" + clean_name(name_2)+".sed"
+    return number_1 + "_" + clean_name(name_1) + "_+_" + number_2 + "_" + clean_name(name_2)
 
-def interpolate(sed_dir, sed_list, sed_number, interpolate_pp, solar_sed, normalisation_filter, out_dir) :
-    """ Create the interpolated SEDs 
-    
-    Parameters:
-    sed_dir (str): The path of the SED directory
-    sed_list (list(str)): ordered list of SEDs. Interpolation arrise between succesive SED
-    sed_number (list(int)): number of SED to be interpolated in each interval
-    interpolate_pp (bool): switch allowing to interpolate PP
-    out_dir (str): path of the folder where to write the interpolated SEDs
-    """
-    
-    
+def interpolate(sed_list, sed_number, interpolate_pp, solar_sed, normalisation_filter, copy_seds) :
+    output_sed_list = []
     for index in range(len(sed_number)):
-        logger.info('Interpolation between SED %s and %s', sed_list[index],  sed_list[index+1] )  
-        path_sed_1 = os.path.join(sed_dir, sed_list[index])   
-        path_sed_2 = os.path.join(sed_dir, sed_list[index + 1])  
-        interpolate_num  = sed_number[index]
-        
-        sed_1_table = normaliseSED(table.Table.read(path_sed_1, format='ascii'),solar_sed, normalisation_filter)
-        sed_2_table = normaliseSED(table.Table.read(path_sed_2, format='ascii'),solar_sed, normalisation_filter)
-        
-        pp_1 = []
-        pp_2 = []
-        if interpolate_pp:
-            keyword_1 = SedUtils.readXYDatasetKeyword(path_sed_1)
-            if "PARAMETER" in keyword_1:
-                pp_1 = keyword_1["PARAMETER"]   
-                
-            keyword_2 = SedUtils.readXYDatasetKeyword(path_sed_2)
-            if "PARAMETER" in keyword_2:
-                pp_2 = keyword_2["PARAMETER"]
+        if copy_seds:
+            output_sed_list.append(sed_list[index]) 
+        logger.info('Interpolation between SED %s and %s', sed_list[index].name,  sed_list[index+1].name )  
+        sed_1= copy.deepcopy(sed_list[index])
+        sed_2= copy.deepcopy(sed_list[index+1])
         
         # Get the new sampling
-        new_sampling = get_sampling(sed_1_table, sed_2_table)
-     
+        new_sampling = get_sampling(sed_1, sed_2)
+ 
         # re-sample if needed
-        resampled_sed_1 = resample(sed_1_table, new_sampling)
-        resampled_sed_2 = resample(sed_2_table, new_sampling)
+        resampled_sed_1 = resample(sed_1, new_sampling)
+        resampled_sed_2 = resample(sed_2, new_sampling)
         
-        for idx in range(interpolate_num):
-            pp_i = []
-            if interpolate_pp:
-                pp_i = do_interpolate_pp(pp_1, pp_2, idx, interpolate_num)  
-            table_i = do_interpolate_sed(resampled_sed_1, resampled_sed_2, idx, interpolate_num)
-       
-            name_i = build_name(sed_list[index], sed_list[index + 1], idx, interpolate_num)
-            
-            path_i = os.path.join(out_dir, name_i)
-            
-            logger.info('Writing the file %s', path_i )  
-            table_i.write(path_i, format='ascii.commented_header')
-             
-            if len(pp_i)>0:
-                SedUtils.replaceXYDatasetKeyword(path_i, {'PARAMETER' : pp_i})
-                
-def createOrder(out_dir, sed_list, interp_number, add_originals):
-    name_list = []
-    for index in range(len(interp_number)): 
-        if add_originals:
-            name_list.append(clean_name_folder(sed_list[index]))
-        interpolate_num  = interp_number[index]
-        for idx in range(interpolate_num):
-            name_i = build_name(sed_list[index], sed_list[index + 1], idx, interpolate_num)
-            name_list.append(name_i)
-    if add_originals:
-        name_list.append(clean_name_folder(sed_list[-1]))
-    
-    logger.info('Writing the order file')  
-    
-    f = open(os.path.join(out_dir, "order.txt"), "w")
-    for sed in name_list:
-        f.write(sed+"\n")
-    f.close()
+        # normalize the SEDs
+        sed_1 = normaliseSED(sed_1, solar_sed, normalisation_filter)
+        sed_2 = normaliseSED(sed_2, solar_sed, normalisation_filter)
+        
+        new_sampling_array =  sed_1.x
 
-def findPath(guess):
-    if os.path.exists(guess):     
-        return guess
-    else:
-        incomplet_file = guess.split('/')[-1]
-        folder = '/'.join(guess.split('/')[:-1])
-        for file in os.listdir(folder):
-           if file.startswith(incomplet_file):
-               logger.info(f'Path {guess} has been completed to {os.path.join(folder,file)}') 
-               return os.path.join(folder,file)
-        raise ValueError(f"Unable to find a file matching {guess}") 
-         
+        interpolate_num  = sed_number[index]
+        for idx in range(interpolate_num):
+            name_i = build_name(sed_1.name, sed_2.name, idx, interpolate_num)
+            values_i = do_interpolate_sed(sed_1, sed_2, idx, interpolate_num)
+            interpolated_sed_i = XYDatasetSetTools.XYDataset(new_sampling_array, values_i, name_i,{})
+            if interpolate_pp:
+                pp_1 = sed_1.listParam()
+                pp_2 = sed_2.listParam()
+                new_pp = do_interpolate_pp(pp_1, pp_2, idx, interpolate_num)
+                for pp in new_pp:
+                    interpolated_sed_i.addParam(pp, new_pp[pp])
+            output_sed_list.append(interpolated_sed_i)
+    if copy_seds:
+        output_sed_list.append(sed_list[-1])
+    return output_sed_list
 
 def mainMethod(args):
     sed_dir = getSedDir(args.sed_dir)
     if sed_dir=="":
         raise ValueError("sed_dir must be provided")
-    out_dir = args.out_dir
-    if out_dir=="":
-        raise ValueError("out_dir must be provided")
-    out_dir = os.path.join(sed_dir, out_dir)
+        
+    logger.info('Listing available SEDs')
+    available_seds = XYDatasetSetTools.listDataset(sed_dir)
     
+    filter_dir = getFilterDir(args.filter_dir)
+    if filter_dir=="":
+        raise ValueError("filter-dir must be provided")
+    logger.info('Listing available Filters')
+    available_filters = XYDatasetSetTools.listDataset(filter_dir)
+
+
     sed_list = args.seds.split(',')
     sed_number = len(sed_list)
     if sed_number<2:
@@ -497,29 +432,51 @@ def mainMethod(args):
     interp_number = [int(bite) for bite in args.numbers.split(',')]    
     if len(interp_number)!=sed_number-1:
         raise ValueError("numbers must have one elements less than seds")
-        
-    norm_sed_path = args.normalization_solar_sed
-    if norm_sed_path[0]!='/':
-        norm_sed_path=os.path.join(sed_dir,norm_sed_path)
-    norm_sed_path = findPath(norm_sed_path)
-    solar_sed =  table.Table.read(norm_sed_path, format='ascii')
-        
-    filter_path=args.normalization_filter
-    if filter_path[0]!='/':
-        filter_dir = getFilterDir(args.filter_dir)
-        if filter_dir=="":
-            raise ValueError("filter-dir must be provided when the normalization-filter is not an absolute path")
-        filter_path=os.path.join(filter_dir,filter_path)   
-    filter_path = findPath(filter_path)
-    normalisation_filter = table.Table.read(filter_path, format='ascii')
     
-    prepareOutFolder(out_dir)
+    logger.info('Reading the SEDs')
+    sed_data = []
+    for sed_name in sed_list:
+        if sed_name in available_seds:
+            sed_data.append(XYDatasetSetTools.readDataset(sed_dir,sed_name, available_seds))
+        else:
+            raise ValueError(f"Sed {sed_name} is not available in folder {sed_dir} ")
+           
+    if not args.normalization_solar_sed in available_seds:  
+        raise ValueError(f"Unable to find the Solar SED {args.normalization_solar_sed} in {sed_dir}")
+    logger.info('Reading the Solar SEDs')   
+    solar_sed =  XYDatasetSetTools.readDataset(sed_dir, args.normalization_solar_sed, available_seds)
     
-    if args.copy_sed.lower() == "true":
-        copy_seds(out_dir, sed_dir, sed_list) 
-        
-    interpolate(sed_dir, sed_list, interp_number, args.interpolate_pp.lower() == "true", solar_sed, normalisation_filter, out_dir)   
+    if not args.normalization_filter in available_filters:  
+        raise ValueError(f"Unable to find the Filter {args.normalization_filter} in {filter_dir}")
+    logger.info('Reading the Filter')
+    normalisation_filter =  XYDatasetSetTools.readDataset(filter_dir, args.normalization_filter, available_filters)
     
-    createOrder(out_dir, sed_list, interp_number,args.copy_sed.lower() == "true")          
-  
+    
+    logger.info('Interpolating')
+    out_seds = interpolate(sed_data, interp_number, args.interpolate_pp.lower() == "true", solar_sed, normalisation_filter, args.copy_sed.lower() == "true")  
 
+    # Write on disk
+    if args.out_format=="individual":
+        out_dir = args.out_path
+        if out_dir=="":
+            raise ValueError("out_path must be provided")
+        out_dir = os.path.join(sed_dir, out_dir)
+        prepareOutFolder(out_dir)
+    
+        all_names = [sed.name.split('/')[-1] for sed in out_seds]
+        if len(all_names)!=len(np.unique(all_names)):
+            raise Exception("Multiple SEDs with the same name cannot be saved in a single folder.")
+        file_names = []
+        for sed in out_seds:
+            file_names.append(XYDatasetSetTools.writeDataset(sed, out_dir))
+            
+        logger.info('Add the order file')
+        with open(out_dir+'/order.txt', 'w') as fh:
+            for name in file_names:
+                fh.write(f'{name.split('/')[-1]}\n') 
+    else:
+        out_file = args.out_path
+        if out_file=="" or out_file.split('.')[-1]!='fits':
+            raise ValueError("out_path must be provided and be a file name with a .fits extension")
+        XYDatasetSetTools.writeDatasetSet(out_seds, os.path.join(sed_dir, out_file), True, True)
+        logger.info(f'write {out_file}')    

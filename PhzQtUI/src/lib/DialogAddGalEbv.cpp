@@ -83,7 +83,7 @@ void DialogAddGalEbv::on_btn_create_clicked() {
     std::string command = "";
 
     m_process->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
-    m_process->start(QString::fromStdString(program), arguments);
+    m_process->start(QString::fromStdString(program));
 
   } else {
     return;

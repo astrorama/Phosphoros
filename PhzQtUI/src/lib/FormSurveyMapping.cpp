@@ -560,7 +560,7 @@ void FormSurveyMapping::on_btn_map_delete_clicked() {
       QFile file(filename);
       if (file.open(QIODevice::ReadWrite)) {
         QTextStream stream(&file);
-        stream << endl;
+        stream << Qt::endl;
      }
      
      if (result== QMessageBox::YesToAll) {
