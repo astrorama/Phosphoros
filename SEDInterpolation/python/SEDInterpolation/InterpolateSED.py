@@ -24,7 +24,6 @@ Created on: 23/06/2021
 Author: dubathf
 """
 
-from __future__ import division, print_function
 
 import argparse
 import os
@@ -81,9 +80,6 @@ def compute_flux(sed, filter_transmission):
     resampled_filter = resample(filter_transmission, new_sampling)
     x = resampled_sed.x
     y = np.nan_to_num(resampled_sed.y*resampled_filter.y)
-    
-    print(x)
-    print(y)
     return np.trapz(y, x);
         
 def do_normalise_sed(sed, current_norm, target_norm):
@@ -93,7 +89,6 @@ def do_normalise_sed(sed, current_norm, target_norm):
 def normaliseSED(sed, solar_sed, filter_transmission):
     solar_flux = compute_flux(solar_sed, filter_transmission)
     sed_flux = compute_flux(sed, filter_transmission)
-    print(f'Normalization of a SED with current norm {sed_flux} to target norm {solar_flux}')
     return do_normalise_sed(sed, sed_flux, solar_flux)
 
 def getSedDir(sed_dir):
@@ -220,7 +215,8 @@ def parse_pp(pp):
     """ Parse the string encoding the Physical parameters
     
     Parameters: 
-    pp (str): Input string of the form A*L0+B[UNIT]
+    pp (str): Input string of the form A*L+B+C*LOG(D*L)[UNIT]
+   
     
     Returns:
     (str,float, float, str): name, A, B, unit
@@ -234,26 +230,41 @@ def parse_pp(pp):
 
     A=0.0
     B=0.0
+    C=0.0
+    D=0.0
     num_bits = pp.split("+")
     for bit in num_bits:
-        if "*L" in bit:
-          A = float(bit.replace("*L",""))
+        if "LOG" in bit:
+            cd_bit = bit.split('LOG')
+            if len(cd_bit)!=2:
+                logger.info(f'The parameter "{pp}" is not well formated')
+            else:
+                C = float(cd_bit[0].replace("*",""))
+                D = float(cd_bit[1].replace("L","").replace("*","").replace("(","").replace(")",""))
+        elif "L" in bit:
+            A = float(bit.replace("L","").replace("*",""))
         else:
-          B=float(bit)
-    return A, B, unit
+            B=float(bit)
+    return A, B, C, D, unit
 
-def format_pp(A, B, unit):
+def format_pp(A, B, C, D, unit):
     """ Convert the PP into the normalized string used to store it
     
     Parameters:
     A (float): Term proportional to the luminosity
     B (float): constant term
+    C (float): mult. factor of the log term
+    D (float): mult factor in the log term
     unit (str): PP unit
     
     Returns:
     str: the formated string
     """
-    return str(A)+"*L+"+str(B)+"["+unit+"]"
+    if C==0.0:
+        return str(A)+"*L+"+str(B)+"["+unit+"]"
+    else:
+        return str(A)+"*L+"+str(B)+"+"+str(C)+"*LOG("+str(D)+"*L)["+unit+"]"
+        
     
     
 def do_interpolate_pp(pp_1, pp_2, idx, total):
@@ -271,13 +282,13 @@ def do_interpolate_pp(pp_1, pp_2, idx, total):
     # pp_i is a dict of "<Name>:<number1 = A>*L+<number2 = B>[<unit>]"
     pp1_dict = {}
     for pp in pp_1:
-        A, B, unit = parse_pp(pp_1[pp])
-        pp1_dict[pp]={"A":A, "B":B, "unit": unit}
+        A, B, C, D, unit = parse_pp(pp_1[pp])
+        pp1_dict[pp]={"A":A, "B":B, "C":C, "D":D, "unit": unit}
         
     pp2_dict = {}
     for pp in pp_2:
-        A, B, unit = parse_pp(pp_2[pp])
-        pp2_dict[pp]={"A":A, "B":B, "unit": unit}
+        A, B, C, D, unit = parse_pp(pp_2[pp])
+        pp2_dict[pp]={"A":A, "B":B, "C":C, "D":D, "unit": unit}
          
     compatible_pp={}
     for name_1 in pp1_dict:
@@ -295,8 +306,10 @@ def do_interpolate_pp(pp_1, pp_2, idx, total):
     for pp in compatible_pp:
         new_A = frac_1*compatible_pp[pp][0]['A'] + frac_2*compatible_pp[pp][1]['A']
         new_B = frac_1*compatible_pp[pp][0]['B'] + frac_2*compatible_pp[pp][1]['B']
+        new_C = frac_1*compatible_pp[pp][0]['C'] + frac_2*compatible_pp[pp][1]['C']
+        new_D = frac_1*compatible_pp[pp][0]['D'] + frac_2*compatible_pp[pp][1]['D']
         new_unit = compatible_pp[pp][0]['unit']
-        new_pp[pp] = format_pp(new_A, new_B, new_unit)
+        new_pp[pp] = format_pp(new_A, new_B, new_C, new_D, new_unit)
     
     return new_pp
     
@@ -436,7 +449,7 @@ def mainMethod(args):
     if not args.normalization_filter in available_filters:  
         raise ValueError(f"Unable to find the Filter {args.normalization_filter} in {filter_dir}")
     logger.info('Reading the Filter')
-    normalisation_filter =  XYDatasetSetTools.readDataset(filter_dir,args.normalization_filter, available_filters)
+    normalisation_filter =  XYDatasetSetTools.readDataset(filter_dir, args.normalization_filter, available_filters)
     
     
     logger.info('Interpolating')
@@ -465,6 +478,5 @@ def mainMethod(args):
         out_file = args.out_path
         if out_file=="" or out_file.split('.')[-1]!='fits':
             raise ValueError("out_path must be provided and be a file name with a .fits extension")
-        out_seds = XYDatasetSetTools.checkSampling(out_seds, True)
-        XYDatasetSetTools.writeDatasetSet(out_seds, os.path.join(sed_dir, out_file))
+        XYDatasetSetTools.writeDatasetSet(out_seds, os.path.join(sed_dir, out_file), True, True)
         logger.info(f'write {out_file}')    

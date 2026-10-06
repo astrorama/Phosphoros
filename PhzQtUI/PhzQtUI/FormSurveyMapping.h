@@ -4,7 +4,7 @@
 #include "FilterMapping.h"
 #include "PhzQtUI/DatasetRepository.h"
 #include "PhzQtUI/SurveyModel.h"
-#include "XYDataset/FileSystemProvider.h"
+#include "XYDataset/XYDatasetProvider.h"
 #include <QItemSelection>
 #include <QModelIndex>
 #include <QStandardItem>
@@ -19,7 +19,7 @@
 namespace Euclid {
 namespace PhzQtUI {
 
-typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::XYDatasetProvider>>> DatasetRepo;
 
 namespace Ui {
 class FormSurveyMapping;

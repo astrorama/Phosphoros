@@ -20,6 +20,8 @@
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/AsciiParser.h"
 #include "XYDataset/FileSystemProvider.h"
+#include "XYDatasetSet/FileSetProvider.h"
+#include "XYDatasetSet/MergeProvider.h"
 
 #include <QProgressDialog>
 #include <chrono>
@@ -96,10 +98,15 @@ void DialogModelSet::sedProcessfinished(int, QProcess::ExitStatus) {
   m_message_buttons = std::vector<MessageButton*>();
 
   // reload the provider and the model
-  std::unique_ptr<XYDataset::FileParser>         sed_file_parser{new XYDataset::AsciiParser{}};
-  std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(
-      new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser)});
-  m_seds_repository->resetProvider(std::move(sed_provider));
+  auto     sed_file_parser = std::make_unique<XYDataset::AsciiParser>();
+  auto     sed_fs_provider = std::make_unique<XYDataset::FileSystemProvider>(FileUtils::getSedRootPath(true), std::move(sed_file_parser));
+  auto     sed_set_provider = std::make_unique<XYDatasetSet::FileSetProvider>(FileUtils::getSedRootPath(true));
+  std::vector<std::unique_ptr<XYDataset::XYDatasetProvider>> sed_provider_vector;
+  sed_provider_vector.push_back(std::move(sed_fs_provider));
+  sed_provider_vector.push_back(std::move(sed_set_provider));
+  auto sed_merge_provider = std::make_unique<XYDatasetSet::MergeProvider>(std::move(sed_provider_vector));
+  m_seds_repository->resetProvider(std::move(sed_merge_provider)); 
+  
 
   loadSeds();
   if (m_view_popup) {

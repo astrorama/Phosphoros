@@ -11,12 +11,10 @@
 #include <vector>
 
 #include "ParameterRule.h"
-#include "PhzQtUI/DatasetRepository.h"
 #include "PhzQtUI/GridButton.h"
 #include "PhzQtUI/MessageButton.h"
 #include "PhzQtUI/Range.h"
 #include "PhzQtUI/SedTreeModel.h"
-#include "XYDataset/FileSystemProvider.h"
 namespace Euclid {
 namespace PhzQtUI {
 
@@ -24,7 +22,6 @@ namespace Ui {
 class DialogRange;
 }
 
-typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
 
 /**
  * @class DialogRange
@@ -36,11 +33,6 @@ class DialogRange : public QDialog {
 public:
   /**
    * @brief Constructor
-   * @param seds_repository a pointer on  DatasetRepository<FileSystemProvider>
-   * storing the available SEDs
-   * @param redenig_curves_repository a pointer on  DatasetRepository<FileSystemProvider>
-   * storing the available Reddening Curves
-   *
    */
   explicit DialogRange(QWidget* parent = 0);
 

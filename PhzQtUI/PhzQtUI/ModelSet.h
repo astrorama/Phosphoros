@@ -2,6 +2,7 @@
 #define MODELSET_H
 
 #include "PhzQtUI/DatasetRepository.h"
+#include "XYDataset/XYDatasetProvider.h"
 #include "ParameterRule.h"
 #include "PhzDataModel/PhzModel.h"
 #include "PhzQtUI/Range.h"
@@ -21,7 +22,7 @@ class variable_value;
 namespace Euclid {
 namespace PhzQtUI {
 
-typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::XYDatasetProvider>>> DatasetRepo;
 
 /**
  * @brief The ModelSet class

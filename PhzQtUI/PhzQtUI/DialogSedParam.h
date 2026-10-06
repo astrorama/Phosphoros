@@ -3,7 +3,7 @@
 
 #include "FilterMapping.h"
 #include "PhzQtUI/DatasetRepository.h"
-#include "XYDataset/FileSystemProvider.h"
+#include "XYDataset/XYDatasetProvider.h"
 #include "XYDataset/QualifiedName.h"
 #include <QDialog>
 #include <QProcess>
@@ -15,7 +15,7 @@
 namespace Euclid {
 namespace PhzQtUI {
 
-typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::XYDatasetProvider>>> DatasetRepo;
 
 namespace Ui {
 class DialogSedParam;
@@ -45,29 +45,13 @@ public:
 
 private slots:
   /**
-   * @brief SLOT on_btn_new_clicked: Add a parameter
-   */
-  void on_btn_new_clicked();
-
-  void processingFinished(int, QProcess::ExitStatus);
-
-  void delParamClicked(const QString& param);
-
-  /**
    * @brief SLOT on_btn_cancel_clicked: close the popup
    */
   void on_btn_cancel_clicked();
 
-  /**
-   * @brief SLOT on_btn_save_clicked: save
-   * and close the popup.
-   */
-  void on_btn_save_clicked();
-
 private:
   std::unique_ptr<Ui::DialogSedParam> ui;
   DatasetRepo                         m_sed_repository;
-  QProcess*                           m_P;
   std::string                         m_file_path = "";
 };
 

@@ -63,10 +63,8 @@ def defineSpecificProgramOptions():
                         help='The beginning of the UV range to integrate (default: 1500.0,2800.0 Angstrom, use  2100,2500 for LePhare like lines)' )
     parser.add_argument('--reference-factor', default=5.91e-6, type=float,
                         help='The luminosity factor between UV and the reference line (default:5.91e-6, use 1.0e13 for LePhare like  lines)')
-    parser.add_argument('--sed-dir', type=str, metavar='DIR',
-                        help='The directory containing the SEDs to add the emission lines on')
-    parser.add_argument('--sed-file',  type=str, 
-                        help='The directory containing a set of SEDs to add the emission lines on')
+    parser.add_argument('--sed-set', type=str, 
+                        help='The directory/.fits file containing the SEDs to add the emission lines on')
     parser.add_argument('--velocity', default=None, type=float,
                         help='The velocity (in km/s) to compute the FWHM of the lines from (defaults to dirac)')
     parser.add_argument('--no-sed', action='store_true', help='Output only the emission lines')
@@ -93,20 +91,6 @@ def readEmissionLinesFromFile(emission_lines_file):
 
     logger.info('Reading emission lines from ' + emission_lines_file)
     return table.Table.read(emission_lines_file, format='ascii')
-
-
-def getSedDir(sed_dir):
-    if os.path.exists(sed_dir):
-        if not os.path.isdir(sed_dir):
-            logger.error(sed_dir + ' is not a directory')
-            exit(1)
-        return sed_dir
-    if not os.path.isabs(sed_dir) and not os.path.exists(sed_dir):
-        path_in_phos_sed = os.path.join(phos_dir, 'AuxiliaryData', 'SEDs', sed_dir)
-        if os.path.isdir(path_in_phos_sed):
-            return path_in_phos_sed
-    logger.error('Unknown SED directory ' + sed_dir)
-    exit(1)
 
 
 class EmissionLinesAdder(object):
@@ -216,19 +200,42 @@ class EmissionLinesAdder(object):
         return sed
 
 
+def getSedPath(sed_set):
+    if os.path.exists(sed_set):
+        if os.path.isdir(sed_set):
+            return sed_set, ""
+        elif sed_set.endswith(".fits"):
+            return "/".join(sed_set.split('/')[:-1]), sed_set.split('/')[-1].replace(".fits", "")
+        else:    
+            logger.error(sed_set + ' is not a directory or a .fits file')
+            exit(1)
+    elif os.path.exists(sed_set+".fits"):
+        return "/".join(sed_set.split('/')[:-1]), sed_set.split('/')[-1]
+            
+    elif not os.path.isabs(sed_set):
+        path_in_phos_sed = os.path.join(sed_set, 'AuxiliaryData', 'SEDs', sed_dir)
+        if os.path.isdir(path_in_phos_sed):
+            if os.path.isdir(path_in_phos_sed):
+                return path_in_phos_sed, ""
+            elif path_in_phos_sed.endswith(".fits"):
+                return "/".join(path_in_phos_sed.split('/')[:-1]), path_in_phos_sed.split('/')[-1].replace(".fits", "")
+            else:    
+                logger.error(path_in_phos_sed + ' is not a directory or a .fits file')
+                exit(1)
+        elif os.path.exists(path_in_phos_sed+".fits"):
+            return "/".join(path_in_phos_sed.split('/')[:-1]), path_in_phos_sed.split('/')[-1]
+                
+    logger.error('Unknown SED group ' + sed_set)
+    exit(1)
+
+
 def mainMethod(args):
-    sed_dir = ""
-    sed_file = ""
-    if args.sed_dir:
-        sed_dir = getSedDir(args.sed_dir)
-    elif args.sed_file:
-        sed_dir = "/".join(args.sed_file.split("/")[:-1])
-        sed_file = ".".join(args.sed_file.split("/")[-1].split(".")[:-1])
+    sed_dir, sed_file = getSedPath(args.sed_set)
         
     logger.info('SED directory: %s', sed_dir)
     logger.info('Aux directory: %s', aux_dir)
     
-    out_dir = sed_dir.rstrip(os.path.sep) + args.suffix
+    out_dir = os.path.join(sed_dir, sed_file).rstrip(os.path.sep) + args.suffix
     if args.out_format=="individual":
         if os.path.exists(out_dir):
             logger.error('Output directory ' + out_dir + ' already exists')

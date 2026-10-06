@@ -5,7 +5,7 @@
 #include "PhzQtUI/DatasetRepository.h"
 #include "PhzQtUI/MessageButton.h"
 #include "PhzQtUI/SedTreeModel.h"
-#include "XYDataset/FileSystemProvider.h"
+#include "XYDataset/XYDatasetProvider.h"
 #include <QFile>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -23,7 +23,7 @@ namespace Ui {
 class FormAuxDataManagement;
 }
 
-typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::XYDatasetProvider>>> DatasetRepo;
 
 /**
  * @brief The FormAuxDataManagement class

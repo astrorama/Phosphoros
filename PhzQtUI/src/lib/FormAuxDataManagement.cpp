@@ -26,6 +26,10 @@
 #include "PhzQtUI/FormAuxDataManagement.h"
 #include "PhzQtUI/filecopyer.h"
 #include "XYDataset/AsciiParser.h"
+#include "XYDataset/FileSystemProvider.h"
+#include "XYDataset/XYDatasetProvider.h"
+#include "XYDatasetSet/FileSetProvider.h"
+#include "XYDatasetSet/MergeProvider.h"
 #include "ui_FormAuxDataManagement.h"
 
 namespace Euclid {
@@ -155,7 +159,7 @@ void FormAuxDataManagement::getParameterInfoClicked(const QString& file) {
 void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
   QMessageBox msgBox;
   msgBox.setText("Add Emission Lines to SEDs in a folder..");
-  msgBox.setInformativeText(QString::fromStdString("This action will create a new folder named ") + group +
+  msgBox.setInformativeText(QString::fromStdString("This action will create a new group named ") + group +
                             QString::fromStdString("_el/_lpel generated from SEDs from folder ") + group +
                             QString::fromStdString(" with added emission lines. Which reciept do you want to use?"));
 
@@ -183,8 +187,8 @@ void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
 
     auto aux_path = FileUtils::getAuxRootPath();
 
-    QString command = QString::fromStdString("PhosphorosAddEmissionLines --sed-dir " + aux_path) + QDir::separator() +
-                      QString::fromStdString("SEDs") + QDir::separator() + group;
+    QString command = QString::fromStdString("PhosphorosAddEmissionLines --sed-set " + aux_path) + QDir::separator() +
+                      QString::fromStdString("SEDs") + QDir::separator() + group + QString::fromStdString(" --out-format set");
 
     logger.info() << "Executing :" << command.toStdString();
 
@@ -199,9 +203,9 @@ void FormAuxDataManagement::addEmissionLineButtonClicked(const QString& group) {
 
     auto    aux_path = FileUtils::getAuxRootPath();
     QString command  = QString::fromStdString("PhosphorosAddEmissionLines --suffix _lpel --reference-factor 1.0e13 "
-                                             "--uv-range 2100,2500 --emission-lines LePhare_lines.txt --sed-dir " +
+                                             "--uv-range 2100,2500 --emission-lines LePhare_lines.txt --sed-set " +
                                              aux_path) +
-                      QDir::separator() + QString::fromStdString("SEDs") + QDir::separator() + group;
+                      QDir::separator() + QString::fromStdString("SEDs") + QDir::separator() + group + QString::fromStdString(" --out-format set");
 
     logger.info() << "Executing :" << command.toStdString();
 
@@ -307,10 +311,14 @@ void FormAuxDataManagement::handleDataException(std::string message) {
 void FormAuxDataManagement::sedProcessfinished(int, QProcess::ExitStatus) {
   // reload the provider and the model
   try {
-    std::unique_ptr<XYDataset::FileParser>         sed_file_parser{new XYDataset::AsciiParser{}};
-    std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(
-        new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser)});
-    m_seds_repository->resetProvider(std::move(sed_provider));
+        auto     sed_file_parser = std::make_unique<XYDataset::AsciiParser>();
+        auto     sed_fs_provider = std::make_unique<XYDataset::FileSystemProvider>(FileUtils::getSedRootPath(true), std::move(sed_file_parser));
+        auto     sed_set_provider = std::make_unique<XYDatasetSet::FileSetProvider>(FileUtils::getSedRootPath(true));
+        std::vector<std::unique_ptr<XYDataset::XYDatasetProvider>> sed_provider_vector;
+        sed_provider_vector.push_back(std::move(sed_fs_provider));
+        sed_provider_vector.push_back(std::move(sed_set_provider));
+        auto sed_merge_provider = std::make_unique<XYDatasetSet::MergeProvider>(std::move(sed_provider_vector));
+        m_seds_repository->resetProvider(std::move(sed_merge_provider));
   } catch (Elements::Exception& e) {
     handleDataException(e.what());
     exit(0);
@@ -325,10 +333,14 @@ void FormAuxDataManagement::copyingFilterFinished(bool success, QVector<QString>
     logger.info() << "files modified ";
     // reset repo
     try {
-      std::unique_ptr<XYDataset::FileParser>         filter_file_parser{new XYDataset::AsciiParser{}};
-      std::unique_ptr<XYDataset::FileSystemProvider> filter_provider(
-          new XYDataset::FileSystemProvider{FileUtils::getFilterRootPath(true), std::move(filter_file_parser)});
-      m_filter_repository->resetProvider(std::move(filter_provider));
+        auto     filter_file_parser = std::make_unique<XYDataset::AsciiParser>();
+        auto     filter_fs_provider = std::make_unique<XYDataset::FileSystemProvider>(FileUtils::getFilterRootPath(true), std::move(filter_file_parser));
+        auto     filter_set_provider = std::make_unique<XYDatasetSet::FileSetProvider>(FileUtils::getFilterRootPath(true));
+        std::vector<std::unique_ptr<XYDataset::XYDatasetProvider>> filter_provider_vector;
+        filter_provider_vector.push_back(std::move(filter_fs_provider));
+        filter_provider_vector.push_back(std::move(filter_set_provider));
+        auto filter_merge_provider = std::make_unique<XYDatasetSet::MergeProvider>(std::move(filter_provider_vector));
+        m_filter_repository->resetProvider(std::move(filter_merge_provider));
     } catch (Elements::Exception& e) {
       handleDataException(e.what());
       exit(0);
@@ -346,10 +358,14 @@ void FormAuxDataManagement::copyingSEDFinished(bool success, QVector<QString>) {
     logger.info() << "files modified ";
     // reload the provider and the model
     try {
-      std::unique_ptr<XYDataset::FileParser>         sed_file_parser{new XYDataset::AsciiParser{}};
-      std::unique_ptr<XYDataset::FileSystemProvider> sed_provider(
-          new XYDataset::FileSystemProvider{FileUtils::getSedRootPath(true), std::move(sed_file_parser)});
-      m_seds_repository->resetProvider(std::move(sed_provider));
+        auto     sed_file_parser = std::make_unique<XYDataset::AsciiParser>();
+        auto     sed_fs_provider = std::make_unique<XYDataset::FileSystemProvider>(FileUtils::getSedRootPath(true), std::move(sed_file_parser));
+        auto     sed_set_provider = std::make_unique<XYDatasetSet::FileSetProvider>(FileUtils::getSedRootPath(true));
+        std::vector<std::unique_ptr<XYDataset::XYDatasetProvider>> sed_provider_vector;
+        sed_provider_vector.push_back(std::move(sed_fs_provider));
+        sed_provider_vector.push_back(std::move(sed_set_provider));
+        auto sed_merge_provider = std::make_unique<XYDatasetSet::MergeProvider>(std::move(sed_provider_vector));
+        m_seds_repository->resetProvider(std::move(sed_merge_provider));
     } catch (Elements::Exception& e) {
       handleDataException(e.what());
       exit(0);
@@ -365,10 +381,14 @@ void FormAuxDataManagement::copyingRedFinished(bool success, QVector<QString>) {
     logger.info() << "files modified ";
     // reload the provider and the model
     try {
-      std::unique_ptr<XYDataset::FileParser>         red_file_parser{new XYDataset::AsciiParser{}};
-      std::unique_ptr<XYDataset::FileSystemProvider> red_provider(
-          new XYDataset::FileSystemProvider{FileUtils::getRedCurveRootPath(true), std::move(red_file_parser)});
-      m_redenig_curves_repository->resetProvider(std::move(red_provider));
+          auto     reddening_file_parser = std::make_unique<XYDataset::AsciiParser>();
+          auto     reddening_fs_provider = std::make_unique<XYDataset::FileSystemProvider>(FileUtils::getRedCurveRootPath(true), std::move(reddening_file_parser));
+          auto     reddening_set_provider = std::make_unique<XYDatasetSet::FileSetProvider>(FileUtils::getRedCurveRootPath(true));
+          std::vector<std::unique_ptr<XYDataset::XYDatasetProvider>> reddening_provider_vector;
+          reddening_provider_vector.push_back(std::move(reddening_fs_provider));
+          reddening_provider_vector.push_back(std::move(reddening_set_provider));
+          auto reddening_merge_provider = std::make_unique<XYDatasetSet::MergeProvider>(std::move(reddening_provider_vector));
+          m_redenig_curves_repository->resetProvider(std::move(reddening_merge_provider));
     } catch (Elements::Exception& e) {
       handleDataException(e.what());
       exit(0);
@@ -420,6 +440,8 @@ void FormAuxDataManagement::deletFilterGroupButtonClicked(const QString& group) 
   if (msgBox.exec() == QMessageBox::Apply) {
     std::string path = FileUtils::getFilterRootPath(false) + "/" + group.toStdString();
     boost::filesystem::remove_all(path);
+    path = FileUtils::getFilterRootPath(false) + "/" + group.toStdString()+".fits";
+    boost::filesystem::remove_all(path);
     copyingFilterFinished(true, {});
   }
 }
@@ -440,6 +462,8 @@ void FormAuxDataManagement::deletSedGroupButtonClicked(const QString& group) {
   if (msgBox.exec() == QMessageBox::Apply) {
     std::string path = FileUtils::getSedRootPath(false) + "/" + group.toStdString();
     boost::filesystem::remove_all(path);
+    path = FileUtils::getSedRootPath(false) + "/" + group.toStdString()+".fits";
+    boost::filesystem::remove_all(path);
     copyingSEDFinished(true, {});
   }
 }
@@ -459,6 +483,8 @@ void FormAuxDataManagement::deletRedGroupButtonClicked(const QString& group) {
   msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Apply);
   if (msgBox.exec() == QMessageBox::Apply) {
     std::string path = FileUtils::getRedCurveRootPath(false) + "/" + group.toStdString();
+    boost::filesystem::remove_all(path);
+    path = FileUtils::getRedCurveRootPath(false) + "/" + group.toStdString()+".fits";
     boost::filesystem::remove_all(path);
     copyingRedFinished(true, {});
   }

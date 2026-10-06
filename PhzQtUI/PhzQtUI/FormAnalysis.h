@@ -8,7 +8,7 @@
 #include "PhzQtUI/SurveyModel.h"
 #include "SedParamUtils.h"
 #include "SurveyFilterMapping.h"
-#include "XYDataset/FileSystemProvider.h"
+#include "XYDataset/XYDatasetProvider.h"
 #include <QFile>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -31,7 +31,7 @@ class variable_value;
 namespace Euclid {
 namespace PhzQtUI {
 
-typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::XYDatasetProvider>>> DatasetRepo;
 
 namespace Ui {
 class FormAnalysis;

@@ -85,26 +85,37 @@ class InterpolateSEDTestCase(unittest.TestCase):
         
     def testFormatPP(self):
         # WHEN
-        result = InterpolateSED.format_pp( 1.5, 0.2, "U")
+        result = InterpolateSED.format_pp( 1.5, 0.2, 3.0, 4.0,"U")
+        
+        # THEN
+        assert result == "1.5*L+0.2+3.0*LOG(4.0*L)[U]"
+        
+        # WHEN
+        result = InterpolateSED.format_pp( 1.5, 0.2, 0.0, 4.0, "U")
         
         # THEN
         assert result == "1.5*L+0.2[U]"
         
+        
     def testParsePP(self):
         # HAVING
-         pps={"AGE":"0*L+5[GY]","MASS":"2*L+0[M0]","TEST":"3*L+2[TT]","MASS2":" 2.1 *L + 7 [ M0 ]"}
+         pps={"AGE":"0*L+5[GY]","MASS":"2*L+0[M0]","TEST":"3*L+2[TT]","MASS2":" 2.1 *L + 7 +3 * LOG ( 4 * L) [ M0 ]"}
          expected_a = [0, 2, 3, 2.1]
          expected_b = [5, 0, 2, 7]
+         expected_c = [0, 0, 0, 3]
+         expected_d = [0, 0, 0, 4]
          expected_unit = ["GY", "M0", "TT", "M0"]
          
          # WHEN
          index=0
          for pp in pps:
-            A, B, unit = InterpolateSED.parse_pp(pps[pp]) 
+            A, B, C, D, unit = InterpolateSED.parse_pp(pps[pp]) 
             
             # THEN
             assert expected_a[index] == A
             assert expected_b[index] == B
+            assert expected_c[index] == C
+            assert expected_d[index] == D
             assert expected_unit[index] == unit
             index+=1
             
@@ -132,8 +143,8 @@ class InterpolateSEDTestCase(unittest.TestCase):
     
     def testDoInterpolatePp(self):
         # HAVING
-        pp_1={"AGE":"0*L+5[GY]","MASS":"2*L+0[M0]","TEST":"3*L+2[TT]","MASS2":"2*L+0[M0]"}
-        pp_2={"AGE":"0*L+7[GY]","MASS":"4*L+0[M0]","TEST2":"5*L+1[TT]","MASS2":"2*L+0[M_0]"}
+        pp_1={"AGE":"0*L+5[GY]","MASS":"2*L+0+3*LOG(4*L)[M0]","TEST":"3*L+2[TT]","MASS2":"2*L+0[M0]"}
+        pp_2={"AGE":"0*L+7[GY]","MASS":"4*L+0+5*LOG(6*L)[M0]","TEST2":"5*L+1[TT]","MASS2":"2*L+0[M_0]"}
         
         # WHEN
         new_pps = InterpolateSED.do_interpolate_pp(pp_1, pp_2, 0, 3)
@@ -143,7 +154,7 @@ class InterpolateSEDTestCase(unittest.TestCase):
         assert "AGE" in new_pps
         assert new_pps["AGE"]=="0.0*L+5.5[GY]" 
         assert "MASS" in new_pps
-        assert new_pps["MASS"]=="2.5*L+0.0[M0]" 
+        assert new_pps["MASS"]=="2.5*L+0.0+3.5*LOG(4.5*L)[M0]" 
          
         # WHEN
         new_pps = InterpolateSED.do_interpolate_pp(pp_1, pp_2, 1, 3)
@@ -153,7 +164,7 @@ class InterpolateSEDTestCase(unittest.TestCase):
         assert "AGE" in new_pps
         assert new_pps["AGE"]=="0.0*L+6.0[GY]" 
         assert "MASS" in new_pps
-        assert new_pps["MASS"]=="3.0*L+0.0[M0]" 
+        assert new_pps["MASS"]=="3.0*L+0.0+4.0*LOG(5.0*L)[M0]" 
         
         # WHEN
         new_pps = InterpolateSED.do_interpolate_pp(pp_1, pp_2, 2, 3)
@@ -163,7 +174,7 @@ class InterpolateSEDTestCase(unittest.TestCase):
         assert "AGE" in new_pps
         assert new_pps["AGE"]=="0.0*L+6.5[GY]" 
         assert "MASS" in new_pps
-        assert new_pps["MASS"]=="3.5*L+0.0[M0]" 
+        assert new_pps["MASS"]=="3.5*L+0.0+4.5*LOG(5.5*L)[M0]" 
         
     def testDoInterpolateSed(self):
         # HAVING

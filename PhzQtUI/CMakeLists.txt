@@ -15,6 +15,7 @@ elements_depends_on_subdirs(PhzExecutables)
 elements_depends_on_subdirs(PhzGalacticCorrection)
 elements_depends_on_subdirs(PhzFilterVariation)
 elements_depends_on_subdirs(EmissionLines)
+elements_depends_on_subdirs(XYDatasetSet)
 
 if(ELEMENTS_HIDE_WARNINGS)
   if(UNIX)
@@ -43,11 +44,11 @@ add_definitions(
 elements_add_library(PhzQtUI ${PhUI_SRCS} ${PhUI_HEADERS_MOC} ${PhUI_FORMS_HEADERS} ${PhUI_RESOURCES_RCC}
                      LINK_LIBRARIES
                         ElementsKernel XYDataset PhzConfiguration PhzPhotometricCorrection
-                        PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzUtils PhzGalacticCorrection PhzFilterVariation PhzExecutables
+                        PhzModeling PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzUtils PhzGalacticCorrection PhzFilterVariation PhzExecutables XYDatasetSet
                         Qt5::Core Qt5::Network Qt5::Gui Qt5::Widgets Qt5::Xml 
                      INCLUDE_DIRS
                         ElementsKernel XYDataset PhzConfiguration PhzPhotometricCorrection PhzModeling
-                        PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzGalacticCorrection PhzFilterVariation
+                        PhzDataModel PhzUITools PhzLikelihood PhzLuminosity PhzGalacticCorrection PhzFilterVariation XYDatasetSet
                         "${Qt5Core_INCLUDE_DIRS}" "${Qt5Concurrent_INCLUDE_DIRS}"
                         "${Qt5Network_INCLUDE_DIRS}"
                         "${Qt5Gui_INCLUDE_DIRS}" "${Qt5Widgets_INCLUDE_DIRS}"

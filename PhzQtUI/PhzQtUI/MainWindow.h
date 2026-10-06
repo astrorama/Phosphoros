@@ -3,6 +3,7 @@
 
 #include "PhzQtUI/DatasetRepository.h"
 #include "XYDataset/FileSystemProvider.h"
+#include "XYDataset/XYDatasetProvider.h"
 #include <QMainWindow>
 #include <QProcess>
 #include <map>
@@ -20,7 +21,7 @@ namespace Ui {
 class MainWindow;
 }
 
-typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::FileSystemProvider>>> DatasetRepo;
+typedef std::shared_ptr<PhzQtUI::DatasetRepository<std::unique_ptr<XYDataset::XYDatasetProvider>>> DatasetRepo;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT

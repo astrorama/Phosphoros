@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>711</width>
+    <width>730</width>
     <height>679</height>
    </rect>
   </property>
@@ -149,8 +149,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>695</width>
-        <height>446</height>
+        <width>710</width>
+        <height>448</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -190,9 +190,30 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Save </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="cb_output_type">
+       <item>
+        <property name="text">
+         <string>all SEDs in Set .fits file</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>individual files in Folder</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Save in a new Folder with name: </string>
+        <string> with name: </string>
        </property>
       </widget>
      </item>
@@ -212,10 +233,24 @@
        </property>
       </spacer>
      </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
       <widget class="QCheckBox" name="cb_cp">
        <property name="text">
         <string>Copy selected SEDs in the output folder</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="cb_interpPP">
+       <property name="text">
+        <string>Interpolate also PPs</string>
        </property>
        <property name="checked">
         <bool>true</bool>
